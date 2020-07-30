@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>SilkBot</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="721518523704410202.serverconfig" />
+    <None Remove="Token.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Token.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Colorful.Console" Version="1.2.10" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00705" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00705" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00705" />
+    <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.6.20305.6" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+  </ItemGroup>
+
+</Project>
