@@ -16,10 +16,6 @@ namespace SilkBot
         public ulong MutedRole { get; set; }
         public List<ulong> SelfAssignableRoles { get; set; }
         public ulong LoggingChannel { get; set; }
-
-        
-        public ServerConfig() { }
-
     }
 }
 

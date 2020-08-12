@@ -60,7 +60,7 @@ namespace SilkBot.Economy
                 }
             }
             //Check if server config exists, if not, check if they're an admin the OTHER way.//
-            ServerConfigurationManager.Configs.TryGetValue(context.Guild.Id, out var possibleConfiguration);
+            ServerConfigurationManager.LocalConfiguration.TryGetValue(context.Guild.Id, out var possibleConfiguration);
             if(possibleConfiguration is null)
             {
                 //Check manually.//

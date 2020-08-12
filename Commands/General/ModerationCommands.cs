@@ -73,7 +73,7 @@ namespace SilkBot
 
                 
                 
-                ServerConfigurationManager.Configs.TryGetValue(ctx.Guild.Id, out var guildConfig);
+                ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var guildConfig);
                 var logChannelID = guildConfig?.LoggingChannel;
                 var logChannelValue = logChannelID.HasValue ? logChannelID.Value : ctx.Channel.Id;
                 await ctx.Client.SendMessageAsync(await ServerInfo.Instance.ReturnChannelFromID(ctx, logChannelValue), 

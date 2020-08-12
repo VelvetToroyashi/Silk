@@ -18,7 +18,7 @@ namespace SilkBot.Commands.TestCommands
             var embed = EmbedGenerator.CreateEmbed(ctx, "", "");
 
             await Task.Delay(3000);
-            ServerConfigurationManager.Configs.TryGetValue(ctx.Guild.Id, out var serverConfigurationObject);
+            ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var serverConfigurationObject);
             if(serverConfigurationObject is null)
             {
                 var newEmbed = new DiscordEmbedBuilder(embed)

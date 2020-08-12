@@ -17,7 +17,7 @@ namespace SilkBot.Commands.Roles
         public async Task ObtainRole(CommandContext ctx, [RemainingText] string Roles)
         {
             var _roles = Roles.Split(',');
-            var configExists = ServerConfigurationManager.Configs.Any(config => config.Key == ctx.Guild.Id);
+            var configExists = ServerConfigurationManager.LocalConfiguration.Any(config => config.Key == ctx.Guild.Id);
             //If a config exists, use that, else assume no config exists and throw an error.//
             foreach(var role in _roles)
             {
@@ -26,7 +26,7 @@ namespace SilkBot.Commands.Roles
                 if (configExists)
                 {
                     
-                    var selfAssignableRoles = ServerConfigurationManager.Configs[ctx.Guild.Id].SelfAssignableRoles;
+                    var selfAssignableRoles = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole == parsedRole.Id))
                     {

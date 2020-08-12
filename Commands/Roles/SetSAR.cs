@@ -24,12 +24,12 @@ namespace SilkBot.Commands.Roles
                 throw new InsufficientPermissionsException();
             }
 
-            var serverconfig = ServerConfigurationManager.Configs.Values.Any(val => val.Guild == ctx.Guild.Id) ? ServerConfigurationManager.Configs[ctx.Guild.Id] : null;
+            var serverconfig = ServerConfigurationManager.LocalConfiguration.Values.Any(val => val.Guild == ctx.Guild.Id) ? ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id] : null;
             if (serverconfig is null)
             {
 
                     var config = await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
-                    ServerConfigurationManager.Configs.TryAdd(ctx.Guild.Id, config);
+                    ServerConfigurationManager.LocalConfiguration.TryAdd(ctx.Guild.Id, config);
                     var ebStringBuilder = new StringBuilder("I added/removed ");
                     foreach (var role in roles)
                     {
@@ -51,7 +51,7 @@ namespace SilkBot.Commands.Roles
             }
             else
             {
-                var config = ServerConfigurationManager.Configs[ctx.Guild.Id];
+                var config = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id];
                 var addedList = new List<string>();
                 var removedList = new List<string>();
                 if (config.SelfAssignableRoles is null)

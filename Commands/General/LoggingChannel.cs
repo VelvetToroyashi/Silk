@@ -17,7 +17,7 @@ namespace SilkBot
         public async Task SetLoggingChannel(CommandContext ctx, DiscordChannel logChannel)
         {
             await ctx.RespondAsync(embed: EmbedGenerator.CreateEmbed(ctx, "Log channel set!", $"I'll log actions to {logChannel.Mention}!", DiscordColor.SapGreen));
-            var serverConfigExists = !(ServerConfigurationManager.Configs.FirstOrDefault(config => config.Key == ctx.Guild.Id).Value is null);
+            var serverConfigExists = !(ServerConfigurationManager.LocalConfiguration.FirstOrDefault(config => config.Key == ctx.Guild.Id).Value is null);
             if (!serverConfigExists) 
             {
                 var config = await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
@@ -25,7 +25,7 @@ namespace SilkBot
             }
             else 
             {
-                ServerConfigurationManager.Configs.First(config => config.Value.Guild == ctx.Guild.Id).Value.LoggingChannel = logChannel.Id;
+                ServerConfigurationManager.LocalConfiguration.First(config => config.Value.Guild == ctx.Guild.Id).Value.LoggingChannel = logChannel.Id;
             }
                 
         }

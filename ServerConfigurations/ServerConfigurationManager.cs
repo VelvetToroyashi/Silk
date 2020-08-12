@@ -12,7 +12,7 @@ namespace SilkBot.ServerConfigurations
     {
         private static ConcurrentDictionary<ulong, ServerConfig> configurations = new ConcurrentDictionary<ulong, ServerConfig>();
         public static ServerConfigurationManager Instance { get; } = new ServerConfigurationManager();
-        public static ConcurrentDictionary<ulong, ServerConfig> Configs { get => configurations; }
+        public static ConcurrentDictionary<ulong, ServerConfig> LocalConfiguration { get => configurations; }
         private ServerConfigurationManager() { }
 
         public void LoadServerConfigs()
@@ -22,9 +22,13 @@ namespace SilkBot.ServerConfigurations
                 var fileContent = File.ReadAllText(file);
                 var currentServerConfiguration = JsonConvert.DeserializeObject<ServerConfig>(fileContent);
                 configurations.TryAdd(currentServerConfiguration.Guild, currentServerConfiguration);
-                for(int i = 0; i < currentServerConfiguration.EconomicUsers.Count; i++)
-                    EconomicUsers.Instance.Users.TryAdd(currentServerConfiguration.EconomicUsers[i].UserId, currentServerConfiguration.EconomicUsers[i]);
+                
             }
+            var globalConfigFilepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "GlobalConfig.gconfig");
+            var globalConfigText = File.ReadAllText(globalConfigFilepath);
+            Bot.GlobalConfig = JsonConvert.DeserializeObject<GlobalUserConfiguration>(globalConfigText);
+            for (int i = 0; i < Bot.GlobalConfig.EconomicUsers.Count; i++)
+                EconomicUsers.Instance.Users.TryAdd(Bot.GlobalConfig.EconomicUsers[i].UserId, Bot.GlobalConfig.EconomicUsers[i]);
 
         }
         
@@ -39,7 +43,6 @@ namespace SilkBot.ServerConfigurations
             { 
                 Administrators = administrators, 
                 BannedMembers = bannedMembers, 
-                EconomicUsers = economicUser, 
                 Guild = guild.Id,
                 Moderators = moderators 
             };

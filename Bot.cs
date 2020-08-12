@@ -16,6 +16,7 @@ namespace SilkBot
     {
 
         public static Bot Instance { get; } = new Bot();
+        public static GlobalUserConfiguration GlobalConfig { get; set; } = new GlobalUserConfiguration();
 
         public DiscordClient Client { get; set; }
         public CommandsNextConfiguration Commands { get; } 

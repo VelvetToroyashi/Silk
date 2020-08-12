@@ -16,9 +16,12 @@ namespace SilkBot.Commands.Bot
         [Command("restart")]
         public async Task RestartBot(CommandContext ctx)
         {
-            foreach(var config in ServerConfigurationManager.Configs)
-                File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", $"{config.Key}.serverconfig"), JsonConvert.SerializeObject(config.Value, Formatting.Indented));
-            await Task.CompletedTask;
+            foreach (var config in ServerConfigurationManager.LocalConfiguration)
+            {
+                var appdataFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var localConfig = Path.Combine(appdataFilePath, "SilkBot", "ServerConfigs", $"{config.Key}.serverconfig");
+                await File.WriteAllTextAsync(localConfig, JsonConvert.SerializeObject(config.Value, Formatting.Indented));
+            }
             Process.Start(@"C:\Users\Cinnamon\Desktop\Restart Bot.bat");
         }
     }
