@@ -9,7 +9,7 @@ namespace SilkBot.Economy
     {
         public ConcurrentDictionary<ulong, DiscordEconomicUser> Users { get; } = new ConcurrentDictionary<ulong, DiscordEconomicUser>();
         public static EconomicUsers Instance { get; } = new EconomicUsers();
-        public void Add(CommandContext ctx, DiscordMember member)
+        public void Add(DiscordMember member)
         {
             var Id = member.Id;
             var user = new DiscordEconomicUser(Id, member.DisplayName);

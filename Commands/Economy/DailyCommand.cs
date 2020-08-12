@@ -20,7 +20,7 @@ namespace SilkBot.Commands.Economic_Commands
             }
             else
             {
-                EconomicUsers.Instance.Add(ctx, ctx.Member);
+                EconomicUsers.Instance.Add(ctx.Member);
                 var embed = EconomicUsers.Instance.Users[ctx.User.Id].DoDaily(ctx);
                 await ctx.RespondAsync(embed: embed);
             }

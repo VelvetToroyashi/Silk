@@ -10,7 +10,7 @@ namespace SilkBot.ServerConfigurations
 {
     public class ServerConfigurationManager
     {
-        private static ConcurrentDictionary<ulong, ServerConfig> configurations = new ConcurrentDictionary<ulong, ServerConfig>();
+        private static readonly ConcurrentDictionary<ulong, ServerConfig> configurations = new ConcurrentDictionary<ulong, ServerConfig>();
         public static ServerConfigurationManager Instance { get; } = new ServerConfigurationManager();
         public static ConcurrentDictionary<ulong, ServerConfig> LocalConfiguration { get => configurations; }
         private ServerConfigurationManager() { }
@@ -38,7 +38,6 @@ namespace SilkBot.ServerConfigurations
             var administrators = await ServerInfo.Instance.GetAdministratorsAsync(guild);
             var moderators = await ServerInfo.Instance.GetModeratorsAsync(guild);
             var bannedMembers = await ServerInfo.Instance.GetBansAsync(guild);
-            var economicUser = EconomicUsers.Instance.Users.Values.ToList();
             var config = new ServerConfig 
             { 
                 Administrators = administrators, 

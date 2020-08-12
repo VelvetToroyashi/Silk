@@ -69,7 +69,7 @@ namespace SilkBot.Commands.Economy
             async void CreateEconomicUser(ulong ID)
             {
                 if (!EconomicUsers.Instance.UserExists(ID))
-                    EconomicUsers.Instance.Add(ctx, await ctx.Guild.GetMemberAsync(ID));
+                    EconomicUsers.Instance.Add(await ctx.Guild.GetMemberAsync(ID));
             }
 
             IEnumerable<DiscordMember> GetMatchingMembers(IEnumerable<DiscordMember> members)

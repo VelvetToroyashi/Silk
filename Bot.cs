@@ -21,9 +21,6 @@ namespace SilkBot
         public DiscordClient Client { get; set; }
         public CommandsNextConfiguration Commands { get; } 
         public InteractivityConfiguration Interactivity { get; } 
-        
-        
-        private double startupTime;
 
          
         private Bot() { }
