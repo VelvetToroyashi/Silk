@@ -32,7 +32,14 @@ namespace SilkBot
         public static async Task DM(CommandContext ctx, DiscordUser user, DiscordEmbed message)
         {
             var member = ctx.Guild.Members.Single(pair => pair.Key == user.Id);
-            await member.Value.SendMessageAsync(embed: message);
+            try 
+            {
+                await member.Value.SendMessageAsync(embed: message);
+            } catch(Exception e)
+            {
+                throw new InvalidOperationException();
+            }
+            
         }
 
 
