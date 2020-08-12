@@ -1,5 +1,4 @@
-﻿using SilkBot.Economy;
-using SilkBot.ServerConfigurations.UserInfo;
+﻿using SilkBot.ServerConfigurations.UserInfo;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +11,6 @@ namespace SilkBot
         public BannedMember[] BannedMembers { get; set; }
         public Moderator[] Moderators { get; set; }
         public Administrator[] Administrators { get; set; }
-        public List<DiscordEconomicUser> EconomicUsers { get; set; }
         public ulong MutedRole { get; set; }
         public List<ulong> SelfAssignableRoles { get; set; }
         public ulong LoggingChannel { get; set; }

@@ -2,6 +2,7 @@
 using SilkBot.Economy;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,9 +17,12 @@ namespace SilkBot.ServerConfigurations
         private ServerConfigurationManager() { }
 
         public void LoadServerConfigs()
-        {   
+        {
+
+
             foreach(var file in Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs")))
             {
+                if (file.EndsWith(".gconfig")) continue;
                 var fileContent = File.ReadAllText(file);
                 var currentServerConfiguration = JsonConvert.DeserializeObject<ServerConfig>(fileContent);
                 configurations.TryAdd(currentServerConfiguration.Guild, currentServerConfiguration);

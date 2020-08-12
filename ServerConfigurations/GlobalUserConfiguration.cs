@@ -7,6 +7,6 @@ namespace SilkBot.ServerConfigurations
     public sealed class GlobalUserConfiguration
     {
         [JsonProperty]
-        public List<DiscordEconomicUser> EconomicUsers { get; set; } 
+        public List<DiscordEconomicUser> EconomicUsers { get; set; } = new List<DiscordEconomicUser>();
     }
 }

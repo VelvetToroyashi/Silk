@@ -22,6 +22,9 @@ namespace SilkBot.Commands.Bot
                 var localConfig = Path.Combine(appdataFilePath, "SilkBot", "ServerConfigs", $"{config.Key}.serverconfig");
                 await File.WriteAllTextAsync(localConfig, JsonConvert.SerializeObject(config.Value, Formatting.Indented));
             }
+            var globalConfig = JsonConvert.SerializeObject(SilkBot.Bot.GlobalConfig);
+            var globalFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "GlobalConfig.gconfig");
+            await File.WriteAllTextAsync(globalFilePath, globalConfig);
             Process.Start(@"C:\Users\Cinnamon\Desktop\Restart Bot.bat");
         }
     }
