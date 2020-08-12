@@ -16,7 +16,6 @@ namespace SilkBot.Commands.GeneralCommands
         {
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                 .WithImageUrl(ctx.User.AvatarUrl.Replace("128", "4096"))
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)

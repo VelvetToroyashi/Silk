@@ -12,12 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Token.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.10" />
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00705" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00705" />
