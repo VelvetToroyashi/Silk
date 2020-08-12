@@ -16,7 +16,7 @@ namespace SilkBot
         [HelpDescription("Sets the channel Silk will log to. *[In implementation, settings will not be saved.]*")]
         public async Task SetLoggingChannel(CommandContext ctx, DiscordChannel logChannel)
         {
-            await ctx.RespondAsync(embed: EmbedMaker.CreateEmbed(ctx, "Log channel set!", $"I'll log actions to {logChannel.Mention}!", DiscordColor.SapGreen));
+            await ctx.RespondAsync(embed: EmbedGenerator.CreateEmbed(ctx, "Log channel set!", $"I'll log actions to {logChannel.Mention}!", DiscordColor.SapGreen));
             var serverConfigExists = !(ServerConfigurationManager.Configs.FirstOrDefault(config => config.Key == ctx.Guild.Id).Value is null);
             if (!serverConfigExists) 
             {

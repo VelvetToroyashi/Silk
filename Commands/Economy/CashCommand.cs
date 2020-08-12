@@ -14,7 +14,7 @@ namespace SilkBot.Commands.Economic_Commands
         {
             var userCoins = EconomicUsers.Instance.Users.TryGetValue(ctx.User.Id, out var user) ? user.Cash : 0;
 
-            var eb = EmbedMaker.CreateEmbed(ctx, "Account balance:", $"You have {userCoins} coins!");
+            var eb = EmbedGenerator.CreateEmbed(ctx, "Account balance:", $"You have {userCoins} coins!");
             var betterEmbed = new DiscordEmbedBuilder(eb).WithAuthor(name: ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
             await ctx.RespondAsync(embed: betterEmbed);
         }

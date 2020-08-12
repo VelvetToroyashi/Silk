@@ -90,7 +90,7 @@ namespace SilkBot
 
             Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.Ignore, Timeout = TimeSpan.FromMinutes(2) });
 
-            var cnc = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = false, EnableMentionPrefix = false, StringPrefixes = new String[] { "!" } };
+            var cnc = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = false, EnableMentionPrefix = false, StringPrefixes = new string[] { "!" } };
 
             Client.UseCommandsNext(cnc);
 

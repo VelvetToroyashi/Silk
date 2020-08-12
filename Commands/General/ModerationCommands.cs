@@ -64,7 +64,7 @@ namespace SilkBot
             } else {
 
 
-                var embed = new DiscordEmbedBuilder(EmbedMaker.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
+                var embed = new DiscordEmbedBuilder(EmbedGenerator.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
 
                 await DMCommand.DM(ctx, user, embed);
 
@@ -123,7 +123,7 @@ namespace SilkBot
             }
             else
             {
-                var embed = new DiscordEmbedBuilder(EmbedMaker.CreateEmbed(ctx, $"You've been banned from {ctx.Guild.Name}!", "")).AddField("Reason:", $"`{reason}`");
+                var embed = new DiscordEmbedBuilder(EmbedGenerator.CreateEmbed(ctx, $"You've been banned from {ctx.Guild.Name}!", "")).AddField("Reason:", $"`{reason}`");
 
                 await DMCommand.DM(ctx, user, embed);
 

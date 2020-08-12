@@ -2,12 +2,10 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SilkBot
 {
-    public static class EmbedMaker
+    public static class EmbedGenerator
     {
         public static DiscordEmbed CreateEmbed(CommandContext ctx, string Title, string Description)
         {

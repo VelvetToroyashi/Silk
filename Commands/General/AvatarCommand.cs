@@ -14,11 +14,11 @@ namespace SilkBot.Commands.GeneralCommands
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync(embed: 
+            await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                .WithImageUrl(ctx.Member.AvatarUrl)
-                .WithColor(DiscordColor.Green)
+                .WithImageUrl(ctx.User.AvatarUrl.Replace("128", "4096"))
+                .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
         }
@@ -31,7 +31,7 @@ namespace SilkBot.Commands.GeneralCommands
                 new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                 .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(user.AvatarUrl)
+                .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
@@ -39,7 +39,6 @@ namespace SilkBot.Commands.GeneralCommands
 
 
         [Command("Avatar")]
-        [Priority(3)]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
         {
             var user = ctx.Guild.Members.Where(m => m.Value.DisplayName.ToLower().StartsWith(mention.ToLower())).First().Value;
@@ -48,7 +47,7 @@ namespace SilkBot.Commands.GeneralCommands
                 new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                 .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(user.AvatarUrl)
+                .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));

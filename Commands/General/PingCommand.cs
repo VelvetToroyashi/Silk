@@ -10,7 +10,7 @@ namespace SilkBot
         [HelpDescription("Returns my API response time.")]
         public async Task Ping(CommandContext ctx)
         {
-            await ctx.RespondAsync($"Pong! Latency of {ctx.Client.Ping} ms");
+            await ctx.RespondAsync($"I'm here! Response time: {ctx.Client.Ping} ms");
         }
 
     }

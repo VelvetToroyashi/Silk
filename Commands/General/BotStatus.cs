@@ -13,9 +13,10 @@ namespace SilkBot
     {
 
 
-        [Priority(2)]
+
         [Command("status")]
         [HelpDescription("Returns the bot's status. Bot's status cannot be changed.")]
+
         public async Task Status(CommandContext ctx)
         {
 
@@ -32,11 +33,9 @@ namespace SilkBot
 
 
         }
-        [Priority(5)]
-        [Command("status")]
-        [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-       
-        public async Task Status(CommandContext ctx, [RemainingText] string status)
+
+
+        public async Task Status(CommandContext ctx, string status)
         {
             var authUsers = new ulong[] { 209279906280898562, 135747025000988672, 265096437937864705 };
             if (!authUsers.Any(id => id == ctx.User.Id))
@@ -55,16 +54,16 @@ namespace SilkBot
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);
                 }
-                else await ctx.Client.UpdateStatusAsync(new DiscordActivity(status));
+                await ctx.Client.UpdateStatusAsync(new DiscordActivity { ActivityType = ctx.Client.CurrentUser.Presence.Activity.ActivityType, Name = status });
             }
         }
 
 
-            [Priority(10)]
+
             [Hidden]
             [Command("status")]
             [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-            
+
             public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
             {
             
@@ -89,11 +88,11 @@ namespace SilkBot
                     else await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, type), idleSince: DateTime.Now);
                 }
             }
-        [Priority(9)]
+
         [Hidden]
         [Command("status")]
         [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-        
+
         public async Task Status(CommandContext ctx, string type, [RemainingText] string status)
         {
             if (!ctx.Channel.IsPrivate)
@@ -119,11 +118,19 @@ namespace SilkBot
 
                 else
                 {
-                    Enum.TryParse(typeof(ActivityType), type, out var activity);
-                    await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, (ActivityType)activity), idleSince: DateTime.Now);
-                    var msg = await ctx.RespondAsync(embed: EmbedMaker.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
-                    await Task.Delay(3000);
-                    await ctx.Channel.DeleteMessageAsync(msg);
+                    if (!Enum.TryParse(typeof(ActivityType), type, true, out var activity))
+                    {
+                        await Status(ctx, status);
+                        return; 
+                    }
+                    else 
+                    {
+                        await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, (ActivityType)activity), idleSince: DateTime.Now);
+                        var msg = await ctx.RespondAsync(embed: EmbedGenerator.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
+                        await Task.Delay(3000);
+                        await ctx.Channel.DeleteMessageAsync(msg);
+                    }
+                    
                 }
             }
         }

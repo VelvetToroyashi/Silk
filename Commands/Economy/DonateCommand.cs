@@ -4,6 +4,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using SilkBot.Economy;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,86 +15,149 @@ namespace SilkBot.Commands.Economy
 
     public class DonateCommand : BaseCommandModule
     {
+ 
         [Command("Donate")]
         [Aliases("Gift")]
-        public async Task Donate(CommandContext ctx, int Amount, DiscordMember Recipient)
+        public async Task Donate(CommandContext ctx, int amount, string recipient)
         {
-
-            var members = await ctx.Guild.GetAllMembersAsync();
+            var allMembers = await ctx.Guild.GetAllMembersAsync();
             var interactivity = ctx.Client.GetInteractivity();
-
-            if(members.Where(member => member.DisplayName.Substring(0, 2).Contains(Recipient.DisplayName.Substring(0, 2))).Count() > 1)
+            var matchingMembers = GetMatchingMembers(allMembers);
+            var multipleMatches = matchingMembers.Count() > 1;
+            if (matchingMembers.Count() < 1)
             {
-                var matches = members.Where(member => member.DisplayName.ToLower().Substring(0, 3).Contains(Recipient.DisplayName.Substring(0, 3).ToLower())).ToList();
-                var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, ctx.User.AvatarUrl)
-                    .WithTitle("I found multiple people matching that username:")
-                    .WithColor(DiscordColor.Blue);
-                var matchesSb = new StringBuilder();
-                for(int i = 0; i < matches.Count(); i++)
-                {
-                    matchesSb.AppendLine($"{i + 1}: {matches[i].Mention}");
-                }
-                embed.WithDescription(matchesSb.ToString() ?? "Embed broke b");
-
-                await ctx.RespondAsync(embed: embed);
-
-                var message = await interactivity.WaitForMessageAsync(message => message.Author.Id == ctx.User.Id && Regex.Match(message.Content, "[1-9]?[1-9]").Success, TimeSpan.FromSeconds(10));
-
-                if(message.Result.Content is null)
-                {
-                    await ctx.RespondAsync("Transaction timed out.");
-                    return;
-                }
-                else
-                {
-
-                }
-                
+                await ctx.RespondAsync("Sorry, I couldn't find anyone matching that name!");
                 return;
             }
 
-            else 
+            if (multipleMatches)
             {
-                if (!EconomicUsers.Instance.UserExists(ctx.Member.Id))
+                var matches = new StringBuilder();
+                for(var i = 0; i < matchingMembers.Count(); i++)
+                    matches.AppendLine($"[{i}]{matchingMembers.ElementAt(i).Mention}");
+                var embed = EmbedGenerator.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
+                await ctx.RespondAsync(embed: embed);
+
+                var userResposne = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member && Regex.IsMatch(message.Content, "[0-9]{1,3}"), TimeSpan.FromSeconds(20));
+                if (userResposne.TimedOut)
                 {
-                    throw new Exception("Sorry, but you haven't setup an account with Silk! `!daily` will set you up.");
+                    await ctx.RespondAsync("Sorry! Your transaction timed out (20 seconds).");
+                    return;
                 }
-                else
+                var isFailure = int.TryParse(userResposne.Result.Content, out var selection);
+                if (selection > matchingMembers.Count() || isFailure)
                 {
-                    if (!EconomicUsers.Instance.UserExists(Recipient.Id))
+                    await ctx.RespondAsync("Sorry, but that's not a valid selection");
+                    return;
+                }
+                var finalizedRecipient = matchingMembers.ElementAt(selection);
+
+                if (!EconomicUsers.Instance.UserExists(ctx.Member.Id)) CreateEconomicUser(ctx.Member.Id);
+                if (!EconomicUsers.Instance.UserExists(finalizedRecipient.Id)) CreateEconomicUser(finalizedRecipient.Id);
+                await ProccessTransaction(ctx, ctx.Member.Id, finalizedRecipient.Id, amount);
+            }
+            else
+            {
+                var finalizedRecipient = matchingMembers.First();
+
+                if (!EconomicUsers.Instance.UserExists(ctx.Member.Id)) CreateEconomicUser(ctx.Member.Id);
+                if (!EconomicUsers.Instance.UserExists(finalizedRecipient.Id)) CreateEconomicUser(finalizedRecipient.Id);
+                await ProccessTransaction(ctx, ctx.Member.Id, finalizedRecipient.Id, amount);
+            }
+
+
+            async void CreateEconomicUser(ulong ID)
+            {
+                if (!EconomicUsers.Instance.UserExists(ID))
+                    EconomicUsers.Instance.Add(ctx, await ctx.Guild.GetMemberAsync(ID));
+            }
+
+            IEnumerable<DiscordMember> GetMatchingMembers(IEnumerable<DiscordMember> members)
+            {
+                foreach(var member in members)
+                {
+                    if (member.IsBot) continue;
+                    var name = member.DisplayName;
+                    var recipientSubstringLength = recipient.Length;
+                    if(name.Length < recipient.Length)
                     {
-                        EconomicUsers.Instance.Add(ctx, Recipient);
+                        recipientSubstringLength = name.Length;
                     }
-
-                    var Sender = EconomicUsers.Instance.Users[ctx.Member.Id];
-                    var Receiver = EconomicUsers.Instance.Users[Recipient.Id];
-
-                    if (Sender.Cash < Amount)
-                        throw new InsufficientFundsException("You do not have enough funds to send this person!");
-
-                    Sender.Widthdraw((uint)Amount);
-                    Receiver.Cash += (uint)Amount;
-
-                    await ctx.RespondAsync(embed: new
-                        DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                        .WithTitle("Transfer Successful!")
-                        .WithDescription($"You sent {Recipient.Mention} {Amount} coins!")
-                        .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                        .WithColor(DiscordColor.Green)
-                        .WithTimestamp(DateTime.Now)
-                        );
+                    if (name.ToLowerInvariant().Contains(recipient.Substring(0, recipientSubstringLength).ToLowerInvariant()))
+                    {
+                        yield return member;
+                    }
+                    else continue;
                 }
             }
-            
-     
-
-
         }
-
-
         //Note from Lunar: Check usernames, if multiple match, ask user to pick.//
 
+        private async Task ProccessTransaction(CommandContext ctx, ulong sender, ulong receiver, int amount) 
+        {
+            
+            var senderAsMember = EconomicUsers.Instance.Users[sender];
+            var recipientAsMember = EconomicUsers.Instance.Users[receiver];
+            var rand = new Random();
+            if (amount > 499)
+            {
+                var confirmationCode = rand.Next(1000, 10000);
+                var interactivity = ctx.Client.GetInteractivity();
+                await ctx.RespondAsync($"Hey! You sure you want to do this? Confirmation code: `{confirmationCode}`  [Type cancel to cancel]");
+                while (true) { 
+                var message = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
+                    if (message.TimedOut)
+                    {
+                        await ctx.RespondAsync("Sorry! But you did not type the confirmation code. Your transaction has been canceled, and no money was withdrawn.");
+                            continue;
+                    }
+                    if (message.Result.Content != confirmationCode.ToString() && message.Result.Content.ToLower() != "cancel")
+                    {
+                        await ctx.RespondAsync("Invalid or incorrect response code.");
+                        continue;
+                    }
+                    if (message.Result.Content.ToLower() == "cancel")
+                    {
+                            return;
+                    }
+                    if (message.Result.Content == confirmationCode.ToString())
+                    {
+                        if (senderAsMember.Cash < amount)
+                        {
+                            throw new InsufficientFundsException($"You do not have enough funds for this transaction. [${senderAsMember.Cash} available]");
+                        }
+                        else
+                        {
+                            senderAsMember.Widthdraw((uint)amount);
+                            recipientAsMember.Cash += (uint)amount;
+
+                            await ctx.RespondAsync(embed: new
+                            DiscordEmbedBuilder()
+                            .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                            .WithTitle("Transfer Successful!")
+                            .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
+                            .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                            .WithColor(DiscordColor.Green)
+                            .WithTimestamp(DateTime.Now)
+                            );
+                        }
+                    }
+                }
+            }
+            else
+            {
+                senderAsMember.Widthdraw((uint)amount);
+                recipientAsMember.Cash += (uint)amount;
+
+                await ctx.RespondAsync(embed: new
+                DiscordEmbedBuilder()
+                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                .WithTitle("Transfer Successful!")
+                .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
+                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                .WithColor(DiscordColor.Green)
+                .WithTimestamp(DateTime.Now));
+            }
+        }
     }
 }
