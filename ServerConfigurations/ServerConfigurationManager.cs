@@ -18,8 +18,6 @@ namespace SilkBot.ServerConfigurations
 
         public void LoadServerConfigs()
         {
-
-
             foreach(var file in Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs")))
             {
                 if (file.EndsWith(".gconfig")) continue;
@@ -33,6 +31,9 @@ namespace SilkBot.ServerConfigurations
             Bot.GlobalConfig = JsonConvert.DeserializeObject<GlobalUserConfiguration>(globalConfigText);
             for (int i = 0; i < Bot.GlobalConfig.EconomicUsers.Count; i++)
                 EconomicUsers.Instance.Users.TryAdd(Bot.GlobalConfig.EconomicUsers[i].UserId, Bot.GlobalConfig.EconomicUsers[i]);
+            
+            var prefixes = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "prefixes.gconfig");
+            Bot.GuildPrefixes = JsonConvert.DeserializeObject<Dictionary<ulong, string>>(File.ReadAllText(prefixes));
 
         }
         

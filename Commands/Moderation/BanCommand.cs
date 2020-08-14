@@ -59,7 +59,7 @@ namespace SilkBot.Commands.Moderation
                 .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
                 .WithDescription($":hammer: banned {user.Mention}!")
-                .WithFooter("Silk")
+                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
 
         }

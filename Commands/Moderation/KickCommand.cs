@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.ServerConfigurations;
+using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,25 +17,20 @@ namespace SilkBot.Commands.Moderation
         public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
         {
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            var isBelowRole = false;
-            var canKick = ctx.Member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers));
 
-            if (!canKick)
+            if (ctx.Member.HasPermission(Permissions.KickMembers))
             {
                 await ctx.RespondAsync("Sorry, but you're not allowed to kick people!");
                 return;
             }
 
 
-            if (user.Roles.Any())
-                foreach (var role in user.Roles)
-                    if (bot.Roles.Last().Position <= user.Roles.Last().Position)
-                        isBelowRole = true;
+
 
 
             //var userRole = user.Roles.Last();
 
-            if (isBelowRole)
+            if (ctx.Member.IsAbove(bot))
             {
                 var staffRole = "";
                 if (user == bot)

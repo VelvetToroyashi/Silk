@@ -61,7 +61,7 @@ namespace SilkBot
                 if (methodEmbed.Description! is null)
                     continue;
                 if(!helpSb.ToString().Contains(methodEmbed.Description?.ToString()))
-                    helpSb.AppendLine($"**{methodEmbed.Title}** - {methodEmbed.Description ?? ""}\n");
+                    helpSb.AppendLine($"**{methodEmbed.Title}** - {methodEmbed.Description ?? ""}");
                 else
                 {
                     methodAttributeParameters.Add(methodEmbed.Description ?? "No description given");
@@ -81,8 +81,6 @@ namespace SilkBot
                         {
                             footerSb.AppendLine($"Example/Syntax: {usage}");
                         }
-
-                        footerSb.AppendLine();
                     }
                 }
                 foreach(var alias in method.GetCustomAttributes<AliasesAttribute>().OrderBy(alias => alias.Aliases.OrderBy(trueAlias => trueAlias)))

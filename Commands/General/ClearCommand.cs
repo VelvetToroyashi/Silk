@@ -18,7 +18,7 @@ namespace SilkBot
 
         public async Task Clear(CommandContext ctx, [HelpDescription("The number of messages to clear.")] int messages = 5)
         {
-            if(!ctx.Member.Roles.Any(role => role.Permissions.HasPermission(Permissions.ManageMessages)))
+            if(!ctx.Member.Roles.Last().Permissions.HasPermission(Permissions.ManageMessages))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
