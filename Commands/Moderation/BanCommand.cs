@@ -11,7 +11,7 @@ namespace SilkBot.Commands.Moderation
     public class BanCommand : BaseCommandModule
     {
         [Command("ban")]
-        public async Task Ban(CommandContext ctx, DiscordMember user, [RemainingText] string reason = null)
+        public async Task Ban(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
         {
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 

@@ -1,9 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace SilkBot.Utilities
 {
@@ -12,8 +10,11 @@ namespace SilkBot.Utilities
         public static bool HasPermission(this DiscordRole role, Permissions permission) =>
             role.Permissions.HasPermission(permission);
 
-        public static bool HasPermission(this DiscordMember member, Permissions perm) =>
-            member.Roles.Last().Permissions.HasPermission(perm);
+        public static bool HasPermission(this DiscordMember member, Permissions perm)
+        {
+            if (!member.Roles.Any()) return member.Guild.EveryoneRole.HasPermission(perm);
+            else return member.Roles.Any(role => role.HasPermission(perm));
+        }
 
         public static IEnumerable<DiscordRole> HasPermission(this DiscordGuild guild, Permissions permission) =>
             guild.Roles.Where(role => role.Value.HasPermission(permission)).Select(t => t.Value);
@@ -24,8 +25,11 @@ namespace SilkBot.Utilities
         public static bool IsAdministrator(this DiscordMember member) =>
             member.Roles.Any(role => role.Permissions.HasPermission(Permissions.Administrator));
 
-        public static bool IsAbove(this DiscordMember target, DiscordMember comparison) =>
-            target.Roles.Last().Position > comparison.Roles.Last().Position;
+        public static bool IsAbove(this DiscordMember target, DiscordMember comparison)
+        {
+            if (!target.Roles.Any()) return false;
+            else return target.Roles.Last().Position > comparison.Roles.Last().Position;
+        }
 
     }
 }
