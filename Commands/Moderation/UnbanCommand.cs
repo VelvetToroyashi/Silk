@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot
@@ -11,12 +12,21 @@ namespace SilkBot
     { 
         [Command("unban")]
         [RequirePermissions(Permissions.BanMembers)]
-        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = null)
+        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
-            await ctx.Guild.UnbanMemberAsync(user, reason);
-            var embed = EmbedGenerator.CreateEmbed(ctx, "", $"Unanned {user.Username}{user.Discriminator}! Reason: {(reason is null ? "No reason given." : reason)}");
+            if((await ctx.Guild.GetBansAsync()).Any(ban => ban.User.Id == user.Id))
+            {
+                await user.UnbanAsync(ctx.Guild, reason);
+                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unanned `{user.Username}#{user.Discriminator} ({user.Id})`! ")).AddField("Reason:", reason);
 
-            await ctx.RespondAsync(embed: embed);
+                await ctx.RespondAsync(embed: embed);
+            }
+            else
+            { 
+                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!")).WithColor(new DiscordColor("#d11515"));
+                await ctx.RespondAsync(embed: embed);
+            }
+            
         }
     }
 }

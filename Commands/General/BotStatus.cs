@@ -126,7 +126,7 @@ namespace SilkBot
                     else 
                     {
                         await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, (ActivityType)activity), idleSince: DateTime.Now);
-                        var msg = await ctx.RespondAsync(embed: EmbedGenerator.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
+                        var msg = await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
                         await Task.Delay(3000);
                         await ctx.Channel.DeleteMessageAsync(msg);
                     }

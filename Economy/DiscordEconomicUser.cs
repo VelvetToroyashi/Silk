@@ -90,7 +90,7 @@ namespace SilkBot.Economy
             if(DateTime.Now - LastCashInTime > dailyCooldown)
             {
                 lastDailyCashIn = DateTime.Now;
-                var returnEmbed = EmbedGenerator.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 coins, come back tomorrow for more!", DiscordColor.SpringGreen);
+                var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 coins, come back tomorrow for more!", DiscordColor.SpringGreen);
                 Cash += 200;
                 return new DiscordEmbedBuilder(returnEmbed).WithAuthor(ctx.User.Username, iconUrl: ctx.Member.AvatarUrl);
             }
@@ -101,7 +101,7 @@ namespace SilkBot.Economy
 
 
 
-                var returnEmbed = EmbedGenerator.CreateEmbed(ctx, "Daily reward:", $"come back in {-(int)timeToReturn.TotalHours} hours!", DiscordColor.IndianRed);
+                var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", $"come back in {-(int)timeToReturn.TotalHours} hours!", DiscordColor.IndianRed);
                 return new DiscordEmbedBuilder(returnEmbed).WithAuthor(ctx.User.Username, iconUrl: ctx.Member.AvatarUrl);
             }
 

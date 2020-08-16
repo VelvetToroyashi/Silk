@@ -2,54 +2,64 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Utilities;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation
 {
     public class BanCommand : BaseCommandModule
     {
-        [Command("ban")]
-        public async Task Ban(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
+        [Command("Ban")]
+        [HelpDescription("Ban someone! Both Silk and Invoker require `Ban Members`.", "<prefix>ban <userID>/<mention>")]
+        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordUser target, [RemainingText] string reason = "Not given.")
         {
+            var user = await ctx.Guild.GetMemberAsync(target.Id);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-
-
-            var banDeniedReason = "";
-            if (user == bot)
-                banDeniedReason = "I can't kick myself!";
-            else if (user == ctx.Guild.Owner)
-                banDeniedReason = $"I can't ban {user.Mention}...They're the owner...";
-
-            if (user.Roles.Any())
+            if(!CanExecuteCommand(out reason))
             {
-                if (user.Roles.Last().Permissions.HasPermission(Permissions.KickMembers))
-                    banDeniedReason = $"I can't ban {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})";
-                else if (user.Roles.Last().Permissions.HasPermission(Permissions.BanMembers))
-                    banDeniedReason = $"I can't ban {user.Mention}! They're an admin! ({user.Roles.Last().Mention})";
-            }
-
-
-            if (banDeniedReason != "")
-            {
-                await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                                                .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
-                                                .WithColor(DiscordColor.Red)
-                                                .WithDescription(banDeniedReason)
-                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                                .WithTimestamp(DateTime.Now));
+                await DenyBanAsync(reason);
                 return;
             }
 
+            async Task DenyBanAsync(string reason)
+            {
+                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.Red).WithDescription(reason)
+                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                                .WithTimestamp(DateTime.Now));
+            }
+
+            bool CanExecuteCommand(out string reason)
+            {
+                if (target == bot)
+                {
+                    reason = $"I can't ban myself!";
+                    return false;
+                }
+                if (!ctx.Member.HasPermission(Permissions.BanMembers))
+                {
+                    reason = $"You do not have permission to ban members!";
+                    return false;
+                }
+                if (user.IsAbove(bot))
+                {
+                    reason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
+                    return false;
+                }
+                    reason = null;
+                    return true;
+            }
 
 
-            var embed = new DiscordEmbedBuilder(EmbedGenerator.CreateEmbed(ctx, $"You've been banned from {ctx.Guild.Name}!", "")).AddField("Reason:", $"{(reason == "" ? "No reason provided." : reason)}");
+
+
+            var userBannedEmbed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been banned from {ctx.Guild.Name}!", "")).AddField("Reason:", $"{(reason == "" ? "No reason provided." : reason)}");
             try
             {
-                await DMCommand.DM(ctx, user, embed);
+                await DMCommand.DM(ctx, target, userBannedEmbed);
             }
-            catch (Exception e) { }
+            catch (Exception e) { ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk", e.Message, DateTime.Now, e); }
 
 
 
@@ -58,7 +68,7 @@ namespace SilkBot.Commands.Moderation
             await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($":hammer: banned {user.Mention}!")
+                .WithDescription($":hammer: banned {target.Mention}!")
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
 

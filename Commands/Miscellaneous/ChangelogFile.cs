@@ -8,11 +8,9 @@ namespace SilkBot.Commands.Miscellaneous
     [Serializable]
     public class ChangelogFile
     {
-        public string Version { get; set; }
-        public string ShortDescription { get; set; }
-        public string Additions { get; set; }
-        public string Removals { get; set; }
 
+        public string Description { get; set; }
+        public string Changes { get; set; }
 
         public static ChangelogFile DeserializeChangeLog()
         {
@@ -29,7 +27,15 @@ namespace SilkBot.Commands.Miscellaneous
             var fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
             var fileContent = File.ReadAllLines(fileInfo.FullName);
 
-            var changeLog = new ChangelogFile { Additions = fileContent[1], Removals = fileContent[2], ShortDescription = fileContent[3], Version = fileContent[0] };
+
+            
+            var desc = string.Join('\n', fileContent.TakeWhile(f => (f.Length > 1)));
+            var changes = string.Join('\n', fileContent.Skip(desc.Split('\n').Length + 1).Take(fileContent.Count() - 1));
+            var changeLog = new ChangelogFile 
+            {
+                Description = desc,
+                Changes = $"```diff\n{changes}```"
+            };
 
             var fileToWrite = JsonConvert.SerializeObject(changeLog, Formatting.Indented);
 

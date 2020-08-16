@@ -65,7 +65,7 @@ namespace SilkBot.Commands.Moderation
             {
 
 
-                var embed = new DiscordEmbedBuilder(EmbedGenerator.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
+                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
 
 
                 try 

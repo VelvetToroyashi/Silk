@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace SilkBot
@@ -20,7 +19,7 @@ namespace SilkBot
 
             var baseHelpEb = new DiscordEmbedBuilder()
             {
-                Title = "Help",
+                Title = "Silk's Commands:",
                 Color = color,
             };
 
@@ -28,9 +27,9 @@ namespace SilkBot
             var helpSb = new StringBuilder();
 
 
-            var commands = CommandHelper.GetAllCommands();
-            var methodAttributeParameters = new List<String>();
-            var sortedCommandNames = commands.OrderBy(e => e.GetCustomAttribute<CommandAttribute>().Name);
+            var allCommands = CommandHelper.GetAllCommands();
+            var methodParameters = new List<string>();
+            var sortedCommandNames = allCommands.OrderBy(e => e.GetCustomAttribute<CommandAttribute>().Name);
 
             foreach (var method in sortedCommandNames)
             {
@@ -64,7 +63,7 @@ namespace SilkBot
                     helpSb.AppendLine($"**{methodEmbed.Title}** - {methodEmbed.Description ?? ""}");
                 else
                 {
-                    methodAttributeParameters.Add(methodEmbed.Description ?? "No description given");
+                    methodParameters.Add(methodEmbed.Description ?? "No description given");
                 }
                 var footerSb = new StringBuilder(method.GetParameters().Any(param => param.ParameterType != typeof(CommandContext)) ? "Accepted Parameters\n" : "This command takes no arguments!");
                 foreach (var parameter in method.GetParameters())

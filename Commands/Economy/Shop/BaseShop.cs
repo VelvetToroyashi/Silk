@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SilkBot.Commands.Economy.Shop
 {
@@ -9,6 +12,9 @@ namespace SilkBot.Commands.Economy.Shop
         public DateTime LastHourlyRefresh { get; set; }
         //The last time the daily shop is refreshed//
         public  DateTime LastFullRefresh { get; set; }
+
+        public DiscordEmbed ShopUI { get; private set; }
+
         //Maximum amount of items that are allowed to appear on the shop at a given time.//
         protected readonly int MAX_ITEMS;
         //Previously circulated items.//
@@ -28,6 +34,11 @@ namespace SilkBot.Commands.Economy.Shop
         }
 
 
+
+
+        private protected IEnumerable<IShopItem> LoadShopFromConfigurationFile(string path) =>
+            JsonConvert.DeserializeObject<IEnumerable<IShopItem>>(path);
+        
 
         public IEnumerable<IShopItem> GetCurrentItems()
         {

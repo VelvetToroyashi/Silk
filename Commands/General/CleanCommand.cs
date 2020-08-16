@@ -4,7 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
 using System.Threading.Tasks;
-using static SilkBot.EmbedGenerator;
+using static SilkBot.EmbedHelper;
 
 
 

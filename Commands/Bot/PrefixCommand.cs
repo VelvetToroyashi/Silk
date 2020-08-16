@@ -41,7 +41,7 @@ namespace SilkBot.Commands.Bot
         {
             if (prefix.Length > 5)
                 return (false, "Prefix cannot be more than 5 characters!");
-            if (!Regex.IsMatch(prefix, "[A-Z]?[!@#$%^&*<>?]", RegexOptions.IgnoreCase)) return (false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
+            if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase)) return (false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
             else return (true, "");
         }
 

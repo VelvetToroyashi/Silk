@@ -15,7 +15,7 @@ namespace SilkBot.Commands.TestCommands
             await ctx.TriggerTypingAsync();
             await Task.Delay(1500);
             await ctx.RespondAsync("Verifying config is set...");
-            var embed = EmbedGenerator.CreateEmbed(ctx, "", "");
+            var embed = EmbedHelper.CreateEmbed(ctx, "", "");
 
             await Task.Delay(3000);
             ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var serverConfigurationObject);

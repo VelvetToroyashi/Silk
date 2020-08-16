@@ -35,7 +35,7 @@ namespace SilkBot.Commands.Economy
                 var matches = new StringBuilder();
                 for(var i = 0; i < matchingMembers.Count(); i++)
                     matches.AppendLine($"[{i}]{matchingMembers.ElementAt(i).Mention}");
-                var embed = EmbedGenerator.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
+                var embed = EmbedHelper.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
                 await ctx.RespondAsync(embed: embed);
 
                 var userResposne = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member && Regex.IsMatch(message.Content, "[0-9]{1,3}"), TimeSpan.FromSeconds(20));
