@@ -6,6 +6,7 @@ using SilkBot.ServerConfigurations;
 using SilkBot.Utilities;
 using System;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
@@ -76,11 +77,7 @@ namespace SilkBot.Commands.Moderation
                     ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop);
                 }
                 
-
-                await ctx.Guild.BanMemberAsync(user, 0, reason);
-                await ctx.Guild.UnbanMemberAsync(user);
-
-
+                await ctx.Member.RemoveAsync(reason);
 
                 ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var guildConfig);
                 var logChannelID = guildConfig?.LoggingChannel;

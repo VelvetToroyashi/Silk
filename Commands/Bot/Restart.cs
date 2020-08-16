@@ -18,6 +18,14 @@ namespace SilkBot.Commands.Bot
         public async Task RestartBot(CommandContext ctx)
         {
             await ctx.Client.UpdateStatusAsync(userStatus: UserStatus.DoNotDisturb);
+            await ctx.RespondAsync(embed:
+                new DiscordEmbedBuilder()
+                .WithTitle("Restart command recieved!")
+                .WithDescription("Restarting... Commands will be processed when status is green.")
+                .WithColor(new DiscordColor("#29ff29"))
+                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+                .WithTimestamp(DateTime.Now)
+                );
             foreach (var config in ServerConfigurationManager.LocalConfiguration)
             {
                 var appdataFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -49,6 +57,14 @@ namespace SilkBot.Commands.Bot
         {
             if (!readOnly) return;
             await ctx.Client.UpdateStatusAsync(userStatus: UserStatus.DoNotDisturb);
+            await ctx.RespondAsync(embed:
+               new DiscordEmbedBuilder()
+               .WithTitle("Restart command recieved!")
+               .WithDescription("Restarting... Commands will be processed when status is green.")
+               .WithColor(new DiscordColor("#29ff29"))
+               .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+               .WithTimestamp(DateTime.Now)
+               );
             foreach (var config in ServerConfigurationManager.LocalConfiguration)
             {
                 var appdataFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
