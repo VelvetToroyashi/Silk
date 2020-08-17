@@ -1,11 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using System;
-using System.Drawing;
-using System.IO;
-using System.Net;
+using SilkBot.Utilities;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.GeneralCommands
@@ -13,17 +9,12 @@ namespace SilkBot.Commands.GeneralCommands
     public class Enbiggen : BaseCommandModule
     {
         [Command("Enlarge")]
-        public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
-        {
-            var ranFileName = new Random().Next();
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "Emojis");
-            var ext = emoji.Url.Substring(emoji.Url.Length - 3);
-            using (WebClient client = new WebClient())
-            {
-                client.DownloadFile(new Uri(emoji.Url), Path.Combine(path, $"{ranFileName}.{ext}"));
-            }
-            await ctx.RespondWithFileAsync(Path.Combine(path, $"{ranFileName}.{ext}"));        
-            
-        }
+        public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji) =>
+            await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
+                .WithDescription("Emoji Name: " + emoji.GetDiscordName())
+                .WithImageUrl(emoji.Url)
+                .WithColor(new DiscordColor("42d4f5"))
+                .AddFooter(ctx));
+        
     }
 }

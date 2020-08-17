@@ -21,7 +21,7 @@ namespace SilkBot.Commands.GeneralCommands
         }
 
         [Command("Avatar")]
-        public async Task GetAvatarAsync(CommandContext ctx, DiscordMember user)
+        public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
         {
             
             await ctx.RespondAsync(embed:

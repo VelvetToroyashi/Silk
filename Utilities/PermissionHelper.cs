@@ -7,8 +7,7 @@ namespace SilkBot.Utilities
 {
     public static class PermissionHelper
     {
-        public static bool HasPermission(this DiscordRole role, Permissions permission) =>
-            role.Permissions.HasPermission(permission);
+        public static bool HasPermission(this DiscordRole role, Permissions permission) => role.Permissions.HasPermission(permission);
 
         public static bool HasPermission(this DiscordMember member, Permissions perm)
         {

@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using SilkBot.ServerConfigurations.UserInfo;
+using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,34 +19,19 @@ namespace SilkBot.ServerConfigurations
 
 
 
-        public async Task<Moderator[]> GetModeratorsAsync(DiscordGuild guild)
-        {
-            var members = await guild.GetAllMembersAsync();
-            var ModeratorObjectList = members.Where(member => member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers)));
-            var ModeratorIDList = new List<Moderator>();
-            foreach (var admin in ModeratorObjectList)
-                ModeratorIDList.Add(new Moderator() { ID = admin.Id });
-            return ModeratorIDList.ToArray();
-        }
-        public async Task<BannedMember[]> GetBansAsync(DiscordGuild guild)
-        {
-            var bannedUsersArray = await guild.GetBansAsync();
-            var bannedUsersList = new List<BannedMember>();
-            foreach (var ban in bannedUsersArray.ToArray())
-                bannedUsersList.Add(new BannedMember() { ID = ban.User.Id, Reason = ban.Reason });
-            return bannedUsersList.ToArray();
+        public async Task<IEnumerable<Moderator>> GetModeratorsAsync(DiscordGuild guild) =>
+            (await guild.GetAllMembersAsync())
+            .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
+                .Select(mod => new Moderator(mod.Id));
+        public async Task<IEnumerable<BannedMember>> GetBansAsync(DiscordGuild guild) =>
+            (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
 
+        public async Task<IEnumerable<Administrator>> GetAdministratorsAsync(DiscordGuild guild) =>
+            (await guild.GetAllMembersAsync())
+            .Where(member => member.HasPermission(Permissions.Administrator) && !member.IsBot)
+                .Select(admin => new Administrator(admin.Id));
 
-        }
-        public async Task<Administrator[]> GetAdministratorsAsync(DiscordGuild guild)
-        {
-            var members = await guild.GetAllMembersAsync();
-            var AdministratorObjectList = members.Where(member => member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers)));
-            var AdministratorIDList = new List<Administrator>();
-            foreach (var admin in AdministratorObjectList)
-                AdministratorIDList.Add(new Administrator() { ID = admin.Id });
-            return AdministratorIDList.ToArray();
-        }
+        
 
         public async Task<DiscordChannel> ReturnChannelFromID(CommandContext commandContext, ulong Id)
         {

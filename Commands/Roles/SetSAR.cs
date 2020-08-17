@@ -19,6 +19,11 @@ namespace SilkBot.Commands.Roles
         [HelpDescription("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
+            if (roles.Count() < 1)
+            {
+                await ctx.RespondAsync("Roles canont be empty!");
+                return;
+            }
             if (!ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.KickMembers))
             {
                 throw new InsufficientPermissionsException();

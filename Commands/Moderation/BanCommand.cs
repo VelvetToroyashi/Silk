@@ -2,6 +2,8 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.ServerConfigurations;
+using SilkBot.ServerConfigurations.UserInfo;
 using SilkBot.Utilities;
 using System;
 using System.Threading.Tasks;
@@ -12,65 +14,80 @@ namespace SilkBot.Commands.Moderation
     {
         [Command("Ban")]
         [HelpDescription("Ban someone! Both Silk and Invoker require `Ban Members`.", "<prefix>ban <userID>/<mention>")]
-        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordUser target, [RemainingText] string reason = "Not given.")
+        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
+            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(ctx.Guild.Id))
+                await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
             var user = await ctx.Guild.GetMemberAsync(target.Id);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            if(!CanExecuteCommand(out reason))
+            if(!CanExecuteCommand(out var errorReason))
             {
-                await DenyBanAsync(reason);
+                await DenyBanAsync(errorReason);
                 return;
             }
 
-            async Task DenyBanAsync(string reason)
+            async Task DenyBanAsync(string errorReason)
             {
-                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
-                                                .WithColor(DiscordColor.Red).WithDescription(reason)
+                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.Red).WithDescription(errorReason)
                                                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                                                 .WithTimestamp(DateTime.Now));
             }
 
-            bool CanExecuteCommand(out string reason)
+            bool CanExecuteCommand(out string errorReason)
             {
                 if (target == bot)
                 {
-                    reason = $"I can't ban myself!";
+                    errorReason = $"I can't ban myself!";
                     return false;
                 }
                 if (!ctx.Member.HasPermission(Permissions.BanMembers))
                 {
-                    reason = $"You do not have permission to ban members!";
+                    errorReason = $"You do not have permission to ban members!";
                     return false;
                 }
                 if (user.IsAbove(bot))
                 {
-                    reason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
+                    errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
                 }
-                    reason = null;
+                    errorReason = null;
                     return true;
             }
 
 
 
 
-            var userBannedEmbed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been banned from {ctx.Guild.Name}!", "")).AddField("Reason:", $"{(reason == "" ? "No reason provided." : reason)}");
-            try
-            {
-                await DMCommand.DM(ctx, target, userBannedEmbed);
-            }
-            catch (Exception e) { ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk", e.Message, DateTime.Now, e); }
+            var userBannedEmbed = new DiscordEmbedBuilder()
+                .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                .WithTitle($"You've been banned from {ctx.Guild.Name}!")
+                .AddField("Reason:", $"{reason}")
+                .AddFooter(ctx)
+                .WithColor(new DiscordColor("#0019bd"));
 
-
-
-            await ctx.Guild.BanMemberAsync(user, 7, reason == "" ? "No reason provided" : reason);
-
-            await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
+            var (name, url) = ctx.GetAuthor();
+            var logEmbed = new DiscordEmbedBuilder()
+                .WithAuthorExtension(name, url)
                 .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($":hammer: banned {target.Mention}!")
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
+                .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
+                .AddField("Reason:", reason).AddFooter(ctx);
+            try
+            { 
+                await DMCommand.DM(ctx, target, userBannedEmbed); 
+            }
+            finally
+            {
+                
+                await ctx.Guild.BanMemberAsync(user, 7, reason);
+                var sendChannel = ctx.Guild.GetChannel(ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].LoggingChannel) ?? ctx.Channel;
+                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].BannedMembers.Add(new BannedMember(user.Id, reason));
+                await sendChannel.SendMessageAsync(embed: logEmbed);
+            }
+
+
+
+            
 
         }
     }

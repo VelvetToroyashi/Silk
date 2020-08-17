@@ -9,6 +9,11 @@ namespace SilkBot.ServerConfigurations.UserInfo
     {
         public ulong ID { get; set; }
         public string Reason { get; set; }
-        
+
+        public BannedMember(ulong Id, string reason)
+        {
+            ID = Id;
+            Reason = reason;
+        }
     }
 }

@@ -33,12 +33,16 @@ namespace SilkBot
 
                 var totalRoll = 0;
 
-                for (var i = 0; i < dieCount; i++)
-                {
+                    for (var i = 0; i < dieCount; i++)
+                    {
                     //Get random roll between 1
                     //and the die size.
-                    totalRoll += r.Next(1, dieSize + 1);
-                }
+                    
+                        totalRoll += r.Next(1, dieSize + 1);
+                    }
+                    
+            
+
 
                 //Now replace the expressions with their resolutions.
                 
@@ -46,9 +50,14 @@ namespace SilkBot
             });
 
             
-
+            
             int total = (int)new Expression(matcher).calculate();
-            _ = await ctx.RespondAsync($"You rolled {total}");
+            if (total == int.MaxValue || total == int.MinValue)
+            {
+                await ctx.RespondAsync("Dice roll resulted in overflow! (Your diceroll was too great for computational power.");
+                return;
+            }
+            await ctx.RespondAsync($"You rolled {total}");
         }
 
 

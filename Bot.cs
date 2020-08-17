@@ -55,6 +55,7 @@ namespace SilkBot
         private Task OnGuildJoin(GuildCreateEventArgs e)
         {
             GuildPrefixes.Add(e.Guild.Id, "!");
+
             return Task.CompletedTask;
         }
 
@@ -69,10 +70,8 @@ namespace SilkBot
 
             var cmd = Client.GetCommandsNext().FindCommand(cnt, out var args);
             var ctx = Client.GetCommandsNext().CreateContext(e.Message, pfx, cmd, args);
-            if (cmd == null)
-            {
-                return Task.FromResult(-1);
-            }
+            if (cmd is null) return Task.FromResult(-1);
+
 
             Task.Run(async () => await Client.GetCommandsNext().ExecuteCommandAsync(ctx));
             return Task.CompletedTask;
@@ -92,8 +91,10 @@ namespace SilkBot
             return Task.CompletedTask;
         }
 
-        private Task OnGuildAvailable(DSharpPlus.EventArgs.GuildCreateEventArgs e)
+        private Task OnGuildAvailable(GuildCreateEventArgs e)
         {
+            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(e.Guild.Id))
+                ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(e.Guild.Id).GetAwaiter();
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {e.Guild.Name}", DateTime.Now);
             return Task.CompletedTask;
         }

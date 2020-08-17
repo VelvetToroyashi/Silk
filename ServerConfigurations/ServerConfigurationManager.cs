@@ -39,16 +39,17 @@ namespace SilkBot.ServerConfigurations
         
         public async Task<ServerConfig> GenerateConfigurationFromIdAsync(ulong guildId)
         {
-            var guild = await Bot.Instance.Client.GetGuildAsync(guildId);
+            var client = Bot.Instance.Client;
+            var guild = await client.GetGuildAsync(guildId);
             var administrators = await ServerInfo.Instance.GetAdministratorsAsync(guild);
             var moderators = await ServerInfo.Instance.GetModeratorsAsync(guild);
             var bannedMembers = await ServerInfo.Instance.GetBansAsync(guild);
             var config = new ServerConfig 
             { 
-                Administrators = administrators, 
-                BannedMembers = bannedMembers, 
+                Administrators = administrators.ToList(), 
+                BannedMembers = bannedMembers.ToList(), 
                 Guild = guild.Id,
-                Moderators = moderators 
+                Moderators = moderators.ToList() 
             };
             configurations.TryAdd(guildId, config);
             var json = JsonConvert.SerializeObject(config, Formatting.Indented);

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SilkBot.ServerConfigurations.UserInfo
 {
@@ -8,5 +6,6 @@ namespace SilkBot.ServerConfigurations.UserInfo
     public class Administrator
     {
         public ulong ID { get; set; }
+        public Administrator(ulong Id) => ID = Id;
     }
 }

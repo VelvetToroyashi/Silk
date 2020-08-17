@@ -6,8 +6,6 @@ using SilkBot.ServerConfigurations;
 using SilkBot.Utilities;
 using System;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation
@@ -36,30 +34,22 @@ namespace SilkBot.Commands.Moderation
 
             if (user.IsAbove(bot))
             {
-                var errorReason = "";
-                if (user == bot)
-                    errorReason = "I wish I could kick myself, but I sadly cannot.";
-                else if (user == ctx.Guild.Owner)
-                    errorReason = $"I can't kick the owner ({user.Mention}) out of their own server!";
-                else if (user.HasPermission(Permissions.KickMembers))
-                    errorReason = $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})";
-                else if (user.HasPermission(Permissions.Administrator))
-                    errorReason = $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})";
+                var isBot = user == bot;
+                var isOwner = user == ctx.Guild.Owner;
+                var isMod   = user.HasPermission(Permissions.KickMembers);
+                var isAdmin = user.HasPermission(Permissions.Administrator);
+                string errorReason;
+                _ = user.IsAbove(bot) switch
+                {
+                    true when isBot => errorReason = "I wish I could kick myself, but I sadly cannot.",
+                    true when isOwner => errorReason = $"I can't kick the owner ({user.Mention}) out of their own server!",
+                    true when isMod => errorReason = $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
+                    true when isAdmin => errorReason = $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
 
+                    _ => errorReason = "`ROLE_CHECK_NULL_REASON.` That's all I know."
+                };
 
-
-
-
-                await ctx.Client.SendMessageAsync(ctx.Channel,
-                                            embed: new DiscordEmbedBuilder()
-                                                .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
-                                                .WithColor(DiscordColor.Red)
-                                                .WithDescription(errorReason == "" ? "Something went horribly wrong, and it's assuming you're below the user you're trying to kick." : errorReason)
-                                                .WithFooter("Silk!", bot.AvatarUrl)
-                                                .WithTimestamp(DateTime.UtcNow));
-
-
-
+                await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, errorReason, DiscordColor.Red));
             }
             else
             {

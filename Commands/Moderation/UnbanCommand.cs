@@ -17,7 +17,7 @@ namespace SilkBot
             if((await ctx.Guild.GetBansAsync()).Any(ban => ban.User.Id == user.Id))
             {
                 await user.UnbanAsync(ctx.Guild, reason);
-                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unanned `{user.Username}#{user.Discriminator} ({user.Id})`! ")).AddField("Reason:", reason);
+                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
 
                 await ctx.RespondAsync(embed: embed);
             }
