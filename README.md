@@ -3,3 +3,7 @@ Silk is a simple, intuitive and efficient bot created using C# and DSharpPlus Li
 
 ## ⚠️ Development ⚠️
 This code is here for development and collaboration purposes, thus we do not provide any support for hosting this bot by yourself. Feel free to do so on your own time.
+
+## Running inside of Docker
+To run Silk inside of docker, create a file called `Token.txt` that just includes your Discord bot token.
+After that just run `docker-compose up -d`.
