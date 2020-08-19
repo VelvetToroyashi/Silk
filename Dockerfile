@@ -9,8 +9,8 @@ RUN dotnet publish -c Release -o out
 # Run it
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1
 
-# Gotta fix an issue where it complains about not finding a path
 WORKDIR /silk
+RUN mkdir -p /silk/SilkBot/ServerConfigs
 COPY --from=build /silk/out .
 
 RUN chmod +x ./Silk!

@@ -5,5 +5,5 @@ services:
         image: silk:latest
         build: .
         volumes:
-            - ./config:/home/.config
+            - ./config:/silk/SilkBot/ServerConfigs
             - ./Token.txt:/silk/Token.txt
