@@ -54,7 +54,7 @@ namespace SilkBot
 
         private Task OnGuildJoin(GuildCreateEventArgs e)
         {
-            GuildPrefixes.Add(e.Guild.Id, "!");
+            
 
             return Task.CompletedTask;
         }
@@ -95,6 +95,8 @@ namespace SilkBot
         {
             if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(e.Guild.Id))
                 ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(e.Guild.Id).GetAwaiter();
+            if(!GuildPrefixes.ContainsKey(e.Guild.Id))
+                GuildPrefixes.Add(e.Guild.Id, "!"); 
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {e.Guild.Name}", DateTime.Now);
             return Task.CompletedTask;
         }

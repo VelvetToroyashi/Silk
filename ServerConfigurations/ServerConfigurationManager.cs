@@ -11,9 +11,8 @@ namespace SilkBot.ServerConfigurations
 {
     public class ServerConfigurationManager
     {
-        private static readonly ConcurrentDictionary<ulong, ServerConfig> configurations = new ConcurrentDictionary<ulong, ServerConfig>();
         public static ServerConfigurationManager Instance { get; } = new ServerConfigurationManager();
-        public static ConcurrentDictionary<ulong, ServerConfig> LocalConfiguration { get => configurations; }
+        public static ConcurrentDictionary<ulong, GuildInfo> LocalConfiguration { get; } = new ConcurrentDictionary<ulong, GuildInfo>();
         private ServerConfigurationManager() { }
 
         public void LoadServerConfigs()
@@ -22,8 +21,8 @@ namespace SilkBot.ServerConfigurations
             {
                 if (file.EndsWith(".gconfig")) continue;
                 var fileContent = File.ReadAllText(file);
-                var currentServerConfiguration = JsonConvert.DeserializeObject<ServerConfig>(fileContent);
-                configurations.TryAdd(currentServerConfiguration.Guild, currentServerConfiguration);
+                var currentServerConfiguration = JsonConvert.DeserializeObject<GuildInfo>(fileContent);
+                LocalConfiguration.TryAdd(currentServerConfiguration.Guild, currentServerConfiguration);
                 
             }
             var globalConfigFilepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "GlobalConfig.gconfig");
@@ -37,21 +36,21 @@ namespace SilkBot.ServerConfigurations
 
         }
         
-        public async Task<ServerConfig> GenerateConfigurationFromIdAsync(ulong guildId)
+        public async Task<GuildInfo> GenerateConfigurationFromIdAsync(ulong guildId)
         {
             var client = Bot.Instance.Client;
             var guild = await client.GetGuildAsync(guildId);
             var administrators = await ServerInfo.Instance.GetAdministratorsAsync(guild);
             var moderators = await ServerInfo.Instance.GetModeratorsAsync(guild);
             var bannedMembers = await ServerInfo.Instance.GetBansAsync(guild);
-            var config = new ServerConfig 
+            var config = new GuildInfo 
             { 
                 Administrators = administrators.ToList(), 
                 BannedMembers = bannedMembers.ToList(), 
                 Guild = guild.Id,
                 Moderators = moderators.ToList() 
             };
-            configurations.TryAdd(guildId, config);
+            LocalConfiguration.TryAdd(guildId, config);
             var json = JsonConvert.SerializeObject(config, Formatting.Indented);
             File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", $"{guildId}.serverconfig"), json);
             return config;
