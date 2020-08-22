@@ -15,7 +15,7 @@ namespace SilkBot.Economy
             var user = new DiscordEconomicUser(Id, member.DisplayName);
             if (Users.ContainsKey(Id)) return;
             Users.TryAdd(Id, user);
-            Bot.GlobalConfig.EconomicUsers.Add(user); 
+            Bot.EconomicUsers.EconomicUsers.Add(user); 
         }
         //I don't use this as much as I could and should. Sad.//
         public bool UserExists(ulong Id) => Users.ContainsKey(Id);

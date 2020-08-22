@@ -6,7 +6,9 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using Newtonsoft.Json;
 using SilkBot.Commands.Economy;
+using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.ServerConfigurations;
+using SilkBot.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +21,11 @@ namespace SilkBot
     {
 
         public static Bot Instance { get; } = new Bot();
-        public static GlobalUserConfiguration GlobalConfig { get; set; } = new GlobalUserConfiguration();
+        public DataStorageContainer Data { get => _data; }
+        private DataStorageContainer _data = new DataStorageContainer();
+        public static DiscordEconomicUsersData EconomicUsers { get; set; } = new DiscordEconomicUsersData();
+
+
         [JsonProperty(PropertyName = "Guild Prefixes")]
         public static Dictionary<ulong, string> GuildPrefixes { get; set; }
 
@@ -28,26 +34,14 @@ namespace SilkBot
 
         public InteractivityConfiguration Interactivity { get; }
 
+        public TimedActionHelper Timer { get; } = new TimedActionHelper();
  
         private Bot() { }
        
 
         public async Task RunBotAsync()
         {
-            InitializeClient();
-            HelpCache.Initialize(DiscordColor.Azure);
-            ServerConfigurationManager.Instance.LoadServerConfigs();
-
-
-            Client.Ready += OnReady;
-            Client.GuildAvailable += OnGuildAvailable;
-            Client.GuildCreated += OnGuildJoin;
-            Client.GetCommandsNext().CommandErrored += OnCommandErrored;
-            Client.MessageCreated += OnMessageCreate;
-
-
-            await Client.ConnectAsync();
-
+            await InitializeClient();
             await Task.Delay(-1);
 
         }
@@ -101,7 +95,7 @@ namespace SilkBot
             return Task.CompletedTask;
         }
 
-        private Task OnReady(DSharpPlus.EventArgs.ReadyEventArgs e)
+        private Task OnReady(ReadyEventArgs e)
         {
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", "Ready to process events.", DateTime.Now);
             return Task.CompletedTask;
@@ -110,7 +104,7 @@ namespace SilkBot
         private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
 
 
-        private void InitializeClient()
+        private async Task InitializeClient()
         {
             var Token = File.ReadAllText("./Token.txt");
             var config = new DiscordConfiguration
@@ -124,13 +118,36 @@ namespace SilkBot
 
             Client = new DiscordClient(config);
 
-            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.Ignore, Timeout = TimeSpan.FromMinutes(2) });
+            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1) });
 
 
             Client.UseCommandsNext(Commands);
 
             RegisterCommands();
-        }
 
+            HelpCache.Initialize(DiscordColor.Azure);
+            Data.PopulateDataOnApplicationLoad();
+            //All these handlers do is subscibe to the bot's appropriate event, and do something, hence not assigning a variable to it.
+            new MessageDeletionHandler(ref _data, Client);
+            new MessageEditHandler(ref _data, Client);
+
+            var prefixData = File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "Configs", "prefixes.gconfig"));
+            GuildPrefixes = JsonConvert.DeserializeObject<Dictionary<ulong, string>>(prefixData);
+
+            Client.Ready += OnReady;
+            Client.GuildAvailable += OnGuildAvailable;
+            Client.GuildCreated += OnGuildJoin;
+            Client.GetCommandsNext().CommandErrored += OnCommandErrored;
+            Client.MessageCreated += OnMessageCreate;
+            Client.MessageDeleted += async (e) => await Task.CompletedTask;
+            Client.GuildDownloadCompleted += async (e) => 
+            {
+                Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Availble guilds: {e.Guilds.Count}", DateTime.Now);
+                await Data.FetchGuildInfo(Client.Guilds.Values);
+            };
+
+            await Client.ConnectAsync();
+
+        }
     }
 }

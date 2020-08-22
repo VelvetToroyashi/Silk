@@ -1,6 +1,6 @@
 ﻿namespace SilkBot.Tools
 {
-    public enum TimingReason
+    public enum RestrictionActionReason
     {
         TemporaryMute,
         TemporaryBan,

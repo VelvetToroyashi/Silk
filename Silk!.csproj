@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="config\**" />
+    <Compile Remove="Silk!\**" />
+    <EmbeddedResource Remove="config\**" />
+    <EmbeddedResource Remove="Silk!\**" />
+    <None Remove="config\**" />
+    <None Remove="Silk!\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="721518523704410202.serverconfig" />
     <None Remove="Token.txt" />
   </ItemGroup>

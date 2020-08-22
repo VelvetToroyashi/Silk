@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace SilkBot.ServerConfigurations
 {
-    public sealed class GlobalUserConfiguration
+    public sealed class DiscordEconomicUsersData
     {
-        [JsonProperty]
+        [JsonProperty(PropertyName = "Economic Users")]
         public List<DiscordEconomicUser> EconomicUsers { get; set; } = new List<DiscordEconomicUser>();
     }
 }

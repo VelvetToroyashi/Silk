@@ -100,12 +100,12 @@ namespace SilkBot.Commands.TestCommands
                     return;
                 }
                 var channelID = ulong.Parse(message.Result.Content);
-                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].LoggingChannel = channelID;
+                SilkBot.Bot.Instance.Data[ctx.Guild].Guild.LoggingChannel = channelID;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(channelID).Mention}", DiscordColor.Gold));
             }
             else
             {
-                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].LoggingChannel = id;
+                SilkBot.Bot.Instance.Data[ctx.Guild].Guild.LoggingChannel = id;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(id).Mention}", DiscordColor.Gold));
             }
         }

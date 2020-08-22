@@ -8,7 +8,9 @@ namespace SilkBot.Commands.Economy.Shop
     {
         //Basically the shop command will serve as a command processor.//
         [Command("Shop")]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task Shop(CommandContext ctx, string action)
+
         {
             
         }

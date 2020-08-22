@@ -7,3 +7,4 @@ services:
         volumes:
             - ./config:/silk/SilkBot/ServerConfigs
             - ./Token.txt:/silk/Token.txt
+            - C:\Users\Cinnamon\AppData\Roaming\SilkBot:/silk/SilkBot

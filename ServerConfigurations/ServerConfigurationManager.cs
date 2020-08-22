@@ -27,9 +27,9 @@ namespace SilkBot.ServerConfigurations
             }
             var globalConfigFilepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "GlobalConfig.gconfig");
             var globalConfigText = File.ReadAllText(globalConfigFilepath);
-            Bot.GlobalConfig = JsonConvert.DeserializeObject<GlobalUserConfiguration>(globalConfigText);
-            for (int i = 0; i < Bot.GlobalConfig.EconomicUsers.Count; i++)
-                EconomicUsers.Instance.Users.TryAdd(Bot.GlobalConfig.EconomicUsers[i].UserId, Bot.GlobalConfig.EconomicUsers[i]);
+            Bot.EconomicUsers = JsonConvert.DeserializeObject<DiscordEconomicUsersData>(globalConfigText);
+            for (int i = 0; i < Bot.EconomicUsers.EconomicUsers.Count; i++)
+                EconomicUsers.Instance.Users.TryAdd(Bot.EconomicUsers.EconomicUsers[i].UserId, Bot.EconomicUsers.EconomicUsers[i]);
             
             var prefixes = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "prefixes.gconfig");
             Bot.GuildPrefixes = JsonConvert.DeserializeObject<Dictionary<ulong, string>>(File.ReadAllText(prefixes));
@@ -47,7 +47,6 @@ namespace SilkBot.ServerConfigurations
             { 
                 Administrators = administrators.ToList(), 
                 BannedMembers = bannedMembers.ToList(), 
-                Guild = guild.Id,
                 Moderators = moderators.ToList() 
             };
             LocalConfiguration.TryAdd(guildId, config);

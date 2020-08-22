@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace SilkBot
 
         public async Task Clear(CommandContext ctx, [HelpDescription("The number of messages to clear.")] int messages = 5)
         {
-            if(!ctx.Member.Roles.Last().Permissions.HasPermission(Permissions.ManageMessages))
+            if(!ctx.Member.HasPermission(Permissions.ManageChannels))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)

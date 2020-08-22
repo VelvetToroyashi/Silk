@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Exceptions;
 using SilkBot.ServerConfigurations;
+using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Roles
 {
-    public class SetSAR : BaseCommandModule
+    public class SetAssignableRole : BaseCommandModule
     {
         [Command("Assign")]
         [Aliases("sar", "selfassignablerole", "selfrole")]
@@ -24,12 +25,12 @@ namespace SilkBot.Commands.Roles
                 await ctx.RespondAsync("Roles canont be empty!");
                 return;
             }
-            if (!ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.KickMembers))
+            if (ctx.Member.HasPermission(Permissions.KickMembers))
             {
                 throw new InsufficientPermissionsException();
             }
 
-            var serverconfig = ServerConfigurationManager.LocalConfiguration.Values.Any(val => val.Guild == ctx.Guild.Id) ? ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id] : null;
+            var serverconfig = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id];
             if (serverconfig is null)
             {
 
