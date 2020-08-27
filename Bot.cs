@@ -5,8 +5,10 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using Newtonsoft.Json;
+using SilkBot.Commands.Bot;
 using SilkBot.Commands.Economy;
 using SilkBot.Commands.Moderation.Utilities;
+using SilkBot.Server;
 using SilkBot.ServerConfigurations;
 using SilkBot.Tools;
 using System;
@@ -19,7 +21,7 @@ namespace SilkBot
 {
     public class Bot
     {
-
+        
         public static Bot Instance { get; } = new Bot();
         public DataStorageContainer Data { get => _data; }
         private DataStorageContainer _data = new DataStorageContainer();
@@ -46,12 +48,7 @@ namespace SilkBot
 
         }
 
-        private Task OnGuildJoin(GuildCreateEventArgs e)
-        {
-            
 
-            return Task.CompletedTask;
-        }
 
         private Task OnMessageCreate(MessageCreateEventArgs e)
         {
@@ -87,8 +84,6 @@ namespace SilkBot
 
         private Task OnGuildAvailable(GuildCreateEventArgs e)
         {
-            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(e.Guild.Id))
-                ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(e.Guild.Id).GetAwaiter();
             if(!GuildPrefixes.ContainsKey(e.Guild.Id))
                 GuildPrefixes.Add(e.Guild.Id, "!"); 
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {e.Guild.Name}", DateTime.Now);
@@ -128,18 +123,14 @@ namespace SilkBot
             HelpCache.Initialize(DiscordColor.Azure);
             Data.PopulateDataOnApplicationLoad();
             //All these handlers do is subscibe to the bot's appropriate event, and do something, hence not assigning a variable to it.
-            new MessageDeletionHandler(ref _data, Client);
-            new MessageEditHandler(ref _data, Client);
 
             var prefixData = File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "Configs", "prefixes.gconfig"));
             GuildPrefixes = JsonConvert.DeserializeObject<Dictionary<ulong, string>>(prefixData);
 
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
-            Client.GuildCreated += OnGuildJoin;
             Client.GetCommandsNext().CommandErrored += OnCommandErrored;
             Client.MessageCreated += OnMessageCreate;
-            Client.MessageDeleted += async (e) => await Task.CompletedTask;
             Client.GuildDownloadCompleted += async (e) => 
             {
                 Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Availble guilds: {e.Guilds.Count}", DateTime.Now);
@@ -147,6 +138,10 @@ namespace SilkBot
             };
 
             await Client.ConnectAsync();
+            new MessageDeletionHandler(ref _data, Client);
+            new MessageEditHandler(ref _data, Client);
+            new GuildJoinHandler();
+            new GuildMemberCountChangeHandler(ref _data, Client);
 
         }
     }

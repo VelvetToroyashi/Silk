@@ -1,5 +1,4 @@
 ﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using SilkBot.ServerConfigurations;
@@ -19,7 +18,7 @@ namespace SilkBot.Commands.Moderation.Utilities
 
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
-            var logChannel = _guildInformation[e.Guild].Guild.LoggingChannel;
+            var logChannel = _guildInformation[e.Guild].GuildInfo.LoggingChannel;
             var guildPrefix = SilkBot.Bot.GuildPrefixes[e.Guild.Id];
             if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix)) return;
             if (logChannel == default) return;

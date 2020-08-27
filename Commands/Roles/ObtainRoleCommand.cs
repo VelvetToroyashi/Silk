@@ -13,20 +13,21 @@ namespace SilkBot.Commands.Roles
     public class ObtainRoleCommand : BaseCommandModule
     {
 
-        [Command("role")]
+        [Command("Role")]
+        [HelpDescription("Grab a role!", "[p]role <rolename>")]
         public async Task ObtainRole(CommandContext ctx, [RemainingText] string Roles)
         {
             var _roles = Roles.Split(',');
-            var configExists = ServerConfigurationManager.LocalConfiguration.Any(config => config.Key == ctx.Guild.Id);
+            
             //If a config exists, use that, else assume no config exists and throw an error.//
             foreach(var role in _roles)
             {
                 var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
-                if (configExists)
+                if (SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.SelfAssignableRoles.Count > 0)
                 {
                     
-                    var selfAssignableRoles = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].SelfAssignableRoles;
+                    var selfAssignableRoles = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole == parsedRole.Id))
                     {

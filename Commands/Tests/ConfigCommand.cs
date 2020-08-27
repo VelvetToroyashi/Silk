@@ -18,23 +18,10 @@ namespace SilkBot.Commands.TestCommands
         [HelpDescription("Something wrong with your settings? Run this command to verify your configuration is set properly!")]
         public async Task TestLogChannelWorks(CommandContext ctx)
         {
-            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(ctx.Guild.Id))
-            {
-                await ctx.RespondAsync(embed:
-                    new DiscordEmbedBuilder()
-                    .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                    .WithTitle("Server confiruation check: FAILED!")
-                    .WithDescription("Strangely, I couldn't pull a configuration for your server.\nHowever, I've generated one for you.")
-                    .WithColor(DiscordColor.Red)
-                    .AddFooter(ctx)
-                    );
-                await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
-                return;
-            }
-            else
-            {
+
+
                 //Configuration
-                var config = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id];
+                var config = SilkBot.Bot.Instance.Data[ctx.Guild];
                 var embed = new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl).WithTitle("Current server config:").WithColor(DiscordColor.Gold);
                 //Admins (might add <prefix>config add admin <roleid>)
                 var adminRoles = string.Join('\n', ctx.Guild.Roles.Where(role => role.Value.HasPermission(Permissions.Administrator) && !role.Value.IsManaged).OrderBy(n => n.Value.Name.Length).Select(r => r.Value.Mention));
@@ -58,12 +45,12 @@ namespace SilkBot.Commands.TestCommands
                 embed.AddField($"Moderator {(modRoles.Split('\n').Count() > 1 ? "roles" : "role")}:", modRoles, true);
 
 
-                embed.AddField("    Muted role:", $"{(config.MutedRole == 0 ? "Not set!" : $"<@&{config.MutedRole}>")}", false);
-                embed.AddField("Logging channel:", $"{(config.LoggingChannel == 0 ? "Not set!" : $"<#{config.LoggingChannel}>")}", true);
+                embed.AddField("    Muted role:", $"{(config.GuildInfo.MutedRole == 0 ? "Not set!" : $"<@&{config.GuildInfo.MutedRole}>")}", false);
+                embed.AddField("Logging channel:", $"{(config.GuildInfo.LoggingChannel == 0 ? "Not set!" : $"<#{config.GuildInfo.LoggingChannel}>")}", true);
 
                 embed.AddFooter(ctx);
                 await ctx.RespondAsync(embed: embed);
-            }
+            
         }
         [Command("Config")]
         public Task SetConfig(CommandContext ctx, string action, ulong Id = 0) =>
@@ -100,12 +87,12 @@ namespace SilkBot.Commands.TestCommands
                     return;
                 }
                 var channelID = ulong.Parse(message.Result.Content);
-                SilkBot.Bot.Instance.Data[ctx.Guild].Guild.LoggingChannel = channelID;
+                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = channelID;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(channelID).Mention}", DiscordColor.Gold));
             }
             else
             {
-                SilkBot.Bot.Instance.Data[ctx.Guild].Guild.LoggingChannel = id;
+                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = id;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(id).Mention}", DiscordColor.Gold));
             }
         }
@@ -132,7 +119,7 @@ namespace SilkBot.Commands.TestCommands
                     .WithDescription($"Done! Muted role is set to {ctx.Guild.GetRole(role).Mention}")
                     .WithColor(DiscordColor.Gold)
                     .AddFooter(ctx);
-                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].MutedRole = role;
+                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = role;
                 await ctx.RespondAsync(embed: embed);
             }
             else
@@ -148,7 +135,7 @@ namespace SilkBot.Commands.TestCommands
                     .WithDescription($"Done! Muted role is set to {ctx.Guild.GetRole(roleID).Mention}")
                     .WithColor(DiscordColor.Gold)
                     .AddFooter(ctx);
-                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].MutedRole = roleID;
+                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = roleID;
                 await ctx.RespondAsync(embed: embed);
             }
         }

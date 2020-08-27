@@ -16,8 +16,6 @@ namespace SilkBot.Commands.Moderation
         [HelpDescription("Ban someone! Both Silk and Invoker require `Ban Members`.", "<prefix>ban <userID>/<mention>")]
         public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
-            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(ctx.Guild.Id))
-                await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
             var user = await ctx.Guild.GetMemberAsync(target.Id);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
             if(!CanExecuteCommand(out var errorReason))
@@ -80,8 +78,9 @@ namespace SilkBot.Commands.Moderation
             {
                 
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                var sendChannel = ctx.Guild.GetChannel(ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].LoggingChannel) ?? ctx.Channel;
-                ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].BannedMembers.Add(new BannedMember(user.Id, reason));
+                var loggingChannel = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel;
+                var sendChannel = ctx.Guild.GetChannel(loggingChannel) ?? ctx.Channel;
+                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.BannedMembers.Add(new BannedMember(user.Id, reason));
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }
 

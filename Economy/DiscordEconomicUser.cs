@@ -1,11 +1,8 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using SilkBot.Commands.Economy;
-using SilkBot.ServerConfigurations;
 using System;
-using System.Linq;
 
 namespace SilkBot.Economy
 {
@@ -49,48 +46,15 @@ namespace SilkBot.Economy
             else Cash -= amount;
         }
 
-        public void ChangeName(CommandContext context, string name)
-        {
-            if (IsUserNameOverrided)
-            {
-               if(DateTime.Now > nameChangedTimestamp + nameChangeCooldown)
-                {
-                    IsUserNameOverrided = false;
 
-                }
-            }
-            //Check if server config exists, if not, check if they're an admin the OTHER way.//
-            ServerConfigurationManager.LocalConfiguration.TryGetValue(context.Guild.Id, out var possibleConfiguration);
-            if(possibleConfiguration is null)
-            {
-                //Check manually.//
-                if (context.Member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers))) 
-                {
-                    IsUserNameOverrided = true;
-                    nameChangedTimestamp = DateTime.Now;
-                    Name = name;
-                }
-                else Name = name;
-            }
-            else
-            {
-                if (possibleConfiguration.Moderators.Any(mod => mod.ID == context.User.Id))
-                {
-                    IsUserNameOverrided = true;
-                    nameChangedTimestamp = DateTime.Now;
-                    Name = name;
-                }
-                else Name = name;
 
-            }
-        }
 
         public DiscordEmbed DoDaily(CommandContext ctx)
         {
             if(DateTime.Now - LastCashInTime > dailyCooldown)
             {
                 lastDailyCashIn = DateTime.Now;
-                var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 coins, come back tomorrow for more!", DiscordColor.SpringGreen);
+                var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 dollars, come back tomorrow for more!", DiscordColor.SpringGreen);
                 Cash += 200;
                 return new DiscordEmbedBuilder(returnEmbed).WithAuthor(ctx.User.Username, iconUrl: ctx.Member.AvatarUrl);
             }

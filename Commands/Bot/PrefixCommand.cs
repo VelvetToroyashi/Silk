@@ -16,8 +16,6 @@ namespace SilkBot.Commands.Bot
         [Aliases("SetPrefix")]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(ctx.Guild.Id))
-                await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
             if (!ctx.Member.IsAdministrator())
             {
                 await ctx.RespondAsync("Sorry, but you're not allowed to change the prefix!");

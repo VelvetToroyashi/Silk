@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using SilkBot.ServerConfigurations;
 using System;
-using System.Drawing;
 using System.Threading.Tasks;
 namespace SilkBot.Commands.Moderation.Utilities
 {
@@ -19,9 +18,10 @@ namespace SilkBot.Commands.Moderation.Utilities
 
         private async Task OnMessageEdit(MessageUpdateEventArgs e)
         {
-            var logChannel = _guildInformation[e.Guild].Guild.LoggingChannel;
-            var guildPrefix = SilkBot.Bot.GuildPrefixes[e.Guild.Id];
-            if (e.Message.Author.IsCurrent) return;
+            if (e.Message.Author is null) return;
+            if (e.MessageBefore.Content == e.Message.Content) return;
+            var logChannel = _guildInformation[e.Guild].GuildInfo.LoggingChannel;
+            if (e.Message.Author.IsCurrent || e.Message.Author.IsBot ) return;
             if (logChannel == default) return;
             var embed =
                 new DiscordEmbedBuilder()

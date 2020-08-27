@@ -24,6 +24,9 @@ namespace SilkBot
         [JsonProperty(PropertyName = "Mute role Id")]
         public ulong MutedRole { get; set; }
 
+        public ulong MemberChangedNotificationChannel { get; set; }
+        public bool NotifyOnGuildMemberCountChanges { get; set; }
+
         public IEnumerable<ulong> GetStaffMembers()
         {
             var adminIds = Administrators.Select(admin => admin.ID);

@@ -21,7 +21,7 @@ namespace SilkBot.ServerConfigurations
         [JsonProperty(PropertyName = "Economic Users")]
         private DiscordEconomicUsersData economicusers;
         
-        public (GuildInfo Guild, List<DiscordEconomicUser> EconomicUsers) this[DiscordGuild guild] => (guildInfos.Single(g => g.Guild == guild.Id), economicusers.EconomicUsers);
+        public (GuildInfo GuildInfo, List<DiscordEconomicUser> EconomicUsers) this[DiscordGuild guild] => (guildInfos.Single(g => g.Guild == guild.Id), economicusers.EconomicUsers);
 
         public DataStorageContainer()
         {

@@ -30,50 +30,23 @@ namespace SilkBot.Commands.Roles
                 throw new InsufficientPermissionsException();
             }
 
-            var serverconfig = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id];
-            if (serverconfig is null)
-            {
-
-                    var config = await ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(ctx.Guild.Id);
-                    ServerConfigurationManager.LocalConfiguration.TryAdd(ctx.Guild.Id, config);
-                    var ebStringBuilder = new StringBuilder("I added/removed ");
-                    foreach (var role in roles)
-                    {
-                        if (!config.SelfAssignableRoles.Contains(role.Id))
-                            config.SelfAssignableRoles.Add(role.Id);
-                        else
-                            config.SelfAssignableRoles.Remove(role.Id);
-
-                        ebStringBuilder.Append($" {ctx.Guild.GetRole(role.Id).Mention}");
-                    }
-                    ebStringBuilder.Append("!");
-
-                    await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                        .WithDescription(ebStringBuilder.ToString())
-                        .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                        .WithTimestamp(DateTime.Now));
-
-            }
-            else
-            {
-                var config = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id];
+                var config = SilkBot.Bot.Instance.Data[ctx.Guild];
                 var addedList = new List<string>();
                 var removedList = new List<string>();
-                if (config.SelfAssignableRoles is null)
-                    config.SelfAssignableRoles = new List<ulong>();
+                if (config.GuildInfo.SelfAssignableRoles == default)
+                config.GuildInfo.SelfAssignableRoles = new List<ulong>();
                 var ebStringBuilder = new StringBuilder("Added Roles: ");
                 foreach (var role in roles)
                 {
-                    if (!config.SelfAssignableRoles.Contains(role.Id)) 
+                    if (!config.GuildInfo.SelfAssignableRoles.Contains(role.Id)) 
                     {
-                        config.SelfAssignableRoles.Add(role.Id);
+                        config.GuildInfo.SelfAssignableRoles.Add(role.Id);
                         addedList.Add(role.Mention);
                     }
 
                     else
                     {
-                        config.SelfAssignableRoles.Remove(role.Id);
+                        config.GuildInfo.SelfAssignableRoles.Remove(role.Id);
                         removedList.Add(role.Mention);
                     }
                 }
@@ -98,7 +71,7 @@ namespace SilkBot.Commands.Roles
                     .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                     .WithTimestamp(DateTime.Now));
 
-            }
+            
         }
     }
 }

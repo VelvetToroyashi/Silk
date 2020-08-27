@@ -53,31 +53,21 @@ namespace SilkBot.Commands.Moderation
             }
             else
             {
-
-
                 var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
-
-
-                try 
-                {
-                    await DMCommand.DM(ctx, user, embed);
-                }
-                catch(InvalidOperationException invalidop)
-                {
-                    ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop);
-                }
+                try { await DMCommand.DM(ctx, user, embed); }
+                catch (InvalidOperationException invalidop) { ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop); }
                 
                 await ctx.Member.RemoveAsync(reason);
 
-                ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var guildConfig);
-                var logChannelID = guildConfig?.LoggingChannel;
-                var logChannelValue = logChannelID ?? ctx.Channel.Id;
+                var guildConfig = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo;
+                var logChannelID = guildConfig.LoggingChannel;
+                var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ServerInfo.Instance.ReturnChannelFromID(ctx, logChannelValue),
                     embed: new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)
                     .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")
-                    .WithFooter("Silk")
+                    .WithFooter("Silk!")
                     .WithTimestamp(DateTime.Now));
             }
         }
