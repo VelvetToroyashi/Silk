@@ -25,7 +25,6 @@ namespace SilkBot.Commands.Moderation
                 await DenyBanAsync(errorReason);
                 return;
             }
-
             async Task DenyBanAsync(string errorReason)
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
