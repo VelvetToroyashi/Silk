@@ -15,6 +15,5 @@ namespace SilkBot.Commands.GeneralCommands
                 .WithImageUrl(emoji.Url)
                 .WithColor(new DiscordColor("42d4f5"))
                 .AddFooter(ctx));
-        
     }
 }

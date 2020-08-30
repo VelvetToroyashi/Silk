@@ -26,14 +26,12 @@ namespace SilkBot
             var methodSb = new StringBuilder();
             var helpSb = new StringBuilder();
 
-
             var allCommands = CommandHelper.GetAllCommands();
             var methodParameters = new List<string>();
             var sortedCommandNames = allCommands.OrderBy(e => e.GetCustomAttribute<CommandAttribute>().Name);
 
             foreach (var method in sortedCommandNames)
             {
-               
                 var key = "";
 
                 //Build base Embed for the method
@@ -48,6 +46,7 @@ namespace SilkBot
                             methodEmbed.WithTitle(cmdAtt.Name);
                             key = cmdAtt.Name ?? "Yeet";
                             break;
+
                         case HelpDescriptionAttribute dscAtt:
                             var sb = new StringBuilder();
                             sb.AppendLine(dscAtt.Description ?? "No description given");
@@ -59,7 +58,7 @@ namespace SilkBot
                     continue;
                 if (methodEmbed.Description! is null)
                     continue;
-                if(!helpSb.ToString().Contains(methodEmbed.Description?.ToString()))
+                if (!helpSb.ToString().Contains(methodEmbed.Description?.ToString()))
                     helpSb.AppendLine($"**{methodEmbed.Title}** - {methodEmbed.Description ?? ""}");
                 else
                 {
@@ -82,7 +81,7 @@ namespace SilkBot
                         }
                     }
                 }
-                foreach(var alias in method.GetCustomAttributes<AliasesAttribute>().OrderBy(alias => alias.Aliases.OrderBy(trueAlias => trueAlias)))
+                foreach (var alias in method.GetCustomAttributes<AliasesAttribute>().OrderBy(alias => alias.Aliases.OrderBy(trueAlias => trueAlias)))
                 {
                     var aliasStringBuilder = new StringBuilder(alias.Aliases.Any() ? $"{alias.Aliases.First()}" : "");
                     if (alias.Aliases.Any())
@@ -102,12 +101,8 @@ namespace SilkBot
             baseHelpEb.WithDescription(helpSb.ToString())
                 .WithFooter("Silk", "https://cdn.discordapp.com/avatars/721514294587424888/311b3e09fa8144721c2c19b9b8ec6c31.png?size=4096")
                 .WithTimestamp(DateTime.Now);
-            
-            Entries.Add("help", baseHelpEb.Build());
 
-            
-           
+            Entries.Add("help", baseHelpEb.Build());
         }
     }
 }
-

@@ -23,7 +23,6 @@ namespace SilkBot.Commands.GeneralCommands
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
         {
-            
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
@@ -33,7 +32,6 @@ namespace SilkBot.Commands.GeneralCommands
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
         }
-
 
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
@@ -49,6 +47,5 @@ namespace SilkBot.Commands.GeneralCommands
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
         }
-
     }
 }

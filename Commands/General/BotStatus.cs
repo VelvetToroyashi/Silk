@@ -4,22 +4,16 @@ using DSharpPlus.Entities;
 using SilkBot.Exceptions;
 using System;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace SilkBot
 {
     public class BotStatus : BaseCommandModule
     {
-
-
-
         [Command("status")]
         [HelpDescription("Returns the bot's status. Bot's status cannot be changed.")]
-
         public async Task Status(CommandContext ctx)
         {
-
             var activity = ctx.Client.CurrentUser.Presence.Activity.Name;
             var status = new DiscordEmbedBuilder()
                 .WithColor(activity == null ? DiscordColor.CornflowerBlue : DiscordColor.SapGreen)
@@ -29,11 +23,7 @@ namespace SilkBot
                 .WithTimestamp(DateTime.Now);
 
             await ctx.RespondAsync(embed: status);
-            
-
-
         }
-
 
         public async Task Status(CommandContext ctx, string status)
         {
@@ -58,41 +48,35 @@ namespace SilkBot
             }
         }
 
-
-
-            [Hidden]
-            [Command("status")]
-            [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-
-            public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
-            {
-            
-
-                var authUsers = new ulong[] { 209279906280898562, 135747025000988672, 265096437937864705 };
-                if (!authUsers.Any(id => id == ctx.User.Id))
-                    throw new UnauthorizedUserException("You are not permitted to use this command!");
+        [Hidden]
+        [Command("status")]
+        [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
+        public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
+        {
+            var authUsers = new ulong[] { 209279906280898562, 135747025000988672, 265096437937864705 };
+            if (!authUsers.Any(id => id == ctx.User.Id))
+                throw new UnauthorizedUserException("You are not permitted to use this command!");
             else
+            {
+                if (status.Equals("clear"))
                 {
-                    if (status.Equals("clear"))
-                    {
-                        var embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                        .WithColor(DiscordColor.SapGreen)
-                        .WithDescription("Bot status has been cleared!")
-                        .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                        .WithTimestamp(DateTime.Now);
+                    var embed = new DiscordEmbedBuilder()
+                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                    .WithColor(DiscordColor.SapGreen)
+                    .WithDescription("Bot status has been cleared!")
+                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                    .WithTimestamp(DateTime.Now);
 
-                        await ctx.Client.UpdateStatusAsync();
-                        await ctx.RespondAsync(embed: embed);
-                    }
-                    else await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, type), idleSince: DateTime.Now);
+                    await ctx.Client.UpdateStatusAsync();
+                    await ctx.RespondAsync(embed: embed);
                 }
+                else await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, type), idleSince: DateTime.Now);
             }
+        }
 
         [Hidden]
         [Command("status")]
         [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-
         public async Task Status(CommandContext ctx, string type, [RemainingText] string status)
         {
             if (!ctx.Channel.IsPrivate)
@@ -115,25 +99,22 @@ namespace SilkBot
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);
                 }
-
                 else
                 {
                     if (!Enum.TryParse(typeof(ActivityType), type, true, out var activity))
                     {
                         await Status(ctx, status);
-                        return; 
+                        return;
                     }
-                    else 
+                    else
                     {
                         await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, (ActivityType)activity), idleSince: DateTime.Now);
                         var msg = await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
                         await Task.Delay(3000);
                         await ctx.Channel.DeleteMessageAsync(msg);
                     }
-                    
                 }
             }
         }
-
     }
 }

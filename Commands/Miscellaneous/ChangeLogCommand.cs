@@ -19,9 +19,6 @@ namespace SilkBot.Commands.Miscellaneous
                 .AddField("Changes:", ChangeLog.Changes);
 
             await ctx.RespondAsync(embed: embed);
-
-
         }
-
     }
 }

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
 {
-
     public class Restart : BaseCommandModule
     {
         [RequireOwner]
@@ -32,17 +31,15 @@ namespace SilkBot.Commands.Bot
                 var localConfig = Path.Combine(appdataFilePath, "SilkBot", "ServerConfigs", $"{config.Key}.serverconfig");
                 await File.WriteAllTextAsync(localConfig, JsonConvert.SerializeObject(config.Value, Formatting.Indented));
             }
-            
+
             var globalConfig = JsonConvert.SerializeObject(SilkBot.Bot.GlobalConfig, Formatting.Indented);
             var globalFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ServerConfigs", "GlobalConfig.gconfig");
             await File.WriteAllTextAsync(globalFilePath, globalConfig);
-
 
             foreach (var guild in SilkBot.Bot.Instance.Client.Guilds.Keys)
             {
                 if (!SilkBot.Bot.GuildPrefixes.ContainsKey(guild))
                     SilkBot.Bot.GuildPrefixes.Add(guild, "!");
-
             }
 
             var prefixConfig = JsonConvert.SerializeObject(SilkBot.Bot.GuildPrefixes, Formatting.Indented);
@@ -51,6 +48,7 @@ namespace SilkBot.Commands.Bot
 
             Process.Start(@"C:\Users\Cinnamon\Desktop\Restart Bot.bat");
         }
+
         [RequireOwner]
         [Command("restart")]
         public async Task RestartBot(CommandContext ctx, bool readOnly)

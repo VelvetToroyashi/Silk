@@ -13,14 +13,14 @@ using System.Threading.Tasks;
 
 namespace SilkBot.ServerConfigurations
 {
-
     public class DataStorageContainer
     {
         [JsonProperty(PropertyName = "Guild Information List")]
         private readonly List<GuildInfo> guildInfos;
+
         [JsonProperty(PropertyName = "Economic Users")]
         private DiscordEconomicUsersData economicusers;
-        
+
         public (GuildInfo GuildInfo, List<DiscordEconomicUser> EconomicUsers) this[DiscordGuild guild] => (guildInfos.Single(g => g.GuildId == guild.Id), economicusers.EconomicUsers);
 
         public DataStorageContainer()
@@ -28,7 +28,6 @@ namespace SilkBot.ServerConfigurations
             guildInfos = new List<GuildInfo>();
             economicusers = new DiscordEconomicUsersData();
         }
-
 
         public void PopulateDataOnApplicationLoad()
         {
@@ -63,7 +62,7 @@ namespace SilkBot.ServerConfigurations
             Console.WriteLine($"[{DateTime.Now:HH:MM}]Saved global data.");
 
             var instancedServerDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "Configs");
-            foreach(var serverInformationFile in guildInfos)
+            foreach (var serverInformationFile in guildInfos)
             {
                 var serverInformationObject = JsonConvert.SerializeObject(serverInformationFile);
                 File.WriteAllText(Path.Combine(instancedServerDataPath, serverInformationFile.GuildId + ".serverconfig"), serverInformationObject);
@@ -80,7 +79,7 @@ namespace SilkBot.ServerConfigurations
 
             var moderatorAsModeratorObject = rawModeratorDiscordmembers.Select(mod => new Moderator(mod.Id));
             var administratorAsAdministratorObject = rawAdministratorDiscordMembers.Select(admin => new Administrator(admin.Id));
-                
+
             var BannedMembers = (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
 
             var guildInfo = new GuildInfo
@@ -93,15 +92,14 @@ namespace SilkBot.ServerConfigurations
 
             guildInfos.Add(guildInfo);
         }
+
         public async Task FetchGuildInfo(IEnumerable<DiscordGuild> guilds)
         {
-            foreach(var guild in guilds)
+            foreach (var guild in guilds)
             {
                 if (guildInfos.Select(g => g.GuildId).Any(g => g == guild.Id)) continue;
                 await GenerateGuildInfoObjectAsync(guild);
             }
         }
-
-
     }
 }

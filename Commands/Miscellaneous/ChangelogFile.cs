@@ -8,7 +8,6 @@ namespace SilkBot.Commands.Miscellaneous
     [Serializable]
     public class ChangelogFile
     {
-
         public string Description { get; set; }
         public string Changes { get; set; }
 
@@ -27,11 +26,9 @@ namespace SilkBot.Commands.Miscellaneous
             var fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
             var fileContent = File.ReadAllLines(fileInfo.FullName);
 
-
-            
             var desc = string.Join('\n', fileContent.TakeWhile(f => (f.Length > 1)));
             var changes = string.Join('\n', fileContent.Skip(desc.Split('\n').Length + 1).Take(fileContent.Count() - 1));
-            var changeLog = new ChangelogFile 
+            var changeLog = new ChangelogFile
             {
                 Description = desc,
                 Changes = $"```diff\n{changes}```"
@@ -40,7 +37,6 @@ namespace SilkBot.Commands.Miscellaneous
             var fileToWrite = JsonConvert.SerializeObject(changeLog, Formatting.Indented);
 
             File.WriteAllText(Path.Combine(pathJSON, $"Changelog{Directory.GetFiles(path).Length}"), fileToWrite);
-
         }
     }
 }

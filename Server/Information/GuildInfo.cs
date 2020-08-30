@@ -20,7 +20,7 @@ namespace SilkBot
 
         [JsonProperty(PropertyName = "Moderators")]
         public virtual IList<Moderator> Moderators { get; set; }
-        
+
         [JsonProperty(PropertyName = "Guild Id")]
         public ulong GuildId { get; set; }
 
@@ -29,7 +29,6 @@ namespace SilkBot
 
         [JsonProperty(PropertyName = "Mute role Id")]
         public ulong MutedRole { get; set; }
-
 
         public ulong MemberChangedNotificationChannel { get; set; }
         public bool NotifyOnGuildMemberCountChanges { get; set; }
@@ -40,7 +39,5 @@ namespace SilkBot
             var modIds = Moderators.Select(mod => mod.ID);
             return modIds.Union(adminIds);
         }
-
-
     }
 }
