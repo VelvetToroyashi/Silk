@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using System.Threading.Tasks;
 
 namespace SilkBot
 {
@@ -8,7 +8,6 @@ namespace SilkBot
     {
         [HelpDescription("This very menu!")]
         [Command("Help")]
-
         public async Task HelpPlusHelp(CommandContext ctx, string commandName = null)
         {
             var key = (commandName ?? "help").ToLower();
@@ -16,5 +15,4 @@ namespace SilkBot
             await ctx.Channel.SendMessageAsync(embed: eb);
         }
     }
-
 }

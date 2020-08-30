@@ -29,21 +29,24 @@ namespace SilkBot.Commands.Miscellaneous
                     status = "Online";
                     emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339430672203796);
                     break;
+
                 case UserStatus.Idle:
                     status = "Idle";
                     emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431720910889);
                     break;
+
                 case UserStatus.DoNotDisturb:
                     status = "Do Not Disturb";
                     emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431632568450);
                     break;
+
                 case UserStatus.Offline:
                     status = "Offline";
                     emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431905198100);
                     break;
             }
 
-            embed.AddField("Status:", $"{emoji}{status}"); 
+            embed.AddField("Status:", $"{emoji}{status}");
             embed.AddField("Name:", member.Username);
             embed.AddField("Creation Date:", member.CreationTimestamp.ToString());
             var roleList = new List<string>();

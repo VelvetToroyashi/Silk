@@ -1,9 +1,9 @@
-﻿using System.Collections;
-
-namespace SilkBot.Commands.Economy.Shop.Testing
+﻿namespace SilkBot.Commands.Economy.Shop.Testing
 {
     public class GlobalShop : BaseShop
     {
-        public GlobalShop() : base(15) { }
+        public GlobalShop() : base(15)
+        {
+        }
     }
 }

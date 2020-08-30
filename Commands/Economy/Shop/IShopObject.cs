@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-
-namespace SilkBot.Commands.Economy.Shop
+﻿namespace SilkBot.Commands.Economy.Shop
 {
-
     public interface IShopItem
     {
         public string Name { get; set; }

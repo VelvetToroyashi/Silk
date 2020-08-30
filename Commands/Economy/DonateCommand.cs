@@ -12,10 +12,8 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Economy
 {
-
     public class DonateCommand : BaseCommandModule
     {
- 
         [Command("Donate")]
         [Aliases("Gift")]
         public async Task Donate(CommandContext ctx, int amount, string recipient)
@@ -33,7 +31,7 @@ namespace SilkBot.Commands.Economy
             if (multipleMatches)
             {
                 var matches = new StringBuilder();
-                for(var i = 0; i < matchingMembers.Count(); i++)
+                for (var i = 0; i < matchingMembers.Count(); i++)
                     matches.AppendLine($"[{i}]{matchingMembers.ElementAt(i).Mention}");
                 var embed = EmbedHelper.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
                 await ctx.RespondAsync(embed: embed);
@@ -65,7 +63,6 @@ namespace SilkBot.Commands.Economy
                 await ProccessTransaction(ctx, ctx.Member.Id, finalizedRecipient.Id, amount);
             }
 
-
             async void CreateEconomicUser(ulong ID)
             {
                 if (!EconomicUsers.Instance.UserExists(ID))
@@ -74,12 +71,12 @@ namespace SilkBot.Commands.Economy
 
             IEnumerable<DiscordMember> GetMatchingMembers(IEnumerable<DiscordMember> members)
             {
-                foreach(var member in members)
+                foreach (var member in members)
                 {
                     if (member.IsBot) continue;
                     var name = member.DisplayName;
                     var recipientSubstringLength = recipient.Length;
-                    if(name.Length < recipient.Length)
+                    if (name.Length < recipient.Length)
                     {
                         recipientSubstringLength = name.Length;
                     }
@@ -91,11 +88,11 @@ namespace SilkBot.Commands.Economy
                 }
             }
         }
+
         //Note from Lunar: Check usernames, if multiple match, ask user to pick.//
 
-        private async Task ProccessTransaction(CommandContext ctx, ulong sender, ulong receiver, int amount) 
+        private async Task ProccessTransaction(CommandContext ctx, ulong sender, ulong receiver, int amount)
         {
-            
             var senderAsMember = EconomicUsers.Instance.Users[sender];
             var recipientAsMember = EconomicUsers.Instance.Users[receiver];
             var rand = new Random();
@@ -104,12 +101,13 @@ namespace SilkBot.Commands.Economy
                 var confirmationCode = rand.Next(1000, 10000);
                 var interactivity = ctx.Client.GetInteractivity();
                 await ctx.RespondAsync($"Hey! You sure you want to do this? Confirmation code: `{confirmationCode}`  [Type cancel to cancel]");
-                while (true) { 
-                var message = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
+                while (true)
+                {
+                    var message = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
                     if (message.TimedOut)
                     {
                         await ctx.RespondAsync("Sorry! But you did not type the confirmation code. Your transaction has been canceled, and no money was withdrawn.");
-                            continue;
+                        continue;
                     }
                     if (message.Result.Content != confirmationCode.ToString() && message.Result.Content.ToLower() != "cancel")
                     {
@@ -118,7 +116,7 @@ namespace SilkBot.Commands.Economy
                     }
                     if (message.Result.Content.ToLower() == "cancel")
                     {
-                            return;
+                        return;
                     }
                     if (message.Result.Content == confirmationCode.ToString())
                     {

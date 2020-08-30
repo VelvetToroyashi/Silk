@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace SilkBot.Commands.Economy
 {
@@ -16,6 +15,5 @@ namespace SilkBot.Commands.Economy
         public InsufficientFundsException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
     }
 }

@@ -1,11 +1,7 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using SilkBot.Commands.Economy.Shop;
 using SilkBot.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SilkBot
 {
@@ -20,8 +16,6 @@ namespace SilkBot
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
 
-
-
         public static DiscordEmbedBuilder CreateEmbed(CommandContext ctx, string title, string description, DiscordColor color) =>
             new DiscordEmbedBuilder()
             .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
@@ -29,13 +23,12 @@ namespace SilkBot
             .WithDescription(description)
             .WithColor(color)
             .AddFooter(ctx);
+
         public static DiscordEmbedBuilder CreateEmbed(CommandContext ctx, string description, DiscordColor color) =>
             new DiscordEmbedBuilder()
             .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
             .WithDescription(description)
             .WithColor(color)
             .AddFooter(ctx);
-
-
     }
 }

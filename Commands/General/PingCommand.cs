@@ -25,9 +25,6 @@ namespace SilkBot
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());
-            
-
         }
-
     }
 }

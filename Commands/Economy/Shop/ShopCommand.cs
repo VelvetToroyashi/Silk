@@ -10,8 +10,6 @@ namespace SilkBot.Commands.Economy.Shop
         [Command("Shop")]
         public async Task Shop(CommandContext ctx, string action)
         {
-            
         }
-
     }
 }

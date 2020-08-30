@@ -37,6 +37,7 @@ namespace SilkBot.Commands.Bot
             File.WriteAllText(Path.Combine(configLocation, "prefixes.gconfig"), prefixConfig);
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
+
         private (bool valid, string reason) IsValidPrefix(string prefix)
         {
             if (prefix.Length > 5)
@@ -50,7 +51,5 @@ namespace SilkBot.Commands.Bot
         {
             await ctx.RespondAsync($"My prefix is `{SilkBot.Bot.GuildPrefixes[ctx.Guild.Id]}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
-
-
     }
 }
