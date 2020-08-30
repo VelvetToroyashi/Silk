@@ -3,30 +3,34 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.ServerConfigurations;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Roles
 {
     public class ObtainRoleCommand : BaseCommandModule
     {
+
         [Command("role")]
         public async Task ObtainRole(CommandContext ctx, [RemainingText] string Roles)
         {
             var _roles = Roles.Split(',');
             var configExists = ServerConfigurationManager.LocalConfiguration.Any(config => config.Key == ctx.Guild.Id);
             //If a config exists, use that, else assume no config exists and throw an error.//
-            foreach (var role in _roles)
+            foreach(var role in _roles)
             {
                 var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
                 if (configExists)
                 {
+                    
                     var selfAssignableRoles = ServerConfigurationManager.LocalConfiguration[ctx.Guild.Id].SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole == parsedRole.Id))
                     {
-                        if (!ctx.Member.Roles.Any(r => r == parsedRole))
+                        if(!ctx.Member.Roles.Any(r => r == parsedRole))
                         {
                             await ctx.Member.GrantRoleAsync(parsedRole);
                             await ctx.RespondAsync(embed:
@@ -49,6 +53,7 @@ namespace SilkBot.Commands.Roles
                                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                                 .WithTimestamp(DateTime.Now));
                         }
+                        
                     }
                     else
                     {
@@ -71,7 +76,9 @@ namespace SilkBot.Commands.Roles
                                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                                 .WithTimestamp(DateTime.Now));
                 }
+                    
             }
+
         }
     }
 }

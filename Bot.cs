@@ -17,9 +17,9 @@ namespace SilkBot
 {
     public class Bot
     {
+
         public static Bot Instance { get; } = new Bot();
         public static GlobalUserConfiguration GlobalConfig { get; set; } = new GlobalUserConfiguration();
-
         [JsonProperty(PropertyName = "Guild Prefixes")]
         public static Dictionary<ulong, string> GuildPrefixes { get; set; }
 
@@ -28,9 +28,9 @@ namespace SilkBot
 
         public InteractivityConfiguration Interactivity { get; }
 
-        private Bot()
-        {
-        }
+ 
+        private Bot() { }
+       
 
         public async Task RunBotAsync()
         {
@@ -38,19 +38,24 @@ namespace SilkBot
             HelpCache.Initialize(DiscordColor.Azure);
             ServerConfigurationManager.Instance.LoadServerConfigs();
 
+
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
             Client.GuildCreated += OnGuildJoin;
             Client.GetCommandsNext().CommandErrored += OnCommandErrored;
             Client.MessageCreated += OnMessageCreate;
 
+
             await Client.ConnectAsync();
 
             await Task.Delay(-1);
+
         }
 
         private Task OnGuildJoin(GuildCreateEventArgs e)
         {
+            
+
             return Task.CompletedTask;
         }
 
@@ -67,6 +72,7 @@ namespace SilkBot
             var ctx = Client.GetCommandsNext().CreateContext(e.Message, pfx, cmd, args);
             if (cmd is null) return Task.FromResult(-1);
 
+
             Task.Run(async () => await Client.GetCommandsNext().ExecuteCommandAsync(ctx));
             return Task.CompletedTask;
         }
@@ -78,7 +84,6 @@ namespace SilkBot
                 case InsufficientFundsException _:
                     e.Context.Channel.SendMessageAsync(e.Exception.Message);
                     break;
-
                 default:
                     Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", e.Exception.Message, DateTime.Now);
                     break;
@@ -90,8 +95,8 @@ namespace SilkBot
         {
             if (!ServerConfigurationManager.LocalConfiguration.ContainsKey(e.Guild.Id))
                 ServerConfigurationManager.Instance.GenerateConfigurationFromIdAsync(e.Guild.Id).GetAwaiter();
-            if (!GuildPrefixes.ContainsKey(e.Guild.Id))
-                GuildPrefixes.Add(e.Guild.Id, "!");
+            if(!GuildPrefixes.ContainsKey(e.Guild.Id))
+                GuildPrefixes.Add(e.Guild.Id, "!"); 
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {e.Guild.Name}", DateTime.Now);
             return Task.CompletedTask;
         }
@@ -103,6 +108,7 @@ namespace SilkBot
         }
 
         private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
+
 
         private void InitializeClient()
         {
@@ -120,9 +126,11 @@ namespace SilkBot
 
             Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.Ignore, Timeout = TimeSpan.FromMinutes(2) });
 
+
             Client.UseCommandsNext(Commands);
 
             RegisterCommands();
         }
+
     }
 }

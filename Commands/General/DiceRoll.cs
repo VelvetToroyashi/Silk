@@ -1,8 +1,10 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using org.mariuszgromada.math.mxparser;
+using SilkBot.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,7 +17,7 @@ namespace SilkBot
         [Command("DiceRoll")]
         public async Task RollDice(CommandContext ctx, [RemainingText][HelpDescription("The dice to roll.")] string DiceRoll)
         {
-            if (DiceRoll is null)
+            if(DiceRoll is null)
             {
                 await ctx.RespondAsync("see `[p]help` diceroll for usage, where `[p]` is the current prefix.");
                 return;
@@ -40,17 +42,22 @@ namespace SilkBot
                 }
                 dieRolls.Add(rolls);
 
+
+
                 //Now replace the expressions with their resolutions.
 
                 return totalRoll.ToString();
             });
             var total = new Expression(result).calculate();
             var sb = new StringBuilder();
-            foreach (var list in dieRolls)
+            foreach(var list in dieRolls)
             {
                 sb.AppendLine(string.Join('\n', list));
             }
             await ctx.RespondAsync($"Raw result: \n{sb} Calculated: {total}");
         }
+
+
+
     }
 }

@@ -19,5 +19,6 @@ namespace SilkBot
                 .WithFooter($"Silk ", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
         }
+
     }
 }

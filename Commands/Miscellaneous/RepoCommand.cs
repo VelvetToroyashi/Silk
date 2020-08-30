@@ -20,5 +20,6 @@ namespace SilkBot.Commands.Miscellaneous
                 .WithTimestamp(DateTime.Now);
             await ctx.RespondAsync(embed: embed);
         }
+
     }
 }

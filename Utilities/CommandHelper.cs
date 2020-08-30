@@ -26,5 +26,6 @@ namespace SilkBot
                 .SelectMany(t => t.GetMethods())
                 .Where(m => m.GetCustomAttribute<CommandAttribute>() != null);
         }
+
     }
 }

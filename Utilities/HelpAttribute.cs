@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace SilkBot
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
     public class HelpAttribute : Attribute
     {
+        
+
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
@@ -19,5 +23,6 @@ namespace SilkBot
             Description = desc;
             ExampleUsages = usages;
         }
+
     }
 }

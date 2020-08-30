@@ -1,4 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using SilkBot.ServerConfigurations;
 using System.Collections.Concurrent;
 
 namespace SilkBot.Economy
@@ -7,21 +9,17 @@ namespace SilkBot.Economy
     {
         public ConcurrentDictionary<ulong, DiscordEconomicUser> Users { get; } = new ConcurrentDictionary<ulong, DiscordEconomicUser>();
         public static EconomicUsers Instance { get; } = new EconomicUsers();
-
         public void Add(DiscordMember member)
         {
             var Id = member.Id;
             var user = new DiscordEconomicUser(Id, member.DisplayName);
             if (Users.ContainsKey(Id)) return;
             Users.TryAdd(Id, user);
-            Bot.GlobalConfig.EconomicUsers.Add(user);
+            Bot.GlobalConfig.EconomicUsers.Add(user); 
         }
-
         //I don't use this as much as I could and should. Sad.//
         public bool UserExists(ulong Id) => Users.ContainsKey(Id);
 
-        private EconomicUsers()
-        {
-        }
+        private EconomicUsers() { }
     }
 }

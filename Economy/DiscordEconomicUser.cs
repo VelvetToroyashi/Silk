@@ -14,13 +14,10 @@ namespace SilkBot.Economy
     {
         [JsonProperty]
         public ulong UserId { get; set; }
-
         [JsonProperty]
         public uint Cash { get; set; }
-
         [JsonProperty]
         public string Name { get; set; }
-
         [JsonProperty]
         public bool IsUserNameOverrided { get; set; }
 
@@ -31,12 +28,15 @@ namespace SilkBot.Economy
         public DateTime NameChangeTimestamp { get => nameChangedTimestamp; set => nameChangedTimestamp = value; }
 
         private DateTime lastDailyCashIn;
-
+        
         private DateTime nameChangedTimestamp;
-
+        
+        private readonly TimeSpan nameChangeCooldown = TimeSpan.FromDays(1);
         private readonly TimeSpan dailyCooldown = TimeSpan.FromDays(1);
+        
+        
 
-        public DiscordEconomicUser(ulong UserId, string Name)
+        public DiscordEconomicUser(ulong UserId, string Name) 
         {
             this.UserId = UserId;
             this.Name = Name;
@@ -53,17 +53,18 @@ namespace SilkBot.Economy
         {
             if (IsUserNameOverrided)
             {
-                if (DateTime.Now > nameChangedTimestamp + nameChangeCooldown)
+               if(DateTime.Now > nameChangedTimestamp + nameChangeCooldown)
                 {
                     IsUserNameOverrided = false;
+
                 }
             }
             //Check if server config exists, if not, check if they're an admin the OTHER way.//
             ServerConfigurationManager.LocalConfiguration.TryGetValue(context.Guild.Id, out var possibleConfiguration);
-            if (possibleConfiguration is null)
+            if(possibleConfiguration is null)
             {
                 //Check manually.//
-                if (context.Member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers)))
+                if (context.Member.Roles.Any(role => role.Permissions.HasPermission(Permissions.KickMembers))) 
                 {
                     IsUserNameOverrided = true;
                     nameChangedTimestamp = DateTime.Now;
@@ -80,12 +81,13 @@ namespace SilkBot.Economy
                     Name = name;
                 }
                 else Name = name;
+
             }
         }
 
         public DiscordEmbed DoDaily(CommandContext ctx)
         {
-            if (DateTime.Now - LastCashInTime > dailyCooldown)
+            if(DateTime.Now - LastCashInTime > dailyCooldown)
             {
                 lastDailyCashIn = DateTime.Now;
                 var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 coins, come back tomorrow for more!", DiscordColor.SpringGreen);
@@ -97,9 +99,13 @@ namespace SilkBot.Economy
                 var lastCash = lastDailyCashIn + dailyCooldown;
                 var timeToReturn = DateTime.Now - lastCash;
 
+
+
                 var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", $"come back in {-(int)timeToReturn.TotalHours} hours!", DiscordColor.IndianRed);
                 return new DiscordEmbedBuilder(returnEmbed).WithAuthor(ctx.User.Username, iconUrl: ctx.Member.AvatarUrl);
             }
+
         }
+
     }
 }

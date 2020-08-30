@@ -21,10 +21,14 @@ namespace SilkBot.Commands.Moderation
 
             if (!ctx.Member.HasPermission(Permissions.KickMembers) && !ctx.Member.IsOwner)
             {
-                if (!ctx.Member.HasPermission(Permissions.Administrator))
+                if (!ctx.Member.HasPermission(Permissions.Administrator)) 
                     await ctx.RespondAsync("Sorry, only moderators and administrators are allowed to kick people.");
-                return;
+                        return;
             }
+
+
+
+
 
             //var userRole = user.Roles.Last();
 
@@ -32,7 +36,7 @@ namespace SilkBot.Commands.Moderation
             {
                 var isBot = user == bot;
                 var isOwner = user == ctx.Guild.Owner;
-                var isMod = user.HasPermission(Permissions.KickMembers);
+                var isMod   = user.HasPermission(Permissions.KickMembers);
                 var isAdmin = user.HasPermission(Permissions.Administrator);
                 string errorReason;
                 _ = user.IsAbove(bot) switch
@@ -49,17 +53,20 @@ namespace SilkBot.Commands.Moderation
             }
             else
             {
+
+
                 var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
 
-                try
+
+                try 
                 {
                     await DMCommand.DM(ctx, user, embed);
                 }
-                catch (InvalidOperationException invalidop)
+                catch(InvalidOperationException invalidop)
                 {
                     ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop);
                 }
-
+                
                 await ctx.Member.RemoveAsync(reason);
 
                 ServerConfigurationManager.LocalConfiguration.TryGetValue(ctx.Guild.Id, out var guildConfig);

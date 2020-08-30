@@ -1,6 +1,9 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using SilkBot.Economy;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Economic_Commands

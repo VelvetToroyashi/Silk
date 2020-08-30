@@ -2,8 +2,11 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
@@ -21,6 +24,7 @@ namespace SilkBot.Commands.Bot
             permissions.Add("Kick", role.HasPermission(Permissions.KickMembers));
             permissions.Add("Ban", role.HasPermission(Permissions.BanMembers));
             permissions.Add("Manage", role.HasPermission(Permissions.ManageMessages));
+
 
             var permStrings = new List<string>();
             var no = DiscordEmoji.FromName(ctx.Client, ":x:");

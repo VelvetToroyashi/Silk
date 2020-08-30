@@ -2,15 +2,17 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SilkBot
 {
+    
     public class AuthCommand : BaseCommandModule
     {
         public static string Key { get; private set; }
-
         [Hidden]
         [Command]
         [RequireOwner]
@@ -29,8 +31,10 @@ namespace SilkBot
                 .WithTimestamp(DateTime.Now));
             await Task.Delay(5000);
             await ctx.Channel.GetMessagesAfterAsync(ctx.Message.Id).Result.First().DeleteAsync();
+            
         }
 
         public static async void ClearKeyAsync() => await Task.Run(() => Key = null);
+
     }
 }

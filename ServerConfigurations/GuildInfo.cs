@@ -14,5 +14,10 @@ namespace SilkBot
         public ulong Guild { get; set; }
         public ulong LoggingChannel { get; set; }
         public ulong MutedRole { get; set; }
+
     }
 }
+
+
+
+
