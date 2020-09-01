@@ -22,7 +22,7 @@ namespace SilkBot
                 await ctx.RespondAsync(embed: embed);
             }
             else
-            { 
+            {
                 var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!")).WithColor(new DiscordColor("#d11515"));
                 await ctx.RespondAsync(embed: embed);
             }

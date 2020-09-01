@@ -8,15 +8,24 @@
 
   <ItemGroup>
     <Compile Remove="config\**" />
+    <Compile Remove="Migrations\**" />
     <Compile Remove="Silk!\**" />
     <EmbeddedResource Remove="config\**" />
+    <EmbeddedResource Remove="Migrations\**" />
     <EmbeddedResource Remove="Silk!\**" />
     <None Remove="config\**" />
+    <None Remove="Migrations\**" />
     <None Remove="Silk!\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Database\Models\BannedMember.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="721518523704410202.serverconfig" />
+    <None Remove="Database\Models\NewFile1.txt" />
+    <None Remove="NewFile1.txt" />
     <None Remove="Token.txt" />
   </ItemGroup>
 
@@ -26,7 +35,17 @@
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00709" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00709" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-preview.8.20407.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-preview.8.20407.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0-preview.8.20407.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.6.20305.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-preview8" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
   </ItemGroup>
 

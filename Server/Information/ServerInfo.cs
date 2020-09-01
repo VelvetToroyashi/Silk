@@ -23,8 +23,8 @@ namespace SilkBot.ServerConfigurations
             (await guild.GetAllMembersAsync())
             .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
                 .Select(mod => new Moderator(mod.Id));
-        public async Task<IEnumerable<BannedMember>> GetBansAsync(DiscordGuild guild) =>
-            (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
+        //public async Task<IEnumerable<BannedMember>> GetBansAsync(DiscordGuild guild) =>
+        //    (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
 
         public async Task<IEnumerable<Administrator>> GetAdministratorsAsync(DiscordGuild guild) =>
             (await guild.GetAllMembersAsync())
@@ -35,11 +35,7 @@ namespace SilkBot.ServerConfigurations
 
         public async Task<DiscordChannel> ReturnChannelFromID(CommandContext commandContext, ulong Id)
         {
-            if (Id == 0)
-                return null;
-
-            return await commandContext.Client.GetChannelAsync(Id);
-
+            return Id == 0 ? null : await commandContext.Client.GetChannelAsync(Id);
         }
 
 

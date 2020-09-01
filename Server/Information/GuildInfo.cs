@@ -10,19 +10,26 @@ namespace SilkBot
     public class GuildInfo
     {
         [JsonProperty(PropertyName = "Admins")]
-        public List<Administrator> Administrators { get; set; }
+        public virtual IList<Administrator> Administrators { get; set; }
+
         [JsonProperty(PropertyName = "Banned Members")]
-        public List<BannedMember> BannedMembers { get; set; }
+        public virtual IList<BannedMember> BannedMembers { get; set; }
+
         [JsonProperty(PropertyName = "Self assignable role Ids")]
-        public List<ulong> SelfAssignableRoles { get; set; }
+        public virtual IList<ulong> SelfAssignableRoles { get; set; }
+
         [JsonProperty(PropertyName = "Moderators")]
-        public List<Moderator> Moderators { get; set; }
+        public virtual IList<Moderator> Moderators { get; set; }
+        
         [JsonProperty(PropertyName = "Guild Id")]
-        public ulong Guild { get; set; }
+        public ulong GuildId { get; set; }
+
         [JsonProperty(PropertyName = "Log channel")]
         public ulong LoggingChannel { get; set; }
+
         [JsonProperty(PropertyName = "Mute role Id")]
         public ulong MutedRole { get; set; }
+
 
         public ulong MemberChangedNotificationChannel { get; set; }
         public bool NotifyOnGuildMemberCountChanges { get; set; }

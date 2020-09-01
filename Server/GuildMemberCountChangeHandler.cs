@@ -27,7 +27,7 @@ namespace SilkBot.Server
         private async Task OnGuildMemberLeft(GuildMemberRemoveEventArgs e)
         {
             var guild = dataContainerReference[e.Guild].GuildInfo;
-            if (guild.BannedMembers.Any(member => member.ID == e.Member.Id)) return;
+            //if (guild.BannedMembers.Any(member => member.ID == e.Member.Id)) return;
             await Task.CompletedTask;
             //Do something useful here as well.
 

@@ -21,7 +21,7 @@ namespace SilkBot.ServerConfigurations
         [JsonProperty(PropertyName = "Economic Users")]
         private DiscordEconomicUsersData economicusers;
         
-        public (GuildInfo GuildInfo, List<DiscordEconomicUser> EconomicUsers) this[DiscordGuild guild] => (guildInfos.Single(g => g.Guild == guild.Id), economicusers.EconomicUsers);
+        public (GuildInfo GuildInfo, List<DiscordEconomicUser> EconomicUsers) this[DiscordGuild guild] => (guildInfos.Single(g => g.GuildId == guild.Id), economicusers.EconomicUsers);
 
         public DataStorageContainer()
         {
@@ -66,7 +66,7 @@ namespace SilkBot.ServerConfigurations
             foreach(var serverInformationFile in guildInfos)
             {
                 var serverInformationObject = JsonConvert.SerializeObject(serverInformationFile);
-                File.WriteAllText(Path.Combine(instancedServerDataPath, serverInformationFile.Guild + ".serverconfig"), serverInformationObject);
+                File.WriteAllText(Path.Combine(instancedServerDataPath, serverInformationFile.GuildId + ".serverconfig"), serverInformationObject);
             }
             Console.WriteLine($"Saved guild information for {guildInfos.Count} guilds.");
         }
@@ -81,14 +81,14 @@ namespace SilkBot.ServerConfigurations
             var moderatorAsModeratorObject = rawModeratorDiscordmembers.Select(mod => new Moderator(mod.Id));
             var administratorAsAdministratorObject = rawAdministratorDiscordMembers.Select(admin => new Administrator(admin.Id));
                 
-            var BannedMembers = (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
+            //var BannedMembers = (await guild.GetBansAsync()).Select(ban => new BannedMember(ban.User.Id, ban.Reason));
 
             var guildInfo = new GuildInfo
             {
                 Administrators = administratorAsAdministratorObject.ToList(),
                 Moderators = moderatorAsModeratorObject.ToList(),
-                BannedMembers = BannedMembers.ToList(),
-                Guild = guild.Id,
+                //BannedMembers = BannedMembers.ToList(),
+                GuildId = guild.Id,
             };
 
             guildInfos.Add(guildInfo);
@@ -97,7 +97,7 @@ namespace SilkBot.ServerConfigurations
         {
             foreach(var guild in guilds)
             {
-                if (guildInfos.Select(g => g.Guild).Any(g => g == guild.Id)) continue;
+                if (guildInfos.Select(g => g.GuildId).Any(g => g == guild.Id)) continue;
                 await GenerateGuildInfoObjectAsync(guild);
             }
         }

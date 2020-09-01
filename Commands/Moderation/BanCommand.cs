@@ -2,10 +2,9 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using SilkBot.ServerConfigurations;
-using SilkBot.ServerConfigurations.UserInfo;
 using SilkBot.Utilities;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation
@@ -13,7 +12,7 @@ namespace SilkBot.Commands.Moderation
     public class BanCommand : BaseCommandModule
     {
         [Command("Ban")]
-        [HelpDescription("Ban someone! Both Silk and Invoker require `Ban Members`.", "<prefix>ban <userID>/<mention>")]
+        
         public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
             var user = await ctx.Guild.GetMemberAsync(target.Id);
@@ -23,7 +22,6 @@ namespace SilkBot.Commands.Moderation
                 await DenyBanAsync(errorReason);
                 return;
             }
-
             async Task DenyBanAsync(string errorReason)
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
@@ -78,9 +76,9 @@ namespace SilkBot.Commands.Moderation
             {
                 
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                var loggingChannel = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel;
-                var sendChannel = ctx.Guild.GetChannel(loggingChannel) ?? ctx.Channel;
-                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.BannedMembers.Add(new BannedMember(user.Id, reason));
+                var loggingChannel = SilkBot.Bot.Instance.DbContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel.Value;
+                var sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
+                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.BannedMembers.Add(new BannedMember(user.Id, reason));
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }
 

@@ -1,12 +1,11 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using Newtonsoft.Json;
-using SilkBot.ServerConfigurations;
+using SilkBot.Models;
 using SilkBot.Utilities;
-using System;
-using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
 {
@@ -16,7 +15,9 @@ namespace SilkBot.Commands.Bot
         [Aliases("SetPrefix")]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            if (!ctx.Member.IsAdministrator())
+
+            var config = Instance.DbContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
+            if (!config.DiscordUserInfos.Any(user => user.UserPermissions.HasFlag(UserPrivileges.Staff)))
             {
                 await ctx.RespondAsync("Sorry, but you're not allowed to change the prefix!");
                 return;
@@ -28,11 +29,8 @@ namespace SilkBot.Commands.Bot
                 return;
             }
 
-            SilkBot.Bot.GuildPrefixes[ctx.Guild.Id] = prefix;
-            var prefixConfig = JsonConvert.SerializeObject(SilkBot.Bot.GuildPrefixes, Formatting.Indented);
-            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var configLocation = Path.Combine(appdata, "SilkBot", "ServerConfigs");
-            File.WriteAllText(Path.Combine(configLocation, "prefixes.gconfig"), prefixConfig);
+            SilkBot.Bot.Instance.DbContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id).Prefix = prefix;
+            await SilkBot.Bot.Instance.DbContext.SaveChangesAsync();
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
         private (bool valid, string reason) IsValidPrefix(string prefix)

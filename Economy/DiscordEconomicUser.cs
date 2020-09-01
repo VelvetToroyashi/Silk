@@ -28,7 +28,6 @@ namespace SilkBot.Economy
         
         private DateTime nameChangedTimestamp;
         
-        private readonly TimeSpan nameChangeCooldown = TimeSpan.FromDays(1);
         private readonly TimeSpan dailyCooldown = TimeSpan.FromDays(1);
         
         

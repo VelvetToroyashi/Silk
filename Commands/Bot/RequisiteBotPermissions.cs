@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Utilities;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +15,8 @@ namespace SilkBot.Commands.Bot
         [HelpDescription("The bot's needed permissions, and what commands they affect.")]
         public async Task GetRequiredPermissions(CommandContext ctx)
         {
-            var prefix = SilkBot.Bot.GuildPrefixes[ctx.Guild.Id];
+
+            var prefix = SilkBot.Bot.Instance.DbContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).AsEnumerable().Select(_ => _.Prefix);
             var embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 

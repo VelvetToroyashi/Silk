@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using SilkBot.Models;
 using SilkBot.ServerConfigurations;
 using SilkBot.Utilities;
 using System;
@@ -15,42 +16,55 @@ namespace SilkBot.Commands.TestCommands
     public class ConfigCommand : BaseCommandModule
     {
         [Command("Config")]
-        [HelpDescription("Something wrong with your settings? Run this command to verify your configuration is set properly!")]
+        [HelpDescription("Set configuration here!")]
         public async Task TestLogChannelWorks(CommandContext ctx)
         {
 
 
-                //Configuration
-                var config = SilkBot.Bot.Instance.Data[ctx.Guild];
-                var embed = new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl).WithTitle("Current server config:").WithColor(DiscordColor.Gold);
-                //Admins (might add <prefix>config add admin <roleid>)
-                var adminRoles = string.Join('\n', ctx.Guild.Roles.Where(role => role.Value.HasPermission(Permissions.Administrator) && !role.Value.IsManaged).OrderBy(n => n.Value.Name.Length).Select(r => r.Value.Mention));
-                
-                if(adminRoles.Length < 1)
-                    adminRoles = "Could not find role with administrator permissions.";
-                
-                embed.AddField($"Admin {(adminRoles.Split('\n').Count() > 1 ? "roles" : "role")}:", adminRoles, true);
-                
-                //Moderator
-                var modRoles = string.Join('\n', ctx.Guild.Roles
-                    .Where(role => role.Value.HasPermission(Permissions.KickMembers) && 
-                    !role.Value.IsManaged && 
-                        !role.Value.HasPermission(Permissions.Administrator))
-                    .OrderBy(n => n.Value.Name.Length)
-                    .Select(r => r.Value.Mention));
+            //Configuration
+            var config = SilkBot.Bot.Instance.DbContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var embed = new DiscordEmbedBuilder()
+                .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                .WithTitle("Current server config:")
+                .WithColor(DiscordColor.Gold);
+            var staffMembers = config.DiscordUserInfos
+                .AsQueryable()
+                .Where(member => member.UserPermissions
+                    .HasFlag(UserPrivileges.Staff));
+            embed.AddField("Staff members:", $"Number of staff: {staffMembers.Count()}, Top 10 members: {string.Join(", ", staffMembers.Take(10).Select(_ => $"<@!{_.UserId}>"))}");
 
-                if (modRoles.Length < 1)
-                    modRoles = "Could not find role with administrator permissions.";
-                
-                embed.AddField($"Moderator {(modRoles.Split('\n').Count() > 1 ? "roles" : "role")}:", modRoles, true);
+            await ctx.RespondAsync(embed: embed);
 
 
-                embed.AddField("    Muted role:", $"{(config.GuildInfo.MutedRole == 0 ? "Not set!" : $"<@&{config.GuildInfo.MutedRole}>")}", false);
-                embed.AddField("Logging channel:", $"{(config.GuildInfo.LoggingChannel == 0 ? "Not set!" : $"<#{config.GuildInfo.LoggingChannel}>")}", true);
+            //var embed = new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl).WithTitle("Current server config:").WithColor(DiscordColor.Gold);
+            ////Admins (might add <prefix>config add admin <roleid>)
+            //var adminRoles = string.Join('\n', ctx.Guild.Roles.Where(role => role.Value.HasPermission(Permissions.Administrator) && !role.Value.IsManaged).OrderBy(n => n.Value.Name.Length).Select(r => r.Value.Mention));
 
-                embed.AddFooter(ctx);
-                await ctx.RespondAsync(embed: embed);
-            
+            //if(adminRoles.Length < 1)
+            //    adminRoles = "Could not find role with administrator permissions.";
+
+            //embed.AddField($"Admin {(adminRoles.Split('\n').Count() > 1 ? "roles" : "role")}:", adminRoles, true);
+
+            ////Moderator
+            //var modRoles = string.Join('\n', ctx.Guild.Roles
+            //    .Where(role => role.Value.HasPermission(Permissions.KickMembers) && 
+            //    !role.Value.IsManaged && 
+            //        !role.Value.HasPermission(Permissions.Administrator))
+            //    .OrderBy(n => n.Value.Name.Length)
+            //    .Select(r => r.Value.Mention));
+
+            //if (modRoles.Length < 1)
+            //    modRoles = "Could not find role with administrator permissions.";
+
+            //embed.AddField($"Moderator {(modRoles.Split('\n').Count() > 1 ? "roles" : "role")}:", modRoles, true);
+
+
+            //embed.AddField("    Muted role:", $"{(config.GuildInfo.MutedRole == 0 ? "Not set!" : $"<@&{config.GuildInfo.MutedRole}>")}", false);
+            //embed.AddField("Logging channel:", $"{(config.GuildInfo.LoggingChannel == 0 ? "Not set!" : $"<#{config.GuildInfo.LoggingChannel}>")}", true);
+
+            //embed.AddFooter(ctx);
+            //await ctx.RespondAsync(embed: embed);
+
         }
         [Command("Config")]
         public Task SetConfig(CommandContext ctx, string action, ulong Id = 0) =>

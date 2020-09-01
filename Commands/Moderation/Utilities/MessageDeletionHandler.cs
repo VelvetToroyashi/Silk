@@ -3,7 +3,9 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using SilkBot.ServerConfigurations;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Moderation.Utilities
 {
@@ -18,10 +20,13 @@ namespace SilkBot.Commands.Moderation.Utilities
 
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
-            var logChannel = _guildInformation[e.Guild].GuildInfo.LoggingChannel;
-            var guildPrefix = SilkBot.Bot.GuildPrefixes[e.Guild.Id];
-            if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix)) return;
+            var config = Instance.DbContext.Guilds.Where(g => g.DiscordGuildId == e.Guild.Id).FirstOrDefault() ;
+            if (!config.LogMessageChanges) return;
+            var logChannel = config.MessageEditChannel.Value;
             if (logChannel == default) return;
+            var guildPrefix = config.Prefix;
+            if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix)) return;
+
             var embed =
                 new DiscordEmbedBuilder()
                 .WithTitle("Message Deleted:")

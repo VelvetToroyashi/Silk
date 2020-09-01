@@ -62,7 +62,7 @@ namespace SilkBot.Commands.Moderation
                 var guildConfig = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo;
                 var logChannelID = guildConfig.LoggingChannel;
                 var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
-                await ctx.Client.SendMessageAsync(await ServerInfo.Instance.ReturnChannelFromID(ctx, logChannelValue),
+                await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),
                     embed: new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)
