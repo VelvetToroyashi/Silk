@@ -2,9 +2,12 @@
 namespace SilkBot.Models
 {
     [Flags]
-    public enum UserPrivileges
+    public enum UserFlag
     {
         Staff,
+        WarnedPrior,
+        KickedPrior,
+        BannedPrior,
         Blacklisted,
         FreeShopOwner,
         PaidShopOwner,

@@ -59,10 +59,10 @@ namespace SilkBot.Commands.Moderation
                 
                 await ctx.Member.RemoveAsync(reason);
 
-                var guildConfig = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo;
-                var logChannelID = guildConfig.LoggingChannel;
+                var guildConfig = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+                var logChannelID = guildConfig.GeneralLoggingChannel;
                 var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
-                await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),
+                await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue.Value),
                     embed: new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)

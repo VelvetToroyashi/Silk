@@ -13,12 +13,17 @@ namespace SilkBot.Tools
         public event EventHandler UnBan;
         public event EventHandler Unlock;
         public event EventHandler Unmute;
-        public TimedActionHelper() => Timer.Elapsed += OnTimerTick;
+        public TimedActionHelper()
+        {
+            Timer.Start();
+            Timer.Elapsed += OnTimerTick;
+        }
 
         private void OnTimerTick(object s, ElapsedEventArgs e)
         {
             foreach(var action in TimedRestrictedActions)
             {
+                if (DateTime.Now < action.Expiration) continue;
                 switch (action.ActionReason)
                 {
                     case RestrictionActionReason.TemporaryBan:

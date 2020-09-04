@@ -18,18 +18,18 @@ namespace SilkBot.Commands.Roles
         public async Task ObtainRole(CommandContext ctx, [RemainingText] string Roles)
         {
             var _roles = Roles.Split(',');
-            
+            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
             //If a config exists, use that, else assume no config exists and throw an error.//
-            foreach(var role in _roles)
+            foreach (var role in _roles)
             {
                 var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
-                if (SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.SelfAssignableRoles.Count > 0)
+                if (guild.SelfAssignableRoles.Count > 0)
                 {
                     
-                    var selfAssignableRoles = SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.SelfAssignableRoles;
+                    var selfAssignableRoles = guild.SelfAssignableRoles;
 
-                    if (selfAssignableRoles.Any(saRole => saRole == parsedRole.Id))
+                    if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
                     {
                         if(!ctx.Member.Roles.Any(r => r == parsedRole))
                         {

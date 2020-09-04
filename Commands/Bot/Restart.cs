@@ -23,7 +23,7 @@ namespace SilkBot.Commands.Bot
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now)
                 );
-            SilkBot.Bot.Instance.DbContext.SaveChanges();
+            SilkBot.Bot.Instance.SilkDBContext.SaveChanges();
 
             Process.Start(@"C:\Users\Cinnamon\Desktop\Restart Bot.bat");
         }

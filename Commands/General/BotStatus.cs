@@ -14,9 +14,7 @@ namespace SilkBot
 
 
 
-        [Command("status")]
-        [HelpDescription("Returns the bot's status. Bot's status cannot be changed.")]
-
+        [Command("Status")]
         public async Task Status(CommandContext ctx)
         {
 
@@ -60,10 +58,7 @@ namespace SilkBot
 
 
 
-            [Hidden]
-            [Command("status")]
-            [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-
+            [Hidden, Command("status")]
             public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
             {
             
@@ -89,10 +84,7 @@ namespace SilkBot
                 }
             }
 
-        [Hidden]
-        [Command("status")]
-        [Description("Sets the bot's status. This action can only be performed by the bot owner.")]
-
+        [Hidden, Command("status")]
         public async Task Status(CommandContext ctx, string type, [RemainingText] string status)
         {
             if (!ctx.Channel.IsPrivate)

@@ -10,11 +10,11 @@ namespace SilkBot
     public class PingCommand : BaseCommandModule
     {
         [Command("Ping")]
-        [HelpDescription("Returns my API response time.")]
+
         public async Task Ping(CommandContext ctx)
         {
             var embed = new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                 .WithTitle("Pong! Silk! at the ready.")
                 .WithColor(DiscordColor.Blue);
             var sw = new Stopwatch();

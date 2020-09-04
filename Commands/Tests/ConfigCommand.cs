@@ -22,15 +22,15 @@ namespace SilkBot.Commands.TestCommands
 
 
             //Configuration
-            var config = SilkBot.Bot.Instance.DbContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
             var embed = new DiscordEmbedBuilder()
                 .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
                 .WithTitle("Current server config:")
                 .WithColor(DiscordColor.Gold);
             var staffMembers = config.DiscordUserInfos
                 .AsQueryable()
-                .Where(member => member.UserPermissions
-                    .HasFlag(UserPrivileges.Staff));
+                .Where(member => member.Flags
+                    .HasFlag(Models.UserFlag.Staff));
             embed.AddField("Staff members:", $"Number of staff: {staffMembers.Count()}, Top 10 members: {string.Join(", ", staffMembers.Take(10).Select(_ => $"<@!{_.UserId}>"))}");
 
             await ctx.RespondAsync(embed: embed);
@@ -66,22 +66,58 @@ namespace SilkBot.Commands.TestCommands
             //await ctx.RespondAsync(embed: embed);
 
         }
+
+
         [Command("Config")]
-        public Task SetConfig(CommandContext ctx, string action, ulong Id = 0) =>
-            action.ToLowerInvariant() switch
+        public async Task SetMute(CommandContext ctx, string mute, DiscordRole mutedRole)
+        {
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            config.MuteRoleID = mutedRole.Id;
+        }
+
+
+        [Command("Config")]
+        public async Task SetConfig(CommandContext ctx, string action, DiscordChannel channel)
+        {
+            switch (action.ToLower())
             {
-                "set_mute"      => SetMute(ctx, Id),
-                "setmute"       => SetMute(ctx, Id),
-                "mute"          => SetMute(ctx, Id),
+                case "onmemberleave":
+                case "onmemberjoin":
+                case "onmemeberchange":
+                case "greetingchannel":
+                    await SetMemberChangeChannel(ctx, channel.Id);
+                    break;
+                case "generallog":
+                case "generalloggingchannel":
+                case "log_channel":
+                case "loggging_channel":
+                    //await SetLogs(ctx, channel.Id);
+                    break;
+                case "mod":
+                    await SetModChannel(ctx, channel.Id);
+                    break;
+                default:
+                    await ctx.RespondAsync("Sorry, but I can't tell what you're trying to setup.");
+                    break;
+            }
+        }
 
-                "log"           => SetLogs(ctx, Id),
-                "log_to"        => SetLogs(ctx, Id),
-                "set_log"       => SetLogs(ctx, Id),
-                "logchannel"    => SetLogs(ctx, Id),
-                "log_channel"   => SetLogs(ctx, Id),
+        private async Task SetMemberChangeChannel(CommandContext ctx, ulong Id)
+        {
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            config.LogMemberJoinOrLeave = true;
+            config.MemberLeaveJoinChannel = Id;
+            await SilkBot.Bot.Instance.SilkDBContext.SaveChangesAsync();
+            
+        }
 
-                _               => Task.CompletedTask,
-            };
+        private async Task SetModChannel(CommandContext ctx, ulong Id)
+        {
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            config.RoleChangeLogChannel = Id;
+            config.MessageEditChannel = Id;
+            await SilkBot.Bot.Instance.SilkDBContext.SaveChangesAsync();
+        }
 
         private async Task SetLogs(CommandContext ctx, ulong id)
         {
@@ -101,44 +137,44 @@ namespace SilkBot.Commands.TestCommands
                     return;
                 }
                 var channelID = ulong.Parse(message.Result.Content);
-                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = channelID;
+                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = channelID;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(channelID).Mention}", DiscordColor.Gold));
             }
             else
             {
-                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = id;
+                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.LoggingChannel = id;
                 await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, $"Done! I'll log actions to {ctx.Guild.GetChannel(id).Mention}", DiscordColor.Gold));
             }
         }
 
-        private async Task SetMute(CommandContext ctx, ulong roleID)
+        [Command("setmute")]
+        public async Task SetMute(CommandContext ctx, DiscordRole mutedRole)
         {
-            if(roleID == 0)
+            if(mutedRole is null)
             {
                 var interactivity = ctx.Client.GetInteractivity();
                 await ctx.RespondAsync("No role ID was passed in the config method. What role would you like for mutes?");
-                var message = await interactivity.WaitForMessageAsync(msg => msg.Author == ctx.Message.Author && 
-                ulong.TryParse(msg.Content, out var roleId) &&
-                ctx.Guild.GetRole(roleId) != null, 
+                var message = await interactivity.WaitForMessageAsync(msg => msg.Author == ctx.Message.Author &&
+                ctx.Message.MentionedRoles.Count > 0, 
                 TimeSpan.FromSeconds(30));
                 if (message.TimedOut)
                 {
                     await ctx.RespondAsync("Setup timed out.");
                     return;
                 }
-                var role = ulong.Parse(message.Result.Content);
+
                 var (authName, authURL) = ctx.GetAuthor();
                 var embed = new DiscordEmbedBuilder()
                     .WithAuthorExtension(authName, authURL)
-                    .WithDescription($"Done! Muted role is set to {ctx.Guild.GetRole(role).Mention}")
+                    .WithDescription($"Done! Muted role is set to {ctx.Guild.GetRole(message.Result.MentionedRoles.First().Id).Mention}")
                     .WithColor(DiscordColor.Gold)
                     .AddFooter(ctx);
-                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = role;
+                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = role;
                 await ctx.RespondAsync(embed: embed);
             }
             else
             {
-                if(ctx.Guild.GetRole(roleID) is null)
+                if(mutedRole is null)
                 {
                     await ctx.RespondAsync("That isn't a role!");
                     return;
@@ -146,10 +182,10 @@ namespace SilkBot.Commands.TestCommands
                 var (authName, authURL) = ctx.GetAuthor();
                 var embed = new DiscordEmbedBuilder()
                     .WithAuthorExtension(authName, authURL)
-                    .WithDescription($"Done! Muted role is set to {ctx.Guild.GetRole(roleID).Mention}")
+                    .WithDescription($"Done! Muted role is set to {mutedRole.Mention}")
                     .WithColor(DiscordColor.Gold)
                     .AddFooter(ctx);
-                SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = roleID;
+                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.MutedRole = roleID;
                 await ctx.RespondAsync(embed: embed);
             }
         }

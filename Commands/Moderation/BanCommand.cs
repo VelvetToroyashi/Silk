@@ -76,7 +76,7 @@ namespace SilkBot.Commands.Moderation
             {
                 
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                var loggingChannel = SilkBot.Bot.Instance.DbContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel.Value;
+                var loggingChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel.Value;
                 var sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
                 //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.BannedMembers.Add(new BannedMember(user.Id, reason));
                 await sendChannel.SendMessageAsync(embed: logEmbed);

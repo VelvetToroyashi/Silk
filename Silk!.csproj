@@ -30,6 +30,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Migrations\20200830011740_help.cs" />
+    <Compile Include="Migrations\20200830011740_help.Designer.cs" />
+    <Compile Include="Migrations\20200830194328_Prefixs.cs" />
+    <Compile Include="Migrations\20200830194328_Prefixs.Designer.cs" />
+    <Compile Include="Migrations\20200830204520_Vgist-said-remove-virtual.cs" />
+    <Compile Include="Migrations\20200830204520_Vgist-said-remove-virtual.Designer.cs" />
+    <Compile Include="Migrations\20200902005726_Ticketing-System-Update-1.cs" />
+    <Compile Include="Migrations\20200902005726_Ticketing-System-Update-1.Designer.cs" />
+    <Compile Include="Migrations\20200902154727_TicketStatus.cs" />
+    <Compile Include="Migrations\20200902154727_TicketStatus.Designer.cs" />
+    <Compile Include="Migrations\20200903185238_LinkWhiteList.cs" />
+    <Compile Include="Migrations\20200903185238_LinkWhiteList.Designer.cs" />
+    <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.10" />
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00709" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00709" />

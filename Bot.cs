@@ -33,16 +33,9 @@
         public static Bot Instance { get; } = new Bot();
 
 
-        public DataStorageContainer Data => _data;
 
 
-        private DataStorageContainer _data = new DataStorageContainer();
-
-
-        public static DiscordEconomicUsersData EconomicUsers { get; set; } = new DiscordEconomicUsersData();
-
-
-        public SilkDbContext DbContext { get; set; } = new SilkDbContext();
+        public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
 
 
         [JsonProperty(PropertyName = "Guild Prefixes")]
@@ -71,35 +64,12 @@
 
         public async Task RunBotAsync()
         {
-            await DbContext.Database.MigrateAsync();
+            await SilkDBContext.Database.MigrateAsync();
             await InitializeClient();
             await Task.Delay(-1);
         }
 
 
-        private Task OnMessageCreate(MessageCreateEventArgs e)
-        {
-            if (e.Message.Author.IsBot) return Task.CompletedTask;
-            var config = DbContext.Guilds.AsEnumerable().Where(guild => guild.DiscordGuildId == e.Guild.Id).FirstOrDefault();
-            if (config is Guild)
-            {
-                if (e.Author.IsBot) return Task.FromResult(-1);
-                var prefix = config.Prefix;
-                var prefixPos = e.Message.GetStringPrefixLength(prefix);
-                if (prefixPos < 0) return Task.FromResult(-1);
-                var pfx = e.Message.Content.Substring(0, prefixPos);
-                var cnt = e.Message.Content.Substring(prefixPos);
-
-                var cmd = Client.GetCommandsNext().FindCommand(cnt, out var args);
-                var ctx = Client.GetCommandsNext().CreateContext(e.Message, pfx, cmd, args);
-                if (cmd is null) return Task.FromResult(-1);
-
-
-                Task.Run(async () => await Client.GetCommandsNext().ExecuteCommandAsync(ctx));
-            }
-
-            return Task.CompletedTask;
-        }
 
 
         private Task OnCommandErrored(CommandErrorEventArgs e)
@@ -123,7 +93,7 @@
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
-            var guild = DbContext.Guilds.Where(g => g.DiscordGuildId == eventArgs.Guild.Id).FirstOrDefault();
+            var guild = SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == eventArgs.Guild.Id);
 
 
             await GetGuildAsync(eventArgs.Guild.Id);
@@ -140,15 +110,16 @@
 
         public async Task CacheStaffMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
-            if (guild.DiscordUserInfos.Where(user => user.UserPermissions.HasFlag(UserPrivileges.Staff)).Count() < 1) return;
+            var staff = guild.DiscordUserInfos.Where(user => user.Flags.HasFlag(UserFlag.Staff));
+            if (staff.Count() < 1) return;
             
             var staffMembers = members
                                 .AsQueryable()
                                 .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
-                                .Select(staffMember => new DiscordUserInfo { Guild = guild, UserId = staffMember.Id, UserPermissions = UserPrivileges.Staff });
+                                .Select(staffMember => new DiscordUserInfo { Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff });
 
             guild.DiscordUserInfos.AddRange(staffMembers);
-            await DbContext.SaveChangesAsync();
+            await SilkDBContext.SaveChangesAsync();
             
         }
 
@@ -156,16 +127,16 @@
         /// The GetGuildAsync.
         /// </summary>
         /// <param name="guildId">The guildId<see cref="ulong"/>.</param>
-        /// <returns>The <see cref="Task{Guild}"/>.</returns>
+        /// <returns><see cref="Task{Guild}"/>.</returns>
         public async Task<Guild> GetGuildAsync(ulong guildId)
         {
-            var guild = await DbContext.Guilds
+            var guild = await SilkDBContext.Guilds
                 .AsQueryable()
                 .Where(g => g.DiscordGuildId == guildId)
                 .FirstOrDefaultAsync();
             if (guild != null) return guild;
             guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
-            await DbContext.SaveChangesAsync();
+            await SilkDBContext.SaveChangesAsync();
             return guild;
         }
 
@@ -219,7 +190,8 @@
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
             Client.GetCommandsNext().CommandErrored += OnCommandErrored;
-            Client.MessageCreated += OnMessageCreate;
+            
+
             Client.GuildDownloadCompleted += async (e) =>
             {
                 Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Availble guilds: {e.Guilds.Count}", DateTime.Now);
@@ -227,12 +199,15 @@
             };
 
             await Client.ConnectAsync();
-            new MessageDeletionHandler(ref _data, Client);
-            new MessageEditHandler(ref _data, Client);
+            new MessageDeletionHandler(Client);
+            new MessageEditHandler(Client);
             new GuildJoinHandler();
-            new GuildMemberCountChangeHandler(ref _data, Client);
+            new MessageCreationHandler();
+            new GuildMemberCountChangeHandler(Client);
             sw.Stop();
             Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
+
+
     }
 }

@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SilkBot.ServerConfigurations;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,16 +10,17 @@ namespace SilkBot.Commands.Moderation.Utilities
 {
     public class MessageDeletionHandler
     {
-        private readonly DataStorageContainer _guildInformation;
-        public MessageDeletionHandler(ref DataStorageContainer guildData, DiscordClient client)
+        public MessageDeletionHandler(DiscordClient client)
         {
-            _guildInformation = guildData;
+
             client.MessageDeleted += OnMessageDeleted;
         }
 
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
-            var config = Instance.DbContext.Guilds.Where(g => g.DiscordGuildId == e.Guild.Id).FirstOrDefault() ;
+            if (e.Channel.IsPrivate) return;
+            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
+            
             if (!config.LogMessageChanges) return;
             var logChannel = config.MessageEditChannel.Value;
             if (logChannel == default) return;

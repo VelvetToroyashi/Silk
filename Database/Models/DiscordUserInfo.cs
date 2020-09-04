@@ -9,10 +9,13 @@ namespace SilkBot.Models
     {
         [Key]
         public int Id { get; set; }
-        public ulong UserId { get; set; }
+        
         public int Cash { get; set; }
+        public Guild Guild { get; set; }
+        public ulong UserId { get; set; }
+        public UserFlag Flags { get; set; }
         public DateTime LastCashIn { get; set; }
-        public UserPrivileges UserPermissions { get; set; }
-        public virtual Guild Guild { get; set; }
+        //public UserInfractionModel Infractions { get; set; }
+
     }
 }

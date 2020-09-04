@@ -3,16 +3,18 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using SilkBot.ServerConfigurations;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+
 namespace SilkBot.Commands.Moderation.Utilities
 {
     public sealed class MessageEditHandler
     {
-        private readonly DataStorageContainer _guildInformation;
 
-        public MessageEditHandler(ref DataStorageContainer guildData, DiscordClient client)
+
+        public MessageEditHandler(DiscordClient client)
         {
-            _guildInformation = guildData;
+
             client.MessageUpdated += OnMessageEdit;
         }
 
@@ -20,7 +22,7 @@ namespace SilkBot.Commands.Moderation.Utilities
         {
             if (e.Message.Author is null) return;
             if (e.MessageBefore.Content == e.Message.Content) return;
-            var logChannel = _guildInformation[e.Guild].GuildInfo.LoggingChannel;
+            var logChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id).GeneralLoggingChannel.Value;
             if (e.Message.Author.IsCurrent || e.Message.Author.IsBot ) return;
             if (logChannel == default) return;
             var embed =

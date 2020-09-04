@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200902154727_TicketStatus")]
+    partial class TicketStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,9 +127,6 @@ namespace SilkBot.Migrations
                     b.Property<int>("Cash")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Flags")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("GuildId")
                         .HasColumnType("integer");
 
@@ -136,6 +135,9 @@ namespace SilkBot.Migrations
 
                     b.Property<decimal>("UserId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("UserPermissions")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -163,9 +165,6 @@ namespace SilkBot.Migrations
                     b.Property<bool>("LogMessageChanges")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("LogRoleChange")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal?>("MemberLeaveJoinChannel")
                         .HasColumnType("numeric(20,0)");
 
@@ -179,12 +178,6 @@ namespace SilkBot.Migrations
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
-
-                    b.Property<decimal?>("RoleChangeLogChannel")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<bool>("WhiteListInvites")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -205,26 +198,6 @@ namespace SilkBot.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("SelfAssignableRole");
-                });
-
-            modelBuilder.Entity("SilkBot.Models.WhiteListedLink", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int?>("GuildId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildId");
-
-                    b.ToTable("WhiteListedLink");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
@@ -265,13 +238,6 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.Guild", null)
                         .WithMany("SelfAssignableRoles")
-                        .HasForeignKey("GuildId");
-                });
-
-            modelBuilder.Entity("SilkBot.Models.WhiteListedLink", b =>
-                {
-                    b.HasOne("SilkBot.Models.Guild", "Guild")
-                        .WithMany("WhiteListedLinks")
                         .HasForeignKey("GuildId");
                 });
 #pragma warning restore 612, 618

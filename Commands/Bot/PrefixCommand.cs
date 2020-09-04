@@ -16,8 +16,8 @@ namespace SilkBot.Commands.Bot
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
 
-            var config = Instance.DbContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
-            if (!config.DiscordUserInfos.Any(user => user.UserPermissions.HasFlag(UserPrivileges.Staff)))
+            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
+            if (!config.DiscordUserInfos.Any(user => user.Flags.HasFlag(UserFlag.Staff)))
             {
                 await ctx.RespondAsync("Sorry, but you're not allowed to change the prefix!");
                 return;
@@ -29,8 +29,8 @@ namespace SilkBot.Commands.Bot
                 return;
             }
 
-            SilkBot.Bot.Instance.DbContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id).Prefix = prefix;
-            await SilkBot.Bot.Instance.DbContext.SaveChangesAsync();
+            SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id).Prefix = prefix;
+            await SilkBot.Bot.Instance.SilkDBContext.SaveChangesAsync();
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
         private (bool valid, string reason) IsValidPrefix(string prefix)

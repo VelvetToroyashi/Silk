@@ -30,9 +30,9 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await message.DeleteAsync();
                 return;
             }
-            var (Guild, EconomicUsers) = SilkBot.Bot.Instance.Data[ctx.Guild];
-            var staffMembers = Guild.GetStaffMembers();
-            if (staffMembers.Any(id => id == user.Id))
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+          
+            if (!config.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
             {
                 await ctx.RespondAsync("Only staff members can use this command");
                 return;

@@ -30,23 +30,21 @@ namespace SilkBot.Commands.Roles
                 throw new InsufficientPermissionsException();
             }
 
-                var config = SilkBot.Bot.Instance.Data[ctx.Guild];
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
                 var addedList = new List<string>();
                 var removedList = new List<string>();
-                if (config.GuildInfo.SelfAssignableRoles == default)
-                config.GuildInfo.SelfAssignableRoles = new List<ulong>();
                 var ebStringBuilder = new StringBuilder("Added Roles: ");
                 foreach (var role in roles)
                 {
-                    if (!config.GuildInfo.SelfAssignableRoles.Contains(role.Id)) 
+                    if (!config.SelfAssignableRoles.Any(r => r.RoleId == role.Id)) 
                     {
-                        config.GuildInfo.SelfAssignableRoles.Add(role.Id);
+                        config.SelfAssignableRoles.Add(new Models.SelfAssignableRole { RoleId = role.Id });
                         addedList.Add(role.Mention);
                     }
 
                     else
                     {
-                        config.GuildInfo.SelfAssignableRoles.Remove(role.Id);
+                        config.SelfAssignableRoles.Remove(config.SelfAssignableRoles.First(r => r.RoleId == role.Id));
                         removedList.Add(role.Mention);
                     }
                 }
