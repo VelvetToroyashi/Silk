@@ -31,7 +31,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 return;
             }
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
-          
+
             if (!config.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
             {
                 await ctx.RespondAsync("Only staff members can use this command");
@@ -41,10 +41,10 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             {
                 await ctx.RespondAsync("User is above bot");
             }
-            
+
             await ctx.Guild.BanMemberAsync(user.Id, reason: reason);
-            
-            try 
+
+            try
             {
                 var _duration = GetTimeFromInput(duration);
                 var tempBan = new TimedRestrictionAction()
@@ -58,7 +58,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
 
             }
-            catch (InvalidOperationException) 
+            catch (InvalidOperationException)
             {
                 var msg = await ctx.RespondAsync("Couldn't determine time from message!");
                 await Task.Delay(10000);
@@ -75,9 +75,9 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 'h' => TimeSpan.FromHours(double.Parse(input[0..^1])),
                 'd' => TimeSpan.FromDays(double.Parse(input[0..^1])),
                 'w' => TimeSpan.FromDays(7 * double.Parse(input[0..^1])),
-                _   => throw new InvalidOperationException()
+                _ => throw new InvalidOperationException()
             };
-        
+
 
         public TempBanCommand()
         {
@@ -86,7 +86,11 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
         private void OnBanExpiration(object sender, EventArgs e)
         {
-            if (sender is null) return;
+            if (sender is null)
+            {
+                return;
+            }
+
             var actionObject = sender as TimedRestrictionAction;
             actionObject.Guild.UnbanMemberAsync(actionObject.Id, "Temporary ban completed.");
         }

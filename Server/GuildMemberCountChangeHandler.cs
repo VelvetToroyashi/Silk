@@ -1,8 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SilkBot.ServerConfigurations;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot.Server
@@ -12,7 +10,7 @@ namespace SilkBot.Server
 
         private readonly DiscordEmbedBuilder memberLeftEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.Red).WithTitle("Member Left!").WithFooter("Silk!", Bot.Instance.Client.CurrentUser.AvatarUrl);
         private readonly DiscordEmbedBuilder memberJoinedEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.Green).WithTitle("Member Joined!").WithFooter("Silk!", Bot.Instance.Client.CurrentUser.AvatarUrl);
-        public GuildMemberCountChangeHandler( DiscordClient client)
+        public GuildMemberCountChangeHandler(DiscordClient client)
         {
 
             client.GuildMemberAdded += OnGuildMemberJoined;

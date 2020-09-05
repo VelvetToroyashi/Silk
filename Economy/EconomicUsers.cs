@@ -1,6 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using SilkBot.ServerConfigurations;
+﻿using DSharpPlus.Entities;
 using System.Collections.Concurrent;
 
 namespace SilkBot.Economy
@@ -13,9 +11,13 @@ namespace SilkBot.Economy
         {
             var Id = member.Id;
             var user = new DiscordEconomicUser(Id, member.DisplayName);
-            if (Users.ContainsKey(Id)) return;
+            if (Users.ContainsKey(Id))
+            {
+                return;
+            }
+
             Users.TryAdd(Id, user);
-            
+
         }
         //I don't use this as much as I could and should. Sad.//
         public bool UserExists(ulong Id) => Users.ContainsKey(Id);

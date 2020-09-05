@@ -18,14 +18,29 @@ namespace SilkBot.Commands.Moderation.Utilities
 
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
-            if (e.Channel.IsPrivate) return;
+            if (e.Channel.IsPrivate)
+            {
+                return;
+            }
+
             var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
-            
-            if (!config.LogMessageChanges) return;
+
+            if (!config.LogMessageChanges)
+            {
+                return;
+            }
+
             var logChannel = config.MessageEditChannel.Value;
-            if (logChannel == default) return;
+            if (logChannel == default)
+            {
+                return;
+            }
+
             var guildPrefix = config.Prefix;
-            if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix)) return;
+            if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix))
+            {
+                return;
+            }
 
             var embed =
                 new DiscordEmbedBuilder()

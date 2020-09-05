@@ -13,7 +13,7 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task SetNickName(CommandContext ctx, DiscordMember target, [RemainingText] string nick)
         {
             await ctx.Message.DeleteAsync();
-            if(nick.Length > 32)
+            if (nick.Length > 32)
             {
                 await ctx.RespondAsync("Nickname out of bounds! Limit: 32 characters");
                 return;
@@ -22,12 +22,12 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 await target.ModifyAsync(t => t.Nickname = nick);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await ctx.RespondAsync("Could not set nickname!");
                 ctx.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Error, "Silk!", e.Message, DateTime.Now, e);
             }
-            
+
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Timers;
 
 namespace SilkBot.Tools
@@ -21,9 +20,13 @@ namespace SilkBot.Tools
 
         private void OnTimerTick(object s, ElapsedEventArgs e)
         {
-            foreach(var action in TimedRestrictedActions)
+            foreach (var action in TimedRestrictedActions)
             {
-                if (DateTime.Now < action.Expiration) continue;
+                if (DateTime.Now < action.Expiration)
+                {
+                    continue;
+                }
+
                 switch (action.ActionReason)
                 {
                     case RestrictionActionReason.TemporaryBan:

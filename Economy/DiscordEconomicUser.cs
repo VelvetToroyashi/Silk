@@ -25,14 +25,14 @@ namespace SilkBot.Economy
         public DateTime NameChangeTimestamp { get => nameChangedTimestamp; set => nameChangedTimestamp = value; }
 
         private DateTime lastDailyCashIn;
-        
-        private DateTime nameChangedTimestamp;
-        
-        private readonly TimeSpan dailyCooldown = TimeSpan.FromDays(1);
-        
-        
 
-        public DiscordEconomicUser(ulong UserId, string Name) 
+        private DateTime nameChangedTimestamp;
+
+        private readonly TimeSpan dailyCooldown = TimeSpan.FromDays(1);
+
+
+
+        public DiscordEconomicUser(ulong UserId, string Name)
         {
             this.UserId = UserId;
             this.Name = Name;
@@ -41,8 +41,13 @@ namespace SilkBot.Economy
         public void Widthdraw(uint amount)
         {
             if (amount > Cash)
+            {
                 throw new InsufficientFundsException("You do not have enough cash to widthdraw.");
-            else Cash -= amount;
+            }
+            else
+            {
+                Cash -= amount;
+            }
         }
 
 
@@ -50,7 +55,7 @@ namespace SilkBot.Economy
 
         public DiscordEmbed DoDaily(CommandContext ctx)
         {
-            if(DateTime.Now - LastCashInTime > dailyCooldown)
+            if (DateTime.Now - LastCashInTime > dailyCooldown)
             {
                 lastDailyCashIn = DateTime.Now;
                 var returnEmbed = EmbedHelper.CreateEmbed(ctx, "Daily reward:", "You've claimed your 200 dollars, come back tomorrow for more!", DiscordColor.SpringGreen);

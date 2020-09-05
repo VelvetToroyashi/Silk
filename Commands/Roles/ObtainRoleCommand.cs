@@ -1,11 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using SilkBot.ServerConfigurations;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Roles
@@ -26,12 +23,12 @@ namespace SilkBot.Commands.Roles
 
                 if (guild.SelfAssignableRoles.Count > 0)
                 {
-                    
+
                     var selfAssignableRoles = guild.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
                     {
-                        if(!ctx.Member.Roles.Any(r => r == parsedRole))
+                        if (!ctx.Member.Roles.Any(r => r == parsedRole))
                         {
                             await ctx.Member.GrantRoleAsync(parsedRole);
                             await ctx.RespondAsync(embed:
@@ -54,7 +51,7 @@ namespace SilkBot.Commands.Roles
                                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                                 .WithTimestamp(DateTime.Now));
                         }
-                        
+
                     }
                     else
                     {
@@ -77,7 +74,7 @@ namespace SilkBot.Commands.Roles
                                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                                 .WithTimestamp(DateTime.Now));
                 }
-                    
+
             }
 
         }

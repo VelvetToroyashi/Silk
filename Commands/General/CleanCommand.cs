@@ -11,7 +11,7 @@ using static SilkBot.EmbedHelper;
 namespace SilkBot
 {
 
-     
+
     public class CleanCommand : BaseCommandModule
     {
 
@@ -19,10 +19,13 @@ namespace SilkBot
         [Command("Clean")]
         [RequirePermissions(Permissions.ManageMessages)]
 
-        public async Task Clean(CommandContext ctx, [HelpDescription("The number of messages to clean. *Defaults to 10*.")] string NumberOfMessages = "10", [HelpDescription("Should I clear your initial messages as well? <true/false>")]bool deleteInitialMessage = false)
+        public async Task Clean(CommandContext ctx, [HelpDescription("The number of messages to clean. *Defaults to 10*.")] string NumberOfMessages = "10", [HelpDescription("Should I clear your initial messages as well? <true/false>")] bool deleteInitialMessage = false)
         {
             if (!int.TryParse(NumberOfMessages.Split(',').First(), out var numberOfMessages))
+            {
                 await ctx.RespondAsync(embed: CreateEmbed(ctx, "Invalid argument!", $"Sorry, but `{NumberOfMessages.Split(',').First()}` is not a valid number!", DiscordColor.Red));
+            }
+
             var unfilteredMessages = ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, numberOfMessages).Result.ToList();
             await ctx.TriggerTypingAsync();
             if (deleteInitialMessage)
@@ -32,7 +35,9 @@ namespace SilkBot
                     for (int i = 0; i < unfilteredMessages.Count(); i++)
                     {
                         if (unfilteredMessages[i].Author.IsBot || unfilteredMessages[i].Content.StartsWith(ctx.Prefix))
+                        {
                             await ctx.Channel.DeleteMessageAsync(unfilteredMessages[i]);
+                        }
                     }
                 });
                 await ctx.Message.DeleteAsync();
@@ -45,7 +50,9 @@ namespace SilkBot
                     foreach (var message in unfilteredMessages)
                     {
                         if (message.Author.IsBot)
+                        {
                             await ctx.Channel.DeleteMessageAsync(message);
+                        }
                     }
                 });
                 await ctx.Message.DeleteAsync();
@@ -58,9 +65,9 @@ namespace SilkBot
 
         [HelpDescription("Cleans all bot commands", "!clean 15")]
         [Command("Clean")]
-        
+
         [RequirePermissions(Permissions.ManageMessages)]
-       public async Task Clean(CommandContext ctx, [HelpDescription("The number of messages to clean, defaults to 10")] int numberOfMessages = 10)
+        public async Task Clean(CommandContext ctx, [HelpDescription("The number of messages to clean, defaults to 10")] int numberOfMessages = 10)
         {
             var unfilteredMessages = ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, numberOfMessages).Result.ToList();
             await ctx.TriggerTypingAsync();
@@ -69,14 +76,16 @@ namespace SilkBot
                 foreach (var message in unfilteredMessages)
                 {
                     if (message.Author.IsBot)
+                    {
                         await ctx.Channel.DeleteMessageAsync(message);
+                    }
                 }
             });
-            if(!ctx.Channel.IsPrivate)
+            if (!ctx.Channel.IsPrivate)
+            {
                 await ctx.RespondAsync(embed: CreateEmbed(ctx, null, $"Cleared {unfilteredMessages.Count} messages!"));
-            
-
-        }   
+            }
+        }
 
 
         [Command("Clean")]
@@ -86,14 +95,16 @@ namespace SilkBot
         {
             var unfilteredMessages = ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, numberOfMessages).Result.ToList();
             await ctx.TriggerTypingAsync();
-            if (deleteInitialMessage) 
-            { 
+            if (deleteInitialMessage)
+            {
                 await Task.Run(async () =>
                 {
                     for (int i = 0; i < unfilteredMessages.Count(); i++)
                     {
                         if (unfilteredMessages[i].Author.IsBot || unfilteredMessages[i].Content.StartsWith(ctx.Prefix))
+                        {
                             await ctx.Channel.DeleteMessageAsync(unfilteredMessages[i]);
+                        }
                     }
                 });
                 await ctx.RespondAsync(embed: CreateEmbed(ctx, null, $"Cleared {unfilteredMessages.Count} messages!"));
@@ -105,7 +116,9 @@ namespace SilkBot
                     foreach (var message in unfilteredMessages)
                     {
                         if (message.Author.IsBot)
+                        {
                             await ctx.Channel.DeleteMessageAsync(message);
+                        }
                     }
                 });
                 await ctx.RespondAsync(embed: CreateEmbed(ctx, null, $"Cleared {unfilteredMessages.Count} messages!"));
@@ -118,7 +131,10 @@ namespace SilkBot
         public async Task Clean(CommandContext ctx, [Description("The number of messages to clean, defaults to 10")] string numOfMessagesString = "10")
         {
             if (!int.TryParse(numOfMessagesString.Split(',').First(), out var numberOfMessages))
+            {
                 await ctx.RespondAsync(embed: CreateEmbed(ctx, "Invalid argument!", $"Sorry, but `{numOfMessagesString.Split(',').First()}` is not a valid number!", DiscordColor.Red));
+            }
+
             var unfilteredMessages = ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, numberOfMessages).Result.ToList();
             await ctx.TriggerTypingAsync();
             await Task.Run(async () =>
@@ -126,7 +142,9 @@ namespace SilkBot
                 foreach (var message in unfilteredMessages)
                 {
                     if (message.Author.IsBot)
+                    {
                         await ctx.Channel.DeleteMessageAsync(message);
+                    }
                 }
             });
             await ctx.RespondAsync(embed: CreateEmbed(ctx, null, $"Cleared {unfilteredMessages.Count} messages!"));
@@ -135,7 +153,7 @@ namespace SilkBot
         }
 
 
-        
+
 
     }
 }

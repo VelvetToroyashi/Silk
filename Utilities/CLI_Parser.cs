@@ -1,11 +1,6 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using Newtonsoft.Json;
+﻿using DSharpPlus.Entities;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,13 +13,13 @@ namespace SilkBot
         {
             await Task.Run(() =>
             {
-                while (true) 
-                { 
+                while (true)
+                {
                     var command = Console.ReadLine();
-                    switch(command.Split(' ').First().ToLower())
+                    switch (command.Split(' ').First().ToLower())
                     {
                         case "status":
-                        var client = Bot.Instance.Client;
+                            var client = Bot.Instance.Client;
                             try
                             {
                                 client.UpdateStatusAsync(client.CurrentUser.Presence.Activity, (UserStatus)Enum.Parse(typeof(UserStatus), command.Split(' ').Last()));
@@ -42,15 +37,15 @@ namespace SilkBot
                         default:
                             Colorful.Console.WriteLine($"You borked somewhere. \"{command.Split(' ').First().ToLower()}\"", Color.IndianRed);
                             break;
-                        
-                        }
+
+                    }
                 }
-                    
+
 
             });
         }
 
-      
+
 
 
     }

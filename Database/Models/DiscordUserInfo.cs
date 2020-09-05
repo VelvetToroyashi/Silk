@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SilkBot.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,7 +8,7 @@ namespace SilkBot.Models
     {
         [Key]
         public int Id { get; set; }
-        
+
         public int Cash { get; set; }
         public Guild Guild { get; set; }
         public ulong UserId { get; set; }

@@ -13,7 +13,6 @@
     using SilkBot.Commands.Moderation.Utilities;
     using SilkBot.Models;
     using SilkBot.Server;
-    using SilkBot.ServerConfigurations;
     using SilkBot.Tools;
     using SilkBot.Utilities;
     using System;
@@ -37,6 +36,7 @@
 
         public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
 
+        public static Stopwatch CommandTimer { get; } = new Stopwatch();
 
         [JsonProperty(PropertyName = "Guild Prefixes")]
         public static Dictionary<ulong, string> GuildPrefixes { get; set; }
@@ -93,10 +93,8 @@
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
-            var guild = SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == eventArgs.Guild.Id);
+            var guild = await GetGuildAsync(eventArgs.Guild.Id);
 
-
-            await GetGuildAsync(eventArgs.Guild.Id);
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
 
             eventArgs.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {eventArgs.Guild.Name}", DateTime.Now);
@@ -110,17 +108,15 @@
 
         public async Task CacheStaffMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
-            var staff = guild.DiscordUserInfos.Where(user => user.Flags.HasFlag(UserFlag.Staff));
-            if (staff.Count() < 1) return;
-            
             var staffMembers = members
                                 .AsQueryable()
                                 .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
                                 .Select(staffMember => new DiscordUserInfo { Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff });
 
+
             guild.DiscordUserInfos.AddRange(staffMembers);
             await SilkDBContext.SaveChangesAsync();
-            
+
         }
 
         /// <summary>
@@ -134,7 +130,11 @@
                 .AsQueryable()
                 .Where(g => g.DiscordGuildId == guildId)
                 .FirstOrDefaultAsync();
-            if (guild != null) return guild;
+            if (guild != null)
+            {
+                return guild;
+            }
+
             guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
             await SilkDBContext.SaveChangesAsync();
             return guild;
@@ -190,7 +190,7 @@
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
             Client.GetCommandsNext().CommandErrored += OnCommandErrored;
-            
+
 
             Client.GuildDownloadCompleted += async (e) =>
             {

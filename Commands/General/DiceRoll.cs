@@ -1,5 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using org.mariuszgromada.math.mxparser;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static System.Console;
 
 namespace SilkBot
 {
@@ -19,12 +17,12 @@ namespace SilkBot
         [Command("DiceRoll")]
         public async Task RollDice(CommandContext ctx, [RemainingText, HelpDescription("The dice to roll.")] string DiceRoll)
         {
-            if(DiceRoll is null)
+            if (DiceRoll is null)
             {
                 await ctx.RespondAsync("see `[p]help` diceroll for usage, where `[p]` is the current prefix.");
                 return;
             }
-            
+
             string changed = Regex.Replace(DiceRoll, @"([1-9]*)d([1-9]{0,4})", string.Empty);
             changed = string.Join(", ", Regex.Matches(changed, @"([0-9])+"));
 
@@ -33,7 +31,7 @@ namespace SilkBot
             var sb = new StringBuilder();
 
             sb.Append(GetFormattedRollsString(dieRolls));
-            sb.Append($"*Modifiers applied: {(changed == "" ? "none" : changed)}* \n*Total: {total}*"); 
+            sb.Append($"*Modifiers applied: {(changed == "" ? "none" : changed)}* \n*Total: {total}*");
             var embed = EmbedHelper.CreateEmbed(ctx, sb.ToString(), DiscordColor.Blurple);
             await ctx.RespondAsync(embed: embed);
         }
@@ -45,7 +43,11 @@ namespace SilkBot
             {
                 var random = new Random();
                 string match = m.Value;
-                if (m.Value[0] == 'd') match = new string(match.Prepend('1').ToArray());
+                if (m.Value[0] == 'd')
+                {
+                    match = new string(match.Prepend('1').ToArray());
+                }
+
                 var split = match.ToLower().Split('d');
                 var dieCount = int.Parse(split[0]);
                 var dieSize = int.Parse(split[1]);

@@ -32,13 +32,13 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await message.DeleteAsync();
                 return;
             }
-            if(config.MuteRoleID is null)
+            if (config.MuteRoleID is null)
             {
                 await ctx.RespondAsync("Muted role is not set up");
                 return;
             }
 
-            
+
             if (user.IsAbove(bot))
             {
                 await ctx.RespondAsync("User is above bot");
@@ -46,7 +46,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             }
 
             var _duration = GetTimeFromInput(duration);
-            if(_duration.Duration() == TimeSpan.Zero)
+            if (_duration.Duration() == TimeSpan.Zero)
             {
                 var msg = await ctx.RespondAsync("Couldn't determine time from message!");
                 await Task.Delay(10000);
@@ -63,7 +63,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleID.Value), reason);
 
 
-            
+
 
         }
 
@@ -71,8 +71,12 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
         private async void OnMuteExpired(object sender, EventArgs e)
         {
-            
-            if (sender is null) return;
+
+            if (sender is null)
+            {
+                return;
+            }
+
             var actionObject = sender as TimedRestrictionAction;
             var unmuteMember = await actionObject.Guild.GetMemberAsync(actionObject.Id);
 
@@ -87,7 +91,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 'h' => TimeSpan.FromHours(double.Parse(input[0..^1])),
                 'd' => TimeSpan.FromDays(double.Parse(input[0..^1])),
                 'w' => TimeSpan.FromDays(7 * double.Parse(input[0..^1])),
-                 _  => TimeSpan.Zero
+                _ => TimeSpan.Zero
             };
     }
 }

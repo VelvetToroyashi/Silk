@@ -12,7 +12,7 @@ namespace SilkBot.Commands.Economy.Shop
         public async Task Shop(CommandContext ctx, string action)
 
         {
-            
+
         }
 
     }

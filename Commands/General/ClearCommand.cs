@@ -16,7 +16,7 @@ namespace SilkBot
 
         public async Task Clear(CommandContext ctx, [HelpDescription("The number of messages to clear.")] int messages = 5)
         {
-            if(!ctx.Member.HasPermission(Permissions.ManageChannels))
+            if (!ctx.Member.HasPermission(Permissions.ManageChannels))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
@@ -32,19 +32,19 @@ namespace SilkBot
             var queryConfirmationMessage = ctx.Message;
             if (messages > 50)
             {
-               
+
                 await ctx.TriggerTypingAsync();
                 await Task.Delay(2000);
                 queryConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.Yellow)
                 .WithDescription($"Initiated bulk delete. Querying {actualMessageCount} messages.")
-                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl)) ;
+                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl));
                 messageID = queryConfirmationMessage.Id;
                 await Task.Delay(4000);
             }
-            
-            
+
+
 
             await ctx.Channel.DeleteMessagesAsync(ctx.Channel.GetMessagesBeforeAsync(messageID, messages).Result);
             await lockoutChannel.GetMessageAsync(queryConfirmationMessage.Id).Result.DeleteAsync();
@@ -58,7 +58,7 @@ namespace SilkBot
             await Task.Delay(5000);
             await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
 
-            
+
         }
 
         public async Task SyncPermissions(CommandContext ctx, DiscordChannel channel)

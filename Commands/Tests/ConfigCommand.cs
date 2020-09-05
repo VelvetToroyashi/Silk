@@ -1,14 +1,10 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using SilkBot.Models;
-using SilkBot.ServerConfigurations;
 using SilkBot.Utilities;
 using System;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.TestCommands
@@ -108,7 +104,7 @@ namespace SilkBot.Commands.TestCommands
             config.LogMemberJoinOrLeave = true;
             config.MemberLeaveJoinChannel = Id;
             await SilkBot.Bot.Instance.SilkDBContext.SaveChangesAsync();
-            
+
         }
 
         private async Task SetModChannel(CommandContext ctx, ulong Id)
@@ -121,15 +117,15 @@ namespace SilkBot.Commands.TestCommands
 
         private async Task SetLogs(CommandContext ctx, ulong id)
         {
-            if(ctx.Guild.GetChannel(id) is null)
+            if (ctx.Guild.GetChannel(id) is null)
             {
                 await ctx.RespondAsync("No channel ID was passed in config command. What channel do you want me to log to?");
                 var interactivity = ctx.Client.GetInteractivity();
-                var message = await interactivity.WaitForMessageAsync(msg => 
-                msg.Author == ctx.Message.Author && 
-                ulong.TryParse(msg.Content, out var channelID) && 
+                var message = await interactivity.WaitForMessageAsync(msg =>
+                msg.Author == ctx.Message.Author &&
+                ulong.TryParse(msg.Content, out var channelID) &&
                 channelID != 0 &&
-                ctx.Guild.GetChannel(channelID) != null, 
+                ctx.Guild.GetChannel(channelID) != null,
                 TimeSpan.FromSeconds(30));
                 if (message.TimedOut)
                 {
@@ -150,12 +146,12 @@ namespace SilkBot.Commands.TestCommands
         [Command("setmute")]
         public async Task SetMute(CommandContext ctx, DiscordRole mutedRole)
         {
-            if(mutedRole is null)
+            if (mutedRole is null)
             {
                 var interactivity = ctx.Client.GetInteractivity();
                 await ctx.RespondAsync("No role ID was passed in the config method. What role would you like for mutes?");
                 var message = await interactivity.WaitForMessageAsync(msg => msg.Author == ctx.Message.Author &&
-                ctx.Message.MentionedRoles.Count > 0, 
+                ctx.Message.MentionedRoles.Count > 0,
                 TimeSpan.FromSeconds(30));
                 if (message.TimedOut)
                 {
@@ -174,7 +170,7 @@ namespace SilkBot.Commands.TestCommands
             }
             else
             {
-                if(mutedRole is null)
+                if (mutedRole is null)
                 {
                     await ctx.RespondAsync("That isn't a role!");
                     return;

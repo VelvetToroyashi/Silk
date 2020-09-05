@@ -29,6 +29,6 @@ namespace SilkBot.Models
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new List<SelfAssignableRole>();
         public List<Ban> Bans { get; set; } = new List<Ban>();
         public List<DiscordUserInfo> DiscordUserInfos { get; set; } = new List<DiscordUserInfo>();
-        
+
     }
 }

@@ -1,11 +1,7 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using SilkBot.Commands.Economy.Shop;
 using SilkBot.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SilkBot
 {

@@ -28,10 +28,10 @@ namespace SilkBot.Commands.Miscellaneous
             var fileContent = File.ReadAllLines(fileInfo.FullName);
 
 
-            
+
             var desc = string.Join('\n', fileContent.TakeWhile(f => (f.Length > 1)));
             var changes = string.Join('\n', fileContent.Skip(desc.Split('\n').Length + 1).Take(fileContent.Count() - 1));
-            var changeLog = new ChangelogFile 
+            var changeLog = new ChangelogFile
             {
                 Description = desc,
                 Changes = $"```diff\n{changes}```"

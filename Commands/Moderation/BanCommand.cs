@@ -12,12 +12,12 @@ namespace SilkBot.Commands.Moderation
     public class BanCommand : BaseCommandModule
     {
         [Command("Ban")]
-        
+
         public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
             var user = await ctx.Guild.GetMemberAsync(target.Id);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            if(!CanExecuteCommand(out var errorReason))
+            if (!CanExecuteCommand(out var errorReason))
             {
                 await DenyBanAsync(errorReason);
                 return;
@@ -47,8 +47,8 @@ namespace SilkBot.Commands.Moderation
                     errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
                 }
-                    errorReason = null;
-                    return true;
+                errorReason = null;
+                return true;
             }
 
 
@@ -69,12 +69,12 @@ namespace SilkBot.Commands.Moderation
                 .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
                 .AddField("Reason:", reason).AddFooter(ctx);
             try
-            { 
-                await DMCommand.DM(ctx, target, userBannedEmbed); 
+            {
+                await DMCommand.DM(ctx, target, userBannedEmbed);
             }
             finally
             {
-                
+
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
                 var loggingChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel.Value;
                 var sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
@@ -84,7 +84,7 @@ namespace SilkBot.Commands.Moderation
 
 
 
-            
+
 
         }
     }

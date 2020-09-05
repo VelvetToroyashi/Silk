@@ -13,6 +13,6 @@ namespace SilkBot.Tools
 
         public TimedRestrictionAction() =>
             Bot.Instance.Timer.TimedRestrictedActions.Add(this);
-        
+
     }
 }

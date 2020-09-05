@@ -2,6 +2,6 @@
 {
     public sealed class PaidShop : BaseShop
     {
-        public PaidShop() : base(25) {}
+        public PaidShop() : base(25) { }
     }
 }

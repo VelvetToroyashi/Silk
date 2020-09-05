@@ -33,7 +33,7 @@ namespace SilkBot
 
             foreach (var method in sortedCommandNames)
             {
-               
+
                 var key = "";
 
                 //Build base Embed for the method
@@ -56,11 +56,19 @@ namespace SilkBot
                     }
                 }
                 if (key.ToLower() == "help")
+                {
                     continue;
+                }
+
                 if (methodEmbed.Description! is null)
+                {
                     continue;
-                if(!helpSb.ToString().Contains(methodEmbed.Description?.ToString()))
+                }
+
+                if (!helpSb.ToString().Contains(methodEmbed.Description?.ToString()))
+                {
                     helpSb.AppendLine($"**{methodEmbed.Title}** - {methodEmbed.Description ?? ""}");
+                }
                 else
                 {
                     methodParameters.Add(methodEmbed.Description ?? "No description given");
@@ -68,7 +76,11 @@ namespace SilkBot
                 var footerSb = new StringBuilder(method.GetParameters().Any(param => param.ParameterType != typeof(CommandContext)) ? "Accepted Parameters\n" : "This command takes no arguments!");
                 foreach (var parameter in method.GetParameters())
                 {
-                    if (parameter.ParameterType == typeof(CommandContext)) continue;
+                    if (parameter.ParameterType == typeof(CommandContext))
+                    {
+                        continue;
+                    }
+
                     var prAtt = parameter.GetCustomAttribute<HelpDescriptionAttribute>();
 
                     footerSb.Append($"- `{parameter.Name}`");
@@ -82,13 +94,15 @@ namespace SilkBot
                         }
                     }
                 }
-                foreach(var alias in method.GetCustomAttributes<AliasesAttribute>().OrderBy(alias => alias.Aliases.OrderBy(trueAlias => trueAlias)))
+                foreach (var alias in method.GetCustomAttributes<AliasesAttribute>().OrderBy(alias => alias.Aliases.OrderBy(trueAlias => trueAlias)))
                 {
                     var aliasStringBuilder = new StringBuilder(alias.Aliases.Any() ? $"{alias.Aliases.First()}" : "");
                     if (alias.Aliases.Any())
                     {
                         foreach (var name in alias.Aliases)
+                        {
                             aliasStringBuilder.AppendLine(name.Length > 0 ? $", {name}" : "Wut");
+                        }
                     }
                     methodEmbed.WithDescription(aliasStringBuilder.ToString());
                 }
@@ -102,11 +116,11 @@ namespace SilkBot
             baseHelpEb.WithDescription(helpSb.ToString())
                 .WithFooter("Silk", "https://cdn.discordapp.com/avatars/721514294587424888/311b3e09fa8144721c2c19b9b8ec6c31.png?size=4096")
                 .WithTimestamp(DateTime.Now);
-            
+
             Entries.Add("help", baseHelpEb.Build());
 
-            
-           
+
+
         }
     }
 }

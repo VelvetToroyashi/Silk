@@ -43,12 +43,15 @@ namespace SilkBot.Commands.Miscellaneous
                     break;
             }
 
-            embed.AddField("Status:", $"{emoji}{status}"); 
+            embed.AddField("Status:", $"{emoji}{status}");
             embed.AddField("Name:", member.Username);
             embed.AddField("Creation Date:", member.CreationTimestamp.ToString());
             var roleList = new List<string>();
             foreach (var role in member.Roles.OrderByDescending(r => r.Position))
+            {
                 roleList.Add(role.Mention);
+            }
+
             embed.AddField("Roles:", string.Join(null, roleList));
 
             await ctx.RespondAsync(embed: embed);

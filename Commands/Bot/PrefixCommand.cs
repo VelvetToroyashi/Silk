@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using SilkBot.Models;
-using SilkBot.Utilities;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -36,9 +35,18 @@ namespace SilkBot.Commands.Bot
         private (bool valid, string reason) IsValidPrefix(string prefix)
         {
             if (prefix.Length > 5)
+            {
                 return (false, "Prefix cannot be more than 5 characters!");
-            if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase)) return (false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
-            else return (true, "");
+            }
+
+            if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase))
+            {
+                return (false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
+            }
+            else
+            {
+                return (true, "");
+            }
         }
 
         [Command("Prefix")]

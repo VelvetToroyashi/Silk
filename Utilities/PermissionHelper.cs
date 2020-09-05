@@ -11,8 +11,14 @@ namespace SilkBot.Utilities
 
         public static bool HasPermission(this DiscordMember member, Permissions perm)
         {
-            if (!member.HasRoles()) return member.Guild.EveryoneRole.HasPermission(perm);
-            else return member.Roles.Any(role => role.HasPermission(perm));
+            if (!member.HasRoles())
+            {
+                return member.Guild.EveryoneRole.HasPermission(perm);
+            }
+            else
+            {
+                return member.Roles.Any(role => role.HasPermission(perm));
+            }
         }
 
         public static IEnumerable<DiscordRole> HasPermission(this DiscordGuild guild, Permissions permission) =>
@@ -27,8 +33,14 @@ namespace SilkBot.Utilities
         public static string GetHighestRoleMention(this DiscordMember member) => member.Roles.Last().Mention;
         public static bool IsAbove(this DiscordMember target, DiscordMember comparison)
         {
-            if (!target.Roles.Any()) return false;
-            else return target.Roles.Last().Position > comparison.Roles.Last().Position;
+            if (!target.Roles.Any())
+            {
+                return false;
+            }
+            else
+            {
+                return target.Roles.Last().Position > comparison.Roles.Last().Position;
+            }
         }
 
     }

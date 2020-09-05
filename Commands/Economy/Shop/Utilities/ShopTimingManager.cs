@@ -10,8 +10,8 @@ namespace SilkBot.Commands.Economy.Shop.Utilities
         public List<BaseShop> Shops { get; set; }
 
 
-        public ShopTimingManager() => timer.Elapsed += (s, e) => Shops.ForEach(shop => 
-        { 
+        public ShopTimingManager() => timer.Elapsed += (s, e) => Shops.ForEach(shop =>
+        {
             shop.CheckShopStatus();
             SilkBot.Bot.Instance.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Info, "Silk!", "Updated a shop!", DateTime.Now);
         });

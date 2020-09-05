@@ -13,6 +13,7 @@ namespace SilkBot
 
         public async Task Ping(CommandContext ctx)
         {
+            Bot.CommandTimer.Stop();
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                 .WithTitle("Pong! Silk! at the ready.")
@@ -21,11 +22,12 @@ namespace SilkBot
             sw.Start();
             var message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
-            embed.WithDescription($"***```cs\nClient Latency: {sw.ElapsedMilliseconds} ms. \n \nGateway latency: {ctx.Client.Ping} ms.```***")
+            Console.WriteLine((GC.GetTotalMemory(true) / 1024 / 1024) + " Mb of ram currently used?");
+            embed.WithDescription($"***```cs\nMessage Latency: {sw.ElapsedMilliseconds} ms. \n \nAPI latency: {ctx.Client.Ping} ms.\n\nCommand Latency: {Bot.CommandTimer.ElapsedMilliseconds} ms.```***")
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());
-            
+
 
         }
 
