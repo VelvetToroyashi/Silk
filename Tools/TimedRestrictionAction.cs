@@ -10,9 +10,9 @@ namespace SilkBot.Tools
         public DiscordGuild Guild { get; set; }
         public DateTime Expiration { get; set; }
         public string Reason { get; set; }
-
-        public TimedRestrictionAction() =>
-            Bot.Instance.Timer.TimedRestrictedActions.Add(this);
-
+        
+        public TimedRestrictionAction()
+        {
+        }
     }
 }
