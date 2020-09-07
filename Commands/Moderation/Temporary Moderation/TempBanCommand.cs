@@ -13,7 +13,8 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
     public class TempBanCommand : BaseCommandModule
     {
         [Command("tempban")]
-        public async Task TempBan(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = null)
+        public async Task TempBan(CommandContext ctx, DiscordMember user, string duration,
+            [RemainingText] string reason = null)
         {
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
             if (!bot.HasPermission(Permissions.BanMembers))
@@ -23,6 +24,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await message.DeleteAsync();
                 return;
             }
+
             if (!ctx.Member.HasPermission(Permissions.BanMembers))
             {
                 var message = await ctx.RespondAsync("Sorry, but you don't have permission to ban members!");
@@ -30,9 +32,13 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await message.DeleteAsync();
                 return;
             }
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
 
-            if (!config.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds
+                .AsQueryable()
+                .First(g => g.DiscordGuildId == ctx.Guild.Id);
+
+            var userInfo = config.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
+            if (!userInfo.Flags.HasFlag(Models.UserFlag.Staff))
             {
                 await ctx.RespondAsync("Only staff members can use this command");
                 return;
@@ -47,7 +53,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             try
             {
                 var _duration = GetTimeFromInput(duration);
-                var tempBan = new TimedRestrictionAction()
+                var tempBan = new TimedRestrictionAction
                 {
                     ActionReason = RestrictionActionReason.TemporaryBan,
                     Expiration = DateTime.Now.Add(_duration),
@@ -56,7 +62,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                     Reason = reason
                 };
 
-
+                SilkBot.Bot.Instance.Timer.TimedRestrictedActions.Add(tempBan);
             }
             catch (InvalidOperationException)
             {
@@ -64,8 +70,6 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await Task.Delay(10000);
                 await msg.DeleteAsync();
             }
-
-
         }
 
         private TimeSpan GetTimeFromInput(string input) =>

@@ -28,10 +28,7 @@
     /// </summary>
     public class Bot
     {
-
         public static Bot Instance { get; } = new Bot();
-
-
 
 
         public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
@@ -70,8 +67,6 @@
         }
 
 
-
-
         private Task OnCommandErrored(CommandErrorEventArgs e)
         {
             switch (e.Exception)
@@ -83,6 +78,7 @@
                     Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", e.Exception.Message, DateTime.Now);
                     break;
             }
+
             return Task.CompletedTask;
         }
 
@@ -101,22 +97,19 @@
         }
 
 
-
         /// <summary>
         /// Cache staff members.
         /// </summary>
-
         public async Task CacheStaffMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
             var staffMembers = members
-                                .AsQueryable()
-                                .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
-                                .Select(staffMember => new DiscordUserInfo { Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff });
+                .AsQueryable()
+                .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
+                .Select(staffMember => new DiscordUserInfo {Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff});
 
 
             guild.DiscordUserInfos.AddRange(staffMembers);
             await SilkDBContext.SaveChangesAsync();
-
         }
 
         /// <summary>
@@ -130,6 +123,7 @@
                 .AsQueryable()
                 .Where(g => g.DiscordGuildId == guildId)
                 .FirstOrDefaultAsync();
+            
             if (guild != null)
             {
                 return guild;
@@ -153,22 +147,20 @@
 
         /// <summary>
         /// Register valid commands.
-
         /// </summary>
         private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// Client initialization method; prepare the bot and load requisite data.
         /// </summary>
-
         private async Task InitializeClient()
         {
-            var Token = File.ReadAllText("./Token.txt");
+            var token = File.ReadAllText("./Token.txt");
             var config = new DiscordConfiguration
             {
                 AutoReconnect = true,
                 LogLevel = LogLevel.Warning | LogLevel.Info,
-                Token = Token,
+                Token = token,
                 TokenType = TokenType.Bot,
                 UseInternalLogHandler = true,
             };
@@ -185,7 +177,7 @@
 
             HelpCache.Initialize(DiscordColor.Azure);
             //Data.PopulateDataOnApplicationLoad();
-            //All these handlers do is subscibe to the bot's appropriate event, and do something, hence not assigning a variable to it.
+            //All these handlers do is subscribe to the bot's appropriate event, and do something, hence not assigning a variable to it.
 
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
@@ -194,7 +186,7 @@
 
             Client.GuildDownloadCompleted += async (e) =>
             {
-                Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Availble guilds: {e.Guilds.Count}", DateTime.Now);
+                Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Available guilds: {e.Guilds.Count}", DateTime.Now);
                 //await Data.FetchGuildInfo(Client.Guilds.Values);
             };
 
@@ -207,7 +199,5 @@
             sw.Stop();
             Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
-
-
     }
 }
