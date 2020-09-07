@@ -79,17 +79,12 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             };
 
 
-        public TempBanCommand()
-        {
+        public TempBanCommand() =>
             SilkBot.Bot.Instance.Timer.UnBan += OnBanExpiration;
-        }
+
 
         private void OnBanExpiration(object sender, EventArgs e)
         {
-            if (sender is null)
-            {
-                return;
-            }
 
             var actionObject = sender as TimedRestrictionAction;
             actionObject.Guild.UnbanMemberAsync(actionObject.Id, "Temporary ban completed.");

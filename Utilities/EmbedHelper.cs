@@ -7,7 +7,7 @@ namespace SilkBot
 {
     public static class EmbedHelper
     {
-        public static DiscordEmbed CreateEmbed(CommandContext ctx, string Title, string Description) =>
+        public static DiscordEmbedBuilder CreateEmbed(CommandContext ctx, string Title, string Description) =>
             new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.CornflowerBlue)

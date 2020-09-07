@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200905213841_QuickFix")]
+    partial class QuickFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,26 +117,6 @@ namespace SilkBot.Migrations
                     b.ToTable("Ban");
                 });
 
-            modelBuilder.Entity("SilkBot.Models.BlackListedWord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int?>("GuildId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Word")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildId");
-
-                    b.ToTable("BlackListedWord");
-                });
-
             modelBuilder.Entity("SilkBot.Models.DiscordUserInfo", b =>
                 {
                     b.Property<int>("Id")
@@ -170,9 +152,6 @@ namespace SilkBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
-
-                    b.Property<bool>("BlacklistWords")
-                        .HasColumnType("boolean");
 
                     b.Property<decimal>("DiscordGuildId")
                         .HasColumnType("numeric(20,0)");
@@ -275,13 +254,6 @@ namespace SilkBot.Migrations
                         .HasForeignKey("UserInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("SilkBot.Models.BlackListedWord", b =>
-                {
-                    b.HasOne("SilkBot.Models.Guild", "Guild")
-                        .WithMany("BlackListedWords")
-                        .HasForeignKey("GuildId");
                 });
 
             modelBuilder.Entity("SilkBot.Models.DiscordUserInfo", b =>

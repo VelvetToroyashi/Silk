@@ -22,8 +22,7 @@ namespace SilkBot
             sw.Start();
             var message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
-            Console.WriteLine((GC.GetTotalMemory(true) / 1024 / 1024) + " Mb of ram currently used?");
-            embed.WithDescription($"***```cs\nMessage Latency: {sw.ElapsedMilliseconds} ms. \n \nAPI latency: {ctx.Client.Ping} ms.\n\nCommand Latency: {Bot.CommandTimer.ElapsedMilliseconds} ms.```***")
+            embed.WithDescription($"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms. \n \nAPI Response Latency: {ctx.Client.Ping} ms.\n\nCommand Parsing Latency: {Bot.CommandTimer.ElapsedMilliseconds} ms.```***")
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());
