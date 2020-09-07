@@ -9,9 +9,11 @@ namespace SilkBot.Tools
         public ConcurrentBag<TimedRestrictionAction> TimedRestrictedActions { get; } = new ConcurrentBag<TimedRestrictionAction>();
 
         public Timer Timer { get; } = new Timer(60000);
+        
         public event EventHandler UnBan;
         public event EventHandler Unlock;
         public event EventHandler Unmute;
+        
         public TimedActionHelper()
         {
             Timer.Start();
@@ -30,13 +32,13 @@ namespace SilkBot.Tools
                 switch (action.ActionReason)
                 {
                     case RestrictionActionReason.TemporaryBan:
-                        UnBan(action, new EventArgs());
+                        UnBan?.Invoke(action, new EventArgs());
                         break;
                     case RestrictionActionReason.TemporaryMute:
-                        Unmute(action, new EventArgs());
+                        Unmute?.Invoke(action, new EventArgs());
                         break;
                     case RestrictionActionReason.TemporaryLockout:
-                        Unlock(action, new EventArgs());
+                        Unlock?.Invoke(action, new EventArgs());
                         break;
                 }
             }

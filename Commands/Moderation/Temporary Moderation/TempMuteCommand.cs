@@ -13,10 +13,12 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
     public sealed class TempMuteCommand : BaseCommandModule
     {
         [Command("Mute")]
-        public async Task TempMute(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = "Not Given.")
+        public async Task TempMute(CommandContext ctx, DiscordMember user, string duration,
+            [RemainingText] string reason = "Not Given.")
         {
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
+                .First(g => g.DiscordGuildId == ctx.Guild.Id);
             if (!bot.HasPermission(Permissions.ManageRoles))
             {
                 var message = await ctx.RespondAsync("Sorry, but I don't have permission to mute members!");
@@ -32,6 +34,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await message.DeleteAsync();
                 return;
             }
+
             if (config.MuteRoleID is null)
             {
                 await ctx.RespondAsync("Muted role is not set up");
@@ -52,7 +55,8 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await Task.Delay(10000);
                 await msg.DeleteAsync();
             }
-            var tempMute = new TimedRestrictionAction()
+
+            var tempMute = new TimedRestrictionAction
             {
                 ActionReason = RestrictionActionReason.TemporaryMute,
                 Expiration = DateTime.Now.Add(_duration),
@@ -60,18 +64,16 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 Id = user.Id,
                 Reason = reason
             };
+
+            SilkBot.Bot.Instance.Timer.TimedRestrictedActions.Add(tempMute);
+
             await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleID.Value), reason);
-
-
-
-
         }
 
         public TempMuteCommand() => SilkBot.Bot.Instance.Timer.Unmute += OnMuteExpired;
 
         private async void OnMuteExpired(object sender, EventArgs e)
         {
-
             if (sender is null)
             {
                 return;
@@ -80,7 +82,10 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             var actionObject = sender as TimedRestrictionAction;
             var unmuteMember = await actionObject.Guild.GetMemberAsync(actionObject.Id);
 
-            var muteRole = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == actionObject.Guild.Id).MuteRoleID.Value;
+            var muteRole = SilkBot.Bot.Instance.SilkDBContext.Guilds
+                .AsQueryable()
+                .First(g => g.DiscordGuildId == actionObject.Guild.Id).MuteRoleID.Value;
+            
             await unmuteMember.RevokeRoleAsync(actionObject.Guild.Roles[muteRole]);
         }
 

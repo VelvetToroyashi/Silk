@@ -15,19 +15,21 @@ namespace SilkBot.Commands.Bot
 
         private async Task OnMessageCreate(MessageCreateEventArgs e)
         {
+            // Could use CommandTimer.Restart();
             CommandTimer.Reset();
             CommandTimer.Start();
+            
             var config = Instance.SilkDBContext.Guilds.AsEnumerable().FirstOrDefault(guild => guild.DiscordGuildId == e.Guild?.Id);
-
-
             if (e.Author.IsBot)
             {
                 return;
             }
+            
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
             Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedMilliseconds} ms.");
+            
             var prefix = config?.Prefix ?? "!";
             var prefixPos = e.Message.GetStringPrefixLength(prefix);
             if (prefixPos < 0)
@@ -35,6 +37,7 @@ namespace SilkBot.Commands.Bot
                 CommandTimer.Stop();
                 return;
             }
+            
             var pfx = e.Message.Content.Substring(0, prefixPos);
             var cnt = e.Message.Content.Substring(prefixPos);
 
@@ -53,15 +56,23 @@ namespace SilkBot.Commands.Bot
         {
             if (config.WhiteListInvites)
             {
-                if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
+                var messageContent = e.Message.Content;
+                if (messageContent.Contains("discord.gg") || 
+                    messageContent.Contains("discord.com/invite"))
                 {
-                    var invite = Regex.Match(e.Message.Content, @"(discord\.gg\/.+)") ?? Regex.Match(e.Message.Content.ToLower(), @"(discord\.com\/invite\/.+)");
+                    var invite = Regex.Match(messageContent, @"(discord\.gg\/.+)") 
+                                 ?? Regex.Match(messageContent.ToLower(), @"(discord\.com\/invite\/.+)");
+                    
                     if (!invite.Success)
                     {
                         return;
                     }
 
-                    var inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' ')).Replace("discord.com/invite", "discord.gg/");
+                    var inviteLink = string.Join("", messageContent
+                        .Skip(invite.Index)
+                        .TakeWhile(c => c != ' '))
+                        .Replace("discord.com/invite", "discord.gg/");
+                    
                     if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink))
                     {
                         e.Message.DeleteAsync().GetAwaiter();
@@ -69,15 +80,13 @@ namespace SilkBot.Commands.Bot
                 }
             }
         }
+
         private async Task CheckForTicket(MessageCreateEventArgs e)
         {
-            var ticket = Instance.SilkDBContext.Tickets.AsQueryable().OrderBy(_ => _.Opened).LastOrDefault(ticket => ticket.Opener == e.Message.Author.Id);
-            if (ticket is null)
-            {
-                return;
-            }
+            var ticket = Instance.SilkDBContext.Tickets.AsQueryable().OrderBy(_ => _.Opened).LastOrDefault(ticketModel => ticketModel.Opener == e.Message.Author.Id);
 
-            if (ticket.Responders == default)
+            // Can use null-propagation because (default(IEnumerable) or reference type is null)
+            if (ticket?.Responders == null)
             {
                 return;
             }
@@ -91,7 +100,9 @@ namespace SilkBot.Commands.Bot
             {
                 foreach (var responder in ticket.Responders.Select(r => r.ResponderId))
                 {
-                    await Instance.Client.PrivateChannels.Values.FirstOrDefault(c => c.Users.Any(u => u.Id == responder)).SendMessageAsync("yesn't");
+                    await Instance.Client.PrivateChannels.Values
+                        .FirstOrDefault(c => c.Users.Any(u => u.Id == responder))
+                        .SendMessageAsync("yesn't");
                 }
             }
         }
