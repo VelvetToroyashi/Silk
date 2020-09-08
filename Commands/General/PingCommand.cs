@@ -1,11 +1,11 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
     public class PingCommand : BaseCommandModule
     {
@@ -13,7 +13,7 @@ namespace SilkBot
 
         public async Task Ping(CommandContext ctx)
         {
-            Bot.CommandTimer.Stop();
+            SilkBot.Bot.CommandTimer.Stop();
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                 .WithTitle("Pong! Silk! at the ready.")
@@ -22,7 +22,7 @@ namespace SilkBot
             sw.Start();
             var message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
-            embed.WithDescription($"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms. \n \nAPI Response Latency: {ctx.Client.Ping} ms.\n\nCommand Parsing Latency: {Bot.CommandTimer.ElapsedMilliseconds} ms.```***")
+            embed.WithDescription($"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms. \n \nAPI Response Latency: {ctx.Client.Ping} ms.\n\nCommand Parsing Latency: {SilkBot.Bot.CommandTimer.ElapsedMilliseconds} ms.```***")
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());

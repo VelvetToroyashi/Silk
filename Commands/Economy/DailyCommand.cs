@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using SilkBot.Economy;
-using System.Threading.Tasks;
 
-namespace SilkBot.Commands.Economic_Commands
+namespace SilkBot.Commands.Economy
 {
     public class DailyCommand : BaseCommandModule
     {

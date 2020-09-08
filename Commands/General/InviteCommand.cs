@@ -1,10 +1,11 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using System;
-using System.Threading.Tasks;
+using SilkBot.Utilities;
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
     public class InviteCommand : BaseCommandModule
     {

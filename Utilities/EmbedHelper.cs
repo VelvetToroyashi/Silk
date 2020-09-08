@@ -1,9 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using SilkBot.Utilities;
-using System;
 
-namespace SilkBot
+namespace SilkBot.Utilities
 {
     public static class EmbedHelper
     {

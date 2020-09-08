@@ -1,14 +1,15 @@
-﻿using DSharpPlus;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using System.Linq;
-using System.Threading.Tasks;
-using static SilkBot.EmbedHelper;
+using SilkBot.Utilities;
+using static SilkBot.Utilities.EmbedHelper;
 
 
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
 
 

@@ -1,13 +1,13 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static SilkBot.Bot;
 
-namespace SilkBot.Commands.TestCommands
+namespace SilkBot.Commands.Tests
 {
     public class ConfigCommand : BaseCommandModule
     {

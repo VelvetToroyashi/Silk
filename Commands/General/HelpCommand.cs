@@ -1,8 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using System.Threading.Tasks;
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
     public class HelpCommand : BaseCommandModule
     {

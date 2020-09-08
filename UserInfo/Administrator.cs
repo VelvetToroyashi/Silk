@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SilkBot.ServerConfigurations.UserInfo
+namespace SilkBot.UserInfo
 {
     [Serializable]
     public class Administrator

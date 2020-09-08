@@ -4,6 +4,7 @@ using DSharpPlus.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
 {

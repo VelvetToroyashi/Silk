@@ -3,6 +3,8 @@ using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using SilkBot.Commands.Economy;
 using System;
+using SilkBot.Exceptions;
+using SilkBot.Utilities;
 
 namespace SilkBot.Economy
 {

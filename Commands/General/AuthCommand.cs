@@ -1,11 +1,11 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
 
     public class AuthCommand : BaseCommandModule

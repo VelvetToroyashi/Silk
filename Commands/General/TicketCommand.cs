@@ -1,14 +1,14 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using static SilkBot.Bot;
 
-namespace SilkBot
+namespace SilkBot.Commands.General
 {
     public partial class Ticket : BaseCommandModule
     {

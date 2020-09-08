@@ -1,10 +1,11 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using SilkBot.Commands.General;
 
-namespace SilkBot
+namespace SilkBot.Commands.Tests
 {
     public class GenerateInvite : BaseCommandModule
     {

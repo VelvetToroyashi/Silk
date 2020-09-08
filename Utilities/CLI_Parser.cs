@@ -1,10 +1,10 @@
-﻿using DSharpPlus.Entities;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
 
-namespace SilkBot
+namespace SilkBot.Utilities
 {
     public static class CLI_Parser
     {

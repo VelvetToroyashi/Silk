@@ -6,6 +6,7 @@ using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Commands.General;
 
 namespace SilkBot.Commands.Moderation
 {
