@@ -1,11 +1,12 @@
-﻿using DSharpPlus;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using System.Linq;
-using System.Threading.Tasks;
+using SilkBot.Utilities;
 
-namespace SilkBot
+namespace SilkBot.Commands.Moderation
 {
 
     public class UnbanCommand : BaseCommandModule

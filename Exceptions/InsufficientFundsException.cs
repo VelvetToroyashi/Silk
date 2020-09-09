@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SilkBot.Commands.Economy
+namespace SilkBot.Exceptions
 {
     public class InsufficientFundsException : Exception
     {

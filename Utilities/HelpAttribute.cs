@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SilkBot
+namespace SilkBot.Utilities
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
     public class HelpAttribute : Attribute

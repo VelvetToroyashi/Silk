@@ -1,10 +1,10 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Utilities;
-using System.Threading.Tasks;
 
-namespace SilkBot.Commands.GeneralCommands
+namespace SilkBot.Commands.General
 {
     public class Enbiggen : BaseCommandModule
     {

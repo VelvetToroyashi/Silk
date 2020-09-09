@@ -1,4 +1,4 @@
-﻿namespace SilkBot.Commands.Economy.Shop.Testing
+﻿namespace SilkBot.Commands.Economy.Shop
 {
     public class GlobalShop : BaseShop
     {

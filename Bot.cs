@@ -1,4 +1,6 @@
-﻿namespace SilkBot
+﻿using SilkBot.Exceptions;
+
+namespace SilkBot
 {
     using DSharpPlus;
     using DSharpPlus.CommandsNext;
