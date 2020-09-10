@@ -58,7 +58,7 @@ namespace SilkBot.Commands.Moderation
             {
                 var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, $"You've been kicked from {ctx.Guild.Name}!", "")).AddField("Reason:", reason);
                 try { await DMCommand.DM(ctx, user, embed); }
-                catch (InvalidOperationException invalidop) { ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop); }
+                catch (InvalidOperationException invalidop) { /*ctx.Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", invalidop.Message, DateTime.Now, invalidop); */ } //TODO: Fix Logger
 
                 await ctx.Member.RemoveAsync(reason);
 

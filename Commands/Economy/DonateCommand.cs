@@ -37,25 +37,25 @@ namespace SilkBot.Commands.Economy
                 var matches = new StringBuilder();
                 for (var i = 0; i < matchingMembers.Count(); i++)
                 {
-                    matches.AppendLine($"[{i}]{matchingMembers.ElementAt(i).Mention}");
+                    matches.AppendLine($"[{i + 1}]{matchingMembers.ElementAt(i).Mention}");
                 }
-
+                
                 var embed = EmbedHelper.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
                 await ctx.RespondAsync(embed: embed);
 
-                var userResposne = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member && Regex.IsMatch(message.Content, "[0-9]{1,3}"), TimeSpan.FromSeconds(20));
+                var userResposne = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member && Regex.IsMatch(message.Content, "[1-9]{1,3}"), TimeSpan.FromSeconds(20));
                 if (userResposne.TimedOut)
                 {
                     await ctx.RespondAsync("Sorry! Your transaction timed out (20 seconds).");
                     return;
                 }
-                var isFailure = int.TryParse(userResposne.Result.Content, out var selection);
-                if (selection > matchingMembers.Count() || isFailure)
+                int.TryParse(userResposne.Result.Content, out var selection);
+                if (selection > matchingMembers.Count() + 1 || selection == 0)
                 {
                     await ctx.RespondAsync("Sorry, but that's not a valid selection");
                     return;
                 }
-                var finalizedRecipient = matchingMembers.ElementAt(selection);
+                var finalizedRecipient = matchingMembers.ElementAt((selection < 0 ? 0 : selection) >= matchingMembers.Count() ? matchingMembers.Count() - 1 : selection);
 
                 if (!EconomicUsers.Instance.UserExists(ctx.Member.Id))
                 {

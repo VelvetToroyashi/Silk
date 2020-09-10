@@ -25,7 +25,7 @@ namespace SilkBot.Commands.Miscellaneous
             catch (Exception e)
             {
                 await ctx.RespondAsync("Could not set nickname!");
-                ctx.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Error, "Silk!", e.Message, DateTime.Now, e);
+                //TODO: Fix Logger ctx.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Error, "Silk!", e.Message, DateTime.Now, e);
             }
 
         }

@@ -51,9 +51,9 @@
 
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.10" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00709" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00709" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00709" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00722" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00722" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00722" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-preview.8.20407.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-preview.8.20407.4">

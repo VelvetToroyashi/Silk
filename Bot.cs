@@ -77,7 +77,6 @@ namespace SilkBot
                     e.Context.Channel.SendMessageAsync(e.Exception.Message);
                     break;
                 default:
-                    Client.DebugLogger.LogMessage(LogLevel.Error, "Silk!", e.Exception.Message, DateTime.Now);
                     break;
             }
 
@@ -95,7 +94,10 @@ namespace SilkBot
 
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
 
-            eventArgs.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {eventArgs.Guild.Name}", DateTime.Now);
+
+            //TODO: Fix Logger
+            
+            //eventArgs.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {eventArgs.Guild.Name}", DateTime.Now);
         }
 
 
@@ -143,7 +145,8 @@ namespace SilkBot
         /// <returns>The <see cref="Task"/>.</returns>
         private Task OnReady(ReadyEventArgs e)
         {
-            e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", "Ready to process events.", DateTime.Now);
+            //TODO: Fix Logger
+            //e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", "Ready to process events.", DateTime.Now);
             return Task.CompletedTask;
         }
 
@@ -161,15 +164,14 @@ namespace SilkBot
             var config = new DiscordConfiguration
             {
                 AutoReconnect = true,
-                LogLevel = LogLevel.Warning | LogLevel.Info,
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information,
                 Token = token,
                 TokenType = TokenType.Bot,
-                UseInternalLogHandler = true,
             };
 
             Client = new DiscordClient(config);
 
-            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1) });
+            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1)});
 
             Client.UseCommandsNext(Commands);
 
@@ -188,7 +190,8 @@ namespace SilkBot
 
             Client.GuildDownloadCompleted += async (e) =>
             {
-                Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Available guilds: {e.Guilds.Count}", DateTime.Now);
+                //TODO: Fix Logger
+                //Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Available guilds: {e.Guilds.Count}", DateTime.Now);
                 //await Data.FetchGuildInfo(Client.Guilds.Values);
             };
 

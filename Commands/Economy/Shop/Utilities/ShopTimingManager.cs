@@ -13,7 +13,8 @@ namespace SilkBot.Commands.Economy.Shop.Utilities
         public ShopTimingManager() => timer.Elapsed += (s, e) => Shops.ForEach(shop =>
         {
             shop.CheckShopStatus();
-            SilkBot.Bot.Instance.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Info, "Silk!", "Updated a shop!", DateTime.Now);
+            //TODO: Fix Logger
+            //SilkBot.Bot.Instance.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Info, "Silk!", "Updated a shop!", DateTime.Now);
         });
     }
 }

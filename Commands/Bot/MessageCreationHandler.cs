@@ -16,12 +16,12 @@ namespace SilkBot.Commands.Bot
         private async Task OnMessageCreate(MessageCreateEventArgs e)
         {
             // Could use CommandTimer.Restart();
-            CommandTimer.Reset();
-            CommandTimer.Start();
-            
-            var config = Instance.SilkDBContext.Guilds.AsEnumerable().FirstOrDefault(guild => guild.DiscordGuildId == e.Guild?.Id);
+            CommandTimer.Restart();
+
+            var config = Instance.SilkDBContext.Guilds.AsQueryable().FirstOrDefault(guild => guild.DiscordGuildId == e.Guild!.Id);
             if (e.Author.IsBot)
             {
+                CommandTimer.Stop();
                 return;
             }
             
@@ -32,12 +32,11 @@ namespace SilkBot.Commands.Bot
             
             var prefix = config?.Prefix ?? "!";
             var prefixPos = e.Message.GetStringPrefixLength(prefix);
-            if (prefixPos < 0)
+            if (prefixPos < 1)
             {
                 CommandTimer.Stop();
                 return;
             }
-            
             var pfx = e.Message.Content.Substring(0, prefixPos);
             var cnt = e.Message.Content.Substring(prefixPos);
 
@@ -45,10 +44,10 @@ namespace SilkBot.Commands.Bot
             var ctx = Instance.Client.GetCommandsNext().CreateContext(e.Message, pfx, cmd, args);
             if (cmd is null)
             {
+                CommandTimer.Stop();
                 return;
             }
-
-            await Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(ctx));
+            _ = Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(ctx));
             CommandTimer.Stop();
         }
 
@@ -60,16 +59,16 @@ namespace SilkBot.Commands.Bot
                 if (messageContent.Contains("discord.gg") || 
                     messageContent.Contains("discord.com/invite"))
                 {
-                    var invite = Regex.Match(messageContent, @"(discord\.gg\/.+)") 
+                    var inviteLinkMatched = Regex.Match(messageContent, @"(discord\.gg\/.+)") 
                                  ?? Regex.Match(messageContent.ToLower(), @"(discord\.com\/invite\/.+)");
                     
-                    if (!invite.Success)
+                    if (!inviteLinkMatched.Success)
                     {
                         return;
                     }
 
                     var inviteLink = string.Join("", messageContent
-                        .Skip(invite.Index)
+                        .Skip(inviteLinkMatched.Index)
                         .TakeWhile(c => c != ' '))
                         .Replace("discord.com/invite", "discord.gg/");
                     
