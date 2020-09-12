@@ -18,7 +18,7 @@ namespace SilkBot.Commands.Bot
             // Could use CommandTimer.Restart();
             CommandTimer.Restart();
 
-            var config = Instance.SilkDBContext.Guilds.AsQueryable().FirstOrDefault(guild => guild.DiscordGuildId == e.Guild!.Id);
+            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild!.Id);
             if (e.Author.IsBot)
             {
                 CommandTimer.Stop();

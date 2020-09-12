@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -16,12 +17,14 @@ namespace SilkBot.Commands.Tests
         [Command("configure")]
         public async Task GuildConfigurationCommand(CommandContext ctx)
         {
-            var guild = Instance.SilkDBContext.Guilds.AsQueryable().First(guild => guild.DiscordGuildId == ctx.Guild.Id);
+            var db = new SilkDbContext();
+            _ = db.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var guild = Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
             if (!guild.DiscordUserInfos.Any(user => user.Flags.HasFlag(Models.UserFlag.Staff) && user.UserId == ctx.User.Id)) return;
             var sentConfigurationMessage = await ctx.RespondAsync("1: Toggle whitelisting invites, 2: Log message edits and deletions, 3: Log member joins and leaves, 4: Log role changes, 5: Set mute role, 6: Set log channel");
             var interactivity = ctx.Client.GetInteractivity();
 
-            var configMessage = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
+            var configMessage = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member && Regex.IsMatch(message.Content, "[1-6]"), TimeSpan.FromSeconds(30));
             
 
 
@@ -37,7 +40,7 @@ namespace SilkBot.Commands.Tests
                     await WhiteListInvites(guild);
                     break;
                 case 2:
-                    await ToggleLogMessageChanges(guild, ctx.Channel, ctx.User);
+                    await ToggleLogMessageChanges(db, guild, ctx.Channel, ctx.User);
                     break;
                 //case 751968150660055150:
                 //    LogMemberJoinLeave(configurationMessage);
@@ -60,7 +63,7 @@ namespace SilkBot.Commands.Tests
             guild.WhiteListInvites = !guild.WhiteListInvites;
         }
 
-        private async Task ToggleLogMessageChanges(Models.Guild guild, DiscordChannel channel, DiscordUser user)
+        private async Task ToggleLogMessageChanges(SilkDbContext db, Models.Guild guild,  DiscordChannel channel, DiscordUser user)
         {
             if (guild.LogMessageChanges)
             {
@@ -75,28 +78,36 @@ namespace SilkBot.Commands.Tests
                 var (yes, no) = (DiscordEmoji.FromName(Instance.Client, ":white_check_mark:"), DiscordEmoji.FromName(Instance.Client, ":x:"));
                 await msg.CreateReactionAsync(yes);
                 await msg.CreateReactionAsync(no);
-
+                
                 var reactionResult = await msg.WaitForReactionAsync(user, TimeSpan.FromSeconds(30));
                 if (reactionResult.TimedOut)
                 {
                     await msg.DeleteAsync("Timed out.");
                     return;
                 }
-                if (reactionResult.Result.Emoji == yes) { /* Do something useful */ }
-                else if (reactionResult.Result.Emoji == no) { /* Do something useful here as well */ }
+                if (reactionResult.Result.Emoji == yes) 
+                { 
+                    guild.LogMessageChanges = false;
+                    await reactionResult.Result.Message.DeleteReactionAsync(yes, user);
+                    await db.SaveChangesAsync(); 
+                }
+                else if (reactionResult.Result.Emoji == no) { return; /* Do something useful here as well */ }
                 else return; //If the user didn't react with proper input, that's on them.
 
             }
-            else
+            else await SetupLogging(channel, user, db);
+
+            
+
+            async Task SetupLogging(DiscordChannel c, DiscordUser u, SilkDbContext d) 
             {
-                guild.LogMessageChanges = !guild.LogMessageChanges;
-                /*
-                 * Add some input handling here.
-                 * Check for mentioned channels.
-                 * Take the first mentioned channel, check if @everyone can send messages, and refuse if true.
-                 * (@everyone == permissions for every role allow messages).
-                 */
-                await Instance.SilkDBContext.SaveChangesAsync();
+                await c.SendMessageAsync("Great. What channel would you like to log to?");
+                var logChannel = await Instance.Client.GetInteractivity().WaitForMessageAsync(m => m.Author == u && m.MentionedChannels.Count > 0);
+                var guild = db.Guilds.AsQueryable().First(g => g.DiscordGuildId == c.GuildId);
+                guild.GeneralLoggingChannel = logChannel.Result.MentionedChannels[0].Id;
+                guild.LogMessageChanges = true;
+                await db.SaveChangesAsync();
+                await c.SendMessageAsync($"Great! I'll log to <#{guild.GeneralLoggingChannel}>");
             }
         }
 

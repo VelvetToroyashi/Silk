@@ -24,6 +24,7 @@ namespace SilkBot
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Defines the <see cref="Bot" />.
@@ -93,7 +94,7 @@ namespace SilkBot
             var guild = await GetGuildAsync(eventArgs.Guild.Id);
 
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
-
+            await SilkDBContext.SaveChangesAsync();
 
             //TODO: Fix Logger
             
@@ -164,10 +165,13 @@ namespace SilkBot
             var config = new DiscordConfiguration
             {
                 AutoReconnect = true,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information,
+                MinimumLogLevel = LogLevel.Information,
                 Token = token,
                 TokenType = TokenType.Bot,
+                
             };
+
+
 
             Client = new DiscordClient(config);
 
