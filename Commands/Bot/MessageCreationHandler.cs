@@ -30,24 +30,23 @@ namespace SilkBot.Commands.Bot
             CheckForInvite(e, config);
             Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedMilliseconds} ms.");
             
-            var prefix = config?.Prefix ?? "!";
-            var prefixPos = e.Message.GetStringPrefixLength(prefix);
+            var guildPrefix = config?.Prefix ?? "!";
+            var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)
             {
                 CommandTimer.Stop();
                 return;
             }
-            var pfx = e.Message.Content.Substring(0, prefixPos);
-            var cnt = e.Message.Content.Substring(prefixPos);
+            var messageContent = e.Message.Content.Substring(prefixPos);
 
-            var cmd = Instance.Client.GetCommandsNext().FindCommand(cnt, out var args);
-            var ctx = Instance.Client.GetCommandsNext().CreateContext(e.Message, pfx, cmd, args);
-            if (cmd is null)
+            var command = Instance.Client.GetCommandsNext().FindCommand(messageContent, out var args);
+            var context = Instance.Client.GetCommandsNext().CreateContext(e.Message, guildPrefix, command, args);
+            if (command is null)
             {
                 CommandTimer.Stop();
                 return;
             }
-            _ = Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(ctx));
+            _ = Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(context));
             CommandTimer.Stop();
         }
 

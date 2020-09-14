@@ -19,6 +19,8 @@ namespace SilkBot.Models
         [StringLength(5)]
         public string Prefix { get; set; }
 
+        public string InfractionFormat { get; set; } 
+
         public ulong? MuteRoleID { get; set; }
         public ulong? MessageEditChannel { get; set; }
         public ulong? RoleChangeLogChannel { get; set; }

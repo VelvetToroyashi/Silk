@@ -33,7 +33,6 @@ namespace SilkBot
     {
         public static Bot Instance { get; } = new Bot();
 
-
         public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
 
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
@@ -91,7 +90,7 @@ namespace SilkBot
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
-            var guild = await GetGuildAsync(eventArgs.Guild.Id);
+            var guild = await CreateGuildOnNullAsync(eventArgs.Guild.Id);
 
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
             await SilkDBContext.SaveChangesAsync();
@@ -122,12 +121,9 @@ namespace SilkBot
         /// </summary>
         /// <param name="guildId">The guildId<see cref="ulong"/>.</param>
         /// <returns><see cref="Task{Guild}"/>.</returns>
-        public async Task<Guild> GetGuildAsync(ulong guildId)
+        public async Task<Guild> CreateGuildOnNullAsync(ulong guildId)
         {
-            var guild = await SilkDBContext.Guilds
-                .AsQueryable()
-                .Where(g => g.DiscordGuildId == guildId)
-                .FirstOrDefaultAsync();
+            var guild = await SilkDBContext.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
             
             if (guild != null)
             {
@@ -138,6 +134,8 @@ namespace SilkBot
             await SilkDBContext.SaveChangesAsync();
             return guild;
         }
+
+
 
         /// <summary>
         /// The OnReady.
@@ -199,6 +197,7 @@ namespace SilkBot
                 //await Data.FetchGuildInfo(Client.Guilds.Values);
             };
 
+
             await Client.ConnectAsync();
             new MessageDeletionHandler(Client);
             new MessageEditHandler(Client);
@@ -208,5 +207,7 @@ namespace SilkBot
             sw.Stop();
             Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
+
+
     }
 }

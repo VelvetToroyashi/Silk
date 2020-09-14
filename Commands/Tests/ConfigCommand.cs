@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using Microsoft.EntityFrameworkCore;
 using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Tests
@@ -18,8 +19,8 @@ namespace SilkBot.Commands.Tests
         public async Task GuildConfigurationCommand(CommandContext ctx)
         {
             var db = new SilkDbContext();
-            _ = db.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
-            var guild = Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var a = db.Guilds.Include(_ => _.DiscordUserInfos).First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var guild = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
             if (!guild.DiscordUserInfos.Any(user => user.Flags.HasFlag(Models.UserFlag.Staff) && user.UserId == ctx.User.Id)) return;
             var sentConfigurationMessage = await ctx.RespondAsync("1: Toggle whitelisting invites, 2: Log message edits and deletions, 3: Log member joins and leaves, 4: Log role changes, 5: Set mute role, 6: Set log channel");
             var interactivity = ctx.Client.GetInteractivity();

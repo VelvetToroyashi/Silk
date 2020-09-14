@@ -10,7 +10,7 @@ namespace SilkBot.Commands.Bot
 {
     public class PrefixCommand : BaseCommandModule
     {
-        public const int PrefixMaxLength = 5;
+        private const int PrefixMaxLength = 5;
         
         [Command("Prefix")]
         [Aliases("SetPrefix")]
@@ -30,10 +30,10 @@ namespace SilkBot.Commands.Bot
                 return;
             }
 
-            var currentGuild = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
+            var currentGuild = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
             currentGuild.Prefix = prefix;
             
-            await SilkBot.Bot.Instance.SilkDBContext.SaveChangesAsync();
+            await Instance.SilkDBContext.SaveChangesAsync();
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
 
