@@ -70,7 +70,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleID.Value), reason);
         }
 
-        public TempMuteCommand() => SilkBot.Bot.Instance.Timer.Unmute += OnMuteExpired;
+        public TempMuteCommand() => SilkBot.Bot.Instance.Timer.UnMute += OnMuteExpired;
 
         private async void OnMuteExpired(object sender, EventArgs e)
         {

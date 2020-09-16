@@ -11,9 +11,12 @@ namespace SilkBot.Tools
         public Timer Timer { get; } = new Timer(60000);
         
         public event EventHandler UnBan;
-        public event EventHandler Unlock;
-        public event EventHandler Unmute;
-        
+        public event EventHandler UnLock;
+        public event EventHandler UnMute;
+        //Region: placeholder (no functionality)
+        public event EventHandler UnNoMeme;
+        public event EventHandler UnVMute;
+        //End Region: placeholder
         public TimedActionHelper()
         {
             Timer.Start();
@@ -35,10 +38,10 @@ namespace SilkBot.Tools
                         UnBan?.Invoke(action, new EventArgs());
                         break;
                     case RestrictionActionReason.TemporaryMute:
-                        Unmute?.Invoke(action, new EventArgs());
+                        UnMute?.Invoke(action, new EventArgs());
                         break;
                     case RestrictionActionReason.TemporaryLockout:
-                        Unlock?.Invoke(action, new EventArgs());
+                        UnLock?.Invoke(action, new EventArgs());
                         break;
                 }
             }

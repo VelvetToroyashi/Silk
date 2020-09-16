@@ -46,6 +46,8 @@
     <Compile Include="Migrations\20200905213841_QuickFix.Designer.cs" />
     <Compile Include="Migrations\20200906053343_WordFilters.cs" />
     <Compile Include="Migrations\20200906053343_WordFilters.Designer.cs" />
+    <Compile Include="Migrations\20200914203953_InfractionModel.cs" />
+    <Compile Include="Migrations\20200914203953_InfractionModel.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 

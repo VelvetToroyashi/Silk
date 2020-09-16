@@ -44,7 +44,7 @@ namespace SilkBot
         public DiscordClient Client { get; set; }
 
 
-        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = false, EnableMentionPrefix = true };
+        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = true, EnableMentionPrefix = true };
 
 
         public InteractivityConfiguration Interactivity { get; }
@@ -91,7 +91,7 @@ namespace SilkBot
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
             var guild = await CreateGuildOnNullAsync(eventArgs.Guild.Id);
-
+            if (!SilkDBContext.Guilds.Contains(guild)) SilkDBContext.Guilds.Add(guild);
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
             await SilkDBContext.SaveChangesAsync();
 
@@ -131,7 +131,6 @@ namespace SilkBot
             }
 
             guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
-            await SilkDBContext.SaveChangesAsync();
             return guild;
         }
 

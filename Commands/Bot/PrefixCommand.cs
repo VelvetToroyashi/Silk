@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -55,7 +56,7 @@ namespace SilkBot.Commands.Bot
         [Command("Prefix")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            await ctx.RespondAsync($"My prefix is `{SilkBot.Bot.GuildPrefixes[ctx.Guild.Id]}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
+            await ctx.RespondAsync($"My prefix is `{new SilkDbContext().Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id).Prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }
 }
