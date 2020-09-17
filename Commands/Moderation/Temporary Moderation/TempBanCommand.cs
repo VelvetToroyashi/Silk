@@ -53,16 +53,16 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             try
             {
                 var _duration = GetTimeFromInput(duration);
-                var tempBan = new TimedRestrictionAction
+                var tempBan = new AppEvent
                 {
-                    ActionReason = RestrictionActionReason.TemporaryBan,
+                    EventType = InfractionType.TemporaryBan,
                     Expiration = DateTime.Now.Add(_duration),
                     Guild = ctx.Guild,
                     Id = user.Id,
                     Reason = reason
                 };
 
-                SilkBot.Bot.Instance.Timer.TimedRestrictedActions.Add(tempBan);
+                SilkBot.Bot.Instance.Timer.Events.Add(tempBan);
             }
             catch (InvalidOperationException)
             {
@@ -90,7 +90,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
         private void OnBanExpiration(object sender, EventArgs e)
         {
 
-            var actionObject = sender as TimedRestrictionAction;
+            var actionObject = sender as AppEvent;
             actionObject.Guild.UnbanMemberAsync(actionObject.Id, "Temporary ban completed.");
         }
     }

@@ -56,16 +56,16 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await msg.DeleteAsync();
             }
 
-            var tempMute = new TimedRestrictionAction
+            var tempMute = new AppEvent
             {
-                ActionReason = RestrictionActionReason.TemporaryMute,
+                EventType = InfractionType.TemporaryMute,
                 Expiration = DateTime.Now.Add(_duration),
                 Guild = ctx.Guild,
                 Id = user.Id,
                 Reason = reason
             };
 
-            SilkBot.Bot.Instance.Timer.TimedRestrictedActions.Add(tempMute);
+            SilkBot.Bot.Instance.Timer.Events.Add(tempMute);
 
             await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleID.Value), reason);
         }
@@ -79,7 +79,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 return;
             }
 
-            var actionObject = sender as TimedRestrictionAction;
+            var actionObject = sender as AppEvent;
             var unmuteMember = await actionObject.Guild.GetMemberAsync(actionObject.Id);
 
             var muteRole = SilkBot.Bot.Instance.SilkDBContext.Guilds

@@ -50,7 +50,7 @@ namespace SilkBot
         public InteractivityConfiguration Interactivity { get; }
 
 
-        public TimedActionHelper Timer { get; } = new TimedActionHelper();
+        public TimerBatcher Timer { get; } = new TimerBatcher();
 
         private Bot()
         {
