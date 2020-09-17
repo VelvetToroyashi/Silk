@@ -3,10 +3,8 @@ using System;
 
 namespace SilkBot.Tools
 {
-    public class TimedRestrictionAction : IDisposable
+    public class TimedRestrictionAction
     {
-        private bool disposedValue;
-
         public RestrictionActionReason ActionReason { get; set; }
         public ulong Id { get; set; }
         public DiscordGuild Guild { get; set; }
@@ -15,21 +13,6 @@ namespace SilkBot.Tools
         
         public TimedRestrictionAction()
         {
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing){}
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

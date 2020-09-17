@@ -4,8 +4,10 @@ using System.Timers;
 
 namespace SilkBot.Tools
 {
-    public class TimedActionHelper
+    public class TimedActionHelper : IDisposable
     {
+        private bool _disposed;
+        
         public ConcurrentBag<TimedRestrictionAction> TimedRestrictedActions { get; } = new ConcurrentBag<TimedRestrictionAction>();
 
         public Timer Timer { get; } = new Timer(60000);
@@ -46,5 +48,29 @@ namespace SilkBot.Tools
                 }
             }
         }
+
+        #region Dispose Pattern
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                Timer?.Dispose();
+            }
+
+            _disposed = true;
+        }
+
+        #endregion
     }
 }

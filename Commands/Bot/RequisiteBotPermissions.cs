@@ -15,8 +15,8 @@ namespace SilkBot.Commands.Bot
         [HelpDescription("The bot's needed permissions, and what commands they affect.")]
         public async Task GetRequiredPermissions(CommandContext ctx)
         {
-
-            var prefix = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).AsEnumerable().Select(_ => _.Prefix);
+            var prefix = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == ctx.Guild.Id)?.Prefix ?? SilkBot.Bot.SilkDefaultCommandPrefix;
+            
             var embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
@@ -27,17 +27,17 @@ namespace SilkBot.Commands.Bot
 
             var sb = new StringBuilder();
 
-            sb.AppendLine($"`Manage Messages`: {(manageMessage ? ":white_check_mark:" : ":x:")}\nAffected commands: `{prefix}clear`, `{prefix}clean`; __error messages will persist if false.__");
-            sb.AppendLine($"`Manage Roles`: {(manageRoles ? ":white_check_mark:" : ":x:")}\nAffected commands: {prefix}role");
-            sb.AppendLine($"`Kick Members` {(kick ? ":white_check_mark:" : ":x:")}\nAffected commands: {prefix}kick");
-            sb.AppendLine($"`Ban Members` {(ban ? ":white_check_mark:" : ":x:")}\nAffected commands: {prefix}ban");
+            sb.AppendLine($"`Manage Messages`: {GetStatusEmoji(manageMessage)}\nAffected commands: `{prefix}clear`, `{prefix}clean`; __error messages will persist if false.__\n");
+            sb.AppendLine($"`Manage Roles`: {GetStatusEmoji(manageRoles)}\nAffected commands: `{prefix}role`\n");
+            sb.AppendLine($"`Kick Members` {GetStatusEmoji(kick)}\nAffected commands: `{prefix}kick`\n");
+            sb.AppendLine($"`Ban Members` {GetStatusEmoji(ban)}\nAffected commands: `{prefix}ban`\n");
 
             embed.WithTitle("Permissions:");
             embed.WithDescription(sb.ToString());
 
-
-
             await ctx.RespondAsync(embed: embed);
         }
+
+        private static string GetStatusEmoji(bool requirementMet) => requirementMet ? ":white_check_mark:" : ":x:";
     }
 }

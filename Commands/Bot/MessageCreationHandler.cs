@@ -30,7 +30,7 @@ namespace SilkBot.Commands.Bot
             CheckForInvite(e, config);
             Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedMilliseconds} ms.");
             
-            var guildPrefix = config?.Prefix ?? "!";
+            var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)
             {
@@ -46,6 +46,8 @@ namespace SilkBot.Commands.Bot
                 CommandTimer.Stop();
                 return;
             }
+            
+            /* NOTE: 'ExecuteCommandAsync' method is wrapped in a try/catch internally so Exceptions will not be rethrown from commands */
             _ = Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(context));
             CommandTimer.Stop();
         }

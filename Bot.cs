@@ -40,6 +40,8 @@ namespace SilkBot
         [JsonProperty(PropertyName = "Guild Prefixes")]
         public static Dictionary<ulong, string> GuildPrefixes { get; set; }
 
+        public static string SilkDefaultCommandPrefix { get; } = "!";
+
 
         public DiscordClient Client { get; set; }
 
@@ -130,7 +132,7 @@ namespace SilkBot
                 return guild;
             }
 
-            guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
+            guild = new Guild { DiscordGuildId = guildId, Prefix = SilkDefaultCommandPrefix };
             return guild;
         }
 

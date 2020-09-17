@@ -24,38 +24,47 @@ namespace SilkBot.Commands.Miscellaneous
 
             var status = "";
             DiscordEmoji emoji = null;
-            switch (member.Presence?.Status)
+            
+            try
             {
-                case UserStatus.Online:
-                    status = "Online";
-                    emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339430672203796);
-                    break;
-                case UserStatus.Idle:
-                    status = "Idle";
-                    emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431720910889);
-                    break;
-                case UserStatus.DoNotDisturb:
-                    status = "Do Not Disturb";
-                    emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431632568450);
-                    break;
-                case UserStatus.Offline:
-                    status = "Offline";
-                    emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431905198100);
-                    break;
-                default:
-                    status = "Offline";
-                    emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431905198100);
-                    break;
+                switch (member.Presence?.Status)
+                {
+                    case UserStatus.Online:
+                        status = "Online";
+                        emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339430672203796);
+                        break;
+                    case UserStatus.Idle:
+                        status = "Idle";
+                        emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431720910889);
+                        break;
+                    case UserStatus.DoNotDisturb:
+                        status = "Do Not Disturb";
+                        emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431632568450);
+                        break;
+                    case UserStatus.Offline:
+                        status = "Offline";
+                        emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431905198100);
+                        break;
+                    default:
+                        status = "Offline";
+                        emoji = DiscordEmoji.FromGuildEmote(ctx.Client, 743339431905198100);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // If here, emoji wasn't able to be grabbed from Guild and threw an exception
+                emoji = DiscordEmoji.FromName(ctx.Client, ":question:");
             }
 
             embed.AddField("Status:", $"{emoji}  {status}");
             embed.AddField("Name:", member.Username);
             embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
-            var roleList = new List<string>();
-            foreach (var role in member.Roles.OrderByDescending(r => r.Position))
-            {
-                roleList.Add(role.Mention);
-            }
+            
+            var roleList = member.Roles
+                .OrderByDescending(r => r.Position)
+                .Select(role => role.Mention)
+                .ToList();
 
             embed.AddField("Roles:", string.Join(' ', roleList));
 
@@ -68,7 +77,7 @@ namespace SilkBot.Commands.Miscellaneous
             var sb = new StringBuilder();
             if(creationTime.Days > 365)
             {
-                var years = creationTime.Days / 360;
+                var years = creationTime.Days / 365;
                 sb.Append($"{years} {(years > 1 ? "years" : "year")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(years * 365));
             }

@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,12 +24,12 @@ namespace SilkBot.Commands.Bot
                 .WithThumbnail(e.Client.CurrentUser.AvatarUrl)
                 .WithFooter("Silk!", e.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            embed.WithDescription("Thank you for chosing Silk! to join your server<3\n" +
+            embed.WithDescription("Thank you for choosing Silk! to join your server<3\n" +
                 "I am a relatively lightweight bot with many functions, partially in moderation" +
                 "partially in games, with many more features to come!\n" +
                 "If there's an issue, feel free to [open an issue on GitHub](https://github.com/VelvetThePanda/Silkbot/issues), or if you're not familiar with GitHub, feel free\n" +
                 "to message the developers directly via [p]support <your message>, where `[p]` is the prefix.\n" +
-                $"By default, the prefix is `!`, or <@{e.Client.CurrentUser.Id}>, but this can be changed by [p]prefix <your prefix here>.");
+                $"By default, the prefix is `{SilkDefaultCommandPrefix}`, or <@{e.Client.CurrentUser.Id}>, but this can be changed by [p]prefix <your prefix here>.");
             await firstChannel.SendMessageAsync(embed: embed);
 
         }
