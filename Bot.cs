@@ -40,8 +40,6 @@ namespace SilkBot
         [JsonProperty(PropertyName = "Guild Prefixes")]
         public static Dictionary<ulong, string> GuildPrefixes { get; set; }
 
-        public static string SilkDefaultCommandPrefix { get; } = "!";
-
 
         public DiscordClient Client { get; set; }
 
@@ -53,15 +51,9 @@ namespace SilkBot
 
 
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
-
-        private Bot()
-        {
-            sw.Start();
-        }
-
-
         private readonly Stopwatch sw = new Stopwatch();
 
+        private Bot() => sw.Start();
 
         public async Task RunBotAsync()
         {
@@ -70,26 +62,6 @@ namespace SilkBot
             await Task.Delay(-1);
         }
 
-
-        private Task OnCommandErrored(CommandErrorEventArgs e)
-        {
-            switch (e.Exception)
-            {
-                case InsufficientFundsException _:
-                    e.Context.Channel.SendMessageAsync(e.Exception.Message);
-                    break;
-                default:
-                    break;
-            }
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// The event fired when the bot can see a guild.
-        /// </summary>
-        /// <param name="eventArgs">The event arguments passed when a guild <see cref="GuildCreateEventArgs"/>.</param>
-        /// <returns>The <see cref="Task"/>.</returns>
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
             var guild = await CreateGuildOnNullAsync(eventArgs.Guild.Id);
@@ -98,14 +70,9 @@ namespace SilkBot
             await SilkDBContext.SaveChangesAsync();
 
             //TODO: Fix Logger
-            
             //eventArgs.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {eventArgs.Guild.Name}", DateTime.Now);
         }
 
-
-        /// <summary>
-        /// Cache staff members.
-        /// </summary>
         public async Task CacheStaffMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
             var staffMembers = members
@@ -118,11 +85,6 @@ namespace SilkBot
             await SilkDBContext.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// The GetGuildAsync.
-        /// </summary>
-        /// <param name="guildId">The guildId<see cref="ulong"/>.</param>
-        /// <returns><see cref="Task{Guild}"/>.</returns>
         public async Task<Guild> CreateGuildOnNullAsync(ulong guildId)
         {
             var guild = await SilkDBContext.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
@@ -132,17 +94,10 @@ namespace SilkBot
                 return guild;
             }
 
-            guild = new Guild { DiscordGuildId = guildId, Prefix = SilkDefaultCommandPrefix };
+            guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
             return guild;
         }
 
-
-
-        /// <summary>
-        /// The OnReady.
-        /// </summary>
-        /// <param name="e">The e<see cref="ReadyEventArgs"/>.</param>
-        /// <returns>The <see cref="Task"/>.</returns>
         private Task OnReady(ReadyEventArgs e)
         {
             //TODO: Fix Logger
@@ -150,14 +105,8 @@ namespace SilkBot
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Register valid commands.
-        /// </summary>
         private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
 
-        /// <summary>
-        /// Client initialization method; prepare the bot and load requisite data.
-        /// </summary>
         private async Task InitializeClient()
         {
             var token = File.ReadAllText("./Token.txt");
@@ -169,8 +118,6 @@ namespace SilkBot
                 TokenType = TokenType.Bot,
                 
             };
-
-
 
             Client = new DiscordClient(config);
 
@@ -188,16 +135,6 @@ namespace SilkBot
 
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
-            Client.GetCommandsNext().CommandErrored += OnCommandErrored;
-
-
-            Client.GuildDownloadCompleted += async (e) =>
-            {
-                //TODO: Fix Logger
-                //Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Available guilds: {e.Guilds.Count}", DateTime.Now);
-                //await Data.FetchGuildInfo(Client.Guilds.Values);
-            };
-
 
             await Client.ConnectAsync();
             new MessageDeletionHandler(Client);
@@ -208,7 +145,5 @@ namespace SilkBot
             sw.Stop();
             Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
-
-
     }
 }

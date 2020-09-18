@@ -11,8 +11,6 @@ namespace SilkBot.Tools
         
         public Timer Timer { get; } = new Timer(60000);
         
-
-        //End Region: placeholder
         public TimerBatcher(ActionDispatcher dispatcher)
         {
             // Set before start of Timer (could throw if timer Ticks before delegate is added to EventHandler)
