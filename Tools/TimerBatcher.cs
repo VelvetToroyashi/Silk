@@ -7,17 +7,19 @@ namespace SilkBot.Tools
     public class TimerBatcher
     {
         public ConcurrentBag<AppEvent> Events { get; } = new ConcurrentBag<AppEvent>();
-        private ActionDispatcher dispatcher;
+        public ActionDispatcher Dispatcher { get; private set; }
+        
         public Timer Timer { get; } = new Timer(60000);
         
-
 
         //End Region: placeholder
         public TimerBatcher(ActionDispatcher dispatcher)
         {
+            // Set before start of Timer (could throw if timer Ticks before delegate is added to EventHandler)
+            this.Dispatcher = dispatcher;
+            
             Timer.Start();
             Timer.Elapsed += OnTimerTick;
-            this.dispatcher = dispatcher;
         }
 
         private void OnTimerTick(object s, ElapsedEventArgs e)
@@ -26,7 +28,7 @@ namespace SilkBot.Tools
             {
                 if (DateTime.Now > @event.Expiration)
                 {
-                    dispatcher.Dispatch(@event);
+                    Dispatcher.Dispatch(@event);
                 }
             }
         }

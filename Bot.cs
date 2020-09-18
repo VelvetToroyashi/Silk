@@ -52,7 +52,7 @@ namespace SilkBot
         public InteractivityConfiguration Interactivity { get; }
 
 
-        public TimerBatcher Timer { get; } = new TimerBatcher();
+        public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
 
         private Bot()
         {
