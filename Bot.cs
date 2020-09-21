@@ -1,7 +1,6 @@
-﻿using SilkBot.Exceptions;
-
-namespace SilkBot
+﻿namespace SilkBot
 {
+    #region Usings
     using DSharpPlus;
     using DSharpPlus.CommandsNext;
     using DSharpPlus.Entities;
@@ -9,9 +8,8 @@ namespace SilkBot
     using DSharpPlus.Interactivity;
     using DSharpPlus.Interactivity.Enums;
     using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
+    using Microsoft.Extensions.Logging;
     using SilkBot.Commands.Bot;
-    using SilkBot.Commands.Economy;
     using SilkBot.Commands.Moderation.Utilities;
     using SilkBot.Models;
     using SilkBot.Server;
@@ -24,37 +22,24 @@ namespace SilkBot
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
-
-    /// <summary>
-    /// Defines the <see cref="Bot" />.
-    /// </summary>
+    #endregion
     public class Bot
     {
-        public static Bot Instance { get; } = new Bot();
-
-        public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
-
-        public static Stopwatch CommandTimer { get; } = new Stopwatch();
-
-        [JsonProperty(PropertyName = "Guild Prefixes")]
-        public static Dictionary<ulong, string> GuildPrefixes { get; set; }
-
-
+        #region Props
         public DiscordClient Client { get; set; }
-
-
-        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = true, EnableMentionPrefix = true };
-
-
+        public static Bot Instance { get; } = new Bot();
         public InteractivityConfiguration Interactivity { get; }
-
-
+        public static string SilkDefaultCommandPrefix { get; } = "!";
+        public static Stopwatch CommandTimer { get; } = new Stopwatch();
+        public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
+        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = true, EnableMentionPrefix = true };
+        #endregion
+
         private readonly Stopwatch sw = new Stopwatch();
 
         private Bot() => sw.Start();
-
+        #region Methods
         public async Task RunBotAsync()
         {
             await SilkDBContext.Database.MigrateAsync();
@@ -145,5 +130,6 @@ namespace SilkBot
             sw.Stop();
             Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
+        #endregion
     }
 }

@@ -16,19 +16,19 @@ namespace SilkBot.Commands.Bot
         private async Task OnMessageCreate(MessageCreateEventArgs e)
         {
             // Could use CommandTimer.Restart();
-            CommandTimer.Restart();
-
-            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild!.Id);
+                        
             if (e.Author.IsBot)
             {
                 CommandTimer.Stop();
                 return;
             }
             
+            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
+            CommandTimer.Restart();
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
-            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
             
             var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
