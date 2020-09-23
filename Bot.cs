@@ -79,7 +79,7 @@
                 return guild;
             }
 
-            guild = new Guild { DiscordGuildId = guildId, Prefix = "!" };
+            guild = new Guild { DiscordGuildId = guildId, Prefix = SilkDefaultCommandPrefix };
             return guild;
         }
 

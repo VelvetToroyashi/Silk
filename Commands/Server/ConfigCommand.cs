@@ -9,7 +9,7 @@ using DSharpPlus.Interactivity;
 using Microsoft.EntityFrameworkCore;
 using static SilkBot.Bot;
 
-namespace SilkBot.Commands.Tests
+namespace SilkBot.Commands.Server
 {
     public class ConfigCommand : BaseCommandModule
     {
@@ -18,7 +18,7 @@ namespace SilkBot.Commands.Tests
         [Command("configure")]
         public async Task GuildConfigurationCommand(CommandContext ctx)
         {
-            var db = new SilkDbContext();
+            using var db = new SilkDbContext();
             var a = db.Guilds.Include(_ => _.DiscordUserInfos).First(g => g.DiscordGuildId == ctx.Guild.Id);
             var guild = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
             if (!guild.DiscordUserInfos.Any(user => user.Flags.HasFlag(Models.UserFlag.Staff) && user.UserId == ctx.User.Id)) return;
