@@ -6,12 +6,12 @@
     <RootNamespace>SilkBot</RootNamespace>
   </PropertyGroup>
 
-  <PropertyGroup>
-	  <TieredCompilationQuickJit>false</TieredCompilationQuickJit>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TieredCompilation>false</TieredCompilation>
+	</PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,6 +56,8 @@
     <Compile Include="Migrations\20200906053343_WordFilters.Designer.cs" />
     <Compile Include="Migrations\20200914203953_InfractionModel.cs" />
     <Compile Include="Migrations\20200914203953_InfractionModel.Designer.cs" />
+    <Compile Include="Migrations\20200922204446_placeholder-smh.cs" />
+    <Compile Include="Migrations\20200922204446_placeholder-smh.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 

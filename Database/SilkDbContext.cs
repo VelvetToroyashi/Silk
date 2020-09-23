@@ -11,7 +11,7 @@ namespace SilkBot
 
         public DbSet<DiscordUserInfo> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseNpgsql("Server=localhost;Database=Silk!;Username=postgres; Password=Cinnamon");
+            => options.UseNpgsql("Server=localhost;Database=Silk_Private;Username=Silk; Password=6TJeWQ8QqCFxg7");
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -86,7 +86,7 @@ namespace SilkBot.Commands.Bot
             var ticket = Instance.SilkDBContext.Tickets.AsQueryable().OrderBy(_ => _.Opened).LastOrDefault(ticketModel => ticketModel.Opener == e.Message.Author.Id);
 
             // Can use null-propagation because (default(IEnumerable) or reference type is null)
-            if (ticket?.Responders == null)
+            if (ticket?.Responders is null)
             {
                 return;
             }

@@ -1,7 +1,9 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +29,7 @@ namespace SilkBot.Commands.General
                 $"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms.  \n\n" +
                 $"API Response Latency: {ctx.Client.Ping} ms.\n\n" +
                 $"Message Processing Latency: {SilkBot.Bot.CommandTimer.ElapsedTicks / 10} µs.\n\n" +
-                $"Database latency: {GetDbLatency(ctx.Guild.Id)} µs.```***")
+                $"Database latency: {GetDbLatency(ctx.Guild.Id)} ms.```***")
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: new Optional<DiscordEmbed>(embed));
@@ -39,10 +41,12 @@ namespace SilkBot.Commands.General
         {
             var sw = Stopwatch.StartNew();
             var db = new SilkDbContext();
-            _ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
+            //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
+            db.Database.BeginTransaction();
+            db.Database.ExecuteSqlRaw("SELECT * FROM Guilds;");
             
             sw.Stop();
-            return (int)sw.ElapsedTicks / 10;
+            return (int)sw.ElapsedMilliseconds;
         }
 
     }
