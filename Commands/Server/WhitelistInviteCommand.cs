@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 
-namespace SilkBot.Commands.Tests
+namespace SilkBot.Commands.Server
 {
     public class WhitelistInviteCommand : BaseCommandModule
     {

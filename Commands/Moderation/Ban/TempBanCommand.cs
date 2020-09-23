@@ -17,7 +17,7 @@ namespace SilkBot.Commands.Moderation.Ban
         [Command("tempban")]
         public async Task TempBan(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = "Not provided.")
         {
-            var db = new SilkDbContext();
+            using var db = new SilkDbContext();
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
             var now = DateTime.Now;
             var banDuration = GetTimeFromInput(duration);
@@ -26,7 +26,7 @@ namespace SilkBot.Commands.Moderation.Ban
 
             if (banFailed is null)
             {
-                embed.WithDescription(banFailed.FailiureReason.Replace("$user", user.Mention));
+                embed.WithDescription(banFailed.FailureReason.Replace("$user", user.Mention));
                 embed.WithColor(DiscordColor.Red);
                 await ctx.RespondAsync(embed: embed);
                 return;
@@ -66,7 +66,7 @@ namespace SilkBot.Commands.Moderation.Ban
 
         private async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed, BanFailureReason reason)
         {
-            embed.WithDescription(reason.FailiureReason.Replace("$user", user.Mention));
+            embed.WithDescription(reason.FailureReason.Replace("$user", user.Mention));
             embed.WithColor(DiscordColor.Red);
             await ctx.RespondAsync(embed: embed);
         }

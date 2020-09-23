@@ -56,7 +56,11 @@ namespace SilkBot.Commands.Bot
         [Command("Prefix")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            await ctx.RespondAsync($"My prefix is `{new SilkDbContext().Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id).Prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
+            using var db = new SilkDbContext();
+            var prefix = db.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id)?.Prefix
+                         ?? SilkDefaultCommandPrefix;
+
+            await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }
 }

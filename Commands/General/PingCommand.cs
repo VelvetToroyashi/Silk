@@ -40,7 +40,7 @@ namespace SilkBot.Commands.General
         private int GetDbLatency(ulong guildId)
         {
             var sw = Stopwatch.StartNew();
-            var db = new SilkDbContext();
+            using var db = new SilkDbContext();
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             db.Database.ExecuteSqlRaw("SELECT * FROM Guilds;");
