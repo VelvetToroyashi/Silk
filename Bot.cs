@@ -18,6 +18,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -49,7 +50,7 @@
 
         private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
         {
-            var guild = await CreateGuildOnNullAsync(eventArgs.Guild.Id);
+            var guild = await GetOrCreateGuildAsync(eventArgs.Guild.Id);
             if (!SilkDBContext.Guilds.Contains(guild)) SilkDBContext.Guilds.Add(guild);
             await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
             await SilkDBContext.SaveChangesAsync();
@@ -61,7 +62,6 @@
         public async Task CacheStaffMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
             var staffMembers = members
-                .AsQueryable()
                 .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
                 .Select(staffMember => new DiscordUserInfo {Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff});
 
@@ -70,7 +70,7 @@
             await SilkDBContext.SaveChangesAsync();
         }
 
-        public async Task<Guild> CreateGuildOnNullAsync(ulong guildId)
+        public async Task<Guild> GetOrCreateGuildAsync(ulong guildId)
         {
             var guild = await SilkDBContext.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
             
@@ -114,7 +114,7 @@
 
             RegisterCommands();
 
-            HelpCache.Initialize(DiscordColor.Azure);
+            //HelpCache.Initialize(DiscordColor.Azure);
             //Data.PopulateDataOnApplicationLoad();
             //All these handlers do is subscribe to the bot's appropriate event, and do something, hence not assigning a variable to it.
 
@@ -122,13 +122,20 @@
             Client.GuildAvailable += OnGuildAvailable;
 
             await Client.ConnectAsync();
+            CreateHandlers();
+            sw.Stop();
+            Colorful.Console.Write($"Startup time: {(sw.ElapsedMilliseconds / 1000d):F2} seconds", Color.CornflowerBlue);
+        }
+
+        private void CreateHandlers()
+        {
+            Client.Ready += OnReady;
+            Client.GuildAvailable += OnGuildAvailable;
             new MessageDeletionHandler(Client);
             new MessageEditHandler(Client);
             new GuildJoinHandler();
             new MessageCreationHandler();
             new GuildMemberCountChangeHandler(Client);
-            sw.Stop();
-            Console.WriteLine($"Startup Time: {sw.ElapsedMilliseconds} ms", ConsoleColor.Blue);
         }
         #endregion
     }

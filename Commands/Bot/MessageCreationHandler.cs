@@ -28,8 +28,9 @@ namespace SilkBot.Commands.Bot
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
-            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
-            
+            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10 :D2} µs.");
+
+            var commands = Instance.Client.GetCommandsNext();
             var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)
@@ -39,8 +40,8 @@ namespace SilkBot.Commands.Bot
             }
             var messageContent = e.Message.Content.Substring(prefixPos);
 
-            var command = Instance.Client.GetCommandsNext().FindCommand(messageContent, out var args);
-            var context = Instance.Client.GetCommandsNext().CreateContext(e.Message, guildPrefix, command, args);
+            var command = commands.FindCommand(messageContent, out var args);
+            var context = commands.CreateContext(e.Message, guildPrefix, command, args);
             if (command is null)
             {
                 CommandTimer.Stop();
@@ -48,7 +49,7 @@ namespace SilkBot.Commands.Bot
             }
             
             /* NOTE: 'ExecuteCommandAsync' method is wrapped in a try/catch internally so Exceptions will not be rethrown from commands */
-            _ = Task.Run(async () => await Instance.Client.GetCommandsNext().ExecuteCommandAsync(context));
+            _ = Task.Run(async () => await commands.ExecuteCommandAsync(context));
             CommandTimer.Stop();
         }
 
