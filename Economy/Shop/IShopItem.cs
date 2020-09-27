@@ -1,4 +1,4 @@
-﻿namespace SilkBot.Commands.Economy.Shop
+﻿namespace SilkBot.Economy.Shop
 {
 
     public interface IShopItem

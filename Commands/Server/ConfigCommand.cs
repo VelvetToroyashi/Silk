@@ -89,7 +89,7 @@ namespace SilkBot.Commands.Server
                 if (reactionResult.Result.Emoji == yes) 
                 { 
                     guild.LogMessageChanges = false;
-                    await reactionResult.Result.Message.DeleteReactionAsync(yes, user);
+                    await msg.DeleteReactionAsync(yes, user);
                     await db.SaveChangesAsync(); 
                 }
                 else if (reactionResult.Result.Emoji == no) { return; /* Do something useful here as well */ }

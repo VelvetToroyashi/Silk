@@ -30,11 +30,12 @@
         public DiscordClient Client { get; set; }
         public static Bot Instance { get; } = new Bot();
         public InteractivityConfiguration Interactivity { get; }
+        public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
-        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration { CaseSensitive = false, EnableDefaultHelp = true, EnableMentionPrefix = true };
+        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration();
         #endregion
 
         private readonly Stopwatch sw = new Stopwatch();

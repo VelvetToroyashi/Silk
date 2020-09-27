@@ -33,8 +33,6 @@ namespace SilkBot.Commands.General
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: new Optional<DiscordEmbed>(embed));
-
-
         }
 
         private int GetDbLatency()

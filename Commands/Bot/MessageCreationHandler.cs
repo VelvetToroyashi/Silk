@@ -28,7 +28,7 @@ namespace SilkBot.Commands.Bot
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
-            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10 :D2} µs.");
+            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10L} µs.");
 
             var commands = Instance.Client.GetCommandsNext();
             var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;

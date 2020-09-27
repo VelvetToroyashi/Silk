@@ -18,12 +18,13 @@ namespace SilkBot.Commands.Moderation.Utilities
 
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
-            if (e.Channel.IsPrivate)
+
+            if (e.Channel.IsPrivate || e.Message.Author.IsCurrent)
             {
                 return;
             }
 
-            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
+            var config = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
 
             if (!config.LogMessageChanges)
             {
@@ -35,12 +36,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             {
                 return;
             }
-
-            var guildPrefix = config.Prefix;
-            if (e.Message.Author.IsCurrent || e.Message.Content.StartsWith(guildPrefix))
-            {
-                return;
-            }
+          
 
             var embed =
                 new DiscordEmbedBuilder()

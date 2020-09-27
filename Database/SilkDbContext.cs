@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SilkBot.Commands.Economy.Shop;
 using SilkBot.Database.Models;
+using SilkBot.Economy.Shop;
 using SilkBot.Models;
 
 namespace SilkBot
@@ -8,7 +10,7 @@ namespace SilkBot
     {
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<TicketModel> Tickets { get; set; }
-
+        //public DbSet<BaseShop> Shops { get; set; }
         public DbSet<DiscordUserInfo> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseNpgsql("Server=localhost;Database=Silk_Private;Username=Silk; Password=6TJeWQ8QqCFxg7");
