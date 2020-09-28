@@ -44,7 +44,16 @@
         #region Methods
         public async Task RunBotAsync()
         {
-            await SilkDBContext.Database.MigrateAsync();
+            try
+            {
+                await SilkDBContext.Database.MigrateAsync();
+            }
+            catch (Npgsql.PostgresException)
+            {
+                Colorful.Console.WriteLine($"Database: Invalid password. Is the password correct, and did you setup the database?", Color.Red);
+                Environment.Exit(1);
+            }
+
             await InitializeClient();
             await Task.Delay(-1);
         }
