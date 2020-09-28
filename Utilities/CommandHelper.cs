@@ -20,6 +20,7 @@ namespace SilkBot.Utilities
         public static IEnumerable<MethodInfo> GetAllCommands()
         {
             return AppDomain.CurrentDomain.GetAssemblies()
+                .AsQueryable()
                 .Where(a => !a.IsDynamic)
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.BaseType == typeof(BaseCommandModule))

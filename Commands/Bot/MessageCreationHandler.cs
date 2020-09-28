@@ -13,28 +13,32 @@ namespace SilkBot.Commands.Bot
     {
         public MessageCreationHandler() => Instance.Client.MessageCreated += OnMessageCreate;
 
+
+        /* Command handler! */
         private async Task OnMessageCreate(MessageCreateEventArgs e)
         {
-            // Could use CommandTimer.Restart();
-                        
+            //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
             {
                 CommandTimer.Stop();
                 return;
             }
-            
+            //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
             var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
             CommandTimer.Restart();
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
             Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10L} µs.");
+            //End of Silk specific code//
+
 
             var commands = Instance.Client.GetCommandsNext();
             var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)
             {
+                //prefix wasn't found in the message
                 CommandTimer.Stop();
                 return;
             }
@@ -44,12 +48,14 @@ namespace SilkBot.Commands.Bot
             var context = commands.CreateContext(e.Message, guildPrefix, command, args);
             if (command is null)
             {
+                //Invalid command; feel free to throw an exception / Send an error message via e.Channel.SendMessage()
                 CommandTimer.Stop();
                 return;
             }
             
             /* NOTE: 'ExecuteCommandAsync' method is wrapped in a try/catch internally so Exceptions will not be rethrown from commands */
             _ = Task.Run(async () => await commands.ExecuteCommandAsync(context));
+            //Very important that you do NOT *EVER* await commands, especially in the case of Interactivity; it will deadlock your bot.//
             CommandTimer.Stop();
         }
 
