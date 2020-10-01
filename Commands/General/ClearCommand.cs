@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
@@ -43,10 +44,10 @@ namespace SilkBot.Commands.General
                 messageID = queryConfirmationMessage.Id;
                 await Task.Delay(4000);
             }
+            var pendingMessages = await ctx.Channel.GetMessagesBeforeAsync(messageID, messages);
 
-
-
-            await ctx.Channel.DeleteMessagesAsync(ctx.Channel.GetMessagesBeforeAsync(messageID, messages).Result);
+            MessageDeletionHandler.UnloggedMessages = pendingMessages.Count;
+            await ctx.Channel.DeleteMessagesAsync(pendingMessages);
             await lockoutChannel.GetMessageAsync(queryConfirmationMessage.Id).Result.DeleteAsync();
             var deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)

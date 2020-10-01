@@ -10,14 +10,22 @@ namespace SilkBot.Commands.Moderation.Utilities
 {
     public class MessageDeletionHandler
     {
+        public static int UnloggedMessages { get; set; }
         public MessageDeletionHandler(DiscordClient client)
         {
 
             client.MessageDeleted += OnMessageDeleted;
         }
-
+        
         private async Task OnMessageDeleted(MessageDeleteEventArgs e)
         {
+
+            if(UnloggedMessages - 1 > 0)
+            {
+                UnloggedMessages--;
+                e.Handled = true;
+                return;
+            }
 
             if (e.Channel.IsPrivate || e.Message.Author.IsCurrent)
             {
@@ -31,7 +39,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                 return;
             }
 
-            var logChannel = config.MessageEditChannel.Value;
+            var logChannel = config.MessageEditChannel!.Value;
             if (logChannel == default)
             {
                 return;

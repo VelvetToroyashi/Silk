@@ -35,7 +35,7 @@
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
-        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration();
+        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration() { EnableDefaultHelp = false, UseDefaultCommandHandler = false };
         #endregion
 
         private readonly Stopwatch sw = new Stopwatch();
@@ -55,6 +55,7 @@
             }
 
             await InitializeClient();
+            HelpCache.Initialize();
             await Task.Delay(-1);
         }
 

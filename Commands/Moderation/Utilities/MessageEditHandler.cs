@@ -23,8 +23,8 @@ namespace SilkBot.Commands.Moderation.Utilities
         {
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
             CheckForInvite(e, config);
-            var logChannel = config.GeneralLoggingChannel;
-            if (e.Message.Author.IsCurrent || e.Message.Author.IsBot) return;
+            var logChannel = config.MessageEditChannel.GetValueOrDefault();
+            if (e.Message.Author.IsCurrent || e.Message.Author.IsBot || !e.Message.IsEdited) return;
 
             if (logChannel == default) return;
 
@@ -41,7 +41,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk!", e.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await e.Client.GetChannelAsync(logChannel.Value);
+            var loggingChannel = await e.Client.GetChannelAsync(logChannel);
             await e.Client.SendMessageAsync(loggingChannel, embed: embed);
         }
         private void CheckForInvite(MessageUpdateEventArgs e, Guild config)

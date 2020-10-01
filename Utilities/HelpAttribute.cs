@@ -12,14 +12,14 @@ namespace SilkBot.Utilities
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
     public class HelpDescriptionAttribute : Attribute
     {
-        private readonly string description;
+        public readonly string Description;
 
-        private string[] exampleUsages;
+        public string[] ExampleUsages;
 
         public HelpDescriptionAttribute(string desc, params string[] usages)
         {
-            description = desc;
-            exampleUsages = usages;
+            Description = desc;
+            ExampleUsages = usages;
         }
 
     }

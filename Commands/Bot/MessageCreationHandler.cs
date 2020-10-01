@@ -13,8 +13,6 @@ namespace SilkBot.Commands.Bot
     {
         public MessageCreationHandler() => Instance.Client.MessageCreated += OnMessageCreate;
 
-
-        /* Command handler! */
         private async Task OnMessageCreate(MessageCreateEventArgs e)
         {
             //Bots shouldn't be running commands.    
