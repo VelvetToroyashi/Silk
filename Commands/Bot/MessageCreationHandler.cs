@@ -21,13 +21,14 @@ namespace SilkBot.Commands.Bot
                 CommandTimer.Stop();
                 return;
             }
+            e.Handled = true;
             //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
             var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
             CommandTimer.Restart();
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
             CheckForInvite(e, config);
-            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10L} µs.");
+            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
             //End of Silk specific code//
 
 

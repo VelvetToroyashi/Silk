@@ -55,7 +55,7 @@
             }
 
             await InitializeClient();
-            HelpCache.Initialize();
+            
             await Task.Delay(-1);
         }
 
@@ -124,18 +124,17 @@
             // Register database context and apply newest migration if not already done.
 
             RegisterCommands();
-
-            //HelpCache.Initialize(DiscordColor.Azure);
-            //Data.PopulateDataOnApplicationLoad();
-            //All these handlers do is subscribe to the bot's appropriate event, and do something, hence not assigning a variable to it.
+            HelpCache.Initialize();
+            
 
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
 
             await Client.ConnectAsync();
             CreateHandlers();
+
             sw.Stop();
-            Colorful.Console.Write($"Startup time: {(sw.ElapsedMilliseconds / 1000d):F2} seconds", Color.CornflowerBlue);
+            Colorful.Console.WriteLine($"Startup time: {(sw.ElapsedMilliseconds / 1000d):F2} seconds", Color.CornflowerBlue);
         }
 
         private void CreateHandlers()

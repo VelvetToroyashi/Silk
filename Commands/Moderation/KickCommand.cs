@@ -12,9 +12,8 @@ namespace SilkBot.Commands.Moderation
 {
     public class KickCommand : BaseCommandModule
     {
-        [Command("Kick")]
-        [HelpDescription("Kick a user! *Note, caller requires moderator permission.*")]
-        public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
+        [Command, HelpDescription("Boot someone from the guild! Must have role permissions.")]
+        public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText, HelpDescription("The reason the user is to be kicked from the guild")] string reason = "Not Given.")
         {
             await ctx.Message.DeleteAsync();
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);

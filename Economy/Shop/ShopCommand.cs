@@ -4,17 +4,49 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Economy.Shop
 {
-    public class ShopCommand : BaseCommandModule
+    [Group("shop")]
+    public partial class ShopCommand : BaseCommandModule
     {
-        
-
         //Basically the shop command will serve as a command processor.//
-        [Command("Shop")]
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task Shop(CommandContext ctx, string shopAction)
+        [GroupCommand]
+        public async Task Shop(CommandContext ctx)
         {
-
+            await ctx.RespondAsync("Command usage:\n\t\t`shop [global | view <name> | create | delete]`");
         }
 
+    }
+
+    public partial class ShopCommand
+    {
+        [Command]
+        public async Task Global(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Placeholder global shop goes here");
+        }
+    }
+
+    public partial class ShopCommand
+    {
+        [Command]
+        public async Task View(CommandContext ctx, string shopname)
+        {
+            await ctx.RespondAsync("Placeholder shop embed goes here");
+        }
+    }
+    public partial class ShopCommand
+    {
+        [Command]
+        public async Task Create(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Placeholder creation modal goes here");
+        }
+    }
+    public partial class ShopCommand
+    {
+        [Command]
+        public async Task Delete(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Placeholder deletion modal goes here");
+        }
     }
 }

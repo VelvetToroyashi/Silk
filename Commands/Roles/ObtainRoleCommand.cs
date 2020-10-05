@@ -13,12 +13,12 @@ namespace SilkBot.Commands.Roles
 
         [Command("Role")]
         [HelpDescription("Grab a role!", "[p]role <rolename>")]
-        public async Task ObtainRole(CommandContext ctx, [RemainingText] string roles)
+        public async Task ObtainRole(CommandContext ctx, 
+            [RemainingText, HelpDescription("What roles you'd like to obtain, no need to mention the role")] string roles)
         {
             if (roles is null) return;
             var _roles = roles.Split(',');
-            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
-            //If a config exists, use that, else assume no config exists and throw an error.//
+            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
             foreach (var role in _roles)
             {
                 var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;

@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Exceptions;
 using SilkBot.Utilities;
 using System;
@@ -19,31 +20,31 @@ namespace SilkBot.Commands.Roles
         [HelpDescription("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
+            var guild = new SilkDbContext().Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
             if (roles.Count() < 1)
             {
-                await ctx.RespondAsync("Roles canont be empty!");
+                await ctx.RespondAsync("Roles cannot be empty!");
                 return;
             }
-            if (ctx.Member.HasPermission(Permissions.KickMembers))
+            if (!guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff)) 
             {
                 throw new InsufficientPermissionsException();
             }
 
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.DiscordGuildId == ctx.Guild.Id);
-            var addedList = new List<string>();
+            var addedList   = new List<string>();
             var removedList = new List<string>();
             var ebStringBuilder = new StringBuilder("Added Roles: ");
             foreach (var role in roles)
             {
-                if (!config.SelfAssignableRoles.Any(r => r.RoleId == role.Id))
+                if (!guild.SelfAssignableRoles.Any(r => r.RoleId == role.Id))
                 {
-                    config.SelfAssignableRoles.Add(new Models.SelfAssignableRole { RoleId = role.Id });
+                    guild.SelfAssignableRoles.Add(new Models.SelfAssignableRole { RoleId = role.Id });
                     addedList.Add(role.Mention);
                 }
 
                 else
                 {
-                    config.SelfAssignableRoles.Remove(config.SelfAssignableRoles.First(r => r.RoleId == role.Id));
+                    guild.SelfAssignableRoles.Remove(guild.SelfAssignableRoles.First(r => r.RoleId == role.Id));
                     removedList.Add(role.Mention);
                 }
             }

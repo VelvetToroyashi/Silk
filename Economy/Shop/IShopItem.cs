@@ -1,6 +1,5 @@
 ﻿namespace SilkBot.Economy.Shop
 {
-
     public interface IShopItem
     {
         public string Name { get; set; }

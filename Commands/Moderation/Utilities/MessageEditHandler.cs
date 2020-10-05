@@ -24,7 +24,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
             CheckForInvite(e, config);
             var logChannel = config.MessageEditChannel.GetValueOrDefault();
-            if (e.Message.Author.IsCurrent || e.Message.Author.IsBot || !e.Message.IsEdited) return;
+            if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
 
             if (logChannel == default) return;
 

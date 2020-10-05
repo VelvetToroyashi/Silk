@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SilkBot.Commands.Economy.Shop;
 using SilkBot.Database.Models;
-using SilkBot.Economy.Shop;
 using SilkBot.Models;
 
 namespace SilkBot
