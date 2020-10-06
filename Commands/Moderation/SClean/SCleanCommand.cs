@@ -4,7 +4,7 @@ using SilkBot.Utilities;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SilkBot.Commands.Moderation
+namespace SilkBot.Commands.Moderation.SClean
 {
     [Group("SClean")]
     public partial class SCleanCommand : BaseCommandModule

@@ -30,36 +30,12 @@ namespace SilkBot.Utilities
             Console.WriteLine($"Initialized Help Cache in {sw.ElapsedMilliseconds} ms.");
         }
 
-        // public static DiscordEmbed GenerateHelpEmbed(IEnumerable<MethodInfo> methods)
-        // {
-        //     var embed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue);
-        //     var sb = new StringBuilder();
-        //     methods.OrderBy(n => n.Name.ToLower());
-        //     for (int i = 0; i < methods.Count(); i++)
-        //     {
-        //         MethodInfo method = methods.ElementAt(i);
-        //         if (sb.ToString().Contains(method.GetCustomAttribute<CommandAttribute>()?.Name ?? method.Name))
-        //         {
-        //             continue;
-        //         }
-
-        //         if (method.GetCustomAttributes().Any(att => att.GetType() == typeof(HiddenAttribute) || att.GetType() == typeof(RequireOwnerAttribute)))
-        //         {
-        //             continue;
-        //         }
-
-        //         sb.AppendLine($"**`{method.GetCustomAttribute<CommandAttribute>().Name}`** - {method.GetCustomAttribute<HelpDescriptionAttribute>()?.Description ?? "No description provided"}");
-        //     }
-        //     embed.WithTitle("Available commands:").WithDescription(sb.ToString());
-        //     return embed;
-        // }
-
         public static DiscordEmbed GenerateHelpEmbed(IEnumerable<MethodInfo> methods)
         {
             var embed = new DiscordEmbedBuilder().WithTitle("Available Commands:").WithColor(DiscordColor.CornflowerBlue);
             var sb = new StringBuilder();
             var orderedMethods = methods.OrderBy(n => n.Name.ToLower());
-            //For loop//
+            //Iterate over each command; skip if cached; skip if it's not to be cached//
             for (int i = 0; i < methods.Count(); i++)
             {
                 MethodInfo method = orderedMethods.ElementAt(i);
