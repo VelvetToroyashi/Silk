@@ -27,23 +27,17 @@ namespace SilkBot.Commands.Moderation.Utilities
                 return;
             }
 
-            if (e.Channel.IsPrivate || e.Message.Author.IsCurrent)
+            if (e.Channel.IsPrivate || e.Message.Author!.IsCurrent)
             {
                 return;
             }
 
             var config = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
 
-            if (!config.LogMessageChanges)
-            {
-                return;
-            }
+            if (!config.LogMessageChanges) return;
 
-            var logChannel = config.MessageEditChannel!.Value;
-            if (logChannel == default)
-            {
-                return;
-            }
+            if (!config.MessageEditChannel.HasValue) return;
+            
           
 
             var embed =
@@ -60,7 +54,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .WithColor(DiscordColor.Red)
                 .WithFooter("Silk!", e.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await e.Client.GetChannelAsync(logChannel);
+            var loggingChannel = await e.Client.GetChannelAsync(config.MessageEditChannel.Value);
             await e.Client.SendMessageAsync(loggingChannel, embed: embed);
         }
     }
