@@ -1,10 +1,10 @@
 ﻿using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System;
 
 namespace SilkBot.Utilities
 {
@@ -34,12 +34,16 @@ namespace SilkBot.Utilities
         {
             var embed = new DiscordEmbedBuilder().WithTitle("Available Commands:").WithColor(DiscordColor.CornflowerBlue);
             var sb = new StringBuilder();
-            var orderedMethods = methods.OrderBy(n => n.Name.ToLower());
-            //Iterate over each command; skip if cached; skip if it's not to be cached//
+            var orderedMethods = methods.OrderBy(n => GetCommandName(n) ?? n.Name.ToLower());
+           
+            //var embed = new DiscordEmbedBuilder().WithTitle("Available Commands:").WithColor(DiscordColor.CornflowerBlue);
+            //var sb = new StringBuilder();
+            //var orderedMethods = methods.OrderBy(n => n.Name.ToLower());
+            ////Iterate over each command; skip if cached; skip if it's not to be cached//
             for (int i = 0; i < methods.Count(); i++)
             {
                 MethodInfo method = orderedMethods.ElementAt(i);
-                string name = method.GetCustomAttribute<CommandAttribute>()?.Name ?? method.Name;
+                string name = GetCommandName(method)?.ToLower() ?? method.Name.ToLower();
                 var description = new Lazy<string>(() => method.GetCustomAttribute<HelpDescriptionAttribute>()?.Description ?? "Description unavailable");
                 if (sb.ToString().Contains(name)) continue;
                 if (HideCommand(method.GetCustomAttributes().Select(a => a.GetType()))) continue;
@@ -47,8 +51,10 @@ namespace SilkBot.Utilities
             }
             return embed.WithDescription(sb.ToString());
         }
+
         private static bool HideCommand(IEnumerable<Type> type) =>
             type.Any(t => t == typeof(HiddenAttribute) || t == typeof(RequireOwnerAttribute));
+        private static string? GetCommandName(MethodInfo m) => m.GetCustomAttribute<CommandAttribute>().Name == string.Empty ? null : m.GetCustomAttribute<CommandAttribute>().Name;
         public static DiscordEmbed GenerateHelp(MethodInfo[] methods)
         {
             var embed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue);
@@ -69,7 +75,11 @@ namespace SilkBot.Utilities
                 }
                 sb.AppendLine();
             }
-            if (sb.ToString().Length < 10) sb.Append("This command takes no arguments.");
+            if (sb.ToString().Length < 10)
+            {
+                sb.Append("This command takes no arguments.");
+            }
+
             embed.WithDescription(sb.ToString());
             Console.WriteLine($"\u001b[34m[{++currentCommand}/{numberOfCommands}] \u001b[37mCreated help embed for command!");
             return embed.Build();

@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SilkBot.Models;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,7 @@ namespace SilkBot.Utilities
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
-            if (CachedStaff.Contains(ctx.User.Id) && RequireGuild) return true; 
-            
+            if (CachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = new SilkDbContext(); //Swap this for your own DBContext.//
             var guild = await db.Guilds.Include(_ => _.DiscordUserInfos).FirstAsync(g => g.DiscordGuildId == ctx.Guild.Id);
             var member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);

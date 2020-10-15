@@ -18,11 +18,11 @@ namespace SilkBot.Server
 
         }
 
-        private async Task OnGuildMemberJoined(GuildMemberAddEventArgs e)
+        private async Task OnGuildMemberJoined(DiscordClient c, GuildMemberAddEventArgs e)
         {
             await Task.CompletedTask;
         }
-        private async Task OnGuildMemberLeft(GuildMemberRemoveEventArgs e)
+        private async Task OnGuildMemberLeft(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
             //var guild = dataContainerReference[e.Guild].GuildInfo;
             //if (guild.BannedMembers.Any(member => member.ID == e.Member.Id)) return;

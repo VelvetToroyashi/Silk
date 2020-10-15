@@ -1,5 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
+using Microsoft.EntityFrameworkCore;
+using Silk__Extensions;
 using SilkBot.Models;
 using System;
 using System.Linq;
@@ -11,9 +14,14 @@ namespace SilkBot.Commands.Bot
 {
     public sealed class MessageCreationHandler
     {
-        public MessageCreationHandler() => Instance.Client.MessageCreated += OnMessageCreate;
+        private readonly IDbContextFactory<SilkDbContext> dbContextFactory;
+        public MessageCreationHandler()
+        {
+            Instance.Client.MessageCreated += OnMessageCreate;
+            dbContextFactory = Instance.Services.Get<IDbContextFactory<SilkDbContext>>();
+        }
 
-        private async Task OnMessageCreate(MessageCreateEventArgs e)
+        private async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)
         {
             //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
@@ -23,7 +31,7 @@ namespace SilkBot.Commands.Bot
             }
             e.Handled = true;
             //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
-            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
+            var config = dbContextFactory.CreateDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
             CommandTimer.Restart();
             //if (e.Channel.IsPrivate) await CheckForTicket(e);
             //Using .GetAwaiter has results in ~50x performance because of async overhead.
@@ -32,7 +40,7 @@ namespace SilkBot.Commands.Bot
             //End of Silk specific code//
 
 
-            var commands = Instance.Client.GetCommandsNext();
+            var commands = c.GetCommandsNext();
             var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)

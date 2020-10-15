@@ -19,9 +19,10 @@ namespace SilkBot.Commands.Moderation.Utilities
             client.MessageUpdated += OnMessageEdit;
         }
 
-        private async Task OnMessageEdit(MessageUpdateEventArgs e)
+        private async Task OnMessageEdit(DiscordClient c, MessageUpdateEventArgs e)
         {
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
+            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
+            if (config is null) return;
             CheckForInvite(e, config);
             var logChannel = config.MessageEditChannel.GetValueOrDefault();
             if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
@@ -39,10 +40,10 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .AddField("Message ID:", e.Message.Id.ToString(), true)
                 .AddField("Channel ID:", e.Channel.Id.ToString(), true)
                 .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk!", e.Client.CurrentUser.AvatarUrl)
+                .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await e.Client.GetChannelAsync(logChannel);
-            await e.Client.SendMessageAsync(loggingChannel, embed: embed);
+            var loggingChannel = await c.GetChannelAsync(logChannel);
+            await c.SendMessageAsync(loggingChannel, embed: embed);
         }
         private void CheckForInvite(MessageUpdateEventArgs e, Guild config)
         {

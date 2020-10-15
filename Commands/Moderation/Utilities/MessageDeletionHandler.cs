@@ -17,7 +17,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             client.MessageDeleted += OnMessageDeleted;
         }
         
-        private async Task OnMessageDeleted(MessageDeleteEventArgs e)
+        private async Task OnMessageDeleted(DiscordClient c, MessageDeleteEventArgs e)
         {
 
             if(UnloggedMessages - 1 > 0)
@@ -52,10 +52,10 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .AddField("User ID:", e.Message.Author.Id.ToString(), true)
                 .WithThumbnail(e.Message.Author.AvatarUrl)
                 .WithColor(DiscordColor.Red)
-                .WithFooter("Silk!", e.Client.CurrentUser.AvatarUrl)
+                .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await e.Client.GetChannelAsync(config.MessageEditChannel.Value);
-            await e.Client.SendMessageAsync(loggingChannel, embed: embed);
+            var loggingChannel = await c.GetChannelAsync(config.MessageEditChannel.Value);
+            await c.SendMessageAsync(loggingChannel, embed: embed);
         }
     }
 

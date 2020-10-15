@@ -8,6 +8,7 @@
     using DSharpPlus.Interactivity;
     using DSharpPlus.Interactivity.Enums;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using SilkBot.Commands.Bot;
     using SilkBot.Commands.Moderation.Utilities;
@@ -23,6 +24,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+
     #endregion
     public class Bot
     {
@@ -33,9 +35,11 @@
         public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
-        public SilkDbContext SilkDBContext { get; set; } = new SilkDbContext();
+        public SilkDbContext SilkDBContext { get; } = new SilkDbContext();
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
-        public CommandsNextConfiguration Commands { get; } = new CommandsNextConfiguration() { EnableDefaultHelp = false, UseDefaultCommandHandler = false };
+        public IServiceProvider Services { get; private set; }
+        public CommandsNextConfiguration Commands { get; private set; }
+        
         #endregion
 
         private readonly Stopwatch sw = new Stopwatch();
@@ -53,19 +57,32 @@
                 Colorful.Console.WriteLine($"Database: Invalid password. Is the password correct, and did you setup the database?", Color.Red);
                 Environment.Exit(1);
             }
-
-            await InitializeClient();
+            AddServices();
+            await InitializeClientAsync();
             
             await Task.Delay(-1);
         }
 
-        private async Task OnGuildAvailable(GuildCreateEventArgs eventArgs)
+        private void AddServices()
         {
-            var guild = await GetOrCreateGuildAsync(eventArgs.Guild.Id);
-            if (!SilkDBContext.Guilds.Contains(guild)) SilkDBContext.Guilds.Add(guild);
-            await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
-            await SilkDBContext.SaveChangesAsync();
+            var emojiService = new DiscordEmojiCreationService();
+            Services = new ServiceCollection()
+                .AddSingleton(emojiService)
+                .AddDbContextFactory<SilkDbContext>(d => _ = d, ServiceLifetime.Transient)
+                .BuildServiceProvider();
+            
+            Commands = new CommandsNextConfiguration { EnableDefaultHelp = false, UseDefaultCommandHandler = false, Services = Services };
+        }
 
+        private async Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs eventArgs)
+        {
+            _ = Task.Run(async () =>
+            {
+                var db = Services.GetService<IDbContextFactory<SilkDbContext>>().CreateDbContext();
+                var guild = await GetOrCreateGuildAsync(eventArgs.Guild.Id);
+                if (!db.Guilds.Contains(guild)) db.Guilds.Add(guild);
+                await CacheStaffMembers(guild, eventArgs.Guild.Members.Values);
+            });
             //TODO: Fix Logger
             //eventArgs.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", $"Guild available: {eventArgs.Guild.Name}", DateTime.Now);
         }
@@ -83,7 +100,8 @@
 
         public async Task<Guild> GetOrCreateGuildAsync(ulong guildId)
         {
-            var guild = await SilkDBContext.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
+            var db = Services.GetService<IDbContextFactory<SilkDbContext>>().CreateDbContext();
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
             
             if (guild != null)
             {
@@ -94,7 +112,7 @@
             return guild;
         }
 
-        private Task OnReady(ReadyEventArgs e)
+        private Task OnReady(DiscordClient c, ReadyEventArgs e)
         {
             //TODO: Fix Logger
             //e.Client.DebugLogger.LogMessage(LogLevel.Info, "Silk!", "Ready to process events.", DateTime.Now);
@@ -103,7 +121,7 @@
 
         private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
 
-        private async Task InitializeClient()
+        private async Task InitializeClientAsync()
         {
             var token = File.ReadAllText("./Token.txt");
             var config = new DiscordConfiguration
