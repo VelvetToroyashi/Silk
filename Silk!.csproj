@@ -63,14 +63,19 @@
     <Compile Include="Migrations\20200926214157_placeholder2.Designer.cs" />
     <Compile Include="Migrations\20201010152257_changelogs.cs" />
     <Compile Include="Migrations\20201010152257_changelogs.Designer.cs" />
+    <Compile Include="Migrations\20201017140658_foobar.cs" />
+    <Compile Include="Migrations\20201017140658_foobar.Designer.cs" />
+    <Compile Include="Migrations\20201017145352_db-update-229.cs" />
+    <Compile Include="Migrations\20201017145352_db-update-229.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.10" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00738" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00738" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00738" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00743" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00743" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00743" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-rc.1.20451.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-rc.1.20451.13">
@@ -82,12 +87,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-rc.1.20451.14" />
+    <PackageReference Include="NLog" Version="4.7.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-rc1" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0-rc.1.20451.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Silk! Extensions\Silk! Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="dbLogin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

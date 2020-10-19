@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201017140658_foobar")]
+    partial class foobar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,21 +50,17 @@ namespace SilkBot.Migrations
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Sender")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Message")
                         .HasColumnType("text");
 
-                    b.Property<decimal>("Sender")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<int?>("TicketModelId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("Sender");
 
                     b.HasIndex("TicketModelId");
 

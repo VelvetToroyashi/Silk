@@ -13,14 +13,9 @@ namespace SilkBot.Commands.Moderation.Utilities
     {
 
 
-        public MessageEditHandler(DiscordClient client)
+        public async Task OnMessageEdit(DiscordClient c, MessageUpdateEventArgs e)
         {
-
-            client.MessageUpdated += OnMessageEdit;
-        }
-
-        private async Task OnMessageEdit(DiscordClient c, MessageUpdateEventArgs e)
-        {
+            if (e.Channel.IsPrivate) return;
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
             if (config is null) return;
             CheckForInvite(e, config);
@@ -43,7 +38,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
             var loggingChannel = await c.GetChannelAsync(logChannel);
-            await c.SendMessageAsync(loggingChannel, embed: embed);
+            _ = c.SendMessageAsync(loggingChannel, embed: embed);
         }
         private void CheckForInvite(MessageUpdateEventArgs e, Guild config)
         {

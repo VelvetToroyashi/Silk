@@ -10,19 +10,12 @@ namespace SilkBot.Server
 
         private readonly DiscordEmbedBuilder memberLeftEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.Red).WithTitle("Member Left!").WithFooter("Silk!", Bot.Instance.Client.CurrentUser.AvatarUrl);
         private readonly DiscordEmbedBuilder memberJoinedEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.Green).WithTitle("Member Joined!").WithFooter("Silk!", Bot.Instance.Client.CurrentUser.AvatarUrl);
-        public GuildMemberCountChangeHandler(DiscordClient client)
-        {
 
-            client.GuildMemberAdded += OnGuildMemberJoined;
-            client.GuildMemberRemoved += OnGuildMemberLeft;
-
-        }
-
-        private async Task OnGuildMemberJoined(DiscordClient c, GuildMemberAddEventArgs e)
+        public async Task OnGuildMemberJoined(DiscordClient c, GuildMemberAddEventArgs e)
         {
             await Task.CompletedTask;
         }
-        private async Task OnGuildMemberLeft(DiscordClient c, GuildMemberRemoveEventArgs e)
+        public async Task OnGuildMemberLeft(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
             //var guild = dataContainerReference[e.Guild].GuildInfo;
             //if (guild.BannedMembers.Any(member => member.ID == e.Member.Id)) return;

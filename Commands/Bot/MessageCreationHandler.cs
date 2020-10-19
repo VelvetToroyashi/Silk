@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk__Extensions;
+using SilkBot.Commands.General;
 using SilkBot.Models;
 using System;
 using System.Linq;
@@ -15,13 +16,13 @@ namespace SilkBot.Commands.Bot
     public sealed class MessageCreationHandler
     {
         private readonly IDbContextFactory<SilkDbContext> dbContextFactory;
+        private readonly TicketService _ticketService = new TicketService(Instance.Client);
         public MessageCreationHandler()
         {
-            Instance.Client.MessageCreated += OnMessageCreate;
             dbContextFactory = Instance.Services.Get<IDbContextFactory<SilkDbContext>>();
         }
 
-        private async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)
+        public async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)
         {
             //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
@@ -31,10 +32,11 @@ namespace SilkBot.Commands.Bot
             }
             e.Handled = true;
             //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
-            var config = dbContextFactory.CreateDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == e.Guild.Id);
+            
             CommandTimer.Restart();
-            //if (e.Channel.IsPrivate) await CheckForTicket(e);
-            //Using .GetAwaiter has results in ~50x performance because of async overhead.
+            if (_ticketService.CheckForTicket(e.Channel, e.Message.Author.Id)) { await _ticketService.RespondToBlindTicket(c, e.Author.Id, e.Message.Content); }
+
+            var config = dbContextFactory.CreateDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == (e.Guild == null ? 0 : e.Guild.Id));
             CheckForInvite(e, config);
             Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
             //End of Silk specific code//
@@ -68,6 +70,7 @@ namespace SilkBot.Commands.Bot
 
         private void CheckForInvite(MessageCreateEventArgs e, Guild config)
         {
+            if (config is null) return; //Channel is privatate, so no guild exists.
             if (config.WhiteListInvites)
             {
                 var messageContent = e.Message.Content;
@@ -95,30 +98,6 @@ namespace SilkBot.Commands.Bot
             }
         }
 
-        private async Task CheckForTicket(MessageCreateEventArgs e)
-        {
-            var ticket = Instance.SilkDBContext.Tickets.AsQueryable().OrderBy(_ => _.Opened).LastOrDefault(ticketModel => ticketModel.Opener == e.Message.Author.Id);
 
-            // Can use null-propagation because (default(IEnumerable) or reference type is null)
-            if (ticket?.Responders is null)
-            {
-                return;
-            }
-
-            if (!e.Channel.IsPrivate)
-            {
-                return;
-            }
-
-            if (ticket.IsOpen && !ticket.Responders.Any(responder => responder.ResponderId == e.Message.Author.Id))
-            {
-                foreach (var responder in ticket.Responders.Select(r => r.ResponderId))
-                {
-                    await Instance.Client.PrivateChannels.Values
-                        .FirstOrDefault(c => c.Users.Any(u => u.Id == responder))
-                        .SendMessageAsync("yesn't");
-                }
-            }
-        }
     }
 }

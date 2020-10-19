@@ -11,9 +11,9 @@ namespace SilkBot.Commands.Bot
 {
     public sealed class GuildJoinHandler
     {
-        public GuildJoinHandler() => Instance.Client.GuildCreated += OnGuildJoin;
 
-        private async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
+
+        public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
             var allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             var botAsMember = await e.Guild.GetMemberAsync(Instance.Client.CurrentUser.Id);

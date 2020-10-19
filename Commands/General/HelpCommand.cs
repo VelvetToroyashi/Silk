@@ -2,9 +2,10 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
 using SilkBot.Utilities;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.General
@@ -17,7 +18,7 @@ namespace SilkBot.Commands.General
             if (command == "help")
             {
 
-                Page[] pages = ctx.Client.GetInteractivity()
+                IEnumerable<Page> pages = ctx.Client.GetInteractivity()
                     .GeneratePagesInEmbed(HelpCache.Entries["help"].Description, SplitType.Line,
                          new DiscordEmbedBuilder()
                         .WithColor(DiscordColor.CornflowerBlue)

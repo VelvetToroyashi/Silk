@@ -1,16 +1,14 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-
+using DSharpPlus.Interactivity.Extensions;
+using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using SilkBot.Exceptions;
-using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy
 {

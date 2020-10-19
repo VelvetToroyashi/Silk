@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Models;
+using System.IO;
 
 namespace SilkBot
 {
@@ -12,7 +13,11 @@ namespace SilkBot
         public DbSet<ChangelogModel> ChangeLogs { get; set; }
         public DbSet<DiscordUserInfo> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseNpgsql("Server=localhost;Database=Silk_Private;Username=Silk; Password=6TJeWQ8QqCFxg7");
+        {
+            var sqlString = File.ReadAllText("./dbLogin");
+            options.EnableDetailedErrors();
+            options.UseNpgsql(sqlString);
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -21,6 +26,7 @@ namespace SilkBot
             builder.Entity<WhiteListedLink>().HasOne(w => w.Guild).WithMany(a => a.WhiteListedLinks);
             builder.Entity<BlackListedWord>().HasOne(_ => _.Guild).WithMany(g => g.BlackListedWords);
             //builder.Entity<UserInfractionModel>().HasOne(i => i.User);
+            builder.Entity<TicketResponderModel>().HasNoKey();
             builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel).WithMany(ticket => ticket.History);
             base.OnModelCreating(builder);
         }

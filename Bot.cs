@@ -7,6 +7,7 @@
     using DSharpPlus.EventArgs;
     using DSharpPlus.Interactivity;
     using DSharpPlus.Interactivity.Enums;
+    using DSharpPlus.Interactivity.Extensions;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -74,9 +75,9 @@
             Commands = new CommandsNextConfiguration { EnableDefaultHelp = false, UseDefaultCommandHandler = false, Services = Services };
         }
 
-        private async Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs eventArgs)
+        private Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs eventArgs)
         {
-            _ = Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 var db = Services.GetService<IDbContextFactory<SilkDbContext>>().CreateDbContext();
                 var guild = await GetOrCreateGuildAsync(eventArgs.Guild.Id);
@@ -143,10 +144,6 @@
 
             RegisterCommands();
             HelpCache.Initialize();
-            
-
-            Client.Ready += OnReady;
-            Client.GuildAvailable += OnGuildAvailable;
 
             await Client.ConnectAsync();
             CreateHandlers();
@@ -159,11 +156,13 @@
         {
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
-            new MessageDeletionHandler(Client);
-            new MessageEditHandler(Client);
-            new GuildJoinHandler();
-            new MessageCreationHandler();
-            new GuildMemberCountChangeHandler(Client);
+            Client.MessageDeleted += new MessageDeletionHandler().OnMessageDeleted;
+            Client.MessageUpdated += new MessageEditHandler().OnMessageEdit;
+            Client.GuildCreated += new GuildJoinHandler().OnGuildJoin;
+            Client.MessageCreated += new MessageCreationHandler().OnMessageCreate;
+            var memberCountChangeHandler = new GuildMemberCountChangeHandler();
+            Client.GuildMemberAdded += memberCountChangeHandler.OnGuildMemberJoined;
+            Client.GuildMemberRemoved += memberCountChangeHandler.OnGuildMemberLeft;
         }
         #endregion
     }

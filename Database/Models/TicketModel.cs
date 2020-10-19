@@ -10,7 +10,6 @@ namespace SilkBot.Database.Models
         public ulong Opener { get; set; }
         public DateTime Opened { get; set; }
         public DateTime Closed { get; set; }
-        public IEnumerable<TicketResponderModel> Responders { get; set; } = new List<TicketResponderModel>();
         public List<TicketMessageHistoryModel> History { get; set; } = new List<TicketMessageHistoryModel>();
     }
 }
