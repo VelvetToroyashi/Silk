@@ -3,7 +3,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Models;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,7 +29,7 @@ namespace SilkBot.Commands.Server
                 embed.AddField("Enabled guild features: ", string.Join(", ", guild.Features));
             }
             embed.AddField("Verification Level:", guild.VerificationLevel.ToString().ToUpper());
-            embed.AddField("Member Count:", (await guild.GetAllMembersAsync()).Count.ToString());
+            embed.AddField("Member Count:", guild.MemberCount.ToString());
             embed.AddField("Owner:", guild.Owner.Mention);
             embed.AddField("Approximate staff member count:", staffCount.ToString());
 

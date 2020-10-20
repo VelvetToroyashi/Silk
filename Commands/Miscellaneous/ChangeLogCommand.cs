@@ -22,7 +22,7 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task GetChangeLog(CommandContext ctx)
         {
             var db = GetDbContext();
-            var embed = BuildChangeLog(db.ChangeLogs.First(c => c.Id == -1));
+            var embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
             await ctx.RespondAsync(embed: embed);
         }
 
@@ -37,6 +37,8 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 db.Value.ChangeLogs.Add(changelog.ToModel());
                 await db.Value.SaveChangesAsync();
+                await clMessage.DeleteAsync();
+                await clMessage.RespondAsync("Changelog added.");
             }
         }
 
@@ -90,7 +92,7 @@ namespace SilkBot.Commands.Miscellaneous
                 .WithTitle($"Changes in version {cl.Version}")
                 .WithColor(new DiscordColor("#832fd6"))
                 .AddField("Added:", cl.Additions)
-                .AddField("Removed:", cl.Removals ?? "No deletions in this change.")
+                .AddField("Fixed/Removed:", cl.Removals.Count() < 1 ? "No information given." : cl.Removals)
                 .AddField("Contributers:", $"Changes created by these contributers: {cl.Authors}")
                 .WithFooter($"Silk! | Change authored: {cl.Time:MMM d, yyyy}");
             return embed;

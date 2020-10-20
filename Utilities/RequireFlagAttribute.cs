@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using SilkBot.Models;
 using System;
 using System.Collections.Generic;
@@ -28,9 +27,11 @@ namespace SilkBot.Utilities
             if (CachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = new SilkDbContext(); //Swap this for your own DBContext.//
             var guild = await db.Guilds.Include(_ => _.DiscordUserInfos).FirstAsync(g => g.DiscordGuildId == ctx.Guild.Id);
-            var member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
-            if ((bool)member?.Flags.HasFlag(UserFlag)) CachedStaff.Add(member.UserId); 
-            return member?.Flags.HasFlag(UserFlag) ?? false && RequireGuild;
+            DiscordUserInfo member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
+            if (member is null) return false;
+            if (member.Flags.HasFlag(UserFlag)) CachedStaff.Add(member.UserId);
+            return member.Flags.HasFlag(UserFlag);
+            
         }
     }
 }

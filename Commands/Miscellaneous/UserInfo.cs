@@ -65,8 +65,8 @@ namespace SilkBot.Commands.Miscellaneous
                 .OrderByDescending(r => r.Position)
                 .Select(role => role.Mention)
                 .ToList();
-
-            embed.AddField("Roles:", string.Join(' ', roleList));
+            var roles = string.Join(' ', roleList);
+            embed.AddField("Roles:", roles.Count() < 1 ? "No roles." : roles);
 
             await ctx.RespondAsync(embed: embed);
         }

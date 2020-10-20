@@ -10,8 +10,12 @@ using Silk__Extensions;
 using SilkBot.Database.Models;
 using SilkBot.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using static SilkBot.Bot;
 
@@ -25,12 +29,13 @@ namespace SilkBot.Commands.General
         private const string TERMINATED_TICKET = "That ticket has been closed prior, and cannot be modified.";
         private const string TICKET_RECORD_MESSAGE = "Thank you for opening a ticket. For security reasons, conversation proxied though the bot is recorded. You will receive a response in due time.";
         private readonly Func<string, string> TerminateTicket = (r) => $"Your ticket has been terminated. Reason: `{r}`";
+
+        private readonly Dictionary<ulong, ulong> ticketChannels = new Dictionary<ulong, ulong>(); // UserId, ChannelId
          
         private readonly TicketService _ticketService = new TicketService(Instance.Client);
         public Ticket(IDbContextFactory<SilkDbContext> db) : base(db) { }
 
-        [Command("respond")]
-        [Aliases("reply")]
+        [Command("respond"), Aliases("reply"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task RespondToTicket(CommandContext ctx, int Id, [RemainingText] string message)
         {
             try
@@ -62,7 +67,8 @@ namespace SilkBot.Commands.General
                 var embed = _ticketService.GenerateRespondantEmbed(messageContent, ctx.Client.CurrentUser.AvatarUrl, ctx.User, ticket.Ticket);
                 DiscordChannel ticketChannel = await _ticketService.GetOrCreateTicketChannelAsync(ctx.Client, ctx.User.Id);
                 await ticketChannel.SendMessageAsync(embed: embed);
-
+                await ctx.RespondAsync(TICKET_RECORD_MESSAGE);
+                ticketChannels.Add(ctx.User.Id, ticketChannel.Id);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }
 
@@ -70,12 +76,16 @@ namespace SilkBot.Commands.General
         }
 
 
-        [Command("close")]
+        [Command("close"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task CloseTicket(CommandContext ctx, int Id, [RemainingText] string reason = TERMINATION_REASON)
         {
             using var db = new SilkDbContext();
             TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
             if (ticket is null) await ctx.RespondAsync("Invalid ticket id!");
+            else if (ctx.Channel.Id != ticketChannels[ticket.Opener]) 
+            {
+                await SendInvalidTicketErrorAsync(ctx.Channel, ctx.Guild.GetChannel(ticketChannels[ticket.Opener]));
+            }
             else if (!ticket.IsOpen) await ctx.RespondAsync(TERMINATED_TICKET);
             else
             {
@@ -85,7 +95,13 @@ namespace SilkBot.Commands.General
                 await db.SaveChangesAsync();
                 DiscordChannel c = await _ticketService.GetDmChannelAsync(ctx.Client, ticket.Opener);
                 await c.SendMessageAsync(embed: EmbedHelper.CreateEmbed(ctx, TerminateTicket(reason), DiscordColor.Red));
+                ticketChannels.Remove(ticket.Opener);
+                await ctx.Channel.DeleteAsync();
             }
+        }
+        private async Task SendInvalidTicketErrorAsync(DiscordChannel tc, DiscordChannel cc)
+        {
+            await tc.SendMessageAsync($"Sorry but you can't close this ticket from this channel! Execute `<prefix>ticket close <id>` in {cc.Mention} instead.");
         }
         
         public class ListTicketsCommand : CommandClass
@@ -101,7 +117,7 @@ namespace SilkBot.Commands.General
                         .WithTimestamp(DateTime.Now);
 
 
-            [Command("List")]
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
             public async Task ListTickets(CommandContext ctx)
             {
                 var db = new Lazy<SilkDbContext>();
@@ -186,11 +202,16 @@ namespace SilkBot.Commands.General
                 await parentCategory.AddOverwriteAsync(g.GetRole(745751916608356467), Permissions.SendMessages | Permissions.ReadMessageHistory | Permissions.AccessChannels, Permissions.None);
             }
             else { parentCategory = (await g.GetChannelsAsync()).Single(c => c.Name.ToLower() == "Silk! Tickets".ToLower()); }
-            
-            return await g.CreateChannelAsync((await g.GetMemberAsync(userId)).Nickname, ChannelType.Text, parentCategory);
+
+            DiscordUser u = await client.GetUserAsync(userId);
+            DiscordChannel returnChannel =
+                g.Channels.Any(c => c.Value.Name.ToLower() == u.Username.ToLower()) 
+                ? g.Channels.Values.Single(c => c.Name.ToLower() == u.Username.ToLower()) 
+                : await g.CreateChannelAsync((await c.GetUserAsync(userId)).Username.ToLower(), ChannelType.Text, parentCategory);
+            return returnChannel;
         }
 
-        public async Task RespondToBlindTicket(DiscordClient client, ulong userId, string message)
+        public async Task RespondToBlindTicketAsync(DiscordClient client, ulong userId, string message)
         {
             using var db = new SilkDbContext();
 
@@ -264,12 +285,11 @@ namespace SilkBot.Commands.General
 
         public bool CheckForTicket(DiscordChannel c, ulong Id)
         {
-            // no point opening the DB is this basic check fails
             if (!c.IsPrivate)
                 return false;
 
-            using var database = new SilkDbContext();
-            TicketModel ticket = database.Tickets
+            using var db = new SilkDbContext();
+            TicketModel ticket = db.Tickets
                 .Where(t => t.IsOpen)
                 .OrderBy(t => t.Opened)
                 .LastOrDefault(t => t.Opener == Id);

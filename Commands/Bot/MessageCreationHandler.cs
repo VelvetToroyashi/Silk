@@ -2,9 +2,10 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
-using Silk__Extensions;
+using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
 using SilkBot.Models;
+using SilkBot.Services;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,13 +17,21 @@ namespace SilkBot.Commands.Bot
     public sealed class MessageCreationHandler
     {
         private readonly IDbContextFactory<SilkDbContext> dbContextFactory;
-        private readonly TicketService _ticketService = new TicketService(Instance.Client);
-        public MessageCreationHandler()
+        private readonly PrefixCacheService _cacheService;
+        private readonly TicketService _ticketService;
+        private readonly ILogger _logger;
+
+        public MessageCreationHandler(IDbContextFactory<SilkDbContext> db, PrefixCacheService cs, TicketService ts, ILogger<MessageCreationHandler> logger)
         {
-            dbContextFactory = Instance.Services.Get<IDbContextFactory<SilkDbContext>>();
+            dbContextFactory = db;
+            _cacheService = cs;
+            _ticketService = ts;
+            _logger = logger;
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)
+#pragma warning restore CS1998 
         {
             //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
@@ -32,23 +41,32 @@ namespace SilkBot.Commands.Bot
             }
             e.Handled = true;
             //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
+            if (!(e.Guild is null))
+            {
+                var config = new SilkDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == (e.Guild == null ? 0 : e.Guild.Id));
+                CommandTimer.Restart();
+                CheckForInvite(e, config);
+                _logger.LogInformation($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
+            }
+            _ = Task.Run(async () =>
+                {
+                    if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
+                        await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);   
+                });
             
-            CommandTimer.Restart();
-            if (_ticketService.CheckForTicket(e.Channel, e.Message.Author.Id)) { await _ticketService.RespondToBlindTicket(c, e.Author.Id, e.Message.Content); }
+            
 
-            var config = dbContextFactory.CreateDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == (e.Guild == null ? 0 : e.Guild.Id));
-            CheckForInvite(e, config);
-            Console.WriteLine($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
             //End of Silk specific code//
 
 
             var commands = c.GetCommandsNext();
-            var guildPrefix = config?.Prefix ?? SilkDefaultCommandPrefix;
+            var guildPrefix = _cacheService.RetrievePrefix(e.Guild.Id) ?? SilkDefaultCommandPrefix;
             var prefixPos = e.Message.GetStringPrefixLength(guildPrefix);
             if (prefixPos < 1)
             {
                 //prefix wasn't found in the message
                 CommandTimer.Stop();
+
                 return;
             }
             var messageContent = e.Message.Content.Substring(prefixPos);

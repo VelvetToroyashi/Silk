@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
+using SilkBot.Utilities;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,14 +16,10 @@ namespace SilkBot.Commands.Bot
         
         [Command("Prefix")]
         [Aliases("SetPrefix")]
+        [RequireFlag(UserFlag.Staff)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
-            if (!config.DiscordUserInfos.Any(user => user.Flags.HasFlag(UserFlag.Staff)))
-            {
-                await ctx.RespondAsync("Sorry, but you're not allowed to change the prefix!");
-                return;
-            }
 
             var (valid, reason) = IsValidPrefix(prefix);
             if (!valid)

@@ -3,6 +3,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Models;
+using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,14 +16,12 @@ namespace SilkBot.Commands.Server
     public class ConfigCommand : BaseCommandModule
     {
 
-
-        [Command("configure")]
+        //TODO: Fix configure command to allow for interactive or static via subcomands
+        [Command("configure"), RequireFlag(UserFlag.Staff)]
         public async Task GuildConfigurationCommand(CommandContext ctx)
         {
             using var db = new SilkDbContext();
-            var a = db.Guilds.Include(_ => _.DiscordUserInfos).First(g => g.DiscordGuildId == ctx.Guild.Id);
-            var guild = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
-            if (!guild.DiscordUserInfos.Any(user => user.Flags.HasFlag(Models.UserFlag.Staff) && user.UserId == ctx.User.Id)) return;
+            var guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
             var sentConfigurationMessage = await ctx.RespondAsync("1: Toggle whitelisting invites, 2: Log message edits and deletions, 3: Log member joins and leaves, 4: Log role changes, 5: Set mute role, 6: Set log channel");
             var interactivity = ctx.Client.GetInteractivity();
 
