@@ -1,0 +1,17 @@
+{
+  "Administrators": [
+    {
+      "ID": 401756823406772225
+    }
+  ],
+  "BannedMembers": [],
+  "SelfAssignableRoles": null,
+  "Moderators": [
+    {
+      "ID": 401756823406772225
+    }
+  ],
+  "Guild": 692814317434961952,
+  "LoggingChannel": 0,
+  "MutedRole": 0
+}
