@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Tests
@@ -10,7 +11,7 @@ namespace SilkBot.Commands.Tests
         [GroupCommand]
         public async Task A(CommandContext c) => await c.RespondAsync("Group Foo, command A");
         [Command("Heck")]
-        public async Task B(CommandContext c) => await c.RespondAsync("Group Foo, command B");
+        public async Task B(CommandContext c) => await c.RespondAsync(c.Prefix);
 
         [Group("Bar")]
         public class OwO : BaseCommandModule

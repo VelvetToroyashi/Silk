@@ -145,15 +145,15 @@
 
             Client = new DiscordClient(config);
             AddServices();
-            Commands = new CommandsNextConfiguration { EnableDefaultHelp = false, UseDefaultCommandHandler = false, Services = Services, EnableMentionPrefix = true };
+            Commands = new CommandsNextConfiguration { EnableDefaultHelp = true, UseDefaultCommandHandler = false, Services = Services, EnableMentionPrefix = true };
             Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1) });
-
             Client.UseCommandsNext(Commands);
+            Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
 
             // Register database context and apply newest migration if not already done.
 
 
-            HelpCache.Initialize();
+            //HelpCache.Initialize();
 
             await Client.ConnectAsync();
 

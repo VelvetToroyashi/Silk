@@ -4,12 +4,15 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
+    [Category(Categories.General)]
     public class AvatarCommand : BaseCommandModule
     {
         [Command("Avatar")]
+        [Description("Show your, or someone else's avatar!")]
         public async Task GetAvatarAsync(CommandContext ctx)
         {
             await ctx.RespondAsync(embed:
@@ -18,10 +21,11 @@ namespace SilkBot.Commands.General
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
+
         }
 
         [Command("Avatar")]
-        public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
+        public async Task GetAvatarAsync(CommandContext ctx, [Description("Test pog?")] DiscordUser user)
         {
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
@@ -37,7 +41,7 @@ namespace SilkBot.Commands.General
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
         {
-            var user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().StartsWith(mention.ToLower())).Value;
+            var user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower())).Value;
 
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()

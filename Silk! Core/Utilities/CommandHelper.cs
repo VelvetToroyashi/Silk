@@ -9,19 +9,15 @@ namespace SilkBot.Utilities
 {
     public static class CommandHelper
     {
-        public static IEnumerable<Type> GetAllCommandModules()
+        public static IEnumerable<Type> GetAllCommandModules(Assembly asm)
         {
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => !a.IsDynamic)
-                .SelectMany(a => a.GetTypes())
+            return asm.GetTypes()
                 .Where(t => t.BaseType == typeof(BaseCommandModule) && !t.IsAbstract);
         }
 
-        public static IEnumerable<MethodInfo> GetAllCommands()
+        public static IEnumerable<MethodInfo> GetAllCommands(Assembly asm)
         {
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => !a.IsDynamic)
-                .SelectMany(a => a.GetTypes())
+            return asm.GetTypes()
                 .Where(t => t.BaseType == typeof(BaseCommandModule))
                 .SelectMany(t => t.GetMethods())
                 .Where(m => m.GetCustomAttribute<CommandAttribute>() != null);
