@@ -1,10 +1,13 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using Humanizer;
+using Humanizer.Localisation;
 using System;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [ModuleLifespan(ModuleLifespan.Transient)]
     public class UptimeCommand : BaseCommandModule
     {
         [Command]
@@ -12,7 +15,7 @@ namespace SilkBot.Commands.Miscellaneous
         {
             var now = DateTime.Now;
             var uptime = now.Subtract(SilkBot.Bot.StartupTime);
-            await ctx.RespondAsync($"Running for `{uptime.Days} days, {uptime.Hours} hours, {uptime.Minutes} minutes, and {uptime.Seconds} seconds.`");
+            await ctx.RespondAsync($"Running for `{uptime.Humanize(4, null, TimeUnit.Month, TimeUnit.Second)}.`");
         }
 
     }
