@@ -2,6 +2,8 @@
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SilkBot.Utilities
@@ -18,7 +20,23 @@ namespace SilkBot.Utilities
              ctx.Guild.Members
             .Where(member => member.Value.DisplayName.ToLowerInvariant()
             .Contains(input.ToLowerInvariant())).Select(m => m.Value);
+        public static IEnumerable<DiscordMember> GetUserByName(this CommandContext ctx, string input) 
+        {
+            var members = ctx.Client.Guilds.SelectMany(g => g.Value.Members.Values);
+            return members.Where(m => m.Username.ToLower().Contains(input.ToLower()) && !m.IsBot).Distinct(new DiscordMemberComparer());
+        } 
 
+    }
+    public class DiscordMemberComparer : IEqualityComparer<DiscordMember>
+    {
+        public bool Equals([AllowNull] DiscordMember x, [AllowNull] DiscordMember y)
+        {
+            return x.Id == y.Id;
+        }
 
+        public int GetHashCode([DisallowNull] DiscordMember obj)
+        {
+            return obj == null ? 0 : (int)obj.Id;
+        }
     }
 }

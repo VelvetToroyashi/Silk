@@ -8,7 +8,7 @@ namespace SilkBot.Models
         public int Id { get; set; } //Requisite Id for DB purposes
         public string Reason { get; set; } // Why was this infraction given
         public ulong Enforcer { get; set; } //Who gave this infraction
-        public DiscordUserInfo User { get; set; } //Who's this affecting
+        public UserInfoModel User { get; set; } //Who's this affecting
         public DateTime InfractionTime { get; set; } //When it happened
         public InfractionType InfractionType { get; set; } //What happened
     }

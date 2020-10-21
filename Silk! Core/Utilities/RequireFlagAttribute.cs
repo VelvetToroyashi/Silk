@@ -27,7 +27,7 @@ namespace SilkBot.Utilities
             if (CachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = new SilkDbContext(); //Swap this for your own DBContext.//
             var guild = await db.Guilds.Include(_ => _.DiscordUserInfos).FirstAsync(g => g.DiscordGuildId == ctx.Guild.Id);
-            DiscordUserInfo member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
+            UserInfoModel member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag)) CachedStaff.Add(member.UserId);
             return member.Flags.HasFlag(UserFlag);

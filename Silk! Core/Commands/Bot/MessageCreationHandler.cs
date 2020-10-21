@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
 using SilkBot.Models;
 using SilkBot.Services;
-using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -39,20 +38,20 @@ namespace SilkBot.Commands.Bot
                 CommandTimer.Stop();
                 return;
             }
-            e.Handled = true;
+
             //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
-            if (!(e.Guild is null))
+            if ((e.Guild is null))
             {
                 var config = new SilkDbContext().Guilds.FirstOrDefault(guild => guild.DiscordGuildId == (e.Guild == null ? 0 : e.Guild.Id));
                 CommandTimer.Restart();
                 CheckForInvite(e, config);
                 _logger.LogInformation($"Scanned for an invite in message in {CommandTimer.ElapsedTicks / 10} µs.");
             }
-            _ = Task.Run(async () =>
-                {
-                    if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
-                        await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);   
-                });
+            //_ = Task.Run(async () =>
+            //    {
+            //        if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
+            //            await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);   
+            //    });
             
             
 
@@ -82,6 +81,7 @@ namespace SilkBot.Commands.Bot
             
             /* NOTE: 'ExecuteCommandAsync' method is wrapped in a try/catch internally so Exceptions will not be rethrown from commands */
             _ = Task.Run(async () => await commands.ExecuteCommandAsync(context));
+            e.Handled = true;
             //Very important that you do NOT *EVER* await commands, especially in the case of Interactivity; it will deadlock your bot.//
             CommandTimer.Stop();
         }

@@ -8,14 +8,13 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Silk__Extensions;
 using SilkBot.Database.Models;
+using SilkBot.Services;
 using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using static SilkBot.Bot;
 
@@ -28,12 +27,12 @@ namespace SilkBot.Commands.General
         private const string TERMINATION_REASON = "Your ticket has been manually terminated and is now void. No further information provided.";
         private const string TERMINATED_TICKET = "That ticket has been closed prior, and cannot be modified.";
         private const string TICKET_RECORD_MESSAGE = "Thank you for opening a ticket. For security reasons, conversation proxied though the bot is recorded. You will receive a response in due time.";
-        private readonly Func<string, string> TerminateTicket = (r) => $"Your ticket has been terminated. Reason: `{r}`";
-
+        private readonly Func<string, string> TicketTermination = (r) => $"Your ticket has been terminated. Reason: `{r}`";
         private readonly Dictionary<ulong, ulong> ticketChannels = new Dictionary<ulong, ulong>(); // UserId, ChannelId
-         
-        private readonly TicketService _ticketService = new TicketService(Instance.Client);
-        public Ticket(IDbContextFactory<SilkDbContext> db) : base(db) { }
+        private readonly TicketService _ticketService;
+
+
+        public Ticket(IDbContextFactory<SilkDbContext> db, TicketService ticket) : base(db) { _ticketService = ticket; }
 
         [Command("respond"), Aliases("reply"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task RespondToTicket(CommandContext ctx, int Id, [RemainingText] string message)
@@ -94,7 +93,7 @@ namespace SilkBot.Commands.General
 
                 await db.SaveChangesAsync();
                 DiscordChannel c = await _ticketService.GetDmChannelAsync(ctx.Client, ticket.Opener);
-                await c.SendMessageAsync(embed: EmbedHelper.CreateEmbed(ctx, TerminateTicket(reason), DiscordColor.Red));
+                await c.SendMessageAsync(embed: EmbedHelper.CreateEmbed(ctx, TicketTermination(reason), DiscordColor.Red));
                 ticketChannels.Remove(ticket.Opener);
                 await ctx.Channel.DeleteAsync();
             }
@@ -132,9 +131,10 @@ namespace SilkBot.Commands.General
                     if (isNumber)
                     {
                         TicketModel ticket = db.Value.Tickets.SingleOrDefault(t => t.Id == int.Parse(msgContent));
-                        if (ticket is null) await ctx.RespondAsync("Invalid ticket Id!");
+                        if (ticket is null) await ctx.RespondAsync($"ArgumentOutOfRangeException: Ticket with Id `{msg.Result.Content}` does not exist.");
                         else
                         {
+                            
                             DiscordUser ticketOpener = await ctx.Client.GetUserAsync(ticket.Opener);
                             DiscordEmbed embed = GetTicketEmbed(ctx, ticketOpener, ticket);
                             await ctx.RespondAsync(embed: embed);
@@ -147,11 +147,44 @@ namespace SilkBot.Commands.General
                         else 
                         {
                             TicketModel ticket = db.Value.Tickets.OrderBy(t => t.Opened).LastOrDefault(t => t.Opener == ticketMember.Id);
-                            _ = ticket == null ? await ctx.RespondAsync("No prior tickets opened by user!") : await ctx.RespondAsync(embed: GetTicketEmbed(ctx, ticketMember, ticket));
+                            _ = ticket == null ? await ctx.RespondAsync($"{ticketMember.Username} has no tickets!") : await ctx.RespondAsync(embed: GetTicketEmbed(ctx, ticketMember, ticket));
                         }                                         
                     }
                 }
             }
+
+
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
+            public async Task ListTickets(CommandContext ctx, int Id) 
+            {
+                using var db = GetDbContext();
+                TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
+                if (ticket is null) await ctx.RespondAsync($"ArgumentOutOfRangeException: Ticket with Id `{Id}` does not exist.");
+                else
+                {
+
+                    DiscordUser ticketOpener = await ctx.Client.GetUserAsync(ticket.Opener);
+                    DiscordEmbed embed = GetTicketEmbed(ctx, ticketOpener, ticket);
+                    await ctx.RespondAsync(embed: embed);
+                }
+            }
+
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
+            public async Task ListTickets(CommandContext ctx, string name)
+            {
+                using var db = GetDbContext();
+                DiscordUser user = await new MemberSelectorService().SelectUser(ctx, ctx.GetUserByName(name));
+                if(user is null) { await ctx.RespondAsync("Canceled."); return; }
+                TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Opener == user.Id);
+                if (ticket is null) await ctx.RespondAsync($"{user.Username} has not opened any tickets.");
+                else
+                {
+                    DiscordEmbed embed = GetTicketEmbed(ctx, user, ticket);
+                    await ctx.RespondAsync(embed: embed);
+                }
+            }
+
+
         }
     }
 

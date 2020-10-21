@@ -73,7 +73,7 @@ namespace SilkBot.Utilities
         {
             var staffMembers = members
                 .Where(member => member.HasPermission(Permissions.KickMembers | Permissions.All) && !member.IsBot)
-                .Select(staffMember => new DiscordUserInfo { Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff });
+                .Select(staffMember => new UserInfoModel { Guild = guild, UserId = staffMember.Id, Flags = UserFlag.Staff });
 
 
             guild.DiscordUserInfos.AddRange(staffMembers);

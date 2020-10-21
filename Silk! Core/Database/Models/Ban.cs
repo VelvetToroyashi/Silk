@@ -7,7 +7,7 @@ namespace SilkBot.Models
     {
         public int Id { get; set; }
         [Required]
-        public DiscordUserInfo UserInfo { get; set; }
+        public UserInfoModel UserInfo { get; set; }
         public string UserId { get; set; }
         public Guild Guild { get; set; }
         public string GuildId { get; set; }

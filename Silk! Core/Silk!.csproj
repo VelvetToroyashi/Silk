@@ -102,6 +102,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="dbLogin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

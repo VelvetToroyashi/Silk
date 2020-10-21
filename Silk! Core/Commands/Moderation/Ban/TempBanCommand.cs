@@ -42,7 +42,7 @@ namespace SilkBot.Commands.Moderation.Ban
                 var infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
-                    bannedUser = new DiscordUserInfo() { Infractions = new List<UserInfractionModel>() };
+                    bannedUser = new UserInfoModel() { Infractions = new List<UserInfractionModel>() };
                     db.Users.Add(bannedUser);
                     bannedUser.Infractions.Add(infraction);
                 }

@@ -11,7 +11,7 @@ namespace SilkBot
         public DbSet<TicketModel> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
         public DbSet<ChangelogModel> ChangeLogs { get; set; }
-        public DbSet<DiscordUserInfo> Users { get; set; }
+        public DbSet<UserInfoModel> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             var sqlString = File.ReadAllText("./dbLogin");

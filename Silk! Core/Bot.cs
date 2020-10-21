@@ -13,7 +13,6 @@
     using NLog.Conditions;
     using NLog.Config;
     using NLog.Extensions.Logging;
-    using NLog.Fluent;
     using NLog.Targets;
     using Silk__Extensions;
     using SilkBot.Commands.Bot;
@@ -22,11 +21,9 @@
     using SilkBot.Tools;
     using SilkBot.Utilities;
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
 
@@ -45,7 +42,7 @@
         private ServiceProvider Services;
 
         public CommandsNextConfiguration Commands { get; private set; }
-        
+
         #endregion
 
         private readonly Stopwatch sw = new Stopwatch();
@@ -55,7 +52,7 @@
         public async Task RunBotAsync()
         {
             SetupNLog();
-            
+
             try
             {
                 await SilkDBContext.Database.MigrateAsync();
@@ -65,9 +62,9 @@
                 Colorful.Console.WriteLine($"Database: Invalid password. Is the password correct, and did you setup the database?", Color.Red);
                 Environment.Exit(1);
             }
-            
+
             await InitializeClientAsync();
-            
+
             RegisterCommands();
 
             await Task.Delay(-1);
@@ -80,7 +77,7 @@
             {
                 Name = "console",
                 EnableAnsiOutput = true,
-                Layout = "$[${level}] \u001b[0m${message}", 
+                Layout = "$[${level}] \u001b[0m${message}",
                 UseDefaultRowHighlightingRules = false,
 
             };
@@ -90,15 +87,15 @@
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
 
-            config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Error, consoleTarget, "*");
+            config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
             LogManager.Configuration = config;
 
-        
+
         }
 
         private void AddServices()
         {
-            
+
             Services = new ServiceCollection()
 
                 //.AddSingleton<DiscordEmojiCreationService>()
@@ -109,16 +106,21 @@
                 .AddScoped<BotEventHelper>()
                 .AddSingleton<TicketService>()
                 .AddDbContextFactory<SilkDbContext>(lifetime: ServiceLifetime.Transient)
-                .AddLogging(lg => 
+                .AddLogging(loggingBuilder =>
                 {
-                    lg.ClearProviders();
-                    lg.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                    lg.AddNLog("./NLog.config");
+                    // configure Logging with NLog
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                    loggingBuilder.AddNLog("./NLog.config");
                 })
 
                 //.AddSingleton<GuildConfigCacheService>()
                 .AddSingleton(Client)
                 .BuildServiceProvider();
+            
+            var logger = Services.Get<ILogger<Bot>>();
+            logger.LogInformation("Logging ready.");
+            logger.LogInformation("DI Services ready.");
 
             Client.MessageCreated += Services.Get<MessageCreationHandler>().OnMessageCreate;
         }
@@ -138,21 +140,21 @@
                 MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information,
                 Token = token,
                 TokenType = TokenType.Bot,
-                
+
             };
 
             Client = new DiscordClient(config);
             AddServices();
             Commands = new CommandsNextConfiguration { EnableDefaultHelp = false, UseDefaultCommandHandler = false, Services = Services, EnableMentionPrefix = true };
-            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1)});
+            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1) });
 
             Client.UseCommandsNext(Commands);
 
             // Register database context and apply newest migration if not already done.
 
-            
+
             HelpCache.Initialize();
-            
+
             await Client.ConnectAsync();
 
             sw.Stop();

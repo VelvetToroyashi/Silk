@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SilkBot.Models
 {
-    public class DiscordUserInfo
+    public class UserInfoModel
     {
         [Key]
         public int Id { get; set; }
