@@ -1,0 +1,79 @@
+{
+  "Administrators": [
+    {
+      "ID": 209279906280898562
+    },
+    {
+      "ID": 321793791029936138
+    },
+    {
+      "ID": 591937689553731586
+    }
+  ],
+  "BannedMembers": [
+    {
+      "ID": 140725605372133376,
+      "Reason": null
+    },
+    {
+      "ID": 306994250032087042,
+      "Reason": null
+    },
+    {
+      "ID": 345998168233869312,
+      "Reason": null
+    },
+    {
+      "ID": 464579025818484757,
+      "Reason": null
+    },
+    {
+      "ID": 497181387023974400,
+      "Reason": null
+    },
+    {
+      "ID": 654158927474196524,
+      "Reason": "predatory comments"
+    },
+    {
+      "ID": 659740746244423682,
+      "Reason": null
+    },
+    {
+      "ID": 664657690852851712,
+      "Reason": "NSFW Imagery and refusing to cooperate"
+    },
+    {
+      "ID": 671536297265070122,
+      "Reason": "manipulating underage girls into perfoming sexual acts"
+    },
+    {
+      "ID": 699835515561574420,
+      "Reason": null
+    },
+    {
+      "ID": 727723443067420785,
+      "Reason": null
+    },
+    {
+      "ID": 727733545795059735,
+      "Reason": null
+    }
+  ],
+  "SelfAssignableRoles": null,
+  "Moderators": [
+    {
+      "ID": 209279906280898562
+    },
+    {
+      "ID": 321793791029936138
+    },
+    {
+      "ID": 591937689553731586
+    }
+  ],
+  "Guild": 633235782358007847,
+  "LoggingChannel": 0,
+  "MutedRole": 0,
+  "PermittedUsers": null
+}

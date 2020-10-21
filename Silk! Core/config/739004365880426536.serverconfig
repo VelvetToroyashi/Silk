@@ -1,0 +1,41 @@
+{
+  "Administrators": [],
+  "BannedMembers": [
+    {
+      "ID": 360612461642252289,
+      "Reason": "get owned faggot shhshs"
+    },
+    {
+      "ID": 460899801194692628,
+      "Reason": null
+    },
+    {
+      "ID": 480066217315663872,
+      "Reason": null
+    },
+    {
+      "ID": 664657690852851712,
+      "Reason": "dumb gay idiot didnt know i could do it after you left"
+    },
+    {
+      "ID": 728812226667872268,
+      "Reason": "die horny bitch"
+    }
+  ],
+  "SelfAssignableRoles": null,
+  "Moderators": [
+    {
+      "ID": 445390126613266435
+    },
+    {
+      "ID": 566354526144037011
+    },
+    {
+      "ID": 694125810197463080
+    }
+  ],
+  "Guild": 739004365880426536,
+  "LoggingChannel": 0,
+  "MutedRole": 0,
+  "PermittedUsers": null
+}
