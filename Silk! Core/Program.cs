@@ -5,5 +5,5 @@
     {
         public static async Task Main()
             => await Bot.Instance.RunBotAsync();
-    }
+    } 
 }
