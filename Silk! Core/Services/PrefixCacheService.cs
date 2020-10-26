@@ -1,40 +1,63 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Models;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace SilkBot.Services
 {
     public class PrefixCacheService
     {
         private readonly ILogger _logger;
-        private readonly IMemoryCache _cache;
+        private readonly ConcurrentDictionary<ulong, string> _cache;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly Stopwatch _sw = new Stopwatch();
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache cache, IDbContextFactory<SilkDbContext> dbFactory) 
+        public PrefixResolverDelegate PrefixDelegate { get; private set; }
+        
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory) 
         {
             _logger = logger;
-            _cache = cache;
+            _cache = new ConcurrentDictionary<ulong, string>();
             _dbFactory = dbFactory;
+
+            PrefixDelegate = ResolvePrefixAsync;
         }
-        public string RetrievePrefix(ulong guildId)
+
+        public async Task<int> ResolvePrefixAsync(DiscordMessage m)
         {
-            if(_cache.TryGetValue(guildId, out string prefix))
-            {
-                return prefix;
-            }
-            else
-            {
-                _logger.LogDebug("Prefix not present in cache; queuing from database.");
-                _sw.Restart();
-                var db = _dbFactory.CreateDbContext();
-                Guild guild = db.Guilds.First(g => g.DiscordGuildId == guildId);
-                _sw.Stop();
-                _logger.LogDebug($"Cached {prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
-                return _cache.Set(guild.DiscordGuildId, guild.Prefix);
-            }
+            var prefix = await RetrievePrefixAsync(m.Channel.GuildId) ?? string.Empty;
+            var prefixPos = m.GetStringPrefixLength(prefix);
+            return prefixPos;
+        }
+
+        public async Task<string> RetrievePrefixAsync(ulong? guildId)
+        {
+            if (guildId == default || guildId == 0) return null;
+            else if (_cache.TryGetValue(guildId.Value, out string prefix)) return prefix;
+            else return await GetPrefixFromDatabaseAsync(guildId.Value);
+        }
+
+        private async Task<string> GetPrefixFromDatabaseAsync(ulong guildId)
+        {
+            _logger.LogDebug("Prefix not present in cache; queuing from database.");
+            _sw.Restart();
+            using var db = _dbFactory.CreateDbContext();
+            GuildModel guild = await db.Guilds.AsNoTracking().FirstAsync(g => g.DiscordGuildId == guildId);
+            _sw.Stop();
+            _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
+            _cache.TryAdd(guildId, guild.Prefix);
+            return guild.Prefix;
+        }
+
+        public void UpdatePrefix(ulong id, string prefix) 
+        {
+            _cache.TryGetValue(id, out string currentPrefix);
+            _cache.AddOrUpdate(id, prefix, (i, p) => p = prefix);
+            _logger.LogDebug($"Updated prefix for {id} - {currentPrefix} -> {prefix}");
         }
     }
 }

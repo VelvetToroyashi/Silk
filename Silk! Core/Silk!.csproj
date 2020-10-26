@@ -67,6 +67,8 @@
     <Compile Include="Migrations\20201017140658_foobar.Designer.cs" />
     <Compile Include="Migrations\20201017145352_db-update-229.cs" />
     <Compile Include="Migrations\20201017145352_db-update-229.Designer.cs" />
+    <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.cs" />
+    <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 
@@ -76,6 +78,7 @@
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00743" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00743" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
+    <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-rc.2.20475.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-rc.2.20475.6">
@@ -89,11 +92,13 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0-rc.2.20475.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-rc.2.20475.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0-rc.2.20475.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0-rc.2.20475.5" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0-rc.2.20475.5" />
     <PackageReference Include="NLog" Version="4.7.5" />
     <PackageReference Include="NLog.Config" Version="4.7.5" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.6.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-rc2" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0-rc.2.20475.5" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0-rc.2.20475.5" />
   </ItemGroup>
 

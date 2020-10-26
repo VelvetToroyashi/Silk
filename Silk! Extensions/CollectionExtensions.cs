@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Silk__Extensions
@@ -43,5 +44,6 @@ namespace Silk__Extensions
             return string.Join(separator, values);
         }
 
+        public static void AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key, TValue value) => dict.AddOrUpdate(key, value, (k, v) => v = value);
     }
 }

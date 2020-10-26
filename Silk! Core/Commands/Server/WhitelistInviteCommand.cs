@@ -21,7 +21,7 @@ namespace SilkBot.Commands.Server
                 return;
             }
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
-            if (!config.WhiteListInvites)
+            if (!config.WhitelistInvites)
             {
                 await ctx.RespondAsync("This server doesn't whitelist invites!");
                 return;

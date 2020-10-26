@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SilkBot.Models
 {
-    public class Guild
+    public class GuildModel
     {
         [Key]
         public int Id { get; set; }
         [Required]
         public ulong DiscordGuildId { get; set; }
 
-        public bool WhiteListInvites { get; set; }
+        public bool WhitelistInvites { get; set; }
         public bool BlacklistWords { get; set; }
         public bool LogMessageChanges { get; set; }
         public bool LogMemberJoinOrLeave { get; set; }
@@ -21,11 +21,10 @@ namespace SilkBot.Models
 
         public string InfractionFormat { get; set; } 
 
-        public ulong? MuteRoleID { get; set; }
+        public ulong? MuteRoleId { get; set; }
         public ulong? MessageEditChannel { get; set; }
-        public ulong? RoleChangeLogChannel { get; set; }
         public ulong? GeneralLoggingChannel { get; set; }
-        public ulong? MemberLeaveJoinChannel { get; set; }
+        public ulong? GreetingChannel { get; set; }
 
         public List<BlackListedWord> BlackListedWords { get; set; } = new List<BlackListedWord>();
         public List<WhiteListedLink> WhiteListedLinks { get; set; } = new List<WhiteListedLink>();

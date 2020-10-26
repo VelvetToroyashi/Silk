@@ -59,12 +59,12 @@ namespace SilkBot.Commands.Server
             }
         }
 
-        private async Task WhiteListInvites(Models.Guild guild)
+        private async Task WhiteListInvites(Models.GuildModel guild)
         {
-            guild.WhiteListInvites = !guild.WhiteListInvites;
+            guild.WhitelistInvites = !guild.WhitelistInvites;
         }
 
-        private async Task ToggleLogMessageChanges(SilkDbContext db, Models.Guild guild,  DiscordChannel channel, DiscordUser user)
+        private async Task ToggleLogMessageChanges(SilkDbContext db, Models.GuildModel guild,  DiscordChannel channel, DiscordUser user)
         {
             if (guild.LogMessageChanges)
             {

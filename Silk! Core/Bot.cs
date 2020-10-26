@@ -24,6 +24,7 @@
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
 
@@ -32,24 +33,29 @@
     {
         #region Props
         public DiscordClient Client { get; set; }
-        public static Bot Instance { get; } = new Bot();
+        public static Bot Instance { get; private set; } 
         public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; } = new SilkDbContext();
         public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
-
+        
         private ServiceProvider Services;
+        
 
         public CommandsNextConfiguration Commands { get; private set; }
 
         #endregion
+        private ILogger<Bot> _logger;
+        private readonly Stopwatch _sw = new Stopwatch();
 
-        private readonly Stopwatch sw = new Stopwatch();
-
-        private Bot() => sw.Start();
+        public Bot() 
+        {
+            _sw.Start();
+            Instance = this;
+        }
         #region Methods
-        public async Task RunBotAsync()
+        public async Task RunBotAsync(ServiceCollection services)
         {
             SetupNLog();
 
@@ -63,7 +69,7 @@
                 Environment.Exit(1);
             }
 
-            await InitializeClientAsync();
+            await InitializeClientAsync(services);
 
             RegisterCommands();
 
@@ -93,72 +99,60 @@
 
         }
 
-        private void AddServices()
+        private void AddServices(ServiceCollection services)
         {
-
-            Services = new ServiceCollection()
-
-                //.AddSingleton<DiscordEmojiCreationService>()
-                .AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1))
-                .AddSingleton<NLogLoggerFactory>()
-                .AddSingleton<PrefixCacheService>()
-                .AddSingleton<MessageCreationHandler>()
-                .AddScoped<BotEventHelper>()
-                .AddSingleton<TicketService>()
-                .AddDbContextFactory<SilkDbContext>(lifetime: ServiceLifetime.Transient)
-                .AddLogging(loggingBuilder =>
-                {
-                    // configure Logging with NLog
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                    loggingBuilder.AddNLog("./NLog.config");
-                })
-
-                //.AddSingleton<GuildConfigCacheService>()
+            Services = services
                 .AddSingleton(Client)
                 .BuildServiceProvider();
-            
-            var logger = Services.Get<ILogger<Bot>>();
-            logger.LogInformation("Logging ready.");
-            logger.LogInformation("DI Services ready.");
-
+            _logger = Services.Get<ILogger<Bot>>();
+            _logger.LogInformation("All services initalized.");
             Client.MessageCreated += Services.Get<MessageCreationHandler>().OnMessageCreate;
+            new BotEventHelper(Client, Services.Get<IDbContextFactory<SilkDbContext>>(), Services.Get<ILogger<BotEventHelper>>());//.CreateHandlers(Client);
         }
 
 
 
 
 
-        private void RegisterCommands() => Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
+        private void RegisterCommands()
+        {
+            var sw = Stopwatch.StartNew();
+            Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
+            sw.Stop();
+            _logger.LogDebug($"Registered all commands in {sw.ElapsedMilliseconds} ms.");
+        }
 
-        private async Task InitializeClientAsync()
+        private async Task InitializeClientAsync(ServiceCollection services)
         {
             var token = File.ReadAllText("./Token.txt");
             var config = new DiscordConfiguration
             {
                 AutoReconnect = true,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information,
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None,
                 Token = token,
                 TokenType = TokenType.Bot,
-
+                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.Guilds,
+                LogTimestampFormat = "H:mm:sstt"
             };
 
             Client = new DiscordClient(config);
-            AddServices();
-            Commands = new CommandsNextConfiguration { EnableDefaultHelp = true, UseDefaultCommandHandler = false, Services = Services, EnableMentionPrefix = true };
-            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1) });
+            
+            AddServices(services);
+            Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate,  Services = Services };
+
+            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1), PaginationDeletion = PaginationDeletion.DeleteMessage });
             Client.UseCommandsNext(Commands);
-            Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
+            //Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
+            await Task.Delay(100);
+            _logger.LogInformation("Client Initialized.");
+            
 
-            // Register database context and apply newest migration if not already done.
-
-
-            //HelpCache.Initialize();
 
             await Client.ConnectAsync();
 
-            sw.Stop();
-            Colorful.Console.WriteLine($"Startup time: {(sw.ElapsedMilliseconds / 1000d):F2} seconds", Color.CornflowerBlue);
+            _sw.Stop();
+            _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
+            Client.Ready += (c, e) => { _logger.LogInformation("Client ready to proccess commands."); return Task.CompletedTask; };
         }
 
 

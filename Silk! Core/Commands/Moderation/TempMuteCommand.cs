@@ -35,7 +35,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 return;
             }
 
-            if (config.MuteRoleID is null)
+            if (config.MuteRoleId is null)
             {
                 await ctx.RespondAsync("Muted role is not set up");
                 return;
@@ -67,7 +67,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
             SilkBot.Bot.Instance.Timer.Events.Add(tempMute);
 
-            await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleID.Value), reason);
+            await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleId.Value), reason);
         }
 
         public TempMuteCommand() => SilkBot.Bot.Instance.Timer.Dispatcher.UnMute += OnMuteExpired;
@@ -84,7 +84,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
             var muteRole = SilkBot.Bot.Instance.SilkDBContext.Guilds
                 .AsQueryable()
-                .First(g => g.DiscordGuildId == actionObject.Guild.Id).MuteRoleID.Value;
+                .First(g => g.DiscordGuildId == actionObject.Guild.Id).MuteRoleId.Value;
             
             await unmuteMember.RevokeRoleAsync(actionObject.Guild.Roles[muteRole]);
         }

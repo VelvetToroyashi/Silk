@@ -15,7 +15,7 @@ namespace SilkBot.Commands.Bot
         [HelpDescription("The bot's needed permissions, and what commands they affect.")]
         public async Task GetRequiredPermissions(CommandContext ctx)
         {
-            var prefix = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(guild => guild.DiscordGuildId == ctx.Guild.Id)?.Prefix ?? SilkBot.Bot.SilkDefaultCommandPrefix;
+            string prefix = ctx.Prefix;
             
             var embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);

@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
+using SilkBot.Services;
 using SilkBot.Utilities;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,13 +11,17 @@ using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
 {
+    [ModuleLifespan(ModuleLifespan.Transient)]
     public class PrefixCommand : BaseCommandModule
     {
         private const int PrefixMaxLength = 5;
-        
-        [Command("Prefix")]
-        [Aliases("SetPrefix")]
-        [RequireFlag(UserFlag.Staff)]
+        private readonly PrefixCacheService _prefixCache;
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+
+
+        public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory) { _prefixCache = prefixCache; _dbFactory = dbFactory; }
+
+        [Command("setprefix"), RequireFlag(UserFlag.Staff)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
@@ -27,11 +32,10 @@ namespace SilkBot.Commands.Bot
                 await ctx.RespondAsync(reason);
                 return;
             }
-
-            var currentGuild = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id);
-            currentGuild.Prefix = prefix;
-            
-            await Instance.SilkDBContext.SaveChangesAsync();
+            var db = _dbFactory.CreateDbContext();
+            GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+            guild.Prefix = prefix;
+            _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
 
@@ -53,10 +57,8 @@ namespace SilkBot.Commands.Bot
         [Command("Prefix")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            using var db = new SilkDbContext();
-            var prefix = db.Guilds.FirstOrDefault(g => g.DiscordGuildId == ctx.Guild.Id)?.Prefix
-                         ?? SilkDefaultCommandPrefix;
-
+            var prefix = await _prefixCache.RetrievePrefixAsync(ctx.Guild?.Id);
+            
             await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }

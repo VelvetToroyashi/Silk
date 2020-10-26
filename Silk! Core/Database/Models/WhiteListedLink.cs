@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public string Link { get; set; }
-        public Guild Guild { get; set; }
+        public GuildModel Guild { get; set; }
     }
 }

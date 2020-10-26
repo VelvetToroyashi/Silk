@@ -7,7 +7,7 @@ namespace SilkBot
 {
     public class SilkDbContext : DbContext
     {
-        public DbSet<Guild> Guilds { get; set; }
+        public DbSet<GuildModel> Guilds { get; set; }
         public DbSet<TicketModel> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
         public DbSet<ChangelogModel> ChangeLogs { get; set; }

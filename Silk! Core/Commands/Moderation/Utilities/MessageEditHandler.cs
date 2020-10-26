@@ -40,9 +40,9 @@ namespace SilkBot.Commands.Moderation.Utilities
             var loggingChannel = await c.GetChannelAsync(logChannel);
             _ = c.SendMessageAsync(loggingChannel, embed: embed);
         }
-        private void CheckForInvite(MessageUpdateEventArgs e, Guild config)
+        private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {
-            if (config.WhiteListInvites)
+            if (config.WhitelistInvites)
             {
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {

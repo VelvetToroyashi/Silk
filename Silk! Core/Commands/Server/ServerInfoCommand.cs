@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk__Extensions;
 using SilkBot.Models;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,9 +14,9 @@ namespace SilkBot.Commands.Server
         [Command]
         public async Task ServerInfo(CommandContext ctx)
         {
-            var guild = ctx.Guild;
+            DiscordGuild guild = ctx.Guild;
             using var db = new SilkDbContext();
-            var staffCount = db.Guilds.First(_ => _.DiscordGuildId == guild.Id).DiscordUserInfos.Where(u => u.Flags.HasFlag(UserFlag.Staff)).Count();
+            int staffCount = db.Guilds.First(_ => _.DiscordGuildId == guild.Id).DiscordUserInfos.Where(u => u.Flags.Has(UserFlag.Staff)).Count();
             var embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:").WithColor(DiscordColor.Gold).WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
             embed.WithThumbnail(guild.IconUrl);
 
