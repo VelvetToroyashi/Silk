@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201029025142_no")]
+    partial class no
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,13 +173,13 @@ namespace SilkBot.Migrations
                     b.Property<decimal>("DiscordGuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("GeneralLoggingChannel")
+                    b.Property<decimal?>("GeneralLoggingChannel")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("GreetMembers")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal>("GreetingChannel")
+                    b.Property<decimal?>("GreetingChannel")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("InfractionFormat")
@@ -189,10 +191,10 @@ namespace SilkBot.Migrations
                     b.Property<bool>("LogRoleChange")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal>("MessageEditChannel")
+                    b.Property<decimal?>("MessageEditChannel")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("MuteRoleId")
+                    b.Property<decimal?>("MuteRoleId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Prefix")

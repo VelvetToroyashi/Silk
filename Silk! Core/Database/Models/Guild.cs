@@ -13,7 +13,7 @@ namespace SilkBot.Models
         public bool WhitelistInvites { get; set; }
         public bool BlacklistWords { get; set; }
         public bool LogMessageChanges { get; set; }
-        public bool LogMemberJoinOrLeave { get; set; }
+        public bool GreetMembers { get; set; }
         public bool LogRoleChange { get; set; }
         [Required]
         [StringLength(5)]
@@ -21,11 +21,11 @@ namespace SilkBot.Models
 
         public string InfractionFormat { get; set; } 
 
-        public ulong? MuteRoleId { get; set; }
-        public ulong? MessageEditChannel { get; set; }
-        public ulong? GeneralLoggingChannel { get; set; }
-        public ulong? GreetingChannel { get; set; }
-
+        public ulong MuteRoleId { get; set; }
+        public ulong MessageEditChannel { get; set; }
+        
+        public ulong GeneralLoggingChannel { get; set; }
+        public ulong GreetingChannel { get; set; }
         public List<BlackListedWord> BlackListedWords { get; set; } = new List<BlackListedWord>();
         public List<WhiteListedLink> WhiteListedLinks { get; set; } = new List<WhiteListedLink>();
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new List<SelfAssignableRole>();

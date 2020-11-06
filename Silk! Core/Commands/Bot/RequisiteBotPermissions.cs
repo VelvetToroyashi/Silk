@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Utilities;
-using System.Linq;
+using SilkBot.Extensions;
 using System.Text;
 using System.Threading.Tasks;
 

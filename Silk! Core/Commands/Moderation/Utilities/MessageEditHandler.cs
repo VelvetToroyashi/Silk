@@ -19,7 +19,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.DiscordGuildId == e.Guild.Id);
             if (config is null) return;
             CheckForInvite(e, config);
-            var logChannel = config.MessageEditChannel.GetValueOrDefault();
+            var logChannel = config.MessageEditChannel;
             if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
 
             if (logChannel == default) return;

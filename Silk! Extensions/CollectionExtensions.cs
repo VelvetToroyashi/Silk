@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace Silk__Extensions
+namespace SilkBot.Extensions
 {
     public static class CollectionExtensions
     {
@@ -45,5 +46,13 @@ namespace Silk__Extensions
         }
 
         public static void AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key, TValue value) => dict.AddOrUpdate(key, value, (k, v) => v = value);
+        
+        public static IEnumerable<string> WhereMoreThan(this IEnumerable<string> e, int count)
+        {
+            for(int i = 0; i < e.Count(); i++)
+            {
+                if (e.ElementAt(i).Length > count) yield return e.ElementAt(i);
+            }
+        }
     }
 }

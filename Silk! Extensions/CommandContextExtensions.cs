@@ -2,13 +2,12 @@
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core.Metadata.Edm;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace SilkBot.Utilities
+namespace SilkBot.Extensions
 {
-    public static class CommandContextHelper
+    public static class CommandContextExtensions
     {
         public static (string DisplayName, string Url) GetAuthor(this CommandContext ctx) => (ctx.Member.DisplayName, ctx.Member.AvatarUrl);
         public static DiscordEmbedBuilder WithAuthorExtension(this DiscordEmbedBuilder builder, string name, string avatarUrl) =>
@@ -24,8 +23,9 @@ namespace SilkBot.Utilities
         {
             var members = ctx.Client.Guilds.SelectMany(g => g.Value.Members.Values);
             return members.Where(m => m.Username.ToLower().Contains(input.ToLower()) && !m.IsBot).Distinct(new DiscordMemberComparer());
-        } 
+        }
 
+        public static string GetBotUrl(this CommandContext ctx) => $"https://discord.com/users/{ctx.Client.CurrentUser.Id}";
     }
     public class DiscordMemberComparer : IEqualityComparer<DiscordMember>
     {

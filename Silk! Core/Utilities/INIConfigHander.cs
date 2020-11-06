@@ -6,6 +6,7 @@ using IniParser.Parser;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,11 +36,13 @@ namespace SilkBot.Utilities
 
                 // Assign values. //
 
-                guild.LogMemberJoinOrLeave  = ParseBool(INI, "SERVER", "GREET_MEMBERS");
+                guild.GreetMembers  = ParseBool(INI, "SERVER", "GREET_MEMBERS");
                 guild.LogMessageChanges     = ParseBool(INI, "SERVER", "LOG_MSG_EDIT");
                 guild.WhitelistInvites      = ParseBool(INI, "SERVER", "WHITELIST_INVITES");
                 guild.BlacklistWords        = ParseBool(INI, "SERVER", "ENABLE_BLACKLIST");
-                guild.BlackListedWords      = INI["SERVER"]["BLACKLIST"].Split(',').Select(w => new BlackListedWord() { Word = w }).ToList();
+                guild.BlackListedWords      = INI["SERVER"]["BLACKLIST"] == "NULL" ? 
+                                                                            new List<BlackListedWord>() : 
+                                                                            INI["SERVER"]["BLACKLIST"].Split(',').Select(w => new BlackListedWord() { Word = w }).ToList();
 
             }
             catch (ParsingException e) 

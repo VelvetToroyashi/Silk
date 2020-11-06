@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Utilities;
-using static SilkBot.Utilities.EmbedHelper;
+using static SilkBot.Extensions.EmbedHelper;
 
 
 

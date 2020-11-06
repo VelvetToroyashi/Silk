@@ -5,7 +5,6 @@ using Humanizer;
 using Humanizer.Localisation;
 using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
@@ -22,18 +21,15 @@ namespace SilkBot.Commands.Bot
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"Stats for Silk!:")
                 .WithColor(DiscordColor.Gold)
-
                 .AddField("Latency", $"{ctx.Client.Ping}ms", true)
                 .AddField("Total guilds", $"{guildCount}", true)
                 .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-
                 .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024.0:n2} MB", true)
                 .AddField("CPU:", $"~{cpu.NextValue() / Environment.ProcessorCount:n2}%", true)
                 .AddField("Threads", $"{process.Threads.Count}", true)
-                
-
                 .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), false);
             await ctx.RespondAsync(embed: embed);
+            cpu.Dispose();
         }
     }
 }

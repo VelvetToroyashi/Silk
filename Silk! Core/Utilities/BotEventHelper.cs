@@ -3,9 +3,9 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Silk__Extensions;
 using SilkBot.Commands.Bot;
 using SilkBot.Commands.Moderation.Utilities;
+using SilkBot.Extensions;
 using SilkBot.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,22 +19,23 @@ namespace SilkBot.Utilities
         
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly ILogger<BotEventHelper> _logger;
-        private readonly DiscordClient _client;
+        private readonly DiscordShardedClient _client;
         private int currentGuildCount = 0;
 
-        public BotEventHelper(DiscordClient client, IDbContextFactory<SilkDbContext> dbFactory, ILogger<BotEventHelper> logger) 
+        public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory, ILogger<BotEventHelper> logger) 
         {
             _dbFactory = dbFactory;
             _logger = logger;
             _client = client;
             CreateHandlers(_client);
         }
-        public void CreateHandlers(DiscordClient Client)
+        public void CreateHandlers(DiscordShardedClient Client)
         {
             Client.ClientErrored += (c, e) =>
             {
                 e.Handled = true;
                 if (e.Exception.Message.Contains("event handler")) _logger.LogWarning("An event handler timed out.");
+                else _logger.LogError($"An exception was thrown; message: {e.Exception.Message}");
                 return Task.CompletedTask;
             };
             Client.GuildAvailable += OnGuildAvailable;

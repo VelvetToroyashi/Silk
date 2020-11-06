@@ -8,15 +8,14 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Silk__Extensions;
 using SilkBot.Database.Models;
+using SilkBot.Extensions;
 using SilkBot.Services;
 using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static SilkBot.Bot;
 
 namespace SilkBot.Commands.General
 {
@@ -198,8 +197,8 @@ namespace SilkBot.Commands.General
 
     public class TicketService
     {
-        private readonly DiscordClient client;
-        public TicketService(DiscordClient client) => this.client = client;
+        private readonly DiscordShardedClient client;
+        public TicketService(DiscordShardedClient client) => this.client = client;
 
 #nullable enable
         public TicketModel? GetTicketById(int Id) 
@@ -236,7 +235,7 @@ namespace SilkBot.Commands.General
             }
             else { parentCategory = (await g.GetChannelsAsync()).Single(c => c.Name.ToLower() == "Silk! Tickets".ToLower()); }
 
-            DiscordUser u = await client.GetUserAsync(userId);
+            DiscordUser u = client.GetUser(userId);
             DiscordChannel returnChannel =
                 g.Channels.Any(c => c.Value.Name.ToLower() == u.Username.ToLower()) 
                 ? g.Channels.Values.Single(c => c.Name.ToLower() == u.Username.ToLower()) 

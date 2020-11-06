@@ -36,7 +36,7 @@ namespace SilkBot.Commands.Bot
                 .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silkbot/issues), ")
                 .AppendLine("or if you're not familiar with GitHub, feel free")
                 .AppendLine($"to message the developers directly via !`ticket create <your message>`.")
-                .Append($"By default, the prefix is `{SilkDefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by [p]prefix <your prefix here>.");
+                .Append($"By default, the prefix is `{SilkDefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
 
             embed.WithDescription(sb.ToString());
 

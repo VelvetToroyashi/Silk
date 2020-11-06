@@ -2,7 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 
-namespace SilkBot.Utilities
+namespace SilkBot.Extensions
 {
     public static class EmbedHelper
     {

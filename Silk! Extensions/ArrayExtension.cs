@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Silk__Extensions
+namespace SilkBot.Extensions
 {
     public static class ArrayExtension
     {

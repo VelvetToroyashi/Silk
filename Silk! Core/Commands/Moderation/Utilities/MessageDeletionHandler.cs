@@ -10,11 +10,11 @@ namespace SilkBot.Commands.Moderation.Utilities
 {
     public class MessageDeletionHandler
     {
-        public static int UnloggedMessages { get; set; }
+        public static int UnloggedMessages { get; set; } // Set when !clear x is called, as to prevent logging messages cleared by the bot. //
         
         public async Task OnMessageDeleted(DiscordClient c, MessageDeleteEventArgs e)
         {
-            if (e.Message.Author is null) return;
+            if (e.Message.Author is null) return; // Message isn't cached. //
             if(UnloggedMessages - 1 > 0)
             {
                 UnloggedMessages--;
@@ -22,16 +22,12 @@ namespace SilkBot.Commands.Moderation.Utilities
                 return;
             }
 
-            if (e.Channel.IsPrivate || e.Message.Author.IsCurrent)
-            {
-                return;
-            }
+            if (e.Channel.IsPrivate || e.Message.Author.IsCurrent) return;
+            
 
             var config = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
 
-            if (!config.LogMessageChanges) return;
-
-            if (!config.MessageEditChannel.HasValue) return;
+            if (!config.LogMessageChanges || config.MessageEditChannel == default) return;
             
           
 
@@ -49,7 +45,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                 .WithColor(DiscordColor.Red)
                 .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await c.GetChannelAsync(config.MessageEditChannel.Value);
+            var loggingChannel = await c.GetChannelAsync(config.MessageEditChannel);
             await c.SendMessageAsync(loggingChannel, embed: embed);
         }
     }

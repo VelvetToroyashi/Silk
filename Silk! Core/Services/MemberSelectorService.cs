@@ -2,7 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using SilkBot.Utilities;
+using SilkBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;

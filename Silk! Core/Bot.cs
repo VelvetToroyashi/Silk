@@ -12,11 +12,9 @@
     using NLog;
     using NLog.Conditions;
     using NLog.Config;
-    using NLog.Extensions.Logging;
     using NLog.Targets;
-    using Silk__Extensions;
     using SilkBot.Commands.Bot;
-    using SilkBot.Commands.General;
+    using SilkBot.Extensions;
     using SilkBot.Services;
     using SilkBot.Tools;
     using SilkBot.Utilities;
@@ -32,13 +30,12 @@
     public class Bot
     {
         #region Props
-        public DiscordClient Client { get; set; }
+        public DiscordShardedClient Client { get; set; }
         public static Bot Instance { get; private set; } 
         public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; } = new SilkDbContext();
-        public TimerBatcher Timer { get; } = new TimerBatcher(new ActionDispatcher());
         
         private ServiceProvider Services;
         
@@ -114,12 +111,18 @@
 
 
 
-        private void RegisterCommands()
+        private async Task RegisterCommands()
         {
             var sw = Stopwatch.StartNew();
-            Client.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
+            foreach (var shard in Client.ShardClients.Values) 
+            {
+                var cmdNext = shard.GetCommandsNext();
+                cmdNext.RegisterCommands(Assembly.GetExecutingAssembly());
+
+            }
+
             sw.Stop();
-            _logger.LogDebug($"Registered all commands in {sw.ElapsedMilliseconds} ms.");
+            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count()} shards in {sw.ElapsedMilliseconds} ms.");
         }
 
         private async Task InitializeClientAsync(ServiceCollection services)
@@ -132,23 +135,28 @@
                 Token = token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.Guilds,
-                LogTimestampFormat = "H:mm:sstt"
+                LogTimestampFormat = "H:mm:sstt",
+                MessageCacheSize = 4096
             };
 
-            Client = new DiscordClient(config);
+            Client = new DiscordShardedClient(config);
             
             AddServices(services);
             Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate,  Services = Services };
-
-            Client.UseInteractivity(new InteractivityConfiguration { PaginationBehaviour = PaginationBehaviour.WrapAround, Timeout = TimeSpan.FromMinutes(1), PaginationDeletion = PaginationDeletion.DeleteMessage });
-            Client.UseCommandsNext(Commands);
+            await Client.UseInteractivityAsync(new InteractivityConfiguration 
+            { 
+                PaginationBehaviour = PaginationBehaviour.WrapAround, 
+                Timeout = TimeSpan.FromMinutes(1),
+                PaginationDeletion = PaginationDeletion.DeleteMessage 
+            });
+            await Client.UseCommandsNextAsync(Commands);
             //Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
             await Task.Delay(100);
             _logger.LogInformation("Client Initialized.");
-            
 
 
-            await Client.ConnectAsync();
+
+            Client.ShardClients.Values.ToList().ForEach(async c => await c.ConnectAsync()); 
 
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");

@@ -4,8 +4,10 @@ using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SilkBot.Services
@@ -21,34 +23,37 @@ namespace SilkBot.Services
         public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory) 
         {
             _logger = logger;
+
             _cache = new ConcurrentDictionary<ulong, string>();
             _dbFactory = dbFactory;
 
-            PrefixDelegate = ResolvePrefixAsync;
+            PrefixDelegate = ResolvePrefix;
         }
 
-        public async Task<int> ResolvePrefixAsync(DiscordMessage m)
+        public async Task<int> ResolvePrefix(DiscordMessage m)
         {
-            var prefix = await RetrievePrefixAsync(m.Channel.GuildId) ?? string.Empty;
+            var prefix = RetrievePrefix(m.Channel.GuildId) ?? string.Empty;
             var prefixPos = m.GetStringPrefixLength(prefix);
             return prefixPos;
         }
 
-        public async Task<string> RetrievePrefixAsync(ulong? guildId)
+        public string RetrievePrefix(ulong? guildId)
         {
             if (guildId == default || guildId == 0) return null;
             else if (_cache.TryGetValue(guildId.Value, out string prefix)) return prefix;
-            else return await GetPrefixFromDatabaseAsync(guildId.Value);
+            else return GetPrefixFromDatabase(guildId.Value);
         }
 
-        private async Task<string> GetPrefixFromDatabaseAsync(ulong guildId)
+        private string GetPrefixFromDatabase(ulong guildId)
         {
             _logger.LogDebug("Prefix not present in cache; queuing from database.");
             _sw.Restart();
             using var db = _dbFactory.CreateDbContext();
-            GuildModel guild = await db.Guilds.AsNoTracking().FirstAsync(g => g.DiscordGuildId == guildId);
-            _sw.Stop();
+            
+
+            GuildModel guild = db.Guilds.AsNoTracking().First(g => g.DiscordGuildId == guildId);
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
+            _sw.Stop();
             _cache.TryAdd(guildId, guild.Prefix);
             return guild.Prefix;
         }

@@ -2,11 +2,11 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Extensions;
 using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using SilkBot.Commands.General;
 
 namespace SilkBot.Commands.Moderation
 {
@@ -25,10 +25,7 @@ namespace SilkBot.Commands.Moderation
             }
             async Task DenyBanAsync(string errorReason)
             {
-                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                                                .WithColor(DiscordColor.Red).WithDescription(errorReason)
-                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                                .WithTimestamp(DateTime.Now));
+                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl).WithColor(DiscordColor.Red).WithDescription(errorReason));
             }
 
             bool CanExecuteCommand(out string errorReason)
@@ -38,12 +35,12 @@ namespace SilkBot.Commands.Moderation
                     errorReason = $"I can't ban myself!";
                     return false;
                 }
-                if (!ctx.Member.HasPermission(Permissions.BanMembers))
+                else if (!ctx.Member.HasPermission(Permissions.BanMembers))
                 {
                     errorReason = $"You do not have permission to ban members!";
                     return false;
                 }
-                if (user.IsAbove(bot))
+                else if (user.IsAbove(bot))
                 {
                     errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
@@ -60,7 +57,7 @@ namespace SilkBot.Commands.Moderation
                 .WithTitle($"You've been banned from {ctx.Guild.Name}!")
                 .AddField("Reason:", $"{reason}")
                 .AddFooter(ctx)
-                .WithColor(new DiscordColor("#0019bd"));
+                .WithColor(new DiscordColor("#cc1400"));
 
             var (name, url) = ctx.GetAuthor();
             var logEmbed = new DiscordEmbedBuilder()
@@ -71,15 +68,15 @@ namespace SilkBot.Commands.Moderation
                 .AddField("Reason:", reason).AddFooter(ctx);
             try
             {
-                await DMCommand.DM(ctx, target, userBannedEmbed);
+                await target.SendMessageAsync(embed: userBannedEmbed);
             }
             finally
             {
 
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                var loggingChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel.Value;
+                var loggingChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.DiscordGuildId == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel;
                 var sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
-                //SilkBot.Bot.Instance.Data[ctx.Guild].GuildInfo.BannedMembers.Add(new BannedMember(user.Id, reason));
+                
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }
 

@@ -36,7 +36,7 @@ namespace SilkBot.Utilities
                 _logger.LogError("Expected value 'Guild' from databse, received null isntead.");
                 return default;
             }
-            var guildConfig = new GuildConfiguration(config.WhitelistInvites, config.BlacklistWords, config.LogMemberJoinOrLeave, config.MuteRoleId, config.MessageEditChannel, config.GeneralLoggingChannel, config.GreetingChannel);
+            var guildConfig = new GuildConfiguration(config.WhitelistInvites, config.BlacklistWords, config.GreetMembers, config.MuteRoleId, config.MessageEditChannel, config.GeneralLoggingChannel, config.GreetingChannel);
             _cache.CreateEntry(guildId).SetValue(guildConfig).SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
             return guildConfig;
         }

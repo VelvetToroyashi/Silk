@@ -37,19 +37,18 @@ namespace SilkBot.Commands.Bot
             }
             _ = Task.Run(async () =>
             {
-            //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
-            if (e.Guild != null)
-            {
-                var config = await _guildCache.GetConfigAsync(e.Guild?.Id);
-                CommandTimer.Restart();
-                CheckForInvite(e, config);
-                
-            }
-            if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
-                await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
-            CommandTimer.Stop();
+                //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
+                if (e.Guild != null)
+                {
+                    var config = await _guildCache.GetConfigAsync(e.Guild?.Id);
+                    CommandTimer.Restart();
+                    CheckForInvite(e, config);
+
+                }
+                if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
+                    await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
+                CommandTimer.Stop();
             });
-            
         }
 
         private void CheckForInvite(MessageCreateEventArgs e, GuildConfiguration config)

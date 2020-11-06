@@ -5,6 +5,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using SilkBot.Utilities;
+using System;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Tests
@@ -15,17 +16,17 @@ namespace SilkBot.Commands.Tests
 
         [Command]
         [RequireFlag(UserFlag.Staff)]
-        public async Task Wait(CommandContext ctx, DiscordEmoji emoji)
+        public async Task Wait(CommandContext ctx)
         {
-            using var db = GetDbContext();
-            var interactivity = ctx.Client.GetInteractivity();
-            await ctx.Message.CreateReactionAsync(emoji);
-            var msg = await interactivity.WaitForReactionAsync(a => a.Emoji == emoji, ctx.Message, ctx.User);
+            var Interactivity = ctx.Client.GetInteractivity();
 
-            if (!msg.TimedOut)
-            {
-                await ctx.RespondAsync("Success");
-            }
+            DiscordMessage msg = ctx.Message;
+
+            DiscordEmoji acceptEmoji = DiscordEmoji.FromUnicode("🆗");
+
+            var reactionResult = await Interactivity.WaitForReactionAsync(
+                                 x => x.Emoji == acceptEmoji,
+                                 msg, ctx.Member, TimeSpan.FromSeconds(60)).ConfigureAwait(false);
         }
     }
 }

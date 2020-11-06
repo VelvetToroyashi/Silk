@@ -9,6 +9,9 @@
 
 	<PropertyGroup>
 		<TieredCompilation>false</TieredCompilation>
+		<Authors>VelvetThePanda, CalebABG</Authors>
+		<Company>The Silk Devs Team</Company>
+		<PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
 	</PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -69,6 +72,10 @@
     <Compile Include="Migrations\20201017145352_db-update-229.Designer.cs" />
     <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.cs" />
     <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.Designer.cs" />
+    <Compile Include="Migrations\20201029025142_no.cs" />
+    <Compile Include="Migrations\20201029025142_no.Designer.cs" />
+    <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.cs" />
+    <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 
