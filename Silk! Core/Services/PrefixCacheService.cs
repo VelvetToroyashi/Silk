@@ -1,10 +1,8 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Models;
-using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
@@ -19,8 +17,8 @@ namespace SilkBot.Services
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly Stopwatch _sw = new Stopwatch();
         public PrefixResolverDelegate PrefixDelegate { get; private set; }
-        
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory) 
+
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _logger = logger;
 
@@ -49,7 +47,7 @@ namespace SilkBot.Services
             _logger.LogDebug("Prefix not present in cache; queuing from database.");
             _sw.Restart();
             using var db = _dbFactory.CreateDbContext();
-            
+
 
             GuildModel guild = db.Guilds.AsNoTracking().First(g => g.DiscordGuildId == guildId);
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
@@ -58,7 +56,7 @@ namespace SilkBot.Services
             return guild.Prefix;
         }
 
-        public void UpdatePrefix(ulong id, string prefix) 
+        public void UpdatePrefix(ulong id, string prefix)
         {
             _cache.TryGetValue(id, out string currentPrefix);
             _cache.AddOrUpdate(id, prefix, (i, p) => p = prefix);

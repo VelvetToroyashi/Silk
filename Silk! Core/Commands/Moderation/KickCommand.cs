@@ -4,9 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SilkBot.Commands.General;
 using SilkBot.Extensions;
-using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +17,7 @@ namespace SilkBot.Commands.Moderation
         public ILogger<KickCommand> Logger { private get; set; }
 
         [Command, RequireBotPermissions(Permissions.KickMembers), RequireGuild(), Description("Boot someone from the guild! Caller must have kick members permission.")]
-        public async Task Kick(CommandContext ctx, [Description("The person to kick.")]DiscordMember user, [RemainingText, Description("The reason the user is to be kicked from the guild")] string reason = null)
+        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user, [RemainingText, Description("The reason the user is to be kicked from the guild")] string reason = null)
         {
             await ctx.Message.DeleteAsync();
             var bot = ctx.Guild.CurrentMember;
@@ -37,10 +35,10 @@ namespace SilkBot.Commands.Moderation
                 var isAdmin = user.HasPermission(Permissions.Administrator);
                 string errorReason = user.IsAbove(bot) switch
                 {
-                    true when isBot     =>  "I wish I could kick myself, but I sadly cannot.",
-                    true when isOwner   => $"I can't kick the owner ({user.Mention}) out of their own server!",
-                    true when isMod     =>  $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
-                    true when isAdmin   =>  $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
+                    true when isBot => "I wish I could kick myself, but I sadly cannot.",
+                    true when isOwner => $"I can't kick the owner ({user.Mention}) out of their own server!",
+                    true when isMod => $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
+                    true when isAdmin => $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
 
                     _ => errorReason = "`UNCAUGHT_CASE_FAILSAFE` That's all I know. Translation: Something has gone wrong, and it's not for any reason I'm aware of."
                 };
@@ -49,7 +47,7 @@ namespace SilkBot.Commands.Moderation
                     .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
                     .WithDescription(errorReason)
                     .WithColor(DiscordColor.Red);
-                
+
                 await ctx.RespondAsync(embed: embed);
             }
             else

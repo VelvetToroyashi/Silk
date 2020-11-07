@@ -16,7 +16,7 @@ namespace SilkBot.Services
         {
             DiscordEmbedBuilder selectorEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue).WithTitle("There are multiple people matching that name; which one do you want?").AddFooter(ctx);
             string userString = string.Empty;
-            for(int i = 0; i < System.Math.Min(10, users.Count()); i++) userString += $"{i}: {users.ElementAt(i).Mention}\n";
+            for (int i = 0; i < System.Math.Min(10, users.Count()); i++) userString += $"{i}: {users.ElementAt(i).Mention}\n";
             selectorEmbed.WithDescription(userString);
             await ctx.RespondAsync(embed: selectorEmbed);
             var interactivity = ctx.Client.GetInteractivity();
@@ -32,7 +32,7 @@ namespace SilkBot.Services
                         await ctx.RespondAsync("That's not a valid selection.");
                         continue;
                     }
-                    else 
+                    else
                     {
                         var index = int.Parse(result.Result.Content);
                         if (index > users.Count())

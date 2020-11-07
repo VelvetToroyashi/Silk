@@ -80,7 +80,7 @@ namespace SilkBot.Commands.General
             using var db = new SilkDbContext();
             TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
             if (ticket is null) await ctx.RespondAsync("Invalid ticket id!");
-            else if (ctx.Channel.Id != ticketChannels[ticket.Opener]) 
+            else if (ctx.Channel.Id != ticketChannels[ticket.Opener])
             {
                 await SendInvalidTicketErrorAsync(ctx.Channel, ctx.Guild.GetChannel(ticketChannels[ticket.Opener]));
             }
@@ -101,7 +101,7 @@ namespace SilkBot.Commands.General
         {
             await tc.SendMessageAsync($"Sorry but you can't close this ticket from this channel! Execute `<prefix>ticket close <id>` in {cc.Mention} instead.");
         }
-        
+
         public class ListTicketsCommand : CommandClass
         {
             public ListTicketsCommand(IDbContextFactory<SilkDbContext> db) : base(db) { }
@@ -133,7 +133,7 @@ namespace SilkBot.Commands.General
                         if (ticket is null) await ctx.RespondAsync($"ArgumentOutOfRangeException: Ticket with Id `{msg.Result.Content}` does not exist.");
                         else
                         {
-                            
+
                             DiscordUser ticketOpener = await ctx.Client.GetUserAsync(ticket.Opener);
                             DiscordEmbed embed = GetTicketEmbed(ctx, ticketOpener, ticket);
                             await ctx.RespondAsync(embed: embed);
@@ -143,18 +143,18 @@ namespace SilkBot.Commands.General
                     {
                         DiscordUser ticketMember = ctx.Client.GetUser(msg.Result.Content);
                         if (ticketMember is null) await ctx.RespondAsync("Could not retrieve member by that name!");
-                        else 
+                        else
                         {
                             TicketModel ticket = db.Value.Tickets.OrderBy(t => t.Opened).LastOrDefault(t => t.Opener == ticketMember.Id);
                             _ = ticket == null ? await ctx.RespondAsync($"{ticketMember.Username} has no tickets!") : await ctx.RespondAsync(embed: GetTicketEmbed(ctx, ticketMember, ticket));
-                        }                                         
+                        }
                     }
                 }
             }
 
 
             [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
-            public async Task ListTickets(CommandContext ctx, int Id) 
+            public async Task ListTickets(CommandContext ctx, int Id)
             {
                 using var db = GetDbContext();
                 TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
@@ -173,7 +173,7 @@ namespace SilkBot.Commands.General
             {
                 using var db = GetDbContext();
                 DiscordUser user = await new MemberSelectorService().SelectUser(ctx, ctx.GetUserByName(name));
-                if(user is null) { await ctx.RespondAsync("Canceled."); return; }
+                if (user is null) { await ctx.RespondAsync("Canceled."); return; }
                 TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Opener == user.Id);
                 if (ticket is null) await ctx.RespondAsync($"{user.Username} has not opened any tickets.");
                 else
@@ -201,7 +201,7 @@ namespace SilkBot.Commands.General
         public TicketService(DiscordShardedClient client) => this.client = client;
 
 #nullable enable
-        public TicketModel? GetTicketById(int Id) 
+        public TicketModel? GetTicketById(int Id)
         {
             using var db = new SilkDbContext();
             TicketModel? t = db.Tickets.SingleOrDefault(t => t.Id == Id);
@@ -216,7 +216,7 @@ namespace SilkBot.Commands.General
             var tickets = db.Tickets;
             if (tickets.Where(t => t.IsOpen).Select(t => t.Opener).Contains(ticketOpener.Id)) return new TicketCreationResult(false, "Ticket already opened for current user.");
             var ticket = new TicketModel() { IsOpen = true, Opener = ticketOpener.Id, Opened = ticketTime };
-            ticket.History.Add(new TicketMessageHistoryModel { Message = ticketMessage, Sender = ticketOpener.Id } );
+            ticket.History.Add(new TicketMessageHistoryModel { Message = ticketMessage, Sender = ticketOpener.Id });
             db.Tickets.Add(ticket);
             await db.SaveChangesAsync();
             return new TicketCreationResult(true, t: ticket);
@@ -224,11 +224,11 @@ namespace SilkBot.Commands.General
 
         public async Task<DiscordChannel> GetOrCreateTicketChannelAsync(DiscordClient c, ulong userId)
         {
-            
+
             DiscordGuild g = c.Guilds[721518523704410202];
             DiscordChannel parentCategory;
-            if (!g.Channels.Values.Any(c => c.IsCategory && c.Name.ToLower() == "Silk! Tickets".ToLower())) 
-            { 
+            if (!g.Channels.Values.Any(c => c.IsCategory && c.Name.ToLower() == "Silk! Tickets".ToLower()))
+            {
                 parentCategory = await g.CreateChannelCategoryAsync("Silk! Tickets");
                 await parentCategory.AddOverwriteAsync(g.EveryoneRole, Permissions.None, Permissions.AccessChannels);
                 await parentCategory.AddOverwriteAsync(g.GetRole(745751916608356467), Permissions.SendMessages | Permissions.ReadMessageHistory | Permissions.AccessChannels, Permissions.None);
@@ -237,8 +237,8 @@ namespace SilkBot.Commands.General
 
             DiscordUser u = client.GetUser(userId);
             DiscordChannel returnChannel =
-                g.Channels.Any(c => c.Value.Name.ToLower() == u.Username.ToLower()) 
-                ? g.Channels.Values.Single(c => c.Name.ToLower() == u.Username.ToLower()) 
+                g.Channels.Any(c => c.Value.Name.ToLower() == u.Username.ToLower())
+                ? g.Channels.Values.Single(c => c.Name.ToLower() == u.Username.ToLower())
                 : await g.CreateChannelAsync((await c.GetUserAsync(userId)).Username.ToLower(), ChannelType.Text, parentCategory);
             return returnChannel;
         }
@@ -248,7 +248,7 @@ namespace SilkBot.Commands.General
             using var db = new SilkDbContext();
 
             var ticket = db.Tickets.OrderBy(t => t.Opened).Last(ticket => ticket.Opener == userId);
-            
+
             ticket.History.Add(new TicketMessageHistoryModel { Message = message, Sender = userId }); // Add this message to the history.
             await db.SaveChangesAsync();
             var embed = GenerateRespondantEmbed(message, client.CurrentUser.AvatarUrl, await client.GetUserAsync(userId), ticket);

@@ -15,8 +15,8 @@ namespace SilkBot.Commands.Bot
         private readonly TicketService _ticketService;
         private readonly GuildConfigCacheService _guildCache;
         private readonly ILogger _logger;
-        
-        public MessageCreationHandler( TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
+
+        public MessageCreationHandler(TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
         {
 
             _ticketService = ts;
@@ -58,17 +58,17 @@ namespace SilkBot.Commands.Bot
                 string messageContent = e.Message.Content;
                 if (messageContent.Contains("discord.gg/") || messageContent.Contains("discord.com/invite/"))
                 {
-                    Match inviteLinkMatched = Regex.Match(messageContent.ToLower(), @"(discord\.gg\/.+)", RegexOptions.IgnoreCase) 
+                    Match inviteLinkMatched = Regex.Match(messageContent.ToLower(), @"(discord\.gg\/.+)", RegexOptions.IgnoreCase)
                                     ?? Regex.Match(messageContent.ToLower(), @"(discord\.com\/invite\/.+)", RegexOptions.IgnoreCase);
-                    
+
                     if (!inviteLinkMatched.Success) return;
-                    
+
                     var inviteLink = string.Join("", messageContent
                         .Skip(inviteLinkMatched.Index)
                         .TakeWhile(c => c != ' '))
                         .Replace("discord.com/invite", "discord.gg");
                     if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink)) e.Message.DeleteAsync().GetAwaiter();
-                    
+
                 }
             }
         }

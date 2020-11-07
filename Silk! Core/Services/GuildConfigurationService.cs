@@ -31,8 +31,8 @@ namespace SilkBot.Utilities
         {
             var db = _dbFactory.CreateDbContext();
             GuildModel config = await db.Guilds.AsNoTracking().FirstAsync(g => g.DiscordGuildId == guildId);
-            if (config is null) 
-            { 
+            if (config is null)
+            {
                 _logger.LogError("Expected value 'Guild' from databse, received null isntead.");
                 return default;
             }
@@ -58,25 +58,25 @@ namespace SilkBot.Utilities
 
         public GuildConfiguration
             (
-            bool whiteListsInvites      = default, 
-            bool wordBlacklistEnabled   = default,
-            bool trackMemberCountChange = default, 
-            ulong? muteRoleId           = default, 
-            ulong? messageEditChannel   = default, 
-            ulong? loggingChannel       = default, 
-            ulong? greetingChannel      = default
+            bool whiteListsInvites = default,
+            bool wordBlacklistEnabled = default,
+            bool trackMemberCountChange = default,
+            ulong? muteRoleId = default,
+            ulong? messageEditChannel = default,
+            ulong? loggingChannel = default,
+            ulong? greetingChannel = default
             )
         {
-            WhitelistsInvites           = whiteListsInvites;
-            WordBlacklistEnabled        = wordBlacklistEnabled;
-            TrackMemberCountChange      = trackMemberCountChange;
-            MuteRoleId                  = muteRoleId;
-            MessageEditChannel          = messageEditChannel;
-            LoggingChannel              = loggingChannel;
-            GreetingChannel             = greetingChannel;
-            BlacklistedWords            = new List<BlackListedWord>();
-            WhiteListedLinks            = new List<WhiteListedLink>();
+            WhitelistsInvites = whiteListsInvites;
+            WordBlacklistEnabled = wordBlacklistEnabled;
+            TrackMemberCountChange = trackMemberCountChange;
+            MuteRoleId = muteRoleId;
+            MessageEditChannel = messageEditChannel;
+            LoggingChannel = loggingChannel;
+            GreetingChannel = greetingChannel;
+            BlacklistedWords = new List<BlackListedWord>();
+            WhiteListedLinks = new List<WhiteListedLink>();
         }
-        }
+    }
 
 }

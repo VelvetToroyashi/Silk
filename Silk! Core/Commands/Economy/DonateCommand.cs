@@ -37,7 +37,7 @@ namespace SilkBot.Commands.Economy
                 {
                     matches.AppendLine($"[{i + 1}]{matchingMembers.ElementAt(i).Mention}");
                 }
-                
+
                 var embed = EmbedHelper.CreateEmbed(ctx, $"Multiple members matching [{recipient}].", matches.ToString());
                 await ctx.RespondAsync(embed: embed);
 
@@ -125,69 +125,69 @@ namespace SilkBot.Commands.Economy
         private async Task ProccessTransaction(CommandContext ctx, ulong sender, ulong receiver, int amount)
         {
 
-        //    var senderAsMember = EconomicUsers.Instance.Users[sender];
-        //    var recipientAsMember = EconomicUsers.Instance.Users[receiver];
-        //    var rand = new Random();
-        //    if (amount > 499)
-        //    {
-        //        var confirmationCode = rand.Next(1000, 10000);
-        //        var interactivity = ctx.Client.GetInteractivity();
-        //        await ctx.RespondAsync($"Hey! You sure you want to do this? Confirmation code: `{confirmationCode}`  [Type cancel to cancel]");
-        //        while (true)
-        //        {
-        //            var message = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
-        //            if (message.TimedOut)
-        //            {
-        //                await ctx.RespondAsync("Sorry! But you did not type the confirmation code. Your transaction has been canceled, and no money was withdrawn.");
-        //                continue;
-        //            }
-        //            if (message.Result.Content != confirmationCode.ToString() && message.Result.Content.ToLower() != "cancel")
-        //            {
-        //                await ctx.RespondAsync("Invalid or incorrect response code.");
-        //                continue;
-        //            }
-        //            if (message.Result.Content.ToLower() == "cancel")
-        //            {
-        //                return;
-        //            }
-        //            if (message.Result.Content == confirmationCode.ToString())
-        //            {
-        //                if (senderAsMember.Cash < amount)
-        //                {
-        //                    throw new InsufficientFundsException($"You do not have enough funds for this transaction. [${senderAsMember.Cash} available]");
-        //                }
-        //                else
-        //                {
-        //                    senderAsMember.Widthdraw((uint)amount);
-        //                    recipientAsMember.Cash += (uint)amount;
+            //    var senderAsMember = EconomicUsers.Instance.Users[sender];
+            //    var recipientAsMember = EconomicUsers.Instance.Users[receiver];
+            //    var rand = new Random();
+            //    if (amount > 499)
+            //    {
+            //        var confirmationCode = rand.Next(1000, 10000);
+            //        var interactivity = ctx.Client.GetInteractivity();
+            //        await ctx.RespondAsync($"Hey! You sure you want to do this? Confirmation code: `{confirmationCode}`  [Type cancel to cancel]");
+            //        while (true)
+            //        {
+            //            var message = await interactivity.WaitForMessageAsync(message => message.Author == ctx.Member, TimeSpan.FromSeconds(30));
+            //            if (message.TimedOut)
+            //            {
+            //                await ctx.RespondAsync("Sorry! But you did not type the confirmation code. Your transaction has been canceled, and no money was withdrawn.");
+            //                continue;
+            //            }
+            //            if (message.Result.Content != confirmationCode.ToString() && message.Result.Content.ToLower() != "cancel")
+            //            {
+            //                await ctx.RespondAsync("Invalid or incorrect response code.");
+            //                continue;
+            //            }
+            //            if (message.Result.Content.ToLower() == "cancel")
+            //            {
+            //                return;
+            //            }
+            //            if (message.Result.Content == confirmationCode.ToString())
+            //            {
+            //                if (senderAsMember.Cash < amount)
+            //                {
+            //                    throw new InsufficientFundsException($"You do not have enough funds for this transaction. [${senderAsMember.Cash} available]");
+            //                }
+            //                else
+            //                {
+            //                    senderAsMember.Widthdraw((uint)amount);
+            //                    recipientAsMember.Cash += (uint)amount;
 
-        //                    await ctx.RespondAsync(embed: new
-        //                    DiscordEmbedBuilder()
-        //                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-        //                    .WithTitle("Transfer Successful!")
-        //                    .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
-        //                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-        //                    .WithColor(DiscordColor.Green)
-        //                    .WithTimestamp(DateTime.Now)
-        //                    );
-        //                }
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        senderAsMember.Widthdraw((uint)amount);
-        //        recipientAsMember.Cash += (uint)amount;
+            //                    await ctx.RespondAsync(embed: new
+            //                    DiscordEmbedBuilder()
+            //                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+            //                    .WithTitle("Transfer Successful!")
+            //                    .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
+            //                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+            //                    .WithColor(DiscordColor.Green)
+            //                    .WithTimestamp(DateTime.Now)
+            //                    );
+            //                }
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        senderAsMember.Widthdraw((uint)amount);
+            //        recipientAsMember.Cash += (uint)amount;
 
-        //        await ctx.RespondAsync(embed: new
-        //        DiscordEmbedBuilder()
-        //        .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-        //        .WithTitle("Transfer Successful!")
-        //        .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
-        //        .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-        //        .WithColor(DiscordColor.Green)
-        //        .WithTimestamp(DateTime.Now));
-        //    }
+            //        await ctx.RespondAsync(embed: new
+            //        DiscordEmbedBuilder()
+            //        .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+            //        .WithTitle("Transfer Successful!")
+            //        .WithDescription($"You sent {(await ctx.Guild.GetMemberAsync(receiver)).Mention} ${amount}!")
+            //        .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+            //        .WithColor(DiscordColor.Green)
+            //        .WithTimestamp(DateTime.Now));
+            //    }
         }
     }
 }

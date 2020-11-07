@@ -15,7 +15,7 @@ namespace SilkBot.Commands.General
 {
     public class DiceRoll : BaseCommandModule
     {
-        
+
         [Command("DiceRoll")]
         [HelpDescription("Allows you to roll dice!", "`!diceroll d5` → Rolls between 1 and 5.", "`!diceroll 2d4` → Rolls 2 dice, between 1 and 4.", "`!diceroll 2d4+6` → Rolls 2 dice, from 1 to 4, with 6 tacked on to the total.")]
         public async Task RollDice(CommandContext ctx, [RemainingText, HelpDescription("The dice to roll.")] string DiceRoll)

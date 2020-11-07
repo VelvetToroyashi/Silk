@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
 {

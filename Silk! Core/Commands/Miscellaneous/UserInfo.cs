@@ -2,7 +2,6 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +23,7 @@ namespace SilkBot.Commands.Miscellaneous
 
             var status = "";
             DiscordEmoji emoji = null;
-            
+
             try
             {
                 switch (member.Presence?.Status)
@@ -60,7 +59,7 @@ namespace SilkBot.Commands.Miscellaneous
             embed.AddField("Status:", $"{emoji}  {status}");
             embed.AddField("Name:", member.Username);
             embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
-            
+
             var roleList = member.Roles
                 .OrderByDescending(r => r.Position)
                 .Select(role => role.Mention)
@@ -75,13 +74,13 @@ namespace SilkBot.Commands.Miscellaneous
         {
             var creationTime = DateTime.Now.Subtract(offset.DateTime);
             var sb = new StringBuilder();
-            if(creationTime.Days > 365)
+            if (creationTime.Days > 365)
             {
                 var years = creationTime.Days / 365;
                 sb.Append($"{years} {(years > 1 ? "years" : "year")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(years * 365));
             }
-            if(creationTime.Days > 30)
+            if (creationTime.Days > 30)
             {
                 var months = creationTime.Days / 30;
                 sb.Append($"{months} {(months > 1 ? "months" : "month")}, ");

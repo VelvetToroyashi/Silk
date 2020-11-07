@@ -14,16 +14,16 @@ namespace SilkBot.Commands.Moderation.SClean
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [HelpDescription("Clean images from chat.")]
-        
+
         public async Task Images(CommandContext ctx, [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")] int amount = 10)
         {
             using var db = new SilkDbContext();
-            
+
             amount = amount > 99 ? 100 : ++amount;
             var images = await GetImages(ctx.Channel, amount);
             if (images.Count() == 0) { await ctx.RespondAsync($"Failed to query images in the last {amount} messages."); return; }
             await ctx.RespondAsync($"Queried {images.Count()} images.");
-            
+
             await ctx.Channel.DeleteMessagesAsync(images);
         }
 

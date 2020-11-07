@@ -15,7 +15,7 @@ namespace SilkBot.Utilities
         }
         public IEnumerable<DiscordEmoji> GetEmoji(params string[] names)
         {
-            foreach(var emojiName in names)
+            foreach (var emojiName in names)
             {
                 yield return DiscordEmoji.FromName(_client, emojiName);
             }

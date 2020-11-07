@@ -16,13 +16,13 @@ namespace SilkBot.Utilities
 {
     public class BotEventHelper
     {
-        
+
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly ILogger<BotEventHelper> _logger;
         private readonly DiscordShardedClient _client;
         private int currentGuildCount = 0;
 
-        public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory, ILogger<BotEventHelper> logger) 
+        public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory, ILogger<BotEventHelper> logger)
         {
             _dbFactory = dbFactory;
             _logger = logger;
@@ -51,7 +51,7 @@ namespace SilkBot.Utilities
             var db = _dbFactory.CreateDbContext();
             var guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
             if (!db.Guilds.Any(g => g.DiscordGuildId == guild.DiscordGuildId)) db.Guilds.Add(guild);
-            var sw = Stopwatch.StartNew(); 
+            var sw = Stopwatch.StartNew();
             CacheStaffMembers(guild, e.Guild.Members.Values);
             db.Guilds.Update(guild);
             await db.SaveChangesAsync();

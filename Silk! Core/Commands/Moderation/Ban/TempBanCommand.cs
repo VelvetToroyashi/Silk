@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Tools;
-using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +15,9 @@ namespace SilkBot.Commands.Moderation.Ban
 {
     public class TempBanCommand : BaseCommandModule
     {
-        public IDbContextFactory<SilkDbContext> DbFactory   { private get; set; }
-        public TimedEventService EventService               { private get; set; }
-        public DiscordClient Client                         { private get; set; }
+        public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }
+        public TimedEventService EventService { private get; set; }
+        public DiscordClient Client { private get; set; }
 
         private const string defaultFormat = "$mention was $action from the guild for $duration for $reason";
         [Command("tempban"), RequireGuild()]
@@ -28,7 +27,7 @@ namespace SilkBot.Commands.Moderation.Ban
             var bot = ctx.Guild.CurrentMember;
             var now = DateTime.Now;
             var banDuration = GetTimeFromInput(duration);
-            var banFailed = CanBan(bot, ctx.Member, user); 
+            var banFailed = CanBan(bot, ctx.Member, user);
             var embed = new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
 
             if (!(banFailed is null))
@@ -46,7 +45,7 @@ namespace SilkBot.Commands.Moderation.Ban
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
                 var guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
-                
+
                 UserInfoModel bannedUser = db.Users.FirstOrDefault(u => u.UserId == user.Id);
                 string? formattedBanReason = Utilities.InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
                 UserInfractionModel? infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
@@ -110,8 +109,8 @@ namespace SilkBot.Commands.Moderation.Ban
         }
 
         private TimeSpan GetTimeFromInput(string input) =>
-            input.Contains('d') ? 
-                double.TryParse(input[0..^1], out var dur) ? 
+            input.Contains('d') ?
+                double.TryParse(input[0..^1], out var dur) ?
             TimeSpan.FromDays(dur) :
                 throw new InvalidOperationException("Couldn't determine duration from message!") :
                 throw new InvalidOperationException("Couldn't determine duration from message!");
@@ -121,7 +120,7 @@ namespace SilkBot.Commands.Moderation.Ban
         {
             var db = DbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == eventObject.Guild);
-            if(guild.GeneralLoggingChannel != default)
+            if (guild.GeneralLoggingChannel != default)
             {
                 DiscordChannel c = (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.GeneralLoggingChannel);
                 DiscordUser u = await Client.GetUserAsync(eventObject.Id);

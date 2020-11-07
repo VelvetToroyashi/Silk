@@ -16,7 +16,6 @@
     using SilkBot.Commands.Bot;
     using SilkBot.Extensions;
     using SilkBot.Services;
-    using SilkBot.Tools;
     using SilkBot.Utilities;
     using System;
     using System.Diagnostics;
@@ -31,14 +30,14 @@
     {
         #region Props
         public DiscordShardedClient Client { get; set; }
-        public static Bot Instance { get; private set; } 
+        public static Bot Instance { get; private set; }
         public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; } = new SilkDbContext();
-        
+
         private ServiceProvider Services;
-        
+
 
         public CommandsNextConfiguration Commands { get; private set; }
 
@@ -46,7 +45,7 @@
         private ILogger<Bot> _logger;
         private readonly Stopwatch _sw = new Stopwatch();
 
-        public Bot() 
+        public Bot()
         {
             _sw.Start();
             Instance = this;
@@ -114,7 +113,7 @@
         private async Task RegisterCommands()
         {
             var sw = Stopwatch.StartNew();
-            foreach (var shard in Client.ShardClients.Values) 
+            foreach (var shard in Client.ShardClients.Values)
             {
                 var cmdNext = shard.GetCommandsNext();
                 cmdNext.RegisterCommands(Assembly.GetExecutingAssembly());
@@ -140,14 +139,14 @@
             };
 
             Client = new DiscordShardedClient(config);
-            
+
             AddServices(services);
-            Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate,  Services = Services };
-            await Client.UseInteractivityAsync(new InteractivityConfiguration 
-            { 
-                PaginationBehaviour = PaginationBehaviour.WrapAround, 
+            Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate, Services = Services };
+            await Client.UseInteractivityAsync(new InteractivityConfiguration
+            {
+                PaginationBehaviour = PaginationBehaviour.WrapAround,
                 Timeout = TimeSpan.FromMinutes(1),
-                PaginationDeletion = PaginationDeletion.DeleteMessage 
+                PaginationDeletion = PaginationDeletion.DeleteMessage
             });
             await Client.UseCommandsNextAsync(Commands);
             //Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
@@ -156,7 +155,7 @@
 
 
 
-            Client.ShardClients.Values.ToList().ForEach(async c => await c.ConnectAsync()); 
+            Client.ShardClients.Values.ToList().ForEach(async c => await c.ConnectAsync());
 
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");

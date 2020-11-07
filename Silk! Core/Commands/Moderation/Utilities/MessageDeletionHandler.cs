@@ -11,11 +11,11 @@ namespace SilkBot.Commands.Moderation.Utilities
     public class MessageDeletionHandler
     {
         public static int UnloggedMessages { get; set; } // Set when !clear x is called, as to prevent logging messages cleared by the bot. //
-        
+
         public async Task OnMessageDeleted(DiscordClient c, MessageDeleteEventArgs e)
         {
             if (e.Message.Author is null) return; // Message isn't cached. //
-            if(UnloggedMessages - 1 > 0)
+            if (UnloggedMessages - 1 > 0)
             {
                 UnloggedMessages--;
                 e.Handled = true;
@@ -23,13 +23,13 @@ namespace SilkBot.Commands.Moderation.Utilities
             }
 
             if (e.Channel.IsPrivate || e.Message.Author.IsCurrent) return;
-            
+
 
             var config = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
 
             if (!config.LogMessageChanges || config.MessageEditChannel == default) return;
-            
-          
+
+
 
             var embed =
                 new DiscordEmbedBuilder()

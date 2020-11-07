@@ -3,8 +3,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Extensions;
 using SilkBot.Tools;
-using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -77,7 +77,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             var guild = DbFactory.CreateDbContext().Guilds
                 .First(g => g.DiscordGuildId == eventObject.Guild);
             ulong muteRole = guild.MuteRoleId;
-            
+
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);
         }
 

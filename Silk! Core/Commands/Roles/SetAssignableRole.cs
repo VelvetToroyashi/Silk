@@ -1,8 +1,6 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore;
 using SilkBot.Exceptions;
 using SilkBot.Utilities;
 using System;
@@ -26,12 +24,12 @@ namespace SilkBot.Commands.Roles
                 await ctx.RespondAsync("Roles cannot be empty!");
                 return;
             }
-            if (!guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff)) 
+            if (!guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
             {
                 throw new InsufficientPermissionsException();
             }
 
-            var addedList   = new List<string>();
+            var addedList = new List<string>();
             var removedList = new List<string>();
             var ebStringBuilder = new StringBuilder("Added Roles: ");
             foreach (var role in roles)

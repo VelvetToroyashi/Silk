@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SilkBot.Database.Models
+﻿namespace SilkBot.Database.Models
 {
     public class TicketMessageHistoryModel
     {

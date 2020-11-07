@@ -12,7 +12,7 @@ namespace SilkBot.Models
         public int Cash { get; set; }
         public GuildModel Guild { get; set; }
 
-        
+
         public ulong UserId { get; set; }
         public UserFlag Flags { get; set; }
         public DateTime LastCashIn { get; set; }

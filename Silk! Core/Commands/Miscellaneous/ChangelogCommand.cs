@@ -16,7 +16,7 @@ namespace SilkBot.Commands.Miscellaneous
     [Group("changelog")]
     public class ChangelogCommand : CommandClass
     {
-        public ChangelogCommand(IDbContextFactory<SilkDbContext> _db) : base(_db) {}
+        public ChangelogCommand(IDbContextFactory<SilkDbContext> _db) : base(_db) { }
 
         [GroupCommand]
         public async Task GetChangeLog(CommandContext ctx)
@@ -27,7 +27,7 @@ namespace SilkBot.Commands.Miscellaneous
         }
 
         [Command("Create")]
-        public async Task CreateChangelog(CommandContext ctx, [RemainingText]string options)
+        public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
         {
             var changelog = CreateChangelog(options);
             var db = new Lazy<SilkDbContext>(() => GetDbContext());
@@ -75,13 +75,13 @@ namespace SilkBot.Commands.Miscellaneous
             public string Authors { get; set; }
             public string Version { get; set; }
             public DateTime Time { get; set; }
-            public ChangelogModel ToModel() => new ChangelogModel 
+            public ChangelogModel ToModel() => new ChangelogModel
             {
-                Additions = Additions, 
-                Authors = Authors, 
-                ChangeTime = Time, 
-                Removals = Removals, 
-                Version = Version 
+                Additions = Additions,
+                Authors = Authors,
+                ChangeTime = Time,
+                Removals = Removals,
+                Version = Version
             };
         }
 

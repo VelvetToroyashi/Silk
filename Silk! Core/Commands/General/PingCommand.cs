@@ -40,7 +40,7 @@ namespace SilkBot.Commands.General
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") over () FROM \"Guilds\"");
-            
+
             sw.Stop();
             return (int)sw.ElapsedMilliseconds;
         }

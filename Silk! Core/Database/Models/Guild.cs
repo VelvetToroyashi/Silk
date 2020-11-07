@@ -19,11 +19,11 @@ namespace SilkBot.Models
         [StringLength(5)]
         public string Prefix { get; set; }
 
-        public string InfractionFormat { get; set; } 
+        public string InfractionFormat { get; set; }
 
         public ulong MuteRoleId { get; set; }
         public ulong MessageEditChannel { get; set; }
-        
+
         public ulong GeneralLoggingChannel { get; set; }
         public ulong GreetingChannel { get; set; }
         public List<BlackListedWord> BlackListedWords { get; set; } = new List<BlackListedWord>();

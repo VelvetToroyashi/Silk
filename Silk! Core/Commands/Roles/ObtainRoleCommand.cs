@@ -1,10 +1,10 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
 {
@@ -13,7 +13,7 @@ namespace SilkBot.Commands.Roles
 
         [Command("Role")]
         [HelpDescription("Grab a role!", "[p]role <rolename>")]
-        public async Task ObtainRole(CommandContext ctx, 
+        public async Task ObtainRole(CommandContext ctx,
             [RemainingText, HelpDescription("What roles you'd like to obtain, no need to mention the role")] string roles)
         {
             if (roles is null) return;

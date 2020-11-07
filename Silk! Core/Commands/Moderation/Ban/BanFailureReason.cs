@@ -10,5 +10,5 @@
 
         public BanFailureReason(string reason) => FailureReason = reason;
     }
-   
+
 }

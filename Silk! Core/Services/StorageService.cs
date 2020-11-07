@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SilkBot.Services
 {
@@ -24,7 +22,7 @@ namespace SilkBot.Services
             using var db = _dbFactory.CreateDbContext();
             return db.Guilds.FirstOrDefault(guild).DiscordUserInfos.FirstOrDefault(u => u.UserId == userId);
         }
-        
+
 
         public UserInfoModel GetUser(GuildModel guild, UserInfoModel userId) => guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == userId.UserId);
         public UserInfoModel GetUser(Func<GuildModel, bool> guild, Func<UserInfoModel, bool> user)
@@ -33,6 +31,6 @@ namespace SilkBot.Services
             return db.Guilds.FirstOrDefault(guild).DiscordUserInfos.FirstOrDefault(user);
         }
 
-        
+
     }
 }

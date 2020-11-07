@@ -19,7 +19,7 @@ namespace SilkBot.Commands.Server
 {
     public class ConfigCommand : BaseCommandModule
     {
-        
+
         public HttpClient Client { private get; set; }
         public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }
 
@@ -34,12 +34,12 @@ namespace SilkBot.Commands.Server
             string response = string.Empty;
 
 
-            await ctx.RespondAsync(containsConfig ? CONFIG_ATTACHED : ATTACH_CONFIG);       
-            if(containsConfig)
+            await ctx.RespondAsync(containsConfig ? CONFIG_ATTACHED : ATTACH_CONFIG);
+            if (containsConfig)
                 await ValidateConfigurationAsync(ctx, msg.Attachments.First(a => a.FileName.Equals("config.ini", StringComparison.OrdinalIgnoreCase)));
         }
 
-        private async Task<GuildModel> ValidateConfigurationAsync(CommandContext ctx, DiscordAttachment config) 
+        private async Task<GuildModel> ValidateConfigurationAsync(CommandContext ctx, DiscordAttachment config)
         {
             string configString = await Client.GetStringAsync(config.Url);
             var parserConfig = new IniDataParser(new IniParserConfiguration
@@ -47,7 +47,7 @@ namespace SilkBot.Commands.Server
                 CommentString = "//",
                 CaseInsensitive = false,
                 ThrowExceptionsOnError = true
-            }) ;
+            });
             var parser = new StreamIniDataParser(parserConfig);
             try
             {
@@ -61,7 +61,7 @@ namespace SilkBot.Commands.Server
             catch (ArgumentException ae)
             {
                 await ctx.RespondAsync(ae.Message);
-                throw ae; 
+                throw ae;
             }
             // Commands are internally wrapped in Try/Catch, so re-throwing allows us to return from the method entirely instead of checking the status of the object. //
             return new GuildModel();
@@ -93,13 +93,13 @@ namespace SilkBot.Commands.Server
             #endregion
 
             #region Server info parsing
-            string INFRACTION_FORMAT       = serverInfo["INFRACTION_FORMAT"].Equals("Auto", StringComparison.OrdinalIgnoreCase) ? string.Empty : serverInfo["INFRACTION_FORMAT"];
+            string INFRACTION_FORMAT = serverInfo["INFRACTION_FORMAT"].Equals("Auto", StringComparison.OrdinalIgnoreCase) ? string.Empty : serverInfo["INFRACTION_FORMAT"];
             List<string> WHITELISTED_LINKS = serverInfo["WHITELISTED_LINKS"].Equals("Auto", StringComparison.OrdinalIgnoreCase) ? null : serverInfo["WHITELISTED_LINKS"].Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             List<string> BLACKLISTED_WORDS = serverInfo["BLACKLISTED_WORDS"].Equals("Auto", StringComparison.OrdinalIgnoreCase) ? null : serverInfo["BLACKLISTED_WORDS"].Split('"').WhereMoreThan(3).Select(t => t.Replace("\"", null)).ToList();
             List<ulong> SELF_ASSIGN_ROLES = new List<ulong>();
             serverInfo["SELF_ASSIGN_ROLES"]
                 .Split(new[] { ',', ' ' }).ToList()
-                .ForEach(n => 
+                .ForEach(n =>
                     {
                         if (n.Equals("Auto", StringComparison.OrdinalIgnoreCase)) return;
                         if (n.Length < 18) throw new ArgumentException($"Value of `{n}` was too short to be a snowflake Id.");
@@ -111,10 +111,10 @@ namespace SilkBot.Commands.Server
 
             using var db = DbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == guildId);
-            guild.WhitelistInvites  = WHITELIST_INVITES;
-            guild.WhiteListedLinks  = WHITELISTED_LINKS.Select(l => new WhiteListedLink() { Link = l }).Distinct().ToList();
-            guild.BlacklistWords    = ENABLE_BLACKLIST;
-            guild.BlackListedWords  = BLACKLISTED_WORDS.Select(w => new BlackListedWord { Word = w }).Distinct().ToList();
+            guild.WhitelistInvites = WHITELIST_INVITES;
+            guild.WhiteListedLinks = WHITELISTED_LINKS.Select(l => new WhiteListedLink() { Link = l }).Distinct().ToList();
+            guild.BlacklistWords = ENABLE_BLACKLIST;
+            guild.BlackListedWords = BLACKLISTED_WORDS.Select(w => new BlackListedWord { Word = w }).Distinct().ToList();
             guild.GreetMembers = GREET_MEMBERS;
 
 

@@ -21,7 +21,7 @@ namespace SilkBot.Commands.Server
             embed.WithThumbnail(guild.IconUrl);
 
 
-            if (guild.PremiumSubscriptionCount.Value > 0) 
+            if (guild.PremiumSubscriptionCount.Value > 0)
             {
                 embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");
             }

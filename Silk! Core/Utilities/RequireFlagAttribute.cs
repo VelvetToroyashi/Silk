@@ -20,10 +20,10 @@ namespace SilkBot.Utilities
         /// Check for a requisite flag from the database, and execute if check passes.
         /// </summary>
         /// <param name="RequireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
-        public RequireFlagAttribute(UserFlag UserFlag, bool RequireGuild = false) { this.UserFlag = UserFlag; this.RequireGuild = RequireGuild; } 
+        public RequireFlagAttribute(UserFlag UserFlag, bool RequireGuild = false) { this.UserFlag = UserFlag; this.RequireGuild = RequireGuild; }
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            
+
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = new SilkDbContext(); //Swap this for your own DBContext.//
@@ -32,7 +32,7 @@ namespace SilkBot.Utilities
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag)) _cachedStaff.Add(member.UserId);
             return member.Flags.HasFlag(UserFlag);
-            
+
         }
     }
 }

@@ -3,7 +3,7 @@ using DSharpPlus.Entities;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SilkBot.Utilities
+namespace SilkBot.Extensions
 {
     public static class PermissionHelper
     {
@@ -12,8 +12,8 @@ namespace SilkBot.Utilities
 
         public static bool HasPermission(this DiscordMember member, Permissions perm) =>
             !member.HasRoles() ? member.Guild.EveryoneRole.HasPermission(perm) : member.Roles.Any(role => role.HasPermission(perm));
-            
-        
+
+
 
         public static IEnumerable<DiscordRole> HasPermission(this DiscordGuild guild, Permissions permission) =>
             guild.Roles.Where(role => role.Value.HasPermission(permission)).Select(t => t.Value);
