@@ -5,13 +5,14 @@ namespace SilkBot.Models
 {
     public class GuildModel
     {
+        //[Key]
+        //public int Id { get; set; }
         [Key]
-        public int Id { get; set; }
-        [Required]
         public ulong DiscordGuildId { get; set; }
 
         public bool WhitelistInvites { get; set; }
         public bool BlacklistWords { get; set; }
+        public bool AutoDehoist { get; set; }
         public bool LogMessageChanges { get; set; }
         public bool GreetMembers { get; set; }
         public bool LogRoleChange { get; set; }

@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using IniParser;
@@ -9,14 +10,17 @@ using IniParser.Parser;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Models;
+using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
 {
+    [Group("config")]
     public class ConfigCommand : BaseCommandModule
     {
 
@@ -26,7 +30,17 @@ namespace SilkBot.Commands.Server
         private readonly string ATTACH_CONFIG = "Please attach a config to your message!";
         private readonly string CONFIG_ATTACHED = "Thank you~ I'll let you know if this config is valid, and adjust your settings accordingly!";
 
-        [Command("submit-config")]
+
+        [GroupCommand]
+        public async Task GetConfig(CommandContext ctx)
+        {
+            await ctx.RespondWithFileAsync("./config.ini", $"Want to submit a config? Sure! Just edit this file, and return it with `{ctx.Prefix}config submit`! :)" +
+                $"You can edit individual settings via `{ctx.Prefix}config edit <section>`. To see all sections, run `{ctx.Prefix}config list-sections`");
+        }
+
+       
+
+        [Command("submit")]
         public async Task SubmitConfigCommand(CommandContext ctx)
         {
             DiscordMessage msg = ctx.Message;
@@ -118,6 +132,99 @@ namespace SilkBot.Commands.Server
             guild.GreetMembers = GREET_MEMBERS;
 
 
+        }
+
+        [Command("List-Sections"), Aliases("List"), RequireFlag(UserFlag.Staff)]
+        public async Task ListSections(CommandContext ctx)
+        {
+            await ctx.RespondAsync($">>> ```md\n" +
+                $"Available sections:\n" +
+                $"\t- WhitelistInvites <true/false>\n" +
+                $"\t- Auto-Dehoist <PREMIUM> <true/false>\n" +
+                $"\t- LogMessages <true/false>\n" +
+                $"\t- MuteRole <UID>\n" +
+                $"\t- MessageLogChannel <UID>\n" +
+                $"\t- ModLogChannel <UID> (Default: MessageLogChannel)\n```");
+
+        }
+        [Group("Edit")]
+        public class ConfigEditCommand : BaseCommandModule
+        {
+            private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+            public ConfigEditCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+            [GroupCommand]
+            public async Task Edit(CommandContext ctx) => await ctx.RespondAsync("Please provide a section you'd like to edit, and it's value!");
+
+            [Command("WhitelistInvites"), RequireFlag(UserFlag.Staff)]
+            public async Task WhitelistInvites(CommandContext ctx, bool whitelist)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.WhitelistInvites = whitelist;
+                await AssertConfigAsync<bool>(ctx, guild.WhitelistInvites, whitelist);
+                await db.SaveChangesAsync();
+            }
+
+            [Command("Auto-Dehoist"), RequireFlag(UserFlag.Staff), RequireFlag(UserFlag.SilkPremiumUser)]
+            public async Task AutoDehoist(CommandContext ctx, bool dehoist)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.AutoDehoist = dehoist;
+                await AssertConfigAsync<bool>(ctx, guild.AutoDehoist, dehoist);
+                await db.SaveChangesAsync();
+            }
+
+            [Command("LogMessages"), RequireFlag(UserFlag.Staff)]
+            public async Task LogMessages(CommandContext ctx, bool logMessages)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.LogMessageChanges = logMessages;
+                await AssertConfigAsync<bool>(ctx, guild.LogMessageChanges, logMessages);
+                await db.SaveChangesAsync();
+            }
+
+            [Command("MuteRole"), RequireFlag(UserFlag.Staff)]
+            public async Task Mute(CommandContext ctx, DiscordRole role)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.MuteRoleId = role.Id;
+                await AssertConfigAsync<ulong>(ctx, guild.MuteRoleId, role.Id);
+                await db.SaveChangesAsync();
+            }
+
+            [Command("MessageLogChannel"), RequireFlag(UserFlag.Staff)]
+            public async Task MLog(CommandContext ctx, DiscordChannel channel)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.MessageEditChannel = channel.Id;
+                if (guild.GeneralLoggingChannel == default) guild.GeneralLoggingChannel = channel.Id;
+                await AssertConfigAsync<ulong>(ctx, guild.MessageEditChannel, channel.Id);
+                await db.SaveChangesAsync();
+            }
+
+            [Command("ModlogChannel"), RequireFlag(UserFlag.Staff)]
+            public async Task Modlog(CommandContext ctx, DiscordChannel channel)
+            {
+                var db = _dbFactory.CreateDbContext();
+                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                guild.GeneralLoggingChannel = channel.Id;
+                await AssertConfigAsync<ulong>(ctx, guild.GeneralLoggingChannel, channel.Id);
+                await db.SaveChangesAsync();
+            }
+
+
+            private async Task AssertConfigAsync<T>(CommandContext ctx, object value, object expectedValue)
+            {
+                
+                if(((T)value).Equals((T)expectedValue))
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                else
+                    await ctx.RespondAsync("Something went wrong when applying that setting.");
+            }
         }
     }
 }

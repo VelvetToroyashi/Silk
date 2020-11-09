@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201107072313_auto-dehoist")]
+    partial class autodehoist
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,11 +116,11 @@ namespace SilkBot.Migrations
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal?>("GuildDiscordGuildId")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<string>("GuildId")
                         .HasColumnType("text");
+
+                    b.Property<int?>("GuildId1")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Reason")
                         .HasColumnType("text");
@@ -131,7 +133,7 @@ namespace SilkBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildDiscordGuildId");
+                    b.HasIndex("GuildId1");
 
                     b.HasIndex("UserInfoId");
 
@@ -145,30 +147,34 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<decimal?>("GuildDiscordGuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<int?>("GuildId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Word")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildDiscordGuildId");
+                    b.HasIndex("GuildId");
 
                     b.ToTable("BlackListedWord");
                 });
 
             modelBuilder.Entity("SilkBot.Models.GuildModel", b =>
                 {
-                    b.Property<decimal>("DiscordGuildId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("integer")
+                        .UseIdentityByDefaultColumn();
 
                     b.Property<bool>("AutoDehoist")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("BlacklistWords")
                         .HasColumnType("boolean");
+
+                    b.Property<decimal>("DiscordGuildId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GeneralLoggingChannel")
                         .HasColumnType("numeric(20,0)");
@@ -202,7 +208,7 @@ namespace SilkBot.Migrations
                     b.Property<bool>("WhitelistInvites")
                         .HasColumnType("boolean");
 
-                    b.HasKey("DiscordGuildId");
+                    b.HasKey("Id");
 
                     b.ToTable("Guilds");
                 });
@@ -213,12 +219,12 @@ namespace SilkBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal?>("GuildModelDiscordGuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<int?>("GuildModelId")
+                        .HasColumnType("integer");
 
                     b.HasKey("RoleId");
 
-                    b.HasIndex("GuildModelDiscordGuildId");
+                    b.HasIndex("GuildModelId");
 
                     b.ToTable("SelfAssignableRole");
                 });
@@ -236,8 +242,8 @@ namespace SilkBot.Migrations
                     b.Property<int>("Flags")
                         .HasColumnType("integer");
 
-                    b.Property<decimal?>("GuildDiscordGuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<int?>("GuildId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("LastCashIn")
                         .HasColumnType("timestamp without time zone");
@@ -247,7 +253,7 @@ namespace SilkBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildDiscordGuildId");
+                    b.HasIndex("GuildId");
 
                     b.ToTable("Users");
                 });
@@ -288,15 +294,15 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<decimal?>("GuildDiscordGuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<int?>("GuildId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Link")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildDiscordGuildId");
+                    b.HasIndex("GuildId");
 
                     b.ToTable("WhiteListedLink");
                 });
@@ -314,7 +320,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("Bans")
-                        .HasForeignKey("GuildDiscordGuildId");
+                        .HasForeignKey("GuildId1");
 
                     b.HasOne("SilkBot.Models.UserInfoModel", "UserInfo")
                         .WithMany()
@@ -329,7 +335,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("BlackListedWords")
-                        .HasForeignKey("GuildDiscordGuildId");
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });
@@ -338,14 +344,14 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", null)
                         .WithMany("SelfAssignableRoles")
-                        .HasForeignKey("GuildModelDiscordGuildId");
+                        .HasForeignKey("GuildModelId");
                 });
 
             modelBuilder.Entity("SilkBot.Models.UserInfoModel", b =>
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("DiscordUserInfos")
-                        .HasForeignKey("GuildDiscordGuildId");
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });
@@ -363,7 +369,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("WhiteListedLinks")
-                        .HasForeignKey("GuildDiscordGuildId");
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });

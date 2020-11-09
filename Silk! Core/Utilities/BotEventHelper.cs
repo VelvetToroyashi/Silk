@@ -40,7 +40,6 @@ namespace SilkBot.Utilities
             };
             Client.GuildAvailable += OnGuildAvailable;
             Client.MessageDeleted += new MessageDeletionHandler().OnMessageDeleted;
-            Client.MessageUpdated += new MessageEditHandler().OnMessageEdit;
             Client.GuildCreated += new GuildJoinHandler().OnGuildJoin;
         }
 

@@ -36,7 +36,10 @@
 
   <ItemGroup>
     <None Remove="721518523704410202.serverconfig" />
+    <None Remove="config.ini" />
     <None Remove="Database\Models\NewFile1.txt" />
+    <None Remove="dbLogin" />
+    <None Remove="docker-compose.yml" />
     <None Remove="NewFile1.txt" />
     <None Remove="Token.txt" />
   </ItemGroup>
@@ -76,7 +79,15 @@
     <Compile Include="Migrations\20201029025142_no.Designer.cs" />
     <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.cs" />
     <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.Designer.cs" />
+    <Compile Include="Migrations\20201107072313_auto-dehoist.cs" />
+    <Compile Include="Migrations\20201107072313_auto-dehoist.Designer.cs" />
+    <Compile Include="Migrations\20201109054950_why.cs" />
+    <Compile Include="Migrations\20201109054950_why.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="docker-compose.yml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -117,13 +128,17 @@
     <None Update="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="dbLogin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Commands\Tests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="config.ini" />
+    <Resource Include="dbLogin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
