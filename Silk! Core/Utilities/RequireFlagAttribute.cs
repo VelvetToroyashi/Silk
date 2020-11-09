@@ -27,7 +27,7 @@ namespace SilkBot.Utilities
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = new SilkDbContext(); //Swap this for your own DBContext.//
-            GuildModel guild = db.Guilds.Include(g => g.DiscordUserInfos).First(g => g.DiscordGuildId == ctx.Guild.Id);
+            GuildModel guild = db.Guilds.Include(g => g.DiscordUserInfos).First(g => g.Id == ctx.Guild.Id);
             UserInfoModel member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag)) _cachedStaff.Add(member.UserId);

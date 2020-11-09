@@ -49,7 +49,7 @@ namespace SilkBot.Utilities
         {
             var db = _dbFactory.CreateDbContext();
             var guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
-            if (!db.Guilds.Any(g => g.DiscordGuildId == guild.DiscordGuildId)) db.Guilds.Add(guild);
+            if (!db.Guilds.Any(g => g.Id == guild.Id)) db.Guilds.Add(guild);
             var sw = Stopwatch.StartNew();
             CacheStaffMembers(guild, e.Guild.Members.Values);
             db.Guilds.Update(guild);
@@ -60,8 +60,8 @@ namespace SilkBot.Utilities
 
         public async Task<GuildModel> GetOrCreateGuildAsync(SilkDbContext db, ulong guildId)
         {
-            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.DiscordGuildId == guildId);
-            return guild ?? new GuildModel { DiscordGuildId = guildId, Prefix = Bot.SilkDefaultCommandPrefix };
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
+            return guild ?? new GuildModel { Id = guildId, Prefix = Bot.SilkDefaultCommandPrefix };
         }
 
 

@@ -13,7 +13,7 @@ namespace SilkBot.Commands.Moderation.SClean
         public async Task SClean(CommandContext ctx)
         {
             using var db = new SilkDbContext();
-            var prefix = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var prefix = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             await ctx.RespondAsync($"Are you looking for `{prefix.Prefix}help SClean`?");
         }
     }

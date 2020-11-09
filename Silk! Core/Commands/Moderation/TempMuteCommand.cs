@@ -23,7 +23,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
         {
             var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
             var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
-                .First(g => g.DiscordGuildId == ctx.Guild.Id);
+                .First(g => g.Id == ctx.Guild.Id);
             if (!bot.HasPermission(Permissions.ManageRoles))
             {
                 var message = await ctx.RespondAsync("Sorry, but I don't have permission to mute members!");
@@ -75,7 +75,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             var unmuteMember = await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
 
             var guild = DbFactory.CreateDbContext().Guilds
-                .First(g => g.DiscordGuildId == eventObject.Guild);
+                .First(g => g.Id == eventObject.Guild);
             ulong muteRole = guild.MuteRoleId;
 
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);

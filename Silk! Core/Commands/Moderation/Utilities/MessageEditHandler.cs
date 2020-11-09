@@ -28,7 +28,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             if (e.Channel.IsPrivate) return;
             _ = Task.Run(async () => 
             {
-                var config = _dbFactory.CreateDbContext().Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
+                var config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
                 CheckForInvite(e, config);
                 var logChannel = config.MessageEditChannel;
                 if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;

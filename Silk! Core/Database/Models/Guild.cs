@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SilkBot.Models
 {
+    [DisplayColumn("Discord Guilds")]
     public class GuildModel
     {
-        //[Key]
-        //public int Id { get; set; }
-        [Key]
-        public ulong DiscordGuildId { get; set; }
+        [Key, DisplayName("Id")]
+        public ulong Id { get; set; }
 
         public bool WhitelistInvites { get; set; }
         public bool BlacklistWords { get; set; }

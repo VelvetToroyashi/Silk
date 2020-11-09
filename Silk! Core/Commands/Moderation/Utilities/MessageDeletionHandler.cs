@@ -25,7 +25,7 @@ namespace SilkBot.Commands.Moderation.Utilities
             if (e.Channel.IsPrivate || e.Message.Author.IsCurrent) return;
 
 
-            var config = Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == e.Guild.Id);
+            var config = Instance.SilkDBContext.Guilds.First(g => g.Id == e.Guild.Id);
 
             if (!config.LogMessageChanges || config.MessageEditChannel == default) return;
 

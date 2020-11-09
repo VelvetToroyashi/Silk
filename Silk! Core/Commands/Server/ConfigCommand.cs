@@ -124,7 +124,7 @@ namespace SilkBot.Commands.Server
             #endregion
 
             using var db = DbFactory.CreateDbContext();
-            GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == guildId);
+            GuildModel guild = db.Guilds.First(g => g.Id == guildId);
             guild.WhitelistInvites = WHITELIST_INVITES;
             guild.WhiteListedLinks = WHITELISTED_LINKS.Select(l => new WhiteListedLink() { Link = l }).Distinct().ToList();
             guild.BlacklistWords = ENABLE_BLACKLIST;
@@ -159,7 +159,7 @@ namespace SilkBot.Commands.Server
             public async Task WhitelistInvites(CommandContext ctx, bool whitelist)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.WhitelistInvites = whitelist;
                 await AssertConfigAsync<bool>(ctx, guild.WhitelistInvites, whitelist);
                 await db.SaveChangesAsync();
@@ -169,7 +169,7 @@ namespace SilkBot.Commands.Server
             public async Task AutoDehoist(CommandContext ctx, bool dehoist)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.AutoDehoist = dehoist;
                 await AssertConfigAsync<bool>(ctx, guild.AutoDehoist, dehoist);
                 await db.SaveChangesAsync();
@@ -179,7 +179,7 @@ namespace SilkBot.Commands.Server
             public async Task LogMessages(CommandContext ctx, bool logMessages)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.LogMessageChanges = logMessages;
                 await AssertConfigAsync<bool>(ctx, guild.LogMessageChanges, logMessages);
                 await db.SaveChangesAsync();
@@ -189,7 +189,7 @@ namespace SilkBot.Commands.Server
             public async Task Mute(CommandContext ctx, DiscordRole role)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.MuteRoleId = role.Id;
                 await AssertConfigAsync<ulong>(ctx, guild.MuteRoleId, role.Id);
                 await db.SaveChangesAsync();
@@ -199,7 +199,7 @@ namespace SilkBot.Commands.Server
             public async Task MLog(CommandContext ctx, DiscordChannel channel)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.MessageEditChannel = channel.Id;
                 if (guild.GeneralLoggingChannel == default) guild.GeneralLoggingChannel = channel.Id;
                 await AssertConfigAsync<ulong>(ctx, guild.MessageEditChannel, channel.Id);
@@ -210,7 +210,7 @@ namespace SilkBot.Commands.Server
             public async Task Modlog(CommandContext ctx, DiscordChannel channel)
             {
                 var db = _dbFactory.CreateDbContext();
-                GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.GeneralLoggingChannel = channel.Id;
                 await AssertConfigAsync<ulong>(ctx, guild.GeneralLoggingChannel, channel.Id);
                 await db.SaveChangesAsync();

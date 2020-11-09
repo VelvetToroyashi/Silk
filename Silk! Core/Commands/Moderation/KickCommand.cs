@@ -63,7 +63,7 @@ namespace SilkBot.Commands.Moderation
 
                 await user.RemoveAsync(reason);
 
-                var guildConfig = DbFactory.CreateDbContext().Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                var guildConfig = DbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
                 var logChannelID = guildConfig.GeneralLoggingChannel;
                 var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),

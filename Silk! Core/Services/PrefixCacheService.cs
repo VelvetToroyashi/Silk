@@ -49,7 +49,7 @@ namespace SilkBot.Services
             using var db = _dbFactory.CreateDbContext();
 
 
-            GuildModel guild = db.Guilds.AsNoTracking().First(g => g.DiscordGuildId == guildId);
+            GuildModel guild = db.Guilds.AsNoTracking().First(g => g.Id == guildId);
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
             _sw.Stop();
             _cache.TryAdd(guildId, guild.Prefix);

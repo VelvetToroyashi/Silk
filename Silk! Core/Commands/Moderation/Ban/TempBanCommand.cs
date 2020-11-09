@@ -44,7 +44,7 @@ namespace SilkBot.Commands.Moderation.Ban
 
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
-                var guild = db.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+                var guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
                 UserInfoModel bannedUser = db.Users.FirstOrDefault(u => u.UserId == user.Id);
                 string? formattedBanReason = Utilities.InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
@@ -119,7 +119,7 @@ namespace SilkBot.Commands.Moderation.Ban
         private async Task OnBanExpiration(TimedInfraction eventObject)
         {
             var db = DbFactory.CreateDbContext();
-            GuildModel guild = db.Guilds.First(g => g.DiscordGuildId == eventObject.Guild);
+            GuildModel guild = db.Guilds.First(g => g.Id == eventObject.Guild);
             if (guild.GeneralLoggingChannel != default)
             {
                 DiscordChannel c = (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.GeneralLoggingChannel);

@@ -12,7 +12,7 @@ namespace SilkBot.Services
         public GuildModel GetGuild(ulong Id)
         {
             using var db = _dbFactory.CreateDbContext();
-            return db.Guilds.FirstOrDefault(g => g.DiscordGuildId == Id);
+            return db.Guilds.FirstOrDefault(g => g.Id == Id);
         }
 
 

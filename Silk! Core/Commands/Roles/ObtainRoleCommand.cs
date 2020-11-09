@@ -18,7 +18,7 @@ namespace SilkBot.Commands.Roles
         {
             if (roles is null) return;
             var _roles = roles.Split(',');
-            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.DiscordGuildId == ctx.Guild.Id);
+            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
             foreach (var role in _roles)
             {
                 var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
