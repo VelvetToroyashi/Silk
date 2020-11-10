@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Extensions;
 using SilkBot.Models;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace SilkBot.Utilities
 
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
-            using var db = new SilkDbContext(); //Swap this for your own DBContext.//
+            using var db = ctx.Services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); //Swap this for your own DBContext.//
             GuildModel guild = db.Guilds.Include(g => g.DiscordUserInfos).First(g => g.Id == ctx.Guild.Id);
             UserInfoModel member = guild.DiscordUserInfos.FirstOrDefault(m => m.UserId == ctx.User.Id);
             if (member is null) return false;

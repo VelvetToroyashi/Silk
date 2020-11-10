@@ -34,7 +34,7 @@
         public static DateTime StartupTime { get; } = DateTime.Now;
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
-        public SilkDbContext SilkDBContext { get; } = new SilkDbContext();
+        public SilkDbContext SilkDBContext { get; private set; }
 
         private ServiceProvider Services;
 
@@ -45,15 +45,17 @@
         private ILogger<Bot> _logger;
         private readonly Stopwatch _sw = new Stopwatch();
 
-        public Bot()
+        public Bot(IDbContextFactory<SilkDbContext> dbFactory, ServiceCollection services, DiscordShardedClient client)
         {
             _sw.Start();
+            SilkDBContext = dbFactory.CreateDbContext();
             Instance = this;
+            Client = client;
+            RunBotAsync(services).GetAwaiter();
         }
         #region Methods
         public async Task RunBotAsync(ServiceCollection services)
         {
-            SetupNLog();
 
             try
             {
@@ -67,7 +69,7 @@
 
             await InitializeClientAsync(services);
 
-            RegisterCommands();
+            await RegisterCommandsAsync();
 
             await Task.Delay(-1);
         }
@@ -99,6 +101,7 @@
         {
             Services = services
                 .AddSingleton(Client)
+                .AddSingleton<MessageCreationHandler>()
                 .BuildServiceProvider();
             _logger = Services.Get<ILogger<Bot>>();
             _logger.LogInformation("All services initalized.");
@@ -110,7 +113,7 @@
 
 
 
-        private async Task RegisterCommands()
+        private async Task RegisterCommandsAsync()
         {
             var sw = Stopwatch.StartNew();
             foreach (var shard in Client.ShardClients.Values)
@@ -126,21 +129,7 @@
 
         private async Task InitializeClientAsync(ServiceCollection services)
         {
-            var token = File.ReadAllText("./Token.txt");
-            var config = new DiscordConfiguration
-            {
-                AutoReconnect = true,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None,
-                Token = token,
-                TokenType = TokenType.Bot,
-                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.Guilds,
-                LogTimestampFormat = "H:mm:sstt",
-                MessageCacheSize = 4096
-            };
 
-            Client = new DiscordShardedClient(config);
-
-            AddServices(services);
             Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate, Services = Services };
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
@@ -152,8 +141,6 @@
             //Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
             await Task.Delay(100);
             _logger.LogInformation("Client Initialized.");
-
-
 
             Client.ShardClients.Values.ToList().ForEach(async c => await c.ConnectAsync());
 

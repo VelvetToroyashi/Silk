@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using System.Linq;
@@ -11,11 +12,14 @@ namespace SilkBot.Commands.Server
 {
     public class ServerInfoCommand : BaseCommandModule
     {
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public ServerInfoCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
         [Command]
         public async Task ServerInfo(CommandContext ctx)
         {
             DiscordGuild guild = ctx.Guild;
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             int staffCount = db.Guilds.First(_ => _.Id == guild.Id).DiscordUserInfos.Where(u => u.Flags.Has(UserFlag.Staff)).Count();
             var embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:").WithColor(DiscordColor.Gold).WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
             embed.WithThumbnail(guild.IconUrl);

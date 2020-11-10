@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 namespace SilkBot.Commands.General
 {
     [Group]
-    public class Ticket : CommandClass
+    public class Ticket
     {
 
         private const string TERMINATION_REASON = "Your ticket has been manually terminated and is now void. No further information provided.";
@@ -29,16 +29,21 @@ namespace SilkBot.Commands.General
         private readonly Func<string, string> TicketTermination = (r) => $"Your ticket has been terminated. Reason: `{r}`";
         private readonly Dictionary<ulong, ulong> ticketChannels = new Dictionary<ulong, ulong>(); // UserId, ChannelId
         private readonly TicketService _ticketService;
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
 
-        public Ticket(IDbContextFactory<SilkDbContext> db, TicketService ticket) : base(db) { _ticketService = ticket; }
+        public Ticket(IDbContextFactory<SilkDbContext> dbFactory, TicketService ticket) 
+        { 
+            _ticketService = ticket;  
+            _dbFactory = dbFactory; 
+        }
 
         [Command("respond"), Aliases("reply"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task RespondToTicket(CommandContext ctx, int Id, [RemainingText] string message)
         {
             try
             {
-                using var db = GetDbContext();
+                using var db = _dbFactory.CreateDbContext();
                 var ticket = db.Tickets.OrderBy(t => t.Opened).Last(ticket => ticket.Id == Id);
                 if (!ticket.IsOpen)
                 {
@@ -77,7 +82,7 @@ namespace SilkBot.Commands.General
         [Command("close"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task CloseTicket(CommandContext ctx, int Id, [RemainingText] string reason = TERMINATION_REASON)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
             if (ticket is null) await ctx.RespondAsync("Invalid ticket id!");
             else if (ctx.Channel.Id != ticketChannels[ticket.Opener])
@@ -197,13 +202,18 @@ namespace SilkBot.Commands.General
 
     public class TicketService
     {
-        private readonly DiscordShardedClient client;
-        public TicketService(DiscordShardedClient client) => this.client = client;
+        private readonly DiscordShardedClient _client;
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public TicketService(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory) 
+        {
+            _client = client;
+            _dbFactory = _dbFactory;
+        }
 
 #nullable enable
         public TicketModel? GetTicketById(int Id)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             TicketModel? t = db.Tickets.SingleOrDefault(t => t.Id == Id);
             return t;
         }
@@ -212,7 +222,7 @@ namespace SilkBot.Commands.General
 
         public async Task<TicketCreationResult> CreateTicketAsync(DiscordUser ticketOpener, DateTime ticketTime, string ticketMessage)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             var tickets = db.Tickets;
             if (tickets.Where(t => t.IsOpen).Select(t => t.Opener).Contains(ticketOpener.Id)) return new TicketCreationResult(false, "Ticket already opened for current user.");
             var ticket = new TicketModel() { IsOpen = true, Opener = ticketOpener.Id, Opened = ticketTime };
@@ -235,7 +245,7 @@ namespace SilkBot.Commands.General
             }
             else { parentCategory = (await g.GetChannelsAsync()).Single(c => c.Name.ToLower() == "Silk! Tickets".ToLower()); }
 
-            DiscordUser u = client.GetUser(userId);
+            DiscordUser u = _client.GetUser(userId);
             DiscordChannel returnChannel =
                 g.Channels.Any(c => c.Value.Name.ToLower() == u.Username.ToLower())
                 ? g.Channels.Values.Single(c => c.Name.ToLower() == u.Username.ToLower())
@@ -245,7 +255,7 @@ namespace SilkBot.Commands.General
 
         public async Task RespondToBlindTicketAsync(DiscordClient client, ulong userId, string message)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
 
             var ticket = db.Tickets.OrderBy(t => t.Opened).Last(ticket => ticket.Opener == userId);
 
@@ -272,8 +282,8 @@ namespace SilkBot.Commands.General
                 .GetMemberAsync(ticket.Opener);
 
             ticket.History.Add(new TicketMessageHistoryModel { Message = message, Sender = ctx.User.Id }); // Add this message to the history.
-            await new SilkDbContext().SaveChangesAsync();
-            var embed = GenerateResponderEmbed(message, client.CurrentUser.AvatarUrl, ctx.User, ticket);
+            await _dbFactory.CreateDbContext().SaveChangesAsync();
+            var embed = GenerateResponderEmbed(message, _client.CurrentUser.AvatarUrl, ctx.User, ticket);
             await FinalizeTicketPrecedure(ctx, recipient, embed);
         }
 
@@ -320,7 +330,7 @@ namespace SilkBot.Commands.General
             if (!c.IsPrivate)
                 return false;
 
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             TicketModel ticket = db.Tickets
                 .Where(t => t.IsOpen)
                 .OrderBy(t => t.Opened)

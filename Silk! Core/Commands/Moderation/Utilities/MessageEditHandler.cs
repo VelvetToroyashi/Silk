@@ -20,7 +20,7 @@ namespace SilkBot.Commands.Moderation.Utilities
         {
             _dbFactory = dbFactory;
             _client = client;
-            client.MessageUpdated += OnMessageEdit;
+            foreach (DiscordClient shard in client.ShardClients.Values) shard.MessageUpdated += OnMessageEdit;
         }
 
         public async Task OnMessageEdit(DiscordClient c, MessageUpdateEventArgs e)
@@ -51,7 +51,6 @@ namespace SilkBot.Commands.Moderation.Utilities
                 var loggingChannel = await c.GetChannelAsync(logChannel);
                 await c.SendMessageAsync(loggingChannel, embed: embed);
             });
-
         }
         private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {

@@ -11,8 +11,10 @@ namespace SilkBot.Commands.General
 {
     public class PingCommand : BaseCommandModule
     {
-        [Command("Ping")]
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
+        [Command("Ping")]
         public async Task Ping(CommandContext ctx)
         {
             SilkBot.Bot.CommandTimer.Stop();
@@ -36,7 +38,7 @@ namespace SilkBot.Commands.General
         private int GetDbLatency()
         {
             var sw = Stopwatch.StartNew();
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") over () FROM \"Guilds\"");

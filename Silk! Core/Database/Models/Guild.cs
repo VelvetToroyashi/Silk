@@ -7,12 +7,15 @@ namespace SilkBot.Models
     [DisplayColumn("Discord Guilds")]
     public class GuildModel
     {
-        [Key, DisplayName("Id")]
+        [Key, Display(Name = "Id")]
         public ulong Id { get; set; }
-
+        [Display(Name = "Whitelist Invites")]
         public bool WhitelistInvites { get; set; }
+        [Display(Name = "Blacklist Enabled")]
         public bool BlacklistWords { get; set; }
+        [Display(Name = "Auto-Dehoist")]
         public bool AutoDehoist { get; set; }
+        [Display(Name = "Log Message Edit/Deletion")]
         public bool LogMessageChanges { get; set; }
         public bool GreetMembers { get; set; }
         public bool LogRoleChange { get; set; }

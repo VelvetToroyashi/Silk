@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using SilkBot.Utilities;
 using System.Collections.Generic;
@@ -11,13 +12,15 @@ namespace SilkBot.Commands.Moderation.SClean
 {
     public partial class SCleanCommand
     {
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public SCleanCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [HelpDescription("Clean images from chat.")]
-
         public async Task Images(CommandContext ctx, [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")] int amount = 10)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext() ;
 
             amount = amount > 99 ? 100 : ++amount;
             var images = await GetImages(ctx.Channel, amount);

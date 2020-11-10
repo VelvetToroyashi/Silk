@@ -1,5 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using IniParser;
@@ -15,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
@@ -24,8 +22,13 @@ namespace SilkBot.Commands.Server
     public class ConfigCommand : BaseCommandModule
     {
 
-        public HttpClient Client { private get; set; }
-        public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }
+        private readonly HttpClient _client;
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public ConfigCommand(HttpClient client, IDbContextFactory<SilkDbContext> factory)
+        {
+            _client = client;
+            this._dbFactory = factory;
+        }
 
         private readonly string ATTACH_CONFIG = "Please attach a config to your message!";
         private readonly string CONFIG_ATTACHED = "Thank you~ I'll let you know if this config is valid, and adjust your settings accordingly!";
@@ -55,7 +58,7 @@ namespace SilkBot.Commands.Server
 
         private async Task<GuildModel> ValidateConfigurationAsync(CommandContext ctx, DiscordAttachment config)
         {
-            string configString = await Client.GetStringAsync(config.Url);
+            string configString = await _client.GetStringAsync(config.Url);
             var parserConfig = new IniDataParser(new IniParserConfiguration
             {
                 CommentString = "//",
@@ -123,7 +126,7 @@ namespace SilkBot.Commands.Server
             ulong.TryParse(serverInfo["GP_LOG_CHANNEL_ID"], out var GP_LOG_CHANNEL);
             #endregion
 
-            using var db = DbFactory.CreateDbContext();
+            using var db = _dbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.Id == guildId);
             guild.WhitelistInvites = WHITELIST_INVITES;
             guild.WhiteListedLinks = WHITELISTED_LINKS.Select(l => new WhiteListedLink() { Link = l }).Distinct().ToList();
@@ -137,6 +140,7 @@ namespace SilkBot.Commands.Server
         [Command("List-Sections"), Aliases("List"), RequireFlag(UserFlag.Staff)]
         public async Task ListSections(CommandContext ctx)
         {
+            // Becuase of the way Android renders embeds for some reason, quoted codeblocks are broken. Dunno. //
             await ctx.RespondAsync($">>> ```md\n" +
                 $"Available sections:\n" +
                 $"\t- WhitelistInvites <true/false>\n" +

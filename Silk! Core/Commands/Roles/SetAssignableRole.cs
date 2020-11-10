@@ -1,7 +1,9 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Exceptions;
+using SilkBot.Models;
 using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,12 +15,15 @@ namespace SilkBot.Commands.Roles
 {
     public class SetAssignableRole : BaseCommandModule
     {
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public SetAssignableRole(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
         [Command("Assign")]
         [Aliases("sar", "selfassignablerole", "selfrole")]
         [HelpDescription("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
-            var guild = new SilkDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
+            var guild = _dbFactory.CreateDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
             if (roles.Count() < 1)
             {
                 await ctx.RespondAsync("Roles cannot be empty!");

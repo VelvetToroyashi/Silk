@@ -1,23 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Models;
-using System.IO;
 
 namespace SilkBot
 {
     public class SilkDbContext : DbContext
     {
+
         public DbSet<GuildModel> Guilds { get; set; }
         public DbSet<TicketModel> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
         public DbSet<ChangelogModel> ChangeLogs { get; set; }
         public DbSet<UserInfoModel> Users { get; set; }
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            var sqlString = File.ReadAllText("./dbLogin");
-            options.EnableDetailedErrors();
-            options.UseNpgsql(sqlString);
-        }
+
+        public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

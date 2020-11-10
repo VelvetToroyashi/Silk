@@ -3,6 +3,8 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
 using SilkBot.Utilities;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -14,11 +16,11 @@ namespace SilkBot.Commands.Bot
     {
         private readonly TicketService _ticketService;
         private readonly GuildConfigCacheService _guildCache;
-        private readonly ILogger _logger;
+        private readonly ILogger<MessageCreationHandler> _logger;
 
-        public MessageCreationHandler(TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
+        public MessageCreationHandler(DiscordShardedClient sc, TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
         {
-
+            sc.MessageCreated += OnMessageCreate ;
             _ticketService = ts;
             _guildCache = guildCache;
             _logger = logger;
@@ -40,9 +42,12 @@ namespace SilkBot.Commands.Bot
                 //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
                 if (e.Guild != null)
                 {
-                    var config = await _guildCache.GetConfigAsync(e.Guild?.Id);
+                    var config = await _guildCache.GetConfigAsync(e.Guild.Id);
                     CommandTimer.Restart();
+                    var sw = Stopwatch.StartNew();
                     CheckForInvite(e, config);
+                    sw.Stop();
+                    _logger.LogInformation($"Checked for information in {sw.ElapsedMilliseconds} ms.");
 
                 }
                 if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
@@ -53,6 +58,7 @@ namespace SilkBot.Commands.Bot
 
         private void CheckForInvite(MessageCreateEventArgs e, GuildConfiguration config)
         {
+            
             if (config.WhitelistsInvites)
             {
                 string messageContent = e.Message.Content;
@@ -70,6 +76,7 @@ namespace SilkBot.Commands.Bot
                     if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink)) e.Message.DeleteAsync().GetAwaiter();
 
                 }
+
             }
         }
     }

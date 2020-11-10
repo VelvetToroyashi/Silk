@@ -28,49 +28,22 @@ namespace SilkBot.Commands.General
                .WithTimestamp(DateTime.Now));
                 return;
             }
-            var lockoutChannel = ctx.Channel;
-            ulong messageID = ctx.Message.Id;
-            var actualMessageCount = lockoutChannel.GetMessagesBeforeAsync(ctx.Message.Id, messages).Result.Count();
-            var queryConfirmationMessage = ctx.Message;
-            if (messages > 50)
-            {
 
-                await ctx.TriggerTypingAsync();
-                await Task.Delay(2000);
-                queryConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                .WithColor(DiscordColor.Yellow)
-                .WithDescription($"Initiated bulk delete. Querying {actualMessageCount} messages.")
-                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl));
-                messageID = queryConfirmationMessage.Id;
-                await Task.Delay(4000);
-            }
-            var pendingMessages = await ctx.Channel.GetMessagesBeforeAsync(messageID, messages);
+            var queriedMessages = await ctx.Channel.GetMessagesAsync(messages + 1);
+            await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{ctx.User.Username}{ctx.User.Discriminator} called clear command.");
 
-            MessageDeletionHandler.UnloggedMessages = pendingMessages.Count;
-            await ctx.Channel.DeleteMessagesAsync(pendingMessages);
-            await lockoutChannel.GetMessageAsync(queryConfirmationMessage.Id).Result.DeleteAsync();
             var deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($"Cleared {actualMessageCount + 1} messages!")
+                .WithDescription($"Cleared {messages} messages!")
                 .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now));
             //Change to whatever.//
             await Task.Delay(5000);
-            await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
+            if(deleteConfirmationMessage != null)
+                await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
 
 
         }
-
-        public async Task SyncPermissions(CommandContext ctx, DiscordChannel channel)
-        {
-            foreach (var ow in channel.Parent.PermissionOverwrites)
-            {
-                var role = await ow.GetRoleAsync();
-                await channel.AddOverwriteAsync(role, ow.Allowed, ow.Denied, $"Syncing with Parent per request from {ctx.User}");
-            }
-        }
-
     }
 }

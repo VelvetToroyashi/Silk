@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,28 @@ namespace SilkBot.Commands.Miscellaneous
 {
     public class UserInfo : BaseCommandModule
     {
-        [Command("userinfo")]
-        [Aliases("info")]
+        [Command("info")]
+        public async Task RoleInfo(CommandContext ctx, DiscordRole role)
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"Info for {role.Name} ( {role.Id} ) :")
+                .AddField("Color:", role.Color.ToString())
+                .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
+                .AddField("Hoisted?:", role.IsHoisted.ToString())
+                .AddField("Bot role?:", role.IsManaged.ToString())
+                .AddField("Permissions:", role.Permissions.ToString())
+                .AddField("Mentionable?:", role.IsMentionable.ToString())
+                .WithColor(role.Color)
+                .WithThumbnail(ctx.Guild.IconUrl);
+            await ctx.RespondAsync(embed: embed);
+        }
+
+        [Command("info")]
         public async Task GetUserInfo(CommandContext ctx, DiscordMember member)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor(member.DisplayName, iconUrl: member.AvatarUrl)
-                .WithDescription($"Information I could pull on {member.Mention}!")
+                .WithDescription($"Information about {member.Mention}!")
                 .WithColor(DiscordColor.Orange)
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);

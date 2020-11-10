@@ -12,7 +12,7 @@ namespace SilkBot.Commands.Moderation.SClean
         [Command, HelpDescription("Clean messages of a specific type, or from specific people!")]
         public async Task SClean(CommandContext ctx)
         {
-            using var db = new SilkDbContext();
+            using var db = _dbFactory.CreateDbContext();
             var prefix = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             await ctx.RespondAsync($"Are you looking for `{prefix.Prefix}help SClean`?");
         }
