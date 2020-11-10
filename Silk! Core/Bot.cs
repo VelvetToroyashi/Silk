@@ -38,7 +38,7 @@
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; private set; }
         public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask != null) return; } }
-        private ServiceProvider Services;
+        private IServiceProvider _services;
 
 
         public CommandsNextConfiguration Commands { get; private set; }
@@ -47,10 +47,11 @@
         private ILogger<Bot> _logger;
         private readonly Stopwatch _sw = new Stopwatch();
 
-        public Bot(IDbContextFactory<SilkDbContext> dbFactory, ServiceCollection services, DiscordShardedClient client)
+        public Bot(IServiceProvider services, DiscordShardedClient client)
         {
             _sw.Start();
-            SilkDBContext = dbFactory.CreateDbContext();
+            _services = services;
+            SilkDBContext = _services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); // Anti-pattern according to some, but it might work. //
             Instance = this;
             Client = client;
         }
@@ -70,7 +71,7 @@
 
             await InitializeClientAsync();
 
-            await RegisterCommandsAsync();
+            await InitializeCommandsAsync();
 
             await ShutDownTask;
         }
@@ -114,7 +115,7 @@
 
 
 
-        private async Task RegisterCommandsAsync()
+        private async Task InitializeCommandsAsync()
         {
             var sw = Stopwatch.StartNew();
             foreach (var shard in Client.ShardClients.Values)
@@ -131,7 +132,7 @@
         private async Task InitializeClientAsync()
         {
 
-            Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate, Services = Services };
+            Commands = new CommandsNextConfiguration { PrefixResolver = _services.Get<PrefixCacheService>().PrefixDelegate, Services = _services };
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,

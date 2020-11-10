@@ -33,7 +33,7 @@
             {
                 IConfiguration config = context.Configuration;
                 services.AddSingleton(new DiscordShardedClient(config.Get<DiscordConfiguration>("Bot")));
-                services.AddDbContext<SilkDbContext>(options => options.UseNpgsql(config.GetConnectionString("dbConnection")));
+                services.AddDbContextFactory<SilkDbContext>(options => options.UseNpgsql(config.GetConnectionString("dbConnection")), ServiceLifetime.Transient);
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                 services.AddSingleton<NLogLoggerFactory>();
                 services.AddSingleton<PrefixCacheService>();
