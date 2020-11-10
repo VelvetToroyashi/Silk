@@ -19,6 +19,7 @@
     public class Program
     {
         public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+            
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -45,7 +46,7 @@
                         client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
                         return client;
                     });
-                services.AddSingleton<Bot>();
+                services.AddHostedService<Bot>();
             })
             .ConfigureLogging((context, builder) =>
             {

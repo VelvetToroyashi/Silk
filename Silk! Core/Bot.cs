@@ -8,6 +8,7 @@
     using DSharpPlus.Interactivity.Extensions;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using NLog;
     using NLog.Conditions;
@@ -23,10 +24,11 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
 
     #endregion
-    public class Bot
+    public class Bot : IHostedService
     {
         #region Props
         public DiscordShardedClient Client { get; set; }
@@ -35,7 +37,7 @@
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; private set; }
-
+        public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask != null) return; } }
         private ServiceProvider Services;
 
 
@@ -51,10 +53,9 @@
             SilkDBContext = dbFactory.CreateDbContext();
             Instance = this;
             Client = client;
-            RunBotAsync(services).GetAwaiter();
         }
         #region Methods
-        public async Task RunBotAsync(ServiceCollection services)
+        public async Task RunBotAsync()
         {
 
             try
@@ -67,47 +68,47 @@
                 Environment.Exit(1);
             }
 
-            await InitializeClientAsync(services);
+            await InitializeClientAsync();
 
             await RegisterCommandsAsync();
 
-            await Task.Delay(-1);
+            await ShutDownTask;
         }
 
-        private void SetupNLog()
-        {
-            var config = new LoggingConfiguration();
-            var consoleTarget = new ColoredConsoleTarget
-            {
-                Name = "console",
-                EnableAnsiOutput = true,
-                Layout = "$[${level}] \u001b[0m${message}",
-                UseDefaultRowHighlightingRules = false,
+        //private void SetupNLog()
+        //{
+        //    var config = new LoggingConfiguration();
+        //    var consoleTarget = new ColoredConsoleTarget
+        //    {
+        //        Name = "console",
+        //        EnableAnsiOutput = true,
+        //        Layout = "$[${level}] \u001b[0m${message}",
+        //        UseDefaultRowHighlightingRules = false,
 
-            };
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Trace"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Debug"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Warn"), ConsoleOutputColor.Blue, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
+        //    };
+        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Trace"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
+        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Debug"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
+        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Warn"), ConsoleOutputColor.Blue, ConsoleOutputColor.Black));
+        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
+        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
 
-            config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
-            LogManager.Configuration = config;
+        //    config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
+        //    LogManager.Configuration = config;
 
 
-        }
+        //}
 
-        private void AddServices(ServiceCollection services)
-        {
-            Services = services
-                .AddSingleton(Client)
-                .AddSingleton<MessageCreationHandler>()
-                .BuildServiceProvider();
-            _logger = Services.Get<ILogger<Bot>>();
-            _logger.LogInformation("All services initalized.");
-            Client.MessageCreated += Services.Get<MessageCreationHandler>().OnMessageCreate;
-            new BotEventHelper(Client, Services.Get<IDbContextFactory<SilkDbContext>>(), Services.Get<ILogger<BotEventHelper>>());//.CreateHandlers(Client);
-        }
+        //private void AddServices(ServiceCollection services)
+        //{
+        //    Services = services
+        //        .AddSingleton(Client)
+        //        .AddSingleton<MessageCreationHandler>()
+        //        .BuildServiceProvider();
+        //    _logger = Services.Get<ILogger<Bot>>();
+        //    _logger.LogInformation("All services initalized.");
+        //    Client.MessageCreated += Services.Get<MessageCreationHandler>().OnMessageCreate;
+        //    new BotEventHelper(Client, Services.Get<IDbContextFactory<SilkDbContext>>(), Services.Get<ILogger<BotEventHelper>>());//.CreateHandlers(Client);
+        //}
 
 
 
@@ -127,7 +128,7 @@
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count()} shards in {sw.ElapsedMilliseconds} ms.");
         }
 
-        private async Task InitializeClientAsync(ServiceCollection services)
+        private async Task InitializeClientAsync()
         {
 
             Commands = new CommandsNextConfiguration { PrefixResolver = Services.Get<PrefixCacheService>().PrefixDelegate, Services = Services };
@@ -142,11 +143,21 @@
             await Task.Delay(100);
             _logger.LogInformation("Client Initialized.");
 
-            Client.ShardClients.Values.ToList().ForEach(async c => await c.ConnectAsync());
+            await Client.StartAsync();
 
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
             Client.Ready += (c, e) => { _logger.LogInformation("Client ready to proccess commands."); return Task.CompletedTask; };
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await RunBotAsync();
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await Client.StopAsync();
         }
 
 
