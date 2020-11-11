@@ -336,7 +336,7 @@ namespace SilkBot.Commands.General
                 .OrderBy(t => t.Opened)
                 .LastOrDefault(t => t.Opener == Id);
 
-            return ticket != null && ticket.IsOpen;
+            return ticket is not null && ticket.IsOpen;
         }
 
 

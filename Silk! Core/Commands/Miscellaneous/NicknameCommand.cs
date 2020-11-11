@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Miscellaneous
 {
-    public class Nickname : BaseCommandModule
+    public class NicknameCommand : BaseCommandModule
     {
         [Command("nickname")]
         [Aliases("nick")]

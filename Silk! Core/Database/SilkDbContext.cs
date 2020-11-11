@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SilkBot.Database.Models;
 using SilkBot.Models;
+using System;
 
 namespace SilkBot
 {
@@ -15,6 +17,10 @@ namespace SilkBot
 
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder builder) => 
+            builder.LogTo(NullLogger);
+
+        private void NullLogger(string s) { return; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
 

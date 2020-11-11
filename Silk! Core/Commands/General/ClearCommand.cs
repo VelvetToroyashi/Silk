@@ -40,7 +40,7 @@ namespace SilkBot.Commands.General
                 .WithTimestamp(DateTime.Now));
             //Change to whatever.//
             await Task.Delay(5000);
-            if(deleteConfirmationMessage != null)
+            if(deleteConfirmationMessage is not null)
                 await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
 
 

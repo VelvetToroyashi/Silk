@@ -25,6 +25,7 @@ namespace SilkBot.Commands.General
             var sw = Stopwatch.StartNew();
             var message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
+            await Task.Delay(200);
             embed.WithDescription(
                 $"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
                 $"API Response Latency: {ctx.Client.Ping} ms.\n\n" +
@@ -32,7 +33,7 @@ namespace SilkBot.Commands.General
                 $"Database latency: {GetDbLatency()} ms.```***")
                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            await message.ModifyAsync(embed: new Optional<DiscordEmbed>(embed));
+            await message.ModifyAsync(embed: embed.Build());
         }
 
         private int GetDbLatency()

@@ -40,7 +40,7 @@ namespace SilkBot.Commands.Bot
             _ = Task.Run(async () =>
             {
                 //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
-                if (e.Guild != null)
+                if (e.Guild is not null)
                 {
                     var config = await _guildCache.GetConfigAsync(e.Guild.Id);
                     CommandTimer.Restart();

@@ -30,7 +30,7 @@ namespace SilkBot.Commands.Moderation.Ban
             var banFailed = CanBan(bot, ctx.Member, user);
             var embed = new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
 
-            if (!(banFailed is null))
+            if (banFailed is not null)
             {
                 await SendFailureMessage(ctx, user, embed, banFailed);
                 return;

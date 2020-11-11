@@ -65,7 +65,7 @@ namespace SilkBot.Utilities
                     title.Append(arg.Name);
                     title.Append(arg.IsOptional ? "]" : ">");
                 }
-                title.Append("`");
+                title.Append('`');
 
                 embed.WithTitle(title.ToString()).WithDescription(Command.Description);
 

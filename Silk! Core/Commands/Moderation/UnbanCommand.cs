@@ -24,7 +24,7 @@ namespace SilkBot.Commands.Moderation
                 await user.UnbanAsync(ctx.Guild, reason);
                 var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
                 var infraction = (TimedInfraction)_eventService.Events.FirstOrDefault(e => ((TimedInfraction)e).Id == user.Id);
-                if (infraction != null) _eventService.Events.TryRemove(infraction);
+                if (infraction is not null) _eventService.Events.TryRemove(infraction);
                 await ctx.RespondAsync(embed: embed);
             }
             else

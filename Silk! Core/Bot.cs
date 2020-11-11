@@ -7,21 +7,17 @@
     using DSharpPlus.Interactivity.Enums;
     using DSharpPlus.Interactivity.Extensions;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using NLog;
     using NLog.Conditions;
     using NLog.Config;
     using NLog.Targets;
-    using SilkBot.Commands.Bot;
     using SilkBot.Extensions;
     using SilkBot.Services;
-    using SilkBot.Utilities;
     using System;
     using System.Diagnostics;
     using System.Drawing;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading;
@@ -37,7 +33,7 @@
         public static string SilkDefaultCommandPrefix { get; } = "!";
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; private set; }
-        public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask != null) return; } }
+        public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask is not null) return; } }
         private IServiceProvider _services;
 
 
@@ -51,6 +47,7 @@
         {
             _sw.Start();
             _services = services;
+            _logger = _services.Get<ILogger<Bot>>();
             SilkDBContext = _services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); // Anti-pattern according to some, but it might work. //
             Instance = this;
             Client = client;
@@ -71,9 +68,9 @@
 
             await InitializeClientAsync();
 
-            await InitializeCommandsAsync();
+            await InitializeCommands();
 
-            await ShutDownTask;
+            await Task.Delay(-1);
         }
 
         //private void SetupNLog()
@@ -115,7 +112,7 @@
 
 
 
-        private async Task InitializeCommandsAsync()
+        private Task InitializeCommands()
         {
             var sw = Stopwatch.StartNew();
             foreach (var shard in Client.ShardClients.Values)
@@ -153,6 +150,23 @@
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var config = new LoggingConfiguration();
+            var consoleTarget = new ColoredConsoleTarget
+            {
+                Name = "console",
+                EnableAnsiOutput = true,
+                Layout = "[${level}] \u001b[0m${message}",
+                UseDefaultRowHighlightingRules = false,
+
+            };
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Info"), ConsoleOutputColor.Cyan, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Debug"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Warn"), ConsoleOutputColor.Blue, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
+
+            config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
+            LogManager.Configuration = config;
             await RunBotAsync();
         }
 

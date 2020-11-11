@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using System;
 using System.Linq;
@@ -8,6 +9,11 @@ namespace SilkBot.Services
     public class StorageService
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+
+        public StorageService(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         public GuildModel GetGuild(ulong Id)
         {

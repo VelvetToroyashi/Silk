@@ -20,7 +20,7 @@ namespace SilkBot.Utilities
             return asm.GetTypes()
                 .Where(t => t.BaseType == typeof(BaseCommandModule))
                 .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttribute<CommandAttribute>() != null);
+                .Where(m => m.GetCustomAttribute<CommandAttribute>() is not null);
         }
 
     }
