@@ -9,12 +9,9 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using NLog;
-    using NLog.Conditions;
-    using NLog.Config;
-    using NLog.Targets;
     using SilkBot.Extensions;
     using SilkBot.Services;
+    using SilkBot.Utilities;
     using System;
     using System.Diagnostics;
     using System.Drawing;
@@ -68,60 +65,19 @@
 
             await InitializeClientAsync();
 
-            await InitializeCommands();
+            InitializeCommands();
 
             await Task.Delay(-1);
         }
 
-        //private void SetupNLog()
-        //{
-        //    var config = new LoggingConfiguration();
-        //    var consoleTarget = new ColoredConsoleTarget
-        //    {
-        //        Name = "console",
-        //        EnableAnsiOutput = true,
-        //        Layout = "$[${level}] \u001b[0m${message}",
-        //        UseDefaultRowHighlightingRules = false,
-
-        //    };
-        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Trace"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
-        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Debug"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
-        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Warn"), ConsoleOutputColor.Blue, ConsoleOutputColor.Black));
-        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
-        //    consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
-
-        //    config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
-        //    LogManager.Configuration = config;
-
-
-        //}
-
-        //private void AddServices(ServiceCollection services)
-        //{
-        //    Services = services
-        //        .AddSingleton(Client)
-        //        .AddSingleton<MessageCreationHandler>()
-        //        .BuildServiceProvider();
-        //    _logger = Services.Get<ILogger<Bot>>();
-        //    _logger.LogInformation("All services initalized.");
-        //    Client.MessageCreated += Services.Get<MessageCreationHandler>().OnMessageCreate;
-        //    new BotEventHelper(Client, Services.Get<IDbContextFactory<SilkDbContext>>(), Services.Get<ILogger<BotEventHelper>>());//.CreateHandlers(Client);
-        //}
-
-
-
-
-
-        private Task InitializeCommands()
+        private void InitializeCommands()
         {
             var sw = Stopwatch.StartNew();
             foreach (var shard in Client.ShardClients.Values)
             {
                 var cmdNext = shard.GetCommandsNext();
                 cmdNext.RegisterCommands(Assembly.GetExecutingAssembly());
-
             }
-
             sw.Stop();
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count()} shards in {sw.ElapsedMilliseconds} ms.");
         }
@@ -137,8 +93,9 @@
                 PaginationDeletion = PaginationDeletion.DeleteMessage
             });
             await Client.UseCommandsNextAsync(Commands);
-            //Client.GetCommandsNext().SetHelpFormatter<HelpFormatter>();
-            await Task.Delay(100);
+            var cmdNext = await Client.GetCommandsNextAsync();
+            foreach(CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
+            
             _logger.LogInformation("Client Initialized.");
 
             await Client.StartAsync();
@@ -150,23 +107,6 @@
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var config = new LoggingConfiguration();
-            var consoleTarget = new ColoredConsoleTarget
-            {
-                Name = "console",
-                EnableAnsiOutput = true,
-                Layout = "[${level}] \u001b[0m${message}",
-                UseDefaultRowHighlightingRules = false,
-
-            };
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Info"), ConsoleOutputColor.Cyan, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Debug"), ConsoleOutputColor.Green, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Warn"), ConsoleOutputColor.Blue, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Error"), ConsoleOutputColor.Red, ConsoleOutputColor.Black));
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression("level == LogLevel.Fatal"), ConsoleOutputColor.DarkRed, ConsoleOutputColor.Black));
-
-            config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Error, consoleTarget, "*");
-            LogManager.Configuration = config;
             await RunBotAsync();
         }
 

@@ -27,20 +27,19 @@ namespace SilkBot.Utilities
             _dbFactory = dbFactory;
             _logger = logger;
             _client = client;
-            CreateHandlers(_client);
         }
-        public void CreateHandlers(DiscordShardedClient Client)
+        public void CreateHandlers()
         {
-            Client.ClientErrored += (c, e) =>
+            _client.ClientErrored += (c, e) =>
             {
                 e.Handled = true;
                 if (e.Exception.Message.Contains("event handler")) _logger.LogWarning("An event handler timed out.");
                 else _logger.LogError($"An exception was thrown; message: {e.Exception.Message}");
                 return Task.CompletedTask;
             };
-            Client.GuildAvailable += OnGuildAvailable;
-            Client.MessageDeleted += new MessageDeletionHandler().OnMessageDeleted;
-            Client.GuildCreated += new GuildJoinHandler().OnGuildJoin;
+            _client.GuildAvailable += OnGuildAvailable;
+            _client.MessageDeleted += new MessageDeletionHandler().OnMessageDeleted;
+            _client.GuildCreated += new GuildJoinHandler().OnGuildJoin;
         }
 
 
