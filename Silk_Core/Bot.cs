@@ -1,25 +1,25 @@
-﻿namespace SilkBot
-{
-    #region Usings
-    using DSharpPlus;
-    using DSharpPlus.CommandsNext;
-    using DSharpPlus.Interactivity;
-    using DSharpPlus.Interactivity.Enums;
-    using DSharpPlus.Interactivity.Extensions;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-    using SilkBot.Extensions;
-    using SilkBot.Services;
-    using SilkBot.Utilities;
-    using System;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
+﻿#region Usings
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SilkBot.Extensions;
+using SilkBot.Services;
+using SilkBot.Utilities;
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
+namespace SilkBot
+{
     #endregion
     public class Bot : IHostedService
     {

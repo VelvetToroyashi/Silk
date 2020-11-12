@@ -27,6 +27,7 @@ namespace SilkBot.Utilities
             _dbFactory = dbFactory;
             _logger = logger;
             _client = client;
+            _logger.LogInformation("Created Event Helper");
         }
         public void CreateHandlers()
         {

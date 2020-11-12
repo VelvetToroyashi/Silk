@@ -8,6 +8,7 @@
     using Microsoft.Extensions.Logging;
     using Serilog;
     using Serilog.Core;
+    using Serilog.Events;
     using Serilog.Extensions.Logging;
     using SilkBot.Commands.General;
     using SilkBot.Extensions;
@@ -20,18 +21,18 @@
     using System.Threading.Tasks;
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
+
     public class Program
     {
         private static readonly DiscordConfiguration clientConfig = new DiscordConfiguration
         {
             Intents = DiscordIntents.All,
-            LogTimestampFormat = "H:mm:sstt",
             MessageCacheSize = 4096,
             MinimumLogLevel = LogLevel.None
         };
 
-        public static async Task Main(string[] args) => CreateHostBuilder(args).RunConsoleAsync().GetAwaiter();
-            
+        public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -41,11 +42,9 @@
                 configuration.SetBasePath(Directory.GetCurrentDirectory());
                 configuration.AddJsonFile("appSettings.json", false, false);
             })
-            .ConfigureLogging((context, builder) =>
-            {
-                Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(context.Configuration).CreateLogger();
-
-            })
+            .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Debug)
+            .CreateLogger())
             .ConfigureServices((context, services) =>
             {
                 IConfiguration config = context.Configuration;
@@ -77,6 +76,7 @@
                 });
                 
                 services.AddHostedService<Bot>();
-            }).UseSerilog();
+            })
+            .UseSerilog();
     }
 }

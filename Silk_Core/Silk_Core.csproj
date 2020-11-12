@@ -73,6 +73,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-rc2" />
     <PackageReference Include="Serilog" Version="2.10.1-dev-01256" />
+    <PackageReference Include="Serilog.Expressions" Version="1.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="4.0.0-dev-00051" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0-dev-00249" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
@@ -81,7 +82,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Silk! Extensions\Silk! Extensions.csproj" />
+    <Resource Include="config.ini" />
+    <Resource Include="dbLogin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -89,10 +93,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="config.ini" />
-    <Resource Include="dbLogin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
   </ItemGroup>
 
 </Project>
