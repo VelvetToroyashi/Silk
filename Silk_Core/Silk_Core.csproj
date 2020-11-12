@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <None Remove="721518523704410202.serverconfig" />
+    <None Remove="appSettings.json" />
     <None Remove="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config" />
     <None Remove="config.ini" />
     <None Remove="Database\Models\NewFile1.txt" />
