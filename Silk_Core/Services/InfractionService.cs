@@ -31,7 +31,7 @@ namespace SilkBot.Services
             {
                 using var db = _dbFactory.CreateDbContext();
                 while (_infractionQueue.TryDequeue(out var infraction))
-                    db.Users.First(u => u.UserId == infraction.User.UserId).Infractions.Add(infraction);
+                    db.Users.First(u => u.Id == infraction.User.Id).Infractions.Add(infraction);
                 db.SaveChangesAsync().GetAwaiter();
             }
         }
@@ -40,13 +40,13 @@ namespace SilkBot.Services
         public void AddInfraction(ulong userId)
         {
             var db = _dbFactory.CreateDbContext();
-            db.Users.FirstOrDefault(u => u.UserId == userId);
+            db.Users.FirstOrDefault(u => u.Id == userId);
         }
 
         public IEnumerable<UserInfractionModel> GetInfractions(ulong userId)
         {
             var db = _dbFactory.CreateDbContext();
-            UserInfoModel user = db.Users.First(u => u.UserId == userId);
+            UserModel user = db.Users.First(u => u.Id == userId);
             return user.Infractions;
         }
 

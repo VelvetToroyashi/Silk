@@ -22,19 +22,19 @@ namespace SilkBot.Services
         }
 
 
-        public UserInfoModel GetUserById(GuildModel guild, ulong userId) => guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == userId);
-        public UserInfoModel GetUserById(Func<GuildModel, bool> guild, ulong userId)
+        public UserModel GetUserById(GuildModel guild, ulong userId) => guild.Users.FirstOrDefault(u => u.Id == userId);
+        public UserModel GetUserById(Func<GuildModel, bool> guild, ulong userId)
         {
             using var db = _dbFactory.CreateDbContext();
-            return db.Guilds.FirstOrDefault(guild).DiscordUserInfos.FirstOrDefault(u => u.UserId == userId);
+            return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(u => u.Id == userId);
         }
 
 
-        public UserInfoModel GetUser(GuildModel guild, UserInfoModel userId) => guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == userId.UserId);
-        public UserInfoModel GetUser(Func<GuildModel, bool> guild, Func<UserInfoModel, bool> user)
+        public UserModel GetUser(GuildModel guild, UserModel userId) => guild.Users.FirstOrDefault(u => u.Id == userId.Id);
+        public UserModel GetUser(Func<GuildModel, bool> guild, Func<UserModel, bool> user)
         {
             using var db = _dbFactory.CreateDbContext();
-            return db.Guilds.FirstOrDefault(guild).DiscordUserInfos.FirstOrDefault(user);
+            return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(user);
         }
 
 

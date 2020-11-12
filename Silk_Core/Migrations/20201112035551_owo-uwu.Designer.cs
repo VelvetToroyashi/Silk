@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201112035551_owo-uwu")]
+    partial class owouwu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,23 +46,6 @@ namespace SilkBot.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ChangeLogs");
-                });
-
-            modelBuilder.Entity("SilkBot.Database.Models.GlobalUserModel", b =>
-                {
-                    b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int>("Cash")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("LastCashOut")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("GlobalUsers");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
@@ -275,11 +260,17 @@ namespace SilkBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<int>("Cash")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Flags")
                         .HasColumnType("integer");
 
                     b.Property<decimal?>("GuildId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<DateTime>("LastCashIn")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 

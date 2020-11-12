@@ -34,7 +34,7 @@ namespace SilkBot.Models
         public List<WhiteListedLink> WhiteListedLinks { get; set; } = new List<WhiteListedLink>();
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new List<SelfAssignableRole>();
         public List<Ban> Bans { get; set; } = new List<Ban>();
-        public List<UserInfoModel> DiscordUserInfos { get; set; } = new List<UserInfoModel>();
+        public List<UserModel> Users { get; set; } = new List<UserModel>();
 
     }
 }

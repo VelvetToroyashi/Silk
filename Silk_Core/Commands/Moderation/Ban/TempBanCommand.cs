@@ -46,12 +46,12 @@ namespace SilkBot.Commands.Moderation.Ban
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
                 var guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
-                UserInfoModel bannedUser = db.Users.FirstOrDefault(u => u.UserId == user.Id);
+                UserModel bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string? formattedBanReason = Utilities.InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
                 UserInfractionModel? infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
-                    bannedUser = new UserInfoModel() { Infractions = new List<UserInfractionModel>() };
+                    bannedUser = new UserModel() { Infractions = new List<UserInfractionModel>() };
                     db.Users.Add(bannedUser);
                     bannedUser.Infractions.Add(infraction);
                 }

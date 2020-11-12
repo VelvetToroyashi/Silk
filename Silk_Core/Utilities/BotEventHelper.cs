@@ -70,16 +70,16 @@ namespace SilkBot.Utilities
         {
             var staffMembers = members
                 .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
-                .Select(staffMember => new UserInfoModel { UserId = staffMember.Id, Flags = UserFlag.Staff });
+                .Select(staffMember => new UserModel { Id = staffMember.Id, Flags = UserFlag.Staff });
 
-            var users = guild.DiscordUserInfos;
+            var users = guild.Users;
             foreach (var staff in staffMembers)
             {
-                if (users.Any(u => u.UserId == staff.UserId && u.Flags.HasFlag(UserFlag.Staff))) continue;
-                else if (users.Any(u => u.UserId == staff.UserId))
+                if (users.Any(u => u.Id == staff.Id && u.Flags.HasFlag(UserFlag.Staff))) continue;
+                else if (users.Any(u => u.Id == staff.Id))
                 {
                     _logger.LogTrace("Added staff flag to user");
-                    var user = users.Single(u => u.UserId == staff.UserId);
+                    var user = users.Single(u => u.Id == staff.Id);
                     user.Flags.Add(UserFlag.Staff);
                 }
                 else users.Add(staff);

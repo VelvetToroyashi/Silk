@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +9,13 @@ namespace SilkBot.Commands.Miscellaneous
 {
     public class NicknameCommand : BaseCommandModule
     {
+        private readonly ILogger<NicknameCommand> _logger;
+
+        public NicknameCommand(ILogger<NicknameCommand> logger)
+        {
+            _logger = logger;
+        }
+
         [Command("nickname")]
         [Aliases("nick")]
         public async Task SetNickName(CommandContext ctx, DiscordMember target, [RemainingText] string nick)
@@ -25,7 +33,7 @@ namespace SilkBot.Commands.Miscellaneous
             catch (Exception e)
             {
                 await ctx.RespondAsync("Could not set nickname!");
-                //TODO: Fix Logger ctx.Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Error, "Silk!", e.Message, DateTime.Now, e);
+                _logger.LogWarn($"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");
             }
 
         }

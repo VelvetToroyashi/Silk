@@ -29,7 +29,7 @@ namespace SilkBot.Commands.Roles
                 await ctx.RespondAsync("Roles cannot be empty!");
                 return;
             }
-            if (!guild.DiscordUserInfos.FirstOrDefault(u => u.UserId == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
+            if (!guild.Users.FirstOrDefault(u => u.Id == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
             {
                 throw new InsufficientPermissionsException();
             }
