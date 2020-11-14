@@ -20,7 +20,8 @@ namespace SilkBot
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
+            builder.Entity<UserModel>().HasOne(g => g.Guild);
+            builder.Entity<GuildModel>().HasMany(u => u.Users);
             builder.Entity<Ban>().HasOne(b => b.UserInfo);
             builder.Entity<WhiteListedLink>().HasOne(w => w.Guild).WithMany(a => a.WhiteListedLinks);
             builder.Entity<BlackListedWord>().HasOne(_ => _.Guild).WithMany(g => g.BlackListedWords);

@@ -10,6 +10,7 @@
     using Serilog.Core;
     using Serilog.Events;
     using Serilog.Extensions.Logging;
+    using SilkBot.Commands.Bot;
     using SilkBot.Commands.General;
     using SilkBot.Extensions;
     using SilkBot.Services;
@@ -61,6 +62,7 @@
                 services.AddSingleton<GuildConfigCacheService>();
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddSingleton<TicketService>();
+                services.AddSingleton<MessageCreationHandler>();
                 services.AddSingleton<TimedEventService>();
                 services.AddSingleton(typeof(HttpClient), (services) =>
                 {

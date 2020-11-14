@@ -7,7 +7,9 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
+using SilkBot.Migrations;
 using SilkBot.Services;
 using SilkBot.Utilities;
 using System;
@@ -45,9 +47,11 @@ namespace SilkBot
             _sw.Start();
             _services = services;
             _logger = _services.Get<ILogger<Bot>>();
+            client.MessageCreated += services.Get<MessageCreationHandler>().OnMessageCreate;
             SilkDBContext = _services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); // Anti-pattern according to some, but it might work. //
             Instance = this;
             Client = client;
+            
         }
         #region Methods
         public async Task RunBotAsync()
@@ -66,7 +70,7 @@ namespace SilkBot
             await InitializeClientAsync();
 
             InitializeCommands();
-
+            
             await Task.Delay(-1);
         }
 
@@ -95,7 +99,7 @@ namespace SilkBot
             await Client.UseCommandsNextAsync(Commands);
             var cmdNext = await Client.GetCommandsNextAsync();
             foreach(CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
-            
+            foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 
             await Client.StartAsync();

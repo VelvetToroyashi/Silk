@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using SilkBot.Services;
 using SilkBot.Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace SilkBot.Commands.Bot
         [Command("setprefix"), RequireFlag(UserFlag.Staff)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            var config = Instance.SilkDBContext.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
+            var db = _dbFactory.CreateDbContext();
+            var config = db.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
 
             var (valid, reason) = IsValidPrefix(prefix);
             if (!valid)
@@ -32,7 +34,7 @@ namespace SilkBot.Commands.Bot
                 await ctx.RespondAsync(reason);
                 return;
             }
-            var db = _dbFactory.CreateDbContext();
+            
             GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);

@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
 using SilkBot.Utilities;
@@ -20,7 +21,6 @@ namespace SilkBot.Commands.Bot
 
         public MessageCreationHandler(DiscordShardedClient sc, TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
         {
-            sc.MessageCreated += OnMessageCreate ;
             _ticketService = ts;
             _guildCache = guildCache;
             _logger = logger;
@@ -37,11 +37,28 @@ namespace SilkBot.Commands.Bot
                 CommandTimer.Stop();
                 return;
             }
+
             _ = Task.Run(async () =>
             {
                 //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
                 if (e.Guild is not null)
                 {
+                    //Feel free to enable this for your own bot; Icba to do ratelimiting so people don't spam :^)
+                    if (e.Message.Content.Trim().ToLower().StartsWith("@someone"))
+                    {
+                        //try
+                        //{
+                        //    string msgContent = e.Message.Content;
+                        //    await e.Message.DeleteAsync();
+                        //    var rand = new Random();
+                        //    var users = e.Channel.Users.Where(u => !u.IsBot).ToList();
+                        //    var selecteduser = users[rand.Next(users.Count())];
+                        //    msgContent = msgContent.Replace("@someone", selecteduser.Mention);
+                        //    await e.Channel.SendMessageAsync(msgContent + $"    ||This message was sent by {e.Author.Username} ({e.Author.Id})||");
+                        //}
+                        //catch { }
+                    }
+
                     var config = await _guildCache.GetConfigAsync(e.Guild.Id);
                     CommandTimer.Restart();
                     var sw = Stopwatch.StartNew();

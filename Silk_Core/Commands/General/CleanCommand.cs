@@ -88,7 +88,7 @@ namespace SilkBot.Commands.General
             }
         }
 
-
+        //TODO: Rewrite this attrocity.//
         [Command("Clean")]
         [RequirePermissions(Permissions.ManageMessages)]
         [HelpDescription("Cleans all bot commands", "!clean 10", "Cleans all bot commands", "!clean 10")]

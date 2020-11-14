@@ -97,6 +97,8 @@
     <Compile Include="Migrations\20201112040004_smh.Designer.cs" />
     <Compile Include="Migrations\20201112041245_GlobalUserInfos.cs" />
     <Compile Include="Migrations\20201112041245_GlobalUserInfos.Designer.cs" />
+    <Compile Include="Migrations\20201114040933_dbFix.cs" />
+    <Compile Include="Migrations\20201114040933_dbFix.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 
@@ -112,6 +114,7 @@
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.7.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -144,11 +147,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Tests\" />
+    <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
+    <Folder Include="Commands\Tests\" />
   </ItemGroup>
 
 </Project>

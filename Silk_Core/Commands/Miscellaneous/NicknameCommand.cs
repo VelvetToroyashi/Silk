@@ -25,7 +25,7 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 await ctx.RespondAsync("Nickname out of bounds! Limit: 32 characters");
                 return;
-            }
+            }// https://velvet.is-ne.at/ISrlCh.png
             try
             {
                 await target.ModifyAsync(t => t.Nickname = nick);

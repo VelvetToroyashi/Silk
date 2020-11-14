@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SilkBot.Models
@@ -7,7 +6,7 @@ namespace SilkBot.Models
     [DisplayColumn("Discord Guilds")]
     public class GuildModel
     {
-        [Key, Display(Name = "Id")]
+        [Key]
         public ulong Id { get; set; }
         [Display(Name = "Whitelist Invites")]
         public bool WhitelistInvites { get; set; }

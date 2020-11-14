@@ -28,7 +28,7 @@ namespace SilkBot.Utilities
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using var db = ctx.Services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); //Swap this for your own DBContext.//
-            GuildModel guild = db.Guilds.Include(g => g.Users).First(g => g.Id == ctx.Guild.Id);
+            GuildModel guild = db.Guilds.Include(d => d.Users).First(g => g.Id == ctx.Guild.Id);
             UserModel member = guild.Users.FirstOrDefault(m => m.Id == ctx.User.Id);
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag)) _cachedStaff.Add(member.Id);
