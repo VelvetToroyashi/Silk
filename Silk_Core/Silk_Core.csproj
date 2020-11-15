@@ -47,58 +47,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Migrations\20200830011740_help.cs" />
-    <Compile Include="Migrations\20200830011740_help.Designer.cs" />
-    <Compile Include="Migrations\20200830194328_Prefixs.cs" />
-    <Compile Include="Migrations\20200830194328_Prefixs.Designer.cs" />
-    <Compile Include="Migrations\20200830204520_Vgist-said-remove-virtual.cs" />
-    <Compile Include="Migrations\20200830204520_Vgist-said-remove-virtual.Designer.cs" />
-    <Compile Include="Migrations\20200902005726_Ticketing-System-Update-1.cs" />
-    <Compile Include="Migrations\20200902005726_Ticketing-System-Update-1.Designer.cs" />
-    <Compile Include="Migrations\20200902154727_TicketStatus.cs" />
-    <Compile Include="Migrations\20200902154727_TicketStatus.Designer.cs" />
-    <Compile Include="Migrations\20200903185238_LinkWhiteList.cs" />
-    <Compile Include="Migrations\20200903185238_LinkWhiteList.Designer.cs" />
-    <Compile Include="Migrations\20200905213841_QuickFix.cs" />
-    <Compile Include="Migrations\20200905213841_QuickFix.Designer.cs" />
-    <Compile Include="Migrations\20200906053343_WordFilters.cs" />
-    <Compile Include="Migrations\20200906053343_WordFilters.Designer.cs" />
-    <Compile Include="Migrations\20200914203953_InfractionModel.cs" />
-    <Compile Include="Migrations\20200914203953_InfractionModel.Designer.cs" />
-    <Compile Include="Migrations\20200922204446_placeholder-smh.cs" />
-    <Compile Include="Migrations\20200922204446_placeholder-smh.Designer.cs" />
-    <Compile Include="Migrations\20200926214157_placeholder2.cs" />
-    <Compile Include="Migrations\20200926214157_placeholder2.Designer.cs" />
-    <Compile Include="Migrations\20201010152257_changelogs.cs" />
-    <Compile Include="Migrations\20201010152257_changelogs.Designer.cs" />
-    <Compile Include="Migrations\20201017140658_foobar.cs" />
-    <Compile Include="Migrations\20201017140658_foobar.Designer.cs" />
-    <Compile Include="Migrations\20201017145352_db-update-229.cs" />
-    <Compile Include="Migrations\20201017145352_db-update-229.Designer.cs" />
-    <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.cs" />
-    <Compile Include="Migrations\20201025161544_Insert-Useful-name-here.Designer.cs" />
-    <Compile Include="Migrations\20201029025142_no.cs" />
-    <Compile Include="Migrations\20201029025142_no.Designer.cs" />
-    <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.cs" />
-    <Compile Include="Migrations\20201106040822_Make-Ids-nonnullable.Designer.cs" />
-    <Compile Include="Migrations\20201107072313_auto-dehoist.cs" />
-    <Compile Include="Migrations\20201107072313_auto-dehoist.Designer.cs" />
-    <Compile Include="Migrations\20201109054950_why.cs" />
-    <Compile Include="Migrations\20201109054950_why.Designer.cs" />
-    <Compile Include="Migrations\20201109055436_​.cs" />
-    <Compile Include="Migrations\20201109055436_​.Designer.cs" />
-    <Compile Include="Migrations\20201109055933_DisplayNameTest2.cs" />
-    <Compile Include="Migrations\20201109055933_DisplayNameTest2.Designer.cs" />
-    <Compile Include="Migrations\20201109060128_DisplayNameTest3.cs" />
-    <Compile Include="Migrations\20201109060128_DisplayNameTest3.Designer.cs" />
-    <Compile Include="Migrations\20201112035551_owo-uwu.cs" />
-    <Compile Include="Migrations\20201112035551_owo-uwu.Designer.cs" />
-    <Compile Include="Migrations\20201112040004_smh.cs" />
-    <Compile Include="Migrations\20201112040004_smh.Designer.cs" />
-    <Compile Include="Migrations\20201112041245_GlobalUserInfos.cs" />
-    <Compile Include="Migrations\20201112041245_GlobalUserInfos.Designer.cs" />
-    <Compile Include="Migrations\20201114040933_dbFix.cs" />
-    <Compile Include="Migrations\20201114040933_dbFix.Designer.cs" />
+    <Compile Include="Migrations\20201114063614_InitialMigration.cs" />
+    <Compile Include="Migrations\20201114063614_InitialMigration.Designer.cs" />
     <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 

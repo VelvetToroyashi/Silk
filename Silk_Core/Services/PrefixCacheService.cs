@@ -30,8 +30,8 @@ namespace SilkBot.Services
 
         public async Task<int> ResolvePrefix(DiscordMessage m)
         {
-            var prefix = RetrievePrefix(m.Channel.GuildId) ?? string.Empty;
-            var prefixPos = m.GetStringPrefixLength(prefix);
+            string prefix = await Task.Run(() => RetrievePrefix(m.Channel.GuildId) ?? string.Empty);
+            int prefixPos = m.GetStringPrefixLength(prefix);
             return prefixPos;
         }
 

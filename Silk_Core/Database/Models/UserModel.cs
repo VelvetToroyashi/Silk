@@ -9,7 +9,7 @@ namespace SilkBot.Models
     {
         [Key]
         public ulong Id { get; set; }
-        [ForeignKey("Guild")]
+        //[ForeignKey("Guild")]
         public GuildModel Guild { get; set; }
         public UserFlag Flags { get; set; }
         public List<UserInfractionModel> Infractions { get; set; }

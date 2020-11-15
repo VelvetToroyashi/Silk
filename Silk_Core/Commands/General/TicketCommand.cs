@@ -27,7 +27,7 @@ namespace SilkBot.Commands.General
         private const string TERMINATED_TICKET = "That ticket has been closed prior, and cannot be modified.";
         private const string TICKET_RECORD_MESSAGE = "Thank you for opening a ticket. For security reasons, conversation proxied though the bot is recorded. You will receive a response in due time.";
         private readonly Func<string, string> TicketTermination = (r) => $"Your ticket has been terminated. Reason: `{r}`";
-        private readonly Dictionary<ulong, ulong> ticketChannels = new Dictionary<ulong, ulong>(); // UserId, ChannelId
+        private readonly Dictionary<ulong, ulong> ticketChannels = new(); // UserId, ChannelId
         private readonly TicketService _ticketService;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
@@ -60,8 +60,7 @@ namespace SilkBot.Commands.General
 
 
         }
-        [Command("create")]
-        [RequireDirectMessage]
+        [Command("create"), RequireDirectMessage]
         public async Task OpenTicket(CommandContext ctx, [RemainingText] string messageContent)
         {
             var ticket = await _ticketService.CreateTicketAsync(ctx.User, DateTime.Now, messageContent);

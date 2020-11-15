@@ -5,20 +5,18 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
     using Serilog;
-    using Serilog.Core;
-    using Serilog.Events;
     using Serilog.Extensions.Logging;
+    using Serilog.Sinks.SystemConsole.Themes;
     using SilkBot.Commands.Bot;
     using SilkBot.Commands.General;
-    using SilkBot.Extensions;
     using SilkBot.Services;
     using SilkBot.Tools;
     using SilkBot.Utilities;
     using System;
     using System.IO;
     using System.Net.Http;
+    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -44,18 +42,16 @@
                 configuration.AddJsonFile("appSettings.json", false, false);
             })
             .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Debug)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+            .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+            .MinimumLevel.Verbose()
             .CreateLogger())
             .ConfigureServices((context, services) =>
             {
                 IConfiguration config = context.Configuration;
                 clientConfig.Token = config.GetConnectionString("BotToken");
                 services.AddSingleton(new DiscordShardedClient(clientConfig));
-                services.AddDbContextFactory<SilkDbContext>(options =>
-                {
-                    options.UseNpgsql(config.GetConnectionString("dbConnection"));
-                    options.UseLoggerFactory(null);
-                }, ServiceLifetime.Transient);
+                services.AddDbContextFactory<SilkDbContext>(option => option.UseNpgsql(config.GetConnectionString("dbConnection")), ServiceLifetime.Transient);
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
 
                 services.AddSingleton<PrefixCacheService>();
@@ -70,12 +66,7 @@
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
                     return client;
                 });
-                services.AddSingleton(typeof(BotEventHelper), (services) => 
-                {
-                    var eHelper = new BotEventHelper(services.Get<DiscordShardedClient>(), services.Get<IDbContextFactory<SilkDbContext>>(), services.Get<ILogger<BotEventHelper>>());
-                    eHelper.CreateHandlers();
-                    return eHelper;
-                });
+                services.AddSingleton<BotEventHelper>();
                 
                 services.AddHostedService<Bot>();
             })

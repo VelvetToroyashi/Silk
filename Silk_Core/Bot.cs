@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
-using SilkBot.Migrations;
 using SilkBot.Services;
 using SilkBot.Utilities;
 using System;
@@ -88,7 +87,7 @@ namespace SilkBot
 
         private async Task InitializeClientAsync()
         {
-
+            _services.Get<BotEventHelper>().CreateHandlers();
             Commands = new CommandsNextConfiguration { PrefixResolver = _services.Get<PrefixCacheService>().PrefixDelegate, Services = _services };
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
@@ -98,12 +97,22 @@ namespace SilkBot
             });
             await Client.UseCommandsNextAsync(Commands);
             var cmdNext = await Client.GetCommandsNextAsync();
-            foreach(CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
+            foreach (CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
             foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 
             await Client.StartAsync();
 
+            Client.GuildDownloadCompleted
+                += async (_, _) =>
+                {
+                    _logger.LogDebug("Starting cache run");
+                    foreach(Task t in BotEventHelper.CacheStaff)
+                    {
+                        _ = t.GetAwaiter();
+                    }
+                    _logger.LogInformation("Cache run complete.");
+                };
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
             Client.Ready += (c, e) => { _logger.LogInformation("Client ready to proccess commands."); return Task.CompletedTask; };
