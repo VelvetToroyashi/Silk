@@ -102,19 +102,22 @@ namespace SilkBot
             foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 
-            
+
 
             Client.GuildDownloadCompleted
-                += (_, _) =>
+                += (_, _) => Task.Run(() =>
                 {
                     _logger.LogDebug("Starting cache run");
-                    foreach(Action a in BotEventHelper.CacheStaff) a();
+                    BotEventHelper.GuildDownloadTask.GetAwaiter();
                     _logger.LogInformation("Cache run complete.");
                     return Task.CompletedTask;
-                };
+                });
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
-            Client.Ready += (c, e) => { _logger.LogInformation("Client ready to proccess commands."); return Task.CompletedTask; };
+            Client.Ready += (c, e) => 
+            {
+                _logger.LogInformation("Client ready to proccess commands."); return Task.CompletedTask; 
+            };
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

@@ -7,7 +7,6 @@
     using Microsoft.Extensions.Hosting;
     using Serilog;
     using Serilog.Extensions.Logging;
-    using Serilog.Sinks.SystemConsole.Themes;
     using SilkBot.Commands.Bot;
     using SilkBot.Commands.General;
     using SilkBot.Services;
@@ -16,7 +15,6 @@
     using System;
     using System.IO;
     using System.Net.Http;
-    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
