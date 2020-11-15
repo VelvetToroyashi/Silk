@@ -82,12 +82,13 @@ namespace SilkBot
                 cmdNext.RegisterCommands(Assembly.GetExecutingAssembly());
             }
             sw.Stop();
-            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count()} shards in {sw.ElapsedMilliseconds} ms.");
+            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shards in {sw.ElapsedMilliseconds} ms.");
         }
 
         private async Task InitializeClientAsync()
         {
             _services.Get<BotEventHelper>().CreateHandlers();
+            await Client.StartAsync();
             Commands = new CommandsNextConfiguration { PrefixResolver = _services.Get<PrefixCacheService>().PrefixDelegate, Services = _services };
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
@@ -101,17 +102,15 @@ namespace SilkBot
             foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 
-            await Client.StartAsync();
+            
 
             Client.GuildDownloadCompleted
-                += async (_, _) =>
+                += (_, _) =>
                 {
                     _logger.LogDebug("Starting cache run");
-                    foreach(Task t in BotEventHelper.CacheStaff)
-                    {
-                        _ = t.GetAwaiter();
-                    }
+                    foreach(Action a in BotEventHelper.CacheStaff) a();
                     _logger.LogInformation("Cache run complete.");
+                    return Task.CompletedTask;
                 };
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");

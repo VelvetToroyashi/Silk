@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
 using SilkBot.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,8 +21,9 @@ namespace SilkBot.Utilities
         private readonly ILogger<BotEventHelper> _logger;
         private readonly DiscordShardedClient _client;
         private int currentGuildCount = 0;
+        private readonly int _guildCount;
 
-        public static List<Task> CacheStaff { get; } = new();
+        public static List<Action> CacheStaff { get; } = new();
 
 
         public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory, ILogger<BotEventHelper> logger)
@@ -30,6 +32,7 @@ namespace SilkBot.Utilities
             _logger = logger;
             _client = client;
             _logger.LogInformation("Created Event Helper");
+            _guildCount = client.ShardClients.Values.Select(c => c.Guilds.Count).Sum();
         }
         public void CreateHandlers()
         {
@@ -37,7 +40,7 @@ namespace SilkBot.Utilities
             _client.ClientErrored += (c, e) =>
             {
                 e.Handled = true;
-                if (e.Exception.Message.Contains("event handler")) _logger.LogWarning("An event handler timed out.");
+                if (e.Exception.Message.Contains("event handler")) _logger.LogWarning($"An event handler timed out. [{e.EventName}]");
                 else _logger.LogError($"An exception was thrown; message: {e.Exception.Message}");
                 return Task.CompletedTask;
             };
@@ -47,21 +50,28 @@ namespace SilkBot.Utilities
             _logger.LogTrace("Subscribed to MESSAGE_DELETED");
             _client.GuildCreated += BotEvents.OnGuildJoin;
         }
+        
 
-
-        private Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e) { CacheStaff.Add(Cache(sender, e)); return Task.CompletedTask; }
+        private Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs e) { CacheStaff.Add(() => Cache(e, client).GetAwaiter()); return Task.CompletedTask; }
        
-        private async Task Cache(DiscordClient sender, GuildCreateEventArgs e)
+        private async Task Cache(GuildCreateEventArgs e, DiscordClient c)
         {
-            var db = _dbFactory.CreateDbContext();
+            using var db = _dbFactory.CreateDbContext();
             GuildModel guild = GetOrCreateGuild(db, e.Guild.Id);
             if (!db.Guilds.Any(g => g.Id == guild.Id)) db.Guilds.Add(guild);
+            //await db.SaveChangesAsync();
             var sw = Stopwatch.StartNew();
             CacheStaffMembers(guild, e.Guild.Members.Values);
             db.Guilds.Update(guild);
-            await db.SaveChangesAsync();
+            try { await db.SaveChangesAsync(); }
+            catch (DbUpdateConcurrencyException) { _logger.LogError("Failed to save to DB."); }
+            
+            
+           
+
+            
             sw.Stop();
-            _logger.LogInformation($"Cached [{++currentGuildCount}/{sender.Guilds.Count}] guild in {sw.ElapsedMilliseconds} ms!");
+            _logger.LogInformation($"Shard [{c.ShardId + 1}/{c.ShardCount}] | Cached [{++currentGuildCount}/{c.Guilds.Count}] guild in {sw.ElapsedMilliseconds} ms!");
             //return Task.CompletedTask;
         }
         private static GuildModel GetOrCreateGuild(SilkDbContext db, ulong guildId)
@@ -72,23 +82,19 @@ namespace SilkBot.Utilities
 
 
 
-        private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
+        private static void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
             var staffMembers = members
                 .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
-                .Select(staffMember => new UserModel { Id = staffMember.Id, Flags = UserFlag.Staff });
+                .Select(staffMember => new UserModel { Id = staffMember.Id, Flags = UserFlag.Staff }).ToList();
 
-            var users = guild.Users;
             foreach (var staff in staffMembers)
             {
-                if (users.Any(u => u.Id == staff.Id && u.Flags.HasFlag(UserFlag.Staff))) continue;
-                else if (users.Any(u => u.Id == staff.Id))
-                {
-                    _logger.LogTrace("Added staff flag to user");
-                    var user = users.Single(u => u.Id == staff.Id);
-                    user.Flags.Add(UserFlag.Staff);
-                }
-                else users.Add(staff);
+                UserModel user = guild.Users.FirstOrDefault(u => u.Id == staff.Id);
+                if (user is not null)
+                    if (!user.Flags.Has(UserFlag.Staff)) user.Flags.Add(UserFlag.Staff);
+                else
+                    guild.Users.Add(staff);
             }
         }
     }

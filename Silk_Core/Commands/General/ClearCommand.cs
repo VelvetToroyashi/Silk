@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
+using SilkBot.Models;
 using SilkBot.Utilities;
 using System;
 using System.Linq;
@@ -15,9 +16,10 @@ namespace SilkBot.Commands.General
     {
         [Command("Clear")]
         [HelpDescription("Cleans all messages from all users. \n Note, clearing more than 50 messages will lock the channel during bulk deletion. Coming soon:tm:", "!clear 20")]
-
+        [RequireFlag(UserFlag.Staff)]
         public async Task Clear(CommandContext ctx, [HelpDescription("The number of messages to clear.")] int messages = 5)
         {
+            //TODO: Remove permissions check
             if (!ctx.Member.HasPermission(Permissions.ManageChannels))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
