@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation.SClean
 {
+    [Category(Categories.Mod)]
     [Group("SClean")]
     public partial class SCleanCommand : BaseCommandModule
     {

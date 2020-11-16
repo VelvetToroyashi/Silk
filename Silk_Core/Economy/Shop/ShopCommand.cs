@@ -1,9 +1,11 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy.Shop
 {
+    [Category(Categories.Economy)]
     [Group("shop")]
     public partial class ShopCommand : BaseCommandModule
     {

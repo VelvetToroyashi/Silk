@@ -6,9 +6,11 @@ using Humanizer.Localisation;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Bot
 {
+    [Category(Categories.Bot)]
     public class BotStatCommand : BaseCommandModule
     {
         [Command("Stats"), Aliases("botstats", "botinfo")]

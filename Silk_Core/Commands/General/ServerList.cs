@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace SilkBot.Commands.General
 {
 
+    [Category(Categories.General)]
     public class ServerList : BaseCommandModule
     {
 

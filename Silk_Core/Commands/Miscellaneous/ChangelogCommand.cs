@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [Category(Categories.Misc)]
     [Group("changelog")]
     public class ChangelogCommand : CommandClass
     {

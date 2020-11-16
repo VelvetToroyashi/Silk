@@ -6,9 +6,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [Category(Categories.Misc)]
     public class UserInfo : BaseCommandModule
     {
         [Command("info")]

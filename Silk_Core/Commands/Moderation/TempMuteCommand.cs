@@ -8,9 +8,11 @@ using SilkBot.Tools;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation.Temporary_Moderation
 {
+    [Category(Categories.Mod)]
     public class TempMuteCommand : BaseCommandModule
     {
         public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }

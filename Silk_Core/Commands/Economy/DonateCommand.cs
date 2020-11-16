@@ -9,10 +9,12 @@ using SilkBot.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy
 {
 
+    [Category(Categories.Economy)]
     public class DonateCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;

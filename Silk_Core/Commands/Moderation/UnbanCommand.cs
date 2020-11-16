@@ -6,10 +6,12 @@ using SilkBot.Extensions;
 using SilkBot.Tools;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {
 
+    [Category(Categories.Mod)]
     public class UnbanCommand : BaseCommandModule
     {
         private readonly TimedEventService _eventService;

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Roles
 {
+    [Category(Categories.Roles)]
     public class SetAssignableRole : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;

@@ -5,9 +5,11 @@ using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy
 {
+    [Category(Categories.Economy)]
     public class CashCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;

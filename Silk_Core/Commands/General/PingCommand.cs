@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 
 namespace SilkBot.Commands.General
 {
+    [Category(Categories.General)]
     public class PingCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
