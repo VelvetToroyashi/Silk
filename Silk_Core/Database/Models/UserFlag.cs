@@ -6,7 +6,7 @@ namespace SilkBot.Models
     {
         WarnedPrior     = 2,
         KickedPrior     = 4,
-        BannedPrior     = WarnedPrior & KickedPrior,
+        BannedPrior     = 8,
         Blacklisted     = 16,
         FreeShopOwner   = 32,
         PaidShopOwner   = 64,
