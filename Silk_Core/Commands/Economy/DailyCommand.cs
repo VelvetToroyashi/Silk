@@ -10,10 +10,12 @@ using SilkBot.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 
 namespace SilkBot.Commands.Economy
 {
+    [Category(Categories.Economy)]
     public class DailyCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;

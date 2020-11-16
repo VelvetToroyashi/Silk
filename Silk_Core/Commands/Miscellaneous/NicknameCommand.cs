@@ -4,9 +4,11 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [Category(Categories.Misc)]
     public class NicknameCommand : BaseCommandModule
     {
         private readonly ILogger<NicknameCommand> _logger;

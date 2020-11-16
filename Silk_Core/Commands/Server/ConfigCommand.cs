@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
 {
+    [Category(Categories.Server)]
     [Group("config")]
     public class ConfigCommand : BaseCommandModule
     {
@@ -151,6 +152,8 @@ namespace SilkBot.Commands.Server
                 $"\t- ModLogChannel <UID> (Default: MessageLogChannel)\n```");
 
         }
+        
+        [Category(Categories.Server)]
         [Group("Edit")]
         public class ConfigEditCommand : BaseCommandModule
         {

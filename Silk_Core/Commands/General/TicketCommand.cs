@@ -101,6 +101,7 @@ namespace SilkBot.Commands.General
             await tc.SendMessageAsync($"Sorry but you can't close this ticket from this channel! Execute `<prefix>ticket close <id>` in {cc.Mention} instead.");
         }
 
+        [Category(Categories.General)]
         public class ListTicketsCommand : CommandClass
         {
             public ListTicketsCommand(IDbContextFactory<SilkDbContext> db) : base(db) { }

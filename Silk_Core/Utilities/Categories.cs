@@ -11,10 +11,16 @@ namespace SilkBot.Utilities
             Mod = CustomEmoji.Staff + " Mod",
             General = "📁 General",
             Games = CustomEmoji.GameCube + " Games",
-            Misc = "💡 Misc";
+            Misc = "💡 Misc",
+            // Todo: Add Emoji's for Categories
+            Server = " Server",
+            Roles = " Roles",
+            Bot = " Bot",
+            Economy = " Economy"
+            ;
 
         public static readonly IReadOnlyList<string> Order
-            = new string[] { Dev, General, Games, Misc, Mod };
+            = new string[] { Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy };
     }
     /// <summary>
     /// All custom emoji that this bot has access to from the Pac-Man support server.

@@ -12,6 +12,7 @@ using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
 {
+    [Category(Categories.Bot)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class PrefixCommand : BaseCommandModule
     {

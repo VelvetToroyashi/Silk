@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation
 {
+    [Category(Categories.Mod)]
     public class BanCommand : BaseCommandModule
     {
         [Command("Ban")]

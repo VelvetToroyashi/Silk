@@ -3,9 +3,11 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [Category(Categories.Misc)]
     public class RepoCommand : BaseCommandModule
     {
         [Command("Repo")]

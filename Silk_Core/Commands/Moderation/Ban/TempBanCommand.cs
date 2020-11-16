@@ -10,9 +10,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation.Ban
 {
+    [Category(Categories.Mod)]
     public class TempBanCommand : BaseCommandModule
     {
         public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }

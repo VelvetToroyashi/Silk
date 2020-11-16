@@ -3,9 +3,11 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
+    [Category(Categories.General)]
     public class Enbiggen : BaseCommandModule
     {
         [Command("Enlarge")]

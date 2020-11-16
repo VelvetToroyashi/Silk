@@ -8,9 +8,11 @@ using SilkBot.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {
+    [Category(Categories.Mod)]
     public class KickCommand : BaseCommandModule
     {
         public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }

@@ -3,9 +3,11 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
+    [Category(Categories.General)]
     public class DMCommand : BaseCommandModule
     {
         [RequireOwner]
