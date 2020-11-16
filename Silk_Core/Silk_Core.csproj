@@ -103,4 +103,8 @@
     <Folder Include="Commands\Tests\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

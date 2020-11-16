@@ -65,13 +65,10 @@ namespace SilkBot.Utilities
                 db.Guilds.Update(guild);
 
                 await db.SaveChangesAsync();
-                //try { await db.SaveChangesAsync(); }
-                //catch (DbUpdateConcurrencyException) { _logger.LogError("Failed to save to DB."); }
-                //catch (Npgsql.NpgsqlOperationInProgressException) { _logger.LogError("DB already in execution state"); }
                 sw.Stop();
                 _logger.LogInformation($"Shard [{c.ShardId + 1}/{c.ShardCount}] | Cached [{++currentGuildCount}/{c.Guilds.Count}] guild in {sw.ElapsedMilliseconds} ms!");
                 if (currentGuildCount == c.Guilds.Count) GuildDownloadTask = Task.CompletedTask;
-            });
+            }).ConfigureAwait(false);
 
 
             //return Task.CompletedTask;
@@ -97,8 +94,8 @@ namespace SilkBot.Utilities
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.Has(UserFlag.Staff)) // Has flag
-                         user.Flags.Add(UserFlag.Staff); // Add flag
-                } 
+                            user.Flags.Add(UserFlag.Staff); // Add flag
+                }
                 else
                     guild.Users.Add(staff);
             }

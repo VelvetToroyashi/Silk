@@ -31,8 +31,8 @@ namespace SilkBot.Utilities
             GuildModel guild = db.Guilds.Include(d => d.Users).First(g => g.Id == ctx.Guild.Id);
             UserModel member = guild.Users.FirstOrDefault(m => m.Id == ctx.User.Id);
             if (member is null) return false;
-            if (member.Flags.HasFlag(UserFlag)) _cachedStaff.Add(member.Id);
-            return member.Flags.HasFlag(UserFlag);
+            if (member.Flags.Has(UserFlag)) _cachedStaff.Add(member.Id);
+            return member.Flags.Has(UserFlag);
 
         }
     }

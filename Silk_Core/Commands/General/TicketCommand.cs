@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.General
 {
-    [Group]
+    [Group, Category(Categories.General)]
     public class Ticket
     {
 
@@ -41,24 +41,19 @@ namespace SilkBot.Commands.General
         [Command("respond"), Aliases("reply"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
         public async Task RespondToTicket(CommandContext ctx, int Id, [RemainingText] string message)
         {
-            try
+
+            using var db = _dbFactory.CreateDbContext();
+            var ticket = db.Tickets.OrderBy(t => t.Opened).LastOrDefault(ticket => ticket.Id == Id);
+            if(ticket is not null)
             {
-                using var db = _dbFactory.CreateDbContext();
-                var ticket = db.Tickets.OrderBy(t => t.Opened).Last(ticket => ticket.Id == Id);
                 if (!ticket.IsOpen)
-                {
                     await ctx.RespondAsync("That ticket has been closed!");
-                    return;
-                }
-                await _ticketService.RespondToTicket(ctx, message, ticket);
+                else await _ticketService.RespondToTicket(ctx, message, ticket).ConfigureAwait(false);
             }
-            catch (InvalidOperationException)
+            else
             {
                 await ctx.RespondAsync($"Ticket Id {Id} doesn't exist!");
-            }
-
-
-
+            }  
         }
         [Command("create"), RequireDirectMessage]
         public async Task OpenTicket(CommandContext ctx, [RemainingText] string messageContent)
