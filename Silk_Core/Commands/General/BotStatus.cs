@@ -6,9 +6,11 @@ using SilkBot.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
+    [Category(Categories.General)]
     public class BotStatus : BaseCommandModule
     {
 

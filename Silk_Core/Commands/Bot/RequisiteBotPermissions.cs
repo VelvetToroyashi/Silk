@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
 {
+    [Category(Categories.Bot)]
     public class RequisiteBotPermissions : BaseCommandModule
     {
         [Command("Perms")]

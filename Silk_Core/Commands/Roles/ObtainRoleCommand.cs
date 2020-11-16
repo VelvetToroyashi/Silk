@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Roles
 {
+    [Category(Categories.Roles)]
     public class ObtainRoleCommand : BaseCommandModule
     {
 

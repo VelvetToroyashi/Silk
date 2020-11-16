@@ -4,9 +4,11 @@ using Humanizer;
 using Humanizer.Localisation;
 using System;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
 {
+    [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class UptimeCommand : BaseCommandModule
     {

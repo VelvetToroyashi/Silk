@@ -5,10 +5,12 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 
 namespace SilkBot.Commands.Bot
 {
+    [Category(Categories.Bot)]
     public class EvalCommand : BaseCommandModule
     {
         [Command("Eval"), RequireOwner()]

@@ -13,6 +13,7 @@ namespace SilkBot.Commands.General
 {
 
 
+    [Category(Categories.General)]
     public class CleanCommand : BaseCommandModule
     {
 

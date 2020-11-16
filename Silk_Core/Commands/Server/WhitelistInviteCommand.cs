@@ -2,9 +2,11 @@
 using DSharpPlus.CommandsNext.Attributes;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Server
 {
+    [Category(Categories.Server)]
     public class WhitelistInviteCommand : BaseCommandModule
     {
         [Command("Whitelist")]

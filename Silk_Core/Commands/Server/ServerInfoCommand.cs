@@ -7,9 +7,11 @@ using SilkBot.Extensions;
 using SilkBot.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Server
 {
+    [Category(Categories.Server)]
     public class ServerInfoCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
