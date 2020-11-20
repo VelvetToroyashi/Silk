@@ -2,10 +2,7 @@
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace SilkBot.Utilities
@@ -42,5 +39,15 @@ namespace SilkBot.Utilities
         }
     }
 
-    public record SCleanType(bool DoUsers = false, ulong[] Users = default, bool ChannelSpecified = false, ulong Channel = default, bool DoBots = false, bool Invites = false, bool MatchString = false, string Match = null);
+    public record SCleanType
+    (
+    
+    bool DoUsers = false,
+    ulong[] Users = default, 
+    bool ChannelSpecified = false, 
+    ulong Channel = default, 
+    bool DoBots = false, 
+    bool Invites = false, 
+    bool MatchString = false, 
+    string Match = null);
 }
