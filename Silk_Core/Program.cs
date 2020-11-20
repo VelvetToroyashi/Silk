@@ -38,6 +38,7 @@
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory());
                 configuration.AddJsonFile("appSettings.json", false, false);
+                configuration.AddUserSecrets(typeof(Program).Assembly, optional: true, reloadOnChange: false);
             })
             .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)

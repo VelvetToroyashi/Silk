@@ -12,6 +12,7 @@
 		<Authors>VelvetThePanda, CalebABG</Authors>
 		<Company>The Silk Devs Team</Company>
 		<PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
+		<UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
 	</PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,7 +37,6 @@
 
   <ItemGroup>
     <None Remove="721518523704410202.serverconfig" />
-    <None Remove="appSettings.json" />
     <None Remove="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config" />
     <None Remove="config.ini" />
     <None Remove="Database\Models\NewFile1.txt" />
@@ -54,6 +54,7 @@
 
   <ItemGroup>
     <Content Include="docker-compose.yml" />
+    <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,6 +76,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
