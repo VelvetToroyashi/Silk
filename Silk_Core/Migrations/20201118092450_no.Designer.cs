@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SilkBot;
@@ -9,9 +10,10 @@ using SilkBot;
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201118092450_no")]
+    partial class no
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,7 +65,7 @@ namespace SilkBot.Migrations
                     b.ToTable("GlobalUsers");
                 });
 
-            modelBuilder.Entity("SilkBot.Database.Models.Items.Foobar", b =>
+            modelBuilder.Entity("SilkBot.Database.Models.Items.Item", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,12 +75,18 @@ namespace SilkBot.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Foobars");
+                    b.ToTable("Item");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Item");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
@@ -264,9 +272,6 @@ namespace SilkBot.Migrations
                     b.Property<decimal>("Enforcer")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<DateTime>("InfractionTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -278,9 +283,6 @@ namespace SilkBot.Migrations
 
                     b.Property<long?>("UserDatabaseId")
                         .HasColumnType("bigint");
-
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -330,6 +332,13 @@ namespace SilkBot.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("WhiteListedLink");
+                });
+
+            modelBuilder.Entity("SilkBot.Database.Models.Items.Foobar", b =>
+                {
+                    b.HasBaseType("SilkBot.Database.Models.Items.Item");
+
+                    b.HasDiscriminator().HasValue("Foobar");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>

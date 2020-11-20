@@ -102,16 +102,6 @@ namespace SilkBot
             foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 
-
-
-            Client.GuildDownloadCompleted
-                += (_, _) => Task.Run(() =>
-                {
-                    _logger.LogDebug("Starting cache run");
-                    BotEventHelper.GuildDownloadTask.GetAwaiter();
-                    _logger.LogInformation("Cache run complete.");
-                    return Task.CompletedTask;
-                });
             _sw.Stop();
             _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
             Client.Ready += (c, e) => 

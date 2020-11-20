@@ -1,4 +1,4 @@
-﻿using SilkBot.Tools;
+﻿using SilkBot.Commands.Moderation.Utilities;
 using System;
 
 namespace SilkBot.Models
@@ -6,6 +6,8 @@ namespace SilkBot.Models
     public class UserInfractionModel
     {
         public int Id { get; set; } //Requisite Id for DB purposes
+        public ulong UserId { get; set; }
+        public ulong GuildId { get; set; }
         public string Reason { get; set; } // Why was this infraction given
         public ulong Enforcer { get; set; } //Who gave this infraction
         public UserModel User { get; set; } //Who's this affecting

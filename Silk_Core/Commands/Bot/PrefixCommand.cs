@@ -4,11 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
 {

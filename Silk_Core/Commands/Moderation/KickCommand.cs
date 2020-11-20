@@ -8,21 +8,36 @@ using SilkBot.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using SilkBot.Utilities;
+using SilkBot.Models;
+using SilkBot.Services;
+using SilkBot.Commands.Moderation.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {
-    [Category(Categories.Mod)]
+    [Category(Categories.Mod), UsedImplicitly]
     public class KickCommand : BaseCommandModule
     {
-        public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }
-        public ILogger<KickCommand> Logger { private get; set; }
 
-        [Command, RequireBotPermissions(Permissions.KickMembers), RequireGuild(), Description("Boot someone from the guild! Caller must have kick members permission.")]
-        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user, [RemainingText, Description("The reason the user is to be kicked from the guild")] string reason = null)
+        private readonly ILogger<KickCommand> _logger;
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly InfractionService _infractionService;
+
+        public KickCommand(ILogger<KickCommand> logger, IDbContextFactory<SilkDbContext> dbFactory, InfractionService infractionService)
         {
-            await ctx.Message.DeleteAsync();
+            _logger = logger;
+            _dbFactory = dbFactory;
+            _infractionService = infractionService;
+        }
+
+        [Command, RequireBotPermissions(Permissions.KickMembers), /* RequireFlag(UserFlag.Staff), RequireGuild(), */ Description("Boot someone from the guild! Caller must have kick members permission.")]
+        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user,
+            [RemainingText, Description("The reason the user is to be kicked from the guild")]
+            string reason = null)
+        {
             var bot = ctx.Guild.CurrentMember;
+
 
             if (!ctx.Guild.CurrentMember.HasPermission(Permissions.KickMembers))
             {
@@ -37,10 +52,10 @@ namespace SilkBot.Commands.Moderation
                 var isAdmin = user.HasPermission(Permissions.Administrator);
                 string errorReason = user.IsAbove(bot) switch
                 {
-                    true when isBot => "I wish I could kick myself, but I sadly cannot.",
-                    true when isOwner => $"I can't kick the owner ({user.Mention}) out of their own server!",
-                    true when isMod => $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
-                    true when isAdmin => $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
+                    true when isBot     =>  "I wish I could kick myself, but I sadly cannot.",
+                    true when isOwner   => $"I can't kick the owner ({user.Mention}) out of their own server!",
+                    true when isMod     => $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
+                    true when isAdmin   => $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
 
                     _ => errorReason = "`UNCAUGHT_CASE_FAILSAFE` That's all I know. Translation: Something has gone wrong, and it's not for any reason I'm aware of."
                 };
@@ -60,12 +75,13 @@ namespace SilkBot.Commands.Moderation
                         .WithThumbnail(ctx.Guild.IconUrl)
                         .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
                         .AddField("Reason:", reason ?? "No reason has been attached to this infraction.");
+                _infractionService.QueueInfraction(new UserInfractionModel { Enforcer = ctx.User.Id, Reason = reason, InfractionType = InfractionType.Kick, InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id});
                 try { await user.SendMessageAsync(embed: embed); }
-                catch (InvalidOperationException) { Logger.LogWarning("Couldn't DM member when notifying kick."); }
+                catch (InvalidOperationException) { _logger.LogWarning("Couldn't DM member when notifying kick."); }
 
                 await user.RemoveAsync(reason);
 
-                var guildConfig = DbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
+                var guildConfig = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
                 var logChannelID = guildConfig.GeneralLoggingChannel;
                 var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),

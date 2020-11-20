@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SilkBot.Utilities
@@ -20,8 +21,14 @@ namespace SilkBot.Utilities
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly ILogger<BotEventHelper> _logger;
         private readonly DiscordShardedClient _client;
-        private int currentGuildCount = 0;
-
+        private readonly Stopwatch _time = new();
+        private readonly object _obj = new();
+        private volatile bool _logged = false;
+        private int _currentMemberCount = 0;
+        private int expectedMembers;
+        private int cachedMembers;
+       
+        
         public static List<Action> CacheStaff { get; } = new();
         public static Task GuildDownloadTask { get; private set; } = new(() => Task.Delay(-1));
 
@@ -42,62 +49,79 @@ namespace SilkBot.Utilities
                 else _logger.LogError($"An exception was thrown; message: {e.Exception.Message}");
                 return Task.CompletedTask;
             };
-            _client.GuildAvailable += OnGuildAvailable;
-            _logger.LogTrace("Subcribed to GUILD_AVAILABLE event.");
+            _client.GuildAvailable += Cache;
+            _logger.LogTrace("Subcribed to GUILD_AVAILABLE");
             _client.MessageDeleted += BotEvents.OnMessageDeleted;
             _logger.LogTrace("Subscribed to MESSAGE_DELETED");
             _client.GuildCreated += BotEvents.OnGuildJoin;
+            _logger.LogTrace("Subscribed to GUILD_CREATED");
         }
 
 
-        private Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs e) => Cache(e, client);
 
-        private async Task Cache(GuildCreateEventArgs e, DiscordClient c)
+        private Task Cache(DiscordClient c, GuildCreateEventArgs e)
         {
-            _ = Task.Run(async () => 
+            if (!_time.IsRunning)
+            {
+                _time.Start();
+                _logger.LogTrace("Beginning Cache Run...");
+            }
+            _ = Task.Run(async () =>
             {
                 using var db = _dbFactory.CreateDbContext();
-                GuildModel guild = GetOrCreateGuild(db, e.Guild.Id);
-                    if (!db.Guilds.Any(g => g.Id == guild.Id)) db.Guilds.Add(guild);
-                //await db.SaveChangesAsync();
                 var sw = Stopwatch.StartNew();
+                GuildModel guild = db.Guilds.AsQueryable().Include(g => g.Users).FirstOrDefault(g => g.Id == e.Guild.Id);
+                sw.Stop();
+                _logger.LogTrace($"Retrieved guild from database in {sw.ElapsedMilliseconds} ms; guild {(guild is not null ? "does" : "does not")} exist.");
+               
+                if (guild is null)
+                {
+                    guild = new GuildModel { Id = e.Guild.Id, Prefix = Bot.SilkDefaultCommandPrefix };
+                    db.Guilds.Add(guild);
+                }
+
+                sw.Restart();
                 CacheStaffMembers(guild, e.Guild.Members.Values);
-                db.Guilds.Update(guild);
 
                 await db.SaveChangesAsync();
+
                 sw.Stop();
-                _logger.LogInformation($"Shard [{c.ShardId + 1}/{c.ShardCount}] | Cached [{++currentGuildCount}/{c.Guilds.Count}] guild in {sw.ElapsedMilliseconds} ms!");
-                if (currentGuildCount == c.Guilds.Count) GuildDownloadTask = Task.CompletedTask;
-            }).ConfigureAwait(false);
-
-
-            //return Task.CompletedTask;
+                if (sw.ElapsedMilliseconds > 400) _logger.LogWarning($"Query took longer than allocated [250ms] time with tolerance of [150ms]. Query time: [{sw.ElapsedMilliseconds} ms]");
+                _logger.LogDebug($"Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++_currentMemberCount}/{c.Guilds.Count}] | Time [{sw.ElapsedMilliseconds}ms]");
+                if (_currentMemberCount == c.Guilds.Count && !_logged)
+                {
+                    _logged = true;
+                    _time.Stop();
+                    _logger.LogTrace("Cache run complete.");
+                    _logger.LogDebug($"Expected [{expectedMembers}] members to be cached got [{cachedMembers}] instead. Cache run took {_time.ElapsedMilliseconds} ms.");
+                }
+            });
+            return Task.CompletedTask;
         }
-        private static GuildModel GetOrCreateGuild(SilkDbContext db, ulong guildId)
+
+
+        private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            var guild = db.Guilds.FirstOrDefault(g => g.Id == guildId);
-            return guild ?? new GuildModel { Id = guildId, Prefix = Bot.SilkDefaultCommandPrefix };
-        }
-
-
-
-        private static void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
-        {
-            var staffMembers = members
-                .Where(member => member.HasPermission(Permissions.KickMembers) && !member.IsBot)
-                .Select(staffMember => new UserModel { Id = staffMember.Id, Flags = UserFlag.Staff }).ToList();
-
-            foreach (var staff in staffMembers)
+            var staff = members.Where(m => m.HasPermission(Permissions.MuteMembers) && !m.IsBot);
+            lock (_obj) expectedMembers += staff.Count();
+            foreach (var member in staff)
             {
-                
-                UserModel user = guild.Users.FirstOrDefault(u => u.Id == staff.Id);
+                UserFlag flags = UserFlag.Staff;
+                if (member.HasPermission(Permissions.Administrator)) flags.Add(UserFlag.EscalatedStaff);
+
+                UserModel user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.Has(UserFlag.Staff)) // Has flag
-                            user.Flags.Add(UserFlag.Staff); // Add flag
+                        user.Flags.Add(UserFlag.Staff); // Add flag
+                    if (member.HasPermission(Permissions.Administrator))
+                        user.Flags.Add(UserFlag.EscalatedStaff);
                 }
-                else
-                    guild.Users.Add(staff);
+                else 
+                { 
+                    guild.Users.Add(new UserModel { Id = member.Id, Flags = flags });
+                    lock (_obj) cachedMembers++;
+                }
             }
         }
     }

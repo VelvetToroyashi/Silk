@@ -3,14 +3,15 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Tools;
+using SilkBot.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation.Ban
 {

@@ -56,6 +56,7 @@
                 services.AddSingleton<GuildConfigCacheService>();
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddSingleton<TicketService>();
+                services.AddSingleton<InfractionService>();
                 services.AddSingleton<MessageCreationHandler>();
                 services.AddSingleton<TimedEventService>();
                 services.AddSingleton(typeof(HttpClient), (services) =>

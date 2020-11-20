@@ -21,7 +21,9 @@ namespace SilkBot.Commands.Bot
             try
             {
                 object o = CSharpScript.EvaluateAsync(code, globals: new Globals() with { ctx = ctx }).ConfigureAwait(false);
-                GC.SuppressFinalize(o);
+                {
+                    GC.SuppressFinalize(o);
+                }
             }
             catch (Exception e)
             {

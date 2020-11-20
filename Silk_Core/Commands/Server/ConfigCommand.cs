@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
 {
+    // TODO: Clean up this monstrosity //
     [Category(Categories.Server)]
     [Group("config")]
     public class ConfigCommand : BaseCommandModule
@@ -74,12 +75,12 @@ namespace SilkBot.Commands.Server
             catch (ParsingException pe)
             {
                 await ctx.RespondAsync($"There was an issue parsing your config! Line: {pe.LineNumber}/{configString.Split('\n').Length} __`{pe.LineValue}`__");
-                throw pe;
+                throw;
             }
             catch (ArgumentException ae)
             {
                 await ctx.RespondAsync(ae.Message);
-                throw ae;
+                throw;
             }
             // Commands are internally wrapped in Try/Catch, so re-throwing allows us to return from the method entirely instead of checking the status of the object. //
             return new GuildModel();

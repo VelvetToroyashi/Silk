@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Humanizer;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
@@ -80,7 +81,7 @@ namespace SilkBot.Commands.Miscellaneous
             embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
 
 
-            embed.AddField("Flags:", member.Flags.ToString());
+            embed.AddField("Flags:", member.Flags.ToString() == "" ? "None" : member.Flags.ToString().Humanize(",").Humanize(LetterCasing.Title));
             embed.AddField("Bot:", member.IsBot.ToString());
             await ctx.RespondAsync(embed: embed);
         }

@@ -74,10 +74,10 @@ namespace SilkBot.Commands.General
 
 
         [Command("close"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
-        public async Task CloseTicket(CommandContext ctx, int Id, [RemainingText] string reason = TERMINATION_REASON)
+        public async Task CloseTicket(CommandContext ctx, int id, [RemainingText] string reason = TERMINATION_REASON)
         {
             using var db = _dbFactory.CreateDbContext();
-            TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
+            TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == id);
             if (ticket is null) await ctx.RespondAsync("Invalid ticket id!");
             else if (ctx.Channel.Id != ticketChannels[ticket.Opener])
             {
@@ -105,7 +105,7 @@ namespace SilkBot.Commands.General
         public class ListTicketsCommand : CommandClass
         {
             public ListTicketsCommand(IDbContextFactory<SilkDbContext> db) : base(db) { }
-            private readonly Func<CommandContext, DiscordUser, TicketModel, DiscordEmbedBuilder> GetTicketEmbed = (c, u, t) => new DiscordEmbedBuilder()
+            private readonly Func<CommandContext, DiscordUser, TicketModel, DiscordEmbedBuilder> _getTicketEmbed = (c, u, t) => new DiscordEmbedBuilder()
                         .WithAuthor($"{u.Username}#{u.Discriminator}", iconUrl: u.AvatarUrl)
                         .AddField("Opened by:", t.Opener.ToString())
                         .AddField("Opened on:", $"{t.Opened:d/M/yyyy} ({t.Opened.GetTime().Humanize(3, false, null, TimeUnit.Year, TimeUnit.Minute)} ago.)")
@@ -135,7 +135,7 @@ namespace SilkBot.Commands.General
                         {
 
                             DiscordUser ticketOpener = await ctx.Client.GetUserAsync(ticket.Opener);
-                            DiscordEmbed embed = GetTicketEmbed(ctx, ticketOpener, ticket);
+                            DiscordEmbed embed = _getTicketEmbed(ctx, ticketOpener, ticket);
                             await ctx.RespondAsync(embed: embed);
                         }
                     }
@@ -146,14 +146,14 @@ namespace SilkBot.Commands.General
                         else
                         {
                             TicketModel ticket = db.Value.Tickets.OrderBy(t => t.Opened).LastOrDefault(t => t.Opener == ticketMember.Id);
-                            _ = ticket == null ? await ctx.RespondAsync($"{ticketMember.Username} has no tickets!") : await ctx.RespondAsync(embed: GetTicketEmbed(ctx, ticketMember, ticket));
+                            _ = ticket == null ? await ctx.RespondAsync($"{ticketMember.Username} has no tickets!") : await ctx.RespondAsync(embed: _getTicketEmbed(ctx, ticketMember, ticket));
                         }
                     }
                 }
             }
 
 
-            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild()]
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributor"), RequireGuild()]
             public async Task ListTickets(CommandContext ctx, int Id)
             {
                 using var db = GetDbContext();
@@ -163,7 +163,7 @@ namespace SilkBot.Commands.General
                 {
 
                     DiscordUser ticketOpener = await ctx.Client.GetUserAsync(ticket.Opener);
-                    DiscordEmbed embed = GetTicketEmbed(ctx, ticketOpener, ticket);
+                    DiscordEmbed embed = _getTicketEmbed(ctx, ticketOpener, ticket);
                     await ctx.RespondAsync(embed: embed);
                 }
             }
@@ -178,7 +178,7 @@ namespace SilkBot.Commands.General
                 if (ticket is null) await ctx.RespondAsync($"{user.Username} has not opened any tickets.");
                 else
                 {
-                    DiscordEmbed embed = GetTicketEmbed(ctx, user, ticket);
+                    DiscordEmbed embed = _getTicketEmbed(ctx, user, ticket);
                     await ctx.RespondAsync(embed: embed);
                 }
             }

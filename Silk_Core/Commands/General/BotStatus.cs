@@ -62,7 +62,7 @@ namespace SilkBot.Commands.General
 
 
 
-        [Hidden, Command("status")]
+        [Hidden, Command("status"), Description("no")]
         public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
         {
 

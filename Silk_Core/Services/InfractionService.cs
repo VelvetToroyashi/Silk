@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SilkBot.Extensions;
 using SilkBot.Models;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace SilkBot.Services
@@ -20,34 +21,52 @@ namespace SilkBot.Services
         {
             _logger = logger;
             _dbFactory = dbFactory;
-            _queueDrainTimer.Elapsed += DrainTimerElapsed;
+            _queueDrainTimer.Elapsed += (_, _) => DrainTimerElapsed();
+            _queueDrainTimer.Start();
         }
 
-        private void DrainTimerElapsed(object sender, ElapsedEventArgs e)
+        private async Task DrainTimerElapsed()
         {
             if (_infractionQueue.IsEmpty)
                 _logger.LogInformation("Infraction queue empty! Skipping this round.");
             else
             {
-                using var db = _dbFactory.CreateDbContext();
+
+                await using var db = _dbFactory.CreateDbContext();
+
                 while (_infractionQueue.TryDequeue(out var infraction))
-                    db.Users.First(u => u.Id == infraction.User.Id).Infractions.Add(infraction);
-                db.SaveChangesAsync().GetAwaiter();
+                {
+                    GuildModel guild = db.Guilds.First(g => g.Id == infraction.GuildId);
+                    UserModel user = guild.Users.FirstOrDefault(u => u.Id == infraction.UserId); 
+                    if(user is null)
+                    {
+                        user = new UserModel { Flags = UserFlag.KickedPrior, Id = infraction.UserId, Guild = guild};
+                        user.Infractions.Add(infraction);
+                        await db.Users.AddAsync(user);
+                        int changed = await db.SaveChangesAsync();
+                        if (changed is 0) _logger.LogWarning("Expected to log [1] entity, but saved [0]");
+                    }
+                    else
+                    {
+                        user.Flags.Add(UserFlag.KickedPrior);
+                        user.Infractions.Add(infraction);
+                        int changed = await db.SaveChangesAsync();
+                        if (changed is 0) _logger.LogWarning("Expected to log [1] entity, but saved [0]");
+                    }
+                   
+                }
+                _logger.LogDebug("Drained infraction queue.");  
             }
         }
 
         public void QueueInfraction(UserInfractionModel infraction) => _infractionQueue.Enqueue(infraction);
-        public void AddInfraction(ulong userId)
-        {
-            var db = _dbFactory.CreateDbContext();
-            db.Users.FirstOrDefault(u => u.Id == userId);
-        }
+
 
         public IEnumerable<UserInfractionModel> GetInfractions(ulong userId)
         {
             var db = _dbFactory.CreateDbContext();
-            UserModel user = db.Users.First(u => u.Id == userId);
-            return user.Infractions;
+            UserModel user = db.Users.Include(u => u.Infractions).FirstOrDefault(u => u.Id == userId);
+            return user?.Infractions;
         }
 
 
