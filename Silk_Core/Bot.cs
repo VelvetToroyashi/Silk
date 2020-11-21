@@ -32,28 +32,22 @@ namespace SilkBot
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; private set; }
         public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask is not null) return; } }
+        private IServiceProvider _services;
 
 
         public CommandsNextConfiguration Commands { get; private set; }
 
         #endregion
-        private readonly IServiceProvider _services;
-        private readonly ILogger<Bot> _logger;
-        private readonly BotEventHelper _eventHelper;
-        private readonly PrefixCacheService _prefixService;
+        private ILogger<Bot> _logger;
         private readonly Stopwatch _sw = new Stopwatch();
 
-        public Bot(IServiceProvider services, DiscordShardedClient client,
-            ILogger<Bot> logger, BotEventHelper eventHelper, PrefixCacheService prefixService,
-            MessageCreationHandler msgHandler, IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(IServiceProvider services, DiscordShardedClient client)
         {
             _sw.Start();
             _services = services;
-            _logger = logger;
-            _eventHelper = eventHelper;
-            _prefixService = prefixService;
-            client.MessageCreated += msgHandler.OnMessageCreate;
-            SilkDBContext = dbFactory.CreateDbContext();
+            _logger = _services.Get<ILogger<Bot>>();
+            client.MessageCreated += services.Get<MessageCreationHandler>().OnMessageCreate;
+            SilkDBContext = _services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); // Anti-pattern according to some, but it might work. //
             Instance = this;
             Client = client;
             
@@ -93,9 +87,9 @@ namespace SilkBot
 
         private async Task InitializeClientAsync()
         {
-            _eventHelper.CreateHandlers();
+            _services.Get<BotEventHelper>().CreateHandlers();
             await Client.StartAsync();
-            Commands = new CommandsNextConfiguration { PrefixResolver = _prefixService.PrefixDelegate, Services = _services };
+            Commands = new CommandsNextConfiguration { PrefixResolver = _services.Get<PrefixCacheService>().PrefixDelegate, Services = _services };
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
