@@ -1,4 +1,9 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -11,11 +16,6 @@ using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.General
 {

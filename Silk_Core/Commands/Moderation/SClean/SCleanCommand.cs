@@ -1,8 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using SilkBot.Utilities;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation.SClean
 {

@@ -1,4 +1,10 @@
 ﻿#region Usings
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
@@ -11,13 +17,6 @@ using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SilkBot
 {

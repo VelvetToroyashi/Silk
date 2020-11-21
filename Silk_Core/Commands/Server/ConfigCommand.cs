@@ -1,4 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using IniParser;
@@ -10,11 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Server
 {

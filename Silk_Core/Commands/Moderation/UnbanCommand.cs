@@ -1,11 +1,11 @@
-﻿using DSharpPlus;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
 using SilkBot.Tools;
-using System.Linq;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation

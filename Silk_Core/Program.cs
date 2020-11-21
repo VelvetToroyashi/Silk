@@ -1,24 +1,23 @@
-﻿namespace SilkBot
+﻿using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
+using DSharpPlus;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Extensions.Logging;
+using SilkBot.Commands.Bot;
+using SilkBot.Commands.General;
+using SilkBot.Services;
+using SilkBot.Tools;
+using SilkBot.Utilities;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
+namespace SilkBot
 {
-    using DSharpPlus;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Serilog;
-    using Serilog.Extensions.Logging;
-    using SilkBot.Commands.Bot;
-    using SilkBot.Commands.General;
-    using SilkBot.Services;
-    using SilkBot.Tools;
-    using SilkBot.Utilities;
-    using System;
-    using System.IO;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-    using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-
-
     public class Program
     {
         private static readonly DiscordConfiguration clientConfig = new DiscordConfiguration

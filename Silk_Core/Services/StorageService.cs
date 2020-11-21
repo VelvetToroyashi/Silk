@@ -1,8 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
-using System;
-using System.Linq;
 
 namespace SilkBot.Services
 {

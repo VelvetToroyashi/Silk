@@ -1,12 +1,12 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
 {

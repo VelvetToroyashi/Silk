@@ -1,4 +1,7 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
@@ -6,10 +9,6 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
-using SilkBot.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 

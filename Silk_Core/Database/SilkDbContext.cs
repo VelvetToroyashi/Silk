@@ -1,7 +1,4 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
+﻿using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Database.Models.Items;
 using SilkBot.Models;
