@@ -28,7 +28,15 @@
             MinimumLogLevel = LogLevel.None
         };
 
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        public static async Task Main(string[] args)
+        {
+            // Todo: Test SClean Parser here (sample input provided)
+            // var parser = new SCleanTypeParser();
+            // Console.WriteLine(await parser.ConvertAsync("-u 123 456 789 -p -c 321 -b -i -m abc", null));
+            // Console.WriteLine(await parser.ConvertAsync("-p -c -b -i -m -abc", null));
+
+            await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        }
 
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
