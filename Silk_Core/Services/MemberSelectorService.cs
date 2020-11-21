@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿#pragma warning disable CA1822 // Mark members as static
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
