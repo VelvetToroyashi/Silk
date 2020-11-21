@@ -21,7 +21,7 @@ namespace SilkBot.Services
         {
             _logger = logger;
             _dbFactory = dbFactory;
-            _queueDrainTimer.Elapsed += (_, _) => DrainTimerElapsed();
+            _queueDrainTimer.Elapsed += (_, _) => _ = DrainTimerElapsed();
             _queueDrainTimer.Start();
         }
 

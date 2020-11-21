@@ -1,4 +1,7 @@
-﻿using DSharpPlus.CommandsNext;
+﻿#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS0414 // Remove unused private members
+#pragma warning disable IDE0044 // Add readonly modifier
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
@@ -24,7 +27,6 @@ namespace SilkBot.Utilities
         private Flag _flag = Flag.None;
         private ErrorState _error = ErrorState.NotErrored;
         private int index = 0;
-
 
         public Task<Optional<SCleanType>> ConvertAsync(string value, CommandContext ctx)
         {
