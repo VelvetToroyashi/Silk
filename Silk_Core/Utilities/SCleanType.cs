@@ -3,51 +3,47 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using CommandLine;
+using Superpower.Model;
 
 namespace SilkBot.Utilities
 {
     public class SCleanTypeParser : IArgumentConverter<SCleanType>
     {
 
-        
+        private enum State { None, OnFlag, Busy, Errored }
+
+        private enum Flag { User, Images, Channel, Bots, Invites, Match, None }
+
+        private enum ErrorState { InvalidParse, EndOfLine, Unknown, NotErrored }
+
+        private State _state = State.None;
+        private State _lastState = State.None;
+        private Flag _flag = Flag.None;
+        private ErrorState _error = ErrorState.NotErrored;
+        private int index = 0;
+
+
         public Task<Optional<SCleanType>> ConvertAsync(string value, CommandContext ctx)
         {
-            try
-            {
-                string[] split = value.ToLower().Split(' ');
-                int index = 0;
+            var tokens = value.Split(' ');
+            while (index != tokens.Length)
+            { }
 
-                while (index != split.Length)
-                {
-                   // TODO: Fix this as well //
-                }
-                return null;
-            }
-            catch
-            {
+            return null;
+        }
 
-                return Task.FromResult(Optional.FromNoValue<SCleanType>());
-            }        
-        }
-        private static (SCleanType t, int returnIndex) GetUsers(string[] array)
-        {
-            var returnValue = new SCleanType(true);
-            ulong[] users = array.AsEnumerable().Skip(2).TakeWhile(t => !t.StartsWith('-')).Select(t => ulong.Parse(t)).ToArray();
-            returnValue = returnValue with { Users = users };
-            return (returnValue, array.IndexOf(users.Last().ToString()));
-        }
     }
 
-    public record SCleanType
-    (
-    
-    bool DoUsers = false,
-    ulong[] Users = default, 
-    bool ChannelSpecified = false, 
-    ulong Channel = default, 
-    bool DoBots = false, 
-    bool Invites = false, 
-    bool MatchString = false, 
-    string Match = null);
+    public class SCleanType
+    {
+        public bool    Bots     { get; init; }
+        public bool    Images   { get; init; }
+        public bool    Invites  { get; init; }
+        public string  Matches  { get; init; }
+        public ulong[] Users    { get; init; }
+        public ulong[] Channels { get; init; }
+    }
 }
