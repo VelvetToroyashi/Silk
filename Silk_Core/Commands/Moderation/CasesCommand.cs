@@ -33,29 +33,29 @@ namespace SilkBot.Commands.Moderation
 
             if (infractions?.Count() is 0 or null)
             {
-                var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"Cases for {user.Username} ({user.Id})")
-                    .WithColor(DiscordColor.PhthaloGreen)
-                    .WithDescription("User has no infractions!")
-                    .WithThumbnail(user.AvatarUrl);
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithTitle($"Cases for {user.Username} ({user.Id})")
+                                            .WithColor(DiscordColor.PhthaloGreen)
+                                            .WithDescription("User has no infractions!")
+                                            .WithThumbnail(user.AvatarUrl);
                 await ctx.RespondAsync(embed: embed);
             }
             else
             {
                 IEnumerable<IGrouping<InfractionType, InfractionType>> groupedInfractions = infractions.GroupBy(i => i.InfractionType, i => i.InfractionType);
-                var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"Cases for {user.Username} ({user.Id})")
-                    .WithColor(DiscordColor.Gold)
-                    .WithThumbnail(user.AvatarUrl)
-                    .WithDescription(infractions
-                            .Take(3)
-                            .Select(i => 
-                            $"Infraction Occured: {i.InfractionTime:dd/mm/yyyy h:mm} {DateTime.Now.Subtract(i.InfractionTime).Humanize(3, minUnit: TimeUnit.Minute)} ago\n" +
-                            $"Enforcer: <@{i.Enforcer}> ({i.Enforcer})\n" +
-                            $"Type: {i.InfractionType.Humanize()}\n" +
-                            $"Reason: {i.Reason}\n")
-                            .JoinString('\n'));
-                foreach(var inf in groupedInfractions)
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithTitle($"Cases for {user.Username} ({user.Id})")
+                                            .WithColor(DiscordColor.Gold)
+                                            .WithThumbnail(user.AvatarUrl)
+                                            .WithDescription(infractions
+                                                             .Take(3)
+                                                             .Select(i => 
+                                                                 $"Infraction Occured: {i.InfractionTime:dd/mm/yyyy h:mm} {DateTime.Now.Subtract(i.InfractionTime).Humanize(3, minUnit: TimeUnit.Minute)} ago\n" +
+                                                                 $"Enforcer: <@{i.Enforcer}> ({i.Enforcer})\n" +
+                                                                 $"Type: {i.InfractionType.Humanize()}\n" +
+                                                                 $"Reason: {i.Reason}\n")
+                                                             .JoinString('\n'));
+                foreach(IGrouping<InfractionType, InfractionType> inf in groupedInfractions)
                 {
                     switch (inf.Key)
                     {

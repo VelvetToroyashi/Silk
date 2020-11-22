@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -32,34 +33,34 @@ namespace SilkBot.Utilities
             if (ctx.Guild == null)
                 return Optional.FromNoValue<DiscordMember>();
 
-            if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var uid))
+            if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong uid))
             {
-                var result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                var ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
+                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
                 return ret;
             }
 
-            var m = UserRegex.Match(value);
+            Match m = UserRegex.Match(value);
             if (m.Success && ulong.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture,
                 out uid))
             {
-                var result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                var ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
+                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
                 return ret;
             }
 
             value = value.ToLowerInvariant();
 
-            var di = value.IndexOf('#');
-            var un = di != -1 ? value.Substring(0, di) : value;
-            var dv = di != -1 ? value.Substring(di + 1) : null;
+            int di = value.IndexOf('#');
+            string un = di != -1 ? value.Substring(0, di) : value;
+            string dv = di != -1 ? value.Substring(di + 1) : null;
 
-            var us = ctx.Guild.Members.Values
-                .Where(xm =>
-                    xm.Username.ToLowerInvariant() == un && (dv != null && xm.Discriminator == dv || dv == null)
-                    || xm.Nickname?.ToLowerInvariant() == value);
+            IEnumerable<DiscordMember> us = ctx.Guild.Members.Values
+                                               .Where(xm =>
+                                                   xm.Username.ToLowerInvariant() == un && (dv != null && xm.Discriminator == dv || dv == null)
+                                                   || xm.Nickname?.ToLowerInvariant() == value);
 
-            var mbr = us.FirstOrDefault();
+            DiscordMember? mbr = us.FirstOrDefault();
             return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();
         }
     }

@@ -14,12 +14,11 @@ namespace SilkBot.Commands.Moderation.Utilities
     {
 
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly DiscordShardedClient _client;
+
 
         public MessageEditHandler(IDbContextFactory<SilkDbContext> dbFactory, DiscordShardedClient client)
         {
             _dbFactory = dbFactory;
-            _client = client;
             foreach (DiscordClient shard in client.ShardClients.Values) shard.MessageUpdated += OnMessageEdit;
         }
 
@@ -28,9 +27,9 @@ namespace SilkBot.Commands.Moderation.Utilities
             if (e.Channel.IsPrivate) return;
             _ = Task.Run(async () => 
             {
-                var config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
+                GuildModel config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
                 CheckForInvite(e, config);
-                var logChannel = config.MessageEditChannel;
+                ulong logChannel = config.MessageEditChannel;
                 if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
 
                 if (logChannel == default) return;
@@ -48,7 +47,7 @@ namespace SilkBot.Commands.Moderation.Utilities
                     .WithColor(DiscordColor.CornflowerBlue)
                     .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                     .WithTimestamp(DateTime.Now);
-                var loggingChannel = await c.GetChannelAsync(logChannel);
+                DiscordChannel loggingChannel = await c.GetChannelAsync(logChannel);
                 await c.SendMessageAsync(loggingChannel, embed: embed);
             });
         }
@@ -58,14 +57,14 @@ namespace SilkBot.Commands.Moderation.Utilities
             {
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
-                    var invite = Regex.Match(e.Message.Content, @"(discord\.gg\/.+)") ?? Regex.Match(e.Message.Content.ToLower(), @"(discord\.com\/invite\/.+)");
+                    Match invite = Regex.Match(e.Message.Content, @"(discord\.gg\/.+)") ?? Regex.Match(e.Message.Content.ToLower(), @"(discord\.com\/invite\/.+)");
                     if (!invite.Success)
                     {
                         return;
                     }
 
                     var inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' ')).Replace("discord.com/invite", "discord.gg/");
-                    if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink))
+                    if (config.WhiteListedLinks.All(link => link.Link != inviteLink))
                     {
                         e.Message.DeleteAsync().GetAwaiter();
                     }

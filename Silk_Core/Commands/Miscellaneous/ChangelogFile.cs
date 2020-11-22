@@ -14,30 +14,30 @@ namespace SilkBot.Commands.Miscellaneous
 
         public static ChangelogFile DeserializeChangeLog()
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "JSON");
-            var fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
-            var file = File.ReadAllText(fileInfo.FullName);
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "JSON");
+            FileInfo? fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
+            string file = File.ReadAllText(fileInfo.FullName);
             return JsonConvert.DeserializeObject<ChangelogFile>(file);
         }
 
         public static void ConvertToJSON()
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "Unformatted");
-            var pathJSON = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "JSON");
-            var fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
-            var fileContent = File.ReadAllLines(fileInfo.FullName);
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "Unformatted");
+            string pathJSON = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkBot", "ChangeLogs", "JSON");
+            FileInfo? fileInfo = new DirectoryInfo(path).GetFiles().OrderBy(f => f.LastWriteTime).LastOrDefault();
+            string[] fileContent = File.ReadAllLines(fileInfo.FullName);
 
 
 
-            var desc = string.Join('\n', fileContent.TakeWhile(f => (f.Length > 1)));
-            var changes = string.Join('\n', fileContent.Skip(desc.Split('\n').Length + 1).Take(fileContent.Count() - 1));
+            string desc = string.Join('\n', fileContent.TakeWhile(f => (f.Length > 1)));
+            string changes = string.Join('\n', fileContent.Skip(desc.Split('\n').Length + 1).Take(fileContent.Count() - 1));
             var changeLog = new ChangelogFile
             {
                 Description = desc,
                 Changes = $"```diff\n{changes}```"
             };
 
-            var fileToWrite = JsonConvert.SerializeObject(changeLog, Formatting.Indented);
+            string fileToWrite = JsonConvert.SerializeObject(changeLog, Formatting.Indented);
 
             File.WriteAllText(Path.Combine(pathJSON, $"Changelog{Directory.GetFiles(path).Length}"), fileToWrite);
 

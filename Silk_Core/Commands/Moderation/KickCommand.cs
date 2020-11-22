@@ -36,7 +36,7 @@ namespace SilkBot.Commands.Moderation
             [RemainingText, Description("The reason the user is to be kicked from the guild")]
             string reason = null)
         {
-            var bot = ctx.Guild.CurrentMember;
+            DiscordMember bot = ctx.Guild.CurrentMember;
 
 
             if (!ctx.Guild.CurrentMember.HasPermission(Permissions.KickMembers))
@@ -46,10 +46,10 @@ namespace SilkBot.Commands.Moderation
             }
             if (user.IsAbove(bot))
             {
-                var isBot = user == bot;
-                var isOwner = user == ctx.Guild.Owner;
-                var isMod = user.HasPermission(Permissions.KickMembers);
-                var isAdmin = user.HasPermission(Permissions.Administrator);
+                bool isBot = user == bot;
+                bool isOwner = user == ctx.Guild.Owner;
+                bool isMod = user.HasPermission(Permissions.KickMembers);
+                bool isAdmin = user.HasPermission(Permissions.Administrator);
                 string errorReason = user.IsAbove(bot) switch
                 {
                     true when isBot     =>  "I wish I could kick myself, but I sadly cannot.",
@@ -60,30 +60,30 @@ namespace SilkBot.Commands.Moderation
                     _ => errorReason = "`UNCAUGHT_CASE_FAILSAFE` That's all I know. Translation: Something has gone wrong, and it's not for any reason I'm aware of."
                 };
 
-                var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
-                    .WithDescription(errorReason)
-                    .WithColor(DiscordColor.Red);
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
+                                            .WithDescription(errorReason)
+                                            .WithColor(DiscordColor.Red);
 
                 await ctx.RespondAsync(embed: embed);
             }
             else
             {
-                var embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
-                        .WithColor(DiscordColor.Blurple)
-                        .WithThumbnail(ctx.Guild.IconUrl)
-                        .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
-                        .AddField("Reason:", reason ?? "No reason has been attached to this infraction.");
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
+                                            .WithColor(DiscordColor.Blurple)
+                                            .WithThumbnail(ctx.Guild.IconUrl)
+                                            .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
+                                            .AddField("Reason:", reason ?? "No reason has been attached to this infraction.");
                 _infractionService.QueueInfraction(new UserInfractionModel { Enforcer = ctx.User.Id, Reason = reason, InfractionType = InfractionType.Kick, InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id});
                 try { await user.SendMessageAsync(embed: embed); }
                 catch (InvalidOperationException) { _logger.LogWarning("Couldn't DM member when notifying kick."); }
 
                 await user.RemoveAsync(reason);
 
-                var guildConfig = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
-                var logChannelID = guildConfig.GeneralLoggingChannel;
-                var logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
+                GuildModel guildConfig = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
+                ulong logChannelID = guildConfig.GeneralLoggingChannel;
+                ulong logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),
                     embed: new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)

@@ -20,13 +20,13 @@ namespace SilkBot.Commands.General
         public async Task Status(CommandContext ctx)
         {
 
-            var activity = ctx.Client.CurrentUser.Presence.Activity.Name;
-            var status = new DiscordEmbedBuilder()
-                .WithColor(activity == null ? DiscordColor.CornflowerBlue : DiscordColor.SapGreen)
-                .WithTitle("Bot status:")
-                .WithDescription(activity ?? "The bot's status is not set.")
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
+            string activity = ctx.Client.CurrentUser.Presence.Activity.Name;
+            DiscordEmbedBuilder status = new DiscordEmbedBuilder()
+                                         .WithColor(activity == null ? DiscordColor.CornflowerBlue : DiscordColor.SapGreen)
+                                         .WithTitle("Bot status:")
+                                         .WithDescription(activity ?? "The bot's status is not set.")
+                                         .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                         .WithTimestamp(DateTime.Now);
 
             await ctx.RespondAsync(embed: status);
 
@@ -46,12 +46,12 @@ namespace SilkBot.Commands.General
             {
                 if (status.Equals("clear"))
                 {
-                    var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.SapGreen)
-                    .WithDescription("Bot status has been cleared!")
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now);
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.SapGreen)
+                                                .WithDescription("Bot status has been cleared!")
+                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                                .WithTimestamp(DateTime.Now);
 
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);
@@ -76,12 +76,12 @@ namespace SilkBot.Commands.General
             {
                 if (status.Equals("clear"))
                 {
-                    var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.SapGreen)
-                    .WithDescription("Bot status has been cleared!")
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now);
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.SapGreen)
+                                                .WithDescription("Bot status has been cleared!")
+                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                                .WithTimestamp(DateTime.Now);
 
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);
@@ -110,12 +110,12 @@ namespace SilkBot.Commands.General
             {
                 if (status.Equals("clear"))
                 {
-                    var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.SapGreen)
-                    .WithDescription("Bot status has been cleared!")
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now);
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.SapGreen)
+                                                .WithDescription("Bot status has been cleared!")
+                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                                .WithTimestamp(DateTime.Now);
 
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);
@@ -123,7 +123,7 @@ namespace SilkBot.Commands.General
 
                 else
                 {
-                    if (!Enum.TryParse(typeof(ActivityType), type, true, out var activity))
+                    if (!Enum.TryParse(typeof(ActivityType), type, true, out object? activity))
                     {
                         await Status(ctx, status);
                         return;
@@ -131,7 +131,7 @@ namespace SilkBot.Commands.General
                     else
                     {
                         await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, (ActivityType)activity), idleSince: DateTime.Now);
-                        var msg = await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
+                        DiscordMessage msg = await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "Status", $"Successfully set status to {status}!"));
                         await Task.Delay(3000);
                         await ctx.Channel.DeleteMessageAsync(msg);
                     }

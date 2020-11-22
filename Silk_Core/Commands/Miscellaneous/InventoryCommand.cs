@@ -13,7 +13,7 @@ namespace SilkBot.Commands.Miscellaneous
         [Command]
         public async Task Inventory(CommandContext ctx)
         {
-            var embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloGreen).WithTitle($"{ctx.User.Username}'s Inventory").WithDescription("You have no items! Purchase some from the shop, or ask a friend to gift you one!");
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloGreen).WithTitle($"{ctx.User.Username}'s Inventory").WithDescription("You have no items! Purchase some from the shop, or ask a friend to gift you one!");
 
 
 

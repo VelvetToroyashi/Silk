@@ -57,7 +57,7 @@ namespace SilkBot.Commands.Bot
                         //catch { }
                     }
 
-                    var config = await _guildCache.GetConfigAsync(e.Guild.Id);
+                    GuildConfiguration config = await _guildCache.GetConfigAsync(e.Guild.Id);
                     CommandTimer.Restart();
                     var sw = Stopwatch.StartNew();
                     CheckForInvite(e, config);
@@ -84,10 +84,10 @@ namespace SilkBot.Commands.Bot
 
                     if (!inviteLinkMatched.Success) return;
 
-                    var inviteLink = string.Join("", messageContent
-                        .Skip(inviteLinkMatched.Index)
-                        .TakeWhile(c => c != ' '))
-                        .Replace("discord.com/invite", "discord.gg");
+                    string inviteLink = string.Join("", messageContent
+                                                        .Skip(inviteLinkMatched.Index)
+                                                        .TakeWhile(c => c != ' '))
+                                              .Replace("discord.com/invite", "discord.gg");
                     if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink)) e.Message.DeleteAsync().GetAwaiter();
 
                 }

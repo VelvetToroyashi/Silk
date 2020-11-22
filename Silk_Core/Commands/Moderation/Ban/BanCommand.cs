@@ -5,21 +5,27 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Utilities;
 
-namespace SilkBot.Commands.Moderation
+namespace SilkBot.Commands.Moderation.Ban
 {
     [Category(Categories.Mod)]
     public class BanCommand : BaseCommandModule
     {
-        [Command("Ban")]
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public BanCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
+        [Command("Ban")]
         public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
-            var user = await ctx.Guild.GetMemberAsync(target.Id);
-            var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            if (!CanExecuteCommand(out var errorReason))
+            DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
+            DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+            if (!CanExecuteCommand(out string errorReason))
             {
                 await DenyBanAsync(errorReason);
                 return;
@@ -53,20 +59,20 @@ namespace SilkBot.Commands.Moderation
 
 
 
-            var userBannedEmbed = new DiscordEmbedBuilder()
-                .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                .WithTitle($"You've been banned from {ctx.Guild.Name}!")
-                .AddField("Reason:", $"{reason}")
-                .AddFooter(ctx)
-                .WithColor(new DiscordColor("#cc1400"));
+            DiscordEmbedBuilder userBannedEmbed = new DiscordEmbedBuilder()
+                                                  .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                                                  .WithTitle($"You've been banned from {ctx.Guild.Name}!")
+                                                  .AddField("Reason:", $"{reason}")
+                                                  .AddFooter(ctx)
+                                                  .WithColor(new DiscordColor("#cc1400"));
 
-            var (name, url) = ctx.GetAuthor();
-            var logEmbed = new DiscordEmbedBuilder()
-                .WithAuthorExtension(name, url)
-                .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
-                .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
-                .AddField("Reason:", reason).AddFooter(ctx);
+            (string name, string url) = ctx.GetAuthor();
+            DiscordEmbedBuilder logEmbed = new DiscordEmbedBuilder()
+                                           .WithAuthorExtension(name, url)
+                                           .WithColor(DiscordColor.SpringGreen)
+                                           .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
+                                           .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
+                                           .AddField("Reason:", reason).AddFooter(ctx);
             try
             {
                 await target.SendMessageAsync(embed: userBannedEmbed);
@@ -75,8 +81,8 @@ namespace SilkBot.Commands.Moderation
             {
 
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                var loggingChannel = SilkBot.Bot.Instance.SilkDBContext.Guilds.Where(guild => guild.Id == ctx.Guild.Id).FirstOrDefault()?.MessageEditChannel;
-                var sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
+                ulong? loggingChannel = _dbFactory.CreateDbContext().Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)?.MessageEditChannel;
+                DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
 
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }

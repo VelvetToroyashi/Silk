@@ -99,9 +99,6 @@
 
   <ItemGroup>
     <Resource Include="config.ini" />
-    <Resource Include="dbLogin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
   <ItemGroup>

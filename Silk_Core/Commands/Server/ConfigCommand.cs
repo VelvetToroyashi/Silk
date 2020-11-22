@@ -94,20 +94,20 @@ namespace SilkBot.Commands.Server
             KeyDataCollection serverInfo = data["SERVER_INFO"];
 
             #region Parse server toggles
-            if (!bool.TryParse(serverToggles["WHITELIST_INVITES"], out var WHITELIST_INVITES))
+            if (!bool.TryParse(serverToggles["WHITELIST_INVITES"], out bool WHITELIST_INVITES))
                 throw new ArgumentException("Value of `WHITELIST_INVITES` was not true or false.");
-            if (!bool.TryParse(serverToggles["ENABLE_BLACKLIST"], out var ENABLE_BLACKLIST))
+            if (!bool.TryParse(serverToggles["ENABLE_BLACKLIST"], out bool ENABLE_BLACKLIST))
                 throw new ArgumentException("Value of `ENABLE_BLACKLIST` was not true or false.");
-            if (!bool.TryParse(serverToggles["LOG_EDITS"], out var LOG_EDITS))
+            if (!bool.TryParse(serverToggles["LOG_EDITS"], out bool LOG_EDITS))
                 throw new ArgumentException("Value of `LOG_EDITS` was not true or false.");
-            if (!bool.TryParse(serverToggles["GREET_MEMBERS"], out var GREET_MEMBERS))
+            if (!bool.TryParse(serverToggles["GREET_MEMBERS"], out bool GREET_MEMBERS))
                 throw new ArgumentException("Value of `GREET_MEMBERS` was not true or false.");
             #endregion
 
             #region Parse roles, if any.
-            if (roleInfo["MUTE_ROLE"].Equals("Auto", StringComparison.OrdinalIgnoreCase) && !ulong.TryParse(roleInfo["MUTE_ROLE"], out var MUTE_ROLE))
+            if (roleInfo["MUTE_ROLE"].Equals("Auto", StringComparison.OrdinalIgnoreCase) && !ulong.TryParse(roleInfo["MUTE_ROLE"], out ulong MUTE_ROLE))
                 throw new ArgumentException("Value of `MUTE_ROLE` was not a valid role Id.");
-            if (roleInfo["NO_MEME_ROLE"].Equals("Auto", StringComparison.OrdinalIgnoreCase) && !ulong.TryParse(roleInfo["NO_MEME_ROLE"], out var NO_MEME_ROLE))
+            if (roleInfo["NO_MEME_ROLE"].Equals("Auto", StringComparison.OrdinalIgnoreCase) && !ulong.TryParse(roleInfo["NO_MEME_ROLE"], out ulong NO_MEME_ROLE))
                 throw new ArgumentException("Value of `NO_MEME_ROLE` was not a valid role Id.");
             #endregion
 
@@ -122,13 +122,13 @@ namespace SilkBot.Commands.Server
                     {
                         if (n.Equals("Auto", StringComparison.OrdinalIgnoreCase)) return;
                         if (n.Length < 18) throw new ArgumentException($"Value of `{n}` was too short to be a snowflake Id.");
-                        else if (!ulong.TryParse(n, out var id)) throw new ArgumentException($"Value of `{id}` was not a valid snowflake.");
+                        else if (!ulong.TryParse(n, out ulong id)) throw new ArgumentException($"Value of `{id}` was not a valid snowflake.");
                         else SELF_ASSIGN_ROLES.Add(id);
                     });
-            ulong.TryParse(serverInfo["GP_LOG_CHANNEL_ID"], out var GP_LOG_CHANNEL);
+            ulong.TryParse(serverInfo["GP_LOG_CHANNEL_ID"], out ulong GP_LOG_CHANNEL);
             #endregion
 
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.Id == guildId);
             guild.WhitelistInvites = WHITELIST_INVITES;
             guild.WhiteListedLinks = WHITELISTED_LINKS.Select(l => new WhiteListedLink() { Link = l }).Distinct().ToList();
@@ -166,7 +166,7 @@ namespace SilkBot.Commands.Server
             [Command("WhitelistInvites"), RequireFlag(UserFlag.Staff)]
             public async Task WhitelistInvites(CommandContext ctx, bool whitelist)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.WhitelistInvites = whitelist;
                 await AssertConfigAsync<bool>(ctx, guild.WhitelistInvites, whitelist);
@@ -176,7 +176,7 @@ namespace SilkBot.Commands.Server
             [Command("Auto-Dehoist"), RequireFlag(UserFlag.Staff), RequireFlag(UserFlag.SilkPremiumUser)]
             public async Task AutoDehoist(CommandContext ctx, bool dehoist)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.AutoDehoist = dehoist;
                 await AssertConfigAsync<bool>(ctx, guild.AutoDehoist, dehoist);
@@ -186,7 +186,7 @@ namespace SilkBot.Commands.Server
             [Command("LogMessages"), RequireFlag(UserFlag.Staff)]
             public async Task LogMessages(CommandContext ctx, bool logMessages)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.LogMessageChanges = logMessages;
                 await AssertConfigAsync<bool>(ctx, guild.LogMessageChanges, logMessages);
@@ -196,7 +196,7 @@ namespace SilkBot.Commands.Server
             [Command("MuteRole"), RequireFlag(UserFlag.Staff)]
             public async Task Mute(CommandContext ctx, DiscordRole role)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.MuteRoleId = role.Id;
                 await AssertConfigAsync<ulong>(ctx, guild.MuteRoleId, role.Id);
@@ -206,7 +206,7 @@ namespace SilkBot.Commands.Server
             [Command("MessageLogChannel"), RequireFlag(UserFlag.Staff)]
             public async Task MLog(CommandContext ctx, DiscordChannel channel)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.MessageEditChannel = channel.Id;
                 if (guild.GeneralLoggingChannel == default) guild.GeneralLoggingChannel = channel.Id;
@@ -217,7 +217,7 @@ namespace SilkBot.Commands.Server
             [Command("ModlogChannel"), RequireFlag(UserFlag.Staff)]
             public async Task Modlog(CommandContext ctx, DiscordChannel channel)
             {
-                var db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
                 guild.GeneralLoggingChannel = channel.Id;
                 await AssertConfigAsync<ulong>(ctx, guild.GeneralLoggingChannel, channel.Id);

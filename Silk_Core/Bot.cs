@@ -1,5 +1,6 @@
 ﻿#region Usings
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
@@ -81,9 +82,9 @@ namespace SilkBot
         private void InitializeCommands()
         {
             var sw = Stopwatch.StartNew();
-            foreach (var shard in Client.ShardClients.Values)
+            foreach (DiscordClient shard in Client.ShardClients.Values)
             {
-                var cmdNext = shard.GetCommandsNext();
+                CommandsNextExtension cmdNext = shard.GetCommandsNext();
                 cmdNext.RegisterCommands(Assembly.GetExecutingAssembly());
             }
             sw.Stop();
@@ -92,7 +93,7 @@ namespace SilkBot
 
         private async Task InitializeClientAsync()
         {
-            _eventHelper.CreateHandlers();
+            
             await Client.StartAsync();
 
             Commands = new CommandsNextConfiguration { PrefixResolver = _prefixService.PrefixDelegate, Services = _services, IgnoreExtraArguments = true };
@@ -104,8 +105,9 @@ namespace SilkBot
                 PaginationDeletion = PaginationDeletion.DeleteMessage
             });
             await Client.UseCommandsNextAsync(Commands);
+            _eventHelper.CreateHandlers();
             var cmdNext = await Client.GetCommandsNextAsync();
-            foreach (CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
+            foreach (var c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
             foreach (var c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
 

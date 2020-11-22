@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Humanizer;
+using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
@@ -41,21 +47,59 @@ namespace SilkBot.Utilities
         public void CreateHandlers()
         {
 
-            _client.ClientErrored += (c, e) =>
-            {
-                e.Handled = true;
-                if (e.Exception.Message.Contains("event handler")) _logger.LogError(e.Exception.Message + " " + e.EventName);//_logger.LogWarning($"An event handler timed out. [{e.EventName}]");
-                else _logger.LogError($"An exception was thrown; message: {e.Exception.Message}");
-                return Task.CompletedTask;
-            };
+            _client.ClientErrored += OnClientErrored;
+            foreach (var c in _client.GetCommandsNextAsync().GetAwaiter().GetResult().Values)
+                c.CommandErrored += OnCommandErrored;
             _client.GuildAvailable += Cache;
-            _logger.LogTrace("Subcribed to GUILD_AVAILABLE");
+            _logger.LogTrace("Subscribed to GUILD_AVAILABLE");
             _client.MessageDeleted += BotEvents.OnMessageDeleted;
             _logger.LogTrace("Subscribed to MESSAGE_DELETED");
             _client.GuildCreated += BotEvents.OnGuildJoin;
             _logger.LogTrace("Subscribed to GUILD_CREATED");
         }
 
+        private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+        {
+            if (e.Exception is not CommandNotFoundException)
+            {
+                if (e.Exception is ArgumentException ex)
+                    await e.Context.RespondAsync(string.IsNullOrEmpty(ex.Message)
+                        ? "Seems like you provided an incorrect parameter."
+                        : ex.Message);
+
+                if (e.Exception is ChecksFailedException cf)
+                {
+                    foreach (var check in cf.FailedChecks)
+                    {
+                        switch (check)
+                        {
+                            case CooldownAttribute cooldown:
+                                await e.Context.RespondAsync(
+                                    $"You're a bit too fast! Come back in {cooldown.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}");
+                                break;
+                            case RequireOwnerAttribute:
+                                await e.Context.RespondAsync($"You're not the owner of this bot!");
+                                break;
+                            case RequireFlagAttribute flag:
+                                await e.Context.RespondAsync(
+                                    $"Sorry, but you need to have {flag.UserFlag} to run this command!");
+                                break;
+                        }
+                    }
+                }
+                else await e.Context.RespondAsync($"See {e.Context.Prefix}help {e.Command.Name} for usage.");
+            }
+        }
+
+        private async Task OnClientErrored(DiscordClient sender, ClientErrorEventArgs e)
+        {
+            if (e.Exception.Message.Contains("event"))
+                _logger.LogWarning($"[{e.EventName}] Timed out.");
+            else if (e.Exception.Message.ToLower().Contains("intents"))
+                _logger.LogCritical("Intents aren't setup.");
+        }
+        
+        
 
 
         private Task Cache(DiscordClient c, GuildCreateEventArgs e)
@@ -67,7 +111,7 @@ namespace SilkBot.Utilities
             }
             _ = Task.Run(async () =>
             {
-                using var db = _dbFactory.CreateDbContext();
+                using SilkDbContext db = _dbFactory.CreateDbContext();
                 var sw = Stopwatch.StartNew();
                 GuildModel guild = db.Guilds.AsQueryable().Include(g => g.Users).FirstOrDefault(g => g.Id == e.Guild.Id);
                 sw.Stop();
@@ -101,9 +145,9 @@ namespace SilkBot.Utilities
 
         private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            var staff = members.Where(m => m.HasPermission(Permissions.MuteMembers) && !m.IsBot);
+            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.MuteMembers) && !m.IsBot);
             lock (_obj) expectedMembers += staff.Count();
-            foreach (var member in staff)
+            foreach (DiscordMember member in staff)
             {
                 UserFlag flags = UserFlag.Staff;
                 if (member.HasPermission(Permissions.Administrator)) flags.Add(UserFlag.EscalatedStaff);

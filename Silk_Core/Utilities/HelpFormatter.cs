@@ -39,27 +39,27 @@ namespace SilkBot.Utilities
 
         public override CommandHelpMessage Build()
         {
-            var embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
             if (Command == null)
             {
                 embed.WithTitle("Silk Commands:");
 
 
-                var modules = Subcommands
-                    .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-                    .Where(x => x.Key != null)
-                    .OrderBy(x => Categories.Order.IndexOf(x.Key));
-                foreach (var commands in modules)
+                IOrderedEnumerable<IGrouping<string, Command>> modules = Subcommands
+                                                                         .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                                                                         .Where(x => x.Key != null)
+                                                                         .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                foreach (IGrouping<string, Command> commands in modules)
                 {
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "), false);
                 }
             }
             else
             {
-                var args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
                 var title = new StringBuilder($"Command `{Command.QualifiedName}");
-                foreach (var arg in args)
+                foreach (CommandArgument arg in args)
                 {
                     title.Append(arg.IsOptional ? " [" : " <");
                     title.Append(arg.Name);
@@ -74,7 +74,7 @@ namespace SilkBot.Utilities
                 else if (Command.IsHidden)
                     embed.AddField("👻 Hidden", "How did you find it?", true);
 
-                var userPerms = Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
+                RequireUserPermissionsAttribute? userPerms = Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
                 if (userPerms != null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())

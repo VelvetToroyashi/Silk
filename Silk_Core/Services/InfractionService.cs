@@ -27,14 +27,12 @@ namespace SilkBot.Services
 
         private async Task DrainTimerElapsed()
         {
-            if (_infractionQueue.IsEmpty)
-                _logger.LogInformation("Infraction queue empty! Skipping this round.");
-            else
+            if (!_infractionQueue.IsEmpty)
             {
 
-                await using var db = _dbFactory.CreateDbContext();
+                await using SilkDbContext db = _dbFactory.CreateDbContext();
 
-                while (_infractionQueue.TryDequeue(out var infraction))
+                while (_infractionQueue.TryDequeue(out UserInfractionModel infraction))
                 {
                     GuildModel guild = db.Guilds.First(g => g.Id == infraction.GuildId);
                     UserModel user = guild.Users.FirstOrDefault(u => u.Id == infraction.UserId); 
@@ -64,7 +62,7 @@ namespace SilkBot.Services
 
         public IEnumerable<UserInfractionModel> GetInfractions(ulong userId)
         {
-            var db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             UserModel user = db.Users.Include(u => u.Infractions).FirstOrDefault(u => u.Id == userId);
             return user?.Infractions;
         }

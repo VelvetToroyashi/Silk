@@ -20,7 +20,7 @@ namespace SilkBot.Services
             for (int i = 0; i < System.Math.Min(10, users.Count()); i++) userString += $"{i}: {users.ElementAt(i).Mention}\n";
             selectorEmbed.WithDescription(userString);
             await ctx.RespondAsync(embed: selectorEmbed);
-            var interactivity = ctx.Client.GetInteractivity();
+            InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             InteractivityResult<DiscordMessage> result;
             while (true)
             {
@@ -35,7 +35,7 @@ namespace SilkBot.Services
                     }
                     else
                     {
-                        var index = int.Parse(result.Result.Content);
+                        int index = int.Parse(result.Result.Content);
                         if (index > users.Count())
                         {
                             await ctx.RespondAsync("That's not a valid selection.");

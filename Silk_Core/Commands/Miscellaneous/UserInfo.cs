@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using System;
 using System.Drawing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,16 +23,16 @@ namespace SilkBot.Commands.Miscellaneous
         [Command("info")]
         public async Task RoleInfo(CommandContext ctx, DiscordRole role)
         {
-            var embed = new DiscordEmbedBuilder()
-                .WithTitle($"Info for {role.Name} ( {role.Id} ) :")
-                .AddField("Color:", role.Color.ToString())
-                .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
-                .AddField("Hoisted?:", role.IsHoisted.ToString())
-                .AddField("Bot role?:", role.IsManaged.ToString())
-                .AddField("Permissions:", role.Permissions.ToString())
-                .AddField("Mentionable?:", role.IsMentionable.ToString())
-                .WithColor(role.Color)
-                .WithThumbnail(ctx.Guild.IconUrl);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithTitle($"Info for {role.Name} ( {role.Id} ) :")
+                                        .AddField("Color:", role.Color.ToString())
+                                        .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
+                                        .AddField("Hoisted?:", role.IsHoisted.ToString())
+                                        .AddField("Bot role?:", role.IsManaged.ToString())
+                                        .AddField("Permissions:", role.Permissions.ToString())
+                                        .AddField("Mentionable?:", role.IsMentionable.ToString())
+                                        .WithColor(role.Color)
+                                        .WithThumbnail(ctx.Guild.IconUrl);
             await ctx.RespondAsync(embed: embed);
         }
 
@@ -39,12 +40,12 @@ namespace SilkBot.Commands.Miscellaneous
         [Command("info")]
         public async Task GetUserInfo(CommandContext ctx, DiscordUser member)
         {
-            var embed = new DiscordEmbedBuilder()
-                .WithAuthor(member.Username, iconUrl: member.AvatarUrl)
-                .WithDescription($"Information about {member.Mention}!")
-                .WithColor(DiscordColor.Orange)
-                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithAuthor(member.Username, iconUrl: member.AvatarUrl)
+                                        .WithDescription($"Information about {member.Mention}!")
+                                        .WithColor(DiscordColor.Orange)
+                                        .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+                                        .WithTimestamp(DateTime.Now);
 
             var status = "";
             DiscordEmoji emoji;
@@ -94,12 +95,12 @@ namespace SilkBot.Commands.Miscellaneous
         [Command("info")]
         public async Task GetUserInfo(CommandContext ctx, DiscordMember member)
         {
-            var embed = new DiscordEmbedBuilder()
-                .WithAuthor(member.DisplayName, iconUrl: member.AvatarUrl)
-                .WithDescription($"Information about {member.Mention}!")
-                .WithColor(DiscordColor.Orange)
-                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithAuthor(member.DisplayName, iconUrl: member.AvatarUrl)
+                                        .WithDescription($"Information about {member.Mention}!")
+                                        .WithColor(DiscordColor.Orange)
+                                        .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+                                        .WithTimestamp(DateTime.Now);
 
             var status = "";
             DiscordEmoji emoji = null;
@@ -140,11 +141,11 @@ namespace SilkBot.Commands.Miscellaneous
             embed.AddField("Name:", member.Username);
             embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
 
-            var roleList = member.Roles
-                .OrderByDescending(r => r.Position)
-                .Select(role => role.Mention)
-                .ToList();
-            var roles = string.Join(' ', roleList);
+            List<string> roleList = member.Roles
+                                          .OrderByDescending(r => r.Position)
+                                          .Select(role => role.Mention)
+                                          .ToList();
+            string roles = string.Join(' ', roleList);
             embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
             embed.AddField("Flags:", member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
@@ -153,17 +154,17 @@ namespace SilkBot.Commands.Miscellaneous
 
         private static string GetCreationTime(DateTimeOffset offset)
         {
-            var creationTime = DateTime.Now.Subtract(offset.DateTime);
+            TimeSpan creationTime = DateTime.Now.Subtract(offset.DateTime);
             var sb = new StringBuilder();
             if (creationTime.Days > 365)
             {
-                var years = creationTime.Days / 365;
+                int years = creationTime.Days / 365;
                 sb.Append($"{years} {(years > 1 ? "years" : "year")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(years * 365));
             }
             if (creationTime.Days > 30)
             {
-                var months = creationTime.Days / 30;
+                int months = creationTime.Days / 30;
                 sb.Append($"{months} {(months > 1 ? "months" : "month")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(months * 30));
             }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using SilkBot.Models;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Server
@@ -14,7 +15,7 @@ namespace SilkBot.Commands.Server
         {
             if (links.Any(l => l.StartsWith("remove")))
             {
-                var removeIndex = links.ToList().IndexOf("remove") + 1;
+                int removeIndex = links.ToList().IndexOf("remove") + 1;
                 if (removeIndex > links.Length)
                 {
                     await ctx.RespondAsync("You must supply a link to remove!");
@@ -22,7 +23,7 @@ namespace SilkBot.Commands.Server
 
                 return;
             }
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
+            GuildModel config = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
             if (!config.WhitelistInvites)
             {
                 await ctx.RespondAsync("This server doesn't whitelist invites!");
@@ -34,7 +35,7 @@ namespace SilkBot.Commands.Server
                 return;
             }
 
-            foreach (var invite in links)
+            foreach (string invite in links)
             {
                 var formattedInvite = string.Empty;
                 formattedInvite = invite.Contains('/') ? invite.Replace("discord.com/invite", "discord.gg/") : "discord.gg/" + invite;

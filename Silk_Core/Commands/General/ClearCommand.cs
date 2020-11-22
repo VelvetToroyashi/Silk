@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -28,10 +29,10 @@ namespace SilkBot.Commands.General
                 return;
             }
 
-            var queriedMessages = await ctx.Channel.GetMessagesAsync(messages + 1);
+            IReadOnlyList<DiscordMessage> queriedMessages = await ctx.Channel.GetMessagesAsync(messages + 1);
             await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{ctx.User.Username}{ctx.User.Discriminator} called clear command.");
 
-            var deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
+            DiscordMessage deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
                 .WithDescription($"Cleared {messages} messages!")

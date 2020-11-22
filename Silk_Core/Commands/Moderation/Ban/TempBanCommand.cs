@@ -26,12 +26,12 @@ namespace SilkBot.Commands.Moderation.Ban
         [Command("tempban"), RequireGuild()]
         public async Task TempBan(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = "Not provided.")
         {
-            using var db = DbFactory.CreateDbContext();
-            var bot = ctx.Guild.CurrentMember;
-            var now = DateTime.Now;
-            var banDuration = GetTimeFromInput(duration);
-            var banFailed = CanBan(bot, ctx.Member, user);
-            var embed = new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
+            using SilkDbContext db = DbFactory.CreateDbContext();
+            DiscordMember bot = ctx.Guild.CurrentMember;
+            DateTime now = DateTime.Now;
+            TimeSpan banDuration = GetTimeFromInput(duration);
+            BanFailureReason banFailed = CanBan(bot, ctx.Member, user);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
 
             if (banFailed is not null)
             {
@@ -40,14 +40,14 @@ namespace SilkBot.Commands.Moderation.Ban
             }
             else
             {
-                var banEmbed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
-                    .WithDescription($"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
-                    .AddField("Reason:", reason);
+                DiscordEmbedBuilder banEmbed = new DiscordEmbedBuilder()
+                                               .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
+                                               .WithDescription($"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
+                                               .AddField("Reason:", reason);
 
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
-                var guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
+                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
                 UserModel bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
@@ -114,7 +114,7 @@ namespace SilkBot.Commands.Moderation.Ban
 
         private static TimeSpan GetTimeFromInput(string input) =>
             input.Contains('d') ?
-                double.TryParse(input[0..^1], out var dur) ?
+                double.TryParse(input[0..^1], out double dur) ?
             TimeSpan.FromDays(dur) :
                 throw new InvalidOperationException("Couldn't determine duration from message!") :
                 throw new InvalidOperationException("Couldn't determine duration from message!");
@@ -122,13 +122,13 @@ namespace SilkBot.Commands.Moderation.Ban
 
         private async Task OnBanExpiration(TimedInfraction eventObject)
         {
-            var db = DbFactory.CreateDbContext();
+            SilkDbContext db = DbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.Id == eventObject.Guild);
             if (guild.GeneralLoggingChannel != default)
             {
                 DiscordChannel c = (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.GeneralLoggingChannel);
                 DiscordUser u = await Client.GetUserAsync(eventObject.Id);
-                var embed = new DiscordEmbedBuilder().WithDescription($"{u.Mention}'s ban has expired.").WithColor(DiscordColor.PhthaloGreen).WithThumbnail(u.AvatarUrl);
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithDescription($"{u.Mention}'s ban has expired.").WithColor(DiscordColor.PhthaloGreen).WithThumbnail(u.AvatarUrl);
             }
             await (await Client.GetGuildAsync(eventObject.Guild)).UnbanMemberAsync(eventObject.Id, "Temporary ban completed.");
         }

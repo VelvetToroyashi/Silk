@@ -11,7 +11,7 @@ namespace SilkBot.Commands.General
     public class InviteCommand : BaseCommandModule
     {
         [Command("Invite")]
-        [HelpDescription("Gives you the Outh2 code to invite me to your server!")]
+        [HelpDescription("Gives you the Oauth2 code to invite me to your server!")]
         public async Task Invite(CommandContext ctx)
         {
             var Oauth2 = "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot";

@@ -35,7 +35,7 @@ namespace SilkBot.Utilities
 
         public static DiscordEmoji ToEmoji(this string text)
         {
-            var match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
+            Match match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
             return DiscordEmoji.FromUnicode(match.Success ? match.Groups[1].Value : text.Trim());
         }
 

@@ -27,9 +27,9 @@ namespace SilkBot.Commands.Economy
         [Aliases("Gift")]
         public async Task Donate(CommandContext ctx, int amount, DiscordMember recipient)
         {
-            var db = _dbFactory.CreateDbContext();
-            var sender = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
-            var receiver = db.GlobalUsers.FirstOrDefault(u => u.Id == recipient.Id);
+            SilkDbContext db = _dbFactory.CreateDbContext();
+            GlobalUserModel? sender = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
+            GlobalUserModel? receiver = db.GlobalUsers.FirstOrDefault(u => u.Id == recipient.Id);
 
 
             if (sender is null && receiver is null)
@@ -54,11 +54,11 @@ namespace SilkBot.Commands.Economy
 
         private async Task DoTransactionAsync(CommandContext ctx, int amount, GlobalUserModel sender, GlobalUserModel receiver)
         {
-            var member = await ctx.Guild.GetMemberAsync(receiver.Id);
-            var embed = new DiscordEmbedBuilder()
-                .WithThumbnail(ctx.User.AvatarUrl)
-                .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                .WithColor(DiscordColor.PhthaloGreen);
+            DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithThumbnail(ctx.User.AvatarUrl)
+                                        .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                                        .WithColor(DiscordColor.PhthaloGreen);
             sender.Cash -= amount;
             receiver.Cash += amount;
             await ctx.RespondAsync(embed: embed);
@@ -67,18 +67,18 @@ namespace SilkBot.Commands.Economy
         private async Task VerifyTransationAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver, int amount)
         {
             // 'Complicated async logic here' //
-            var interactivity = ctx.Client.GetInteractivity();
+            InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             int authKey = new Random().Next(1000, 10000);
             await ctx.RespondAsync($"Just verifying you want to send money to this person. Could you type `{authKey}` to confirm? (Ignoring this will cancel, since Velvet can't be bothered to write that logic right now.)");
             InteractivityResult<DiscordMessage> message = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.Content == authKey.ToString(), TimeSpan.FromMinutes(3));
             if (message.TimedOut) await ctx.RespondAsync("Timed out :(");
             else
             {
-                var member = await ctx.Guild.GetMemberAsync(receiver.Id);
-                var embed = new DiscordEmbedBuilder()
-                    .WithThumbnail(ctx.User.AvatarUrl)
-                    .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                    .WithColor(DiscordColor.PhthaloGreen);
+                DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithThumbnail(ctx.User.AvatarUrl)
+                                            .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                                            .WithColor(DiscordColor.PhthaloGreen);
                 sender.Cash -= amount;
                 receiver.Cash += amount;
                 await ctx.RespondAsync(embed: embed);

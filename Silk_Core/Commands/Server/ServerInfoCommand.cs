@@ -21,9 +21,9 @@ namespace SilkBot.Commands.Server
         public async Task ServerInfo(CommandContext ctx)
         {
             DiscordGuild guild = ctx.Guild;
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             int staffCount = db.Guilds.First(_ => _.Id == guild.Id).Users.Where(u => u.Flags.Has(UserFlag.Staff)).Count();
-            var embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:").WithColor(DiscordColor.Gold).WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:").WithColor(DiscordColor.Gold).WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
             embed.WithThumbnail(guild.IconUrl);
 
 

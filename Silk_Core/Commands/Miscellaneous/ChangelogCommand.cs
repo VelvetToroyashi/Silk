@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
@@ -23,20 +25,20 @@ namespace SilkBot.Commands.Miscellaneous
         [GroupCommand]
         public async Task GetChangeLog(CommandContext ctx)
         {
-            var db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             if (db.ChangeLogs.Count() is 0) return;
 
-            var embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
+            DiscordEmbed embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
             await ctx.RespondAsync(embed: embed);
         }
 
         [Command("Create")]
         public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
         {
-            var changelog = CreateChangelog(options);
+            Changelog changelog = CreateChangelog(options);
             var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
-            var clMessage = await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
-            var embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
+            DiscordMessage clMessage = await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
+            bool embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
             if (embedAccepted)
             {
                 db.Value.ChangeLogs.Add(changelog.ToModel());
@@ -52,10 +54,10 @@ namespace SilkBot.Commands.Miscellaneous
             IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
             DiscordEmoji confirm = emojis.ElementAt(1);
             DiscordEmoji deny = emojis.ElementAt(0);
-            var interactivity = context.Client.GetInteractivity();
+            InteractivityExtension interactivity = context.Client.GetInteractivity();
             await message.CreateReactionAsync(confirm);
             await message.CreateReactionAsync(deny);
-            var result = (await interactivity.WaitForReactionAsync(m => m.Emoji == confirm || m.Emoji == deny && m.User == context.User));
+            InteractivityResult<MessageReactionAddEventArgs> result = (await interactivity.WaitForReactionAsync(m => m.Emoji == confirm || m.Emoji == deny && m.User == context.User));
             if (result.TimedOut) return false;
             return result.Result.Emoji == confirm;
         }
@@ -68,7 +70,7 @@ namespace SilkBot.Commands.Miscellaneous
             string removals = (string)splitOptions.GetNext();
             string authors = (string)splitOptions.GetNext();
             string version = (string)splitOptions.GetNext();
-            var time = DateTime.Now;
+            DateTime time = DateTime.Now;
             var changelog = new Changelog { Additions = additions, Removals = removals, Authors = authors, Version = version, Time = time };
             return changelog;
         }

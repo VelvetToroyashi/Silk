@@ -30,20 +30,20 @@ namespace SilkBot.Commands.General
             string changed = Regex.Replace(DiceRoll, @"([1-9]*)d([1-9]{0,4})", string.Empty);
             changed = string.Join(", ", Regex.Matches(changed, @"([0-9])+"));
 
-            (var dieRolls, var result) = CalculateDiceValues(DiceRoll);
+            (List<List<string>> dieRolls, string result) = CalculateDiceValues(DiceRoll);
             double total = new Expression(result).calculate();
             var sb = new StringBuilder();
 
             sb.Append(GetFormattedRollsString(dieRolls));
             sb.Append($"*Modifiers applied: {(changed == "" ? "none" : changed)}* \n*Total: {total}*");
-            var embed = EmbedHelper.CreateEmbed(ctx, sb.ToString(), DiscordColor.Blurple);
+            DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed(ctx, sb.ToString(), DiscordColor.Blurple);
             await ctx.RespondAsync(embed: embed);
         }
 
         public (List<List<string>> rollList, string rollString) CalculateDiceValues(string diceRollString)
         {
             var rollList = new List<List<string>>();
-            var rollString = Regex.Replace(diceRollString, @"([1-9]*)d([1-9]{0,4})", m =>
+            string rollString = Regex.Replace(diceRollString, @"([1-9]*)d([1-9]{0,4})", m =>
             {
                 var random = new Random();
                 string match = m.Value;
@@ -52,15 +52,15 @@ namespace SilkBot.Commands.General
                     match = new string(match.Prepend('1').ToArray());
                 }
 
-                var split = match.ToLower().Split('d');
-                var dieCount = int.Parse(split[0]);
-                var dieSize = int.Parse(split[1]);
+                string[] split = match.ToLower().Split('d');
+                int dieCount = int.Parse(split[0]);
+                int dieSize = int.Parse(split[1]);
 
                 var totalRoll = 0;
                 var rolls = new List<string>();
                 for (var i = 0; i < dieCount; i++)
                 {
-                    var nextRoll = random.Next(1, dieSize + 1);
+                    int nextRoll = random.Next(1, dieSize + 1);
                     totalRoll += nextRoll;
                     rolls.Add($"Die {i + 1}: {nextRoll}");
                 }
@@ -74,9 +74,9 @@ namespace SilkBot.Commands.General
         {
             var sb = new StringBuilder();
 
-            foreach (var rollList in rolls)
+            foreach (List<string> rollList in rolls)
             {
-                foreach (var roll in rollList)
+                foreach (string roll in rollList)
                 {
                     sb.AppendLine($":game_die: {roll}");
                 }

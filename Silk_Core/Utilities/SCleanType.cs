@@ -25,7 +25,7 @@ namespace SilkBot.Utilities
 
         public Task<Optional<SCleanType>> ConvertAsync(string value, CommandContext ctx)
         {
-            var tokens = value.Split(' ');
+            string[] tokens = value.Split(' ');
             while (index != tokens.Length)
             { }
 

@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
+using SilkBot.Models;
 using SilkBot.Tools;
 using SilkBot.Utilities;
 
@@ -23,12 +24,12 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
         public async Task TempMute(CommandContext ctx, DiscordMember user, string duration,
             [RemainingText] string reason = "Not Given.")
         {
-            var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            var config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
-                .First(g => g.Id == ctx.Guild.Id);
+            DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+            GuildModel config = SilkBot.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
+                                       .First(g => g.Id == ctx.Guild.Id);
             if (!bot.HasPermission(Permissions.ManageRoles))
             {
-                var message = await ctx.RespondAsync("Sorry, but I don't have permission to mute members!");
+                DiscordMessage message = await ctx.RespondAsync("Sorry, but I don't have permission to mute members!");
                 await Task.Delay(10000);
                 await message.DeleteAsync();
                 return;
@@ -36,7 +37,7 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
             if (!ctx.Member.HasPermission(Permissions.ManageRoles))
             {
-                var message = await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
+                DiscordMessage message = await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
                 await Task.Delay(10000);
                 await message.DeleteAsync();
                 return;
@@ -55,10 +56,10 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 return;
             }
 
-            var _duration = GetTimeFromInput(duration);
+            TimeSpan _duration = GetTimeFromInput(duration);
             if (_duration.Duration() == TimeSpan.Zero)
             {
-                var msg = await ctx.RespondAsync("Couldn't determine time from message!");
+                DiscordMessage msg = await ctx.RespondAsync("Couldn't determine time from message!");
                 await Task.Delay(10000);
                 await msg.DeleteAsync();
             }
@@ -74,10 +75,10 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
         private async void OnMuteExpired(TimedInfraction eventObject)
         {
 
-            var unmuteMember = await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
+            DiscordMember unmuteMember = await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
 
-            var guild = DbFactory.CreateDbContext().Guilds
-                .First(g => g.Id == eventObject.Guild);
+            GuildModel guild = DbFactory.CreateDbContext().Guilds
+                                        .First(g => g.Id == eventObject.Guild);
             ulong muteRole = guild.MuteRoleId;
 
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);

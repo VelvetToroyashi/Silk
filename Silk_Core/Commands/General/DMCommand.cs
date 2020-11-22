@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -14,8 +15,8 @@ namespace SilkBot.Commands.General
         [Command("DM")]
         public async Task DM(CommandContext ctx, ulong guildId, DiscordUser user, [RemainingText] string message)
         {
-            var guild = await ctx.Client.GetGuildAsync(guildId);
-            var member = guild.Members.Single(pair => pair.Key == user.Id);
+            DiscordGuild guild = await ctx.Client.GetGuildAsync(guildId);
+            KeyValuePair<ulong, DiscordMember> member = guild.Members.Single(pair => pair.Key == user.Id);
 
             await member.Value.SendMessageAsync(message);
         }
@@ -23,7 +24,7 @@ namespace SilkBot.Commands.General
         [Command("DM")]
         public async Task DM(CommandContext ctx, DiscordUser user, [RemainingText] string message)
         {
-            var member = ctx.Guild.Members.Single(pair => pair.Key == user.Id);
+            KeyValuePair<ulong, DiscordMember> member = ctx.Guild.Members.Single(pair => pair.Key == user.Id);
             await member.Value.SendMessageAsync(message);
         }
 

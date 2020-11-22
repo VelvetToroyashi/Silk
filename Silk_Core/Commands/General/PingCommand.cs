@@ -20,12 +20,12 @@ namespace SilkBot.Commands.General
         public async Task Ping(CommandContext ctx)
         {
             SilkBot.Bot.CommandTimer.Stop();
-            var embed = new DiscordEmbedBuilder()
-                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-                .WithTitle("Ping? Sure!")
-                .WithColor(DiscordColor.Blue);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
+                                        .WithTitle("Ping? Sure!")
+                                        .WithColor(DiscordColor.Blue);
             var sw = Stopwatch.StartNew();
-            var message = await ctx.RespondAsync(embed: embed);
+            DiscordMessage message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
             await Task.Delay(200);
             embed.WithDescription(
@@ -41,7 +41,7 @@ namespace SilkBot.Commands.General
         private int GetDbLatency()
         {
             var sw = Stopwatch.StartNew();
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") over () FROM \"Guilds\"");

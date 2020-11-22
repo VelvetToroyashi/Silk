@@ -8,6 +8,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
+using SilkBot.Models;
 
 namespace SilkBot.Commands.Bot
 {
@@ -15,19 +16,19 @@ namespace SilkBot.Commands.Bot
     {
         public static async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
         {
-            var allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
-            var botAsMember = await e.Guild.GetMemberAsync(c.CurrentUser.Id);
+            IOrderedEnumerable<DiscordChannel> allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            DiscordMember botAsMember = await e.Guild.GetMemberAsync(c.CurrentUser.Id);
 
-            var firstChannel = allChannels.First(channel =>
+            DiscordChannel firstChannel = allChannels.First(channel =>
                 channel.PermissionsFor(botAsMember).HasPermission(Permissions.SendMessages) &&
                 channel.Type == ChannelType.Text);
 
-            var embed = new DiscordEmbedBuilder()
-                .WithTitle("Thank you for adding me!")
-                .WithColor(new DiscordColor("94f8ff"))
-                .WithThumbnail(c.CurrentUser.AvatarUrl)
-                .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithTitle("Thank you for adding me!")
+                                        .WithColor(new DiscordColor("94f8ff"))
+                                        .WithThumbnail(c.CurrentUser.AvatarUrl)
+                                        .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
+                                        .WithTimestamp(DateTime.Now);
 
             var sb = new StringBuilder();
             sb.Append("Thank you for choosing Silk! to join your server <3")
@@ -61,13 +62,13 @@ namespace SilkBot.Commands.Bot
             if (e.Channel.IsPrivate || e.Message.Author.IsCurrent) return;
 
 
-            var config = c.GetCommandsNext().Services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
+            GuildModel config = c.GetCommandsNext().Services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
 
             if (!config.LogMessageChanges || config.MessageEditChannel == default) return;
 
 
 
-            var embed =
+            DiscordEmbedBuilder embed =
                 new DiscordEmbedBuilder()
                 .WithTitle("Message Deleted:")
                 .WithDescription(
@@ -81,7 +82,7 @@ namespace SilkBot.Commands.Bot
                 .WithColor(DiscordColor.Red)
                 .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
                 .WithTimestamp(DateTime.Now);
-            var loggingChannel = await c.GetChannelAsync(config.MessageEditChannel);
+            DiscordChannel loggingChannel = await c.GetChannelAsync(config.MessageEditChannel);
             await c.SendMessageAsync(loggingChannel, embed: embed);
         }
     }

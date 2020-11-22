@@ -24,10 +24,10 @@ namespace SilkBot.Commands.Bot
         [Command("setprefix"), RequireFlag(UserFlag.Staff)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            var db = _dbFactory.CreateDbContext();
-            var config = db.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
+            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildModel? config = db.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
 
-            var (valid, reason) = IsValidPrefix(prefix);
+            (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {
                 await ctx.RespondAsync(reason);
@@ -59,7 +59,7 @@ namespace SilkBot.Commands.Bot
         [Command("Prefix")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            var prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
+            string prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
 
             await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }

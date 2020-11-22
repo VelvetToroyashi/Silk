@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Models;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
@@ -18,16 +20,16 @@ namespace SilkBot.Commands.Roles
             [RemainingText, HelpDescription("What roles you'd like to obtain, no need to mention the role")] string roles)
         {
             if (roles is null) return;
-            var _roles = roles.Split(',');
-            var guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
-            foreach (var role in _roles)
+            string[] _roles = roles.Split(',');
+            GuildModel guild = SilkBot.Bot.Instance.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
+            foreach (string role in _roles)
             {
-                var parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
+                DiscordRole parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
                 if (guild.SelfAssignableRoles.Count > 0)
                 {
 
-                    var selfAssignableRoles = guild.SelfAssignableRoles;
+                    List<SelfAssignableRole> selfAssignableRoles = guild.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
                     {

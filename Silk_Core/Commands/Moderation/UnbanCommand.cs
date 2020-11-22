@@ -24,14 +24,14 @@ namespace SilkBot.Commands.Moderation
             if ((await ctx.Guild.GetBansAsync()).Select(b => b.User.Id).Contains(user.Id))
             {
                 await user.UnbanAsync(ctx.Guild, reason);
-                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
                 var infraction = (TimedInfraction)_eventService.Events.FirstOrDefault(e => ((TimedInfraction)e).Id == user.Id);
                 if (infraction is not null) _eventService.Events.TryRemove(infraction);
                 await ctx.RespondAsync(embed: embed);
             }
             else
             {
-                var embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!")).WithColor(new DiscordColor("#d11515"));
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!")).WithColor(new DiscordColor("#d11515"));
                 await ctx.RespondAsync(embed: embed);
             }
 

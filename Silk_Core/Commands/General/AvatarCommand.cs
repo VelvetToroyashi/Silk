@@ -41,7 +41,7 @@ namespace SilkBot.Commands.General
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
         {
-            var user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower())).Value;
+            DiscordMember user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower())).Value;
 
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()

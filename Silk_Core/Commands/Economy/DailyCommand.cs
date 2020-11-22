@@ -26,17 +26,17 @@ namespace SilkBot.Commands.Economy
         [Command("Daily"), RequireGuild()]
         public async Task DailyMoney(CommandContext ctx)
         {
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             GlobalUserModel user = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if(user is null)
             {
                 user = new GlobalUserModel { Id = ctx.User.Id, Cash = 500, LastCashOut = DateTime.Now };
-                var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.Green)
-                    .WithDescription("It appears this is your first time I've seen you. I'm feeling extra generous, and have given you an extra three hundred dollars" +
-                    " on top of normal daily rates *:)* Don't spend it all in one place~")
-                    .WithTitle("Collected $500, come back in 24h for $200 more!");
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                            .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
+                                            .WithColor(DiscordColor.Green)
+                                            .WithDescription("It appears this is your first time I've seen you. I'm feeling extra generous, and have given you an extra three hundred dollars" +
+                                                             " on top of normal daily rates *:)* Don't spend it all in one place~")
+                                            .WithTitle("Collected $500, come back in 24h for $200 more!");
                 await ctx.RespondAsync(embed: embed);
                 db.GlobalUsers.Add(user);
                 await db.SaveChangesAsync();
@@ -46,19 +46,19 @@ namespace SilkBot.Commands.Economy
 
                 if (DateTime.Now.Subtract(user.LastCashOut).TotalDays < 1)
                 {
-                    var embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
-                        .WithColor(DiscordColor.Red)
-                        .WithDescription($"You're a little too early! Check back in {user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                                .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.Red)
+                                                .WithDescription($"You're a little too early! Check back in {user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
                     await ctx.RespondAsync(embed: embed);
                 }
                 else
                 {
                     user.Cash += 200;
-                    var embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
-                        .WithColor(DiscordColor.Green)
-                        .WithDescription($"Done! I've deposited $200 in your account. Come back tomorrow for more~");
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                                .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
+                                                .WithColor(DiscordColor.Green)
+                                                .WithDescription($"Done! I've deposited $200 in your account. Come back tomorrow for more~");
                     await ctx.RespondAsync(embed: embed);
                     await db.SaveChangesAsync();
                 }

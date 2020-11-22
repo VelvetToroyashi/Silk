@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Exceptions;
+using SilkBot.Models;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
@@ -23,7 +24,7 @@ namespace SilkBot.Commands.Roles
         [HelpDescription("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
-            var guild = _dbFactory.CreateDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
+            GuildModel guild = _dbFactory.CreateDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
             if (roles.Count() < 1)
             {
                 await ctx.RespondAsync("Roles cannot be empty!");
@@ -37,7 +38,7 @@ namespace SilkBot.Commands.Roles
             var addedList = new List<string>();
             var removedList = new List<string>();
             var ebStringBuilder = new StringBuilder("Added Roles: ");
-            foreach (var role in roles)
+            foreach (DiscordRole role in roles)
             {
                 if (!guild.SelfAssignableRoles.Any(r => r.RoleId == role.Id))
                 {
@@ -54,7 +55,7 @@ namespace SilkBot.Commands.Roles
 
             if (addedList.Any())
             {
-                foreach (var addedRole in addedList)
+                foreach (string addedRole in addedList)
                 {
                     ebStringBuilder.Append(addedRole);
                 }
@@ -67,7 +68,7 @@ namespace SilkBot.Commands.Roles
             ebStringBuilder.AppendLine();
             ebStringBuilder.AppendLine("Removed Roles: " + (removedList.Any() ? "" : "none"));
 
-            foreach (var removedRole in removedList)
+            foreach (string removedRole in removedList)
             {
                 ebStringBuilder.Append(removedRole);
             }

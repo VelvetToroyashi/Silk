@@ -18,13 +18,13 @@ namespace SilkBot.Commands.Bot
         {
             string prefix = ctx.Prefix;
 
-            var embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
-            var bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+            DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
+            DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
-            var manageMessage = bot.HasPermission(Permissions.ManageMessages);
-            var kick = bot.HasPermission(Permissions.KickMembers);
-            var ban = bot.HasPermission(Permissions.BanMembers);
-            var manageRoles = bot.HasPermission(Permissions.ManageRoles);
+            bool manageMessage = bot.HasPermission(Permissions.ManageMessages);
+            bool kick = bot.HasPermission(Permissions.KickMembers);
+            bool ban = bot.HasPermission(Permissions.BanMembers);
+            bool manageRoles = bot.HasPermission(Permissions.ManageRoles);
 
             var sb = new StringBuilder();
 

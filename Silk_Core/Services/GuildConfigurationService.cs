@@ -29,7 +29,7 @@ namespace SilkBot.Utilities
 
         public async ValueTask<GuildConfiguration> GetConfigFromDatabaseAsync(ulong guildId)
         {
-            var db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel config = await db.Guilds.AsNoTracking().FirstAsync(g => g.Id == guildId);
             if (config is null)
             {

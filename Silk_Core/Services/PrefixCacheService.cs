@@ -46,7 +46,7 @@ namespace SilkBot.Services
         {
             _logger.LogDebug("Prefix not present in cache; queuing from database.");
             _sw.Restart();
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
 
 
             GuildModel guild = db.Guilds.AsNoTracking().First(g => g.Id == guildId);

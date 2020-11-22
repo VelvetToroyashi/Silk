@@ -16,7 +16,7 @@ namespace SilkBot.Services
 
         public GuildModel GetGuild(ulong Id)
         {
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.FirstOrDefault(g => g.Id == Id);
         }
 
@@ -24,7 +24,7 @@ namespace SilkBot.Services
         public static UserModel GetUserById(GuildModel guild, ulong userId) => guild.Users.FirstOrDefault(u => u.Id == userId);
         public UserModel GetUserById(Func<GuildModel, bool> guild, ulong userId)
         {
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(u => u.Id == userId);
         }
 
@@ -32,7 +32,7 @@ namespace SilkBot.Services
         public static UserModel GetUser(GuildModel guild, UserModel userId) => guild.Users.FirstOrDefault(u => u.Id == userId.Id);
         public UserModel GetUser(Func<GuildModel, bool> guild, Func<UserModel, bool> user)
         {
-            using var db = _dbFactory.CreateDbContext();
+            using SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(user);
         }
 
