@@ -81,7 +81,7 @@ namespace SilkBot.Commands.Miscellaneous
             embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
 
 
-            embed.AddField("Flags:", member.Flags.ToString() == "" ? "None" : member.Flags.ToString().Humanize(",").Humanize(LetterCasing.Title));
+            embed.AddField("Flags:", member.Flags.ToString() == "" ? "None" : member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
             await ctx.RespondAsync(embed: embed);
         }

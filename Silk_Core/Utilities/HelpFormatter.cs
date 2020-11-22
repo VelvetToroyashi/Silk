@@ -12,12 +12,12 @@ using System.Reflection;
 using System.Text;
 
 namespace SilkBot.Utilities
-{
+{ 
     public class HelpFormatter : BaseHelpFormatter
     {
         public Command Command { get; private set; }
         public Command[] Subcommands { get; private set; }
-
+        
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Command = null;
@@ -57,7 +57,7 @@ namespace SilkBot.Utilities
             }
             else
             {
-                var args = Command.Overloads.OrderByDescending(x => x.Priority).First().Arguments;
+                var args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
                 var title = new StringBuilder($"Command `{Command.QualifiedName}");
                 foreach (var arg in args)
                 {

@@ -95,7 +95,9 @@ namespace SilkBot
         {
             _eventHelper.CreateHandlers();
             await Client.StartAsync();
-            Commands = new CommandsNextConfiguration { PrefixResolver = _prefixService.PrefixDelegate, Services = _services };
+
+            Commands = new CommandsNextConfiguration { PrefixResolver = _prefixService.PrefixDelegate, Services = _services, IgnoreExtraArguments = true };
+
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
