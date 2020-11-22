@@ -1,4 +1,6 @@
-﻿using System;
+#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable IDE0060 // Unused parameter
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -96,7 +98,8 @@ namespace SilkBot.Commands.General
                 await ctx.Channel.DeleteAsync();
             }
         }
-        private async Task SendInvalidTicketErrorAsync(DiscordChannel tc, DiscordChannel cc)
+
+        private async static Task SendInvalidTicketErrorAsync(DiscordChannel tc, DiscordChannel cc)
         {
             await tc.SendMessageAsync($"Sorry but you can't close this ticket from this channel! Execute `<prefix>ticket close <id>` in {cc.Mention} instead.");
         }
@@ -186,14 +189,15 @@ namespace SilkBot.Commands.General
 
         }
     }
-
+#nullable enable
     public struct TicketCreationResult
     {
         public bool Succeeded { get; }
         public string? Reason { get; }
-        public TicketModel Ticket { get; }
-        public TicketCreationResult(bool s, string? r = default, TicketModel t = default) { Succeeded = s; Reason = r; Ticket = t; }
+        public TicketModel? Ticket { get; }
+        public TicketCreationResult(bool s, string? r = default, TicketModel? t = default) { Succeeded = s; Reason = r; Ticket = t; }
     }
+#nullable disable
 
     public class TicketService
     {
@@ -202,7 +206,7 @@ namespace SilkBot.Commands.General
         public TicketService(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory) 
         {
             _client = client;
-            _dbFactory = _dbFactory;
+            _dbFactory = dbFactory;
         }
 
 #nullable enable
@@ -261,12 +265,12 @@ namespace SilkBot.Commands.General
             await c.SendMessageAsync(embed: embed);
         }
 
-        private async ValueTask<DiscordChannel> GetTicketUserAsync(DiscordClient c, ulong Id)
-        {
-            DiscordGuild g = c.Guilds[721518523704410202];
-            DiscordUser u = await g.GetMemberAsync(Id);
-            return g.Channels.Values.SingleOrDefault(c => c.Name == u.Username);
-        }
+        //private async ValueTask<DiscordChannel> GetTicketUserAsync(DiscordClient c, ulong Id)
+        //{
+        //    DiscordGuild g = c.Guilds[721518523704410202];
+        //    DiscordUser u = await g.GetMemberAsync(Id);
+        //    return g.Channels.Values.SingleOrDefault(c => c.Name == u.Username);
+        //}
 
 
         public async Task RespondToTicket(CommandContext ctx, string message, TicketModel ticket)
@@ -283,9 +287,8 @@ namespace SilkBot.Commands.General
         }
 
 
-        private async Task FinalizeTicketPrecedure(CommandContext ctx, DiscordMember recipient, DiscordEmbed embed)
+        private static async Task FinalizeTicketPrecedure(CommandContext ctx, DiscordMember recipient, DiscordEmbed embed)
         {
-
             await recipient.SendMessageAsync(embed: embed);
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
         }

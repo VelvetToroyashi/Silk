@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+#pragma warning disable CA1822 // Mark members as static
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;

@@ -1,4 +1,10 @@
-﻿using System;
+#pragma warning disable CA1822 // Mark members as static
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using System;
+using System.Drawing;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,7 +75,7 @@ namespace SilkBot.Commands.Miscellaneous
                         break;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // If here, emoji wasn't able to be grabbed from Guild and threw an exception
                 emoji = DiscordEmoji.FromName(ctx.Client, ":question:");
@@ -124,7 +130,7 @@ namespace SilkBot.Commands.Miscellaneous
                         break;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // If here, emoji wasn't able to be grabbed from Guild and threw an exception
                 emoji = DiscordEmoji.FromName(ctx.Client, ":question:");
@@ -139,13 +145,13 @@ namespace SilkBot.Commands.Miscellaneous
                 .Select(role => role.Mention)
                 .ToList();
             var roles = string.Join(' ', roleList);
-            embed.AddField("Roles:", roles.Count() < 1 ? "No roles." : roles);
+            embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
             embed.AddField("Flags:", member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
             await ctx.RespondAsync(embed: embed);
         }
 
-        private string GetCreationTime(DateTimeOffset offset)
+        private static string GetCreationTime(DateTimeOffset offset)
         {
             var creationTime = DateTime.Now.Subtract(offset.DateTime);
             var sb = new StringBuilder();

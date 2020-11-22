@@ -32,7 +32,7 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 await target.ModifyAsync(t => t.Nickname = nick);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await ctx.RespondAsync("Could not set nickname!");
                 _logger.LogWarning($"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");

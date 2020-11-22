@@ -46,7 +46,7 @@ namespace SilkBot.Commands.Miscellaneous
             }
         }
 
-        private async ValueTask<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
+        private static async ValueTask<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
         {
             var creationService = context.Services.Get<DiscordEmojiCreationService>();
             IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
@@ -59,7 +59,8 @@ namespace SilkBot.Commands.Miscellaneous
             if (result.TimedOut) return false;
             return result.Result.Emoji == confirm;
         }
-        private Changelog CreateChangelog(string cl)
+
+        private static Changelog CreateChangelog(string cl)
         {
             var delimiter = "|";
             string[] splitOptions = cl.Split(delimiter);
@@ -89,19 +90,20 @@ namespace SilkBot.Commands.Miscellaneous
             };
         }
 
-        private DiscordEmbed BuildChangeLog(Changelog cl)
+        private static DiscordEmbed BuildChangeLog(Changelog cl)
         {
             var embed = new DiscordEmbedBuilder();
             embed
                 .WithTitle($"Changes in version {cl.Version}")
                 .WithColor(new DiscordColor("#832fd6"))
                 .AddField("Added:", cl.Additions)
-                .AddField("Fixed/Removed:", cl.Removals.Count() < 1 ? "No information given." : cl.Removals)
+                .AddField("Fixed/Removed:", cl.Removals.Length < 1 ? "No information given." : cl.Removals)
                 .AddField("Contributers:", $"Changes created by these contributers: {cl.Authors}")
                 .WithFooter($"Silk! | Change authored: {cl.Time:MMM d, yyyy}");
             return embed;
         }
-        private DiscordEmbed BuildChangeLog(ChangelogModel cl)
+
+        private static DiscordEmbed BuildChangeLog(ChangelogModel cl)
         {
             var embed = new DiscordEmbedBuilder();
             embed
