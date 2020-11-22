@@ -1,5 +1,10 @@
-﻿#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable CA1822 // Mark members as static
 #pragma warning disable IDE0060 // Unused parameter
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -13,11 +18,6 @@ using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.General
 {

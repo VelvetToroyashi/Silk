@@ -1,4 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
@@ -6,23 +10,22 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Miscellaneous
 {
     [Category(Categories.Misc)]
     [Group("changelog")]
-    public class ChangelogCommand : CommandClass
+    public class ChangelogCommand : BaseCommandModule
     {
-        public ChangelogCommand(IDbContextFactory<SilkDbContext> _db) : base(_db) { }
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
         [GroupCommand]
         public async Task GetChangeLog(CommandContext ctx)
         {
-            var db = GetDbContext();
+            var db = _dbFactory.CreateDbContext();
+            if (db.ChangeLogs.Count() is 0) return;
+
             var embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
             await ctx.RespondAsync(embed: embed);
         }
@@ -31,7 +34,7 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
         {
             var changelog = CreateChangelog(options);
-            var db = new Lazy<SilkDbContext>(() => GetDbContext());
+            var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
             var clMessage = await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
             var embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
             if (embedAccepted)

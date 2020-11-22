@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable CA1822 // Mark members as static
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;

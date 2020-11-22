@@ -1,6 +1,6 @@
-﻿using DSharpPlus.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using DSharpPlus.Entities;
 
 namespace SilkBot.Utilities
 {

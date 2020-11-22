@@ -1,4 +1,9 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
@@ -6,12 +11,6 @@ using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
 using SilkBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SilkBot.Utilities
 {

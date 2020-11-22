@@ -1,15 +1,10 @@
-﻿#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable CS0414 // Remove unused private members
 #pragma warning disable IDE0044 // Add readonly modifier
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
-using SilkBot.Extensions;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using CommandLine;
-using Superpower.Model;
 
 namespace SilkBot.Utilities
 {

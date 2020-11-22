@@ -1,6 +1,6 @@
-﻿using DSharpPlus;
+﻿using System.Linq;
+using DSharpPlus;
 using DSharpPlus.Entities;
-using System.Linq;
 
 namespace Silk__Extensions
 {

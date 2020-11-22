@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous

@@ -1,12 +1,12 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
 using SilkBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SilkBot.Utilities
 {

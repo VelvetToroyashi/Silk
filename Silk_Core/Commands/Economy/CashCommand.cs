@@ -1,10 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database.Models;
 using SilkBot.Extensions;
-using System.Linq;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy

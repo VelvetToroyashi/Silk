@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 
 namespace SilkBot.Extensions
 {

@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Humanizer;
 using Humanizer.Localisation;
-using System;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous

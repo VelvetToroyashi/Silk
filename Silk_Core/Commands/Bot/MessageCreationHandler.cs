@@ -1,14 +1,12 @@
-﻿using DSharpPlus;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
-using Microsoft.Extensions.Logging;
-using SilkBot.Commands.General;
-using SilkBot.Utilities;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
+using SilkBot.Commands.General;
+using SilkBot.Utilities;
 using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
