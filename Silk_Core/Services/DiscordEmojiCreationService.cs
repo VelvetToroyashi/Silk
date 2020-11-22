@@ -1,6 +1,6 @@
-﻿using DSharpPlus;
+﻿using System.Collections.Generic;
+using DSharpPlus;
 using DSharpPlus.Entities;
-using System.Collections.Generic;
 
 namespace SilkBot.Utilities
 {

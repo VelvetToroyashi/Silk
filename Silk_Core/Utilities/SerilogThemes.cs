@@ -1,10 +1,6 @@
-﻿using Serilog.Sinks.SystemConsole.Themes;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace SilkBot.Utilities
 {

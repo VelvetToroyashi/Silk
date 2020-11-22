@@ -1,14 +1,13 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Bot
 {

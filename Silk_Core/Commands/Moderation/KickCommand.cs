@@ -1,18 +1,18 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
-using SilkBot.Utilities;
 using SilkBot.Models;
 using SilkBot.Services;
-using SilkBot.Commands.Moderation.Utilities;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {

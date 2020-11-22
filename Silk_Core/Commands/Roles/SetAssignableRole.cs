@@ -1,15 +1,14 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore;
-using SilkBot.Exceptions;
-using SilkBot.Models;
-using SilkBot.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
+using SilkBot.Exceptions;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
 {

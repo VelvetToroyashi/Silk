@@ -1,11 +1,11 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Bot
