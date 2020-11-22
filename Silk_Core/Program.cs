@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -7,24 +7,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using Serilog.Extensions.Logging;
 using SilkBot.Commands.Bot;
 using SilkBot.Commands.General;
 using SilkBot.Services;
 using SilkBot.Tools;
 using SilkBot.Utilities;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace SilkBot
 {
     public class Program
     {
-        private static readonly DiscordConfiguration clientConfig = new DiscordConfiguration
+        private static readonly DiscordConfiguration _clientConfig = new DiscordConfiguration
         {
             Intents = DiscordIntents.All,
             MessageCacheSize = 4096,
-            MinimumLogLevel = LogLevel.None
+            MinimumLogLevel = LogLevel.Error
         };
 
         public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
@@ -41,14 +42,14 @@ namespace SilkBot
             })
             .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-            .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Verbose()
             .CreateLogger())
             .ConfigureServices((context, services) =>
             {
                 IConfiguration config = context.Configuration;
-                clientConfig.Token = config.GetConnectionString("BotToken");
-                services.AddSingleton(new DiscordShardedClient(clientConfig));
+                _clientConfig.Token = config.GetConnectionString("BotToken");
+                services.AddSingleton(new DiscordShardedClient(_clientConfig));
                 services.AddDbContextFactory<SilkDbContext>(option => option.UseNpgsql(config.GetConnectionString("dbConnection")), ServiceLifetime.Transient);
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
 
@@ -59,7 +60,7 @@ namespace SilkBot
                 services.AddSingleton<InfractionService>();
                 services.AddSingleton<MessageCreationHandler>();
                 services.AddSingleton<TimedEventService>();
-                services.AddSingleton(typeof(HttpClient), (services) =>
+                services.AddSingleton(typeof(HttpClient), services =>
                 {
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
