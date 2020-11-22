@@ -16,8 +16,8 @@ namespace SilkBot.Commands.Bot
         [Command("Eval"), RequireOwner()]
         public async Task Eval(CommandContext ctx, [RemainingText] string code) 
         {
-            
-            await ctx.Message.DeleteAsync();
+
+            //await ctx.Message.DeleteAsync();
             try
             {
                 object o = CSharpScript.EvaluateAsync(code, globals: new Globals() with { ctx = ctx }).ConfigureAwait(false);

@@ -39,6 +39,12 @@ namespace SilkBot.Commands.Economy
                 return;
             }
 
+            if (receiver is null)
+            {
+                receiver = new GlobalUserModel {Id = recipient.Id};
+                db.GlobalUsers.Add(receiver);
+            }
+
             if (receiver == sender)             await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");
             else if (sender.Cash < amount)      await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
             else if (amount >= 1000)            await VerifyTransationAsync(ctx, sender, receiver, amount);
