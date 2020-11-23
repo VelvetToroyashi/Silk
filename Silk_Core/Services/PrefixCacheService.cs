@@ -15,7 +15,7 @@ namespace SilkBot.Services
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<ulong, string> _cache;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly Stopwatch _sw = new Stopwatch();
+        private readonly Stopwatch _sw = new();
         public PrefixResolverDelegate PrefixDelegate { get; private set; }
 
         public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory)

@@ -21,55 +21,67 @@ namespace SilkBot
 {
     public class Program
     {
-        private static readonly DiscordConfiguration _clientConfig = new DiscordConfiguration
+        private static readonly DiscordConfiguration _clientConfig = new()
         {
             Intents = DiscordIntents.All,
             MessageCacheSize = 4096,
             MinimumLogLevel = LogLevel.Error
         };
 
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        public static async Task Main(string[] args)
+        {
+            await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        }
 
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-            .UseConsoleLifetime()
-            .ConfigureAppConfiguration((context, configuration) =>
-            {
-                configuration.SetBasePath(Directory.GetCurrentDirectory());
-                configuration.AddJsonFile("appSettings.json", false, false);
-                configuration.AddUserSecrets(typeof(Program).Assembly, optional: true, reloadOnChange: false);
-            })
-            .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Verbose()
-            .CreateLogger())
-            .ConfigureServices((context, services) =>
-            {
-                IConfiguration config = context.Configuration;
-                _clientConfig.Token = config.GetConnectionString("BotToken");
-                services.AddSingleton(new DiscordShardedClient(_clientConfig));
-                services.AddDbContextFactory<SilkDbContext>(option => option.UseNpgsql(config.GetConnectionString("dbConnection")), ServiceLifetime.Transient);
-                services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
-
-                services.AddSingleton<PrefixCacheService>();
-                services.AddSingleton<GuildConfigCacheService>();
-                services.AddSingleton<SerilogLoggerFactory>();
-                services.AddSingleton<TicketService>();
-                services.AddSingleton<InfractionService>();
-                services.AddSingleton<MessageCreationHandler>();
-                services.AddSingleton<TimedEventService>();
-                services.AddSingleton(typeof(HttpClient), services =>
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
-                    return client;
-                });
-                services.AddSingleton<BotEventHelper>();
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                       .UseConsoleLifetime()
+                       .ConfigureAppConfiguration((context, configuration) =>
+                       {
+                           configuration.SetBasePath(Directory.GetCurrentDirectory());
+                           configuration.AddJsonFile("appSettings.json", true, false);
+                           configuration.AddUserSecrets<Program>(true, false);
+                       })
+                       .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
+                                                                            .WriteTo.Console(
+                                                                                outputTemplate:
+                                                                                "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
+                                                                                theme: SerilogThemes.Bot)
+                                                                            .MinimumLevel.Override("Microsoft",
+                                                                                LogEventLevel.Warning)
+                                                                            .MinimumLevel.Verbose()
+                                                                            .CreateLogger())
+                       .ConfigureServices((context, services) =>
+                       {
+                           IConfiguration config = context.Configuration;
+                           _clientConfig.Token = config.GetConnectionString("BotToken");
+                           services.AddSingleton(new DiscordShardedClient(_clientConfig));
+                           services.AddDbContextFactory<SilkDbContext>(
+                               option => option.UseNpgsql(config.GetConnectionString("dbConnection")),
+                               ServiceLifetime.Transient);
+                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                 
-                services.AddHostedService<Bot>();
-            })
-            .UseSerilog();
+                           services.AddSingleton<PrefixCacheService>();
+                           services.AddSingleton<GuildConfigCacheService>();
+                           services.AddSingleton<SerilogLoggerFactory>();
+                           services.AddSingleton<TicketService>();
+                           services.AddSingleton<InfractionService>();
+                           services.AddSingleton<MessageCreationHandler>();
+                           services.AddSingleton<TimedEventService>();
+                           services.AddSingleton(typeof(HttpClient), _ =>
+                           {
+                               var client = new HttpClient();
+                               client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
+                               return client;
+                           });
+                           services.AddScoped(_ => new BotConfig(config));
+                           services.AddSingleton<BotEventHelper>();
+
+                           services.AddHostedService<Bot>();
+                       })
+                       .UseSerilog();
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -10,23 +10,23 @@ using JetBrains.Annotations;
 using SilkBot.Commands.Furry.Utilities;
 using SilkBot.Utilities;
 
-namespace SilkBot.Commands.Furry.SFW
+namespace SilkBot.Commands.Furry.NSFW
 {
     [UsedImplicitly]
     [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]
-    [Cooldown(1, 15, CooldownBucketType.User)]
-    public class e926Command : eBooruBaseCommand
+    [Cooldown(1, 10, CooldownBucketType.User)]
+    public class e621Command : eBooruBaseCommand
     {
-        public e926Command(HttpClient client) : base(client)
+        public e621Command(HttpClient client) : base(client)
         {
-            baseUrl = "https://e926.net/posts.json?tags=";
+            baseUrl = "https://e621.net/posts.json?tags=";
         }
 
-        [Command("e926")]
-        [Aliases("e9")]
-        [Description("SFW! Get cute stuff off none other than e926.net." +
-                     "(See the [tags](https://e926.net/tags) section on e926.")]
+        [Command("e621")]
+        [Aliases("e6")]
+        [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
+        [RequireNsfw]
         public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string query = null)
         {
             if (query?.Split().Length > 5)
@@ -36,12 +36,12 @@ namespace SilkBot.Commands.Furry.SFW
             }
             else if (amount > 7)
             {
-                await ctx.RespondAsync("You can only request 7 images every 30 seconds.");
+                await ctx.RespondAsync("You can only request 10 images every 10 seconds.");
                 return;
             }
 
             eBooruPostResult result = await DoQueryAsync(query);
-            if (result is null)
+            if (result is null || result.Posts.Count is 0)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
                 return;
@@ -53,11 +53,13 @@ namespace SilkBot.Commands.Furry.SFW
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithTitle(query)
                                             .WithDescription(
-                                                $"[Direct Link](https://e926.net/posts/{post.Id})\nDescription: {post.Description.Truncate(200)}")
+                                                $"[Direct Link]({post.File.Url})\nDescription: {post.Description.Truncate(200)}")
                                             .AddField("Score:", post.Score.Total.ToString())
-                                            .WithColor(DiscordColor.PhthaloBlue)
-                                            .WithImageUrl(post.File.Url)
-                                            .WithFooter("Limit: 10 img / 10 sec");
+                                            .AddField("Source:",
+                                                GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
+                                                "No source available")
+                                            .WithColor(DiscordColor.PhthaloBlue).WithImageUrl(post.File.Url)
+                                            .WithFooter("Limit: 7 img / 30sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }

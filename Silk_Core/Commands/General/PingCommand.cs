@@ -14,7 +14,11 @@ namespace SilkBot.Commands.General
     public class PingCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
+        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         [Command("Ping")]
         public async Task Ping(CommandContext ctx)
@@ -29,12 +33,12 @@ namespace SilkBot.Commands.General
             sw.Stop();
             await Task.Delay(200);
             embed.WithDescription(
-                $"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
-                $"API Response Latency: {ctx.Client.Ping} ms.\n\n" +
-                $"Processing Latency: {SilkBot.Bot.CommandTimer.ElapsedTicks / 10} µs.\n\n" +
-                $"Database latency: {GetDbLatency()} ms.```***")
-                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
+                     $"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
+                     $"API Response Latency: {ctx.Client.Ping} ms.\n\n" +
+                     $"Processing Latency: {SilkBot.Bot.CommandTimer.ElapsedTicks / 10} µs.\n\n" +
+                     $"Database latency: {GetDbLatency()} ms.```***")
+                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+                 .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());
         }
 
@@ -47,8 +51,7 @@ namespace SilkBot.Commands.General
             db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") over () FROM \"Guilds\"");
 
             sw.Stop();
-            return (int)sw.ElapsedMilliseconds;
+            return (int) sw.ElapsedMilliseconds;
         }
-
     }
 }

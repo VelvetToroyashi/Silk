@@ -5,10 +5,8 @@ namespace SilkBot.Database.Models
 {
     public class GlobalUserModel
     {
-        [Key]
-        public ulong Id { get; set; }
+        [Key] public ulong Id { get; set; }
         public int Cash { get; set; }
         public DateTime LastCashOut { get; set; }
-
     }
 }

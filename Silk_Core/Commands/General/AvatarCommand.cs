@@ -17,11 +17,10 @@ namespace SilkBot.Commands.General
         {
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
-                .WithImageUrl(ctx.User.AvatarUrl.Replace("128", "4096"))
-                .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
-
+                    .WithImageUrl(ctx.User.AvatarUrl.Replace("128", "4096"))
+                    .WithColor(DiscordColor.CornflowerBlue)
+                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                    .WithTimestamp(DateTime.Now));
         }
 
         [Command("Avatar")]
@@ -29,29 +28,29 @@ namespace SilkBot.Commands.General
         {
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
-                .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                    .WithDescription($"{user.Mention}'s Avatar")
+                    .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
+                    .WithColor(DiscordColor.CornflowerBlue)
+                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                    .WithTimestamp(DateTime.Now));
         }
 
 
         [Command("Avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
         {
-            DiscordMember user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower())).Value;
+            DiscordMember user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower()))
+                                    .Value;
 
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
-                .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                    .WithDescription($"{user.Mention}'s Avatar")
+                    .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
+                    .WithColor(DiscordColor.CornflowerBlue)
+                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                    .WithTimestamp(DateTime.Now));
         }
-
     }
 }

@@ -8,17 +8,19 @@ namespace SilkBot.Utilities
     {
         private readonly DiscordClient _client;
 
-        public DiscordEmojiCreationService(DiscordClient client) => _client = client;
+        public DiscordEmojiCreationService(DiscordClient client)
+        {
+            _client = client;
+        }
+
         public DiscordEmoji GetEmoji(string name)
         {
             return DiscordEmoji.FromName(_client, name);
         }
+
         public IEnumerable<DiscordEmoji> GetEmoji(params string[] names)
         {
-            foreach (string emojiName in names)
-            {
-                yield return DiscordEmoji.FromName(_client, emojiName);
-            }
+            foreach (string emojiName in names) yield return DiscordEmoji.FromName(_client, emojiName);
         }
     }
 }

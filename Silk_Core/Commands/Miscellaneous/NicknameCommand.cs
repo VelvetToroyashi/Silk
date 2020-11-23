@@ -27,7 +27,8 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 await ctx.RespondAsync("Nickname out of bounds! Limit: 32 characters");
                 return;
-            }// https://velvet.is-ne.at/ISrlCh.png
+            } // https://velvet.is-ne.at/ISrlCh.png
+
             try
             {
                 await target.ModifyAsync(t => t.Nickname = nick);
@@ -35,9 +36,9 @@ namespace SilkBot.Commands.Miscellaneous
             catch (Exception)
             {
                 await ctx.RespondAsync("Could not set nickname!");
-                _logger.LogWarning($"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");
+                _logger.LogWarning(
+                    $"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");
             }
-
         }
     }
 }

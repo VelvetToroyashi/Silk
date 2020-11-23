@@ -11,10 +11,10 @@ namespace Silk__Extensions
             foreach (DiscordGuild g in c.Guilds.Values)
             {
                 foreach (DiscordMember m in g.Members.Values)
-                {
-                    if (m.Username.ToLower().Contains(u.ToLower())) return m;
-                }
+                    if (m.Username.ToLower().Contains(u.ToLower()))
+                        return m;
             }
+
             return null;
         }
 
@@ -23,21 +23,22 @@ namespace Silk__Extensions
             foreach (DiscordGuild g in c.ShardClients.Values.SelectMany(c => c.Guilds.Values))
             {
                 foreach (DiscordMember m in g.Members.Values)
-                {
-                    if (m.Username.ToLower().Contains(u.ToLower())) return m;
-                }
+                    if (m.Username.ToLower().Contains(u.ToLower()))
+                        return m;
             }
+
             return null;
         }
+
         public static DiscordUser GetUser(this DiscordShardedClient c, ulong u)
         {
             foreach (DiscordGuild g in c.ShardClients.Values.SelectMany(c => c.Guilds.Values))
             {
                 foreach (DiscordMember m in g.Members.Values)
-                {
-                    if (m.Id == u) return m;
-                }
+                    if (m.Id == u)
+                        return m;
             }
+
             return null;
         }
     }

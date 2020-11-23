@@ -18,7 +18,6 @@ namespace SilkBot.Commands.Moderation
     [UsedImplicitly]
     public class CasesCommand : BaseCommandModule
     {
-
         private readonly InfractionService _infractionService;
 
         public CasesCommand(InfractionService infractionService)
@@ -42,21 +41,21 @@ namespace SilkBot.Commands.Moderation
             }
             else
             {
-                IEnumerable<IGrouping<InfractionType, InfractionType>> groupedInfractions = infractions.GroupBy(i => i.InfractionType, i => i.InfractionType);
+                IEnumerable<IGrouping<InfractionType, InfractionType>> groupedInfractions =
+                    infractions.GroupBy(i => i.InfractionType, i => i.InfractionType);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithTitle($"Cases for {user.Username} ({user.Id})")
                                             .WithColor(DiscordColor.Gold)
                                             .WithThumbnail(user.AvatarUrl)
                                             .WithDescription(infractions
                                                              .Take(3)
-                                                             .Select(i => 
+                                                             .Select(i =>
                                                                  $"Infraction Occured: {i.InfractionTime:dd/mm/yyyy h:mm} {DateTime.Now.Subtract(i.InfractionTime).Humanize(3, minUnit: TimeUnit.Minute)} ago\n" +
                                                                  $"Enforcer: <@{i.Enforcer}> ({i.Enforcer})\n" +
                                                                  $"Type: {i.InfractionType.Humanize()}\n" +
                                                                  $"Reason: {i.Reason}\n")
                                                              .JoinString('\n'));
-                foreach(IGrouping<InfractionType, InfractionType> inf in groupedInfractions)
-                {
+                foreach (IGrouping<InfractionType, InfractionType> inf in groupedInfractions)
                     switch (inf.Key)
                     {
                         case InfractionType.Kick:
@@ -66,7 +65,7 @@ namespace SilkBot.Commands.Moderation
                             embed.AddField("Mutes", inf.Count().ToString());
                             break;
                     }
-                }
+
                 await ctx.RespondAsync(embed: embed);
             }
         }

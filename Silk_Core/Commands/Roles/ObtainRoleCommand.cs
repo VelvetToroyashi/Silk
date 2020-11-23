@@ -13,11 +13,11 @@ namespace SilkBot.Commands.Roles
     [Category(Categories.Roles)]
     public class ObtainRoleCommand : BaseCommandModule
     {
-
         [Command("Role")]
         [HelpDescription("Grab a role!", "[p]role <rolename>")]
         public async Task ObtainRole(CommandContext ctx,
-            [RemainingText, HelpDescription("What roles you'd like to obtain, no need to mention the role")] string roles)
+            [RemainingText] [HelpDescription("What roles you'd like to obtain, no need to mention the role")]
+            string roles)
         {
             if (roles is null) return;
             string[] _roles = roles.Split(',');
@@ -28,7 +28,6 @@ namespace SilkBot.Commands.Roles
 
                 if (guild.SelfAssignableRoles.Count > 0)
                 {
-
                     List<SelfAssignableRole> selfAssignableRoles = guild.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
@@ -38,30 +37,29 @@ namespace SilkBot.Commands.Roles
                             await ctx.Member.GrantRoleAsync(parsedRole);
                             await ctx.RespondAsync(embed:
                                 new DiscordEmbedBuilder()
-                                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                                .WithColor(DiscordColor.CornflowerBlue)
-                                .WithDescription($"Gave you the role {parsedRole.Mention}")
-                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                .WithTimestamp(DateTime.Now)
-                                );
+                                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                                    .WithColor(DiscordColor.CornflowerBlue)
+                                    .WithDescription($"Gave you the role {parsedRole.Mention}")
+                                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                    .WithTimestamp(DateTime.Now)
+                            );
                         }
                         else
                         {
                             await ctx.Member.RevokeRoleAsync(parsedRole);
                             await ctx.RespondAsync(embed:
                                 new DiscordEmbedBuilder()
-                                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                                .WithColor(DiscordColor.CornflowerBlue)
-                                .WithDescription($"Revoked {parsedRole.Mention}")
-                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                .WithTimestamp(DateTime.Now));
+                                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                                    .WithColor(DiscordColor.CornflowerBlue)
+                                    .WithDescription($"Revoked {parsedRole.Mention}")
+                                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                    .WithTimestamp(DateTime.Now));
                         }
-
                     }
                     else
                     {
                         await ctx.RespondAsync(embed:
-                                new DiscordEmbedBuilder()
+                            new DiscordEmbedBuilder()
                                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                                 .WithColor(DiscordColor.IndianRed)
                                 .WithDescription($"Sorry, but {parsedRole.Mention} is NOT available to assign.")
@@ -72,16 +70,14 @@ namespace SilkBot.Commands.Roles
                 else
                 {
                     await ctx.RespondAsync(embed:
-                                new DiscordEmbedBuilder()
-                                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                                .WithColor(DiscordColor.IndianRed)
-                                .WithDescription($"Sorry, but this server has not set up self-assignable roles.")
-                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                .WithTimestamp(DateTime.Now));
+                        new DiscordEmbedBuilder()
+                            .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                            .WithColor(DiscordColor.IndianRed)
+                            .WithDescription($"Sorry, but this server has not set up self-assignable roles.")
+                            .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                            .WithTimestamp(DateTime.Now));
                 }
-
             }
-
         }
     }
 }

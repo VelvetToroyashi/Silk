@@ -8,25 +8,23 @@ namespace SilkBot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Item",
-                columns: table => new
+                "Item",
+                table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Discriminator = table.Column<string>(type: "text", nullable: false)
+                    Id = table.Column<int>("integer", nullable: false)
+                              .Annotation("Npgsql:ValueGenerationStrategy",
+                                  NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>("text", nullable: true),
+                    Description = table.Column<string>("text", nullable: true),
+                    Discriminator = table.Column<string>("text", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Item", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Item", x => x.Id); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Item");
+                "Item");
         }
     }
 }

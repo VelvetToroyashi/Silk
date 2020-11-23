@@ -1,7 +1,4 @@
 ﻿namespace SilkBot.Services
 {
-    public class InventoryService
-    {
-
-    }
+    public class InventoryService { }
 }

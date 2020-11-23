@@ -14,7 +14,8 @@ namespace SilkBot.Commands.Bot
     [Category(Categories.Bot)]
     public class BotStatCommand : BaseCommandModule
     {
-        [Command("Stats"), Aliases("botstats", "botinfo")]
+        [Command("Stats")]
+        [Aliases("botstats", "botinfo")]
         public async Task BotStat(CommandContext ctx)
         {
             var process = Process.GetCurrentProcess();
@@ -27,10 +28,13 @@ namespace SilkBot.Commands.Bot
                                         .AddField("Latency", $"{ctx.Client.Ping}ms", true)
                                         .AddField("Total guilds", $"{guildCount}", true)
                                         .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-                                        .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024.0:n2} MB", true)
+                                        .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024.0:n2} MB",
+                                            true)
                                         .AddField("CPU:", $"~{cpu.NextValue() / Environment.ProcessorCount:n2}%", true)
                                         .AddField("Threads", $"{process.Threads.Count}", true)
-                                        .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), false);
+                                        .AddField("Uptime",
+                                            (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second),
+                                            false);
             await ctx.RespondAsync(embed: embed);
             cpu.Dispose();
         }

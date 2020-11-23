@@ -11,7 +11,8 @@ namespace SilkBot.Commands.Moderation.SClean
     [Group("SClean")]
     public partial class SCleanCommand : BaseCommandModule
     {
-        [Command, HelpDescription("Clean messages of a specific type, or from specific people!")]
+        [Command]
+        [HelpDescription("Clean messages of a specific type, or from specific people!")]
         public async Task SClean(CommandContext ctx)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();

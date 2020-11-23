@@ -8,81 +8,82 @@ namespace SilkBot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Ban_Users_UserInfoId",
-                table: "Ban");
+                "FK_Ban_Users_UserInfoId",
+                "Ban");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_UserInfractionModel_Users_UserId",
-                table: "UserInfractionModel");
+                "FK_UserInfractionModel_Users_UserId",
+                "UserInfractionModel");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Users",
-                table: "Users");
+                "PK_Users",
+                "Users");
 
             migrationBuilder.DropIndex(
-                name: "IX_UserInfractionModel_UserId",
-                table: "UserInfractionModel");
+                "IX_UserInfractionModel_UserId",
+                "UserInfractionModel");
 
             migrationBuilder.DropIndex(
-                name: "IX_Ban_UserInfoId",
-                table: "Ban");
+                "IX_Ban_UserInfoId",
+                "Ban");
 
             migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "UserInfractionModel");
+                "UserId",
+                "UserInfractionModel");
 
             migrationBuilder.DropColumn(
-                name: "UserInfoId",
-                table: "Ban");
+                "UserInfoId",
+                "Ban");
 
             migrationBuilder.AddColumn<long>(
-                name: "DatabaseId",
-                table: "Users",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L)
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                "DatabaseId",
+                                "Users",
+                                "bigint",
+                                nullable: false,
+                                defaultValue: 0L)
+                            .Annotation("Npgsql:ValueGenerationStrategy",
+                                NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             migrationBuilder.AddColumn<long>(
-                name: "UserDatabaseId",
-                table: "UserInfractionModel",
-                type: "bigint",
+                "UserDatabaseId",
+                "UserInfractionModel",
+                "bigint",
                 nullable: true);
 
             migrationBuilder.AddColumn<long>(
-                name: "UserInfoDatabaseId",
-                table: "Ban",
-                type: "bigint",
+                "UserInfoDatabaseId",
+                "Ban",
+                "bigint",
                 nullable: true);
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Users",
-                table: "Users",
-                column: "DatabaseId");
+                "PK_Users",
+                "Users",
+                "DatabaseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserInfractionModel_UserDatabaseId",
-                table: "UserInfractionModel",
-                column: "UserDatabaseId");
+                "IX_UserInfractionModel_UserDatabaseId",
+                "UserInfractionModel",
+                "UserDatabaseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ban_UserInfoDatabaseId",
-                table: "Ban",
-                column: "UserInfoDatabaseId");
+                "IX_Ban_UserInfoDatabaseId",
+                "Ban",
+                "UserInfoDatabaseId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Ban_Users_UserInfoDatabaseId",
-                table: "Ban",
-                column: "UserInfoDatabaseId",
-                principalTable: "Users",
+                "FK_Ban_Users_UserInfoDatabaseId",
+                "Ban",
+                "UserInfoDatabaseId",
+                "Users",
                 principalColumn: "DatabaseId",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_UserInfractionModel_Users_UserDatabaseId",
-                table: "UserInfractionModel",
-                column: "UserDatabaseId",
-                principalTable: "Users",
+                "FK_UserInfractionModel_Users_UserDatabaseId",
+                "UserInfractionModel",
+                "UserDatabaseId",
+                "Users",
                 principalColumn: "DatabaseId",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -90,77 +91,77 @@ namespace SilkBot.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Ban_Users_UserInfoDatabaseId",
-                table: "Ban");
+                "FK_Ban_Users_UserInfoDatabaseId",
+                "Ban");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_UserInfractionModel_Users_UserDatabaseId",
-                table: "UserInfractionModel");
+                "FK_UserInfractionModel_Users_UserDatabaseId",
+                "UserInfractionModel");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Users",
-                table: "Users");
+                "PK_Users",
+                "Users");
 
             migrationBuilder.DropIndex(
-                name: "IX_UserInfractionModel_UserDatabaseId",
-                table: "UserInfractionModel");
+                "IX_UserInfractionModel_UserDatabaseId",
+                "UserInfractionModel");
 
             migrationBuilder.DropIndex(
-                name: "IX_Ban_UserInfoDatabaseId",
-                table: "Ban");
+                "IX_Ban_UserInfoDatabaseId",
+                "Ban");
 
             migrationBuilder.DropColumn(
-                name: "DatabaseId",
-                table: "Users");
+                "DatabaseId",
+                "Users");
 
             migrationBuilder.DropColumn(
-                name: "UserDatabaseId",
-                table: "UserInfractionModel");
+                "UserDatabaseId",
+                "UserInfractionModel");
 
             migrationBuilder.DropColumn(
-                name: "UserInfoDatabaseId",
-                table: "Ban");
+                "UserInfoDatabaseId",
+                "Ban");
 
             migrationBuilder.AddColumn<decimal>(
-                name: "UserId",
-                table: "UserInfractionModel",
-                type: "numeric(20,0)",
+                "UserId",
+                "UserInfractionModel",
+                "numeric(20,0)",
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "UserInfoId",
-                table: "Ban",
-                type: "numeric(20,0)",
+                "UserInfoId",
+                "Ban",
+                "numeric(20,0)",
                 nullable: true);
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Users",
-                table: "Users",
-                column: "Id");
+                "PK_Users",
+                "Users",
+                "Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserInfractionModel_UserId",
-                table: "UserInfractionModel",
-                column: "UserId");
+                "IX_UserInfractionModel_UserId",
+                "UserInfractionModel",
+                "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ban_UserInfoId",
-                table: "Ban",
-                column: "UserInfoId");
+                "IX_Ban_UserInfoId",
+                "Ban",
+                "UserInfoId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Ban_Users_UserInfoId",
-                table: "Ban",
-                column: "UserInfoId",
-                principalTable: "Users",
+                "FK_Ban_Users_UserInfoId",
+                "Ban",
+                "UserInfoId",
+                "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_UserInfractionModel_Users_UserId",
-                table: "UserInfractionModel",
-                column: "UserId",
-                principalTable: "Users",
+                "FK_UserInfractionModel_Users_UserId",
+                "UserInfractionModel",
+                "UserId",
+                "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }

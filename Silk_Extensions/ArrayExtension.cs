@@ -5,6 +5,7 @@ namespace SilkBot.Extensions
     public static class ArrayExtension
     {
         private static int index = 0;
+
         public static object GetNext(this object[] o)
         {
             index++;

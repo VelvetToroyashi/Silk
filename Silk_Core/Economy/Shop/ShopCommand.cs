@@ -15,7 +15,6 @@ namespace SilkBot.Commands.Economy.Shop
         {
             await ctx.RespondAsync("Command usage:\n\t\t`shop [global | view <name> | create | delete]`");
         }
-
     }
 
     public partial class ShopCommand
@@ -35,6 +34,7 @@ namespace SilkBot.Commands.Economy.Shop
             await ctx.RespondAsync("Placeholder shop embed goes here");
         }
     }
+
     public partial class ShopCommand
     {
         [Command]
@@ -43,6 +43,7 @@ namespace SilkBot.Commands.Economy.Shop
             await ctx.RespondAsync("Placeholder creation modal goes here");
         }
     }
+
     public partial class ShopCommand
     {
         [Command]

@@ -162,16 +162,17 @@ namespace SilkBot.Commands.Miscellaneous
                 sb.Append($"{years} {(years > 1 ? "years" : "year")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(years * 365));
             }
+
             if (creationTime.Days > 30)
             {
                 int months = creationTime.Days / 30;
                 sb.Append($"{months} {(months > 1 ? "months" : "month")}, ");
                 creationTime = creationTime.Subtract(TimeSpan.FromDays(months * 30));
             }
+
             sb.Append($"{creationTime.Days} {(creationTime.Days > 1 ? "days" : "day")}");
 
             return sb.ToString();
-
         }
     }
 }

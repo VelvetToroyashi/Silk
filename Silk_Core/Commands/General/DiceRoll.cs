@@ -16,10 +16,12 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class DiceRoll : BaseCommandModule
     {
-
         [Command("DiceRoll")]
-        [HelpDescription("Allows you to roll dice!", "`!diceroll d5` → Rolls between 1 and 5.", "`!diceroll 2d4` → Rolls 2 dice, between 1 and 4.", "`!diceroll 2d4+6` → Rolls 2 dice, from 1 to 4, with 6 tacked on to the total.")]
-        public async Task RollDice(CommandContext ctx, [RemainingText, HelpDescription("The dice to roll.")] string DiceRoll)
+        [HelpDescription("Allows you to roll dice!", "`!diceroll d5` → Rolls between 1 and 5.",
+            "`!diceroll 2d4` → Rolls 2 dice, between 1 and 4.",
+            "`!diceroll 2d4+6` → Rolls 2 dice, from 1 to 4, with 6 tacked on to the total.")]
+        public async Task RollDice(CommandContext ctx, [RemainingText] [HelpDescription("The dice to roll.")]
+            string DiceRoll)
         {
             if (DiceRoll is null)
             {
@@ -47,10 +49,7 @@ namespace SilkBot.Commands.General
             {
                 var random = new Random();
                 string match = m.Value;
-                if (m.Value[0] == 'd')
-                {
-                    match = new string(match.Prepend('1').ToArray());
-                }
+                if (m.Value[0] == 'd') match = new string(match.Prepend('1').ToArray());
 
                 string[] split = match.ToLower().Split('d');
                 int dieCount = int.Parse(split[0]);
@@ -64,26 +63,25 @@ namespace SilkBot.Commands.General
                     totalRoll += nextRoll;
                     rolls.Add($"Die {i + 1}: {nextRoll}");
                 }
+
                 rollList.Add(rolls);
                 //Now replace the expressions with their resolutions
                 return totalRoll.ToString();
             }, RegexOptions.Compiled);
             return (rollList, rollString);
         }
+
         public string GetFormattedRollsString(List<List<string>> rolls)
         {
             var sb = new StringBuilder();
 
             foreach (List<string> rollList in rolls)
             {
-                foreach (string roll in rollList)
-                {
-                    sb.AppendLine($":game_die: {roll}");
-                }
+                foreach (string roll in rollList) sb.AppendLine($":game_die: {roll}");
                 sb.AppendLine();
             }
+
             return sb.ToString();
         }
-
     }
 }

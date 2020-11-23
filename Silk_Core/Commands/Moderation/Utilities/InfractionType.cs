@@ -9,6 +9,6 @@
         TemporaryMute,
         TemporaryLockout,
         NoMeme,
-        Strike,
+        Strike
     }
 }

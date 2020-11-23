@@ -4,7 +4,6 @@ namespace SilkBot.Models
 {
     public class SelfAssignableRole
     {
-        [Key]
-        public ulong RoleId { get; set; }
+        [Key] public ulong RoleId { get; set; }
     }
 }

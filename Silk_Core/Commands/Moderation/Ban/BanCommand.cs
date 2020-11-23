@@ -15,13 +15,15 @@ namespace SilkBot.Commands.Moderation.Ban
     public class BanCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+
         public BanCommand(IDbContextFactory<SilkDbContext> dbFactory)
         {
             _dbFactory = dbFactory;
         }
 
         [Command("Ban")]
-        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target, [RemainingText] string reason = "No reason given.")
+        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target,
+            [RemainingText] string reason = "No reason given.")
         {
             DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
@@ -30,9 +32,12 @@ namespace SilkBot.Commands.Moderation.Ban
                 await DenyBanAsync(errorReason);
                 return;
             }
+
             async Task DenyBanAsync(string errorReason)
             {
-                await ctx.RespondAsync(embed: new DiscordEmbedBuilder().WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl).WithColor(DiscordColor.Red).WithDescription(errorReason));
+                await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
+                                              .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                                              .WithColor(DiscordColor.Red).WithDescription(errorReason));
             }
 
             bool CanExecuteCommand(out string errorReason)
@@ -49,14 +54,14 @@ namespace SilkBot.Commands.Moderation.Ban
                 }
                 else if (user.IsAbove(bot))
                 {
-                    errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
+                    errorReason =
+                        $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
                 }
+
                 errorReason = null;
                 return true;
             }
-
-
 
 
             DiscordEmbedBuilder userBannedEmbed = new DiscordEmbedBuilder()
@@ -71,7 +76,8 @@ namespace SilkBot.Commands.Moderation.Ban
                                            .WithAuthorExtension(name, url)
                                            .WithColor(DiscordColor.SpringGreen)
                                            .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
-                                           .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
+                                           .AddField("Infraction occured:",
+                                               DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
                                            .AddField("Reason:", reason).AddFooter(ctx);
             try
             {
@@ -79,18 +85,13 @@ namespace SilkBot.Commands.Moderation.Ban
             }
             finally
             {
-
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
-                ulong? loggingChannel = _dbFactory.CreateDbContext().Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)?.MessageEditChannel;
+                ulong? loggingChannel = _dbFactory.CreateDbContext().Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)
+                                                  ?.MessageEditChannel;
                 DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
 
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }
-
-
-
-
-
         }
     }
 }

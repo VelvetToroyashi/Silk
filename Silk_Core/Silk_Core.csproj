@@ -5,6 +5,8 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>SilkBot</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>
+    <IsPackable>false</IsPackable>
+    <Product>Silk!</Product>
   </PropertyGroup>
 
 	<PropertyGroup>
@@ -17,6 +19,11 @@
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>false</Optimize>
+    <WarningLevel>3</WarningLevel>
+  </PropertyGroup>
+	
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\Silk_Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

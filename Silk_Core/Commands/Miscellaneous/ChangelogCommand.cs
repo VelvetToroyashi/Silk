@@ -20,7 +20,11 @@ namespace SilkBot.Commands.Miscellaneous
     public class ChangelogCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
+        public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         [GroupCommand]
         public async Task GetChangeLog(CommandContext ctx)
@@ -37,7 +41,8 @@ namespace SilkBot.Commands.Miscellaneous
         {
             Changelog changelog = CreateChangelog(options);
             var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
-            DiscordMessage clMessage = await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
+            DiscordMessage clMessage =
+                await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
             bool embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
             if (embedAccepted)
             {
@@ -57,7 +62,9 @@ namespace SilkBot.Commands.Miscellaneous
             InteractivityExtension interactivity = context.Client.GetInteractivity();
             await message.CreateReactionAsync(confirm);
             await message.CreateReactionAsync(deny);
-            InteractivityResult<MessageReactionAddEventArgs> result = (await interactivity.WaitForReactionAsync(m => m.Emoji == confirm || m.Emoji == deny && m.User == context.User));
+            InteractivityResult<MessageReactionAddEventArgs> result =
+                await interactivity.WaitForReactionAsync(m =>
+                    m.Emoji == confirm || m.Emoji == deny && m.User == context.User);
             if (result.TimedOut) return false;
             return result.Result.Emoji == confirm;
         }
@@ -67,11 +74,12 @@ namespace SilkBot.Commands.Miscellaneous
             var delimiter = "|";
             string[] splitOptions = cl.Split(delimiter);
             string additions = splitOptions[0];
-            string removals = (string)splitOptions.GetNext();
-            string authors = (string)splitOptions.GetNext();
-            string version = (string)splitOptions.GetNext();
+            var removals = (string) splitOptions.GetNext();
+            var authors = (string) splitOptions.GetNext();
+            var version = (string) splitOptions.GetNext();
             DateTime time = DateTime.Now;
-            var changelog = new Changelog { Additions = additions, Removals = removals, Authors = authors, Version = version, Time = time };
+            var changelog = new Changelog
+                {Additions = additions, Removals = removals, Authors = authors, Version = version, Time = time};
             return changelog;
         }
 
@@ -82,14 +90,18 @@ namespace SilkBot.Commands.Miscellaneous
             public string Authors { get; set; }
             public string Version { get; set; }
             public DateTime Time { get; set; }
-            public ChangelogModel ToModel() => new ChangelogModel
+
+            public ChangelogModel ToModel()
             {
-                Additions = Additions,
-                Authors = Authors,
-                ChangeTime = Time,
-                Removals = Removals,
-                Version = Version
-            };
+                return new()
+                {
+                    Additions = Additions,
+                    Authors = Authors,
+                    ChangeTime = Time,
+                    Removals = Removals,
+                    Version = Version
+                };
+            }
         }
 
         private static DiscordEmbed BuildChangeLog(Changelog cl)

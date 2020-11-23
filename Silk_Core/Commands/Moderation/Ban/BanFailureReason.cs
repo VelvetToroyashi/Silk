@@ -8,7 +8,9 @@
         public const string UNSUITABLE_HIERARCHY_POSITION = "I cannot ban $user due to roles.";
         public const string MODERATOR_BAN_ATTEMPT = "I can't ban $user; they're a staff member of this guild.";
 
-        public BanFailureReason(string reason) => FailureReason = reason;
+        public BanFailureReason(string reason)
+        {
+            FailureReason = reason;
+        }
     }
-
 }

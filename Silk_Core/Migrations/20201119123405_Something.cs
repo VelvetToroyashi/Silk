@@ -7,66 +7,66 @@ namespace SilkBot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Item",
-                table: "Item");
+                "PK_Item",
+                "Item");
 
             migrationBuilder.DropColumn(
-                name: "Discriminator",
-                table: "Item");
+                "Discriminator",
+                "Item");
 
             migrationBuilder.RenameTable(
-                name: "Item",
+                "Item",
                 newName: "Foobars");
 
             migrationBuilder.AddColumn<decimal>(
-                name: "GuildId",
-                table: "UserInfractionModel",
-                type: "numeric(20,0)",
+                "GuildId",
+                "UserInfractionModel",
+                "numeric(20,0)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "UserId",
-                table: "UserInfractionModel",
-                type: "numeric(20,0)",
+                "UserId",
+                "UserInfractionModel",
+                "numeric(20,0)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Foobars",
-                table: "Foobars",
-                column: "Id");
+                "PK_Foobars",
+                "Foobars",
+                "Id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Foobars",
-                table: "Foobars");
+                "PK_Foobars",
+                "Foobars");
 
             migrationBuilder.DropColumn(
-                name: "GuildId",
-                table: "UserInfractionModel");
+                "GuildId",
+                "UserInfractionModel");
 
             migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "UserInfractionModel");
+                "UserId",
+                "UserInfractionModel");
 
             migrationBuilder.RenameTable(
-                name: "Foobars",
+                "Foobars",
                 newName: "Item");
 
             migrationBuilder.AddColumn<string>(
-                name: "Discriminator",
-                table: "Item",
-                type: "text",
+                "Discriminator",
+                "Item",
+                "text",
                 nullable: false,
                 defaultValue: "");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Item",
-                table: "Item",
-                column: "Id");
+                "PK_Item",
+                "Item",
+                "Id");
         }
     }
 }

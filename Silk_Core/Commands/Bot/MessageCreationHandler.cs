@@ -17,7 +17,8 @@ namespace SilkBot.Commands.Bot
         private readonly GuildConfigCacheService _guildCache;
         private readonly ILogger<MessageCreationHandler> _logger;
 
-        public MessageCreationHandler(DiscordShardedClient sc, TicketService ts, GuildConfigCacheService guildCache, ILogger<MessageCreationHandler> logger)
+        public MessageCreationHandler(DiscordShardedClient sc, TicketService ts, GuildConfigCacheService guildCache,
+            ILogger<MessageCreationHandler> logger)
         {
             _ticketService = ts;
             _guildCache = guildCache;
@@ -26,9 +27,8 @@ namespace SilkBot.Commands.Bot
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)
-#pragma warning restore CS1998 
+#pragma warning restore CS1998
         {
-
             //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
             {
@@ -63,8 +63,8 @@ namespace SilkBot.Commands.Bot
                     CheckForInvite(e, config);
                     sw.Stop();
                     _logger.LogInformation($"Checked for information in {sw.ElapsedMilliseconds} ms.");
-
                 }
+
                 if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
                     await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
                 CommandTimer.Stop();
@@ -73,14 +73,15 @@ namespace SilkBot.Commands.Bot
 
         private void CheckForInvite(MessageCreateEventArgs e, GuildConfiguration config)
         {
-            
             if (config.WhitelistsInvites)
             {
                 string messageContent = e.Message.Content;
                 if (messageContent.Contains("discord.gg/") || messageContent.Contains("discord.com/invite/"))
                 {
-                    Match inviteLinkMatched = Regex.Match(messageContent.ToLower(), @"(discord\.gg\/.+)", RegexOptions.IgnoreCase)
-                                    ?? Regex.Match(messageContent.ToLower(), @"(discord\.com\/invite\/.+)", RegexOptions.IgnoreCase);
+                    Match inviteLinkMatched =
+                        Regex.Match(messageContent.ToLower(), @"(discord\.gg\/.+)", RegexOptions.IgnoreCase)
+                        ?? Regex.Match(messageContent.ToLower(), @"(discord\.com\/invite\/.+)",
+                            RegexOptions.IgnoreCase);
 
                     if (!inviteLinkMatched.Success) return;
 
@@ -88,10 +89,9 @@ namespace SilkBot.Commands.Bot
                                                         .Skip(inviteLinkMatched.Index)
                                                         .TakeWhile(c => c != ' '))
                                               .Replace("discord.com/invite", "discord.gg");
-                    if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink)) e.Message.DeleteAsync().GetAwaiter();
-
+                    if (!config.WhiteListedLinks.Any(link => link.Link == inviteLink))
+                        e.Message.DeleteAsync().GetAwaiter();
                 }
-
             }
         }
     }

@@ -4,6 +4,9 @@ namespace SilkBot.Extensions
 {
     public static class DateTimeExtensions
     {
-        public static TimeSpan GetTime(this DateTime dt) => dt - DateTime.Now;
+        public static TimeSpan GetTime(this DateTime dt)
+        {
+            return dt - DateTime.Now;
+        }
     }
 }

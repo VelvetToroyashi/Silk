@@ -5,7 +5,7 @@ namespace SilkBot.Economy.Shop.Utilities
 {
     public sealed class ShopRefreshTimer
     {
-        private readonly Timer timer = new Timer(3600000);
+        private readonly Timer timer = new(3600000);
 
         public ShopRefreshTimer()
         {

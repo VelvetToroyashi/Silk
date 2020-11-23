@@ -14,13 +14,13 @@ namespace SilkBot.Commands.General
         [HelpDescription("Gives you the Oauth2 code to invite me to your server!")]
         public async Task Invite(CommandContext ctx)
         {
-            var Oauth2 = "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot";
+            var Oauth2 =
+                "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot";
             await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Gold)
-                .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!")
-                .WithFooter($"Silk ", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                                          .WithColor(DiscordColor.Gold)
+                                          .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!")
+                                          .WithFooter($"Silk ", ctx.Client.CurrentUser.AvatarUrl)
+                                          .WithTimestamp(DateTime.Now));
         }
-
     }
 }

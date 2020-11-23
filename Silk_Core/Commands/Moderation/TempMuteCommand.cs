@@ -37,7 +37,8 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
             if (!ctx.Member.HasPermission(Permissions.ManageRoles))
             {
-                DiscordMessage message = await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
+                DiscordMessage message =
+                    await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
                 await Task.Delay(10000);
                 await message.DeleteAsync();
                 return;
@@ -64,7 +65,8 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 await msg.DeleteAsync();
             }
 
-            var tempMute = new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(_duration), reason, (e) => OnMuteExpired((TimedInfraction)e));
+            var tempMute = new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(_duration), reason,
+                (e) => OnMuteExpired((TimedInfraction) e));
 
             EventService.Events.Add(tempMute);
 
@@ -74,8 +76,8 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
 
         private async void OnMuteExpired(TimedInfraction eventObject)
         {
-
-            DiscordMember unmuteMember = await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
+            DiscordMember unmuteMember =
+                await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
 
             GuildModel guild = DbFactory.CreateDbContext().Guilds
                                         .First(g => g.Id == eventObject.Guild);
@@ -84,8 +86,9 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);
         }
 
-        private TimeSpan GetTimeFromInput(string input) =>
-            input.ToLower()[^1] switch
+        private TimeSpan GetTimeFromInput(string input)
+        {
+            return input.ToLower()[^1] switch
             {
                 'm' => TimeSpan.FromMinutes(double.Parse(input[0..^1])),
                 'h' => TimeSpan.FromHours(double.Parse(input[0..^1])),
@@ -93,5 +96,6 @@ namespace SilkBot.Commands.Moderation.Temporary_Moderation
                 'w' => TimeSpan.FromDays(7 * double.Parse(input[0..^1])),
                 _ => TimeSpan.Zero
             };
+        }
     }
 }

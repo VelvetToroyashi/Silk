@@ -12,16 +12,15 @@ namespace SilkBot.Utilities
         public static IEnumerable<Type> GetAllCommandModules(Assembly asm)
         {
             return asm.GetTypes()
-                .Where(t => t.BaseType == typeof(BaseCommandModule) && !t.IsAbstract);
+                      .Where(t => t.BaseType == typeof(BaseCommandModule) && !t.IsAbstract);
         }
 
         public static IEnumerable<MethodInfo> GetAllCommands(Assembly asm)
         {
             return asm.GetTypes()
-                .Where(t => t.BaseType == typeof(BaseCommandModule))
-                .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttribute<CommandAttribute>() is not null);
+                      .Where(t => t.BaseType == typeof(BaseCommandModule))
+                      .SelectMany(t => t.GetMethods())
+                      .Where(m => m.GetCustomAttribute<CommandAttribute>() is not null);
         }
-
     }
 }

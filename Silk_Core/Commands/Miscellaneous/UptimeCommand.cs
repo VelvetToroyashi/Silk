@@ -19,6 +19,5 @@ namespace SilkBot.Commands.Miscellaneous
             TimeSpan uptime = now.Subtract(SilkBot.Bot.StartupTime);
             await ctx.RespondAsync($"Running for `{uptime.Humanize(4, null, TimeUnit.Month, TimeUnit.Second)}.`");
         }
-
     }
 }

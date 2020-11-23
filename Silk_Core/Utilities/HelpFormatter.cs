@@ -12,12 +12,12 @@ using DSharpPlus.Entities;
 using SilkBot.Extensions;
 
 namespace SilkBot.Utilities
-{ 
+{
     public class HelpFormatter : BaseHelpFormatter
     {
         public Command Command { get; private set; }
         public Command[] Subcommands { get; private set; }
-        
+
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Command = null;
@@ -47,17 +47,19 @@ namespace SilkBot.Utilities
 
 
                 IOrderedEnumerable<IGrouping<string, Command>> modules = Subcommands
-                                                                         .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                                                                         .GroupBy(x =>
+                                                                             x.Module.ModuleType
+                                                                              .GetCustomAttribute<CategoryAttribute>()
+                                                                              ?.Name)
                                                                          .Where(x => x.Key != null)
                                                                          .OrderBy(x => Categories.Order.IndexOf(x.Key));
                 foreach (IGrouping<string, Command> commands in modules)
-                {
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "), false);
-                }
             }
             else
             {
-                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority)
+                                                             .FirstOrDefault()?.Arguments;
                 var title = new StringBuilder($"Command `{Command.QualifiedName}");
                 foreach (CommandArgument arg in args)
                 {
@@ -65,6 +67,7 @@ namespace SilkBot.Utilities
                     title.Append(arg.Name);
                     title.Append(arg.IsOptional ? "]" : ">");
                 }
+
                 title.Append('`');
 
                 embed.WithTitle(title.ToString()).WithDescription(Command.Description);
@@ -74,18 +77,18 @@ namespace SilkBot.Utilities
                 else if (Command.IsHidden)
                     embed.AddField("👻 Hidden", "How did you find it?", true);
 
-                RequireUserPermissionsAttribute? userPerms = Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
+                RequireUserPermissionsAttribute? userPerms =
+                    Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
                 if (userPerms != null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())
                     embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
                 if (Subcommands != null)
-                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString(", "), true);
+                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString(", "),
+                        true);
             }
 
             return new CommandHelpMessage(null, embed.Build());
         }
     }
-
 }
-

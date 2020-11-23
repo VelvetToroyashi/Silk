@@ -13,7 +13,7 @@ namespace SilkBot.Utilities
     public class MemberConverter : IArgumentConverter<DiscordMember>
     {
         private static Regex UserRegex { get; } =
-            new Regex(@"^<@\!?(\d+?)>$", RegexOptions.ECMAScript | RegexOptions.Compiled);
+            new(@"^<@\!?(\d+?)>$", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
         public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
         {
@@ -36,7 +36,8 @@ namespace SilkBot.Utilities
             if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong uid))
             {
                 DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                Optional<DiscordMember> ret =
+                    result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
                 return ret;
             }
 
@@ -45,7 +46,8 @@ namespace SilkBot.Utilities
                 out uid))
             {
                 DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                Optional<DiscordMember> ret =
+                    result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
                 return ret;
             }
 
@@ -57,7 +59,8 @@ namespace SilkBot.Utilities
 
             IEnumerable<DiscordMember> us = ctx.Guild.Members.Values
                                                .Where(xm =>
-                                                   xm.Username.ToLowerInvariant() == un && (dv != null && xm.Discriminator == dv || dv == null)
+                                                   xm.Username.ToLowerInvariant() == un &&
+                                                   (dv != null && xm.Discriminator == dv || dv == null)
                                                    || xm.Nickname?.ToLowerInvariant() == value);
 
             DiscordMember? mbr = us.FirstOrDefault();

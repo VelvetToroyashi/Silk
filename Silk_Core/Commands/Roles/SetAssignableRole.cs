@@ -17,11 +17,16 @@ namespace SilkBot.Commands.Roles
     public class SetAssignableRole : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public SetAssignableRole(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
+        public SetAssignableRole(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         [Command("Assign")]
         [Aliases("sar", "selfassignablerole", "selfrole")]
-        [HelpDescription("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
+        [HelpDescription(
+            "Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
             GuildModel guild = _dbFactory.CreateDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
@@ -30,19 +35,17 @@ namespace SilkBot.Commands.Roles
                 await ctx.RespondAsync("Roles cannot be empty!");
                 return;
             }
-            if (!guild.Users.FirstOrDefault(u => u.Id == ctx.User.Id).Flags.HasFlag(Models.UserFlag.Staff))
-            {
+
+            if (!guild.Users.FirstOrDefault(u => u.Id == ctx.User.Id).Flags.HasFlag(UserFlag.Staff))
                 throw new InsufficientPermissionsException();
-            }
 
             var addedList = new List<string>();
             var removedList = new List<string>();
             var ebStringBuilder = new StringBuilder("Added Roles: ");
             foreach (DiscordRole role in roles)
-            {
                 if (!guild.SelfAssignableRoles.Any(r => r.RoleId == role.Id))
                 {
-                    guild.SelfAssignableRoles.Add(new Models.SelfAssignableRole { RoleId = role.Id });
+                    guild.SelfAssignableRoles.Add(new SelfAssignableRole {RoleId = role.Id});
                     addedList.Add(role.Mention);
                 }
 
@@ -51,35 +54,23 @@ namespace SilkBot.Commands.Roles
                     guild.SelfAssignableRoles.Remove(guild.SelfAssignableRoles.First(r => r.RoleId == role.Id));
                     removedList.Add(role.Mention);
                 }
-            }
 
             if (addedList.Any())
-            {
                 foreach (string addedRole in addedList)
-                {
                     ebStringBuilder.Append(addedRole);
-                }
-            }
             else
-            {
                 ebStringBuilder.Append("none");
-            }
 
             ebStringBuilder.AppendLine();
             ebStringBuilder.AppendLine("Removed Roles: " + (removedList.Any() ? "" : "none"));
 
-            foreach (string removedRole in removedList)
-            {
-                ebStringBuilder.Append(removedRole);
-            }
+            foreach (string removedRole in removedList) ebStringBuilder.Append(removedRole);
 
             await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                .WithDescription(ebStringBuilder.ToString())
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
-
-
+                                          .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                                          .WithDescription(ebStringBuilder.ToString())
+                                          .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                                          .WithTimestamp(DateTime.Now));
         }
     }
 }

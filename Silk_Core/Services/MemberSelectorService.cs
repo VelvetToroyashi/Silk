@@ -15,9 +15,13 @@ namespace SilkBot.Services
     {
         public async Task<DiscordUser> SelectUser(CommandContext ctx, IEnumerable<DiscordUser> users)
         {
-            DiscordEmbedBuilder selectorEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue).WithTitle("There are multiple people matching that name; which one do you want?").AddFooter(ctx);
-            string userString = string.Empty;
-            for (int i = 0; i < System.Math.Min(10, users.Count()); i++) userString += $"{i}: {users.ElementAt(i).Mention}\n";
+            DiscordEmbedBuilder selectorEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue)
+                                                                         .WithTitle(
+                                                                             "There are multiple people matching that name; which one do you want?")
+                                                                         .AddFooter(ctx);
+            var userString = string.Empty;
+            for (var i = 0; i < System.Math.Min(10, users.Count()); i++)
+                userString += $"{i}: {users.ElementAt(i).Mention}\n";
             selectorEmbed.WithDescription(userString);
             await ctx.RespondAsync(embed: selectorEmbed);
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
@@ -41,11 +45,18 @@ namespace SilkBot.Services
                             await ctx.RespondAsync("That's not a valid selection.");
                             continue;
                         }
-                        else return users.ElementAt(index);
+                        else
+                        {
+                            return users.ElementAt(index);
+                        }
                     }
                 }
-                else break;
+                else
+                {
+                    break;
+                }
             }
+
             return null;
         }
     }

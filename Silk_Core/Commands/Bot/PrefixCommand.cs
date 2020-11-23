@@ -19,9 +19,14 @@ namespace SilkBot.Commands.Bot
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
 
-        public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory) { _prefixCache = prefixCache; _dbFactory = dbFactory; }
+        public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _prefixCache = prefixCache;
+            _dbFactory = dbFactory;
+        }
 
-        [Command("setprefix"), RequireFlag(UserFlag.Staff)]
+        [Command("setprefix")]
+        [RequireFlag(UserFlag.Staff)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
@@ -33,7 +38,7 @@ namespace SilkBot.Commands.Bot
                 await ctx.RespondAsync(reason);
                 return;
             }
-            
+
             GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
@@ -44,16 +49,14 @@ namespace SilkBot.Commands.Bot
         private PrefixValidationResult IsValidPrefix(string prefix)
         {
             if (prefix.Length > PrefixMaxLength)
-            {
-                return new PrefixValidationResult { Reason = $"Prefix cannot be more than {PrefixMaxLength} characters!" };
-            }
+                return new PrefixValidationResult
+                    {Reason = $"Prefix cannot be more than {PrefixMaxLength} characters!"};
 
             if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase))
-            {
-                return new PrefixValidationResult { Reason = "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`" };
-            }
+                return new PrefixValidationResult
+                    {Reason = "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`"};
 
-            return new PrefixValidationResult { Valid = true };
+            return new PrefixValidationResult {Valid = true};
         }
 
         [Command("Prefix")]
@@ -61,7 +64,8 @@ namespace SilkBot.Commands.Bot
         {
             string prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
 
-            await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
+            await ctx.RespondAsync(
+                $"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }
 }

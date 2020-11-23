@@ -10,11 +10,32 @@ namespace SilkBot.Utilities
 {
     public class SCleanTypeParser : IArgumentConverter<SCleanType>
     {
-        private enum State { None, OnFlag, Busy, Errored }
+        private enum State
+        {
+            None,
+            OnFlag,
+            Busy,
+            Errored
+        }
 
-        private enum Flag { User, Images, Channel, Bots, Invites, Match, None }
+        private enum Flag
+        {
+            User,
+            Images,
+            Channel,
+            Bots,
+            Invites,
+            Match,
+            None
+        }
 
-        private enum ErrorState { InvalidParse, EndOfLine, Unknown, NotErrored }
+        private enum ErrorState
+        {
+            InvalidParse,
+            EndOfLine,
+            Unknown,
+            NotErrored
+        }
 
         private State _state = State.None;
         private State _lastState = State.None;
@@ -26,21 +47,19 @@ namespace SilkBot.Utilities
         public Task<Optional<SCleanType>> ConvertAsync(string value, CommandContext ctx)
         {
             string[] tokens = value.Split(' ');
-            while (index != tokens.Length)
-            { }
+            while (index != tokens.Length) { }
 
             return null;
         }
-
     }
 
     public class SCleanType
     {
-        public bool    Bots     { get; init; }
-        public bool    Images   { get; init; }
-        public bool    Invites  { get; init; }
-        public string  Matches  { get; init; }
-        public ulong[] Users    { get; init; }
+        public bool Bots { get; init; }
+        public bool Images { get; init; }
+        public bool Invites { get; init; }
+        public string Matches { get; init; }
+        public ulong[] Users { get; init; }
         public ulong[] Channels { get; init; }
     }
 }

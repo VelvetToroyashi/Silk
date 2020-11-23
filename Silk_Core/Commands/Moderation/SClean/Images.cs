@@ -13,18 +13,29 @@ namespace SilkBot.Commands.Moderation.SClean
     public partial class SCleanCommand
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public SCleanCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+
+        public SCleanCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [HelpDescription("Clean images from chat.")]
-        public async Task Images(CommandContext ctx, [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")] int amount = 10)
+        public async Task Images(CommandContext ctx,
+            [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")]
+            int amount = 10)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext() ;
+            using SilkDbContext db = _dbFactory.CreateDbContext();
 
             amount = amount > 99 ? 100 : ++amount;
             IEnumerable<DiscordMessage> images = await GetImages(ctx.Channel, amount);
-            if (images.Count() == 0) { await ctx.RespondAsync($"Failed to query images in the last {amount} messages."); return; }
+            if (images.Count() == 0)
+            {
+                await ctx.RespondAsync($"Failed to query images in the last {amount} messages.");
+                return;
+            }
+
             await ctx.RespondAsync($"Queried {images.Count()} images.");
 
             await ctx.Channel.DeleteMessagesAsync(images);
@@ -36,8 +47,10 @@ namespace SilkBot.Commands.Moderation.SClean
         {
             IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync(messageScanCount);
             var @return = new List<DiscordMessage>();
-            IEnumerable<DiscordMessage> rawImageMessages = messages.Where(m => m.Attachments.Count > 0 && m.Attachments.Select(a => a.Width).Any(w => w > 0));
-            IEnumerable<DiscordMessage> linkImageMessages = messages.Where(m => m.Embeds.Select(e => e.Type).Where(t => t == "image").Count() > 0);
+            IEnumerable<DiscordMessage> rawImageMessages = messages.Where(m =>
+                m.Attachments.Count > 0 && m.Attachments.Select(a => a.Width).Any(w => w > 0));
+            IEnumerable<DiscordMessage> linkImageMessages =
+                messages.Where(m => m.Embeds.Select(e => e.Type).Where(t => t == "image").Count() > 0);
             @return.AddRange(rawImageMessages);
             @return.AddRange(linkImageMessages);
             return @return;

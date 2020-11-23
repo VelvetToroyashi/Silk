@@ -13,7 +13,8 @@ namespace SilkBot.Utilities
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly ILogger<GuildConfigCacheService> _logger;
 
-        public GuildConfigCacheService(IMemoryCache cache, IDbContextFactory<SilkDbContext> dbFactory, ILogger<GuildConfigCacheService> logger)
+        public GuildConfigCacheService(IMemoryCache cache, IDbContextFactory<SilkDbContext> dbFactory,
+            ILogger<GuildConfigCacheService> logger)
         {
             _cache = cache;
             _dbFactory = dbFactory;
@@ -36,11 +37,14 @@ namespace SilkBot.Utilities
                 _logger.LogError("Expected value 'Guild' from databse, received null isntead.");
                 return default;
             }
-            var guildConfig = new GuildConfiguration(config.WhitelistInvites, config.BlacklistWords, config.AutoDehoist, config.GreetMembers, config.MuteRoleId, config.MessageEditChannel, config.GeneralLoggingChannel, config.GreetingChannel);
-            _cache.CreateEntry(guildId).SetValue(guildConfig).SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
+
+            var guildConfig = new GuildConfiguration(config.WhitelistInvites, config.BlacklistWords, config.AutoDehoist,
+                config.GreetMembers, config.MuteRoleId, config.MessageEditChannel, config.GeneralLoggingChannel,
+                config.GreetingChannel);
+            _cache.CreateEntry(guildId).SetValue(guildConfig)
+                  .SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
             return guildConfig;
         }
-
     }
 
     public struct GuildConfiguration
@@ -58,7 +62,7 @@ namespace SilkBot.Utilities
         public List<WhiteListedLink> WhiteListedLinks { get; }
 
         public GuildConfiguration
-            (
+        (
             bool whiteListsInvites = default,
             bool wordBlacklistEnabled = default,
             bool autoDehoistEnabled = default,
@@ -67,7 +71,7 @@ namespace SilkBot.Utilities
             ulong? messageEditChannel = default,
             ulong? loggingChannel = default,
             ulong? greetingChannel = default
-            )
+        )
         {
             WhitelistsInvites = whiteListsInvites;
             WordBlacklistEnabled = wordBlacklistEnabled;
@@ -81,5 +85,4 @@ namespace SilkBot.Utilities
             WhiteListedLinks = new List<WhiteListedLink>();
         }
     }
-
 }

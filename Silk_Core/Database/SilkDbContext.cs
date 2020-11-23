@@ -7,8 +7,8 @@ namespace SilkBot
 {
     public class SilkDbContext : DbContext
     {
-
         public DbSet<GuildModel> Guilds { get; set; }
+
         public DbSet<TicketModel> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
 
@@ -31,9 +31,8 @@ namespace SilkBot
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
             builder.Entity<UserModel>().HasOne(g => g.Guild);
-            
+
             builder.Entity<UserInfractionModel>().HasIndex(a => new {a.GuildId, a.UserId});
 
             builder.Entity<GuildModel>().Property(g => g.Id).ValueGeneratedNever();
@@ -43,9 +42,9 @@ namespace SilkBot
             builder.Entity<BlackListedWord>().HasOne(_ => _.Guild).WithMany(g => g.BlackListedWords);
             //builder.Entity<UserInfractionModel>().HasOne(i => i.User);
             builder.Entity<TicketResponderModel>().HasNoKey();
-            builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel).WithMany(ticket => ticket.History);
+            builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel)
+                   .WithMany(ticket => ticket.History);
             base.OnModelCreating(builder);
         }
     }
-    
 }

@@ -8,7 +8,6 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Bot
 {
-
     [Category(Categories.Bot)]
     public class Restart : BaseCommandModule
     {
@@ -19,12 +18,12 @@ namespace SilkBot.Commands.Bot
             await ctx.Client.UpdateStatusAsync(userStatus: UserStatus.DoNotDisturb);
             await ctx.RespondAsync(embed:
                 new DiscordEmbedBuilder()
-                .WithTitle("Restart command recieved!")
-                .WithDescription("Restarting... Commands will be processed when status is green.")
-                .WithColor(new DiscordColor("#29ff29"))
-                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now)
-                );
+                    .WithTitle("Restart command recieved!")
+                    .WithDescription("Restarting... Commands will be processed when status is green.")
+                    .WithColor(new DiscordColor("#29ff29"))
+                    .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+                    .WithTimestamp(DateTime.Now)
+            );
             SilkBot.Bot.Instance.SilkDBContext.SaveChanges();
 
             Process.Start(@"C:\Users\Cinnamon\Desktop\Restart Bot.bat");

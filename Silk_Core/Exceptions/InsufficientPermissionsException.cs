@@ -2,7 +2,5 @@
 
 namespace SilkBot.Exceptions
 {
-    public sealed class InsufficientPermissionsException : Exception
-    {
-    }
+    public sealed class InsufficientPermissionsException : Exception { }
 }

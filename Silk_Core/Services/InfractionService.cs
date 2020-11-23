@@ -14,8 +14,8 @@ namespace SilkBot.Services
     {
         private readonly ILogger<InfractionService> _logger;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new ConcurrentQueue<UserInfractionModel>();
-        private readonly Timer _queueDrainTimer = new Timer(30000);
+        private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new();
+        private readonly Timer _queueDrainTimer = new(30000);
 
         public InfractionService(ILogger<InfractionService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
@@ -29,16 +29,15 @@ namespace SilkBot.Services
         {
             if (!_infractionQueue.IsEmpty)
             {
-
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
 
                 while (_infractionQueue.TryDequeue(out UserInfractionModel infraction))
                 {
                     GuildModel guild = db.Guilds.First(g => g.Id == infraction.GuildId);
-                    UserModel user = guild.Users.FirstOrDefault(u => u.Id == infraction.UserId); 
-                    if(user is null)
+                    UserModel user = guild.Users.FirstOrDefault(u => u.Id == infraction.UserId);
+                    if (user is null)
                     {
-                        user = new UserModel { Flags = UserFlag.KickedPrior, Id = infraction.UserId, Guild = guild};
+                        user = new UserModel {Flags = UserFlag.KickedPrior, Id = infraction.UserId, Guild = guild};
                         user.Infractions.Add(infraction);
                         await db.Users.AddAsync(user);
                         int changed = await db.SaveChangesAsync();
@@ -51,13 +50,16 @@ namespace SilkBot.Services
                         int changed = await db.SaveChangesAsync();
                         if (changed is 0) _logger.LogWarning("Expected to log [1] entity, but saved [0]");
                     }
-                   
                 }
-                _logger.LogDebug("Drained infraction queue.");  
+
+                _logger.LogDebug("Drained infraction queue.");
             }
         }
 
-        public void QueueInfraction(UserInfractionModel infraction) => _infractionQueue.Enqueue(infraction);
+        public void QueueInfraction(UserInfractionModel infraction)
+        {
+            _infractionQueue.Enqueue(infraction);
+        }
 
 
         public IEnumerable<UserInfractionModel> GetInfractions(ulong userId)
@@ -66,8 +68,5 @@ namespace SilkBot.Services
             UserModel user = db.Users.Include(u => u.Infractions).FirstOrDefault(u => u.Id == userId);
             return user?.Infractions;
         }
-
-
-
     }
 }
