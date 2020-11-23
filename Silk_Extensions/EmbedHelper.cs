@@ -1,6 +1,6 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using System;
 
 namespace SilkBot.Extensions
 {

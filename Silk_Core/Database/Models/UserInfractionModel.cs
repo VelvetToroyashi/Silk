@@ -1,5 +1,5 @@
-﻿using SilkBot.Commands.Moderation.Utilities;
-using System;
+﻿using System;
+using SilkBot.Commands.Moderation.Utilities;
 
 namespace SilkBot.Models
 {

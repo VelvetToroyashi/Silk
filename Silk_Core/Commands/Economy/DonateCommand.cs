@@ -1,14 +1,13 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
-using SilkBot.Extensions;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy
@@ -37,6 +36,12 @@ namespace SilkBot.Commands.Economy
             {
                 await ctx.RespondAsync($"Hmm. Seems like neither of you have an account here. Go ahead and do `{ctx.Prefix}daily` for me and I'll give you some cash to send to your friend *:)*");
                 return;
+            }
+
+            if (receiver is null)
+            {
+                receiver = new GlobalUserModel {Id = recipient.Id};
+                db.GlobalUsers.Add(receiver);
             }
 
             if (receiver == sender)             await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");

@@ -1,9 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
@@ -32,7 +32,7 @@ namespace SilkBot.Commands.Miscellaneous
             {
                 await target.ModifyAsync(t => t.Nickname = nick);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await ctx.RespondAsync("Could not set nickname!");
                 _logger.LogWarning($"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");

@@ -1,4 +1,8 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -8,10 +12,6 @@ using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Tools;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Moderation.Ban
 {
@@ -50,8 +50,8 @@ namespace SilkBot.Commands.Moderation.Ban
                 var guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
                 UserModel bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
-                string? formattedBanReason = Utilities.InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
-                UserInfractionModel? infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
+                string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned", banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
+                UserInfractionModel infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
                     bannedUser = new UserModel() { Infractions = new List<UserInfractionModel>() };
@@ -65,17 +65,18 @@ namespace SilkBot.Commands.Moderation.Ban
                     embed.WithColor(DiscordColor.Green);
                     await ctx.Guild.GetChannel(guild.GeneralLoggingChannel).SendMessageAsync(embed: embed);
                 }
-                EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration), reason, (e) => OnBanExpiration((TimedInfraction)e)));
+                EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration), reason, (e) => _ = OnBanExpiration((TimedInfraction)e)));
             }
         }
 
-        private async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed, BanFailureReason reason)
+        private static async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed, BanFailureReason reason)
         {
             embed.WithDescription(reason.FailureReason.Replace("$user", user.Mention));
             embed.WithColor(DiscordColor.Red);
             await ctx.RespondAsync(embed: embed);
         }
-        private UserInfractionModel CreateInfraction(string reason, ulong enforcerId, DateTime infractionTime)
+
+        private static UserInfractionModel CreateInfraction(string reason, ulong enforcerId, DateTime infractionTime)
         {
             return new UserInfractionModel
             {
@@ -93,7 +94,7 @@ namespace SilkBot.Commands.Moderation.Ban
         /// <param name="caller">The member that's executing the command</param>
         /// <param name="recipient">The member to be banned.</param>
         /// <returns>A <see cref="BanFailureReason"></see> if some check fails, else null.</returns>
-        private BanFailureReason CanBan(DiscordMember bot, DiscordMember caller, DiscordMember recipient)
+        private static BanFailureReason CanBan(DiscordMember bot, DiscordMember caller, DiscordMember recipient)
         {
 
 
@@ -111,7 +112,7 @@ namespace SilkBot.Commands.Moderation.Ban
             else return null;
         }
 
-        private TimeSpan GetTimeFromInput(string input) =>
+        private static TimeSpan GetTimeFromInput(string input) =>
             input.Contains('d') ?
                 double.TryParse(input[0..^1], out var dur) ?
             TimeSpan.FromDays(dur) :

@@ -1,4 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
@@ -6,23 +10,22 @@ using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SilkBot.Commands.Miscellaneous
 {
     [Category(Categories.Misc)]
     [Group("changelog")]
-    public class ChangelogCommand : CommandClass
+    public class ChangelogCommand : BaseCommandModule
     {
-        public ChangelogCommand(IDbContextFactory<SilkDbContext> _db) : base(_db) { }
+        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
         [GroupCommand]
         public async Task GetChangeLog(CommandContext ctx)
         {
-            var db = GetDbContext();
+            var db = _dbFactory.CreateDbContext();
+            if (db.ChangeLogs.Count() is 0) return;
+
             var embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
             await ctx.RespondAsync(embed: embed);
         }
@@ -31,7 +34,7 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
         {
             var changelog = CreateChangelog(options);
-            var db = new Lazy<SilkDbContext>(() => GetDbContext());
+            var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
             var clMessage = await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
             var embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
             if (embedAccepted)
@@ -43,7 +46,7 @@ namespace SilkBot.Commands.Miscellaneous
             }
         }
 
-        private async ValueTask<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
+        private static async ValueTask<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
         {
             var creationService = context.Services.Get<DiscordEmojiCreationService>();
             IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
@@ -56,7 +59,8 @@ namespace SilkBot.Commands.Miscellaneous
             if (result.TimedOut) return false;
             return result.Result.Emoji == confirm;
         }
-        private Changelog CreateChangelog(string cl)
+
+        private static Changelog CreateChangelog(string cl)
         {
             var delimiter = "|";
             string[] splitOptions = cl.Split(delimiter);
@@ -86,19 +90,20 @@ namespace SilkBot.Commands.Miscellaneous
             };
         }
 
-        private DiscordEmbed BuildChangeLog(Changelog cl)
+        private static DiscordEmbed BuildChangeLog(Changelog cl)
         {
             var embed = new DiscordEmbedBuilder();
             embed
                 .WithTitle($"Changes in version {cl.Version}")
                 .WithColor(new DiscordColor("#832fd6"))
                 .AddField("Added:", cl.Additions)
-                .AddField("Fixed/Removed:", cl.Removals.Count() < 1 ? "No information given." : cl.Removals)
+                .AddField("Fixed/Removed:", cl.Removals.Length < 1 ? "No information given." : cl.Removals)
                 .AddField("Contributers:", $"Changes created by these contributers: {cl.Authors}")
                 .WithFooter($"Silk! | Change authored: {cl.Time:MMM d, yyyy}");
             return embed;
         }
-        private DiscordEmbed BuildChangeLog(ChangelogModel cl)
+
+        private static DiscordEmbed BuildChangeLog(ChangelogModel cl)
         {
             var embed = new DiscordEmbedBuilder();
             embed

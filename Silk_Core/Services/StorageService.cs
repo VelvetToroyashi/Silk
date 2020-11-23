@@ -1,8 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Models;
-using System;
-using System.Linq;
 
 namespace SilkBot.Services
 {
@@ -22,7 +21,7 @@ namespace SilkBot.Services
         }
 
 
-        public UserModel GetUserById(GuildModel guild, ulong userId) => guild.Users.FirstOrDefault(u => u.Id == userId);
+        public static UserModel GetUserById(GuildModel guild, ulong userId) => guild.Users.FirstOrDefault(u => u.Id == userId);
         public UserModel GetUserById(Func<GuildModel, bool> guild, ulong userId)
         {
             using var db = _dbFactory.CreateDbContext();
@@ -30,7 +29,7 @@ namespace SilkBot.Services
         }
 
 
-        public UserModel GetUser(GuildModel guild, UserModel userId) => guild.Users.FirstOrDefault(u => u.Id == userId.Id);
+        public static UserModel GetUser(GuildModel guild, UserModel userId) => guild.Users.FirstOrDefault(u => u.Id == userId.Id);
         public UserModel GetUser(Func<GuildModel, bool> guild, Func<UserModel, bool> user)
         {
             using var db = _dbFactory.CreateDbContext();

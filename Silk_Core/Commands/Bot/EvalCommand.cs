@@ -1,10 +1,8 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using SilkBot.Utilities;
 
 
@@ -16,8 +14,8 @@ namespace SilkBot.Commands.Bot
         [Command("Eval"), RequireOwner()]
         public async Task Eval(CommandContext ctx, [RemainingText] string code) 
         {
-            
-            await ctx.Message.DeleteAsync();
+
+            //await ctx.Message.DeleteAsync();
             try
             {
                 object o = CSharpScript.EvaluateAsync(code, globals: new Globals() with { ctx = ctx }).ConfigureAwait(false);

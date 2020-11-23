@@ -1,4 +1,10 @@
 ﻿#region Usings
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
@@ -11,13 +17,6 @@ using SilkBot.Commands.Bot;
 using SilkBot.Extensions;
 using SilkBot.Services;
 using SilkBot.Utilities;
-using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SilkBot
 {
@@ -32,22 +31,28 @@ namespace SilkBot
         public static Stopwatch CommandTimer { get; } = new Stopwatch();
         public SilkDbContext SilkDBContext { get; private set; }
         public Task ShutDownTask { get => ShutDownTask; set { if (ShutDownTask is not null) return; } }
-        private IServiceProvider _services;
 
 
         public CommandsNextConfiguration Commands { get; private set; }
 
         #endregion
-        private ILogger<Bot> _logger;
+        private readonly IServiceProvider _services;
+        private readonly ILogger<Bot> _logger;
+        private readonly BotEventHelper _eventHelper;
+        private readonly PrefixCacheService _prefixService;
         private readonly Stopwatch _sw = new Stopwatch();
 
-        public Bot(IServiceProvider services, DiscordShardedClient client)
+        public Bot(IServiceProvider services, DiscordShardedClient client,
+            ILogger<Bot> logger, BotEventHelper eventHelper, PrefixCacheService prefixService,
+            MessageCreationHandler msgHandler, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _sw.Start();
             _services = services;
-            _logger = _services.Get<ILogger<Bot>>();
-            client.MessageCreated += services.Get<MessageCreationHandler>().OnMessageCreate;
-            SilkDBContext = _services.Get<IDbContextFactory<SilkDbContext>>().CreateDbContext(); // Anti-pattern according to some, but it might work. //
+            _logger = logger;
+            _eventHelper = eventHelper;
+            _prefixService = prefixService;
+            client.MessageCreated += msgHandler.OnMessageCreate;
+            SilkDBContext = dbFactory.CreateDbContext();
             Instance = this;
             Client = client;
             
@@ -87,9 +92,11 @@ namespace SilkBot
 
         private async Task InitializeClientAsync()
         {
-            _services.Get<BotEventHelper>().CreateHandlers();
+            _eventHelper.CreateHandlers();
             await Client.StartAsync();
-            Commands = new CommandsNextConfiguration { PrefixResolver = _services.Get<PrefixCacheService>().PrefixDelegate, Services = _services };
+
+            Commands = new CommandsNextConfiguration { PrefixResolver = _prefixService.PrefixDelegate, Services = _services, IgnoreExtraArguments = true };
+
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,

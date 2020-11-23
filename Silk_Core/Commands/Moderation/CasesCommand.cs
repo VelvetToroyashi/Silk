@@ -1,17 +1,17 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
+using JetBrains.Annotations;
 using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
-using DSharpPlus.CommandsNext.Attributes;
 
 namespace SilkBot.Commands.Moderation
 {

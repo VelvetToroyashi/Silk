@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SilkBot.Extensions;
-using SilkBot.Models;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using SilkBot.Extensions;
+using SilkBot.Models;
 
 namespace SilkBot.Services
 {
@@ -21,7 +21,7 @@ namespace SilkBot.Services
         {
             _logger = logger;
             _dbFactory = dbFactory;
-            _queueDrainTimer.Elapsed += (_, _) => DrainTimerElapsed();
+            _queueDrainTimer.Elapsed += (_, _) => _ = DrainTimerElapsed();
             _queueDrainTimer.Start();
         }
 

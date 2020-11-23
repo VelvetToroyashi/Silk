@@ -1,7 +1,7 @@
-﻿using ConcurrentCollections;
-using System;
+﻿using System;
 using System.Linq;
 using System.Timers;
+using ConcurrentCollections;
 
 namespace SilkBot.Tools
 {
@@ -9,7 +9,7 @@ namespace SilkBot.Tools
     {
         public ConcurrentHashSet<ITimedEvent> Events { get; } = new ConcurrentHashSet<ITimedEvent>();
 
-        private Timer _timer = new Timer(60000);
+        private readonly Timer _timer = new Timer(60000);
 
         public TimedEventService()
         {
