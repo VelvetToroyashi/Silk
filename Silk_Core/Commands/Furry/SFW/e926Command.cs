@@ -57,7 +57,7 @@ namespace SilkBot.Commands.Furry.SFW
                                             .AddField("Score:", post.Score.Total.ToString())
                                             .WithColor(DiscordColor.PhthaloBlue)
                                             .WithImageUrl(post.File.Url)
-                                            .WithFooter("Limit: 10 img / 10 sec");
+                                            .WithFooter("Limit: 7 img / 15 sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }

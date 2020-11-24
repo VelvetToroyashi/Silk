@@ -18,9 +18,12 @@ namespace SilkBot.Commands.Furry.NSFW
     [Cooldown(1, 10, CooldownBucketType.User)]
     public class e621Command : eBooruBaseCommand
     {
-        public e621Command(HttpClient client) : base(client)
+        private readonly BotConfig _config;
+        public e621Command(HttpClient client, BotConfig config) : base(client)
         {
             baseUrl = "https://e621.net/posts.json?tags=";
+            _config = config;
+            this.username = _config.e621Username;
         }
 
         [Command("e621")]
@@ -40,7 +43,12 @@ namespace SilkBot.Commands.Furry.NSFW
                 return;
             }
 
-            eBooruPostResult result = await DoQueryAsync(query);
+            eBooruPostResult result;
+            
+            if (this.username is null)
+                result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
+            else result = await this.DoKeyedQueryAsync(query, _config.e621APIKey, true);
+            
             if (result is null || result.Posts.Count is 0)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
@@ -59,7 +67,7 @@ namespace SilkBot.Commands.Furry.NSFW
                                                 GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
                                                 "No source available")
                                             .WithColor(DiscordColor.PhthaloBlue).WithImageUrl(post.File.Url)
-                                            .WithFooter("Limit: 7 img / 30sec");
+                                            .WithFooter("Limit: 10 img / 10sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }

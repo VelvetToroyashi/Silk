@@ -60,7 +60,7 @@ namespace SilkBot.Utilities
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            if (e.Exception is not CommandNotFoundException)
+            if (e.Exception is not CommandNotFoundException or Exception)
             {
                 if (e.Exception.Message is "Could not find a suitable overload for the command.") return;
                 if (e.Exception is ArgumentException ex)
@@ -87,7 +87,6 @@ namespace SilkBot.Utilities
                                     $"You're a bit too fast! Come back in {cooldown.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}");
                                 break;
                         }
-                else await e.Context.RespondAsync($"See {e.Context.Prefix}help {e.Command.Name} for usage.");
 
                 _logger.LogWarning(e.Exception, "");
             }

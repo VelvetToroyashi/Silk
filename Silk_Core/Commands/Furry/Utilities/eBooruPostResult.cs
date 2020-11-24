@@ -128,7 +128,8 @@ namespace SilkBot.Commands.Furry.Utilities
         Gif,
         Jpg,
         Png,
-        Webm
+        Webm,
+        Swf
     };
 
     public enum Rating

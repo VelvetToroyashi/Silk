@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -58,8 +62,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// <param name="apiKey">The API key.</param>
         /// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult> DoKeyedQueryAsync(string query, string apiKey,
-            bool requireUsername = false)
+        private protected async Task<eBooruPostResult> DoKeyedQueryAsync(string query, string apiKey, bool requireUsername = false)
         {
             if (requireUsername)
                 _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
@@ -67,16 +70,14 @@ namespace SilkBot.Commands.Furry.Utilities
 
 
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
+            var credentials = new NetworkCredential(username, apiKey);
 
-            request.Headers.Add("api_key", apiKey);
-
-            if (requireUsername) request.Headers.Add("login", username);
-
-
+            var cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
+            request.Headers.Add("Authorization",$"Basic {Convert.ToBase64String(cred)}");
             string result = await _client.Send(request).Content.ReadAsStringAsync();
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
 
-            for (var i = 0; i < posts.Posts.Count; i++)
+            for (var i = 0; i < posts.Posts.Count; ++i)
                 if (posts.Posts[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);
             // Still remove blank posts even after authenticating, in case they're blacklisted. //
