@@ -1,4 +1,4 @@
-﻿#region Usings
+#region Usings
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -55,7 +56,7 @@ namespace SilkBot
         private readonly BotEventHelper _eventHelper;
         private readonly PrefixCacheService _prefixService;
         private readonly Stopwatch _sw = new();
-
+        private volatile Task _task = new Task(() => Task.Delay(-1));
         public Bot(IServiceProvider services, DiscordShardedClient client,
             ILogger<Bot> logger, BotEventHelper eventHelper, PrefixCacheService prefixService,
             MessageCreationHandler msgHandler, IDbContextFactory<SilkDbContext> dbFactory)
@@ -90,7 +91,7 @@ namespace SilkBot
 
             InitializeCommands();
 
-            await Task.Delay(-1);
+            await _task;
         }
 
         private void InitializeCommands()
@@ -138,11 +139,13 @@ namespace SilkBot
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await RunBotAsync();
+
+            RunBotAsync();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            _task = Task.CompletedTask;
             await Client.StopAsync();
         }
 
