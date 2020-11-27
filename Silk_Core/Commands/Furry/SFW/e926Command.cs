@@ -12,7 +12,6 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Furry.SFW
 {
-    [UsedImplicitly]
     [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Cooldown(1, 15, CooldownBucketType.User)]

@@ -15,7 +15,6 @@ using SilkBot.Services;
 
 namespace SilkBot.Commands.Moderation
 {
-    [UsedImplicitly]
     public class CasesCommand : BaseCommandModule
     {
         private readonly InfractionService _infractionService;

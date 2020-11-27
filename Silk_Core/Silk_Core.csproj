@@ -73,9 +73,6 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.11" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
@@ -109,6 +106,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\DSharpPlus\DSharpPlus.Interactivity\DSharpPlus.Interactivity.csproj" />
     <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
   </ItemGroup>
 

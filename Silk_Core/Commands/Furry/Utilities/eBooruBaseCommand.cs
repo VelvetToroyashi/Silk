@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -70,14 +71,14 @@ namespace SilkBot.Commands.Furry.Utilities
 
 
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
-            var credentials = new NetworkCredential(username, apiKey);
 
             var cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
             request.Headers.Add("Authorization",$"Basic {Convert.ToBase64String(cred)}");
+            // TODO: Log if API key is rejected.
             string result = await _client.Send(request).Content.ReadAsStringAsync();
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
-
-            for (var i = 0; i < posts.Posts.Count; ++i)
+            
+            for (var i = 0; i < posts.Posts.Count; i++)
                 if (posts.Posts[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);
             // Still remove blank posts even after authenticating, in case they're blacklisted. //

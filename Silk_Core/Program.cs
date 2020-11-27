@@ -36,20 +36,21 @@ namespace SilkBot
         {
             return Host.CreateDefaultBuilder(args)
                        .UseConsoleLifetime()
-                       .ConfigureAppConfiguration((context, configuration) =>
+                       .ConfigureAppConfiguration((_, configuration) =>
                        {
+                           
                            configuration.SetBasePath(Directory.GetCurrentDirectory());
                            configuration.AddJsonFile("appSettings.json", true, false);
                            configuration.AddUserSecrets<Program>(true, false);
                        })
-                       .ConfigureLogging((context, builder) => Log.Logger = new LoggerConfiguration()
+                       .ConfigureLogging((_, _) => Log.Logger = new LoggerConfiguration()
                                                                             .WriteTo.Console(
                                                                                 outputTemplate:
                                                                                 "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
                                                                                 theme: SerilogThemes.Bot)
                                                                             .MinimumLevel.Override("Microsoft",
                                                                                 LogEventLevel.Warning)
-                                                                            .MinimumLevel.Verbose()
+                                                                            .MinimumLevel.Debug()
                                                                             .CreateLogger())
                        .ConfigureServices((context, services) =>
                        {

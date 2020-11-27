@@ -17,7 +17,6 @@ using SilkBot.Utilities;
 namespace SilkBot.Commands.Moderation
 {
     [Category(Categories.Mod)]
-    [UsedImplicitly]
     public class KickCommand : BaseCommandModule
     {
         private readonly ILogger<KickCommand> _logger;

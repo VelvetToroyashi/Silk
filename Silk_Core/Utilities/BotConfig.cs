@@ -1,18 +1,20 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace SilkBot.Utilities
 {
     public record BotConfig
     {
         // Took them out; they make no sense. //
-        internal string e621APIKey      { get; init; }
-        internal string e621Username    { get; init; }
-        
+        internal KeyValuePair<string, string> e6API { get; init; }
+
 
         public BotConfig(IConfiguration c)
         {
-            e621APIKey = c.GetSection("API_Keys")["e621_Key"];
-            e621Username = c.GetSection("API_Keys")["e621_User"];
+            var e6k = c.GetSection("API_Keys")["e621:key"];
+            var e6u = c.GetSection("API_Keys")["e621:user"];
+            e6API = new KeyValuePair<string, string>(e6k, e6u);
+
         }
     }
 }

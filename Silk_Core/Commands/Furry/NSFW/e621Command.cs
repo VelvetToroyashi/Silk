@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -12,18 +13,19 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Furry.NSFW
 {
-    [UsedImplicitly]
+
     [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Cooldown(1, 10, CooldownBucketType.User)]
     public class e621Command : eBooruBaseCommand
     {
+        
         private readonly BotConfig _config;
         public e621Command(HttpClient client, BotConfig config) : base(client)
         {
             baseUrl = "https://e621.net/posts.json?tags=";
             _config = config;
-            this.username = _config.e621Username;
+            this.username = _config.e6API.Value;
         }
 
         [Command("e621")]
@@ -32,6 +34,7 @@ namespace SilkBot.Commands.Furry.NSFW
         [RequireNsfw]
         public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string query = null)
         {
+
             if (query?.Split().Length > 5)
             {
                 await ctx.RespondAsync("You can search 5 tags at a time!");
@@ -47,7 +50,7 @@ namespace SilkBot.Commands.Furry.NSFW
             
             if (this.username is null)
                 result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
-            else result = await this.DoKeyedQueryAsync(query, _config.e621APIKey, true);
+            else result = await this.DoKeyedQueryAsync(query, this.username, true);
             
             if (result is null || result.Posts.Count is 0)
             {
