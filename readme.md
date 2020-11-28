@@ -1,8 +1,7 @@
 # Silk! 
 Silk is a simple, and, for the most part efficient Discord bot written in C#, with the aid of DSharpPlus for Discord API wrapping. The goal of Silk! is be not only a great bot, but fill in the gaps that certain bots have. A bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk! also large guilds in mind. Feel free to join the [Silk! server](https://discord.gg/HZfZb95) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot)
 
-![Code Quality](https://www.code-inspector.com/project/16577/status/svg)
-
+![Code Quality](https://www.code-inspector.com/project/16577/status/svg) [![CodeFactor](https://www.codefactor.io/repository/github/velvetthepanda/silkbot/badge)](https://www.codefactor.io/repository/github/velvetthepanda/silkbot)
 <br/>
 
 ---
