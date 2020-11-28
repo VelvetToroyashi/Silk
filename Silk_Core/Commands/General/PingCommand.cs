@@ -19,7 +19,7 @@ namespace SilkBot.Commands.General
         {
             _dbFactory = dbFactory;
         }
-
+        
         [Command("Ping")]
         public async Task Ping(CommandContext ctx)
         {

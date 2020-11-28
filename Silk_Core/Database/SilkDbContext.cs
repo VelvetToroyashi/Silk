@@ -14,7 +14,8 @@ namespace SilkBot
 
         public DbSet<Foobar> Foobars { get; set; }
         public DbSet<ChangelogModel> ChangeLogs { get; set; }
-
+        
+        public DbSet<ItemModel> Items { get; set; }
         /// <summary>
         /// Users on a guild level; holds information and states that reflect such.
         /// </summary>P

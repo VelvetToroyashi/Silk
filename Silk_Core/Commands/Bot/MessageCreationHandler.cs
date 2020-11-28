@@ -31,11 +31,8 @@ namespace SilkBot.Commands.Bot
         {
             //Bots shouldn't be running commands.    
             if (e.Author.IsBot)
-            {
-                CommandTimer.Stop();
                 return;
-            }
-
+            
             _ = Task.Run(async () =>
             {
                 //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
@@ -58,16 +55,15 @@ namespace SilkBot.Commands.Bot
                     }
 
                     GuildConfiguration config = await _guildCache.GetConfigAsync(e.Guild.Id);
-                    CommandTimer.Restart();
-                    var sw = Stopwatch.StartNew();
+
                     CheckForInvite(e, config);
-                    sw.Stop();
-                    _logger.LogInformation($"Checked for information in {sw.ElapsedMilliseconds} ms.");
+
+                    
                 }
 
                 if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
                     await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
-                CommandTimer.Stop();
+                
             });
         }
 

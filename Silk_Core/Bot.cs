@@ -33,20 +33,10 @@ namespace SilkBot
         public DiscordShardedClient Client { get; set; }
         public static Bot Instance { get; private set; }
         public static DateTime StartupTime { get; } = DateTime.Now;
-        public static string SilkDefaultCommandPrefix { get; } = "!";
+        public static string SilkDefaultCommandPrefix { get; } = "s!";
         public static Stopwatch CommandTimer { get; } = new();
         public SilkDbContext SilkDBContext { get; private set; }
-
-        public Task ShutDownTask
-        {
-            get => ShutDownTask;
-            set
-            {
-                if (ShutDownTask is not null) return;
-            }
-        }
-
-
+        
         public CommandsNextConfiguration Commands { get; private set; }
 
         #endregion

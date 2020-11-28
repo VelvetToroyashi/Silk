@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using SilkBot.Utilities;
@@ -37,7 +38,7 @@ namespace SilkBot.Commands.Bot
                                                     .WithColor(new DiscordColor("#FF007F"))
                                                     .WithDescription("Evaluating...")
                                                     .Build()).ConfigureAwait(false);
-
+                
             try
             {
                 var globals = new TestVariables(ctx.Message, ctx.Client, ctx);
@@ -71,6 +72,7 @@ namespace SilkBot.Commands.Bot
             {
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder
                 {
+                    
                     Title = "Evaluation Failure",
                     Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
                     Color = new DiscordColor("#FF0000")

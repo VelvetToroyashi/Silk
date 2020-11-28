@@ -1,12 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Economy.Shop.Items;
 
 namespace SilkBot.Commands.Miscellaneous
 {
     public class InventoryCommand : BaseCommandModule
     {
+        public static Dictionary<ulong, List<IBaseItem>> items = new();
+        
         [Command]
         public async Task Inventory(CommandContext ctx)
         {

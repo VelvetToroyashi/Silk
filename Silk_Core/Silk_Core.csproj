@@ -36,6 +36,7 @@
     <None Remove="config\**" />
     <None Remove="Migrations\**" />
     <None Remove="Silk!\**" />
+    <Compile Remove="Utilities\ICopyable.cs" />
   </ItemGroup>
 
   <ItemGroup>

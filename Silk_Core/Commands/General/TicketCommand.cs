@@ -207,7 +207,7 @@ namespace SilkBot.Commands.General
 
             [Command("List")]
             [RequireRoles(RoleCheckMode.Any, "Silk Contributor")]
-            [RequireGuild()]
+            [RequireGuild]
             public async Task ListTickets(CommandContext ctx, int Id)
             {
                 using SilkDbContext db = GetDbContext();
