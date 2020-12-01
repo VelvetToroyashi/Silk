@@ -11,46 +11,54 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class AvatarCommand : BaseCommandModule
     {
-        [Command("Avatar")]
-        [Description("Show your, or someone else's avatar!")]
-        public async Task GetAvatarAsync(CommandContext ctx)
-        {
-            await ctx.RespondAsync(embed:
-                new DiscordEmbedBuilder()
-                    .WithImageUrl(ctx.User.AvatarUrl.Replace("128", "4096"))
-                    .WithColor(DiscordColor.CornflowerBlue)
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now));
-        }
-
-        [Command("Avatar")]
+        [Command("avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [Description("Test pog?")] DiscordUser user)
         {
-            await ctx.RespondAsync(embed:
-                new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                    .WithDescription($"{user.Mention}'s Avatar")
-                    .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
-                    .WithColor(DiscordColor.CornflowerBlue)
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now));
+            DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
+                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                .WithDescription($"{user.Mention}'s Avatar")
+                .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
+            
+            await ctx.RespondAsync(embed: embedBuilder);
+        }
+        
+        [Command("avatar")]
+        [Description("Show your, or someone else's avatar!")]
+        public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string text = null)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                await ctx.RespondAsync(embed: DefaultAvatarEmbed(ctx).WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
+            }
+            else
+            {
+                DiscordMember user = ctx.Guild.Members
+                    .FirstOrDefault(m => m.Value.DisplayName.ToLower()
+                        .Contains(text.ToLower())).Value;
+
+                if (user is null)
+                {
+                    await ctx.RespondAsync("Sorry, I couldn't find anyone with a name matching the text provided.");
+                }
+                else
+                {
+                    await ctx.RespondAsync(embed: 
+                        DefaultAvatarEmbed(ctx)
+                            .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                            .WithDescription($"{user.Mention}'s Avatar")
+                            .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl)));
+                }
+            }
         }
 
+        private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096");
 
-        [Command("Avatar")]
-        public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string mention)
+        private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx)
         {
-            DiscordMember user = ctx.Guild.Members.First(m => m.Value.DisplayName.ToLower().Contains(mention.ToLower()))
-                                    .Value;
-
-            await ctx.RespondAsync(embed:
-                new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                    .WithDescription($"{user.Mention}'s Avatar")
-                    .WithImageUrl(user.AvatarUrl.Replace("128", "4096"))
-                    .WithColor(DiscordColor.CornflowerBlue)
-                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now));
+            return new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.CornflowerBlue)
+                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
+                .WithTimestamp(DateTime.Now);
         }
     }
 }
