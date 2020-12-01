@@ -107,7 +107,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DSharpPlus\DSharpPlus.Interactivity\DSharpPlus.Interactivity.csproj" />
     <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
   </ItemGroup>
 
