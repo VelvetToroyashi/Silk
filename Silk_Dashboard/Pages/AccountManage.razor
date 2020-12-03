@@ -1,0 +1,84 @@
+﻿@page "/Account/Manage"
+
+@attribute [Authorize]
+
+@inherits LayoutComponentBase
+
+@using Microsoft.AspNetCore.Http
+@using Silk_Dashboard.Data
+@using Silk_Dashboard.Models
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IDiscordUserService UserService
+
+<div class="card border-primary mb-3" style="max-width: 20rem;">
+    <div class="card-body">
+        <h4 class="card-title">Hello, @HttpContextAccessor.HttpContext.User.Identity.Name!</h4>
+        <p class="card-text">
+            <ul>
+                <li>
+                    Name: @claim.Name#@claim.Discriminator
+                </li>
+                <li>
+                    ID: @claim.UserId
+                </li>
+                <li>
+                    OAuth Token: @token
+                </li>
+            </ul>
+        </p>
+    </div>
+</div>
+
+<!--Since guilds is not populated instantly on page load, there needs to be a null check on guilds-->
+@if (guilds == null)
+{
+    <p>
+        <em>Loading Guilds...</em>
+    </p>
+}
+else
+{
+    <h2>Guilds</h2>
+    <br />
+    <div class="container">
+        <div class="card-columns">
+            @foreach (var guild in guilds)
+            {
+                <div class="card border-primary mb-3" style="max-width: 20rem;">
+                    <div class="card-body">
+                        <h4 class="card-title">@guild.Name</h4>
+                        <p class="card-text">
+                            <ul>
+                                <li>
+                                    Guild Id: @guild.Id
+                                </li>
+                                <li>
+                                    Guild Permisions: @guild.Permissions
+                                </li>
+                                <li>
+                                    Icon: @guild.Icon
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private string token;
+
+    private DiscordUserClaim claim;
+    private List<Guild> guilds;
+
+    protected override async Task OnInitializedAsync()
+    {
+        claim = UserService.GetUserInfo(HttpContextAccessor.HttpContext);
+        token = await UserService.GetTokenAsync(HttpContextAccessor.HttpContext);
+        guilds = await UserService.GetUserGuildsAsync(HttpContextAccessor.HttpContext);
+    }
+
+}
