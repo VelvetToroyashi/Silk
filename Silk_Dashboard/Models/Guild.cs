@@ -15,7 +15,7 @@ namespace Silk_Dashboard.Models
 
         [JsonProperty("owner")] public bool Owner { get; set; }
 
-        [JsonProperty("permissions")] public long Permissions { get; set; }
+        [JsonProperty("permissions")] public ulong Permissions { get; set; }
 
         [JsonProperty("features")] public List<string> Features { get; set; }
 
