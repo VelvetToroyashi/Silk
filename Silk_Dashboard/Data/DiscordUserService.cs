@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -80,7 +81,7 @@ namespace Silk_Dashboard.Data
         /// </summary>
         /// <param name="httpContext"></param>
         /// <returns></returns>
-        public async Task<List<Guild>> GetUserGuildsAsync(HttpContext httpContext)
+        public async Task<List<Guild>> GetUserGuildsAsync(HttpContext httpContext, Expression<Func<Guild, bool>> filter = null)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
@@ -102,9 +103,11 @@ namespace Silk_Dashboard.Data
             }
 
             var content = await response.Content.ReadAsStringAsync();
+
             try
             {
                 var guilds = Guild.ListFromJson(content);
+                if (filter != null) guilds = guilds.Where(filter.Compile()).ToList();
                 return guilds;
             }
             catch

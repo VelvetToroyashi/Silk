@@ -8,9 +8,5 @@
         public static readonly string AuthorizationEndpoint = "https://discord.com/api/oauth2/authorize";
         public static readonly string TokenEndpoint = "https://discord.com/api/oauth2/token";
         public static readonly string UserInformationEndpoint = "https://discord.com/api/users/@me";
-
-        /*public static readonly string AuthorizationEndpoint = "https://discordapp.com/api/oauth2/authorize";
-        public static readonly string TokenEndpoint = "https://discordapp.com/api/oauth2/token";
-        public static readonly string UserInformationEndpoint = "https://discordapp.com/api/users/@me";*/
     }
 }
