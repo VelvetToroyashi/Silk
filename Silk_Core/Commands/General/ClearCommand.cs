@@ -27,10 +27,7 @@ namespace SilkBot.Commands.General
                                               .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                                               .WithColor(DiscordColor.Red)
                                               .WithDescription(
-                                                  $"Sorry, but you need to be able to manage messages to use this command!")
-                                              .WithFooter(ctx.Client.CurrentUser.Username,
-                                                  ctx.Client.CurrentUser.AvatarUrl)
-                                              .WithTimestamp(DateTime.Now));
+                                                  $"Sorry, but you need to be able to manage messages to use this command!"));
                 return;
             }
 

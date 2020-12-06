@@ -7,6 +7,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Exceptions;
 using SilkBot.Models;
 using SilkBot.Utilities;

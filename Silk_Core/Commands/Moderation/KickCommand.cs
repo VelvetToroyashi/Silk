@@ -1,16 +1,14 @@
 ﻿using System;
-
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Moderation.Utilities;
+using SilkBot.Database;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Services;

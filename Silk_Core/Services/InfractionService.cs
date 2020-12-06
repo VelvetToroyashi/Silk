@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 

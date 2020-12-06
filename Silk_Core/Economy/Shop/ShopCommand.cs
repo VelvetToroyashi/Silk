@@ -3,17 +3,17 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using SilkBot.Utilities;
 
-namespace SilkBot.Commands.Economy.Shop
+namespace SilkBot.Economy.Shop
 {
-    [Category(Categories.Economy)]
+    
     [Group("shop")]
+    [Category(Categories.Economy)]
     public partial class ShopCommand : BaseCommandModule
     {
-        //Basically the shop command will serve as a command processor.//
         [GroupCommand]
         public async Task Shop(CommandContext ctx)
         {
-            await ctx.RespondAsync("Command usage:\n\t\t`shop [global | view <name> | create | delete]`");
+            //TODO: Show glaobal shop.
         }
     }
 

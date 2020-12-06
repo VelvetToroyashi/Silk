@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace SilkBot.Commands.Furry.Utilities
 {
@@ -41,7 +38,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult> DoQueryAsync(string query)
+        private protected async Task<eBooruPostResult?> DoQueryAsync(string? query)
         {
             // Thanks to Spookdot on Discord for showing me this method existed. ~Velvet. //
             //var posts = await _client.GetFromJsonAsync<eBooruPostResult>($"{baseUrl}{query?.Replace(' ', '+')}");
@@ -63,7 +60,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// <param name="apiKey">The API key.</param>
         /// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult> DoKeyedQueryAsync(string query, string apiKey, bool requireUsername = false)
+        private protected async Task<eBooruPostResult> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
         {
             if (requireUsername)
                 _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
@@ -74,16 +71,22 @@ namespace SilkBot.Commands.Furry.Utilities
 
             var cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
             request.Headers.Add("Authorization",$"Basic {Convert.ToBase64String(cred)}");
+            
             // TODO: Log if API key is rejected.
             string result = await _client.Send(request).Content.ReadAsStringAsync();
+            if (result.Contains("AuthenticationFailure"))
+            {
+                Log.Error("API Token rejected! Are you API banned?");
+                throw new UnauthorizedAccessException();
+            }
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
-            
+            if (posts.Posts is null) return null;
             for (var i = 0; i < posts.Posts.Count; i++)
                 if (posts.Posts[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);
             // Still remove blank posts even after authenticating, in case they're blacklisted. //
 
-            return posts.Posts?.Count is 0 ? null : posts;
+            return posts;
         }
 
         /// <summary>

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace SilkBot.Commands.Furry.Utilities
 {
     public partial class eBooruPostResult
     {
-        public List<Post> Posts { get; set; }
+        public List<Post>? Posts { get; set; }
     }
 
     public partial class Post

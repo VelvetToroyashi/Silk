@@ -12,6 +12,8 @@ using IniParser.Model;
 using IniParser.Model.Configuration;
 using IniParser.Parser;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Utilities;

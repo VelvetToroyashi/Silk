@@ -7,6 +7,8 @@
     <Platforms>AnyCPU;x64</Platforms>
     <IsPackable>false</IsPackable>
     <Product>Silk!</Product>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Silk.Core</AssemblyName>
   </PropertyGroup>
 
 	<PropertyGroup>
@@ -30,13 +32,15 @@
     <Compile Remove="config\**" />
     <Compile Remove="Migrations\**" />
     <Compile Remove="Silk!\**" />
+    <Compile Include="Migrations\20201205224159_InitialMigration.cs" />
+    <Compile Include="Migrations\20201205224159_InitialMigration.Designer.cs" />
+    <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
     <EmbeddedResource Remove="config\**" />
     <EmbeddedResource Remove="Migrations\**" />
     <EmbeddedResource Remove="Silk!\**" />
     <None Remove="config\**" />
     <None Remove="Migrations\**" />
     <None Remove="Silk!\**" />
-    <Compile Remove="Utilities\ICopyable.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,26 +48,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="721518523704410202.serverconfig" />
     <None Remove="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config" />
-    <None Remove="config.ini" />
-    <None Remove="Database\Models\NewFile1.txt" />
     <None Remove="dbLogin" />
-    <None Remove="docker-compose.yml" />
-    <None Remove="NewFile1.txt" />
-    <None Remove="Token.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Migrations\20201114063614_InitialMigration.cs" />
-    <Compile Include="Migrations\20201114063614_InitialMigration.Designer.cs" />
-    <Compile Include="Migrations\20201117103922_UserSnowflake.cs" />
-    <Compile Include="Migrations\20201117103922_UserSnowflake.Designer.cs" />
-    <Compile Include="Migrations\20201118092450_no.cs" />
-    <Compile Include="Migrations\20201118092450_no.Designer.cs" />
-    <Compile Include="Migrations\20201119123405_Something.cs" />
-    <Compile Include="Migrations\20201119123405_Something.Designer.cs" />
-    <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,10 +60,13 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.11" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Database;
 using SilkBot.Models;
 
 namespace SilkBot.Services
@@ -14,34 +15,34 @@ namespace SilkBot.Services
             _dbFactory = dbFactory;
         }
 
-        public GuildModel GetGuild(ulong Id)
+        public GuildModel? GetGuild(ulong Id)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.FirstOrDefault(g => g.Id == Id);
         }
 
 
-        public static UserModel GetUserById(GuildModel guild, ulong userId)
+        public static UserModel? GetUserById(GuildModel guild, ulong userId)
         {
             return guild.Users.FirstOrDefault(u => u.Id == userId);
         }
 
-        public UserModel GetUserById(Func<GuildModel, bool> guild, ulong userId)
+        public UserModel? GetUserById(Func<GuildModel, bool> guild, ulong userId)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
-            return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(u => u.Id == userId);
+            return db.Guilds.FirstOrDefault(guild)?.Users.FirstOrDefault(u => u.Id == userId);
         }
 
 
-        public static UserModel GetUser(GuildModel guild, UserModel userId)
+        public static UserModel? GetUser(GuildModel guild, UserModel userId)
         {
             return guild.Users.FirstOrDefault(u => u.Id == userId.Id);
         }
 
-        public UserModel GetUser(Func<GuildModel, bool> guild, Func<UserModel, bool> user)
+        public UserModel? GetUser(Func<GuildModel, bool> guild, Func<UserModel, bool> user)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
-            return db.Guilds.FirstOrDefault(guild).Users.FirstOrDefault(user);
+            return db.Guilds.FirstOrDefault(guild)?.Users.FirstOrDefault(user);
         }
     }
 }

@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SilkBot.Database;
 using SilkBot.Models;
 
 namespace SilkBot.Services
@@ -35,10 +36,10 @@ namespace SilkBot.Services
             return prefixPos;
         }
 
-        public string RetrievePrefix(ulong? guildId)
+        public string? RetrievePrefix(ulong? guildId)
         {
             if (guildId == default || guildId == 0) return null;
-            else if (_cache.TryGetValue(guildId.Value, out string prefix)) return prefix;
+            else if (_cache.TryGetValue(guildId.Value, out string? prefix)) return prefix;
             else return GetPrefixFromDatabase(guildId.Value);
         }
 
@@ -49,7 +50,12 @@ namespace SilkBot.Services
             using SilkDbContext db = _dbFactory.CreateDbContext();
 
 
-            GuildModel guild = db.Guilds.AsNoTracking().First(g => g.Id == guildId);
+            GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
+            if (guild is null)
+            {
+                _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database.");
+                return Bot.DefaultCommandPrefix;
+            }
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
             _sw.Stop();
             _cache.TryAdd(guildId, guild.Prefix);
@@ -58,7 +64,7 @@ namespace SilkBot.Services
 
         public void UpdatePrefix(ulong id, string prefix)
         {
-            _cache.TryGetValue(id, out string currentPrefix);
+            _cache.TryGetValue(id, out string? currentPrefix);
             _cache.AddOrUpdate(id, prefix, (i, p) => p = prefix);
             _logger.LogDebug($"Updated prefix for {id} - {currentPrefix} -> {prefix}");
         }

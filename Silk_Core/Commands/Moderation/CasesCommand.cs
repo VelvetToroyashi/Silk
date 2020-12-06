@@ -7,7 +7,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
-using JetBrains.Annotations;
 using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Models;

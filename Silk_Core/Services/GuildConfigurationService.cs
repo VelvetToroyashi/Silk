@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using SilkBot.Database;
 using SilkBot.Models;
 
-namespace SilkBot.Utilities
+namespace SilkBot.Services
 {
     public class GuildConfigCacheService
     {
@@ -34,10 +35,10 @@ namespace SilkBot.Utilities
             GuildModel config = await db.Guilds.AsNoTracking().FirstAsync(g => g.Id == guildId);
             if (config is null)
             {
-                _logger.LogError("Expected value 'Guild' from databse, received null isntead.");
+                _logger.LogWarning("Expected value was not returned from database call; asked for config, received null.");
                 return default;
             }
-
+            
             var guildConfig = new GuildConfiguration(config.WhitelistInvites, config.BlacklistWords, config.AutoDehoist,
                 config.GreetMembers, config.MuteRoleId, config.MessageEditChannel, config.GeneralLoggingChannel,
                 config.GreetingChannel);
@@ -81,8 +82,8 @@ namespace SilkBot.Utilities
             MessageEditChannel = messageEditChannel;
             LoggingChannel = loggingChannel;
             GreetingChannel = greetingChannel;
-            BlacklistedWords = new List<BlackListedWord>();
-            WhiteListedLinks = new List<WhiteListedLink>();
+            BlacklistedWords = new();
+            WhiteListedLinks = new();
         }
     }
 }

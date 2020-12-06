@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -15,6 +16,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Silk__Extensions;
+using SilkBot.Database;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Services;
@@ -22,10 +24,10 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
-    [Group]
-    [Category(Categories.General)]
+    [Group, Category(Categories.General)]
     public class Ticket
     {
+        
         private const string TERMINATION_REASON =
             "Your ticket has been manually terminated and is now void. No further information provided.";
 
@@ -48,36 +50,29 @@ namespace SilkBot.Commands.General
             _dbFactory = dbFactory;
         }
 
-        [Command("respond")]
-        [Aliases("reply")]
-        [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
-        [RequireGuild()]
+        [Command("respond"), Aliases("reply"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild]
         public async Task RespondToTicket(CommandContext ctx, int Id, [RemainingText] string message)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
             TicketModel? ticket = db.Tickets.OrderBy(t => t.Opened).LastOrDefault(ticket => ticket.Id == Id);
             if (ticket is not null)
-            {
                 if (!ticket.IsOpen)
                     await ctx.RespondAsync("That ticket has been closed!");
                 else await _ticketService.RespondToTicket(ctx, message, ticket).ConfigureAwait(false);
-            }
             else
-            {
                 await ctx.RespondAsync($"Ticket Id {Id} doesn't exist!");
-            }
+            
         }
 
-        [Command("create")]
-        [RequireDirectMessage]
+        [Command("create"), RequireDirectMessage]
         public async Task OpenTicket(CommandContext ctx, [RemainingText] string messageContent)
         {
             TicketCreationResult ticket =
                 await _ticketService.CreateTicketAsync(ctx.User, DateTime.Now, messageContent);
-            if (ticket.Succeeded)
+            if (ticket.s)
             {
                 DiscordEmbedBuilder embed = _ticketService.GenerateRespondantEmbed(messageContent,
-                    ctx.Client.CurrentUser.AvatarUrl, ctx.User, ticket.Ticket);
+                    ctx.Client.CurrentUser.AvatarUrl, ctx.User, ticket.t);
                 DiscordChannel ticketChannel =
                     await _ticketService.GetOrCreateTicketChannelAsync(ctx.Client, ctx.User.Id);
                 await ticketChannel.SendMessageAsync(embed: embed);
@@ -88,18 +83,16 @@ namespace SilkBot.Commands.General
 
             else
             {
-                await ctx.RespondAsync($"Your ticket could not be created due to: `{ticket.Reason}`");
+                await ctx.RespondAsync($"Your ticket could not be created due to: `{ticket.r}`");
             }
         }
 
 
-        [Command("close")]
-        [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
-        [RequireGuild()]
+        [Command("close"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild]
         public async Task CloseTicket(CommandContext ctx, int id, [RemainingText] string reason = TERMINATION_REASON)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
-            TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Id == id);
+            TicketModel? ticket = db.Tickets.SingleOrDefault(t => t.Id == id);
             if (ticket is null)
             {
                 await ctx.RespondAsync("Invalid ticket id!");
@@ -152,9 +145,7 @@ namespace SilkBot.Commands.General
                              .WithTimestamp(DateTime.Now);
 
 
-            [Command("List")]
-            [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
-            [RequireGuild()]
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild]
             public async Task ListTickets(CommandContext ctx)
             {
                 var db = new Lazy<SilkDbContext>();
@@ -172,7 +163,7 @@ namespace SilkBot.Commands.General
                     bool isNumber = Regex.IsMatch(msgContent, @"[0-9]+$");
                     if (isNumber)
                     {
-                        TicketModel ticket = db.Value.Tickets.SingleOrDefault(t => t.Id == int.Parse(msgContent));
+                        TicketModel? ticket = db.Value.Tickets.SingleOrDefault(t => t.Id == int.Parse(msgContent));
                         if (ticket is null)
                         {
                             await ctx.RespondAsync(
@@ -194,7 +185,7 @@ namespace SilkBot.Commands.General
                         }
                         else
                         {
-                            TicketModel ticket = db.Value.Tickets.OrderBy(t => t.Opened)
+                            TicketModel? ticket = db.Value.Tickets.OrderBy(t => t.Opened)
                                                    .LastOrDefault(t => t.Opener == ticketMember.Id);
                             _ = ticket == null
                                 ? await ctx.RespondAsync($"{ticketMember.Username} has no tickets!")
@@ -205,9 +196,7 @@ namespace SilkBot.Commands.General
             }
 
 
-            [Command("List")]
-            [RequireRoles(RoleCheckMode.Any, "Silk Contributor")]
-            [RequireGuild]
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributor"), RequireGuild]
             public async Task ListTickets(CommandContext ctx, int Id)
             {
                 using SilkDbContext db = GetDbContext();
@@ -224,20 +213,18 @@ namespace SilkBot.Commands.General
                 }
             }
 
-            [Command("List")]
-            [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
-            [RequireGuild()]
+            [Command("List"), RequireRoles(RoleCheckMode.Any, "Silk Contributer"), RequireGuild]
             public async Task ListTickets(CommandContext ctx, string name)
             {
                 using SilkDbContext db = GetDbContext();
-                DiscordUser user = await new MemberSelectorService().SelectUser(ctx, ctx.GetUserByName(name));
+                DiscordUser? user = await new MemberSelectorService().SelectUser(ctx, ctx.GetUserByName(name));
                 if (user is null)
                 {
                     await ctx.RespondAsync("Canceled.");
                     return;
                 }
 
-                TicketModel ticket = db.Tickets.SingleOrDefault(t => t.Opener == user.Id);
+                TicketModel? ticket = db.Tickets.SingleOrDefault(t => t.Opener == user.Id);
                 if (ticket is null)
                 {
                     await ctx.RespondAsync($"{user.Username} has not opened any tickets.");
@@ -250,21 +237,8 @@ namespace SilkBot.Commands.General
             }
         }
     }
-#nullable enable
-    public struct TicketCreationResult
-    {
-        public bool Succeeded { get; }
-        public string? Reason { get; }
-        public TicketModel? Ticket { get; }
 
-        public TicketCreationResult(bool s, string? r = default, TicketModel? t = default)
-        {
-            Succeeded = s;
-            Reason = r;
-            Ticket = t;
-        }
-    }
-#nullable disable
+    public record TicketCreationResult(bool s, string? r = default, TicketModel? t = default);
 
     public class TicketService
     {
@@ -276,15 +250,14 @@ namespace SilkBot.Commands.General
             _client = client;
             _dbFactory = dbFactory;
         }
-
-#nullable enable
+        
         public TicketModel? GetTicketById(int Id)
         {
             using var db = _dbFactory.CreateDbContext();
-            TicketModel? t = db.Tickets.SingleOrDefault(t => t.Id == Id);
-            return t;
+            TicketModel? ticket = db.Tickets.SingleOrDefault(t => t.Id == Id);
+            return ticket;
         }
-#nullable disable
+
 
 
         public async Task<TicketCreationResult> CreateTicketAsync(DiscordUser ticketOpener, DateTime ticketTime,
@@ -328,7 +301,7 @@ namespace SilkBot.Commands.General
             return returnChannel;
         }
 
-        public async Task RespondToBlindTicketAsync(DiscordClient client, ulong userId, string message)
+        public async Task RespondToInferredTicketAsync(DiscordClient client, ulong userId, string message)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
 
@@ -407,17 +380,15 @@ namespace SilkBot.Commands.General
         }
 
 
-        public bool CheckForTicket(DiscordChannel c, ulong Id)
+        public bool HasOpenTicket(DiscordChannel c, ulong Id)
         {
             if (!c.IsPrivate)
                 return false;
-
             using SilkDbContext db = _dbFactory.CreateDbContext();
-            TicketModel ticket = db.Tickets
-                                   .Where(t => t.IsOpen)
-                                   .OrderBy(t => t.Opened)
-                                   .LastOrDefault(t => t.Opener == Id);
-
+            TicketModel? ticket = db.Tickets
+                                    .Where(t => t.IsOpen)
+                                    .OrderBy(t => t.Opened)
+                                    .LastOrDefault(t => t.Opener == Id);
             return ticket is not null && ticket.IsOpen;
         }
     }

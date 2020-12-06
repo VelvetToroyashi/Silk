@@ -14,21 +14,26 @@ namespace SilkBot.Commands.General
         [Command("avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [Description("Test pog?")] DiscordUser user)
         {
-            DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
+            DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder()
+                                               .WithColor(DiscordColor.CornflowerBlue)
+                                               .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.User.AvatarUrl)
+                                               .WithDescription($"{user.Mention}'s Avatar")
+                                               .WithImageUrl(UpsizeAvatarUrl(user.AvatarUrl));
             
             await ctx.RespondAsync(embed: embedBuilder);
         }
-        
+
         [Command("avatar")]
+        public async Task GetAvatarAsync(CommandContext ctx, DiscordMember m) =>
+            await GetAvatarAsync(ctx, (DiscordUser) m).ConfigureAwait(false);
+        
+        //[Command("avatar")]
         [Description("Show your, or someone else's avatar!")]
-        public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string text = null)
+        public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string? text = null)
         {
             if (string.IsNullOrEmpty(text))
             {
-                await ctx.RespondAsync(embed: DefaultAvatarEmbed(ctx).WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
+                await ctx.RespondAsync(embed: DefaultAvatarEmbed().WithImageUrl(UpsizeAvatarUrl(ctx.User.AvatarUrl)));
             }
             else
             {
@@ -38,27 +43,22 @@ namespace SilkBot.Commands.General
 
                 if (user is null)
                 {
-                    await ctx.RespondAsync("Sorry, I couldn't find anyone with a name matching the text provided.");
+                    await ctx.RespondAsync("Sorry, I couldn't find anyone with a name matching the text provided.").ConfigureAwait(false);
                 }
                 else
                 {
                     await ctx.RespondAsync(embed: 
-                        DefaultAvatarEmbed(ctx)
+                        DefaultAvatarEmbed()
                             .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                             .WithDescription($"{user.Mention}'s Avatar")
-                            .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl)));
+                            .WithImageUrl(UpsizeAvatarUrl(user.AvatarUrl))).ConfigureAwait(false);
                 }
             }
         }
 
-        private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096");
+        private static string UpsizeAvatarUrl(string avatarUrl) => avatarUrl.Replace("128", "4096");
 
-        private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx)
-        {
-            return new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now);
-        }
+        private static DiscordEmbedBuilder DefaultAvatarEmbed() => new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue);
+        
     }
 }

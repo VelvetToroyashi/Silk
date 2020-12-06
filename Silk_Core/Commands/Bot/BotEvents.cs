@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Database;
 using SilkBot.Extensions;
 using SilkBot.Models;
 
@@ -40,7 +41,7 @@ namespace SilkBot.Commands.Bot
               .AppendLine("or if you're not familiar with GitHub, feel free")
               .AppendLine($"to message the developers directly via !`ticket create <your message>`.")
               .Append(
-                  $"By default, the prefix is `{SilkBot.Bot.SilkDefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
+                  $"By default, the prefix is `{SilkBot.Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
 
             embed.WithDescription(sb.ToString());
 
