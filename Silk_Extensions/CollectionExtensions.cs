@@ -40,7 +40,7 @@ namespace SilkBot.Extensions
         }
 
         /// <summary>Fluid method that joins the members of a collection using the specified separator between them.</summary>
-        public static string JoinString<T>(this IEnumerable<T> values, char separator)
+        public static string Join<T>(this IEnumerable<T> values, char separator)
         {
             return string.Join(separator, values);
         }

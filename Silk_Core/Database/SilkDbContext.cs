@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SilkBot.Database.Models;
-using SilkBot.Database.Models.Items;
 using SilkBot.Models;
 
 namespace SilkBot
@@ -11,8 +10,7 @@ namespace SilkBot
 
         public DbSet<TicketModel> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
-
-        public DbSet<Foobar> Foobars { get; set; }
+        
         public DbSet<ChangelogModel> ChangeLogs { get; set; }
         
         public DbSet<ItemModel> Items { get; set; }
@@ -45,6 +43,7 @@ namespace SilkBot
             builder.Entity<TicketResponderModel>().HasNoKey();
             builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel)
                    .WithMany(ticket => ticket.History);
+            builder.Entity<SelfAssignableRole>().Property(r => r.RoleId).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }
     }

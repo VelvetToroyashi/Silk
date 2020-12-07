@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -15,6 +14,8 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 
@@ -31,11 +32,7 @@ namespace SilkBot.Utilities
         private int _currentMemberCount = 0;
         private int expectedMembers;
         private int cachedMembers;
-
-
-        public static List<Action> CacheStaff { get; } = new();
-        public static Task GuildDownloadTask { get; private set; } = new(() => Task.Delay(-1));
-
+        
         public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory,
             ILogger<BotEventHelper> logger)
         {
@@ -60,7 +57,7 @@ namespace SilkBot.Utilities
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            if (e.Exception is not CommandNotFoundException or Exception)
+            if (e.Exception is not CommandNotFoundException)
             {
                 if (e.Exception.Message is "Could not find a suitable overload for the command.") return;
                 if (e.Exception is ArgumentException ex)
@@ -113,7 +110,7 @@ namespace SilkBot.Utilities
             {
                 using SilkDbContext db = _dbFactory.CreateDbContext();
                 var sw = Stopwatch.StartNew();
-                GuildModel guild = db.Guilds.AsQueryable().Include(g => g.Users)
+                GuildModel? guild = db.Guilds.AsQueryable().Include(g => g.Users)
                                      .FirstOrDefault(g => g.Id == e.Guild.Id);
                 sw.Stop();
                 _logger.LogTrace(
@@ -121,7 +118,7 @@ namespace SilkBot.Utilities
 
                 if (guild is null)
                 {
-                    guild = new GuildModel {Id = e.Guild.Id, Prefix = Bot.SilkDefaultCommandPrefix};
+                    guild = new GuildModel {Id = e.Guild.Id, Prefix = Bot.DefaultCommandPrefix};
                     db.Guilds.Add(guild);
                 }
 
@@ -160,9 +157,9 @@ namespace SilkBot.Utilities
             foreach (DiscordMember member in staff)
             {
                 var flags = UserFlag.Staff;
-                if (member.HasPermission(Permissions.Administrator)) flags.Add(UserFlag.EscalatedStaff);
+                if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
 
-                UserModel user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
+                UserModel? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.Has(UserFlag.Staff)) // Has flag
