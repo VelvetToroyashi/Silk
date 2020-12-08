@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Economy.Shop
@@ -22,6 +23,7 @@ namespace SilkBot.Commands.Economy.Shop
         [Command]
         public async Task Global(CommandContext ctx)
         {
+            
             await ctx.RespondAsync("Placeholder global shop goes here");
         }
     }

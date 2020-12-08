@@ -79,6 +79,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
+    <ProjectReference Include="..\Silk_Items\Silk_Items.csproj" />
   </ItemGroup>
 
   <ItemGroup>

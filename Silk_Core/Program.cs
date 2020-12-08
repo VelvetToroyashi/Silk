@@ -23,6 +23,8 @@ namespace SilkBot
 {
     public class Program
     {
+        public static DateTime Startup { get; } = DateTime.Now;
+
         private static readonly DiscordConfiguration _clientConfig = new()
         {
             Intents = DiscordIntents.All,

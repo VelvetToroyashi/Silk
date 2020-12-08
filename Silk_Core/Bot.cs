@@ -30,7 +30,6 @@ namespace SilkBot
         //TODO: Fix all these usages, because they should be pulling from ctx.Services if possible. //
         public DiscordShardedClient Client          { get; set; }
         public static Bot? Instance                 { get; private set; }
-        public static DateTime StartupTime          { get; } = DateTime.Now;
         public static string DefaultCommandPrefix   { get; } = "s!";
         public static Stopwatch CommandTimer        { get; } = new();
         public SilkDbContext SilkDBContext          { get; private set; }
@@ -108,9 +107,7 @@ namespace SilkBot
             foreach (CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
             foreach (CommandsNextExtension c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
             _logger.LogInformation("Client Initialized.");
-            _sw.Stop();
-            
-            _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
+            _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
             Client.Ready += async (c, e) => _logger.LogInformation("Client ready to proccess commands.");
         }

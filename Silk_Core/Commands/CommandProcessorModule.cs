@@ -49,10 +49,10 @@ namespace SilkBot.Commands
                 
                 if (e.Guild is not null &&
                     (disabledCommandsCache.GetValueOrDefault(e.Guild.Id)
-                                          ?.Contains(commandString.Split(' ')[0]) ?? false)) return;
+                                          ?.Contains(commandString.Split(' ')?[0]) ?? false)) return;
                 
                 
-                Command? command = cnext.FindCommand(commandString, out string arguments);
+                Command command = cnext.FindCommand(commandString, out string arguments);
                 CommandContext context = cnext.CreateContext(e.Message, prefix, command, arguments);
                 await cnext.ExecuteCommandAsync(context);
             });
