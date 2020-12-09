@@ -20,18 +20,18 @@ namespace SilkBot.Commands
             _prefixCache = prefixCache;
         }
 
-        public static void DisableCommand(string command, ulong id)
+        public static void DisableCommand(string command, ulong guildId)
         {
-            disabledCommandsCache.TryGetValue(id, out var value);
-            if (value is not null)
+            disabledCommandsCache.TryGetValue(guildId, out var guildDisabledCommands);
+            if (guildDisabledCommands is not null)
             {
-                value.Add(command);
+                guildDisabledCommands.Add(command);
             }
             else
             {
-                value = new();
-                value.Add(command);
-                disabledCommandsCache.TryAdd(id, value);
+                guildDisabledCommands = new();
+                guildDisabledCommands.Add(command);
+                disabledCommandsCache.TryAdd(guildId, guildDisabledCommands);
             }
         }
         public async Task OnMessageCreate(DiscordClient c, MessageCreateEventArgs e)

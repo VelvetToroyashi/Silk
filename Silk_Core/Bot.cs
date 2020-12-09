@@ -104,12 +104,16 @@ namespace SilkBot
             _eventHelper.CreateHandlers();
             
             var cmdNext = await Client.GetCommandsNextAsync();
-            foreach (CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
-            foreach (CommandsNextExtension c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
+            foreach (CommandsNextExtension c in cmdNext.Values)
+            {
+                c.SetHelpFormatter<HelpFormatter>(); 
+                c.RegisterConverter(new MemberConverter());
+            }
+            
             _logger.LogInformation("Client Initialized.");
             _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
-            Client.Ready += async (c, e) => _logger.LogInformation("Client ready to proccess commands.");
+            Client.Ready += async (c, e) => _logger.LogInformation("Client ready to process commands.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

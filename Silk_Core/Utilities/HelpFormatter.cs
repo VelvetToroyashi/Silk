@@ -61,11 +61,14 @@ namespace SilkBot.Utilities
                 IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority)
                                                              .FirstOrDefault()?.Arguments;
                 var title = new StringBuilder($"Command `{Command.QualifiedName}");
-                foreach (CommandArgument arg in args)
+                if (args is not null)
                 {
-                    title.Append(arg.IsOptional ? " [" : " <");
-                    title.Append(arg.Name);
-                    title.Append(arg.IsOptional ? "]" : ">");
+                    foreach (CommandArgument arg in args)
+                    {
+                        title.Append(arg.IsOptional ? " [" : " <");
+                        title.Append(arg.Name);
+                        title.Append(arg.IsOptional ? "]" : ">");
+                    }
                 }
 
                 title.Append('`');
