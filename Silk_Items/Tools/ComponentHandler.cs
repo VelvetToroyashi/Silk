@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Silk_Items.Components;
 
-namespace Silk_Items
+namespace Silk_Items.Tools
 {
     public static class ComponentHandler
     {
@@ -23,8 +23,8 @@ namespace Silk_Items
         /// </summary>
         public static void Init()
         {
-            IEnumerable<Type> comps = Assembly.GetAssembly(typeof(IComponent))?.GetTypes()
-                                              .Where(c => c.GetType().IsSubclassOf(typeof(IComponent)));
+            IEnumerable<Type> comps = Assembly.GetAssembly(typeof(Icomponent))?.GetTypes()
+                                              .Where(c => c.GetType().IsSubclassOf(typeof(Icomponent)));
             foreach (Type c in comps!)
                 componenents.TryAdd(c.Name.ToLower(), c.GetType());
         }

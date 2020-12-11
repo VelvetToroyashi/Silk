@@ -36,24 +36,18 @@ namespace SilkBot.Commands.Bot
             sb.Append("Thank you for choosing Silk! to join your server <3")
               .AppendLine("I am a relatively lightweight bot with many functions - partially in moderation, ")
               .AppendLine("partially in games, with many more features to come!")
-              .Append(
-                  "If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silkbot/issues), ")
+              .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silkbot/issues), ")
               .AppendLine("or if you're not familiar with GitHub, feel free")
-              .AppendLine($"to message the developers directly via !`ticket create <your message>`.")
-              .Append(
-                  $"By default, the prefix is `{SilkBot.Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
+              .AppendLine($"to message the developers directly via {SilkBot.Bot.DefaultCommandPrefix}`ticket create <your message>`.")
+              .Append($"By default, the prefix is `{SilkBot.Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
 
             embed.WithDescription(sb.ToString());
 
             await firstChannel.SendMessageAsync(embed: embed);
         }
 
-        public static int
-            UnloggedMessages
-        {
-            get;
-            set;
-        } // Set when !clear x is called, as to prevent logging messages cleared by the bot. //
+        // Set when !clear x is called, as to prevent logging messages cleared by the bot. //
+        public static int UnloggedMessages { get; set; } 
 
 
         public static async Task OnMessageDeleted(DiscordClient c, MessageDeleteEventArgs e)

@@ -89,5 +89,9 @@
   <ItemGroup>
     <Compile Remove="Silk!\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\General\Tickets" />
+  </ItemGroup>
   
 </Project>

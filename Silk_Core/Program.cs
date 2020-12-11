@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -48,22 +49,27 @@ namespace SilkBot
                            configuration.AddJsonFile("appSettings.json", true, false);
                            configuration.AddUserSecrets<Program>(true, false);
                        })
-                       .ConfigureLogging((_, _) => Log.Logger = new LoggerConfiguration()
-                                                                            .WriteTo.Console(
-                                                                                outputTemplate:
-                                                                                "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                                                                                theme: SerilogThemes.Bot)
-                                                                            .MinimumLevel.Override("Microsoft",
-                                                                                LogEventLevel.Warning)
-                                                                            .MinimumLevel.Debug()
-                                                                            .CreateLogger())
+                       .ConfigureLogging((_, _) => 
+                           Log.Logger = new LoggerConfiguration()
+                                                .WriteTo.Console(
+                                                    outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                                                .MinimumLevel.Debug()
+                                                .CreateLogger())
                        .ConfigureServices((context, services) =>
                        {
                            IConfiguration config = context.Configuration;
                            _clientConfig.Token = config.GetConnectionString("BotToken");
                            services.AddSingleton(new DiscordShardedClient(_clientConfig));
                            services.AddDbContextFactory<SilkDbContext>(
-                               option => option.UseNpgsql(config.GetConnectionString("dbConnection")),
+                               option =>
+                               {
+                                   option.UseNpgsql(config.GetConnectionString("dbConnection"));
+                                    #if  DEBUG
+                                    option.EnableSensitiveDataLogging();
+                                    option.EnableDetailedErrors();                                
+                                    #endif
+                               },
                                ServiceLifetime.Transient);
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                 
