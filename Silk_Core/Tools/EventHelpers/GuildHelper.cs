@@ -36,12 +36,11 @@ namespace SilkBot.Tools.EventHelpers
             if (startupCacheCompleted) return;
             _ = Task.Run(async () =>
             {
-                _logger.LogDebug("Beginning Cache");
+                _logger.LogDebug($"Beginning Cache Shard [{c.ShardId}/{c.ShardCount}] | Guild {++currentGuild}/");
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
                 CacheStaffMembers(guild, e.Guild.Members.Values); 
                 await db.SaveChangesAsync();
-                
             });
         }
         
@@ -50,17 +49,14 @@ namespace SilkBot.Tools.EventHelpers
         {
             _ = Task.Run(async () =>
             {
-                _logger.LogDebug("Beginning Cache");
+                
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 await SendWelcomeMessage(c, e);
                 GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
                 CacheStaffMembers(guild, e.Guild.Members.Values);
-                _logger.LogDebug("Saving..");
-                
-                var saved = await db.SaveChangesAsync();
-                GuildModel? g = db.Guilds.FirstOrDefault(guild => guild.Id == e.Guild.Id);
-                _logger.LogDebug($"Saved {saved} {g?.Id} {g?.Prefix} {g?.Users?.Count}");
-                _prefixService.UpdatePrefix(e.Guild.Id, Bot.DefaultCommandPrefix);
+                await db.SaveChangesAsync();
+                //_prefixService.UpdatePrefix(e.Guild.Id, Bot.DefaultCommandPrefix);
+                // I don't think this should be needed, assuming I'm not totally inept. ~Velvet. //
             });
         }
        
