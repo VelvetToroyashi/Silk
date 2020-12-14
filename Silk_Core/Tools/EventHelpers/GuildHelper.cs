@@ -115,7 +115,7 @@ namespace SilkBot.Tools.EventHelpers
         {
             
             IEnumerable<DiscordMember> staff = members.Where(m => 
-                   ((m.HasPermission(Permissions.KickMembers | Permissions.ManageRoles) 
+                   ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages) 
                 || m.HasPermission(Permissions.Administrator) 
                 || m.IsOwner) && !m.IsBot));
             _logger.LogDebug($"Captured {staff.Count()} members marked with staff flag.");
