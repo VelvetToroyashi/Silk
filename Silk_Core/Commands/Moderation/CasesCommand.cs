@@ -12,9 +12,11 @@ using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Services;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {
+    [Expiremental]
     public class CasesCommand : BaseCommandModule
     {
         private readonly InfractionService _infractionService;

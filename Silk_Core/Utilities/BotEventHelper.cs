@@ -53,16 +53,16 @@ namespace SilkBot.Utilities
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            // Command not found //
-            if (e.Exception is InvalidOperationException)
-            {
-                _logger.LogWarning($"Unkown sub-command: {e.Command.Name}. Arguments: {e.Context.RawArgumentString}");
-                return;
-            }
-
+            
             if (e.Exception is CommandNotFoundException)
             {
                 _logger.LogWarning($"Unkown command: {e.Command.Name}. Arguments: {e.Context.RawArgumentString}");
+                return;
+            }
+
+            if (e.Exception.Message is "No matching subcommands were found, and this group is not executable.") 
+            {
+                _logger.LogWarning($"Unknown subcommand: {e.Command.Name} | Arguments: {e.Context.RawArgumentString}");
                 return;
             }
             

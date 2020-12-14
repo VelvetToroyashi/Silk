@@ -20,7 +20,9 @@ namespace SilkBot.Tools.EventHelpers
         private readonly ILogger<GuildHelper> _logger;
         private readonly PrefixCacheService _prefixService;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-
+        private bool startupCacheCompleted;
+        private volatile int currentGuild;
+        
         public GuildHelper(ILogger<GuildHelper> logger, PrefixCacheService prefixService, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _logger = logger;
@@ -31,12 +33,15 @@ namespace SilkBot.Tools.EventHelpers
         // Run on startup to cache all members //
         public async Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
+            if (startupCacheCompleted) return;
             _ = Task.Run(async () =>
             {
+                _logger.LogDebug("Beginning Cche");
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
                 CacheStaffMembers(guild, e.Guild.Members.Values); 
                 await db.SaveChangesAsync();
+                
             });
         }
         
@@ -45,6 +50,7 @@ namespace SilkBot.Tools.EventHelpers
         {
             _ = Task.Run(async () =>
             {
+                
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 await SendWelcomeMessage(c, e);
                 CacheStaffMembers(await GetOrCreateGuildAsync(db, e.Guild.Id), e.Guild.Members.Values);
@@ -98,7 +104,7 @@ namespace SilkBot.Tools.EventHelpers
         
         private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            _logger.LogDebug("Scanning guild for cache members.");
+            
             IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.KickMembers | Permissions.ManageRoles) && !m.IsBot);
             _logger.LogDebug($"Captured {staff.Count()} members marked with staff flag.");
             

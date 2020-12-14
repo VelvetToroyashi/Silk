@@ -31,8 +31,6 @@ namespace SilkBot.Commands.Bot
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel? config = db.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
-
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {
