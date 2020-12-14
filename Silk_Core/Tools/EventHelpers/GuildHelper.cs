@@ -36,7 +36,7 @@ namespace SilkBot.Tools.EventHelpers
             if (startupCacheCompleted) return;
             _ = Task.Run(async () =>
             {
-                _logger.LogDebug("Beginning Cche");
+                _logger.LogDebug("Beginning Cache");
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
                 CacheStaffMembers(guild, e.Guild.Members.Values); 
@@ -50,14 +50,18 @@ namespace SilkBot.Tools.EventHelpers
         {
             _ = Task.Run(async () =>
             {
-                
+                _logger.LogDebug("Beginning Cache");
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 await SendWelcomeMessage(c, e);
-                CacheStaffMembers(await GetOrCreateGuildAsync(db, e.Guild.Id), e.Guild.Members.Values);
-                await db.SaveChangesAsync();
+                GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
+                CacheStaffMembers(guild, e.Guild.Members.Values);
+                _logger.LogDebug("Saving..");
+                
+                var saved = await db.SaveChangesAsync();
+                GuildModel? g = db.Guilds.FirstOrDefault(guild => guild.Id == e.Guild.Id);
+                _logger.LogDebug($"Saved {saved} {g?.Id} {g?.Prefix} {g?.Users?.Count}");
                 _prefixService.UpdatePrefix(e.Guild.Id, Bot.DefaultCommandPrefix);
             });
-            
         }
        
         // Used in conjunction with OnGuildJoin() //
@@ -95,9 +99,14 @@ namespace SilkBot.Tools.EventHelpers
         private async Task<GuildModel> GetOrCreateGuildAsync(SilkDbContext db, ulong Id)
         {
             GuildModel? guild = db.Guilds.FirstOrDefault(g => g.Id == Id);
-            if (guild is null) guild = new();
-            guild.Id = Id;
-            await db.SaveChangesAsync();
+            if (guild is null)
+            {
+                guild = new();
+                guild.Id = Id;
+                guild.Prefix = Bot.DefaultCommandPrefix;
+                db.Guilds.Add(guild);
+            }
+            
             return guild;
         }
         
@@ -105,11 +114,15 @@ namespace SilkBot.Tools.EventHelpers
         private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
             
-            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.KickMembers | Permissions.ManageRoles) && !m.IsBot);
+            IEnumerable<DiscordMember> staff = members.Where(m => 
+                   ((m.HasPermission(Permissions.KickMembers | Permissions.ManageRoles) 
+                || m.HasPermission(Permissions.Administrator) 
+                || m.IsOwner) && !m.IsBot));
             _logger.LogDebug($"Captured {staff.Count()} members marked with staff flag.");
             
             foreach (DiscordMember member in staff)
             {
+                
                 var flags = UserFlag.Staff;
                 if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
 
@@ -118,7 +131,7 @@ namespace SilkBot.Tools.EventHelpers
                 {
                     if (!user.Flags.Has(UserFlag.Staff)) // Has flag
                         user.Flags.Add(UserFlag.Staff); // Add flag
-                    if (member.HasPermission(Permissions.Administrator))
+                    if (member.HasPermission(Permissions.Administrator) || member.IsOwner)
                         user.Flags.Add(UserFlag.EscalatedStaff);
                 }
                 else guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
