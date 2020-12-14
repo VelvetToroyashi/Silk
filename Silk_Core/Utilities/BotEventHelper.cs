@@ -47,12 +47,8 @@ namespace SilkBot.Utilities
             _client.ClientErrored += OnClientErrored;
             foreach (CommandsNextExtension c in _client.GetCommandsNextAsync().GetAwaiter().GetResult().Values)
                 c.CommandErrored += OnCommandErrored;
-            _client.GuildAvailable += Cache;
-            _logger.LogTrace("Subscribed to GUILD_AVAILABLE");
             _client.MessageDeleted += BotEvents.OnMessageDeleted;
             _logger.LogTrace("Subscribed to MESSAGE_DELETED");
-            _client.GuildCreated += BotEvents.OnGuildJoin;
-            _logger.LogTrace("Subscribed to GUILD_CREATED");
         }
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
@@ -154,12 +150,8 @@ namespace SilkBot.Utilities
 
         private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.MuteMembers) && !m.IsBot);
-            lock (_obj)
-            {
-                expectedMembers += staff.Count();
-            }
-
+            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.KickMembers & Permissions.ManageRoles) && !m.IsBot);
+            
             foreach (DiscordMember member in staff)
             {
                 var flags = UserFlag.Staff;
@@ -176,10 +168,7 @@ namespace SilkBot.Utilities
                 else
                 {
                     guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
-                    lock (_obj)
-                    {
-                        cachedMembers++;
-                    }
+                    
                 }
             }
         }

@@ -9,6 +9,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SilkBot.Extensions;
 
 namespace SilkBot.Utilities
@@ -39,6 +40,7 @@ namespace SilkBot.Utilities
 
         public override CommandHelpMessage Build()
         {
+            
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
             if (Command == null)
@@ -58,22 +60,16 @@ namespace SilkBot.Utilities
             }
             else
             {
-                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority)
-                                                             .FirstOrDefault()?.Arguments;
-                var title = new StringBuilder($"Command `{Command.QualifiedName}");
-                if (args is not null)
-                {
-                    foreach (CommandArgument arg in args)
-                    {
-                        title.Append(arg.IsOptional ? " [" : " <");
-                        title.Append(arg.Name);
-                        title.Append(arg.IsOptional ? "]" : ">");
-                    }
-                }
+                if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
-                title.Append('`');
+                string title = Command.IsExperimental() ? $"[E] Command: `{Command.QualifiedName}" : $"Command: `{Command.QualifiedName}";
+                var builder = new StringBuilder(title);
+                if (args is not null) builder.Append(GetArgs(args));
+                
+                builder.Append('`');
 
-                embed.WithTitle(title.ToString()).WithDescription(Command.Description);
+                embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
                 if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
                     embed.AddField($"{CustomEmoji.Staff} Developer", "You can't use it!", true);
@@ -82,16 +78,34 @@ namespace SilkBot.Utilities
 
                 RequireUserPermissionsAttribute? userPerms =
                     Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
-                if (userPerms != null)
+                if (userPerms is not null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())
                     embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
-                if (Subcommands != null)
-                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString(", "),
-                        true);
+                if (Subcommands is not null)
+                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"), true);
+                if (Command.Overloads.Count > 1)
+                    embed.AddField("Command overloads:", Command.Overloads
+                                            .Skip(1)
+                                            .Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
+                                            .JoinString("\n"));
+
             }
 
             return new CommandHelpMessage(null, embed.Build());
         }
+
+        private string GetArgs(IReadOnlyList<CommandArgument> args)
+        {
+            string argString = string.Empty;
+            foreach (CommandArgument arg in args)
+            {
+                argString += arg.IsOptional ? " [" : " <";
+                argString += arg.Name;
+                argString += arg.IsOptional ? "]" : ">";
+            }
+            return argString;
+        }
+        
     }
 }

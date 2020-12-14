@@ -1,9 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Silk_Items.Entities;
 using Silk_Items.Tools;
@@ -41,7 +46,7 @@ namespace SilkBot.Commands.Tests
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
         public Test(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
-        
+
         [Command]
         public async Task GetSword(CommandContext ctx) => 
             await ctx.RespondAsync($"Sword has: {_sword.Count()} components; " +

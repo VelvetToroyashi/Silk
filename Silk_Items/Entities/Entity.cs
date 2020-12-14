@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -10,10 +11,7 @@ namespace Silk_Items.Entities
     {
         [JsonInclude]
         private List<Icomponent> Components = new();
-
-        [JsonInclude]
-        private List<object> Foo { get; } 
-
+        
         public IEnumerator<Icomponent> GetEnumerator() => Components.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

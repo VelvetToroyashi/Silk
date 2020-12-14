@@ -22,9 +22,8 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
-    [Group]
     [Category(Categories.General)]
-    public class Ticket : BaseCommandModule
+    public class Ticket 
     {
         private const string TERMINATION_REASON =
             "Your ticket has been manually terminated and is now void. No further information provided.";
@@ -67,9 +66,7 @@ namespace SilkBot.Commands.General
                 await ctx.RespondAsync($"Ticket Id {Id} doesn't exist!");
             }
         }
-        [RequireDirectMessage]
-        [Command("create")]
-        [Description("Create a ticket.")]
+
         
         public async Task OpenTicket(CommandContext ctx, [RemainingText] string messageContent)
         {

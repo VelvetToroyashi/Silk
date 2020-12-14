@@ -7,6 +7,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <IsPackable>false</IsPackable>
     <Product>Silk!</Product>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -88,10 +89,6 @@
 
   <ItemGroup>
     <Compile Remove="Silk!\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\General\Tickets" />
   </ItemGroup>
   
 </Project>

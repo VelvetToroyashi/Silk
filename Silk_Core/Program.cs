@@ -15,9 +15,11 @@ using Serilog.Extensions.Logging;
 using SilkBot.Commands;
 using SilkBot.Commands.Bot;
 using SilkBot.Commands.General;
+using SilkBot.Commands.General.Tickets;
 using SilkBot.Database;
 using SilkBot.Services;
 using SilkBot.Tools;
+using SilkBot.Tools.EventHelpers;
 using SilkBot.Utilities;
 
 namespace SilkBot
@@ -54,7 +56,7 @@ namespace SilkBot
                                                 .WriteTo.Console(
                                                     outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
                                                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                                                .MinimumLevel.Debug()
+                                                .MinimumLevel.Verbose()
                                                 .CreateLogger())
                        .ConfigureServices((context, services) =>
                        {
@@ -73,23 +75,28 @@ namespace SilkBot
                                ServiceLifetime.Transient);
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                 
-                           services.AddSingleton<PrefixCacheService>();
-                           services.AddSingleton<GuildConfigCacheService>();
-                           services.AddSingleton<SerilogLoggerFactory>();
                            services.AddSingleton<TicketService>();
                            services.AddSingleton<InfractionService>();
-                           services.AddSingleton<MessageCreationHandler>();
-                           services.AddSingleton<CommandProcessorModule>();
                            services.AddSingleton<TimedEventService>();
+                           services.AddSingleton<PrefixCacheService>();
+                           services.AddSingleton<TicketHandlerService>();
+                           services.AddSingleton<GuildConfigCacheService>();
+                           
+                           services.AddSingleton<GuildHelper>();
+                           services.AddSingleton<BotEventHelper>();
+                           services.AddSingleton<MessageCreationHelper>();
+                           
+                           services.AddSingleton<SerilogLoggerFactory>();
+                           services.AddSingleton<CommandProcessorModule>();
+                           
                            services.AddSingleton(typeof(HttpClient), _ =>
                            {
                                var client = new HttpClient();
-                               client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.3");
+                               client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.4");
                                return client;
                            });
-                           services.AddScoped(_ => new BotConfig(config));
-                           services.AddSingleton<BotEventHelper>();
-
+                           services.AddTransient(_ => new BotConfig(config));
+                           
                            services.AddHostedService<Bot>();
                        })
                        .UseSerilog();
