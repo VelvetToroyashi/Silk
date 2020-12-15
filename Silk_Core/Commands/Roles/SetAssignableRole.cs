@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Exceptions;
+using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Utilities;
 
@@ -29,48 +32,45 @@ namespace SilkBot.Commands.Roles
             "Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
-            GuildModel guild = _dbFactory.CreateDbContext().Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
-            if (roles.Count() < 1)
+            using SilkDbContext db = _dbFactory.CreateDbContext();
+
+            GuildModel guild = await db.Guilds.Include(g => g.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
+
+            IEnumerable<ulong> currentlyAssignableRoles = guild.SelfAssignableRoles.Select(r => r.RoleId);
+            
+            List<string> added = new();
+            List<string> removed = new();
+
+            foreach (var role in roles)
             {
-                await ctx.RespondAsync("Roles cannot be empty!");
-                return;
-            }
-
-            if (!guild.Users.FirstOrDefault(u => u.Id == ctx.User.Id).Flags.HasFlag(UserFlag.Staff))
-                throw new InsufficientPermissionsException();
-
-            var addedList = new List<string>();
-            var removedList = new List<string>();
-            var ebStringBuilder = new StringBuilder("Added Roles: ");
-            foreach (DiscordRole role in roles)
-                if (!guild.SelfAssignableRoles.Any(r => r.RoleId == role.Id))
+                if (currentlyAssignableRoles.Any(r => r == role.Id))
                 {
-                    guild.SelfAssignableRoles.Add(new SelfAssignableRole {RoleId = role.Id});
-                    addedList.Add(role.Mention);
+                    removed.Add(role.Mention);
+                    var r = guild.SelfAssignableRoles.Single(ro => ro.RoleId == role.Id);
+                    guild.SelfAssignableRoles.Remove(r);
+                    //await db.SaveChangesAsync();
                 }
-
                 else
                 {
-                    guild.SelfAssignableRoles.Remove(guild.SelfAssignableRoles.First(r => r.RoleId == role.Id));
-                    removedList.Add(role.Mention);
+                    added.Add(role.Mention);
+                    var r = new SelfAssignableRole {RoleId = role.Id};
+                    guild.SelfAssignableRoles.Add(r);
+                    //await db.SaveChangesAsync();
                 }
+            }
+            await db.SaveChangesAsync();
+   
+            string addedString = string.IsNullOrWhiteSpace(added.Join('\n')) ? "none" :  added.Join('\n');
+            string removedString = string.IsNullOrWhiteSpace(removed.Join('\n')) ? "none" : removed.Join('\n');
 
-            if (addedList.Any())
-                foreach (string addedRole in addedList)
-                    ebStringBuilder.Append(addedRole);
-            else
-                ebStringBuilder.Append("none");
-
-            ebStringBuilder.AppendLine();
-            ebStringBuilder.AppendLine("Removed Roles: " + (removedList.Any() ? "" : "none"));
-
-            foreach (string removedRole in removedList) ebStringBuilder.Append(removedRole);
-
-            await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                                          .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                                          .WithDescription(ebStringBuilder.ToString())
-                                          .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                          .WithTimestamp(DateTime.Now));
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                        .WithColor(GetEmbedColor(roles))
+                                        .WithTitle("Self-Assignable roles")
+                                        .AddField("Added:", addedString, true)
+                                        .AddField("Removed:", removedString, true);
         }
+
+        private static DiscordColor GetEmbedColor(DiscordRole[] roles) =>
+            roles.Length is 1 ? roles[0].Color : DiscordColor.Gold;
     }
 }

@@ -7,65 +7,39 @@
     <Platforms>AnyCPU;x64</Platforms>
     <IsPackable>false</IsPackable>
     <Product>Silk!</Product>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<TieredCompilation>false</TieredCompilation>
-		<Authors>VelvetThePanda, CalebABG</Authors>
-		<Company>The Silk Devs Team</Company>
-		<PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
-		<UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
-	</PropertyGroup>
-	
+  <PropertyGroup>
+    <TieredCompilation>false</TieredCompilation>
+    <Authors>VelvetThePanda, CalebABG</Authors>
+    <Company>The Silk Devs Team</Company>
+    <PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
+    <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
-	
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DocumentationFile>bin\Release\Silk_Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="config\**" />
-    <Compile Remove="Migrations\**" />
-    <Compile Remove="Silk!\**" />
     <EmbeddedResource Remove="config\**" />
     <EmbeddedResource Remove="Migrations\**" />
     <EmbeddedResource Remove="Silk!\**" />
-    <None Remove="config\**" />
-    <None Remove="Migrations\**" />
-    <None Remove="Silk!\**" />
-    <Compile Remove="Utilities\ICopyable.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Database\Models\BannedMember.cs" />
-  </ItemGroup>
 
   <ItemGroup>
-    <None Remove="721518523704410202.serverconfig" />
-    <None Remove="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config" />
     <None Remove="config.ini" />
-    <None Remove="Database\Models\NewFile1.txt" />
-    <None Remove="dbLogin" />
     <None Remove="docker-compose.yml" />
-    <None Remove="NewFile1.txt" />
-    <None Remove="Token.txt" />
+    <None Remove="Silk!\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Migrations\20201114063614_InitialMigration.cs" />
-    <Compile Include="Migrations\20201114063614_InitialMigration.Designer.cs" />
-    <Compile Include="Migrations\20201117103922_UserSnowflake.cs" />
-    <Compile Include="Migrations\20201117103922_UserSnowflake.Designer.cs" />
-    <Compile Include="Migrations\20201118092450_no.cs" />
-    <Compile Include="Migrations\20201118092450_no.Designer.cs" />
-    <Compile Include="Migrations\20201119123405_Something.cs" />
-    <Compile Include="Migrations\20201119123405_Something.Designer.cs" />
-    <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Content Include="docker-compose.yml" />
     <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
@@ -102,12 +76,11 @@
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="config.ini" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
+    <ProjectReference Include="..\Silk_Items\Silk_Items.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,7 +88,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Tests\" />
+    <Compile Remove="Silk!\**" />
   </ItemGroup>
-
+  
 </Project>

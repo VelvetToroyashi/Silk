@@ -13,13 +13,13 @@ namespace SilkBot.Utilities
             Games = "🎮 Games",
             Misc = "💡 Misc",
             // Todo: Add Emoji's for Categories
-            Server = " Server",
+            Server = CustomEmoji.Server + " Server",
             Roles = " Roles",
             Bot = CustomEmoji.Bot + " Bot",
             Economy = CustomEmoji.Money + " Economy";
 
         public static readonly IReadOnlyList<string> Order
-            = new string[] {Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy};
+            = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy};
     }
 
     public static class CustomEmoji
@@ -40,15 +40,16 @@ namespace SilkBot.Utilities
 
 
         public const string
-            Check = "<:check:410612082929565696>",
-            Cross = "<:cross:410612082988285952>",
+            Check   = "<:check:410612082929565696>",
+            Cross   = "<:cross:410612082988285952>",
             Loading = "<a:loading:410612084527595520>",
-            Help = "<:help:438481218674229248>",
-            Bot = "<:bot:777726275161817088>",
-            Money = "<:money:777725904758505482>",
+            Help    = "<:help:438481218674229248>",
+            Bot     = "<:bot:777726275161817088>",
+            Money   = "<:money:777725904758505482>",
             Discord = "<:developer:777724802793996298>",
-            GitHub = "<:github:409803419717599234>",
-            Staff = "<:DiscordStaff:777722613966438442>",
-            Empty = "<:Empty:445680384592576514>";
+            GitHub  = "<:github:409803419717599234>",
+            Staff   = "<:DiscordStaff:777722613966438442>",
+            Server  = "<:Server:787537636007870485>",
+            Empty   = "<:Empty:445680384592576514>";
     }
 }

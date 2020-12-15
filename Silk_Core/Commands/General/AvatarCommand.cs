@@ -12,6 +12,7 @@ namespace SilkBot.Commands.General
     public class AvatarCommand : BaseCommandModule
     {
         [Command("avatar")]
+        [Description("Show your, or someone else's avatar!")]
         public async Task GetAvatarAsync(CommandContext ctx, [Description("Test pog?")] DiscordUser user)
         {
             DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
@@ -23,7 +24,7 @@ namespace SilkBot.Commands.General
         }
         
         [Command("avatar")]
-        [Description("Show your, or someone else's avatar!")]
+        
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string text = null)
         {
             if (string.IsNullOrEmpty(text))

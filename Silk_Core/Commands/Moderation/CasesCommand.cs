@@ -12,9 +12,11 @@ using SilkBot.Commands.Moderation.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Services;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Moderation
 {
+    [Expiremental]
     public class CasesCommand : BaseCommandModule
     {
         private readonly InfractionService _infractionService;
@@ -53,18 +55,7 @@ namespace SilkBot.Commands.Moderation
                                                                  $"Enforcer: <@{i.Enforcer}> ({i.Enforcer})\n" +
                                                                  $"Type: {i.InfractionType.Humanize()}\n" +
                                                                  $"Reason: {i.Reason}\n")
-                                                             .JoinString('\n'));
-                foreach (IGrouping<InfractionType, InfractionType> inf in groupedInfractions)
-                    switch (inf.Key)
-                    {
-                        case InfractionType.Kick:
-                            embed.AddField("Kicks:", inf.Count().ToString());
-                            break;
-                        case InfractionType.Mute:
-                            embed.AddField("Mutes", inf.Count().ToString());
-                            break;
-                    }
-
+                                                                .Join('\n'));
                 await ctx.RespondAsync(embed: embed);
             }
         }

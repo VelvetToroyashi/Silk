@@ -11,7 +11,6 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class DMCommand : BaseCommandModule
     {
-        [RequireOwner]
         [Command("DM")]
         public async Task DM(CommandContext ctx, ulong guildId, DiscordUser user, [RemainingText] string message)
         {
@@ -20,8 +19,8 @@ namespace SilkBot.Commands.General
 
             await member.Value.SendMessageAsync(message);
         }
-
-        [RequireOwner]
+        
+        [Hidden]
         [Command("DM")]
         public async Task DM(CommandContext ctx, DiscordUser user, [RemainingText] string message)
         {

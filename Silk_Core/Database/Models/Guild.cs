@@ -18,9 +18,9 @@ namespace SilkBot.Models
         public bool LogRoleChange { get; set; }
         [Required] [StringLength(5)] public string Prefix { get; set; }
 
-        public string InfractionFormat { get; set; }
+        public string InfractionFormat { get; set; } = string.Empty;
 
-        public ulong MuteRoleId { get; set; }
+        public ulong MuteRoleId { get; set; } 
         public ulong MessageEditChannel { get; set; }
 
         public ulong GeneralLoggingChannel { get; set; }

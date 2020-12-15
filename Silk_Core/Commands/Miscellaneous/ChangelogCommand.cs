@@ -15,12 +15,10 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
 {
-    [Category(Categories.Misc)]
-    [Group("changelog")]
-    public class ChangelogCommand : BaseCommandModule
+    [Obsolete("This command is now deprecated, as changelogs will be managed via the Web-Dashboard.")]
+    public class ChangelogCommand
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-
         public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory)
         {
             _dbFactory = dbFactory;
@@ -30,7 +28,11 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task GetChangeLog(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            if (db.ChangeLogs.Count() is 0) return;
+            if (db.ChangeLogs.Count() is 0)
+            {
+                await ctx.RespondAsync("It's quite empty here. Perhaps you're using the internal test bot, or this is a self-hosted instance. There are no changelogs to speak of here. :)").ConfigureAwait(false);
+                return;
+            }
 
             DiscordEmbed embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
             await ctx.RespondAsync(embed: embed);
@@ -53,7 +55,7 @@ namespace SilkBot.Commands.Miscellaneous
             }
         }
 
-        private static async ValueTask<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
+        private static async Task<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
         {
             var creationService = context.Services.Get<DiscordEmojiCreationService>();
             IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
@@ -72,11 +74,11 @@ namespace SilkBot.Commands.Miscellaneous
         private static Changelog CreateChangelog(string cl)
         {
             var delimiter = "|";
-            string[] splitOptions = cl.Split(delimiter);
-            string additions = splitOptions[0];
-            var removals = (string) splitOptions.GetNext();
-            var authors = (string) splitOptions.GetNext();
-            var version = (string) splitOptions.GetNext();
+            string[] splitOptions   = cl.Split(delimiter);
+            string additions        = splitOptions[0];
+            string removals         = splitOptions.GetNext();
+            string authors          =  splitOptions.GetNext();
+            string version          =  splitOptions.GetNext();
             DateTime time = DateTime.Now;
             var changelog = new Changelog
                 {Additions = additions, Removals = removals, Authors = authors, Version = version, Time = time};

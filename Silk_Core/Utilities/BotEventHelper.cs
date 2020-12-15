@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -15,6 +14,8 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Bot;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 
@@ -27,15 +28,11 @@ namespace SilkBot.Utilities
         private readonly DiscordShardedClient _client;
         private readonly Stopwatch _time = new();
         private readonly object _obj = new();
-        private volatile bool _logged = false;
-        private int _currentMemberCount = 0;
+        private bool _hasLoggedCompletion;
+        private int _currentMemberCount;
         private int expectedMembers;
         private int cachedMembers;
-
-
-        public static List<Action> CacheStaff { get; } = new();
-        public static Task GuildDownloadTask { get; private set; } = new(() => Task.Delay(-1));
-
+        private int guildMembers;
         public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory,
             ILogger<BotEventHelper> logger)
         {
@@ -50,24 +47,27 @@ namespace SilkBot.Utilities
             _client.ClientErrored += OnClientErrored;
             foreach (CommandsNextExtension c in _client.GetCommandsNextAsync().GetAwaiter().GetResult().Values)
                 c.CommandErrored += OnCommandErrored;
-            _client.GuildAvailable += Cache;
-            _logger.LogTrace("Subscribed to GUILD_AVAILABLE");
             _client.MessageDeleted += BotEvents.OnMessageDeleted;
             _logger.LogTrace("Subscribed to MESSAGE_DELETED");
-            _client.GuildCreated += BotEvents.OnGuildJoin;
-            _logger.LogTrace("Subscribed to GUILD_CREATED");
         }
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            if (e.Exception is not CommandNotFoundException or Exception)
+            
+            if (e.Exception is CommandNotFoundException)
             {
-                if (e.Exception.Message is "Could not find a suitable overload for the command.") return;
-                if (e.Exception is ArgumentException ex)
-                    await e.Context.RespondAsync(string.IsNullOrEmpty(ex.Message)
-                        ? "Seems like you provided an incorrect parameter."
-                        : ex.Message);
+                _logger.LogWarning($"Unkown command: {e.Command.Name}. Arguments: {e.Context.RawArgumentString}");
+                return;
+            }
 
+            if (e.Exception.Message is "No matching subcommands were found, and this group is not executable.") 
+            {
+                _logger.LogWarning($"Unknown subcommand: {e.Command.Name} | Arguments: {e.Context.RawArgumentString}");
+                return;
+            }
+            
+            if (e.Exception is not CommandNotFoundException)
+            {
                 if (e.Exception is ChecksFailedException cf)
                     foreach (CheckBaseAttribute check in cf.FailedChecks)
                         switch (check)
@@ -111,17 +111,18 @@ namespace SilkBot.Utilities
 
             _ = Task.Run(async () =>
             {
+                guildMembers += e.Guild.MemberCount;
+                
                 using SilkDbContext db = _dbFactory.CreateDbContext();
                 var sw = Stopwatch.StartNew();
-                GuildModel guild = db.Guilds.AsQueryable().Include(g => g.Users)
+                GuildModel? guild = db.Guilds.AsQueryable().Include(g => g.Users)
                                      .FirstOrDefault(g => g.Id == e.Guild.Id);
                 sw.Stop();
-                _logger.LogTrace(
-                    $"Retrieved guild from database in {sw.ElapsedMilliseconds} ms; guild {(guild is not null ? "does" : "does not")} exist.");
+                _logger.LogTrace($"Retrieved guild from database in {sw.ElapsedMilliseconds} ms.");
 
                 if (guild is null)
                 {
-                    guild = new GuildModel {Id = e.Guild.Id, Prefix = Bot.SilkDefaultCommandPrefix};
+                    guild = new (){Id = e.Guild.Id, Prefix = Bot.DefaultCommandPrefix};
                     db.Guilds.Add(guild);
                 }
 
@@ -131,18 +132,16 @@ namespace SilkBot.Utilities
                 await db.SaveChangesAsync();
 
                 sw.Stop();
-                if (sw.ElapsedMilliseconds > 400)
-                    _logger.LogWarning(
-                        $"Query took longer than allocated [250ms] time with tolerance of [150ms]. Query time: [{sw.ElapsedMilliseconds} ms]");
+                if (sw.ElapsedMilliseconds > 300)
+                    _logger.LogWarning($"Databse query took longer than expected. (Expected <300ms, took {sw.ElapsedMilliseconds} ms)");
                 _logger.LogDebug(
-                    $"Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++_currentMemberCount}/{c.Guilds.Count}] | Time [{sw.ElapsedMilliseconds}ms]");
-                if (_currentMemberCount == c.Guilds.Count && !_logged)
+                    $"Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++_currentMemberCount}/{c.Guilds.Count}] | {sw.ElapsedMilliseconds}ms");
+                if (_currentMemberCount == c.Guilds.Count && !_hasLoggedCompletion)
                 {
-                    _logged = true;
+                    _hasLoggedCompletion = true;
                     _time.Stop();
                     _logger.LogTrace("Cache run complete.");
-                    _logger.LogDebug(
-                        $"Expected [{expectedMembers}] members to be cached got [{cachedMembers}] instead. Cache run took {_time.ElapsedMilliseconds} ms.");
+                    if(expectedMembers < cachedMembers) _logger.LogWarning($"{expectedMembers} members flagged as staff from iterating over {guildMembers} members. [{cachedMembers}/{expectedMembers}] saved to db.");
                 }
             });
             return Task.CompletedTask;
@@ -151,18 +150,14 @@ namespace SilkBot.Utilities
 
         private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.MuteMembers) && !m.IsBot);
-            lock (_obj)
-            {
-                expectedMembers += staff.Count();
-            }
-
+            IEnumerable<DiscordMember> staff = members.Where(m => m.HasPermission(Permissions.KickMembers & Permissions.ManageRoles) && !m.IsBot);
+            
             foreach (DiscordMember member in staff)
             {
                 var flags = UserFlag.Staff;
-                if (member.HasPermission(Permissions.Administrator)) flags.Add(UserFlag.EscalatedStaff);
+                if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
 
-                UserModel user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
+                UserModel? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.Has(UserFlag.Staff)) // Has flag
@@ -173,10 +168,7 @@ namespace SilkBot.Utilities
                 else
                 {
                     guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
-                    lock (_obj)
-                    {
-                        cachedMembers++;
-                    }
+                    
                 }
             }
         }

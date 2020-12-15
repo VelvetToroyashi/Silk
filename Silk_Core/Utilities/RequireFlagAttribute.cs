@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
+using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 
@@ -29,6 +31,7 @@ namespace SilkBot.Utilities
 
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
+            if (help) return help;
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
             using SilkDbContext

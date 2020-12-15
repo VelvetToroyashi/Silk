@@ -70,35 +70,17 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<string>("InstanceState")
-                        .HasColumnType("jsonb");
-
                     b.Property<decimal?>("OwnerId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("State")
+                        .HasColumnType("jsonb");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("SilkBot.Database.Models.Items.Foobar", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Foobars");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
@@ -261,7 +243,6 @@ namespace SilkBot.Migrations
             modelBuilder.Entity("SilkBot.Models.SelfAssignableRole", b =>
                 {
                     b.Property<decimal>("RoleId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("GuildModelId")

@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using SilkBot.Database.Models;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Miscellaneous
@@ -19,6 +20,7 @@ namespace SilkBot.Commands.Miscellaneous
         }
 
         [Command("nickname")]
+        [RequireFlag(UserFlag.Staff)]
         [Aliases("nick")]
         public async Task SetNickName(CommandContext ctx, DiscordMember target, [RemainingText] string nick)
         {

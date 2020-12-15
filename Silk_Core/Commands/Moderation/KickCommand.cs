@@ -35,9 +35,9 @@ namespace SilkBot.Commands.Moderation
 
         [Command]
         [RequireBotPermissions(Permissions.KickMembers)]
-        [Description("Boot someone from the guild! Caller must have kick members permission.")]
+        [Description("Boot someone from the guild! Requires kick members permission.")]
         public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user,
-            [RemainingText] [Description("The reason the user is to be kicked from the guild")]
+            [RemainingText, Description("The reason the user is to be kicked from the guild")]
             string reason = null)
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
@@ -50,22 +50,21 @@ namespace SilkBot.Commands.Moderation
                 return;
             }
             
-            if (user.IsAbove(bot))
+            if (user.IsAbove(bot) || ctx.User == user)
             {
                 bool isBot = user == bot;
                 bool isOwner = user == ctx.Guild.Owner;
                 bool isMod = user.HasPermission(Permissions.KickMembers);
                 bool isAdmin = user.HasPermission(Permissions.Administrator);
+                bool isCurrent = ctx.User == user;
                 string errorReason = user.IsAbove(bot) switch
                 {
-                    true when isBot     => "I wish I could kick myself, but I sadly cannot.",
-                    true when isOwner   => $"I can't kick the owner ({user.Mention}) out of their own server!",
-                    true when isMod     =>
-                        $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
-                    true when isAdmin   =>
-                        $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
-                    _                   =>
-                        "`UNCAUGHT_CASE_FAILSAFE` That's all I know. Translation: Something has gone wrong, and it's not for any reason I'm aware of."
+                    _ when isBot     => "I wish I could kick myself, but I sadly cannot.",
+                    _ when isOwner   => $"I can't kick the owner ({user.Mention}) out of their own server!",
+                    _ when isMod     => $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
+                    _ when isAdmin   => $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
+                    _ when isCurrent => "Very funny, I like you, but no, you can't kick yourself.",
+                    _                => "Something has gone really wrong, and I don't know what *:(*"
                 };
 
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()

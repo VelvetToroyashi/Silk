@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -7,9 +6,8 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
 using SilkBot.Utilities;
-using static SilkBot.Bot;
 
-namespace SilkBot.Commands.Bot
+namespace SilkBot.Tools
 {
     public sealed class MessageCreationHandler
     {
@@ -60,10 +58,6 @@ namespace SilkBot.Commands.Bot
 
                     
                 }
-
-                if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
-                    await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
-                
             });
         }
 
@@ -71,6 +65,7 @@ namespace SilkBot.Commands.Bot
         {
             if (config.WhitelistsInvites)
             {
+                
                 string messageContent = e.Message.Content;
                 if (messageContent.Contains("discord.gg/") || messageContent.Contains("discord.com/invite/"))
                 {
