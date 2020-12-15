@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
+using JetBrains.Annotations;
 using SilkBot.Commands.Furry.Utilities;
 using SilkBot.Utilities;
 

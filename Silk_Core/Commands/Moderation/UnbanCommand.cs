@@ -4,6 +4,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Tools;
 using SilkBot.Utilities;
@@ -21,10 +22,15 @@ namespace SilkBot.Commands.Moderation
         }
 
         [Command("unban")]
-        [RequirePermissions(Permissions.BanMembers)]
-        public async Task UnBan(CommandContext ctx, DiscordUser user,
-            [RemainingText] string reason = "No reason given.")
+        [RequireFlag(UserFlag.Staff)]
+        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
+            if (!ctx.Member.HasPermission(Permissions.BanMembers))
+            {
+                await ctx.RespondAsync("[You] Can't ban, can't unban. Sorry.").ConfigureAwait(false);
+                return;
+            }
+            
             if ((await ctx.Guild.GetBansAsync()).Select(b => b.User.Id).Contains(user.Id))
             {
                 await user.UnbanAsync(ctx.Guild, reason);

@@ -13,7 +13,7 @@ namespace SilkBot.Services
 {
     public class MemberSelectorService
     {
-        public async Task<DiscordUser?> SelectUser(CommandContext ctx, IEnumerable<DiscordUser> users)
+        public async Task<DiscordUser> SelectUser(CommandContext ctx, IEnumerable<DiscordUser> users)
         {
             DiscordEmbedBuilder selectorEmbed = new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue)
                                                                          .WithTitle(

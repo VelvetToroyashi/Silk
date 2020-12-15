@@ -1,19 +1,20 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+
 using SilkBot.Utilities;
 
-namespace SilkBot.Economy.Shop
+namespace SilkBot.Commands.Economy.Shop
 {
-    
-    [Group("shop")]
     [Category(Categories.Economy)]
+    [Group("shop")]
     public partial class ShopCommand : BaseCommandModule
     {
+        //Basically the shop command will serve as a command processor.//
         [GroupCommand]
         public async Task Shop(CommandContext ctx)
         {
-            //TODO: Show glaobal shop.
+            await ctx.RespondAsync("Command usage:\n\t\t`shop [global | view <name> | create | delete]`");
         }
     }
 
@@ -22,6 +23,7 @@ namespace SilkBot.Economy.Shop
         [Command]
         public async Task Global(CommandContext ctx)
         {
+            
             await ctx.RespondAsync("Placeholder global shop goes here");
         }
     }

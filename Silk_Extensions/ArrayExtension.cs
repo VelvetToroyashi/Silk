@@ -6,7 +6,7 @@ namespace SilkBot.Extensions
     {
         private static int index = 0;
 
-        public static object GetNext(this object[] o)
+        public static T GetNext<T>(this T[] o)
         {
             index++;
             return index >= o.Length ? o.Last() : o[index];

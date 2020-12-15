@@ -17,6 +17,8 @@ using SilkBot.Commands;
 using SilkBot.Commands.Bot;
 using SilkBot.Database;
 using SilkBot.Services;
+using SilkBot.Tools;
+using SilkBot.Tools.EventHelpers;
 using SilkBot.Utilities;
 
 namespace SilkBot
@@ -30,7 +32,6 @@ namespace SilkBot
         //TODO: Fix all these usages, because they should be pulling from ctx.Services if possible. //
         public DiscordShardedClient Client          { get; set; }
         public static Bot? Instance                 { get; private set; }
-        public static DateTime StartupTime          { get; } = DateTime.Now;
         public static string DefaultCommandPrefix   { get; } = "s!";
         public static Stopwatch CommandTimer        { get; } = new();
         public SilkDbContext SilkDBContext          { get; private set; }
@@ -48,7 +49,7 @@ namespace SilkBot
         
         public Bot(IServiceProvider services, DiscordShardedClient client,
             ILogger<Bot> logger, BotEventHelper eventHelper, PrefixCacheService prefixService,
-            MessageCreationHandler msgHandler, CommandProcessorModule commandProcessor, IDbContextFactory<SilkDbContext> dbFactory)
+            MessageCreationHelper messageHelper, GuildHelper guildHelper, IDbContextFactory<SilkDbContext> dbFactory)
         {
             
             _sw.Start();
@@ -56,8 +57,12 @@ namespace SilkBot
             _logger = logger;
             _eventHelper = eventHelper;
             _prefixService = prefixService;
-            client.MessageCreated += msgHandler.OnMessageCreate;
-            client.MessageCreated += commandProcessor.OnMessageCreate;
+            
+            client.MessageCreated += messageHelper.Commands;
+            client.MessageCreated += messageHelper.Tickets;
+            
+            client.GuildAvailable += guildHelper.OnGuildAvailable;
+            client.GuildCreated += guildHelper.OnGuildJoin;
             SilkDBContext = dbFactory.CreateDbContext();
             SilkDBContext.Database.Migrate();
             Instance = this;
@@ -105,14 +110,16 @@ namespace SilkBot
             _eventHelper.CreateHandlers();
             
             var cmdNext = await Client.GetCommandsNextAsync();
-            foreach (CommandsNextExtension c in cmdNext.Values) c.SetHelpFormatter<HelpFormatter>();
-            foreach (CommandsNextExtension c in cmdNext.Values) c.RegisterConverter(new MemberConverter());
+            foreach (CommandsNextExtension c in cmdNext.Values)
+            {
+                c.SetHelpFormatter<HelpFormatter>(); 
+                c.RegisterConverter(new MemberConverter());
+            }
+            
             _logger.LogInformation("Client Initialized.");
-            _sw.Stop();
+            _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
-            _logger.LogInformation($"Startup time: {_sw.Elapsed.Seconds} seconds.");
-            
-            Client.Ready += async (c, e) => _logger.LogInformation("Client ready to proccess commands.");
+            Client.Ready += async (_, _) => _logger.LogInformation("Client ready to process commands.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

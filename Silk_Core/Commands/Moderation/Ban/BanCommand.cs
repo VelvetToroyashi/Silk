@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Utilities;
 
@@ -23,6 +23,8 @@ namespace SilkBot.Commands.Moderation.Ban
         }
 
         [Command("Ban")]
+        [RequireGuild]
+        [RequireFlag(UserFlag.Staff)]
         public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target,
             [RemainingText] string reason = "No reason given.")
         {

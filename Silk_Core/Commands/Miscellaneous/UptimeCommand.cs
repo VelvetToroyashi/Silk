@@ -16,7 +16,7 @@ namespace SilkBot.Commands.Miscellaneous
         public async Task UpTime(CommandContext ctx)
         {
             DateTime now = DateTime.Now;
-            TimeSpan uptime = now.Subtract(SilkBot.Bot.StartupTime);
+            TimeSpan uptime = now.Subtract(SilkBot.Program.Startup);
             await ctx.RespondAsync($"Running for `{uptime.Humanize(4, null, TimeUnit.Month, TimeUnit.Second)}.`");
         }
     }

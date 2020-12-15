@@ -8,50 +8,38 @@
     <IsPackable>false</IsPackable>
     <Product>Silk!</Product>
     <Nullable>enable</Nullable>
-    <AssemblyName>Silk.Core</AssemblyName>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<TieredCompilation>false</TieredCompilation>
-		<Authors>VelvetThePanda, CalebABG</Authors>
-		<Company>The Silk Devs Team</Company>
-		<PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
-		<UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
-	</PropertyGroup>
-	
+  <PropertyGroup>
+    <TieredCompilation>false</TieredCompilation>
+    <Authors>VelvetThePanda, CalebABG</Authors>
+    <Company>The Silk Devs Team</Company>
+    <PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
+    <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
-	
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DocumentationFile>bin\Release\Silk_Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="config\**" />
-    <Compile Remove="Migrations\**" />
-    <Compile Remove="Silk!\**" />
-    <Compile Include="Migrations\20201205224159_InitialMigration.cs" />
-    <Compile Include="Migrations\20201205224159_InitialMigration.Designer.cs" />
-    <Compile Include="Migrations\SilkDbContextModelSnapshot.cs" />
     <EmbeddedResource Remove="config\**" />
     <EmbeddedResource Remove="Migrations\**" />
     <EmbeddedResource Remove="Silk!\**" />
-    <None Remove="config\**" />
-    <None Remove="Migrations\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Remove="config.ini" />
+    <None Remove="docker-compose.yml" />
     <None Remove="Silk!\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Database\Models\BannedMember.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\Cinnamon\.nuget\packages\nlog.config\4.7.5\contentFiles\any\any\NLog.config" />
-    <None Remove="dbLogin" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Content Include="docker-compose.yml" />
     <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
@@ -60,13 +48,10 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.11" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -91,12 +76,11 @@
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="config.ini" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\Silk_Extensions\Silk_Extensions.csproj" />
+    <ProjectReference Include="..\Silk_Items\Silk_Items.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -104,7 +88,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Tests\" />
+    <Compile Remove="Silk!\**" />
   </ItemGroup>
-
+  
 </Project>

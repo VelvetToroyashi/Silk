@@ -16,72 +16,56 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class DiceRoll : BaseCommandModule
     {
-        [Command("DiceRoll")]
-        [HelpDescription("Allows you to roll dice!", "`!diceroll d5` → Rolls between 1 and 5.",
-            "`!diceroll 2d4` → Rolls 2 dice, between 1 and 4.",
-            "`!diceroll 2d4+6` → Rolls 2 dice, from 1 to 4, with 6 tacked on to the total.")]
-        public async Task RollDice(CommandContext ctx, [RemainingText] [HelpDescription("The dice to roll.")]
-            string DiceRoll)
+        [Command]
+        public async Task Random(CommandContext ctx, int max = 100) =>
+            await ctx.RespondAsync(new Random().Next(max).ToString()).ConfigureAwait(false);
+
+
+        private enum State
         {
-            if (DiceRoll is null)
-            {
-                await ctx.RespondAsync("see `[p]help` diceroll for usage, where `[p]` is the current prefix.");
-                return;
-            }
-
-            string changed = Regex.Replace(DiceRoll, @"([1-9]*)d([1-9]{0,4})", string.Empty);
-            changed = string.Join(", ", Regex.Matches(changed, @"([0-9])+"));
-
-            (List<List<string>> dieRolls, string result) = CalculateDiceValues(DiceRoll);
-            double total = new Expression(result).calculate();
-            var sb = new StringBuilder();
-
-            sb.Append(GetFormattedRollsString(dieRolls));
-            sb.Append($"*Modifiers applied: {(changed == "" ? "none" : changed)}* \n*Total: {total}*");
-            DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed(ctx, sb.ToString(), DiscordColor.Blurple);
-            await ctx.RespondAsync(embed: embed);
+            DiceMult,
+            DiceSign,
+            DiceSide,
+            Unknown,
+            DiceAddi,
+            Modifier
         }
-
-        public (List<List<string>> rollList, string rollString) CalculateDiceValues(string diceRollString)
+        
+        
+        //I'll get back to this later :c
+        [Command]
+        public async Task Roll(CommandContext ctx, [RemainingText] string roll)
         {
-            var rollList = new List<List<string>>();
-            string rollString = Regex.Replace(diceRollString, @"([1-9]*)d([1-9]{0,4})", m =>
+            // if (roll.Any(r => r is >= '0' and <= '9' and not 'd' or '+' or ' '))
+            //     throw new ArgumentException("That doesn't seem to be a valid roll..");
+            
+            State lastState = State.Unknown;
+
+            List<State> stateList = new();
+            
+            for (int i = 0; i < roll.Length; i++)
             {
-                var random = new Random();
-                string match = m.Value;
-                if (m.Value[0] == 'd') match = new string(match.Prepend('1').ToArray());
-
-                string[] split = match.ToLower().Split('d');
-                int dieCount = int.Parse(split[0]);
-                int dieSize = int.Parse(split[1]);
-
-                var totalRoll = 0;
-                var rolls = new List<string>();
-                for (var i = 0; i < dieCount; i++)
+                lastState = roll[i] switch
                 {
-                    int nextRoll = random.Next(1, dieSize + 1);
-                    totalRoll += nextRoll;
-                    rolls.Add($"Die {i + 1}: {nextRoll}");
-                }
-
-                rollList.Add(rolls);
-                //Now replace the expressions with their resolutions
-                return totalRoll.ToString();
-            }, RegexOptions.Compiled);
-            return (rollList, rollString);
-        }
-
-        public string GetFormattedRollsString(List<List<string>> rolls)
-        {
-            var sb = new StringBuilder();
-
-            foreach (List<string> rollList in rolls)
-            {
-                foreach (string roll in rollList) sb.AppendLine($":game_die: {roll}");
-                sb.AppendLine();
+                    '+'                                               => State.DiceAddi,
+                    'd'                                               => State.DiceSign,
+                    >= '1' or <= '0' when lastState is State.DiceAddi => State.Modifier,
+                    >= '1' or <= '0' when lastState is State.Unknown  => State.DiceMult,
+                    >= '1' or <= '0' when lastState is State.DiceSide => State.DiceSide,
+                    >= '1' or <= '0' when lastState is State.DiceSign => State.DiceSide,
+                    >= '1' or <= '0' when lastState is State.DiceMult => State.DiceMult,
+                    _                                                 => State.Unknown
+                };
+                stateList.Add(lastState);
             }
 
-            return sb.ToString();
+            await ctx.RespondAsync(
+                         stateList
+                             .GroupBy(i => i)
+                             .Select(s => $"{s.Key} ({s.Count()} times)")
+                             .JoinString("\n"))
+                             .ConfigureAwait(false);
+
         }
     }
 }

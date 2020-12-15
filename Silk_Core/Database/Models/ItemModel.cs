@@ -9,6 +9,6 @@ namespace SilkBot.Database.Models
         public int Id { get; set; }
         public GlobalUserModel Owner { get; set; }
         [Column(TypeName = "jsonb")]
-        public string InstanceState { get; set; }
+        public string State { get; set; }
     }
 }

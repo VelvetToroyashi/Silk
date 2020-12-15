@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
 using SilkBot.Database.Models;
 using SilkBot.Models;
 using SilkBot.Services;
@@ -32,8 +31,6 @@ namespace SilkBot.Commands.Bot
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel? config = db.Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id);
-
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {

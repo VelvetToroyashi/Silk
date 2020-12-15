@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
-using SilkBot.Extensions;
 
 namespace SilkBot.Utilities
 {
@@ -18,11 +17,12 @@ namespace SilkBot.Utilities
 
         public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
         {
-            var exists = ctx.Guild.Members.Values.SingleOrDefault(m =>
-                (m.Nickname ?? m.Username).Contains(value, StringComparison.OrdinalIgnoreCase));
-
-            if (exists is not null) return exists; 
-            else return await ConvertMemberAsync(value, ctx);
+            if (ctx.Guild.Members.Values.Any(m =>
+                m.Username.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                (m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false)))
+                return Optional.FromValue(ctx.Guild.Members.Values.First(m =>
+                    (m.Nickname ?? m.Username).Contains(value, StringComparison.OrdinalIgnoreCase)));
+            return await ConvertMemberAsync(value, ctx);
         }
 
 
