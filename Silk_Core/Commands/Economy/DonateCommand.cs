@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
 using SilkBot.Database.Models;
 using SilkBot.Utilities;
 

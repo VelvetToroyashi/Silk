@@ -6,7 +6,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
 using SilkBot.Models;
 
 namespace SilkBot.Commands.Moderation.Utilities

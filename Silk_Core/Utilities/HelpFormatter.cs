@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -45,21 +46,21 @@ namespace SilkBot.Utilities
                 embed.WithTitle("Silk Commands:");
 
 
-                IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands
+                IOrderedEnumerable<IGrouping<string, Command>> modules = Subcommands
                                                                          .GroupBy(x =>
                                                                              x.Module.ModuleType
                                                                               .GetCustomAttribute<CategoryAttribute>()
                                                                               ?.Name)
                                                                          .Where(x => x.Key != null)
                                                                          .OrderBy(x => Categories.Order.IndexOf(x.Key));
-                foreach (IGrouping<string?, Command> commands in modules)
+                foreach (IGrouping<string, Command> commands in modules)
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "), false);
             }
             else
             {
-                IReadOnlyList<CommandArgument>? args = Command.Overloads.OrderByDescending(x => x.Priority)
+                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority)
                                                              .FirstOrDefault()?.Arguments;
-                var title = new StringBuilder($"Help for `{Command.QualifiedName}");
+                var title = new StringBuilder($"Command `{Command.QualifiedName}");
                 foreach (CommandArgument arg in args)
                 {
                     title.Append(arg.IsOptional ? " [" : " <");
@@ -78,11 +79,11 @@ namespace SilkBot.Utilities
 
                 RequireUserPermissionsAttribute? userPerms =
                     Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
-                if (userPerms is not null)
+                if (userPerms != null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())
                     embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
-                if (Subcommands is not null)
+                if (Subcommands != null)
                     embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString(", "),
                         true);
             }

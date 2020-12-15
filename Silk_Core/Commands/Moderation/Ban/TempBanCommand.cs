@@ -8,7 +8,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using SilkBot.Commands.Moderation.Utilities;
-using SilkBot.Database;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Tools;

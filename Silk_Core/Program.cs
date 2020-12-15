@@ -11,10 +11,8 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
-using SilkBot.Commands;
 using SilkBot.Commands.Bot;
 using SilkBot.Commands.General;
-using SilkBot.Database;
 using SilkBot.Services;
 using SilkBot.Tools;
 using SilkBot.Utilities;
@@ -31,8 +29,7 @@ namespace SilkBot
         };
 
         public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
-
-   
+        
 
 
         public static IHostBuilder CreateHostBuilder(string[] args)
@@ -71,7 +68,6 @@ namespace SilkBot
                            services.AddSingleton<TicketService>();
                            services.AddSingleton<InfractionService>();
                            services.AddSingleton<MessageCreationHandler>();
-                           services.AddSingleton<CommandProcessorModule>();
                            services.AddSingleton<TimedEventService>();
                            services.AddSingleton(typeof(HttpClient), _ =>
                            {

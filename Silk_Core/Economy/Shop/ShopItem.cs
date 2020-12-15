@@ -1,18 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using SilkBot.Economy.Shop.Items.Interfaces;
+﻿using System;
+using SilkBot.Economy.Shop.Items;
 
-namespace SilkBot.Economy.Shop
+namespace SilkBot.Commands.Economy.Shop
 {
     public class ShopItem 
     {
-        public int Id { get; set; }
-        [NotMapped]
-        public IBaseItem Item { get; set; }
-        public int ItemId { get; set; }
+        private readonly IBaseItem _item;
+
+        public string Name { get => _item.Name; }
+        public string Description { get => _item.ShortDescription; }
+
+        public int Amount { get; set; }
         
-        public string Name { get; }
-        public string Description { get; }
-        public int Price { get; set; }
-        
+
+        public ShopItem(IBaseItem item, int initialAmount)
+        {
+            _item = item;
+            Amount = initialAmount;
+        }
+
     }
 }

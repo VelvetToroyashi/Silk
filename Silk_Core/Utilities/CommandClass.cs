@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
 
 namespace SilkBot.Utilities
 {

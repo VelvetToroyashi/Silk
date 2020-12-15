@@ -1,11 +1,13 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.General;
-using SilkBot.Services;
+using SilkBot.Utilities;
+using static SilkBot.Bot;
 
 namespace SilkBot.Commands.Bot
 {
@@ -33,14 +35,34 @@ namespace SilkBot.Commands.Bot
             
             _ = Task.Run(async () =>
             {
+                //Silk specific, but feel free to use the same code, modified to fit your DB or other prefix-storing method.
                 if (e.Guild is not null)
                 {
+                    //Feel free to enable this for your own bot; Icba to do ratelimiting so people don't spam :^)
+                    if (e.Message.Content.Trim().ToLower().StartsWith("@someone"))
+                    {
+                        //try
+                        //{
+                        //    string msgContent = e.Message.Content;
+                        //    await e.Message.DeleteAsync();
+                        //    var rand = new Random();
+                        //    var users = e.Channel.Users.Where(u => !u.IsBot).ToList();
+                        //    var selecteduser = users[rand.Next(users.Count())];
+                        //    msgContent = msgContent.Replace("@someone", selecteduser.Mention);
+                        //    await e.Channel.SendMessageAsync(msgContent + $"    ||This message was sent by {e.Author.Username} ({e.Author.Id})||");
+                        //}
+                        //catch { }
+                    }
+
                     GuildConfiguration config = await _guildCache.GetConfigAsync(e.Guild.Id);
+
                     CheckForInvite(e, config);
+
+                    
                 }
 
-                if (_ticketService.HasOpenTicket(e.Message.Channel, e.Message.Author.Id))
-                    await _ticketService.RespondToInferredTicketAsync(c, e.Message.Author.Id, e.Message.Content);
+                if (_ticketService.CheckForTicket(e.Message.Channel, e.Message.Author.Id))
+                    await _ticketService.RespondToBlindTicketAsync(c, e.Message.Author.Id, e.Message.Content);
                 
             });
         }

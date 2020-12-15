@@ -3,15 +3,12 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using SilkBot.Database;
 
 namespace SilkBot.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    [Migration("20201205224159_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20201118092450_no")]
+    partial class no
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -29,22 +26,18 @@ namespace SilkBot.Migrations
                         .UseIdentityByDefaultColumn();
 
                     b.Property<string>("Additions")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Authors")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ChangeTime")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Removals")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Version")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -69,25 +62,28 @@ namespace SilkBot.Migrations
                     b.ToTable("GlobalUsers");
                 });
 
-            modelBuilder.Entity("SilkBot.Database.Models.ItemModel", b =>
+            modelBuilder.Entity("SilkBot.Database.Models.Items.Item", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<string>("InstanceState")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
 
-                    b.Property<decimal>("OwnerId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.ToTable("Item");
 
-                    b.ToTable("Items");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Item");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
@@ -98,13 +94,12 @@ namespace SilkBot.Migrations
                         .UseIdentityByDefaultColumn();
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("Sender")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<int>("TicketModelId")
+                    b.Property<int?>("TicketModelId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -141,59 +136,12 @@ namespace SilkBot.Migrations
             modelBuilder.Entity("SilkBot.Database.Models.TicketResponderModel", b =>
                 {
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("ResponderId")
                         .HasColumnType("numeric(20,0)");
 
                     b.ToTable("TicketResponderModel");
-                });
-
-            modelBuilder.Entity("SilkBot.Database.Models.UserShopModel", b =>
-                {
-                    b.Property<decimal>("OwnerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsPremium")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("ItemsSold")
-                        .HasColumnType("integer");
-
-                    b.HasKey("OwnerId");
-
-                    b.ToTable("Shops");
-                });
-
-            modelBuilder.Entity("SilkBot.Economy.Shop.ShopItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("UserShopModelOwnerId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserShopModelOwnerId");
-
-                    b.ToTable("ShopItem");
                 });
 
             modelBuilder.Entity("SilkBot.Models.Ban", b =>
@@ -206,7 +154,10 @@ namespace SilkBot.Migrations
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<string>("GuildId")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("GuildId1")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Reason")
@@ -217,7 +168,7 @@ namespace SilkBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("GuildId1");
 
                     b.HasIndex("UserInfoDatabaseId");
 
@@ -231,11 +182,10 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal?>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Word")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -266,7 +216,6 @@ namespace SilkBot.Migrations
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("InfractionFormat")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("LogMessageChanges")
@@ -320,9 +269,6 @@ namespace SilkBot.Migrations
                     b.Property<decimal>("Enforcer")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<DateTime>("InfractionTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -330,20 +276,14 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("UserDatabaseId")
+                    b.Property<long?>("UserDatabaseId")
                         .HasColumnType("bigint");
-
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserDatabaseId");
-
-                    b.HasIndex("GuildId", "UserId");
 
                     b.ToTable("UserInfractionModel");
                 });
@@ -358,7 +298,7 @@ namespace SilkBot.Migrations
                     b.Property<int>("Flags")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal?>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("Id")
@@ -378,11 +318,10 @@ namespace SilkBot.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal?>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Link")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -392,42 +331,27 @@ namespace SilkBot.Migrations
                     b.ToTable("WhiteListedLink");
                 });
 
-            modelBuilder.Entity("SilkBot.Database.Models.ItemModel", b =>
+            modelBuilder.Entity("SilkBot.Database.Models.Items.Foobar", b =>
                 {
-                    b.HasOne("SilkBot.Database.Models.GlobalUserModel", "Owner")
-                        .WithMany("Items")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("SilkBot.Database.Models.Items.Item");
 
-                    b.Navigation("Owner");
+                    b.HasDiscriminator().HasValue("Foobar");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketMessageHistoryModel", b =>
                 {
                     b.HasOne("SilkBot.Database.Models.TicketModel", "TicketModel")
                         .WithMany("History")
-                        .HasForeignKey("TicketModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TicketModelId");
 
                     b.Navigation("TicketModel");
-                });
-
-            modelBuilder.Entity("SilkBot.Economy.Shop.ShopItem", b =>
-                {
-                    b.HasOne("SilkBot.Database.Models.UserShopModel", null)
-                        .WithMany("Items")
-                        .HasForeignKey("UserShopModelOwnerId");
                 });
 
             modelBuilder.Entity("SilkBot.Models.Ban", b =>
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("Bans")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuildId1");
 
                     b.HasOne("SilkBot.Models.UserModel", "UserInfo")
                         .WithMany()
@@ -442,9 +366,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("BlackListedWords")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });
@@ -460,9 +382,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.UserModel", "User")
                         .WithMany("Infractions")
-                        .HasForeignKey("UserDatabaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserDatabaseId");
 
                     b.Navigation("User");
                 });
@@ -471,9 +391,7 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("Users")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });
@@ -482,26 +400,14 @@ namespace SilkBot.Migrations
                 {
                     b.HasOne("SilkBot.Models.GuildModel", "Guild")
                         .WithMany("WhiteListedLinks")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
-                });
-
-            modelBuilder.Entity("SilkBot.Database.Models.GlobalUserModel", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("SilkBot.Database.Models.TicketModel", b =>
                 {
                     b.Navigation("History");
-                });
-
-            modelBuilder.Entity("SilkBot.Database.Models.UserShopModel", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("SilkBot.Models.GuildModel", b =>

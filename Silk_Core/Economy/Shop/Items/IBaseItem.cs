@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 
-namespace SilkBot.Economy.Shop.Items.Interfaces
+namespace SilkBot.Economy.Shop.Items
 {
     public interface IBaseItem
     {

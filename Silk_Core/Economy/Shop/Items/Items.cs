@@ -3,7 +3,6 @@
     // Enum used for indexing items. //
     public enum Items
     {
-        Potion,
-        Sword
+        Potion
     }
 }

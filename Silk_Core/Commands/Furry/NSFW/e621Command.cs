@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+using JetBrains.Annotations;
 using SilkBot.Commands.Furry.Utilities;
 using SilkBot.Utilities;
 
@@ -46,9 +47,10 @@ namespace SilkBot.Commands.Furry.NSFW
             }
 
             eBooruPostResult result;
+            
             if (this.username is null)
                 result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
-            else result = await this.DoKeyedQueryAsync(query, this._config.e6API.Key, true);
+            else result = await this.DoKeyedQueryAsync(query, this.username, true);
             
             if (result is null || result.Posts.Count is 0)
             {

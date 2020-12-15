@@ -4,7 +4,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SilkBot.Economy.Shop.Items;
-using SilkBot.Economy.Shop.Items.Interfaces;
 
 namespace SilkBot.Commands.Miscellaneous
 {
@@ -12,7 +11,7 @@ namespace SilkBot.Commands.Miscellaneous
     {
         public static Dictionary<ulong, List<IBaseItem>> items = new();
         
-        
+        [Command]
         public async Task Inventory(CommandContext ctx)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloGreen)

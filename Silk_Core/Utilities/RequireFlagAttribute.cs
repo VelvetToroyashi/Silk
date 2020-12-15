@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
-using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
 

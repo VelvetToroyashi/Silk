@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using SilkBot.Database.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SilkBot.Models
 {

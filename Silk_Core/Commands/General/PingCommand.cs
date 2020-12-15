@@ -5,7 +5,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Database;
 using SilkBot.Utilities;
 
 
@@ -30,9 +29,9 @@ namespace SilkBot.Commands.General
                                         .WithTitle("Ping? Sure!")
                                         .WithColor(DiscordColor.Blue);
             var sw = Stopwatch.StartNew();
-            DiscordMessage message = await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
+            DiscordMessage message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
-            await Task.Delay(100);
+            await Task.Delay(200);
             embed.WithDescription(
                      $"***```cs\nBot Response Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
                      $"API Response Latency: {ctx.Client.Ping} ms.\n\n" +
