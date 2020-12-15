@@ -21,7 +21,7 @@ namespace SilkBot.Tools.EventHelpers
         private readonly PrefixCacheService _prefixService;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private bool startupCacheCompleted;
-        private volatile int currentGuild;
+        private int currentGuild;
         
         public GuildHelper(ILogger<GuildHelper> logger, PrefixCacheService prefixService, IDbContextFactory<SilkDbContext> dbFactory)
         {
@@ -36,7 +36,7 @@ namespace SilkBot.Tools.EventHelpers
             if (startupCacheCompleted) return;
             _ = Task.Run(async () =>
             {
-                _logger.LogDebug($"Beginning Cache Shard [{c.ShardId}/{c.ShardCount}] | Guild {++currentGuild}/");
+                _logger.LogDebug($"Beginning Cache Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
                 CacheStaffMembers(guild, e.Guild.Members.Values); 
@@ -114,7 +114,7 @@ namespace SilkBot.Tools.EventHelpers
                    ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages) 
                 || m.HasPermission(Permissions.Administrator) 
                 || m.IsOwner) && !m.IsBot));
-            _logger.LogDebug($"Captured {staff.Count()} members marked with staff flag.");
+            _logger.LogDebug($"{staff.Count()}/{members.Count()} members marked as staff.");
             
             foreach (DiscordMember member in staff)
             {
