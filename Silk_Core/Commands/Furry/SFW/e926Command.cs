@@ -17,7 +17,7 @@ namespace SilkBot.Commands.Furry.SFW
     [Cooldown(1, 15, CooldownBucketType.User)]
     public class e926Command : eBooruBaseCommand
     {
-        public e926Command(HttpClient client) : base(client)
+        public e926Command(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
             baseUrl = "https://e926.net/posts.json?tags=";
         }

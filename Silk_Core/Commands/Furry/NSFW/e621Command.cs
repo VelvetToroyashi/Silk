@@ -18,7 +18,7 @@ namespace SilkBot.Commands.Furry.NSFW
     {
         
         private readonly BotConfig _config;
-        public e621Command(HttpClient client, BotConfig config) : base(client)
+        public e621Command(IHttpClientFactory httpClientFactory, BotConfig config) : base(httpClientFactory)
         {
             baseUrl = "https://e621.net/posts.json?tags=";
             _config = config;
@@ -36,7 +36,8 @@ namespace SilkBot.Commands.Furry.NSFW
                 await ctx.RespondAsync("You can search 5 tags at a time!");
                 return;
             }
-            else if (amount > 10)
+
+            if (amount > 10)
             {
                 await ctx.RespondAsync("You can only request 10 images every 10 seconds.");
                 return;
@@ -57,6 +58,7 @@ namespace SilkBot.Commands.Furry.NSFW
             foreach (Post? post in posts)
             {
                 //if (post is null) continue;
+                // TODO: Handle Null Exception for parts of the post which may be null (i.e image source)
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithTitle(query)
                                             .WithDescription(

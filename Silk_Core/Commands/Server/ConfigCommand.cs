@@ -28,9 +28,9 @@ namespace SilkBot.Commands.Server
         private readonly HttpClient _client;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
-        public ConfigCommand(HttpClient client, IDbContextFactory<SilkDbContext> factory)
+        public ConfigCommand(IHttpClientFactory httpClientFactory, IDbContextFactory<SilkDbContext> factory)
         {
-            _client = client;
+            _client = httpClientFactory.CreateSilkClient();
             _dbFactory = factory;
         }
 

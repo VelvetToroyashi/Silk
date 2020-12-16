@@ -21,7 +21,7 @@ namespace SilkBot.Commands.General
             int messages = 5)
         {
             // Anyone who's got permission to manage channels might not be staff, so adding [RequireFlag(UserFlag.Staff)] needlessly permwalls it. //
-            if (!ctx.Member.HasPermission(Permissions.ManageChannels))
+            if (!ctx.Member.HasPermission(Permissions.ManageMessages))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                                               .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)

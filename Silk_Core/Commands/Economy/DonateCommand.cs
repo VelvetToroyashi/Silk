@@ -49,7 +49,7 @@ namespace SilkBot.Commands.Economy
                     "I'd love to duplicate money just as much as the next person, but we have an economy!");
             else if (sender.Cash < amount)
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
-            else if (amount >= 1000) await VerifyTransationAsync(ctx, sender, receiver, amount);
+            else if (amount >= 1000) await VerifyTransactionAsync(ctx, sender, receiver, amount);
             else await DoTransactionAsync(ctx, amount, sender, receiver);
 
             await db.SaveChangesAsync();
@@ -69,7 +69,7 @@ namespace SilkBot.Commands.Economy
             await ctx.RespondAsync(embed: embed);
         }
 
-        private async Task VerifyTransationAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
+        private async Task VerifyTransactionAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
             int amount)
         {
             // 'Complicated async logic here' //

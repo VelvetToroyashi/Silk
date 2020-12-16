@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Furry.Utilities
 {
@@ -18,9 +19,9 @@ namespace SilkBot.Commands.Furry.Utilities
         
         private protected readonly HttpClient _client;
 
-        public eBooruBaseCommand(HttpClient client)
+        public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
         {
-            _client = client;
+            _client = httpClientFactory.CreateSilkClient();
         }
 
         /// <summary>
