@@ -29,7 +29,7 @@ namespace SilkBot
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
-        public static string HttpClientName { get; } = "VelvetThePandaSilkBot";
+        public static string HttpClientName { get; } = "SilkBot";
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
