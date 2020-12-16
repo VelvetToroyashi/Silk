@@ -25,7 +25,7 @@ namespace SilkBot.Commands.Economy
         }
 
         [Command("Daily")]
-        [RequireGuild()]
+        [RequireGuild]
         public async Task DailyMoney(CommandContext ctx)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
