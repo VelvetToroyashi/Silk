@@ -58,7 +58,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// <param name="apiKey">The API key.</param>
         /// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string query, string apiKey, bool requireUsername = false)
+        private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
         {
             if (requireUsername)
                 _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");

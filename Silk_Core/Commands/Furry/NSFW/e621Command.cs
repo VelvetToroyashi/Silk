@@ -42,20 +42,21 @@ namespace SilkBot.Commands.Furry.NSFW
                 return;
             }
 
-            eBooruPostResult result;
+            eBooruPostResult? result;
             if (this.username is null)
                 result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
             else result = await this.DoKeyedQueryAsync(query, this._config.e6API.Key, true);
             
-            if (result is null || result.Posts.Count is 0)
+            if (result is null || result.Posts?.Count is 0)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
                 return;
             }
 
-            List<Post> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
-            foreach (Post post in posts)
+            List<Post?> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
+            foreach (Post? post in posts)
             {
+                //if (post is null) continue;
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithTitle(query)
                                             .WithDescription(
