@@ -40,8 +40,6 @@ namespace SilkBot
 
         public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
 
-   
-
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
