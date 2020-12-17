@@ -355,6 +355,7 @@ MigrationBackup/
 
 # Rider IDE
 .idea/
+.vscode/
 
 /Token.txt
 /Dockerfile

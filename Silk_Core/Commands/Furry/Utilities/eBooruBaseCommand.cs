@@ -1,31 +1,27 @@
 ﻿using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Furry.Utilities
 {
     public abstract class eBooruBaseCommand : BaseCommandModule
     {
-        private protected string baseUrl;
+        private protected string? baseUrl;
+        // Needed for e621.net //
+        private protected string? username;
+        
         private protected readonly HttpClient _client;
 
-        // Needed for e621.net //
-        private protected string username;
-
-
-        public eBooruBaseCommand(HttpClient client)
+        public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
         {
-            _client = client;
+            _client = httpClientFactory.CreateSilkClient();
         }
 
         /// <summary>
@@ -41,7 +37,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult> DoQueryAsync(string query)
+        private protected async Task<eBooruPostResult?> DoQueryAsync(string? query)
         {
             // Thanks to Spookdot on Discord for showing me this method existed. ~Velvet. //
             //var posts = await _client.GetFromJsonAsync<eBooruPostResult>($"{baseUrl}{query?.Replace(' ', '+')}");
@@ -49,8 +45,8 @@ namespace SilkBot.Commands.Furry.Utilities
             string result = await _client.GetStringAsync($"{baseUrl}{query?.Replace(' ', '+')}");
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
 
-            for (var i = 0; i < posts.Posts.Count; i++)
-                if (posts.Posts[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
+            for (var i = 0; i < posts.Posts?.Count; i++)
+                if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);
 
             return posts.Posts?.Count is 0 ? null : posts;
@@ -63,7 +59,7 @@ namespace SilkBot.Commands.Furry.Utilities
         /// <param name="apiKey">The API key.</param>
         /// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
         /// <returns></returns>
-        private protected async Task<eBooruPostResult> DoKeyedQueryAsync(string query, string apiKey, bool requireUsername = false)
+        private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
         {
             if (requireUsername)
                 _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
@@ -78,8 +74,8 @@ namespace SilkBot.Commands.Furry.Utilities
             string result = await _client.Send(request).Content.ReadAsStringAsync();
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
             
-            for (var i = 0; i < posts.Posts.Count; i++)
-                if (posts.Posts[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
+            for (var i = 0; i < posts.Posts?.Count; i++)
+                if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);
             // Still remove blank posts even after authenticating, in case they're blacklisted. //
 
@@ -93,22 +89,22 @@ namespace SilkBot.Commands.Furry.Utilities
         /// <param name="amount">The amount of posts to return.</param>
         /// <param name="seed">The seed for the <see cref="Random"/> used to pick posts, preferably being a casted message Id.</param>
         /// <returns>A list of mostly random posts from a given post result.</returns>
-        private protected async Task<List<Post>> GetPostsAsync(eBooruPostResult post, int amount, int seed = default)
+        private protected async Task<List<Post?>> GetPostsAsync(eBooruPostResult? post, int amount, int seed = default)
         {
             var rand = new Random(seed);
-            var posts = new List<Post>();
+            var posts = new List<Post?>();
 
             for (var i = 0; i < amount; i++)
             {
-                int r = rand.Next(post.Posts.Count);
-                posts.Add(post.Posts[r]);
-                post.Posts.RemoveAt(r);
+                int r = rand.Next(post?.Posts?.Count ?? 0);
+                if (post?.Posts?[i] is null) continue;
+                posts.Add(post.Posts?[r]);
+                post?.Posts?.RemoveAt(r);
             }
-
             return posts;
         }
 
-        private protected string GetSource(string source)
+        private protected string? GetSource(string? source)
         {
             if (source is null) return null;
             return Regex.Match(source, @"[A-z]+\.[A-z]+\/").Value[0..^1];

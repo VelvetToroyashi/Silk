@@ -11,54 +11,52 @@ using Microsoft.Extensions.Logging;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
 using SilkBot.Models;
-using SilkBot.Services;
 
 namespace SilkBot.Tools.EventHelpers
 {
     public class GuildHelper
     {
         private readonly ILogger<GuildHelper> _logger;
-        private readonly PrefixCacheService _prefixService;
+
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private bool startupCacheCompleted;
-        private volatile int currentGuild;
+        private int currentGuild;
         
-        public GuildHelper(ILogger<GuildHelper> logger, PrefixCacheService prefixService, IDbContextFactory<SilkDbContext> dbFactory)
+        public GuildHelper(ILogger<GuildHelper> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _logger = logger;
-            _prefixService = prefixService;
             _dbFactory = dbFactory;
         }
 
         // Run on startup to cache all members //
         public async Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
-            if (startupCacheCompleted) return;
-            _ = Task.Run(async () =>
-            {
-                _logger.LogDebug($"Beginning Cache Shard [{c.ShardId}/{c.ShardCount}] | Guild {++currentGuild}/");
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
-                GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
-                CacheStaffMembers(guild, e.Guild.Members.Values); 
-                await db.SaveChangesAsync();
-            });
+            if (startupCacheCompleted) return; // Prevent double logging when joining a new guild //
+            _ = Task.Run(async () => await DoCacheAsync(c, e));
+            startupCacheCompleted = currentGuild == c.Guilds.Count; 
         }
-        
         // Run when Silk! joins a new guild // 
-        public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
-        {
-            _ = Task.Run(async () =>
+        public  Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e) =>
+            Task.Run(async () =>
             {
                 
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
+                await DoCacheAsync(c, e);
                 await SendWelcomeMessage(c, e);
-                GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
-                CacheStaffMembers(guild, e.Guild.Members.Values);
-                await db.SaveChangesAsync();
-                //_prefixService.UpdatePrefix(e.Guild.Id, Bot.DefaultCommandPrefix);
-                // I don't think this should be needed, assuming I'm not totally inept. ~Velvet. //
             });
+
+        private async Task DoCacheAsync(DiscordClient c, GuildCreateEventArgs e)
+        {
+            _logger.LogDebug($"Beginning Cache Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
+            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildModel guild = await GetOrCreateGuildAsync(db, e.Guild.Id);
+            CacheStaffMembers(guild, e.Guild.Members.Values); 
+            await db.SaveChangesAsync();
+            
         }
+        
+
+        
+        
        
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
@@ -102,7 +100,6 @@ namespace SilkBot.Tools.EventHelpers
                 guild.Prefix = Bot.DefaultCommandPrefix;
                 db.Guilds.Add(guild);
             }
-            
             return guild;
         }
         
@@ -114,7 +111,7 @@ namespace SilkBot.Tools.EventHelpers
                    ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages) 
                 || m.HasPermission(Permissions.Administrator) 
                 || m.IsOwner) && !m.IsBot));
-            _logger.LogDebug($"Captured {staff.Count()} members marked with staff flag.");
+            _logger.LogDebug($"{staff.Count()}/{members.Count()} members marked as staff.");
             
             foreach (DiscordMember member in staff)
             {

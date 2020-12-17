@@ -6,7 +6,9 @@ using DSharpPlus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -27,6 +29,7 @@ namespace SilkBot
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
+        public static string HttpClientName { get; } = "SilkBot";
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
@@ -88,13 +91,18 @@ namespace SilkBot
                            
                            services.AddSingleton<SerilogLoggerFactory>();
                            services.AddSingleton<CommandProcessorModule>();
-                           
-                           services.AddSingleton(typeof(HttpClient), _ =>
+
+                           services.AddHttpClient(HttpClientName, client =>
                            {
-                               var client = new HttpClient();
                                client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.4");
-                               return client;
                            });
+                           
+                           // Sub out the default implementation filter with custom filter
+                           services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
+
+                           /* Can remove all filters with this line */
+                           // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
+
                            services.AddTransient(_ => new BotConfig(config));
                            
                            services.AddHostedService<Bot>();

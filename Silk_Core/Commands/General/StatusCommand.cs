@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using SilkBot.Exceptions;
 using SilkBot.Extensions;
 using SilkBot.Utilities;
 
@@ -34,9 +32,7 @@ namespace SilkBot.Commands.General
         public async Task Status(CommandContext ctx, string status)
         {
             var authUsers = new ulong[] {209279906280898562, 135747025000988672, 265096437937864705};
-            if (!authUsers.Any(id => id == ctx.User.Id))
-                throw new UnauthorizedUserException("Sorry, but only Velvet, Morgan, and Tami are allowed to change my status~");
-            else
+            if (authUsers.Any(id => id == ctx.User.Id))
             {
                 if (status is "clear")
                 {
@@ -61,11 +57,7 @@ namespace SilkBot.Commands.General
         public async Task Status(CommandContext ctx, ActivityType type, [RemainingText] string status)
         {
             var authUsers = new ulong[] {209279906280898562, 135747025000988672, 265096437937864705};
-            if (!authUsers.Any(id => id == ctx.User.Id))
-            {
-                throw new UnauthorizedUserException("You are not permitted to use this command!");
-            }
-            else
+            if (authUsers.Any(id => id == ctx.User.Id))
             {
                 var update = status.ToLower() is "clear" ? 
                      ctx.Client.UpdateStatusAsync() : 
@@ -83,11 +75,7 @@ namespace SilkBot.Commands.General
             if (!ctx.Channel.IsPrivate) await ctx.Channel.DeleteMessageAsync(ctx.Message);
 
             var authUsers = new ulong[] {209279906280898562, 135747025000988672, 265096437937864705};
-            if (!authUsers.Any(id => id == ctx.User.Id))
-            {
-                throw new UnauthorizedUserException("You are not permitted to use this command!");
-            }
-            else
+            if (authUsers.Any(id => id == ctx.User.Id))
             {
                 if (status.ToLower() is "clear")
                 {
