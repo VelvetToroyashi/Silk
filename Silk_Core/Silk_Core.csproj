@@ -35,7 +35,6 @@
 
 
   <ItemGroup>
-    <None Remove="appSettings.json" />
     <None Remove="config.ini" />
     <None Remove="docker-compose.yml" />
     <None Remove="Silk!\**" />

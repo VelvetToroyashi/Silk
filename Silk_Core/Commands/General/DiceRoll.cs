@@ -20,6 +20,8 @@ namespace SilkBot.Commands.General
         {
             public int TotalNumber;
             public int NoSides;
+
+            public Dice(int totalNo, int noSides) => (TotalNumber, NoSides) = (totalNo, noSides);
         }
 
         [Command]
@@ -32,7 +34,7 @@ namespace SilkBot.Commands.General
             var parser = new DiceParser(roll);
             var allDice = parser.Run();
 
-            // Test printing:
+            // TEST CODE
             var sb = new StringBuilder();
             for (int i = 0; i < allDice.Count; i++)
             {
@@ -56,27 +58,25 @@ namespace SilkBot.Commands.General
                 var result = new List<Dice>();
 
                 // Read all the dice.
-                do result.Add(ParseDice());
+                do
+                {
+                    result.Add(ParseDice());
+                }
                 while (ReadIf('+'));
 
                 // Ensure there's no junk data at the end.
-                if (Read() != EOT) throw new Exception($"Unexpected character {CurrentPosition}");
+                if (Read() != EOT) throw new Exception($"Unexpected character at position {CurrentPosition}!");
 
                 return result;
             }
 
             public Dice ParseDice()
             {
-                var res = new Dice();
-
-                res.TotalNumber = ReadNumberOr1();
-
-                // Make sure there's definitely a "d" in the middle.
+                var totalNo = ReadNumberOr1();
                 if (!ReadIf('d')) throw new Exception($"Unexpected character at position {CurrentPosition}!");
+                var noSides = ReadNumberOr1();
 
-                res.NoSides = ReadNumberOr1();
-
-                return res;
+                return new Dice(totalNo, noSides);
             }
         }
     }
