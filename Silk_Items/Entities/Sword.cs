@@ -2,8 +2,8 @@
 
 namespace Silk_Items.Entities
 {
-    public class Sword : Entity<IComponent>
+    public class Sword : Entity
     {
-        public Sword() => this.Add(new DamageComponent());
+        public Sword() => this.Add(new DamageIcomponent());
     }
 }

@@ -22,9 +22,8 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.General
 {
-    [Group]
     [Category(Categories.General)]
-    public class Ticket
+    public class Ticket 
     {
         private const string TERMINATION_REASON =
             "Your ticket has been manually terminated and is now void. No further information provided.";
@@ -68,8 +67,7 @@ namespace SilkBot.Commands.General
             }
         }
 
-        [Command("create")]
-        [RequireDirectMessage]
+        
         public async Task OpenTicket(CommandContext ctx, [RemainingText] string messageContent)
         {
             TicketCreationResult ticket =
@@ -94,7 +92,7 @@ namespace SilkBot.Commands.General
 
 
         [Command("close")]
-        [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
+        [RequireRoles(RoleCheckMode.Any, "Silk Contributor")]
         [RequireGuild()]
         public async Task CloseTicket(CommandContext ctx, int id, [RemainingText] string reason = TERMINATION_REASON)
         {
@@ -153,7 +151,7 @@ namespace SilkBot.Commands.General
 
 
             [Command("List")]
-            [RequireRoles(RoleCheckMode.Any, "Silk Contributer")]
+            [RequireRoles(RoleCheckMode.Any, "Silk Contributor")]
             [RequireGuild()]
             public async Task ListTickets(CommandContext ctx)
             {
@@ -304,14 +302,14 @@ namespace SilkBot.Commands.General
         public async Task<DiscordChannel> GetOrCreateTicketChannelAsync(DiscordClient c, ulong userId)
         {
             DiscordGuild g = c.Guilds[721518523704410202];
+            Permissions perms = Permissions.SendMessages | Permissions.AccessChannels | Permissions.EmbedLinks;
             DiscordChannel parentCategory;
             if (!g.Channels.Values.Any(c => c.IsCategory && c.Name.ToLower() == "Silk! Tickets".ToLower()))
             {
                 parentCategory = await g.CreateChannelCategoryAsync("Silk! Tickets");
-                await parentCategory.AddOverwriteAsync(g.EveryoneRole, Permissions.None, Permissions.AccessChannels);
-                await parentCategory.AddOverwriteAsync(g.GetRole(745751916608356467),
-                    Permissions.SendMessages | Permissions.ReadMessageHistory | Permissions.AccessChannels,
-                    Permissions.None);
+                await parentCategory.AddOverwriteAsync(g.EveryoneRole, Permissions.None, Permissions.All);
+                await parentCategory.AddOverwriteAsync(g.GetRole(745751916608356467), perms);
+                await parentCategory.AddOverwriteAsync(g.GetRole(721514294587424888), perms);
             }
             else
             {

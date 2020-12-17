@@ -1,9 +1,11 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Tests
 {
+    [Expiremental]
     public class DisableCommandCommand : BaseCommandModule
     {
 

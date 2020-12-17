@@ -6,13 +6,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using SilkBot.Commands.Furry.Utilities;
 using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Furry.NSFW
 {
-
     [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Cooldown(1, 10, CooldownBucketType.User)]
@@ -20,45 +18,47 @@ namespace SilkBot.Commands.Furry.NSFW
     {
         
         private readonly BotConfig _config;
-        public e621Command(HttpClient client, BotConfig config) : base(client)
+        public e621Command(IHttpClientFactory httpClientFactory, BotConfig config) : base(httpClientFactory)
         {
             baseUrl = "https://e621.net/posts.json?tags=";
             _config = config;
             this.username = _config.e6API.Value;
         }
 
-        [Command("e621")]
-        [Aliases("e6")]
-        [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
         [RequireNsfw]
-        public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string query = null)
+        [Aliases("e6")]
+        [Command("e621")]
+        [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
+        public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null)
         {
-
             if (query?.Split().Length > 5)
             {
                 await ctx.RespondAsync("You can search 5 tags at a time!");
                 return;
             }
-            else if (amount > 7)
+
+            if (amount > 10)
             {
                 await ctx.RespondAsync("You can only request 10 images every 10 seconds.");
                 return;
             }
 
-            eBooruPostResult result;
+            eBooruPostResult? result;
             if (this.username is null)
                 result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
             else result = await this.DoKeyedQueryAsync(query, this._config.e6API.Key, true);
             
-            if (result is null || result.Posts.Count is 0)
+            if (result is null || result.Posts?.Count is 0)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
                 return;
             }
 
-            List<Post> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
-            foreach (Post post in posts)
+            List<Post?> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
+            foreach (Post? post in posts)
             {
+                //if (post is null) continue;
+                // TODO: Handle Null Exception for parts of the post which may be null (i.e image source)
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithTitle(query)
                                             .WithDescription(

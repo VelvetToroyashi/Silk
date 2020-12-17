@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using SilkBot.Exceptions;
 using SilkBot.Extensions;
 using SilkBot.Models;
 using SilkBot.Utilities;
@@ -35,7 +32,7 @@ namespace SilkBot.Commands.Roles
             GuildModel guild = await db.Guilds.Include(g => g.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
 
             IEnumerable<ulong> currentlyAssignableRoles = guild.SelfAssignableRoles.Select(r => r.RoleId);
-
+            
             List<string> added = new();
             List<string> removed = new();
 
