@@ -16,12 +16,20 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class DiceRoll : BaseCommandModule
     {
-        struct Dice
+        enum StepType
         {
-            public int TotalNumber;
-            public int NoSides;
+            Roll, Addition
+        }
+        
+        struct Step
+        {
+            public StepType Type;
 
-            public Dice(int totalNo, int noSides) => (TotalNumber, NoSides) = (totalNo, noSides);
+            // The quantity of this dice or the number to add.
+            public int TotalNumber;
+            public int DiceNoSides;
+
+            public Step(StepType type, int totalNo, int diceNoSides) => (Type, TotalNumber, DiceNoSides) = (type, totalNo, diceNoSides);
         }
 
         [Command]
@@ -32,18 +40,27 @@ namespace SilkBot.Commands.General
         public async Task Roll(CommandContext ctx, [RemainingText] string roll)
         {
             var parser = new DiceParser(roll);
-            var allDice = parser.Run();
+            var steps = parser.Run();
 
             // TEST CODE
             var sb = new StringBuilder();
-            for (int i = 0; i < allDice.Count; i++)
+            for (int i = 0; i < steps.Count; i++)
             {
-                sb.Append(allDice[i].TotalNumber);
-                sb.Append(" x ");
-                sb.Append(allDice[i].NoSides);
-                sb.Append(" sides");
+                sb.Append(steps[i].Type.ToString());
 
-                if (i < allDice.Count - 1) sb.Append(", ");
+                sb.Append('(');
+                sb.Append(steps[i].TotalNumber);
+
+                if (steps[i].Type == StepType.Roll)
+                {
+                    sb.Append(" x ");
+                    sb.Append(steps[i].DiceNoSides);
+                    sb.Append(" sides");
+                }
+
+                sb.Append(')');
+
+                if (i < steps.Count - 1) sb.Append(", ");
             }
 
             await ctx.RespondAsync(sb.ToString()).ConfigureAwait(false);
@@ -53,14 +70,14 @@ namespace SilkBot.Commands.General
         {
             public DiceParser(string text) : base(text) { }
 
-            public IList<Dice> Run()
+            public IList<Step> Run()
             {
-                var result = new List<Dice>();
+                var result = new List<Step>();
 
                 // Read all the dice.
                 do
                 {
-                    result.Add(ParseDice());
+                    result.Add(ParseStep());
                 }
                 while (ReadIf('+'));
 
@@ -70,13 +87,21 @@ namespace SilkBot.Commands.General
                 return result;
             }
 
-            public Dice ParseDice()
+            Step ParseStep()
             {
-                var totalNo = ReadNumberOr1();
-                if (!ReadIf('d')) throw new Exception($"Unexpected character at position {CurrentPosition}!");
-                var noSides = ReadNumberOr1();
+                // Fill in the quantity as "1" if there's no number and it's a dice.
+                if (ReadIf('d')) return ParseDice(1);
 
-                return new Dice(totalNo, noSides);
+                var startNo = ReadNumber();
+
+                if (ReadIf('d')) return ParseDice(startNo);
+                else return new Step(StepType.Addition, startNo, 0);
+            }
+
+            Step ParseDice(int totalQuantity)
+            {
+                var noOfSides = ReadNumber();
+                return new Step(StepType.Roll, totalQuantity, noOfSides);
             }
         }
     }
