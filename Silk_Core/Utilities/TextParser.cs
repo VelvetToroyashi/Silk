@@ -51,9 +51,9 @@ namespace SilkBot.Utilities
             return false;
         }
 
-        public int ReadNumberOr1()
+        public int ReadNumber()
         {
-            if (!char.IsNumber(Peek())) return 1;
+            if (!char.IsNumber(Peek())) throw new Exception($"Expected integer at position {CurrentPosition}!");
 
             int startPos = CurrentPosition;
 
