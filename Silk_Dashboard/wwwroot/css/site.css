@@ -56,7 +56,5 @@ a.navbar-brand {
 }
 
 @media (min-width: 768px) {
-    .navbar-toggler {
-        display: none;
-    }
+    
 }

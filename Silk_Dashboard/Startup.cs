@@ -1,11 +1,13 @@
+using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Silk_Dashboard.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Silk_Dashboard.Discord.OAuth2;
+using Silk_Dashboard.Helpers;
+using Silk_Dashboard.Services.Concretions;
+using Silk_Dashboard.Services.Contracts;
 
 namespace Silk_Dashboard
 {
@@ -24,26 +26,32 @@ namespace Silk_Dashboard
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            
             services.AddHttpContextAccessor();
             services.AddHttpClient();
 
             services.AddSingleton<IDiscordUserService, DiscordUserService>();
+            services.AddSingleton<IDiscordHttpClient, DiscordHttpClient>();
 
             // Configure authentication for the user
             services.AddAuthentication(opt =>
                 {
                     opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    opt.DefaultChallengeScheme = DiscordDefaults.AuthenticationScheme;
+                    opt.DefaultChallengeScheme = DiscordConfiguration.AuthenticationScheme;
                 })
                 .AddCookie()
-                .AddDiscord(x =>
+                .AddDiscord(opt =>
                 {
-                    x.AppId = Configuration["Discord:AppId"];
-                    x.AppSecret = Configuration["Discord:AppSecret"];
+                    opt.ClientId = Configuration["Discord:AppId"];
+                    opt.ClientSecret = Configuration["Discord:AppSecret"];
+                    
+                    opt.CallbackPath = DiscordConfiguration.OAuth2CallbackPath;
+                    
+                    opt.Scope.Add("guilds");
 
                     // Required for accessing the oauth2 token in order to make requests on the user's behalf, ie. accessing the user's guild list
-                    x.SaveTokens = true;
+                    opt.SaveTokens = true;
                 });
         }
 
@@ -67,7 +75,7 @@ namespace Silk_Dashboard
             app.UseRouting();
 
             app.UseAuthentication();
-            // app.UseAuthorization();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

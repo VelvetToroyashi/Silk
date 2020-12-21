@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using Silk_Dashboard.Helpers;
 
 namespace Silk_Dashboard.Data
 {
@@ -19,7 +20,7 @@ namespace Silk_Dashboard.Data
         [HttpGet]
         public IActionResult Login(string returnUrl = "/")
         {
-            var challenge = Challenge(new AuthenticationProperties {RedirectUri = returnUrl}, "Discord");
+            var challenge = Challenge(new AuthenticationProperties {RedirectUri = returnUrl}, DiscordConfiguration.AuthenticationScheme);
             return challenge;
         }
 

@@ -2,11 +2,11 @@
 
 @attribute [Authorize]
 
-@inherits LayoutComponentBase
+@inherits ComponentBase
 
 @using Microsoft.AspNetCore.Http
-@using Silk_Dashboard.Data
-@using Silk_Dashboard.Models
+@using Silk_Dashboard.Models.Discord
+@using Silk_Dashboard.Services.Contracts
 
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IDiscordUserService UserService
@@ -15,20 +15,25 @@
     <div class="jumbotron">
         <h2>Hello, @HttpContextAccessor.HttpContext.User.Identity.Name</h2>
         <hr style="height: 1px; background-color: white">
-        <div>
-            <p>Name: @claim.Name#@claim.Discriminator</p>
-            <p>ID: @claim.UserId</p>
-        </div>
+        @if (_user is not null)
+        {
+            <div>
+                <p>Name: @_user.Username#@_user.Discriminator</p>
+                <p>ID: @_user.Id</p>
+                <p>Flags: @_user.Flags</p>
+                
+            </div>
+        }
         <div class="form-group w-25">
             <p>OAuth Token:</p>
-            <button type="button" class="btn btn-primary btn-sm" @onclick="ToggleOAuthTokenVisibility">@(oAuthTokenVisible ? "Hide Token" : "Show Token")</button>
-            <input class="form-control" type="@OAuthTokenVisibility" value="@token" readonly="">
+            <button type="button" class="btn btn-primary btn-sm" @onclick="ToggleOAuthTokenVisibility">@(_oAuthTokenVisible ? "Hide Token" : "Show Token")</button>
+            <input class="form-control" type="@OAuthTokenVisibility" value="@_token" readonly="">
         </div>
     </div>
 </div>
 
 <!--Since guilds is not populated instantly on page load, there needs to be a null check on guilds-->
-@if (guilds == null)
+@if (_guilds == null)
 {
     <div class="container">
         <h3>Loading...</h3>
@@ -40,56 +45,46 @@ else
     <div class="container">
         <h3>Servers You Manage:</h3>
         <br />
-        <div class="card-columns">
-            @foreach (var guild in guilds)
-            {
-                <div class="card border-info mb-3" style="max-width: 20rem;">
-                    <div class="card-body">
-                        <h4 class="card-title text-warning">@guild.Name</h4>
-                        <p class="card-text">
-                            <p>ID: @guild.Id</p>
-                            <p>Permisions: @guild.Permissions</p>
-                            <p>Icon: @(string.IsNullOrEmpty(guild.Icon) ? "No Icon Set Yet" : guild.Icon)</p>
-                            @if (guild.Features?.Count > 0)
-                            {
-                                <div>
-                                    <h5>Features: </h5>
-                                    <ul>
-                                        @foreach (var feature in guild.Features)
-                                        {
-                                            <li>@feature</li>
-                                        }
-                                    </ul>
-                                </div>
-                            }
-                        </p>
-                    </div>
-                </div>
-            }
-        </div>
+        @RenderGuilds(_guilds.Where(guild => (guild.Permissions & DiscordManageServerPermission) == DiscordManageServerPermission).ToList())
+    </div>
+    
+    <div class="container">
+        <h3>All Servers:</h3>
+        <br />
+        @RenderGuilds(_guilds)
     </div>
 }
 
-@code {
-    private string token;
-    private bool oAuthTokenVisible;
-    private const ulong DiscordManageServerPermission = 0x20;
-
-    private DiscordUserClaim claim;
-    private List<Guild> guilds;
-
-    private string OAuthTokenVisibility => oAuthTokenVisible ? "text" : "password";
-
-    protected override async Task OnInitializedAsync()
+@functions
+{
+    RenderFragment RenderGuilds(List<DiscordApiGuild> guilds)
     {
-        claim = UserService.GetUserInfo(HttpContextAccessor.HttpContext);
-        token = await UserService.GetTokenAsync(HttpContextAccessor.HttpContext);
-        guilds = await UserService.GetUserGuildsAsync(HttpContextAccessor.HttpContext, guild => (guild.Permissions & DiscordManageServerPermission) == DiscordManageServerPermission);
+        return @<div class="card-columns">
+                   @foreach (var guild in guilds)
+                   {
+                       <div class="card border-info mb-3" style="max-width: 20rem;">
+                           <div class="card-body">
+                               <h4 class="card-title text-warning">@guild.Name</h4>
+                               <p class="card-text">
+                                   <p>ID: @guild.Id</p>
+                                   <p>Permisions: @guild.Permissions</p>
+                                   <p>Icon: @(string.IsNullOrEmpty(guild.Icon) ? "No Icon Set Yet" : guild.Icon)</p>
+                                   @if (guild.Features?.Count > 0)
+                                   {
+                                       <div>
+                                           <h5>Features: </h5>
+                                           <ul>
+                                               @foreach (var feature in guild.Features)
+                                               {
+                                                   <li>@feature</li>
+                                               }
+                                           </ul>
+                                       </div>
+                                   }
+                               </p>
+                           </div>
+                       </div>
+                   }
+               </div>;
     }
-
-    private void ToggleOAuthTokenVisibility()
-    {
-        oAuthTokenVisible = !oAuthTokenVisible;
-    }
-
 }

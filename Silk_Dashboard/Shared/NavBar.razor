@@ -34,18 +34,18 @@
 
 
 @code {
-    bool collapseNavMenu = true;
+    bool _collapseNavMenu = true;
 
-    string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    string NavMenuCssClass => _collapseNavMenu ? "collapse" : string.Empty;
 
     void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        _collapseNavMenu = !_collapseNavMenu;
     }
 
     void CollapseNavMenu()
     {
-        collapseNavMenu = true;
+        _collapseNavMenu = true;
     }
 
 }
