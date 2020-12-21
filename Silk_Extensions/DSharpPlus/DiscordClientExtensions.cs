@@ -2,7 +2,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace Silk__Extensions
+namespace SilkBot.Extensions.DSharpPlus
 {
     public static class DiscordClientExtensions
     {

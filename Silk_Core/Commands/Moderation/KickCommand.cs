@@ -11,7 +11,9 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SilkBot.Commands.Moderation.Utilities;
+using SilkBot.Database.Models;
 using SilkBot.Extensions;
+using SilkBot.Extensions.DSharpPlus;
 using SilkBot.Models;
 using SilkBot.Services;
 using SilkBot.Utilities;
@@ -22,26 +24,19 @@ namespace SilkBot.Commands.Moderation
     public class KickCommand : BaseCommandModule
     {
         private readonly ILogger<KickCommand> _logger;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly InfractionService _infractionService;
+        private readonly DatabaseService _dbService;
 
-        public KickCommand(ILogger<KickCommand> logger, IDbContextFactory<SilkDbContext> dbFactory,
-            InfractionService infractionService)
-        {
-            _logger = logger;
-            _dbFactory = dbFactory;
-            _infractionService = infractionService;
-        }
+
+        public KickCommand(ILogger<KickCommand> logger, DatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
 
         [Command]
+        [RequireFlag(UserFlag.Staff)]
         [RequireBotPermissions(Permissions.KickMembers)]
         [Description("Boot someone from the guild! Requires kick members permission.")]
-        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user,
-            [RemainingText, Description("The reason the user is to be kicked from the guild")]
-            string reason = null)
+        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user, [RemainingText] string? reason = null)
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-
+            
 
             if (!ctx.Guild.CurrentMember.HasPermission(Permissions.KickMembers))
             {
@@ -76,6 +71,7 @@ namespace SilkBot.Commands.Moderation
             }
             else
             {
+                
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                                             .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
                                             .WithColor(DiscordColor.Blurple)
@@ -83,11 +79,12 @@ namespace SilkBot.Commands.Moderation
                                             .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
                                             .AddField("Reason:",
                                                 reason ?? "No reason has been attached to this infraction.");
-                _infractionService.QueueInfraction(new UserInfractionModel
+                await _dbService.UpdateGuildUserAsync(user.Id, ctx.Guild.Id, (u) => u.Infractions.Add(new()
                 {
-                    Enforcer = ctx.User.Id, Reason = reason, InfractionType = InfractionType.Kick,
+                    Enforcer = ctx.User.Id, Reason = reason!, InfractionType = InfractionType.Kick,
                     InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id
-                });
+                }));
+                
                 try
                 {
                     await user.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -97,9 +94,9 @@ namespace SilkBot.Commands.Moderation
                     _logger.LogWarning("Couldn't DM member when notifying kick.");
                 }
 
-                await user.RemoveAsync(reason).ConfigureAwait(false);
+                await user.RemoveAsync(reason);
 
-                GuildModel guildConfig = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == ctx.Guild.Id);
+                GuildModel guildConfig = await _dbService.GetGuildAsync(ctx.Guild.Id);
                 ulong logChannelID = guildConfig.GeneralLoggingChannel;
                 ulong logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),

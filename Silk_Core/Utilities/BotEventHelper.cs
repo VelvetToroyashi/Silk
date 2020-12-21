@@ -39,7 +39,6 @@ namespace SilkBot.Utilities
             _dbFactory = dbFactory;
             _logger = logger;
             _client = client;
-            _logger.LogInformation("Created Event Helper");
         }
 
         public void CreateHandlers()
@@ -47,8 +46,6 @@ namespace SilkBot.Utilities
             _client.ClientErrored += OnClientErrored;
             foreach (CommandsNextExtension c in _client.GetCommandsNextAsync().GetAwaiter().GetResult().Values)
                 c.CommandErrored += OnCommandErrored;
-            _client.MessageDeleted += BotEvents.OnMessageDeleted;
-            _logger.LogTrace("Subscribed to MESSAGE_DELETED");
         }
 
         private async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
@@ -66,30 +63,26 @@ namespace SilkBot.Utilities
                 return;
             }
             
-            if (e.Exception is not CommandNotFoundException)
-            {
-                if (e.Exception is ChecksFailedException cf)
-                    foreach (CheckBaseAttribute check in cf.FailedChecks)
-                        switch (check)
-                        {
-                            case RequireOwnerAttribute:
-                                await e.Context.RespondAsync($"You're not the owner of this bot!");
-                                break;
-                            case RequireNsfwAttribute:
-                                await e.Context.RespondAsync("Channel must be marked as NSFW!");
-                                break;
-                            case RequireFlagAttribute flag:
-                                await e.Context.RespondAsync(
-                                    $"Sorry, but you need to have {flag.UserFlag} to run this command!");
-                                break;
-                            case CooldownAttribute cooldown:
-                                await e.Context.RespondAsync(
-                                    $"You're a bit too fast! Come back in {cooldown.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}");
-                                break;
-                        }
-
-                _logger.LogWarning(e.Exception, "");
-            }
+            if (e.Exception is ChecksFailedException cf)
+                foreach (CheckBaseAttribute check in cf.FailedChecks)
+                    switch (check)
+                    {
+                        case RequireOwnerAttribute:
+                            await e.Context.RespondAsync($"You're not the owner of this bot!");
+                            break;
+                        case RequireNsfwAttribute:
+                            await e.Context.RespondAsync("Channel must be marked as NSFW!");
+                            break;
+                        case RequireFlagAttribute flag:
+                            await e.Context.RespondAsync(
+                                $"Sorry, but you need to have {flag.UserFlag} to run this command!");
+                            break;
+                        case CooldownAttribute cooldown:
+                            await e.Context.RespondAsync(
+                                $"You're a bit too fast! Come back in {cooldown.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}");
+                            break;
+                    }
+            _logger.LogWarning(e.Exception, "");
         }
 
         private async Task OnClientErrored(DiscordClient sender, ClientErrorEventArgs e)

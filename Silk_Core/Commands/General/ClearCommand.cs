@@ -13,12 +13,10 @@ namespace SilkBot.Commands.General
     [Category(Categories.General)]
     public class ClearCommand : BaseCommandModule
     {
-        [Command("Clear")]
-        [HelpDescription(
-            "Cleans all messages from all users. \n Note, clearing more than 50 messages will lock the channel during bulk deletion. Coming soon:tm:",
-            "!clear 20")]
-        public async Task Clear(CommandContext ctx, [HelpDescription("The number of messages to clear.")]
-            int messages = 5)
+        [Command]
+        [RequireUserPermissions(Permissions.ManageMessages)]
+        [Description("Cleans all messages from all users. \n Note, clearing more than 50 messages will lock the channel during bulk deletion. Coming soon:tm:")]
+        public async Task Clear(CommandContext ctx, int messages = 5)
         {
             // Anyone who's got permission to manage channels might not be staff, so adding [RequireFlag(UserFlag.Staff)] needlessly permwalls it. //
             if (!ctx.Member.HasPermission(Permissions.ManageMessages))

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using SilkBot.Models;
@@ -10,14 +11,14 @@ namespace SilkBot.Utilities
     public class GuildConfigCacheService
     {
         private readonly IMemoryCache _cache;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly SilkDbContext _db;
         private readonly ILogger<GuildConfigCacheService> _logger;
 
-        public GuildConfigCacheService(IMemoryCache cache, IDbContextFactory<SilkDbContext> dbFactory,
+        public GuildConfigCacheService(IMemoryCache cache, SilkDbContext db,
             ILogger<GuildConfigCacheService> logger)
         {
             _cache = cache;
-            _dbFactory = dbFactory;
+            _db = db;
             _logger = logger;
         }
 
@@ -28,10 +29,10 @@ namespace SilkBot.Utilities
             else return await GetConfigFromDatabaseAsync(guildId.Value);
         }
 
-        public async ValueTask<GuildConfiguration> GetConfigFromDatabaseAsync(ulong guildId)
+        public async Task<GuildConfiguration> GetConfigFromDatabaseAsync(ulong guildId)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel config = await db.Guilds.AsNoTracking().FirstAsync(g => g.Id == guildId);
+            
+            GuildModel? config = await _db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.Id == guildId);
             if (config is null)
             {
                 _logger.LogError("Expected value 'Guild' from databse, received null isntead.");

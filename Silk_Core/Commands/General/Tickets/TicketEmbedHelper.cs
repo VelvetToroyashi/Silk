@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
+using SilkBot.Extensions.DSharpPlus;
 
 namespace SilkBot.Commands.General.Tickets
 {

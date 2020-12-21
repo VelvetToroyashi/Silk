@@ -48,21 +48,32 @@ namespace SilkBot
         
         
         public Bot(IServiceProvider services, DiscordShardedClient client,
-            ILogger<Bot> logger, BotEventHelper eventHelper, PrefixCacheService prefixService,
-            MessageCreationHelper messageHelper, GuildHelper guildHelper, IDbContextFactory<SilkDbContext> dbFactory)
+            ILogger<Bot> logger, BotEventHelper eventHelper,
+            MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper, 
+            GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
+            RoleAddedHelper roleAddedHelper, RoleRemovedHelper roleRemovedHelper, 
+            
+            IDbContextFactory<SilkDbContext> dbFactory)
         {
             
             _sw.Start();
             _services = services;
             _logger = logger;
             _eventHelper = eventHelper;
-            _prefixService = prefixService;
+
+            client.MessageCreated += messageAHelper.Commands;
+            client.MessageCreated += messageAHelper.Tickets;
+
+            client.MessageDeleted += messageRHelper.OnRemoved;
             
-            client.MessageCreated += messageHelper.Commands;
-            client.MessageCreated += messageHelper.Tickets;
+            client.GuildDownloadCompleted += guildAddedHelper.OnGuildDownloadComplete;
+            client.GuildAvailable += guildAddedHelper.OnGuildAvailable;
+            client.GuildCreated += guildAddedHelper.OnGuildJoin;
+               
+
+            client.GuildMemberUpdated += roleAddedHelper.CheckStaffRole;
+            client.GuildMemberUpdated += roleRemovedHelper.CheckStaffRoles;
             
-            client.GuildAvailable += guildHelper.OnGuildAvailable;
-            client.GuildCreated += guildHelper.OnGuildJoin;
             SilkDBContext = dbFactory.CreateDbContext();
             SilkDBContext.Database.Migrate();
             Instance = this;

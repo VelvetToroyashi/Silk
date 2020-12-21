@@ -40,8 +40,6 @@ namespace SilkBot
 
         public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
 
-   
-
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
@@ -79,15 +77,21 @@ namespace SilkBot
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                 
                            services.AddSingleton<TicketService>();
+                           services.AddSingleton<DatabaseService>();
                            services.AddSingleton<InfractionService>();
                            services.AddSingleton<TimedEventService>();
                            services.AddSingleton<PrefixCacheService>();
                            services.AddSingleton<TicketHandlerService>();
                            services.AddSingleton<GuildConfigCacheService>();
                            
-                           services.AddSingleton<GuildHelper>();
+                           
                            services.AddSingleton<BotEventHelper>();
-                           services.AddSingleton<MessageCreationHelper>();
+                           services.AddSingleton<GuildAddedHelper>();
+                           services.AddSingleton<MessageAddedHelper>();
+                           services.AddSingleton<MessageRemovedHelper>();
+                           
+                           services.AddSingleton<RoleAddedHelper>();
+                           services.AddSingleton<RoleRemovedHelper>();
                            
                            services.AddSingleton<SerilogLoggerFactory>();
                            services.AddSingleton<CommandProcessorModule>();

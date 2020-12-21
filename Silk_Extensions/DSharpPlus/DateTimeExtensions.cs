@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SilkBot.Extensions
+namespace SilkBot.Extensions.DSharpPlus
 {
     public static class DateTimeExtensions
     {

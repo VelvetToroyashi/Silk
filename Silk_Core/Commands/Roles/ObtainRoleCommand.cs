@@ -10,7 +10,7 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
 {
-    [Category(Categories.Roles)]
+    [Category(Categories.Misc)]
     public class ObtainRoleCommand : BaseCommandModule
     {
         [Command("Role")]
