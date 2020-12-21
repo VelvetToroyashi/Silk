@@ -16,8 +16,8 @@ namespace SilkBot.Utilities
 {
     public class HelpFormatter : BaseHelpFormatter
     {
-        public Command Command { get; private set; }
-        public Command[] Subcommands { get; private set; }
+        public Command? Command { get; private set; }
+        public Command[]? Subcommands { get; private set; }
 
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
@@ -48,33 +48,29 @@ namespace SilkBot.Utilities
                 embed.WithTitle("Silk Commands:");
 
 
-                IOrderedEnumerable<IGrouping<string, Command>> modules = Subcommands
-                                                                         .GroupBy(x =>
-                                                                             x.Module.ModuleType
-                                                                              .GetCustomAttribute<CategoryAttribute>()
-                                                                              ?.Name)
-                                                                         .Where(x => x.Key != null)
+                IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
+                                                                         .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                                                                         .Where(x => x.Key is not null)
                                                                          .OrderBy(x => Categories.Order.IndexOf(x.Key));
-                foreach (IGrouping<string, Command> commands in modules)
+                foreach (IGrouping<string?, Command> commands in modules)
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "), false);
             }
             else
             {
                 if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
-                IReadOnlyList<CommandArgument> args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+                IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
-                string title = Command.IsExperimental() ? $"[E] Command: `{Command.QualifiedName}" : $"Command: `{Command.QualifiedName}";
+                string title = Command.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
                 var builder = new StringBuilder(title);
                 if (args is not null) builder.Append(GetArgs(args));
-                
                 builder.Append('`');
-
+                
                 embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
                 if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
                     embed.AddField($"{CustomEmoji.Staff} Developer", "You can't use it!", true);
                 else if (Command.IsHidden)
-                    embed.AddField("👻 Hidden", "How did you find it?", true);
+                    embed.AddField("\\👻 Hidden", "How did you find it?", true);
 
                 RequireUserPermissionsAttribute? userPerms =
                     Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
@@ -86,9 +82,9 @@ namespace SilkBot.Utilities
                     embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"), true);
                 if (Command.Overloads.Count > 1)
                     embed.AddField("Command overloads:", Command.Overloads
-                                            .Skip(1)
-                                            .Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
-                                            .JoinString("\n"));
+                        .Skip(1)
+                        .Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
+                        .JoinString("\n"));
 
             }
 

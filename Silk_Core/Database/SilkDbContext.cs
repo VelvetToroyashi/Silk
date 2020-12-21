@@ -16,7 +16,7 @@ namespace SilkBot
         public DbSet<ItemModel> Items { get; set; }
         /// <summary>
         /// Users on a guild level; holds information and states that reflect such.
-        /// </summary>P
+        /// </summary>
         public DbSet<UserModel> Users { get; set; }
 
 

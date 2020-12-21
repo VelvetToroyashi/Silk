@@ -11,7 +11,7 @@ using SilkBot.Utilities;
 
 namespace SilkBot.Commands.Roles
 {
-    [Category(Categories.Roles)]
+    [Category(Categories.Misc)]
     public class SetAssignableRole : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
@@ -23,8 +23,7 @@ namespace SilkBot.Commands.Roles
 
         [Command("Assign")]
         [Aliases("sar", "selfassignablerole", "selfrole")]
-        [HelpDescription(
-            "Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
+        [Description("Allows you to set self assignable roles. Role menu coming soon:tm:. All Self-Assignable Roles are opt-*in*.")]
         public async Task SetSelfAssignableRole(CommandContext ctx, params DiscordRole[] roles)
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();

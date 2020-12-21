@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-
 using SilkBot.Utilities;
 
-namespace SilkBot.Commands.Economy.Shop
+namespace SilkBot.Economy.Shop
 {
     [Category(Categories.Economy)]
+    [Expiremental]
     [Group("shop")]
     public partial class ShopCommand : BaseCommandModule
     {

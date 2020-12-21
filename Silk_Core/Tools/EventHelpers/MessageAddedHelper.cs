@@ -12,26 +12,26 @@ using SilkBot.Services;
 
 namespace SilkBot.Tools.EventHelpers
 {
-    public class MessageCreationHelper
+    public class MessageAddedHelper
     {
         private readonly TicketHandlerService _ticketService;
         private readonly PrefixCacheService _prefixCache;
 
-        public MessageCreationHelper(TicketHandlerService ticketService, PrefixCacheService prefixCache)
+        public MessageAddedHelper(TicketHandlerService ticketService, PrefixCacheService prefixCache)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;
         }
-
+        
         public async Task Tickets(DiscordClient c, MessageCreateEventArgs e)
         {
             _ = Task.Run(async () =>
             {
                 if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
                 ulong ticketUser = TicketHandlerService.GetTicketUser(e.Channel);
-                IEnumerable<KeyValuePair<ulong, DiscordMember>> members = c.Guilds.Values.SelectMany(g => g.Members);
-                DiscordMember member = members.SingleOrDefault(m => m.Key == ticketUser)!.Value;
-                if (member is null) return; // Member doesn't exit anymore //
+                IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
+                DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUser).Value;
+                if (member is null) return; // Member doesn't exist anymore // 
                 DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author);
                 await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
             });

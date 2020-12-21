@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 
-namespace SilkBot.Extensions
+namespace SilkBot.Extensions.DSharpPlus
 {
     public static class DiscordUserExtensions
     {

@@ -10,6 +10,7 @@ using SilkBot.Utilities;
 namespace SilkBot.Commands.Miscellaneous
 {
     [Category(Categories.Misc)]
+    [Hidden]
     public class NicknameCommand : BaseCommandModule
     {
         private readonly ILogger<NicknameCommand> _logger;

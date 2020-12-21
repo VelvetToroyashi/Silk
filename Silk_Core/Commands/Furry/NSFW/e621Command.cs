@@ -16,7 +16,7 @@ namespace SilkBot.Commands.Furry.NSFW
     [Cooldown(1, 10, CooldownBucketType.User)]
     public class e621Command : eBooruBaseCommand
     {
-        
+
         private readonly BotConfig _config;
         public e621Command(IHttpClientFactory httpClientFactory, BotConfig config) : base(httpClientFactory)
         {
@@ -47,7 +47,7 @@ namespace SilkBot.Commands.Furry.NSFW
             if (this.username is null)
                 result = await this.DoQueryAsync(query); // May return empty results locked behind API key //
             else result = await this.DoKeyedQueryAsync(query, this._config.e6API.Key, true);
-            
+
             if (result is null || result.Posts?.Count is 0)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
@@ -60,18 +60,22 @@ namespace SilkBot.Commands.Furry.NSFW
                 //if (post is null) continue;
                 // TODO: Handle Null Exception for parts of the post which may be null (i.e image source)
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                            .WithTitle(query)
-                                            .WithDescription(
-                                                $"[Direct Link]({post.File.Url})\nDescription: {post.Description.Truncate(200)}")
-                                            .AddField("Score:", post.Score.Total.ToString())
-                                            .AddField("Source:",
-                                                GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
-                                                "No source available")
-                                            .WithColor(DiscordColor.PhthaloBlue).WithImageUrl(post.File.Url)
-                                            .WithFooter("Limit: 10 img / 10sec");
+                    .WithTitle(query)
+                    .WithDescription(
+                        $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}")
+                    .AddField("Score:", post.Score.Total.ToString())
+                    .AddField("Source:",
+                        GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
+                        "No source available")
+                    .WithColor(DiscordColor.PhthaloBlue).WithImageUrl(post.File.Url)
+                    .WithFooter("Limit: 10 img / 10sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }
         }
+
+        [Command("e621")]
+        [RequireNsfw]
+        public async Task Search(CommandContext ctx, [RemainingText] string? search) => await Search(ctx, 3, search);
     }
 }

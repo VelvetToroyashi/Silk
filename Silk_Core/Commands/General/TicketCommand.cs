@@ -14,9 +14,9 @@ using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
-using Silk__Extensions;
 using SilkBot.Database.Models;
 using SilkBot.Extensions;
+using SilkBot.Extensions.DSharpPlus;
 using SilkBot.Services;
 using SilkBot.Utilities;
 
