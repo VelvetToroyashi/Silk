@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Silk_Dashboard": {
+    "Silk.Dashboard": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,

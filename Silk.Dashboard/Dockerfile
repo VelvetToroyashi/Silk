@@ -12,4 +12,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 WORKDIR /dashboard
 COPY --from=build /dashboard/out .
 
-ENTRYPOINT ["dotnet", "Silk_Dashboard.dll"]
+ENTRYPOINT ["dotnet", "Silk.Dashboard.dll"]

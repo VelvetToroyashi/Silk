@@ -3,10 +3,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Silk_Dashboard.Models.Discord;
-using Silk_Dashboard.Services.Contracts;
+using Silk.Dashboard.Models.Discord;
+using Silk.Dashboard.Services.Contracts;
 
-namespace Silk_Dashboard.Services.Concretions
+namespace Silk.Dashboard.Services.Concretions
 {
     /*
      * Adapted from: https://github.com/GedasFX/Alderto/blob/master/Alderto.Web/Services/DiscordHttpClient.cs

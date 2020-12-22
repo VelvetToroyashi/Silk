@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using Silk_Dashboard.Models.Discord;
+using Silk.Dashboard.Models.Discord;
 
-namespace Silk_Dashboard.Pages
+namespace Silk.Dashboard.Pages
 {
     public partial class AccountManage : ComponentBase
     {

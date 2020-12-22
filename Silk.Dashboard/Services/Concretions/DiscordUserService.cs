@@ -6,11 +6,11 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Silk_Dashboard.Helpers;
-using Silk_Dashboard.Models.Discord;
-using Silk_Dashboard.Services.Contracts;
+using Silk.Dashboard.Helpers;
+using Silk.Dashboard.Models.Discord;
+using Silk.Dashboard.Services.Contracts;
 
-namespace Silk_Dashboard.Services.Concretions
+namespace Silk.Dashboard.Services.Concretions
 {
     public class DiscordUserService : IDiscordUserService, IDisposable
     {

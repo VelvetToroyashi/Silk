@@ -1,6 +1,6 @@
 ﻿using AspNet.Security.OAuth.Discord;
 
-namespace Silk_Dashboard.Helpers
+namespace Silk.Dashboard.Helpers
 {
     public static class DiscordConfiguration
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Silk_Dashboard.Models.Discord
+namespace Silk.Dashboard.Models.Discord
 {
     public class DiscordApiGuild
     {

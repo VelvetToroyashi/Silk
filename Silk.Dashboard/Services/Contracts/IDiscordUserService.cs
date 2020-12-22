@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Silk_Dashboard.Models.Discord;
+using Silk.Dashboard.Models.Discord;
 
-namespace Silk_Dashboard.Services.Contracts
+namespace Silk.Dashboard.Services.Contracts
 {
     public interface IDiscordUserService
     {

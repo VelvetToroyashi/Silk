@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>VelvetThePanda-SilkBot-Dashboard</UserSecretsId>
+    <RootNamespace>Silk.Dashboard</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

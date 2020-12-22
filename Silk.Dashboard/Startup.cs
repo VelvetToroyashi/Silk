@@ -1,15 +1,14 @@
-using AspNet.Security.OAuth.Discord;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Silk_Dashboard.Helpers;
-using Silk_Dashboard.Services.Concretions;
-using Silk_Dashboard.Services.Contracts;
+using Silk.Dashboard.Helpers;
+using Silk.Dashboard.Services.Concretions;
+using Silk.Dashboard.Services.Contracts;
 
-namespace Silk_Dashboard
+namespace Silk.Dashboard
 {
     public class Startup
     {

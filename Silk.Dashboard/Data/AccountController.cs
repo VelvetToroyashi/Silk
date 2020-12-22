@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using Silk_Dashboard.Helpers;
+using Silk.Dashboard.Helpers;
 
-namespace Silk_Dashboard.Data
+namespace Silk.Dashboard.Data
 {
     [Route("[controller]/[action]")]
     public class AccountController : ControllerBase
