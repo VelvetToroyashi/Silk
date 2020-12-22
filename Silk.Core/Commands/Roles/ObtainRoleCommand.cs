@@ -19,8 +19,9 @@ namespace Silk.Core.Commands.Roles
     {
         [Command("Role")]
         [Description("Grab a role!")]
-        public async Task ObtainRole(CommandContext ctx, [RemainingText] string roles)
+        public async Task ObtainRole(CommandContext ctx, [RemainingText] string? roles)
         {
+            if (roles is null) return;
             string[] _roles = roles.Split(',');
             GuildModel guild = Core.Bot.Instance!.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
             foreach (string role in _roles)

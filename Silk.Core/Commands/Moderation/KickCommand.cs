@@ -75,9 +75,11 @@ namespace Silk.Core.Commands.Moderation
                                             .WithColor(DiscordColor.Blurple)
                                             .WithThumbnail(ctx.Guild.IconUrl)
                                             .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
-                                            .AddField("Reason:",
-                                                reason ?? "No reason has been attached to this infraction.");
-                await _dbService.UpdateGuildUserAsync(user.Id, ctx.Guild.Id, u => u.Infractions.Add(new()
+                                            .AddField("Reason:", reason ?? "No reason has been attached to this infraction.");
+
+
+                UserModel mUser = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, user.Id);
+                await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
                 {
                     Enforcer = ctx.User.Id, Reason = reason!, InfractionType = InfractionType.Kick,
                     InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id

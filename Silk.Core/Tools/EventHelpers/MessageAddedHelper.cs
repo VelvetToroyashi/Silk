@@ -57,7 +57,7 @@ namespace Silk.Core.Tools.EventHelpers
                 //     (disabledCommandsCache.GetValueOrDefault(e.Guild.Id)?.Contains(split) ?? false)) return;
                 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
-                
+
                  if (command is null) 
                      throw new CommandNotFoundException(commandString);
                 

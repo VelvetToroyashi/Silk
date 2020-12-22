@@ -4,6 +4,8 @@
     {
         public int Id { get; set; }
         public string Link { get; set; }
+        
+        public bool GuildLevelLink { get; set; }
         public GuildModel Guild { get; set; }
     }
 }

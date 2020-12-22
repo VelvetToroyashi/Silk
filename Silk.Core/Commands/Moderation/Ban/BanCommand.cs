@@ -30,8 +30,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         [Command("Ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
-        public async Task Ban(CommandContext ctx, [HelpDescription("The person to ban")] DiscordMember target,
-            [RemainingText] string reason = "No reason given.")
+        public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
             DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
@@ -67,7 +66,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                     return false;
                 }
 
-                errorReason = null;
+                errorReason = null!;
                 return true;
             }
 
@@ -96,7 +95,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
                 ulong? loggingChannel = _dbFactory.CreateDbContext().Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)
                                                   ?.MessageEditChannel;
-                DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel.Value) ?? ctx.Channel;
+                DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel!.Value) ?? ctx.Channel;
 
                 await sendChannel.SendMessageAsync(embed: logEmbed);
             }

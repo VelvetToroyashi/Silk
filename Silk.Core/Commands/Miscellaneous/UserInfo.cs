@@ -26,11 +26,11 @@ namespace Silk.Core.Commands.Miscellaneous
                                         .WithTitle($"Info for {role.Name} ( {role.Id} ) :")
                                         .AddField("Color:", role.Color.ToString())
                                         .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
-                                        .AddField("Hoisted?:", role.IsHoisted.ToString())
+                                        .AddField("Hoisted:", role.IsHoisted.ToString())
                                         .AddField("Hierarchy:", role.Position.ToString())
-                                        .AddField("Bot role?:", role.IsManaged.ToString())
+                                        .AddField("Bot role:", role.IsManaged.ToString())
                                         .AddField("Permissions:", role.Permissions.ToString())
-                                        .AddField("Mentionable?:", role.IsMentionable.ToString())
+                                        .AddField("Mentionable:", role.IsMentionable.ToString())
                                         .WithColor(role.Color)
                                         .WithThumbnail(ctx.Guild.IconUrl);
             await ctx.RespondAsync(embed: embed);
@@ -47,7 +47,7 @@ namespace Silk.Core.Commands.Miscellaneous
                                         .WithColor(DiscordColor.Orange);
 
             var status = string.Empty;
-            DiscordEmoji emoji = null;
+            DiscordEmoji? emoji = null;
 
             try
             {
@@ -78,7 +78,7 @@ namespace Silk.Core.Commands.Miscellaneous
                                         .WithColor(DiscordColor.Orange);
 
             var status = string.Empty;
-            DiscordEmoji emoji = null;
+            DiscordEmoji? emoji = null;
 
             try
             {

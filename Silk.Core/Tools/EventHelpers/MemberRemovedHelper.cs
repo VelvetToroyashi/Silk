@@ -28,6 +28,7 @@ namespace Silk.Core.Tools.EventHelpers
             e.Handled = true;
             _ = Task.Run(async () =>
             {
+                Log.Logger.Verbose("Entered event handler");
                 UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
                 if (user is null) return; // Doesn't exist in the DB. No point in continuing. //
                 if(user.Infractions.Any()) return; // They have infractions, and shouldn't be removed from the DB. //

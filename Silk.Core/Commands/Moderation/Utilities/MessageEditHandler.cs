@@ -62,8 +62,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             if (config.WhitelistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
-                    Match invite = Regex.Match(e.Message.Content, @"(discord\.gg\/.+)") ??
-                                   Regex.Match(e.Message.Content.ToLower(), @"(discord\.com\/invite\/.+)");
+                    Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
                     if (!invite.Success) return;
 
                     string inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' '))

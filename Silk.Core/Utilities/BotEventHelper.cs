@@ -15,6 +15,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using org.mariuszgromada.math.mxparser;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using SilkBot.Extensions;
@@ -52,29 +53,35 @@ namespace Silk.Core.Utilities
 
         private async Task CommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
-            string message = e.Exception switch
+            (string message, bool sendHelp) = e.Exception switch
             {
-                CommandNotFoundException => $"Unkown command: {e.Command.Name}. Arguments: {e.Context.RawArgumentString}",
+                CommandNotFoundException => ($"Unkown command: {e.Command.Name}. Arguments: {e.Context.RawArgumentString}", true),
                 InvalidOperationException {Message: "No matching subcommands were found, and this group is not executable."} => 
-                    $"Unknown subcommand: {e.Command.Name} | Arguments: {e.Context.RawArgumentString}",
-                {Message: "Could not find a suitable overload for the command."} => "SEND_HELP_MESSAGE",
+                    ($"Unknown subcommand: {e.Command.Name} | Arguments: {e.Context.RawArgumentString}", true),
+                {Message: "Could not find a suitable overload for the command."} => ("", true),
                 ChecksFailedException cf => cf.FailedChecks[0] switch
                     {
-                        RequireFlagAttribute              f => $"You need {f.RequisiteUserFlag} for that!",
-                        RequireNsfwAttribute                => "Channel must be maked as NSFW!",
-                        RequireDirectMessageAttribute       => "This command is limited to direct messages!",
-                        RequireGuildAttribute               => "This command is limited to servers!",
-                        RequireUserPermissionsAttribute   p => $"You need to have {p.Permissions.Humanize(LetterCasing.Title)} to run that!", 
-                        CooldownAttribute                cd => $"This command has a cooldown of ({cd.MaxUses} use / {cd.Reset.Humanize(minUnit: TimeUnit.Second)}. Come back in {cd.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}",
-                        _                                   => $"Something is limiting you from running this command.. This is the reason: `{cf.FailedChecks.Select(f => f.GetType().Name).JoinString("\n")}`"
+                        RequireFlagAttribute              f => ($"You need {f.RequisiteUserFlag} for that!", false),
+                        RequireNsfwAttribute                => ("Channel must be maked as NSFW!", false),
+                        RequireDirectMessageAttribute       => ("This command is limited to direct messages!", false),
+                        RequireGuildAttribute               => ("This command is limited to servers!", false),
+                        RequireUserPermissionsAttribute   p => ($"You need to have {p.Permissions.Humanize(LetterCasing.Title)} to run that!", false),
+                        CooldownAttribute                cd => ($"This command has a cooldown of ({cd.MaxUses} use / {cd.Reset.Humanize(minUnit: TimeUnit.Second)}. " +
+                                                                $"Come back in {cd.GetRemainingCooldown(e.Context).Humanize(3, minUnit: TimeUnit.Second)}", false),
+                        _                                   => ($"Something is limiting you from running this command. " +
+                                                                $"Reason: `{cf.FailedChecks.Select(f => f.GetType().Name).JoinString("\n")}`", false)
                 },
 
-            _ => e.Exception.Message
+            _ => (e.Exception.Message, false)
             };
-
-            if (message is "SEND_HELP_MESSGAGE") await SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
-            else if (message.Contains("Something is")) await e.Context.RespondAsync(message);
-            else _logger.LogWarning(message);
+            
+            if (sendHelp) await SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+            else 
+            {
+                await e.Context.RespondAsync(message ?? "No");
+                _logger.LogWarning(message);
+            }
+            
         }
         
         private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
