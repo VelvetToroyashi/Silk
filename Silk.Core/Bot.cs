@@ -52,6 +52,7 @@ namespace Silk.Core
             ILogger<Bot> logger, BotEventHelper eventHelper,
             MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper, 
             GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
+            MemberRemovedHelper memberRemovedHelper,
             RoleAddedHelper roleAddedHelper, RoleRemovedHelper roleRemovedHelper, 
             
             IDbContextFactory<SilkDbContext> dbFactory)
@@ -66,6 +67,8 @@ namespace Silk.Core
             client.MessageCreated += messageAHelper.Tickets;
 
             client.MessageDeleted += messageRHelper.OnRemoved;
+
+            client.GuildMemberRemoved += memberRemovedHelper.OnMemberRemoved;
             
             client.GuildDownloadCompleted += guildAddedHelper.OnGuildDownloadComplete;
             client.GuildAvailable += guildAddedHelper.OnGuildAvailable;

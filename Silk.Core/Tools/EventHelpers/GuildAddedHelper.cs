@@ -51,9 +51,7 @@ namespace Silk.Core.Tools.EventHelpers
             Task.Run(async () =>
             {
                 for (int i = 0; i < cacheQueue.Count; i++)
-                {
-                    DoCacheAsync(cacheQueue[i]);
-                }
+                    await DoCacheAsync(cacheQueue[i]);
             });
             return Task.CompletedTask;
         }
@@ -112,7 +110,7 @@ namespace Silk.Core.Tools.EventHelpers
 
         private async Task<GuildModel> GetOrCreateGuildAsync(SilkDbContext db, ulong Id)
         {
-            GuildModel? guild = db.Guilds.FirstOrDefault(g => g.Id == Id);
+            GuildModel? guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == Id);
             if (guild is null)
             {
                 guild = new();

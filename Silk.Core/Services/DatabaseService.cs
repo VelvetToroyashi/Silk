@@ -1,9 +1,12 @@
 ﻿#region
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Core;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 
@@ -61,6 +64,20 @@ namespace Silk.Core.Services
             updateAction(user);
             await db.SaveChangesAsync();
         }
+
+        public async Task RemoveUserAsync(UserModel user)
+        {
+            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildModel guild = await db.Guilds.FirstAsync(g => g == user.Guild);
+            UserModel? trackedUser = guild.Users.FirstOrDefault(u => u == user);
+            Log.Logger.Verbose("Grabbed user");
+            if (trackedUser is null) return;
+            Log.Logger.Verbose("User was not null");
+            trackedUser.Guild.Users.Remove(trackedUser);
+            await db.SaveChangesAsync();
+        }
+
+        
 
 
     }

@@ -90,6 +90,8 @@ namespace Silk.Core
                            services.AddSingleton<GuildAddedHelper>();
                            services.AddSingleton<MessageAddedHelper>();
                            services.AddSingleton<MessageRemovedHelper>();
+
+                           services.AddSingleton<MemberRemovedHelper>();
                            
                            services.AddSingleton<RoleAddedHelper>();
                            services.AddSingleton<RoleRemovedHelper>();
