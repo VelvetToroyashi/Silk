@@ -27,10 +27,13 @@ namespace Silk.Core.Database
         /// Users on a bot level; contains information that should have a globally persisted state.
         /// </summary>
         public DbSet<GlobalUserModel> GlobalUsers { get; set; }
-
+        public DbSet<GuildConfigModel> GuildConfigs { get; set; }
+        
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
 
 
+        // TODO: Clean this up
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<UserModel>().HasOne(g => g.Guild);
@@ -40,8 +43,7 @@ namespace Silk.Core.Database
             builder.Entity<GuildModel>().Property(g => g.Id).ValueGeneratedNever();
             builder.Entity<GuildModel>().HasMany(u => u.Users);
             builder.Entity<Ban>().HasOne(b => b.UserInfo);
-            builder.Entity<WhiteListedLink>().HasOne(w => w.Guild).WithMany(a => a.WhiteListedLinks);
-            builder.Entity<BlackListedWord>().HasOne(_ => _.Guild).WithMany(g => g.BlackListedWords);
+            
             //builder.Entity<UserInfractionModel>().HasOne(i => i.User);
             builder.Entity<TicketResponderModel>().HasNoKey();
             builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel)

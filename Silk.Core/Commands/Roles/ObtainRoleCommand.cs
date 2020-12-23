@@ -28,9 +28,9 @@ namespace Silk.Core.Commands.Roles
             {
                 DiscordRole parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
-                if (guild.SelfAssignableRoles.Count > 0)
+                if (guild.Configuration.SelfAssignableRoles.Count > 0)
                 {
-                    List<SelfAssignableRole> selfAssignableRoles = guild.SelfAssignableRoles;
+                    List<SelfAssignableRole> selfAssignableRoles = guild.Configuration.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
                     {

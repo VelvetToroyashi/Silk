@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
@@ -15,7 +16,7 @@ namespace Silk.Core.Tools.EventHelpers
     {
         //TODO: Implement removing Staff flag from members when their role is removed. 
 
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly ILogger<RoleRemovedHelper> _logger;
         private readonly DatabaseService _dbService;
         public RoleRemovedHelper(DatabaseService dbService) => _dbService = dbService;
         

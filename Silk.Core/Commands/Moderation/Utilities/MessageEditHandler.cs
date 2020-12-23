@@ -33,7 +33,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             {
                 GuildModel config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
                 CheckForInvite(e, config);
-                ulong logChannel = config.MessageEditChannel;
+                ulong logChannel = config.Configuration.GeneralLoggingChannel;
                 if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
 
                 if (logChannel == default) return;
@@ -59,7 +59,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
         private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {
-            if (config.WhitelistInvites)
+            if (config.Configuration.WhitelistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
                     Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
@@ -67,7 +67,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
                     string inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' '))
                                               .Replace("discord.com/invite", "discord.gg/");
-                    if (config.WhiteListedLinks.All(link => link.Link != inviteLink))
+                    if (config.Configuration.WhiteListedLinks.All(link => link.Link != inviteLink))
                         e.Message.DeleteAsync().GetAwaiter();
                 }
         }

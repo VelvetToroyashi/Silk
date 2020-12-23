@@ -51,6 +51,7 @@ namespace Silk.Core.Tools.EventHelpers
                     e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id)
                         ? e.Message.GetMentionPrefixLength(c.CurrentUser)
                         : e.Message.GetStringPrefixLength(prefix);
+                if (commandLength is -1) return;
                 string? commandString = e.Message.Content.Substring(commandLength);
                 //string? split = commandString?.Split()?[0];
                 // if (e.Guild is not null &&

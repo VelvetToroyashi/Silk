@@ -29,9 +29,9 @@ namespace Silk.Core.Tools.EventHelpers
             
             GuildModel guild = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
 
-            if (!guild.LogMessageChanges) return;
+            if (!guild.Configuration.LogMessageChanges) return;
             DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
-            DiscordChannel channel = await c.GetChannelAsync(guild.GeneralLoggingChannel);
+            DiscordChannel channel = await c.GetChannelAsync(guild.Configuration.GeneralLoggingChannel);
             await channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
 

@@ -49,7 +49,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (config.MuteRoleId == default)
+            if (config.Configuration.MuteRoleId == default)
             {
                 await ctx.RespondAsync("Muted role is not set up");
                 return;
@@ -75,7 +75,7 @@ namespace Silk.Core.Commands.Moderation
 
             EventService.Events.Add(tempMute);
 
-            await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleId), reason);
+            await user.GrantRoleAsync(ctx.Guild.GetRole(config.Configuration.MuteRoleId), reason);
         }
 
 
@@ -86,7 +86,7 @@ namespace Silk.Core.Commands.Moderation
 
             GuildModel guild = DbFactory.CreateDbContext().Guilds
                                         .First(g => g.Id == eventObject.Guild);
-            ulong muteRole = guild.MuteRoleId;
+            ulong muteRole = guild.Configuration.MuteRoleId;
 
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);
         }

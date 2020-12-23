@@ -24,6 +24,7 @@ namespace Silk.Core.Commands.Moderation.Ban
     [Category(Categories.Mod)]
     public class TempBanCommand : BaseCommandModule
     {
+        //TODO: Clean this up
         public IDbContextFactory<SilkDbContext> DbFactory { private get; set; }
         public TimedEventService EventService { private get; set; }
         public DiscordClient Client { private get; set; }
@@ -61,7 +62,7 @@ namespace Silk.Core.Commands.Moderation.Ban
 
                 UserModel bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned",
-                    banDuration.TotalDays + " days", user.Mention, reason, guild.InfractionFormat ?? defaultFormat);
+                    banDuration.TotalDays + " days", user.Mention, reason, guild.Configuration.InfractionFormat ?? defaultFormat);
                 UserInfractionModel infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
@@ -71,11 +72,11 @@ namespace Silk.Core.Commands.Moderation.Ban
                     bannedUser.Infractions.Add(infraction);
                 }
 
-                if (guild.GeneralLoggingChannel != default)
+                if (guild.Configuration.GeneralLoggingChannel != default)
                 {
                     embed.WithDescription(formattedBanReason);
                     embed.WithColor(DiscordColor.Green);
-                    await ctx.Guild.GetChannel(guild.GeneralLoggingChannel).SendMessageAsync(embed: embed);
+                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel).SendMessageAsync(embed: embed);
                 }
 
                 EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration),
@@ -139,10 +140,10 @@ namespace Silk.Core.Commands.Moderation.Ban
         {
             SilkDbContext db = DbFactory.CreateDbContext();
             GuildModel guild = db.Guilds.First(g => g.Id == eventObject.Guild);
-            if (guild.GeneralLoggingChannel != default)
+            if (guild.Configuration.GeneralLoggingChannel != default)
             {
                 DiscordChannel c =
-                    (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.GeneralLoggingChannel);
+                    (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.Configuration.GeneralLoggingChannel);
                 DiscordUser u = await Client.GetUserAsync(eventObject.Id);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithDescription($"{u.Mention}'s ban has expired.")
                                                                      .WithColor(DiscordColor.PhthaloGreen)

@@ -97,7 +97,7 @@ namespace Silk.Core.Commands.Moderation
                 await user.RemoveAsync(reason);
 
                 GuildModel guildConfig = await _dbService.GetGuildAsync(ctx.Guild.Id);
-                ulong logChannelID = guildConfig.GeneralLoggingChannel;
+                ulong logChannelID = guildConfig.Configuration.GeneralLoggingChannel;
                 ulong logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),
                     embed: new DiscordEmbedBuilder()
