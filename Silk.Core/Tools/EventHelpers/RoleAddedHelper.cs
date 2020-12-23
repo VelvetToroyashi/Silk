@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
@@ -9,8 +7,6 @@ using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {

@@ -1,5 +1,4 @@
 #pragma warning disable CA1822 // Mark members as static
-#region
 
 using System;
 using System.Diagnostics;
@@ -10,8 +9,6 @@ using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Utilities;
-
-#endregion
 
 #pragma warning disable 1591
 

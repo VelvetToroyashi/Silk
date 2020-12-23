@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
@@ -10,8 +8,6 @@ using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.General
 {

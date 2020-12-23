@@ -1,10 +1,6 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
-
-#endregion
 
 namespace Silk.Core.Services
 {

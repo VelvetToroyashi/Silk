@@ -1,8 +1,4 @@
-﻿#region
-
-using Silk.Core.Database.Models;
-
-#endregion
+﻿using Silk.Core.Database.Models;
 
 namespace Silk.Core.Commands.General.Tickets
 {

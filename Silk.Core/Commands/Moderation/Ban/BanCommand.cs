@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -12,8 +10,6 @@ using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Commands.Moderation.Ban
 {

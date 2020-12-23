@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -9,8 +7,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {

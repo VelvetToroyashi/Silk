@@ -1,9 +1,5 @@
-﻿#region
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Database
 {

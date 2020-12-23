@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,8 +8,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Commands.Moderation.Utilities
 {

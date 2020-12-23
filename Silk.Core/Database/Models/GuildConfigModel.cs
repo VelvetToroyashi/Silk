@@ -5,7 +5,6 @@ namespace Silk.Core.Database.Models
 {
     public class GuildConfigModel
     {
-        #region Ids
 
         public ulong MuteRoleId { get; set; } 
         public ulong GeneralLoggingChannel { get; set; }
@@ -15,17 +14,12 @@ namespace Silk.Core.Database.Models
 
         public bool GreetMembers { get; set; }
         public bool LogRoleChange { get; set; }
-        
-        #endregion
 
-        #region Toggles
-        
         public bool WhitelistInvites { get; set; }
         public bool BlacklistWords { get; set; }
         public bool AutoDehoist { get; set; }
         public bool IsPremium { get; set; }
 
-        #endregion
         [Key] public ulong Id { get; set; }
         
         
