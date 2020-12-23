@@ -1,10 +1,6 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.General.DiceRoll
 {

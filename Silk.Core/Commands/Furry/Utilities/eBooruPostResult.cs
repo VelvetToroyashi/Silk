@@ -1,9 +1,5 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-
-#endregion
 
 namespace Silk.Core.Commands.Furry.Utilities
 {

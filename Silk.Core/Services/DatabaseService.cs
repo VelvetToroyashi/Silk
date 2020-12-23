@@ -1,16 +1,10 @@
-﻿#region
-
-using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Core;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Services
 {
@@ -38,7 +32,7 @@ namespace Silk.Core.Services
             
             await using SilkDbContext db = _dbFactory.CreateDbContext();
             
-            GuildModel guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
+            GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
             user ??= new() {Id = userId.Value};
@@ -51,20 +45,26 @@ namespace Silk.Core.Services
         /// <summary>
         /// Update a <see cref="UserModel"/>.
         /// </summary>
-        /// <param name="userId">The Id of the user to update.</param>
-        /// <param name="guildId"></param>
-        /// <param name="updateAction"></param>
-        /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task UpdateGuildUserAsync(ulong userId, ulong guildId, Action<UserModel> updateAction)
+        public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
             await using SilkDbContext db = _dbFactory.CreateDbContext();
-            UserModel? user = await GetGuildUserAsync(userId, guildId);
-            if (user is null) throw new ArgumentNullException($"{nameof(userId)} cannot be null.");
-            updateAction(user);
+            UserModel? trackedUser = await db.Users.FirstOrDefaultAsync(u => u == user);
+            if (trackedUser is null) throw new ArgumentNullException($"{nameof(user)} cannot be null.");
+            updateAction(trackedUser);
             await db.SaveChangesAsync();
         }
 
+        public async Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId)
+        {
+            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
+            UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
+            user ??= new() {Id = userId};
+            await db.SaveChangesAsync();
+            return user;
+        }
+        
         public async Task RemoveUserAsync(UserModel user)
         {
             await using SilkDbContext db = _dbFactory.CreateDbContext();

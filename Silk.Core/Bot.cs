@@ -1,7 +1,3 @@
-#region Usings
-
-#region
-
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -20,16 +16,11 @@ using Silk.Core.Services;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
 
-#endregion
-
 namespace Silk.Core
 {
 
-    #endregion
-
     public class Bot : IHostedService
     {
-        #region Props
         //TODO: Fix all these usages, because they should be pulling from ctx.Services if possible. //
         public DiscordShardedClient Client          { get; set; }
         public static Bot? Instance                 { get; private set; }
@@ -38,8 +29,6 @@ namespace Silk.Core
         public SilkDbContext SilkDBContext          { get; private set; }
         
         public CommandsNextConfiguration? Commands  { get; private set; }
-
-        #endregion
 
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
@@ -84,8 +73,6 @@ namespace Silk.Core
             Client = client;
         }
 
-        #region Methods
-        
         private void InitializeCommands()
         {
            
@@ -147,6 +134,5 @@ namespace Silk.Core
             await Client.StopAsync();
         }
 
-        #endregion
     }
 }

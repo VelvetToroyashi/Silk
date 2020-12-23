@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -10,8 +8,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {
@@ -51,13 +47,14 @@ namespace Silk.Core.Tools.EventHelpers
                     e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id)
                         ? e.Message.GetMentionPrefixLength(c.CurrentUser)
                         : e.Message.GetStringPrefixLength(prefix);
+                if (commandLength is -1) return;
                 string? commandString = e.Message.Content.Substring(commandLength);
                 //string? split = commandString?.Split()?[0];
                 // if (e.Guild is not null &&
                 //     (disabledCommandsCache.GetValueOrDefault(e.Guild.Id)?.Contains(split) ?? false)) return;
                 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
-                
+
                  if (command is null) 
                      throw new CommandNotFoundException(commandString);
                 

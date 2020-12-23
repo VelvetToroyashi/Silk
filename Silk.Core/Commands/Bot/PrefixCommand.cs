@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -10,8 +8,6 @@ using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.Bot
 {

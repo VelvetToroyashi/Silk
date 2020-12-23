@@ -1,9 +1,5 @@
-﻿#region
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-#endregion
 
 namespace Silk.Core.Database.Models
 {

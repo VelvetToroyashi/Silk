@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -9,8 +7,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {
@@ -29,9 +25,9 @@ namespace Silk.Core.Tools.EventHelpers
             
             GuildModel guild = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
 
-            if (!guild.LogMessageChanges) return;
+            if (!guild.Configuration.LogMessageChanges) return;
             DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
-            DiscordChannel channel = await c.GetChannelAsync(guild.GeneralLoggingChannel);
+            DiscordChannel channel = await c.GetChannelAsync(guild.Configuration.GeneralLoggingChannel);
             await channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
         }
 

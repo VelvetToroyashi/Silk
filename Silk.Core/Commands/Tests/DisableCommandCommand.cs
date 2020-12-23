@@ -1,11 +1,7 @@
-﻿#region
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.Tests
 {

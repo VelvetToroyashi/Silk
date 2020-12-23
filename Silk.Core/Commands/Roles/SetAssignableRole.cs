@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -12,10 +10,9 @@ using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 
-#endregion
-
 namespace Silk.Core.Commands.Roles
 {
+    //TODO: Clean this abomination //
     [Category(Categories.Misc)]
     public class SetAssignableRole : BaseCommandModule
     {
@@ -33,9 +30,9 @@ namespace Silk.Core.Commands.Roles
         {
             using SilkDbContext db = _dbFactory.CreateDbContext();
 
-            GuildModel guild = await db.Guilds.Include(g => g.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
+            GuildModel guild = await db.Guilds.Include(g => g.Configuration.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
 
-            IEnumerable<ulong> currentlyAssignableRoles = guild.SelfAssignableRoles.Select(r => r.RoleId);
+            IEnumerable<ulong> currentlyAssignableRoles = guild.Configuration.SelfAssignableRoles.Select(r => r.RoleId);
             
             List<string> added = new();
             List<string> removed = new();
@@ -45,15 +42,15 @@ namespace Silk.Core.Commands.Roles
                 if (currentlyAssignableRoles.Any(r => r == role.Id))
                 {
                     removed.Add(role.Mention);
-                    var r = guild.SelfAssignableRoles.Single(ro => ro.RoleId == role.Id);
-                    guild.SelfAssignableRoles.Remove(r);
+                    var r = guild.Configuration.SelfAssignableRoles.Single(ro => ro.RoleId == role.Id);
+                    guild.Configuration.SelfAssignableRoles.Remove(r);
                     //await db.SaveChangesAsync();
                 }
                 else
                 {
                     added.Add(role.Mention);
                     var r = new SelfAssignableRole {RoleId = role.Id};
-                    guild.SelfAssignableRoles.Add(r);
+                    guild.Configuration.SelfAssignableRoles.Add(r);
                     //await db.SaveChangesAsync();
                 }
             }

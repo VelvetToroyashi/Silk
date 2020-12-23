@@ -1,5 +1,3 @@
-#region
-
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,8 +20,6 @@ using Silk.Core.Services;
 using Silk.Core.Tools;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core
 {

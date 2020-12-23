@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,8 +8,6 @@ using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 
-#endregion
-
 namespace Silk.Core.Commands.Roles
 {
     [Category(Categories.Misc)]
@@ -19,17 +15,18 @@ namespace Silk.Core.Commands.Roles
     {
         [Command("Role")]
         [Description("Grab a role!")]
-        public async Task ObtainRole(CommandContext ctx, [RemainingText] string roles)
+        public async Task ObtainRole(CommandContext ctx, [RemainingText] string? roles)
         {
+            if (roles is null) return;
             string[] _roles = roles.Split(',');
             GuildModel guild = Core.Bot.Instance!.SilkDBContext.Guilds.First(g => g.Id == ctx.Guild.Id);
             foreach (string role in _roles)
             {
                 DiscordRole parsedRole = ctx.Guild.Roles.First(r => r.Value.Name.ToLower() == role.ToLower()).Value;
 
-                if (guild.SelfAssignableRoles.Count > 0)
+                if (guild.Configuration.SelfAssignableRoles.Count > 0)
                 {
-                    List<SelfAssignableRole> selfAssignableRoles = guild.SelfAssignableRoles;
+                    List<SelfAssignableRole> selfAssignableRoles = guild.Configuration.SelfAssignableRoles;
 
                     if (selfAssignableRoles.Any(saRole => saRole.RoleId == parsedRole.Id))
                     {

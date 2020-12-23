@@ -1,10 +1,6 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.IO;
 using Serilog.Sinks.SystemConsole.Themes;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {

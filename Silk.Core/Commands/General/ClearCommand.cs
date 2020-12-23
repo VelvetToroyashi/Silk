@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -10,16 +8,14 @@ using DSharpPlus.Entities;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 
-#endregion
-
 namespace Silk.Core.Commands.General
 {
-    [Category(Categories.General)]
+    [Category(Categories.Mod)]
     public class ClearCommand : BaseCommandModule
     {
         [Command]
         [RequireUserPermissions(Permissions.ManageMessages)]
-        [Description("Cleans all messages from all users. \n Note, clearing more than 50 messages will lock the channel during bulk deletion. Coming soon:tm:")]
+        [Description("Cleans all messages from all users.")]
         public async Task Clear(CommandContext ctx, int messages = 5)
         {
             // Anyone who's got permission to manage channels might not be staff, so adding [RequireFlag(UserFlag.Staff)] needlessly permwalls it. //

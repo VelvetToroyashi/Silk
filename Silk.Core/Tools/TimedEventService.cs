@@ -1,11 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Timers;
 using ConcurrentCollections;
-
-#endregion
 
 namespace Silk.Core.Tools
 {

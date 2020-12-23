@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
@@ -9,8 +7,6 @@ using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {
@@ -25,7 +21,7 @@ namespace Silk.Core.Tools.EventHelpers
             _ = Task.Run(async () =>
             {
                 await using SilkDbContext db = _dbFactory.CreateDbContext();
-                GuildModel guild = await db.Guilds.FirstAsync(g => g.Id == e.Guild.Id);
+                GuildModel guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {
                     // I was really stupid to make the oversight of picking the first user in the Database instead of the first user in the guild. ~Velvet. //
