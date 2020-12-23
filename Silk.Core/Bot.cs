@@ -66,9 +66,8 @@ namespace Silk.Core
 
             client.GuildMemberUpdated += roleAddedHelper.CheckStaffRole;
             client.GuildMemberUpdated += roleRemovedHelper.CheckStaffRoles;
-            
+
             SilkDBContext = dbFactory.CreateDbContext();
-            SilkDBContext.Database.Migrate();
             Instance = this;
             Client = client;
         }

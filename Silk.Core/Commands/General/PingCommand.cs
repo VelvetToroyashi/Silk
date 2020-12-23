@@ -34,12 +34,11 @@ namespace Silk.Core.Commands.General
             sw.Stop();
             await Task.Delay(100);
             var silkAPIResponse = await new Ping().SendPingAsync("velvetthepanda.dev");
-            embed.WithDescription(
-                     $"***```cs\nMessage Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
-                     $"Discord API Latency: {ctx.Client.Ping} ms.\n\n" +
-                     $"Silk! API Latency: {silkAPIResponse.RoundtripTime} ms.\n\n" +
-                     $"Database latency: {GetDbLatency()} ms.```***")
-                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
+            embed.AddField("→ Message Latency ←", $"```cs\n{sw.ElapsedMilliseconds} ms```", true)
+                .AddField("→ Discord API latency ←", $"```cs\n{ctx.Client.Ping} ms```", true)
+                .AddField("→ Silk! API Latency ←", $"```cs\n{silkAPIResponse.RoundtripTime} ms```", true)
+                .AddField("→ Database Latency ←", $"```cs\n{GetDbLatency()} ms```", true)
+                .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
                  .WithTimestamp(DateTime.Now);
             await message.ModifyAsync(embed: embed.Build());
         }

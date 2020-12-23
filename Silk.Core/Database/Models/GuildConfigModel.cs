@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Silk.Core.Database.Models
 {
     public class GuildConfigModel
     {
-
+        
+        [Key] 
+        public int Id { get; set; }
         public ulong MuteRoleId { get; set; } 
         public ulong GeneralLoggingChannel { get; set; }
         public ulong GreetingChannel { get; set; }
@@ -19,16 +22,6 @@ namespace Silk.Core.Database.Models
         public bool BlacklistWords { get; set; }
         public bool AutoDehoist { get; set; }
         public bool IsPremium { get; set; }
-
-        [Key] public ulong Id { get; set; }
-        
-        
-
-        
-        [Required] 
-        [StringLength(5)] 
-        public string Prefix { get; set; }
-
         public string InfractionFormat { get; set; } = string.Empty;
 
 
@@ -38,7 +31,7 @@ namespace Silk.Core.Database.Models
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
         public List<Ban> Bans { get; set; } = new();
         
-        
-        public GuildModel Guild { get; set; }
+        // [ForeignKey("Guild")]
+        // public GuildModel Guild { get; set; }
     }
 }
