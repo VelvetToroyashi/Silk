@@ -91,8 +91,7 @@ namespace Silk.Core.Tools.EventHelpers
                                         .WithTitle("Thank you for adding me!")
                                         .WithColor(new DiscordColor("94f8ff"))
                                         .WithThumbnail(c.CurrentUser.AvatarUrl)
-                                        .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3")
-                                        .WithTimestamp(DateTime.Now);
+                                        .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
 
             var sb = new StringBuilder();
             sb.Append("Thank you for choosing Silk! to join your server <3")

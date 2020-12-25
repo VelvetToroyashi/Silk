@@ -25,8 +25,7 @@ namespace Silk.Core.Commands.General
                                              : DiscordColor.SapGreen)
                                          .WithTitle("Bot status:")
                                          .WithDescription(activity ?? "I'm not currently playing anything :).")
-                                         .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                         .WithTimestamp(DateTime.Now);
+                                         .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl);
 
             await ctx.RespondAsync(embed: status);
         }
@@ -43,8 +42,7 @@ namespace Silk.Core.Commands.General
                                                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                                                 .WithColor(DiscordColor.SapGreen)
                                                 .WithDescription("Bot status has been cleared!")
-                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                                                .WithTimestamp(DateTime.Now);
+                                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl);
 
                     await ctx.Client.UpdateStatusAsync();
                     await ctx.RespondAsync(embed: embed);

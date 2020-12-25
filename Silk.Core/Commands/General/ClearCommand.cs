@@ -31,8 +31,7 @@ namespace Silk.Core.Commands.General
                                               .WithDescription(
                                                   "Sorry, but you need to be able to manage messages to use this command!")
                                               .WithFooter(ctx.Client.CurrentUser.Username,
-                                                  ctx.Client.CurrentUser.AvatarUrl)
-                                              .WithTimestamp(DateTime.Now));
+                                                  ctx.Client.CurrentUser.AvatarUrl));
                 return;
             }
 
@@ -44,8 +43,7 @@ namespace Silk.Core.Commands.General
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
                 .WithDescription($"Cleared {messages} messages!")
-                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl));
             //Change to whatever.//
             await Task.Delay(5000);
             if (deleteConfirmationMessage is not null)

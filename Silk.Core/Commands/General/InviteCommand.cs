@@ -23,8 +23,7 @@ namespace Silk.Core.Commands.General
             await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                                           .WithColor(DiscordColor.Gold)
                                           .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!")
-                                          .WithFooter("Silk ", ctx.Client.CurrentUser.AvatarUrl)
-                                          .WithTimestamp(DateTime.Now));
+                                          .WithFooter("Silk ", ctx.Client.CurrentUser.AvatarUrl));
         }
     }
 }

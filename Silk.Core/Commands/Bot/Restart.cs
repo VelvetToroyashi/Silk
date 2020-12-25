@@ -26,7 +26,6 @@ namespace Silk.Core.Commands.Bot
                     .WithDescription("Restarting... Commands will be processed when status is green.")
                     .WithColor(new DiscordColor("#29ff29"))
                     .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                    .WithTimestamp(DateTime.Now)
             );
             Core.Bot.Instance.SilkDBContext.SaveChanges();
 

@@ -18,8 +18,7 @@ namespace Silk.Core.Utilities
                    .WithColor(DiscordColor.CornflowerBlue)
                    .WithTitle(Title)
                    .WithDescription(Description)
-                   .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
-                   .WithTimestamp(DateTime.Now);
+                   .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl);
         }
 
 

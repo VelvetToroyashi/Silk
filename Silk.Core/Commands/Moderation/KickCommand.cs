@@ -104,8 +104,7 @@ namespace Silk.Core.Commands.Moderation
                            .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                            .WithColor(DiscordColor.SpringGreen)
                            .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")
-                           .WithFooter("Silk!")
-                           .WithTimestamp(DateTime.Now)).ConfigureAwait(false);
+                           .WithFooter("Silk!")).ConfigureAwait(false);
             }
         }
     }

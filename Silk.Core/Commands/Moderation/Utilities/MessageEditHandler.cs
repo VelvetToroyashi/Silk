@@ -50,8 +50,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
                         .AddField("Message ID:", e.Message.Id.ToString(), true)
                         .AddField("Channel ID:", e.Channel.Id.ToString(), true)
                         .WithColor(DiscordColor.CornflowerBlue)
-                        .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
-                        .WithTimestamp(DateTime.Now);
+                        .WithFooter("Silk!", c.CurrentUser.AvatarUrl);
                 DiscordChannel loggingChannel = await c.GetChannelAsync(logChannel);
                 await c.SendMessageAsync(loggingChannel, embed: embed);
             });
