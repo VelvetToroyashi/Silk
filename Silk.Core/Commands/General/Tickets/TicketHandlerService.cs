@@ -167,7 +167,10 @@ namespace Silk.Core.Commands.General.Tickets
             // If the message is sent on a guild, check if it's a ticket channel, else follow normal check flow. //
             if (!c.IsPrivate)
             {
-                try { _ = ticketChannels[id]; }
+                try
+                {
+                    _ = ticketChannels[id];
+                }
                 catch (KeyNotFoundException) { return false; }
                 return true;
             }

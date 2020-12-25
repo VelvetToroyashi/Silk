@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -24,8 +25,9 @@ namespace Silk.Core.Services
 
         public async Task<GuildConfigModel> GetConfigAsync(ulong? guildId)
         {
-            if (guildId is null || guildId == 0) return default;
+            if (guildId is null or 0) throw new ArgumentException("Must have value!", nameof(guildId));
             if (_cache.TryGetValue(guildId.Value, out GuildConfigModel config)) return config;
+            //_logger.LogInformation("Guild not present in cache! Querying from database");
             return await GetConfigFromDatabaseAsync(guildId.Value);
         }
 

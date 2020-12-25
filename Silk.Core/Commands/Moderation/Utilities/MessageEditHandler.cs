@@ -55,7 +55,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
         private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {
-            if (config.Configuration.WhitelistInvites)
+            if (config.Configuration.BlacklistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
                     Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);

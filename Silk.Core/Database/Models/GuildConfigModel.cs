@@ -10,18 +10,38 @@ namespace Silk.Core.Database.Models
         [Key] 
         public int Id { get; set; }
         public ulong MuteRoleId { get; set; } 
-        public ulong GeneralLoggingChannel { get; set; }
+        
         public ulong GreetingChannel { get; set; }
 
-        public bool LogMessageChanges { get; set; }
+        #region AutoMod/Moderation
 
+        public ulong GeneralLoggingChannel { get; set; }
+        public bool LogMessageChanges { get; set; }
         public bool GreetMembers { get; set; }
         public bool LogRoleChange { get; set; }
 
-        public bool WhitelistInvites { get; set; }
+        public bool BlacklistInvites { get; set; }
         public bool BlacklistWords { get; set; }
-        public bool AutoDehoist { get; set; }
+        
+        public bool UseAggressiveRegex { get; set; }
+
+        #endregion
+
+        
+
+        #region Premium Features
+        
         public bool IsPremium { get; set; }
+        
+        public bool AutoDehoist { get; set; }
+
+        public bool ScanInvites { get; set; }
+        
+        public List<GuildInviteModel> AllowedInvites { get; set; }
+        
+
+        #endregion
+        
         public string InfractionFormat { get; set; } = string.Empty;
 
 

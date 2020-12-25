@@ -14,37 +14,49 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using org.mariuszgromada.math.mxparser;
+using Silk.Core.AutoMod;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using SilkBot.Extensions;
 
 namespace Silk.Core.Utilities
 {
-    public class BotEventHelper
+    public class BotEventSubscriber
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly ILogger<BotEventHelper> _logger;
+        private readonly ILogger<BotEventSubscriber> _logger;
         private readonly DiscordShardedClient _client;
         private readonly Stopwatch _time = new();
-        private readonly object _obj = new();
+        private readonly IServiceProvider _services;
         private bool _hasLoggedCompletion;
         private int _currentMemberCount;
         private int expectedMembers;
         private int cachedMembers;
         private int guildMembers;
-        public BotEventHelper(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory,
-            ILogger<BotEventHelper> logger)
+        public BotEventSubscriber(DiscordShardedClient client, IDbContextFactory<SilkDbContext> dbFactory,
+            ILogger<BotEventSubscriber> logger, IServiceProvider services)
         {
             _dbFactory = dbFactory;
             _logger = logger;
             _client = client;
+            _services = services;
         }
 
-        public void CreateHandlers()
+        public async Task CreateHandlers()
         {
             _client.ClientErrored += OnClientErrored;
-            foreach (CommandsNextExtension c in _client.GetCommandsNextAsync().GetAwaiter().GetResult().Values)
+            foreach (CommandsNextExtension c in (await _client.GetCommandsNextAsync()).Values)
                 c.CommandErrored += CommandErrored;
+            
+            _logger.LogInformation("Subscribing to events; this may take a while.");
+            foreach (DiscordClient c in _client.ShardClients.Values)
+            {
+                c.MessageCreated += _services.Get<AutoModMessageHandler>().CheckForInvites;
+                
+            }
+            
+            
+            
         }
 
         private async Task CommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
