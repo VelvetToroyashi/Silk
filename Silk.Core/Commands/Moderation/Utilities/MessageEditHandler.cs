@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,8 +8,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Commands.Moderation.Utilities
 {
@@ -56,7 +52,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
         private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {
-            if (config.Configuration.WhitelistInvites)
+            if (config.Configuration.BlacklistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
                     Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);

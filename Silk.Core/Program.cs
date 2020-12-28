@@ -1,5 +1,3 @@
-#region
-
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Commands;
 using Silk.Core.Commands.General;
 using Silk.Core.Commands.General.Tickets;
@@ -22,8 +21,6 @@ using Silk.Core.Services;
 using Silk.Core.Tools;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core
 {
@@ -75,7 +72,7 @@ namespace Silk.Core
                                     #endif
                                },
                                ServiceLifetime.Transient);
-                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
+                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromDays(1));
                 
                            services.AddSingleton<TicketService>();
                            services.AddSingleton<DatabaseService>();
@@ -84,9 +81,12 @@ namespace Silk.Core
                            services.AddSingleton<PrefixCacheService>();
                            services.AddSingleton<TicketHandlerService>();
                            services.AddSingleton<GuildConfigCacheService>();
+
+
+                           services.AddSingleton<AutoModMessageHandler>();
                            
                            
-                           services.AddSingleton<BotEventHelper>();
+                           services.AddSingleton<BotEventSubscriber>();
                            services.AddSingleton<GuildAddedHelper>();
                            services.AddSingleton<MessageAddedHelper>();
                            services.AddSingleton<MessageRemovedHelper>();

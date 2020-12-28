@@ -1,10 +1,6 @@
-﻿#region
-
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {

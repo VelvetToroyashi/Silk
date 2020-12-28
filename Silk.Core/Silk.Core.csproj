@@ -93,5 +93,9 @@
   <ItemGroup>
     <Compile Remove="Silk!\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations" />
+  </ItemGroup>
   
 </Project>

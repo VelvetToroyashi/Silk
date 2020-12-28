@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -10,8 +8,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
-
-#endregion
 
 namespace Silk.Core.Tools.EventHelpers
 {

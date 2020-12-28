@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -9,8 +7,6 @@ using DSharpPlus.Entities;
 using Humanizer;
 using Silk.Core.Commands.Furry.Utilities;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.Furry.SFW
 {

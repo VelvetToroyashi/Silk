@@ -1,10 +1,6 @@
-#region
-
 using System;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {

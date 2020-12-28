@@ -1,16 +1,10 @@
-﻿#region
-
-using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Core;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Services
 {
@@ -29,7 +23,7 @@ namespace Silk.Core.Services
         public async Task<GuildModel> GetGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = _dbFactory.CreateDbContext();
-            return await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
+            return await db.Guilds.Include(g => g.Configuration).Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
         }
 
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)

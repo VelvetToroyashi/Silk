@@ -1,9 +1,5 @@
-﻿#region
-
-using System;
+﻿using System;
 using Silk.Core.Commands.Moderation.Utilities;
-
-#endregion
 
 namespace Silk.Core.Database.Models
 {

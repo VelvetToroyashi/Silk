@@ -1,5 +1,4 @@
 #pragma warning disable CA1822 // Mark members as static
-#region
 
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +9,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Services
 {

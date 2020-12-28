@@ -1,11 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 using SilkBot.Extensions.DSharpPlus;
-
-#endregion
 
 namespace Silk.Core.Commands.General.Tickets
 {

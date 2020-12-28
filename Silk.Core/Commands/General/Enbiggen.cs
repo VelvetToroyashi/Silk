@@ -1,13 +1,9 @@
-﻿#region
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Commands.General
 {

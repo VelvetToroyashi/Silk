@@ -1,13 +1,9 @@
-#region
-
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {
@@ -56,13 +52,13 @@ namespace Silk.Core.Utilities
 
             private static readonly Action<ILogger, HttpMethod, Uri, Exception> _requestPipelineStart =
                 LoggerMessage.Define<HttpMethod, Uri>(
-                    LogLevel.Information,
+                    LogLevel.Trace,
                     EventIds.PipelineStart,
                     "Start processing HTTP request {HttpMethod} {Uri}");
 
             private static readonly Action<ILogger, HttpStatusCode, Exception> _requestPipelineEnd =
                 LoggerMessage.Define<HttpStatusCode>(
-                    LogLevel.Information,
+                    LogLevel.Trace,
                     EventIds.PipelineEnd,
                     "End processing HTTP request - {StatusCode}");
 
