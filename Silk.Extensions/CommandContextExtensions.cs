@@ -29,8 +29,7 @@ namespace SilkBot.Extensions
 
         public static DiscordEmbedBuilder AddFooter(this DiscordEmbedBuilder builder, CommandContext ctx)
         {
-            return builder.WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl)
-                          .WithTimestamp(DateTime.Now);
+            return builder;
         }
 
         public static IEnumerable<DiscordMember> GetMemberByName(this CommandContext ctx, string input)

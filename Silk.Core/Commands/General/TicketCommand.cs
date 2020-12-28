@@ -148,8 +148,7 @@ namespace Silk.Core.Commands.General
                                      ? "This ticket is still active!"
                                      : $"{t.Closed:d/M/yyyy} ({t.Closed.GetTime().Humanize(3, false, null, TimeUnit.Year, TimeUnit.Minute)} ago.)")
                              .WithColor(DiscordColor.Chartreuse)
-                             .WithFooter($"Silk! Requested by: {c.User.Id}", c.Client.CurrentUser.AvatarUrl)
-                             .WithTimestamp(DateTime.Now);
+                             .WithFooter($"Silk! Requested by: {c.User.Id}", c.Client.CurrentUser.AvatarUrl);
 
 
             [Command("List")]
@@ -383,8 +382,7 @@ namespace Silk.Core.Commands.General
                    .WithAuthor(ticketOpener.Username, null, ticketOpener.AvatarUrl)
                    .WithColor(DiscordColor.DarkBlue)
                    .WithDescription(message)
-                   .WithFooter($"Silk! | Ticket Id: {ticket.Id}", avatarUrl)
-                   .WithTimestamp(DateTime.Now);
+                   .WithFooter($"Silk! | Ticket Id: {ticket.Id}", avatarUrl);
         }
 
 
@@ -394,9 +392,7 @@ namespace Silk.Core.Commands.General
             return new DiscordEmbedBuilder()
                    .WithAuthor(responder.Username, null, responder.AvatarUrl)
                    .WithColor(DiscordColor.Green)
-                   .WithDescription(message)
-                   .WithFooter("Silk!", avatarUrl)
-                   .WithTimestamp(DateTime.Now);
+                   .WithDescription(message);
         }
 
         public async Task<DiscordChannel> GetDmChannelAsync(DiscordClient c, ulong recipientId)

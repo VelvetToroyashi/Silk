@@ -13,7 +13,6 @@ namespace Silk.Core.Commands.General.Tickets
                     .WithAuthor(responder.Username, responder.GetUrl(), responder.AvatarUrl)
                     .WithDescription(message)
                     .WithFooter("Ticket history is saved for security purposes")
-                    .WithTimestamp(DateTime.Now)
                     .WithColor(DiscordColor.Goldenrod)
                     .Build();
 
@@ -22,8 +21,7 @@ namespace Silk.Core.Commands.General.Tickets
                 .WithAuthor(ticketOpener.Username, null, ticketOpener.AvatarUrl)
                 .WithColor(DiscordColor.DarkBlue)
                 .WithDescription(message)
-                .WithFooter($"Silk! | Ticket Id: {ticket.Id}")
-                .WithTimestamp(DateTime.Now);
+                .WithFooter($"Silk! | Ticket Id: {ticket.Id}");
 
         public static DiscordEmbed GenerateTicketClosedEmbed() =>
             new DiscordEmbedBuilder()

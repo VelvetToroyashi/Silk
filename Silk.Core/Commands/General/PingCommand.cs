@@ -40,9 +40,7 @@ namespace Silk.Core.Commands.General
                 .AddField("​", "​", true)
                 .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms"                        .PadLeft(10, '⠀') + "```", true)
                 .AddField("​", "​", true)
-                
-                .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl)
-                 .WithTimestamp(DateTime.Now);
+                .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
             await message.ModifyAsync(embed: embed.Build());
         }
 

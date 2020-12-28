@@ -25,10 +25,7 @@ namespace Silk.Core.Commands.General
                                               .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                                               .WithColor(DiscordColor.Red)
                                               .WithDescription(
-                                                  "Sorry, but you need to be able to manage messages to use this command!")
-                                              .WithFooter(ctx.Client.CurrentUser.Username,
-                                                  ctx.Client.CurrentUser.AvatarUrl)
-                                              .WithTimestamp(DateTime.Now));
+                                                  "Sorry, but you need to be able to manage messages to use this command!"));
                 return;
             }
 
@@ -39,9 +36,7 @@ namespace Silk.Core.Commands.General
             DiscordMessage deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($"Cleared {messages} messages!")
-                .WithFooter(ctx.Client.CurrentUser.Username, ctx.Client.CurrentUser.AvatarUrl)
-                .WithTimestamp(DateTime.Now));
+                .WithDescription($"Cleared {messages} messages!"));
             //Change to whatever.//
             await Task.Delay(5000);
             if (deleteConfirmationMessage is not null)
