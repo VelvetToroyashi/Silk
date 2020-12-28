@@ -22,8 +22,7 @@ namespace Silk.Core.Commands.General
                 "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot";
             await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                                           .WithColor(DiscordColor.Gold)
-                                          .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!")
-                                          .WithFooter("Silk ", ctx.Client.CurrentUser.AvatarUrl));
+                                          .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!");
         }
     }
 }

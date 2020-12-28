@@ -38,7 +38,6 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
                 if (logChannel == default) return;
 
-
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder()
                         .WithAuthor($"{e.Message.Author.Username} ({e.Message.Author.Id})",
@@ -49,8 +48,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
                                          $"📝 **Changed:**\n```\n{e.Message.Content}\n```\n")
                         .AddField("Message ID:", e.Message.Id.ToString(), true)
                         .AddField("Channel ID:", e.Channel.Id.ToString(), true)
-                        .WithColor(DiscordColor.CornflowerBlue)
-                        .WithFooter("Silk!", c.CurrentUser.AvatarUrl);
+                        .WithColor(DiscordColor.CornflowerBlue);
                 DiscordChannel loggingChannel = await c.GetChannelAsync(logChannel);
                 await c.SendMessageAsync(loggingChannel, embed: embed);
             });

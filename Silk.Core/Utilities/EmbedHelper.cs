@@ -17,8 +17,7 @@ namespace Silk.Core.Utilities
                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                    .WithColor(DiscordColor.CornflowerBlue)
                    .WithTitle(Title)
-                   .WithDescription(Description)
-                   .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl);
+                   .WithDescription(Description);
         }
 
 

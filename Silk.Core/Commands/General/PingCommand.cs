@@ -42,8 +42,7 @@ namespace Silk.Core.Commands.General
                      $"***```cs\nMessage Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
                      $"Discord API Latency: {ctx.Client.Ping} ms.\n\n" +
                      $"Silk! API Latency: {silkAPIResponse.RoundtripTime} ms.\n\n" +
-                     $"Database latency: {GetDbLatency()} ms.```***")
-                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl);
+                     $"Database latency: {GetDbLatency()} ms.```***");
             await message.ModifyAsync(embed: embed.Build());
         }
 

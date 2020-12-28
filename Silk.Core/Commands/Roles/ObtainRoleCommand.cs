@@ -42,7 +42,6 @@ namespace Silk.Core.Commands.Roles
                                     .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                                     .WithColor(DiscordColor.CornflowerBlue)
                                     .WithDescription($"Gave you the role {parsedRole.Mention}")
-                                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl)
                             );
                         }
                         else
@@ -52,8 +51,7 @@ namespace Silk.Core.Commands.Roles
                                 new DiscordEmbedBuilder()
                                     .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                                     .WithColor(DiscordColor.CornflowerBlue)
-                                    .WithDescription($"Revoked {parsedRole.Mention}")
-                                    .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl));
+                                    .WithDescription($"Revoked {parsedRole.Mention}"));
                         }
                     }
                     else
@@ -62,8 +60,7 @@ namespace Silk.Core.Commands.Roles
                             new DiscordEmbedBuilder()
                                 .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                                 .WithColor(DiscordColor.IndianRed)
-                                .WithDescription($"Sorry, but {parsedRole.Mention} is NOT available to assign.")
-                                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl));
+                                .WithDescription($"Sorry, but {parsedRole.Mention} is NOT available to assign."));
                     }
                 }
                 else
@@ -72,8 +69,7 @@ namespace Silk.Core.Commands.Roles
                         new DiscordEmbedBuilder()
                             .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                             .WithColor(DiscordColor.IndianRed)
-                            .WithDescription("Sorry, but this server has not set up self-assignable roles.")
-                            .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl));
+                            .WithDescription("Sorry, but this server has not set up self-assignable roles."));
                 }
             }
         }

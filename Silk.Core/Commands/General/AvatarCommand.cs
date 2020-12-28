@@ -61,8 +61,7 @@ namespace Silk.Core.Commands.General
         private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx)
         {
             return new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.CornflowerBlue)
-                .WithFooter("Silk", ctx.Client.CurrentUser.AvatarUrl);
+                .WithColor(DiscordColor.CornflowerBlue);
         }
     }
 }

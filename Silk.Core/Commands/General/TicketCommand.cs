@@ -395,8 +395,7 @@ namespace Silk.Core.Commands.General
             return new DiscordEmbedBuilder()
                    .WithAuthor(responder.Username, null, responder.AvatarUrl)
                    .WithColor(DiscordColor.Green)
-                   .WithDescription(message)
-                   .WithFooter("Silk!", avatarUrl);
+                   .WithDescription(message);
         }
 
         public async Task<DiscordChannel> GetDmChannelAsync(DiscordClient c, ulong recipientId)

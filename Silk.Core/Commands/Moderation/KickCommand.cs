@@ -103,8 +103,7 @@ namespace Silk.Core.Commands.Moderation
                     embed: new DiscordEmbedBuilder()
                            .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                            .WithColor(DiscordColor.SpringGreen)
-                           .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")
-                           .WithFooter("Silk!")).ConfigureAwait(false);
+                           .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")).ConfigureAwait(false);
             }
         }
     }
