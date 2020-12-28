@@ -1,14 +1,10 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.Miscellaneous
 {

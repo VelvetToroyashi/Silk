@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -11,8 +9,6 @@ using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Commands.Roles
 {

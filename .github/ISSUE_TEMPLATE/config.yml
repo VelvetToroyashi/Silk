@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🙋 Bot Usage
+    url: https://discord.gg/WjM22kHVzJ
+    about: Please visit our Discord if you are experiecing issues using Silk!
+  - name: ❓ General Question
+    url: https://discord.gg/WjM22kHVzJ
+    about: Please visit our Discord if you have any general questions about Silk!

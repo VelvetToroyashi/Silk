@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -14,8 +12,6 @@ using Silk.Core.Services;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Extensions.DSharpPlus;
-
-#endregion
 
 namespace Silk.Core.Commands.Moderation
 {

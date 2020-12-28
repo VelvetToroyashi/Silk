@@ -1,8 +1,4 @@
-﻿#region
-
-using System.Net.Http;
-
-#endregion
+﻿using System.Net.Http;
 
 namespace Silk.Core.Utilities
 {

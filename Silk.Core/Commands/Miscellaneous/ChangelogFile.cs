@@ -1,11 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-
-#endregion
 
 namespace Silk.Core.Commands.Miscellaneous
 {

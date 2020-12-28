@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
@@ -10,8 +8,6 @@ using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Utilities;
-
-#endregion
 
 namespace Silk.Core.Commands.General
 {
@@ -30,20 +26,22 @@ namespace Silk.Core.Commands.General
         {
             Core.Bot.CommandTimer.Stop();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-                                        .WithTitle("Ping? Sure!")
-                                        .WithColor(DiscordColor.Blue);
+                .WithColor(DiscordColor.Blue);
             var sw = Stopwatch.StartNew();
             DiscordMessage message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
             await Task.Delay(100);
             var silkAPIResponse = await new Ping().SendPingAsync("velvetthepanda.dev");
-            embed.WithDescription(
-                     $"***```cs\nMessage Latency: {sw.ElapsedMilliseconds} ms.\n\n" +
-                     $"Discord API Latency: {ctx.Client.Ping} ms.\n\n" +
-                     $"Silk! API Latency: {silkAPIResponse.RoundtripTime} ms.\n\n" +
-                     $"Database latency: {GetDbLatency()} ms.```***")
-                 .WithFooter("Silk!", ctx.Client.CurrentUser.AvatarUrl);
+            embed
+                .AddField("→ Message Latency ←",        "```cs\n" + $"{sw.ElapsedMilliseconds} ms"          .PadLeft(10, '⠀') + "```", true)
+                .AddField("→ Discord API latency ←",    "```cs\n" + $"{ctx.Client.Ping} ms"                 .PadLeft(10, '⠀') + "```", true)
+                .AddField("→ Silk! API Latency ←",      "```cs\n" + $"{silkAPIResponse.RoundtripTime} ms"   .PadLeft(9,  '⠀') + "```", true)
+                // Make the databse latency centered. //
+                .AddField("​", "​", true)
+                .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms"                        .PadLeft(10, '⠀') + "```", true)
+                .AddField("​", "​", true)
+                
+                .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
             await message.ModifyAsync(embed: embed.Build());
         }
 

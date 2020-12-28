@@ -1,7 +1,3 @@
-#region Usings
-
-#region
-
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -20,16 +16,11 @@ using Silk.Core.Services;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
 
-#endregion
-
 namespace Silk.Core
 {
 
-    #endregion
-
     public class Bot : IHostedService
     {
-        #region Props
         //TODO: Fix all these usages, because they should be pulling from ctx.Services if possible. //
         public DiscordShardedClient Client          { get; set; }
         public static Bot? Instance                 { get; private set; }
@@ -39,17 +30,15 @@ namespace Silk.Core
         
         public CommandsNextConfiguration? Commands  { get; private set; }
 
-        #endregion
-
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
-        private readonly BotEventHelper _eventHelper;
+        private readonly BotEventSubscriber _eventSubscriber;
         private readonly PrefixCacheService _prefixService;
         private readonly Stopwatch _sw = new();
         
         
         public Bot(IServiceProvider services, DiscordShardedClient client,
-            ILogger<Bot> logger, BotEventHelper eventHelper,
+            ILogger<Bot> logger, BotEventSubscriber eventSubscriber,
             MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper, 
             GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
             MemberRemovedHelper memberRemovedHelper,
@@ -61,7 +50,7 @@ namespace Silk.Core
             _sw.Start();
             _services = services;
             _logger = logger;
-            _eventHelper = eventHelper;
+            _eventSubscriber = eventSubscriber;
 
             client.MessageCreated += messageAHelper.Commands;
             client.MessageCreated += messageAHelper.Tickets;
@@ -77,15 +66,12 @@ namespace Silk.Core
 
             client.GuildMemberUpdated += roleAddedHelper.CheckStaffRole;
             client.GuildMemberUpdated += roleRemovedHelper.CheckStaffRoles;
-            
+
             SilkDBContext = dbFactory.CreateDbContext();
-            SilkDBContext.Database.Migrate();
             Instance = this;
             Client = client;
         }
 
-        #region Methods
-        
         private void InitializeCommands()
         {
            
@@ -122,7 +108,7 @@ namespace Silk.Core
                 Timeout = TimeSpan.FromMinutes(1),
             });
             
-            _eventHelper.CreateHandlers();
+            _eventSubscriber.CreateHandlers();
             
             var cmdNext = await Client.GetCommandsNextAsync();
             foreach (CommandsNextExtension c in cmdNext.Values)
@@ -147,6 +133,5 @@ namespace Silk.Core
             await Client.StopAsync();
         }
 
-        #endregion
     }
 }

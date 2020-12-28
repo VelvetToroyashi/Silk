@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-#endregion
 
 namespace Silk.Core.Commands.General.Tickets
 {
@@ -40,8 +36,6 @@ namespace Silk.Core.Commands.General.Tickets
         private static readonly ConcurrentDictionary<ulong, ulong> ticketChannels = new();
         private static readonly Permissions requisitePermissions =  Permissions.SendMessages | Permissions.AccessChannels | 
                                                                     Permissions.EmbedLinks   | Permissions.ReadMessageHistory;
-
-        #region Ticket Creation
 
         /// <summary>
         /// Create a TicketModel in the database, and add the message sent as the first piece of history for it. 
@@ -94,10 +88,6 @@ namespace Silk.Core.Commands.General.Tickets
             await _dbFactory.CreateDbContext().SaveChangesAsync();
         }
 
-        #endregion
-
-
-        #region Ticket Deletion
 
         private bool IsOpenTicket(ulong id) => _dbFactory
                                                      .CreateDbContext().Tickets
@@ -142,10 +132,6 @@ namespace Silk.Core.Commands.General.Tickets
 
         }
 
-        #endregion
-        
-        
-        #region Helper Methods
 
         public async Task<TicketModel> GetTicketAsync(ulong id)
         {
@@ -181,7 +167,10 @@ namespace Silk.Core.Commands.General.Tickets
             // If the message is sent on a guild, check if it's a ticket channel, else follow normal check flow. //
             if (!c.IsPrivate)
             {
-                try { _ = ticketChannels[id]; }
+                try
+                {
+                    _ = ticketChannels[id];
+                }
                 catch (KeyNotFoundException) { return false; }
                 return true;
             }
@@ -221,8 +210,6 @@ namespace Silk.Core.Commands.General.Tickets
             guild = guilds.FirstOrDefault(g => g.Id == SILK_GUILD_ID);
             return guild != null;
         }
-
-        #endregion
 
     }
 }

@@ -1,6 +1,5 @@
 #pragma warning disable CA1822 // Mark members as static
 #pragma warning disable IDE0060 // Unused parameter
-#region
 
 using System;
 using System.Collections.Generic;
@@ -22,8 +21,6 @@ using Silk.Core.Services;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Extensions.DSharpPlus;
-
-#endregion
 
 namespace Silk.Core.Commands.General
 {

@@ -1,14 +1,11 @@
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable CS0414 // Remove unused private members
 #pragma warning disable IDE0044 // Add readonly modifier
-#region
 
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {

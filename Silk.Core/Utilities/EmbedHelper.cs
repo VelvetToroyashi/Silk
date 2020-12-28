@@ -1,11 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using SilkBot.Extensions;
-
-#endregion
 
 namespace Silk.Core.Utilities
 {
