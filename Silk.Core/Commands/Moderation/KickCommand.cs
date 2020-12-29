@@ -28,18 +28,10 @@ namespace Silk.Core.Commands.Moderation
         [RequireFlag(UserFlag.Staff)]
         [RequireBotPermissions(Permissions.KickMembers)]
         [Description("Boot someone from the guild! Requires kick members permission.")]
-        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user, [RemainingText] string? reason = null)
+        public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string? reason = null)
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-            
 
-            if (!ctx.Guild.CurrentMember.HasPermission(Permissions.KickMembers))
-            {
-                await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "I don't have permission to kick members!",
-                    DiscordColor.Red)).ConfigureAwait(false);
-                return;
-            }
-            
             if (user.IsAbove(bot) || ctx.User == user)
             {
                 bool isBot = user == bot;
@@ -77,7 +69,7 @@ namespace Silk.Core.Commands.Moderation
                 UserModel mUser = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, user.Id);
                 await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
                 {
-                    Enforcer = ctx.User.Id, Reason = reason!, InfractionType = InfractionType.Kick,
+                    Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = InfractionType.Kick,
                     InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id
                 }));
                 
@@ -92,7 +84,7 @@ namespace Silk.Core.Commands.Moderation
 
                 await user.RemoveAsync(reason);
 
-                GuildModel guildConfig = await _dbService.GetGuildAsync(ctx.Guild.Id);
+                GuildModel guildConfig = await _dbService.GetGuildConfigAsync(ctx.Guild.Id);
                 ulong logChannelID = guildConfig.Configuration.GeneralLoggingChannel;
                 ulong logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),

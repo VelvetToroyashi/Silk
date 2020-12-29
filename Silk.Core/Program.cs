@@ -73,8 +73,7 @@ namespace Silk.Core
                                },
                                ServiceLifetime.Transient);
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromDays(1));
-                
-                           services.AddSingleton<TicketService>();
+                           
                            services.AddSingleton<DatabaseService>();
                            services.AddSingleton<InfractionService>();
                            services.AddSingleton<TimedEventService>();

@@ -11,8 +11,9 @@ namespace Silk.Core.AutoMod
 {
     public class AutoModMessageHandler
     {
-        private static readonly Regex AGGRESSIVE_REGEX = new(@"discord((app\.com|\.com)\/invite|\.gg\/.+)");
-        private static readonly Regex LENIENT_REGEX    = new(@"discord.gg\/invite\/.+");
+        private static readonly RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
+        private static readonly Regex AGGRESSIVE_REGEX = new(@"discord((app\.com|\.com)\/invite|\.gg\/.+)", flags);
+        private static readonly Regex LENIENT_REGEX    = new(@"discord.gg\/invite\/.+", flags);
         
         private readonly DatabaseService _dbService; // Used to querying user from the DB, though I may switch this out //
                                                     // Perhaps something along the lines of rewriting that infraction service ~Velvet //
@@ -29,13 +30,14 @@ namespace Silk.Core.AutoMod
             
             _ = Task.Run(async () =>
             {
-                GuildConfigModel guild = await _configService.GetConfigAsync(e.Guild.Id);
-                if (!guild.BlacklistInvites) return;
-                Regex matchingPattern = guild.UseAggressiveRegex ? AGGRESSIVE_REGEX : LENIENT_REGEX;
-
-                if (matchingPattern.IsMatch(e.Message.Content))
+                GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);
+                    if (!config.BlacklistInvites) return;
+                Regex matchingPattern = config.UseAggressiveRegex ? AGGRESSIVE_REGEX : LENIENT_REGEX;
+                Match m = matchingPattern.Match(e.Message.Content);
+                
+                if (m.Success)
                 {
-                    await e.Channel.SendMessageAsync("No invites smh.");
+                    await e.Message.DeleteAsync();
                 }
 
             });

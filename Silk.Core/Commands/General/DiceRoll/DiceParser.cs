@@ -20,7 +20,7 @@ namespace Silk.Core.Commands.General.DiceRoll
             while (ReadIf('+'));
 
             // Ensure there's no junk data at the end.
-            if (Read() != EOT) throw new Exception($"Unexpected character at position {CurrentPosition}!");
+            if (ReadChar() != EOT) throw new Exception($"Unexpected character at position {_currentPosition}!");
 
             return result;
         }

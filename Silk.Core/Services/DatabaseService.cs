@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -20,10 +21,10 @@ namespace Silk.Core.Services
 
         public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
-        public async Task<GuildModel> GetGuildAsync(ulong guildId)
+        public Task<GuildModel> GetGuildConfigAsync(ulong guildId)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
-            return await db.Guilds.Include(g => g.Configuration).Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
+            using SilkDbContext db = _dbFactory.CreateDbContext();
+            return db.Guilds.Include(g => g.Configuration).Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
         }
 
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)
@@ -50,7 +51,7 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = _dbFactory.CreateDbContext();
             UserModel? trackedUser = await db.Users.FirstOrDefaultAsync(u => u == user);
-            if (trackedUser is null) throw new ArgumentNullException($"{nameof(user)} cannot be null.");
+            if (trackedUser is null) throw new ArgumentNullException(nameof(user), $"{nameof(user)} cannot be null.");
             updateAction(trackedUser);
             await db.SaveChangesAsync();
         }
@@ -61,6 +62,7 @@ namespace Silk.Core.Services
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             user ??= new() {Id = userId};
+            guild.Users.Add(user);
             await db.SaveChangesAsync();
             return user;
         }

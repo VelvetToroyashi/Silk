@@ -8,7 +8,7 @@ namespace Silk.Core.Database.Models
     {
         
         [Key] 
-        public int Id { get; set; }
+        public ulong Id { get; set; }
         public ulong MuteRoleId { get; set; } 
         
         public ulong GreetingChannel { get; set; }
@@ -51,6 +51,7 @@ namespace Silk.Core.Database.Models
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
         public List<Ban> Bans { get; set; } = new();
         
+        public virtual GuildModel Guild { get; set; }
         // [ForeignKey("Guild")]
         // public GuildModel Guild { get; set; }
     }

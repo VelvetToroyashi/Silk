@@ -33,8 +33,7 @@ namespace Silk.Core.Services
 
         public async Task<GuildConfigModel> GetConfigFromDatabaseAsync(ulong guildId)
         {
-
-            GuildModel config = await _db.GetGuildAsync(guildId);
+            GuildModel config = await _db.GetGuildConfigAsync(guildId);
             _cache.CreateEntry(guildId).SetValue(config.Configuration)
                   .SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
             return config.Configuration;

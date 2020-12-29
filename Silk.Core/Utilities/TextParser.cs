@@ -6,40 +6,40 @@ namespace Silk.Core.Utilities
     {
         public const char EOT = '\0';
 
-        protected int CurrentPosition;
-        protected string Source;
+        protected int _currentPosition;
+        protected string _source;
 
         int _nextWhitespaceEnd;
 
-        public TextParser(string currentString) => Source = currentString;
+        public TextParser(string currentString) => _source = currentString;
 
-        protected char Read()
+        protected char ReadChar()
         {
             if (!TryConsumeWhitespace()) return EOT;
-            return Source[CurrentPosition++];
+            return _source[_currentPosition++];
         }
 
-        protected char Peek()
+        protected char PeekChar()
         {
             if (!TryConsumeWhitespace()) return EOT;
-            return Source[CurrentPosition];
+            return _source[_currentPosition];
         }
 
         protected bool TryConsumeWhitespace()
         {
-            if (CurrentPosition >= Source.Length) return false;
+            if (_currentPosition >= _source.Length) return false;
 
-            while (char.IsWhiteSpace(Source[CurrentPosition])) CurrentPosition++;
+            while (char.IsWhiteSpace(_source[_currentPosition])) _currentPosition++;
             return true;
         }
 
         public bool ReadIf(char c)
         {
-            var next = Peek();
+            var next = PeekChar();
 
             if (next == c)
             {
-                Read();
+                ReadChar();
                 return true;
             }
 
@@ -48,15 +48,15 @@ namespace Silk.Core.Utilities
 
         public int ReadNumber()
         {
-            if (!char.IsNumber(Peek())) throw new Exception($"Expected integer at position {CurrentPosition}!");
+            if (!char.IsNumber(PeekChar())) throw new Exception($"Expected integer at position {_currentPosition}!");
 
-            int startPos = CurrentPosition;
+            int startPos = _currentPosition;
 
             // Read the numerical characters.
-            while (char.IsNumber(Peek())) Read();
+            while (char.IsNumber(PeekChar())) ReadChar();
 
             // Convert the number.
-            return int.Parse(Source[startPos..CurrentPosition]);
+            return int.Parse(_source[startPos.._currentPosition]);
         }
     }
 }

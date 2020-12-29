@@ -36,8 +36,10 @@ namespace Silk.Core.Database
             
             builder.Entity<UserInfractionModel>().HasIndex(a => new {a.GuildId, a.UserId});
             //builder.Entity<GuildModel>().HasOne(g => g.Configuration).WithMany();
+            builder.Entity<GuildModel>().HasOne(g => g.Configuration).WithOne(g => g.Guild).HasForeignKey<GuildModel>(g => g.Id);
             builder.Entity<GuildModel>().Property(g => g.Id).ValueGeneratedNever();
             builder.Entity<GuildModel>().HasMany(u => u.Users);
+            builder.Entity<GuildConfigModel>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<Ban>().HasOne(b => b.UserInfo);
             
             //builder.Entity<UserInfractionModel>().HasOne(i => i.User);

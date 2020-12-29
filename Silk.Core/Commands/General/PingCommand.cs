@@ -16,12 +16,9 @@ namespace Silk.Core.Commands.General
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
-        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory)
-        {
-            _dbFactory = dbFactory;
-        }
+        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
         
-        [Command("Ping")]
+        [Command("ping")]
         public async Task Ping(CommandContext ctx)
         {
             Core.Bot.CommandTimer.Stop();
