@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.General
 
         private int GetDbLatency()
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             var sw = Stopwatch.StartNew();

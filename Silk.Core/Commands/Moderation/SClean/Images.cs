@@ -27,7 +27,7 @@ namespace Silk.Core.Commands.Moderation.SClean
             [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")]
             int amount = 10)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
 
             amount = amount > 99 ? 100 : ++amount;
             IEnumerable<DiscordMessage> images = await GetImages(ctx.Channel, amount);

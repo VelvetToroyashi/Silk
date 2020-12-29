@@ -24,7 +24,7 @@ namespace Silk.Core.Commands.Economy
         [Aliases("Money")]
         public async Task Cash(CommandContext ctx)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GlobalUserModel? account = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (account is null)
             {

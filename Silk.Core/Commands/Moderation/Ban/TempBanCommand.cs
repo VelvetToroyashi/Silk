@@ -32,7 +32,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         public async Task TempBan(CommandContext ctx, DiscordMember user, string duration,
             [RemainingText] string reason = "Not provided.")
         {
-            using SilkDbContext db = DbFactory.CreateDbContext();
+            SilkDbContext db = DbFactory.CreateDbContext();
             DiscordMember bot = ctx.Guild.CurrentMember;
             DateTime now = DateTime.Now;
             TimeSpan banDuration = GetTimeFromInput(duration);

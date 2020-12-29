@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Economy
         [RequireGuild]
         public async Task DailyMoney(CommandContext ctx)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GlobalUserModel user = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (user is null)
             {

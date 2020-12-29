@@ -121,7 +121,7 @@ namespace Silk.Core.Utilities
             {
                 guildMembers += e.Guild.MemberCount;
                 
-                using SilkDbContext db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 var sw = Stopwatch.StartNew();
                 GuildModel? guild = db.Guilds.AsQueryable().Include(g => g.Users)
                                      .FirstOrDefault(g => g.Id == e.Guild.Id);

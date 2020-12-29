@@ -36,7 +36,7 @@ namespace Silk.Core.Services
             _logger.LogDebug("Prefix not present in cache; querying from database.");
             _sw.Restart();
             
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             
             GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)
