@@ -66,7 +66,7 @@ namespace Silk.Core
                                option =>
                                {
                                    option.UseNpgsql(config.GetConnectionString("dbConnection"));
-                                    #if  DEBUG
+                                   #if  DEBUG
                                     option.EnableSensitiveDataLogging();
                                     option.EnableDetailedErrors();                                
                                     #endif

@@ -18,6 +18,7 @@ namespace Silk.Core.Commands.General
         [Description("Cleans all messages from all users.")]
         public async Task Clear(CommandContext ctx, int messages = 5)
         {
+            
             // Anyone who's got permission to manage channels might not be staff, so adding [RequireFlag(UserFlag.Staff)] needlessly permwalls it. //
             if (!ctx.Member.HasPermission(Permissions.ManageMessages))
             {

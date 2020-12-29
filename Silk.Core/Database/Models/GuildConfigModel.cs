@@ -51,7 +51,7 @@ namespace Silk.Core.Database.Models
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
         public List<Ban> Bans { get; set; } = new();
         
-        public virtual GuildModel Guild { get; set; }
+        public GuildModel Guild { get; set; }
         // [ForeignKey("Guild")]
         // public GuildModel Guild { get; set; }
     }

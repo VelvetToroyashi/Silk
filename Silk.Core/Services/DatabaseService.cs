@@ -24,7 +24,7 @@ namespace Silk.Core.Services
         public Task<GuildModel> GetGuildConfigAsync(ulong guildId)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            return db.Guilds.Include(g => g.Configuration).Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
+            return db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
         }
 
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)
