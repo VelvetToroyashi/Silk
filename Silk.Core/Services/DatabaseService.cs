@@ -23,7 +23,7 @@ namespace Silk.Core.Services
 
         public Task<GuildModel> GetGuildConfigAsync(ulong guildId)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.Include(g => g.Configuration).Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
         }
 
@@ -31,7 +31,7 @@ namespace Silk.Core.Services
         {
             if (!userId.HasValue) return null;
             
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
@@ -49,7 +49,7 @@ namespace Silk.Core.Services
         /// <exception cref="ArgumentNullException"></exception>
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             UserModel? trackedUser = await db.Users.FirstOrDefaultAsync(u => u == user);
             if (trackedUser is null) throw new ArgumentNullException(nameof(user), $"{nameof(user)} cannot be null.");
             updateAction(trackedUser);
@@ -58,7 +58,7 @@ namespace Silk.Core.Services
 
         public async Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             user ??= new() {Id = userId};
@@ -69,7 +69,7 @@ namespace Silk.Core.Services
         
         public async Task RemoveUserAsync(UserModel user)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await db.Guilds.FirstAsync(g => g == user.Guild);
             UserModel? trackedUser = guild.Users.FirstOrDefault(u => u == user);
             Log.Logger.Verbose("Grabbed user");
@@ -78,9 +78,5 @@ namespace Silk.Core.Services
             trackedUser.Guild.Users.Remove(trackedUser);
             await db.SaveChangesAsync();
         }
-
-        
-
-
     }
 }
