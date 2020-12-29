@@ -62,7 +62,7 @@ namespace Silk.Core.Tools.EventHelpers
 
         private async Task DoCacheAsync(DiscordGuild e)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+             SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await GetOrCreateGuildAsync(db, e.Id);
             CacheStaffMembers(guild, e.Members.Values); 
             await db.SaveChangesAsync();

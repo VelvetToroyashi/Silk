@@ -20,7 +20,7 @@ namespace Silk.Core.Tools.EventHelpers
             if (e.RolesBefore.Count >= e.RolesAfter.Count) return;
             _ = Task.Run(async () =>
             {
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
+                 SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {

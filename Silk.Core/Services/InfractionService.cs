@@ -31,7 +31,7 @@ namespace Silk.Core.Services
         {
             if (!_infractionQueue.IsEmpty)
             {
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
+                 SilkDbContext db = _dbFactory.CreateDbContext();
 
                 while (_infractionQueue.TryDequeue(out UserInfractionModel? infraction))
                 {
