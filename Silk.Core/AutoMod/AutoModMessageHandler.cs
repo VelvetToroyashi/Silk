@@ -37,10 +37,8 @@ namespace Silk.Core.AutoMod
                 Match m = matchingPattern.Match(e.Message.Content);
                 
                 if (m.Success)
-                {
                     await e.Message.DeleteAsync();
-                }
-
+                
             });
         }
         

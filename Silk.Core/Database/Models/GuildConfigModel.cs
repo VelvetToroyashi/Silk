@@ -6,9 +6,11 @@ namespace Silk.Core.Database.Models
 {
     public class GuildConfigModel
     {
-        
-        [Key] 
-        public ulong Id { get; set; }
+        [Key]
+        public int ConfigId { get; set; }
+        public ulong GuildId { get; set; }
+        public GuildModel Guild { get; set; }
+
         public ulong MuteRoleId { get; set; } 
         
         public ulong GreetingChannel { get; set; }
@@ -44,15 +46,8 @@ namespace Silk.Core.Database.Models
         
         public string InfractionFormat { get; set; } = string.Empty;
 
-
-        
         public List<BlackListedWord> BlackListedWords { get; set; } = new();
         public List<WhiteListedLink> WhiteListedLinks { get; set; } = new();
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
-        public List<Ban> Bans { get; set; } = new();
-        
-        public GuildModel Guild { get; set; }
-        // [ForeignKey("Guild")]
-        // public GuildModel Guild { get; set; }
     }
 }

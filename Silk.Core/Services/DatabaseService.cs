@@ -30,7 +30,7 @@ namespace Silk.Core.Services
         public async Task<GuildConfigModel> GetConfigAsync(ulong configId)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            return (await db.Guilds.FirstOrDefaultAsync(g => g.Id == configId)).Configuration;
+            return (await db.GuildConfigs.FirstAsync(g => g.GuildId == configId));
         }
         
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)

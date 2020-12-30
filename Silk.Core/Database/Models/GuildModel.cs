@@ -11,9 +11,10 @@ namespace Silk.Core.Database.Models
         [Required] 
         [StringLength(5)] 
         public string Prefix { get; set; }
-        
-        public GuildConfigModel Configuration { get; set; } = new();
+
+        public GuildConfigModel Configuration { get; set; }
             
         public List<UserModel> Users { get; set; } = new();
+        public List<Ban> Bans { get; set; } = new();
     }
 }
