@@ -8,7 +8,7 @@ using DSharpPlus.Entities;
 
 #endregion
 
-namespace SilkBot.Extensions.DSharpPlus
+namespace Silk.Extensions.DSharpPlus
 {
     public static class DiscordMessageExtensions
     {

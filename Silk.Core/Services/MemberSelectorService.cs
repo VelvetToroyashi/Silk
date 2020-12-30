@@ -8,7 +8,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Services
 {

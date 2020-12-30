@@ -21,12 +21,18 @@ namespace Silk.Core.Services
 
         public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
-        public Task<GuildModel> GetGuildConfigAsync(ulong guildId)
+        public Task<GuildModel> GetGuildAsync(ulong guildId)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
             return db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
         }
 
+        public async Task<GuildConfigModel> GetConfigAsync(ulong configId)
+        {
+            SilkDbContext db = _dbFactory.CreateDbContext();
+            return (await db.Guilds.FirstOrDefaultAsync(g => g.Id == configId)).Configuration;
+        }
+        
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)
         {
             if (!userId.HasValue) return null;

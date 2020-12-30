@@ -28,6 +28,7 @@ namespace Silk.Core.AutoMod
         public async Task CheckForInvites(DiscordClient c, MessageCreateEventArgs e)
         {
             if (e.Guild is null) return;
+            
             _ = Task.Run(async () =>
             {
                 GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);

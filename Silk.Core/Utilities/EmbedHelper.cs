@@ -1,7 +1,7 @@
 ﻿using System;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {

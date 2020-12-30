@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Services;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Tests
 {

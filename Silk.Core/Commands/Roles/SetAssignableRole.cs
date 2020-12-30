@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Roles
 {

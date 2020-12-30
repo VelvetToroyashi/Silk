@@ -17,7 +17,7 @@ using org.mariuszgromada.math.mxparser;
 using Silk.Core.AutoMod;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {

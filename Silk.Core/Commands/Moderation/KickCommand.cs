@@ -10,8 +10,8 @@ using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
-using SilkBot.Extensions.DSharpPlus;
+using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
@@ -84,7 +84,7 @@ namespace Silk.Core.Commands.Moderation
 
                 await user.RemoveAsync(reason);
 
-                GuildModel guildConfig = await _dbService.GetGuildConfigAsync(ctx.Guild.Id);
+                GuildModel guildConfig = await _dbService.GetGuildAsync(ctx.Guild.Id);
                 ulong logChannelID = guildConfig.Configuration.GeneralLoggingChannel;
                 ulong logChannelValue = logChannelID == default ? ctx.Channel.Id : logChannelID;
                 await ctx.Client.SendMessageAsync(await ctx.Client.GetChannelAsync(logChannelValue),

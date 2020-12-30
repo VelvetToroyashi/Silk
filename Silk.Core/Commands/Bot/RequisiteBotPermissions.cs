@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Bot
 {

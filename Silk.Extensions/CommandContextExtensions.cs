@@ -9,7 +9,7 @@ using DSharpPlus.Entities;
 
 #endregion
 
-namespace SilkBot.Extensions
+namespace Silk.Extensions
 {
     public static class CommandContextExtensions
     {

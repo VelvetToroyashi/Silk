@@ -11,7 +11,7 @@ using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation
 {
