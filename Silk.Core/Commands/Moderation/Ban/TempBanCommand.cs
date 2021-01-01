@@ -36,7 +36,7 @@ namespace Silk.Core.Commands.Moderation.Ban
             DiscordMember bot = ctx.Guild.CurrentMember;
             DateTime now = DateTime.Now;
             TimeSpan banDuration = GetTimeFromInput(duration);
-            BanFailureReason banFailed = CanBan(bot, ctx.Member, user);
+            BanFailureReason? banFailed = CanBan(bot, ctx.Member, user);
             DiscordEmbedBuilder embed =
                 new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
 
@@ -56,7 +56,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
-                UserModel bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
+                UserModel? bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned",
                     banDuration.TotalDays + " days", user.Mention, reason, guild.Configuration.InfractionFormat ?? defaultFormat);
                 UserInfractionModel infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
@@ -95,7 +95,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 Reason = reason,
                 Enforcer = enforcerId,
                 InfractionTime = infractionTime,
-                InfractionType = InfractionType.TemporaryBan
+                InfractionType = InfractionType.TempBan
             };
         }
 

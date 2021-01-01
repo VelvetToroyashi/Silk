@@ -9,14 +9,14 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Services
 {
-    public class GuildConfigCacheService
+    public class ConfigService
     {
         private readonly IMemoryCache _cache;
         private readonly DatabaseService _db;
-        private readonly ILogger<GuildConfigCacheService> _logger;
+        private readonly ILogger<ConfigService> _logger;
 
-        public GuildConfigCacheService(IMemoryCache cache, DatabaseService db,
-            ILogger<GuildConfigCacheService> logger)
+        public ConfigService(IMemoryCache cache, DatabaseService db,
+            ILogger<ConfigService> logger)
         {
             _cache = cache;
             _db = db;

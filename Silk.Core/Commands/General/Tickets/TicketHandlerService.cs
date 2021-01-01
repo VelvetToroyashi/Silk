@@ -23,7 +23,7 @@ namespace Silk.Core.Commands.General.Tickets
         
         
         // private readonly DatabaseService _dbService;
-        // TODO: Make DatabaseService
+        // TODO: Complete closing precedure, because apparently I'm an idiot and forgot about it ~Velvet.
         public TicketHandlerService(DiscordShardedClient client, ILogger<TicketHandlerService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _client = client;

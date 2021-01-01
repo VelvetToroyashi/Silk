@@ -51,8 +51,8 @@ namespace Silk.Core.Utilities
             _logger.LogInformation("Subscribing to events; this may take a while.");
             foreach (DiscordClient c in _client.ShardClients.Values)
             {
-                c.MessageCreated += _services.Get<AutoModMessageHandler>().CheckForInvites;
-                
+                c.MessageCreated += _services.Get<MessageHandler>().CheckForInvites;
+                _logger.LogTrace("Subbed to automod module");
             }
             
             

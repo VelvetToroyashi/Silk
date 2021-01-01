@@ -10,7 +10,7 @@ namespace Silk.Core.Commands.Tests
     public class Time : BaseCommandModule
     {
 
-        public GuildConfigCacheService CacheService { private get; set; }
+        public ConfigService Service { private get; set; }
         [Command]
         public async Task GetTimeAsync(CommandContext ctx, TimeSpan t)
         {
@@ -20,7 +20,7 @@ namespace Silk.Core.Commands.Tests
         [Command]
         public async Task GetConfig(CommandContext ctx)
         {
-            await ctx.RespondAsync((await CacheService.GetConfigFromDatabaseAsync(ctx.Guild.Id)).IsPremium.ToString());
+            await ctx.RespondAsync((await Service.GetConfigFromDatabaseAsync(ctx.Guild.Id)).IsPremium.ToString());
         }
     }
 }

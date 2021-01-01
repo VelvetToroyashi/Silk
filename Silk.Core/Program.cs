@@ -79,10 +79,10 @@ namespace Silk.Core
                            services.AddSingleton<TimedEventService>();
                            services.AddSingleton<PrefixCacheService>();
                            services.AddSingleton<TicketHandlerService>();
-                           services.AddSingleton<GuildConfigCacheService>();
+                           services.AddSingleton<ConfigService>();
 
 
-                           services.AddSingleton<AutoModMessageHandler>();
+                           services.AddSingleton<MessageHandler>();
                            
                            
                            services.AddSingleton<BotEventSubscriber>();

@@ -15,9 +15,9 @@ namespace Silk.Core.Utilities
     {
         //public ConfigParser(string currentString) : base(currentString) { }
         private static readonly IniParserConfiguration _config = new() {CaseInsensitive = true, CommentString = "//"};
-        private readonly GuildConfigCacheService _configService;
+        private readonly ConfigService _configService;
 
-        public ConfigParser(GuildConfigCacheService configService) => _configService = configService;
+        public ConfigParser(ConfigService configService) => _configService = configService;
         
         public void GetConfigInfo(string file)
         {
