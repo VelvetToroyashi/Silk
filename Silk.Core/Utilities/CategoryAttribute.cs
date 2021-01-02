@@ -8,11 +8,9 @@ namespace Silk.Core.Utilities
     [AttributeUsage(AttributeTargets.Class)]
     public class CategoryAttribute : Attribute
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public CategoryAttribute(string name)
-        {
-            Name = name;
-        }
+        public CategoryAttribute(string name) => Name = name;
+        
     }
 }
