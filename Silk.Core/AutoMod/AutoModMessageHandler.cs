@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,8 +19,11 @@ namespace Silk.Core.AutoMod
         private static readonly Regex AgressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/[A-z]+)", flags);
         private static readonly Regex LenientRegexPattern    = new(@"discord.gg\/invite\/.+", flags);
 
-        private readonly InfractionService _infractionService;
+        private readonly InfractionService _infractionService; // I'll implement this soon. //
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
+
+        private readonly HashSet<string> _blacklistedLinkCache = new();
+        
         
         public AutoModMessageHandler(ConfigService configService, InfractionService infractionService) => 
              (_configService, _infractionService) = (configService, infractionService);
@@ -28,7 +32,7 @@ namespace Silk.Core.AutoMod
         public Task CheckForInvites(DiscordClient c, MessageCreateEventArgs e)
         {
             if (e.Channel.IsPrivate) return Task.CompletedTask;
-            _ = Task.Run(async () => //Before you ask; Task.Run() in event handlers because await = block
+            _ = Task.Run(async () => //Before you ask: Task.Run() in event handlers because await = block
             {
                 GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);
                 if (!config.BlacklistInvites) return;
@@ -36,9 +40,11 @@ namespace Silk.Core.AutoMod
                 Match match = matchingPattern.Match(e.Message.Content);
                 if (match.Success)
                 {
+                    int codeStart = match.Value.LastIndexOf('/');
+                    string code = match.Value[codeStart..];
                     if (config.ScanInvites)
                     {
-                        DiscordInvite invite = await c.GetInviteByCodeAsync(match.Value.Substring(match.Value.LastIndexOf('/') + 1));
+                        DiscordInvite invite = await c.GetInviteByCodeAsync(code);
                         // Vanity invite and no vanity URL matches //
                         if (invite.Inviter is null && config.AllowedInvites.All(i => i.VanityURL != invite.Code))
                             await AutoModMatchedInvitePrecedureAsync(config, e.Message);
@@ -53,6 +59,7 @@ namespace Silk.Core.AutoMod
         }
         private async Task AutoModMatchedInvitePrecedureAsync(GuildConfigModel config, DiscordMessage message)
         {
+            
             if (config.DeleteMessageOnMatchedInvite) await message.DeleteAsync();
             if (config.WarnOnMatchedInvite) return; // Coming Soon™️ //
         }

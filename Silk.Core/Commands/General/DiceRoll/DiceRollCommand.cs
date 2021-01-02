@@ -10,7 +10,7 @@ using Silk.Core.Utilities;
 namespace Silk.Core.Commands.General.DiceRoll
 {
     [Category(Categories.General)]
-    public class DiceRoll : BaseCommandModule
+    public class DiceRollCommand : BaseCommandModule
     {
         [Command]
         [Description("Generate a random number in a given range; defaults to 100. (Hard limit of ~2.1 billion)")]
