@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-
+using Silk.Core.Database;
 using Silk.Core.Database.Models;
 
 namespace Silk.Core.Services
@@ -41,10 +41,5 @@ namespace Silk.Core.Services
         public Task RemoveUserAsync(UserModel user);
 
         
-        /// <summary>
-        /// Internal method used for getting a context to call SQL queries on.
-        /// </summary>
-        /// <returns>A <see cref="DbContext"/>.</returns>
-        protected DbContext GetContext();
     }
 }
