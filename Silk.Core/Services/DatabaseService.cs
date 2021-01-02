@@ -98,10 +98,7 @@ namespace Silk.Core.Services
             SilkDbContext db = _dbFactory.CreateDbContext();
             db.Attach(user);
 
-            if (user.Infractions.Any())
-            {
-                
-            }
+            if (user.Infractions.Any()) return; // If they have infractions, don't remove them. //
             user.Guild.Users.Remove(user);
 
             await db.SaveChangesAsync();
