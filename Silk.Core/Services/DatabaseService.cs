@@ -14,7 +14,7 @@ namespace Silk.Core.Services
     ///     <see cref="GuildModel" />
     ///     This class also provides methods for updating models, and handles Database operations, abstracting it from command classes.
     /// </summary>
-    public class DatabaseService
+    public class DatabaseService : IDatabaseService
     {
         #region Service ctor
 
