@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.Bot
 
                 var sopts = ScriptOptions.Default;
                 sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
+                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entites", "Silk.Core", "Silk.Extensions", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
                 sopts = sopts.WithReferences(AppDomain.CurrentDomain.GetAssemblies()
                                                       .Where(xa =>
@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Bot
                 script.Compile();
                 ScriptState<object> result = await script.RunAsync(globals).ConfigureAwait(false);
 
-                if (result?.ReturnValue != null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
+                if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
@@ -70,37 +70,37 @@ namespace Silk.Core.Commands.Bot
             {
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder
                 {
-                    
                     Title = "Evaluation Failure",
                     Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
                     Color = new DiscordColor("#FF0000")
                 }.Build()).ConfigureAwait(false);
             }
         }
-    }
-
-    public class TestVariables
-    {
-        public DiscordMessage Message { get; set; }
-        public DiscordChannel Channel { get; set; }
-        public DiscordGuild Guild { get; set; }
-        public DiscordUser User { get; set; }
-        public DiscordMember Member { get; set; }
-        public CommandContext Context { get; set; }
-
-        public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
+        
+        private record TestVariables
         {
-            Client = client;
-
-            Message = msg;
-            Channel = msg.Channel;
-            Guild = Channel.Guild;
-            User = Message.Author;
-            if (Guild != null)
-                Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
-            Context = ctx;
+            public DiscordMessage Message { get; set; }
+            public DiscordChannel Channel { get; set; }
+            public DiscordGuild Guild { get; set; }
+            public DiscordUser User { get; set; }
+            public DiscordMember Member { get; set; }
+            public CommandContext Context { get; set; }
+        
+            public DiscordClient Client { get; set; }
+        
+            public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
+            {
+                Client = client;
+                Context = ctx;
+                Message = msg;
+                Channel = msg.Channel;
+                Guild = Channel.Guild;
+                User = Message.Author;
+                
+                if (Guild != null) Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
         }
-
-        public DiscordClient Client;
     }
+
+
 }
