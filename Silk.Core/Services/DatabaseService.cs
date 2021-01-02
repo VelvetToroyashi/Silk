@@ -110,7 +110,7 @@ namespace Silk.Core.Services
 
         #region Internal helper methods
 
-        SilkDbContext IDatabaseService.GetContext() => _dbFactory.CreateDbContext();
+        private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
 
         #endregion
     }
