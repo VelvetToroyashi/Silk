@@ -25,7 +25,7 @@ namespace Silk.Core.Commands.Economy
 
         [Command("Donate")]
         [Aliases("Gift")]
-        public async Task Donate(CommandContext ctx, int amount, DiscordMember recipient)
+        public async Task Donate(CommandContext ctx, uint amount, DiscordMember recipient)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
             GlobalUserModel? sender = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
@@ -56,7 +56,7 @@ namespace Silk.Core.Commands.Economy
             await db.SaveChangesAsync();
         }
 
-        private async Task DoTransactionAsync(CommandContext ctx, int amount, GlobalUserModel sender,
+        private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUserModel sender,
             GlobalUserModel receiver)
         {
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
@@ -65,13 +65,13 @@ namespace Silk.Core.Commands.Economy
                                         .WithDescription(
                                             $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
                                         .WithColor(DiscordColor.PhthaloGreen);
-            sender.Cash -= amount;
-            receiver.Cash += amount;
+            sender.Cash -= (int)amount;
+            receiver.Cash += (int)amount;
             await ctx.RespondAsync(embed: embed);
         }
 
         private async Task VerifyTransactionAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
-            int amount)
+            uint amount)
         {
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
@@ -93,8 +93,8 @@ namespace Silk.Core.Commands.Economy
                                             .WithDescription(
                                                 $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
                                             .WithColor(DiscordColor.PhthaloGreen);
-                sender.Cash -= amount;
-                receiver.Cash += amount;
+                sender.Cash -= (int)amount;
+                receiver.Cash += (int)amount;
                 await ctx.RespondAsync(embed: embed);
             }
         }
