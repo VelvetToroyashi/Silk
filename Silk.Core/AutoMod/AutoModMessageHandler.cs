@@ -71,11 +71,8 @@ namespace Silk.Core.AutoMod
 
                         if (config.AllowedInvites.All(inv => inv.GuildName != invite.Guild.Name))
                              AutoModMatchedInvitePrecedureAsync(config, e.Message, code).GetAwaiter();
-                        Log.Logger.Verbose($"Matched and deleted invite in {sw.ElapsedMilliseconds} ms!");
-                        return;
                     }
                     else AutoModMatchedInvitePrecedureAsync(config, e.Message, code).GetAwaiter(); // I can't think of a better name. //
-                    Log.Logger.Verbose($"Matched and deleted invite in {sw.ElapsedMilliseconds} ms!");
                 }
             });
             return Task.CompletedTask;
