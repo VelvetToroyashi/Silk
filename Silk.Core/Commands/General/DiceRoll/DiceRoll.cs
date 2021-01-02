@@ -13,7 +13,7 @@ namespace Silk.Core.Commands.General.DiceRoll
     public class DiceRoll : BaseCommandModule
     {
         [Command]
-        [Description("Generate a random number in a given range; defaults to 100.")]
+        [Description("Generate a random number in a given range; defaults to 100. (Hard limit of ~2.1 billion)")]
         public async Task Random(CommandContext ctx, int max = 100) =>
             await ctx.RespondAsync(new Random().Next(max).ToString()).ConfigureAwait(false);
 
@@ -45,7 +45,7 @@ namespace Silk.Core.Commands.General.DiceRoll
                     }
                     int sum = localRolls.Sum();
                     rolls.Add(sum);
-                    embed.AddField($"🎲{steps[i].TotalNumber}d{steps[i].DiceNoSides}", $"\t{string.Join(", ", localRolls)}   |   {sum}");
+                    embed.AddField($"🎲{steps[i].TotalNumber}d{steps[i].DiceNoSides}", $"\t{string.Join(", ", localRolls)}   =   {sum}");
                 }
             }
 
