@@ -54,7 +54,7 @@ namespace Silk.Core
                            Log.Logger = new LoggerConfiguration()
                                                 .WriteTo.Console(
                                                     outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                                                .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                                                 .MinimumLevel.Verbose()
                                                 .CreateLogger())
                        .ConfigureServices((context, services) =>
@@ -72,7 +72,7 @@ namespace Silk.Core
                                     #endif
                                },
                                ServiceLifetime.Transient);
-                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromDays(1));
+                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                            
                            services.AddSingleton<DatabaseService>();
                            services.AddSingleton<InfractionService>();
@@ -83,9 +83,11 @@ namespace Silk.Core
 
 
                            services.AddSingleton<MessageHandler>();
+                            
                            
-                           
+                           services.AddSingleton<BotExceptionHelper>();
                            services.AddSingleton<BotEventSubscriber>();
+                           
                            services.AddSingleton<GuildAddedHelper>();
                            services.AddSingleton<MessageAddedHelper>();
                            services.AddSingleton<MessageRemovedHelper>();

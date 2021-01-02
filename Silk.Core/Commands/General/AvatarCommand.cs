@@ -41,7 +41,7 @@ namespace Silk.Core.Commands.General
             }
         }
 
-        private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096");
+        private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096&v=1");
 
         private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx) =>
             new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue)

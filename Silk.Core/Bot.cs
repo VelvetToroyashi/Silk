@@ -32,41 +32,17 @@ namespace Silk.Core
 
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
-        private readonly BotEventSubscriber _eventSubscriber;
-        private readonly PrefixCacheService _prefixService;
+        private readonly BotExceptionHelper _exceptionHelper;
         private readonly Stopwatch _sw = new();
         
         
-        public Bot(IServiceProvider services, DiscordShardedClient client,
-            ILogger<Bot> logger, BotEventSubscriber eventSubscriber,
-            MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper, 
-            GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
-            MemberRemovedHelper memberRemovedHelper,
-            RoleAddedHelper roleAddedHelper, RoleRemovedHelper roleRemovedHelper, 
-            
-            IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHelper exceptionHelper, BotEventSubscriber eventSubscriber, IDbContextFactory<SilkDbContext> dbFactory)
         {
-            
             _sw.Start();
             _services = services;
             _logger = logger;
-            _eventSubscriber = eventSubscriber;
-
-            client.MessageCreated += messageAHelper.Commands;
-            client.MessageCreated += messageAHelper.Tickets;
-
-            client.MessageDeleted += messageRHelper.OnRemoved;
-
-            client.GuildMemberRemoved += memberRemovedHelper.OnMemberRemoved;
+            _exceptionHelper = exceptionHelper;
             
-            client.GuildDownloadCompleted += guildAddedHelper.OnGuildDownloadComplete;
-            client.GuildAvailable += guildAddedHelper.OnGuildAvailable;
-            client.GuildCreated += guildAddedHelper.OnGuildJoin;
-               
-
-            client.GuildMemberUpdated += roleAddedHelper.CheckStaffRole;
-            client.GuildMemberUpdated += roleRemovedHelper.CheckStaffRoles;
-
             SilkDBContext = dbFactory.CreateDbContext();
             Instance = this;
             Client = client;
@@ -74,13 +50,11 @@ namespace Silk.Core
 
         private void InitializeCommands()
         {
-           
             var sw = Stopwatch.StartNew();
             
             foreach (DiscordClient shard in Client.ShardClients.Values)
                 shard.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
             
-
             sw.Stop();
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shards in {sw.ElapsedMilliseconds} ms.");
         }
@@ -92,7 +66,6 @@ namespace Silk.Core
                 UseDefaultCommandHandler = false,
                 Services = _services,
                 IgnoreExtraArguments = true
-                
             };
             
             await Client.StartAsync();
@@ -108,7 +81,7 @@ namespace Silk.Core
                 Timeout = TimeSpan.FromMinutes(1),
             });
             
-            _eventSubscriber.CreateHandlers();
+            await _exceptionHelper.SubscribeToEventsAsync();
             
             var cmdNext = await Client.GetCommandsNextAsync();
             foreach (CommandsNextExtension c in cmdNext.Values)

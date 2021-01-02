@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,38 @@ namespace Silk.Core.Services
         private readonly DatabaseService _dbService;
         private readonly ConfigService _configService;
         private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new();
+        private readonly Thread _infractionThread;
 
-        public InfractionService(ILogger<InfractionService> logger, DatabaseService dbService, ConfigService configService) => 
-            (_logger, _dbService, _configService) = (logger, dbService, configService);
+        public InfractionService(ILogger<InfractionService> logger, DatabaseService dbService, ConfigService configService)
+        {
+            _logger = logger;
+            _dbService = dbService;
+            _configService = configService;
+            _infractionThread = new(() => ProcessInfractions());
+            InitThread(_infractionThread);
+            _logger.LogInformation("Started Infraction Service Thread!");
+            
+        }
 
+        private void InitThread(Thread thread)
+        {
+            thread.Name = "Infraction Thread";
+            thread.Priority = ThreadPriority.BelowNormal;
+            
+            thread.Start();
+        }
         
-        
-        
+        private void ProcessInfractions()
+        {
+            while (true)
+            {
+                if (!_infractionQueue.IsEmpty)
+                {
+                    Thread.Sleep(200);
+                }
+            }
+        }
+
+
     }
 }
