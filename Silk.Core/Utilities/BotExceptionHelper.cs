@@ -33,6 +33,7 @@ namespace Silk.Core.Utilities
                 _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
+            
             if (e.Exception is ArgumentException) _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             
             if (e.Exception is ChecksFailedException cf)
@@ -68,7 +69,8 @@ namespace Silk.Core.Utilities
 
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
-            // Handle stuff here //
+            if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
+            if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard.");
         }
         
         
@@ -88,12 +90,8 @@ namespace Silk.Core.Utilities
             _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected."); // Async keyword because I'm lazy, and then I don't need to return anything.
 
             IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
-            foreach (CommandsNextExtension? cne in commandsNext)
-            {
-                _logger.LogTrace("Attempting to subscribe to CommandErorred");
-                cne!.CommandErrored += OnCommandErrored;
-                _logger.LogTrace("Subscribbed");
-            }
+            foreach (CommandsNextExtension? c in commandsNext)
+                c!.CommandErrored += OnCommandErrored;
         }
     }
 }
