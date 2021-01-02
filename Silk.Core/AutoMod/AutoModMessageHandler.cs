@@ -12,7 +12,7 @@ using Silk.Core.Services;
 
 namespace Silk.Core.AutoMod
 {
-    public class MessageHandler
+    public class AutoModMessageHandler
     {
         private static readonly RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
         private static readonly Regex AgressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/[A-z]+)", flags);
@@ -21,7 +21,7 @@ namespace Silk.Core.AutoMod
         private readonly InfractionService _infractionService;
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
         
-        public MessageHandler(ConfigService configService, InfractionService infractionService) => 
+        public AutoModMessageHandler(ConfigService configService, InfractionService infractionService) => 
              (_configService, _infractionService) = (configService, infractionService);
 
 

@@ -10,11 +10,11 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class MessageRemovedHelper
+    public class MessageRemovedHandler
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
-        public MessageRemovedHelper(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public MessageRemovedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
         
         public async Task OnRemoved(DiscordClient c, MessageDeleteEventArgs e)
         {

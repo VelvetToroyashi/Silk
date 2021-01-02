@@ -25,6 +25,7 @@ namespace Silk.Core.Utilities
         
         public async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
+            
             if (e.Exception is CommandNotFoundException)
                 _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
             
@@ -70,7 +71,8 @@ namespace Silk.Core.Utilities
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
-            if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard.");
+            else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard.");
+            else _logger.LogInformation($"{e.Exception.Message}");
         }
         
         
@@ -85,7 +87,6 @@ namespace Silk.Core.Utilities
 
         public async Task SubscribeToEventsAsync()
         {
-            _logger.LogTrace("Subscribbing to client and command errored events.");
             _client.ClientErrored += OnClientErrored;
             _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected."); // Async keyword because I'm lazy, and then I don't need to return anything.
 

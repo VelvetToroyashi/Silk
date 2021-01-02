@@ -10,10 +10,10 @@ using Silk.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class RoleAddedHelper
+    public class RoleAddedHandler
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public RoleAddedHelper(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public RoleAddedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
         
         public async Task CheckStaffRole(DiscordClient c, GuildMemberUpdateEventArgs e)
         {

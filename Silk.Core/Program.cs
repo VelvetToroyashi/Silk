@@ -82,19 +82,19 @@ namespace Silk.Core
                            services.AddSingleton<ConfigService>();
 
 
-                           services.AddSingleton<MessageHandler>();
+                           services.AddSingleton<AutoModMessageHandler>();
                             
                            
                            services.AddSingleton<BotExceptionHelper>();
                            services.AddSingleton<BotEventSubscriber>();
                            
-                           services.AddSingleton<GuildAddedHelper>();
-                           services.AddSingleton<MessageAddedHelper>();
-                           services.AddSingleton<MessageRemovedHelper>();
+                           services.AddSingleton<GuildAddedHandler>();
+                           services.AddSingleton<MessageAddedHandler>();
+                           services.AddSingleton<MessageRemovedHandler>();
 
-                           services.AddSingleton<MemberRemovedHelper>();
+                           services.AddSingleton<MemberRemovedHandler>();
                            
-                           services.AddSingleton<RoleAddedHelper>();
+                           services.AddSingleton<RoleAddedHandler>();
                            services.AddSingleton<RoleRemovedHelper>();
                            
                            services.AddSingleton<SerilogLoggerFactory>();

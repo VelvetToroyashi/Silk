@@ -14,18 +14,18 @@ using Silk.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class GuildAddedHelper
+    public class GuildAddedHandler
     {
         private int currentGuild;
         private bool startupCacheCompleted;
         
         
-        private readonly ILogger<GuildAddedHelper> _logger;
+        private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         
         private readonly List<DiscordGuild> cacheQueue = new();
 
-        public GuildAddedHelper(ILogger<GuildAddedHelper> logger, IDbContextFactory<SilkDbContext> dbFactory) => (_logger, _dbFactory) = (logger, dbFactory);
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDbContextFactory<SilkDbContext> dbFactory) => (_logger, _dbFactory) = (logger, dbFactory);
 
         // Run on startup to cache all members //
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)

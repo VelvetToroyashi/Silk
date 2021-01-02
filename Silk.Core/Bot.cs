@@ -33,6 +33,7 @@ namespace Silk.Core
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
         private readonly BotExceptionHelper _exceptionHelper;
+        private readonly BotEventSubscriber _eventSubscriber;
         private readonly Stopwatch _sw = new();
         
         
@@ -42,6 +43,7 @@ namespace Silk.Core
             _services = services;
             _logger = logger;
             _exceptionHelper = exceptionHelper;
+            _eventSubscriber = eventSubscriber;
             
             SilkDBContext = dbFactory.CreateDbContext();
             Instance = this;
@@ -67,12 +69,14 @@ namespace Silk.Core
                 Services = _services,
                 IgnoreExtraArguments = true
             };
+            Client.Ready += async (_, _) => _logger.LogInformation($"Recieved OP 7 - HELLO from Discord on shard 1!");
             
-            await Client.StartAsync();
             
             await Client.UseCommandsNextAsync(Commands);
+            await _exceptionHelper.SubscribeToEventsAsync();
+            _eventSubscriber.SubscribeToEvents();
             InitializeCommands();
-            
+            await Client.StartAsync();
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -89,10 +93,10 @@ namespace Silk.Core
                 c.SetHelpFormatter<HelpFormatter>(); 
                 c.RegisterConverter(new MemberConverter());
             }
-            await _exceptionHelper.SubscribeToEventsAsync();
+           
             _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
-            Client.Ready += async (_, _) => _logger.LogInformation("Client ready to process commands.");
+            
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();

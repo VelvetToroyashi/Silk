@@ -10,12 +10,12 @@ using Silk.Core.Services;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class MemberRemovedHelper
+    public class MemberRemovedHandler
     {
 
         private readonly DatabaseService _dbService;
-        private readonly ILogger<MemberRemovedHelper> _logger;
-        public MemberRemovedHelper(DatabaseService dbService, ILogger<MemberRemovedHelper> logger) => (_dbService, _logger) = (dbService, logger);
+        private readonly ILogger<MemberRemovedHandler> _logger;
+        public MemberRemovedHandler(DatabaseService dbService, ILogger<MemberRemovedHandler> logger) => (_dbService, _logger) = (dbService, logger);
 
         /// <summary>
         /// Event handler responsible for removing user from the database if they leave a guild.
