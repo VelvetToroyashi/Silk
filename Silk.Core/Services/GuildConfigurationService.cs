@@ -13,30 +13,19 @@ namespace Silk.Core.Services
     {
         private readonly IMemoryCache _cache;
         private readonly DatabaseService _db;
-        private readonly ILogger<ConfigService> _logger;
 
-        public ConfigService(IMemoryCache cache, DatabaseService db,
-            ILogger<ConfigService> logger)
-        {
-            _cache = cache;
-            _db = db;
-            _logger = logger;
-        }
+        public ConfigService(IMemoryCache cache, DatabaseService db) => (_cache, _db) = (cache, db);
 
-        public async Task<GuildConfigModel> GetConfigAsync(ulong? guildId)
+        public async Task<GuildConfigModel> GetConfigAsync(ulong guildId)
         {
-            if (guildId is null or 0) throw new ArgumentException("Must have value!", nameof(guildId));
-            if (_cache.TryGetValue(guildId.Value, out GuildConfigModel config)) return config;
-            //_logger.LogInformation("Guild not present in cache! Querying from database");
-            return await GetConfigFromDatabaseAsync(guildId.Value);
+            if (_cache.TryGetValue(guildId, out GuildConfigModel config)) return config;
+            return await GetConfigFromDatabaseAsync(guildId);
         }
 
         public async Task<GuildConfigModel> GetConfigFromDatabaseAsync(ulong guildId)
         {
             GuildConfigModel configuration = await _db.GetConfigAsync(guildId);
-            
-            _cache.CreateEntry(guildId).SetValue(configuration)
-                  .SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
+            _cache.Set(guildId, configuration, TimeSpan.FromHours(1));
             return configuration;
         }
     }

@@ -19,7 +19,7 @@ namespace Silk.Core.Services
         private readonly ConfigService _configService;
         private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new();
         private readonly Thread _infractionThread;
-
+        // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
         public InfractionService(ILogger<InfractionService> logger, DatabaseService dbService, ConfigService configService)
         {
             _logger = logger;
@@ -35,7 +35,6 @@ namespace Silk.Core.Services
         {
             thread.Name = "Infraction Thread";
             thread.Priority = ThreadPriority.BelowNormal;
-            
             thread.Start();
         }
         
