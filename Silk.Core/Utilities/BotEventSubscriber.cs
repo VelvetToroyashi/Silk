@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using Microsoft.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Tools.EventHelpers;
 
 namespace Silk.Core.Utilities
@@ -8,6 +9,7 @@ namespace Silk.Core.Utilities
     {
         public BotEventSubscriber(DiscordShardedClient client, ILogger<BotEventSubscriber> logger,
             MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper,
+            MessageHandler automodMessageHandler,
             GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
             MemberRemovedHelper memberRemovedHelper,
             RoleAddedHelper roleAddedHelper, RoleRemovedHelper roleRemovedHelper)
@@ -18,6 +20,8 @@ namespace Silk.Core.Utilities
             logger.LogTrace("Subscribed to:" +" MessageAddedHelper/Commands".PadLeft(40));
             client.MessageCreated += messageAHelper.Tickets;
             logger.LogTrace("Subscribed to:" +" MessageAddedHelper/Tickets".PadLeft(40));
+            client.MessageCreated += automodMessageHandler.CheckForInvites;
+            logger.LogTrace("Subscribed to:" +" AutoMod/CheckForInvites".PadLeft(40));
             client.MessageDeleted += messageRHelper.OnRemoved;
             logger.LogTrace("Subscribed to:" +" MessageRemovedHelper/MessageRemoved".PadLeft(40));
             client.GuildMemberRemoved += memberRemovedHelper.OnMemberRemoved;

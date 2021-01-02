@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -22,16 +23,17 @@ namespace Silk.Core.Utilities
 
         public BotExceptionHelper(ILogger<BotExceptionHelper> logger, DiscordShardedClient client) => (_logger, _client) = (logger, client);
         
-        private async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
+        public async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
             if (e.Exception is CommandNotFoundException)
                 _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
             
-            if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("sub"))
+            if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
             {
                 _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
-                _ = SendHelpAsync(c.Client, e.Command.Name, e.Context);
+                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
+            if (e.Exception is ArgumentException) _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             
             if (e.Exception is ChecksFailedException cf)
             {
@@ -81,11 +83,17 @@ namespace Silk.Core.Utilities
 
         public async Task SubscribeToEventsAsync()
         {
+            _logger.LogTrace("Subscribbing to client and command errored events.");
             _client.ClientErrored += OnClientErrored;
             _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected."); // Async keyword because I'm lazy, and then I don't need to return anything.
 
-            foreach (var cne in (await _client.GetCommandsNextAsync()).Values)
-                cne.CommandErrored += OnCommandErrored;
+            IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
+            foreach (CommandsNextExtension? cne in commandsNext)
+            {
+                _logger.LogTrace("Attempting to subscribe to CommandErorred");
+                cne!.CommandErrored += OnCommandErrored;
+                _logger.LogTrace("Subscribbed");
+            }
         }
     }
 }

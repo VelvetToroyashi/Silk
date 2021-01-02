@@ -81,7 +81,7 @@ namespace Silk.Core
                 Timeout = TimeSpan.FromMinutes(1),
             });
             
-            await _exceptionHelper.SubscribeToEventsAsync();
+            
             
             var cmdNext = await Client.GetCommandsNextAsync();
             foreach (CommandsNextExtension c in cmdNext.Values)
@@ -89,22 +89,15 @@ namespace Silk.Core
                 c.SetHelpFormatter<HelpFormatter>(); 
                 c.RegisterConverter(new MemberConverter());
             }
-            
-            _logger.LogInformation("Client Initialized.");
+            await _exceptionHelper.SubscribeToEventsAsync();
             _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
             Client.Ready += async (_, _) => _logger.LogInformation("Client ready to process commands.");
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await InitializeClientAsync();
-        }
+        public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await Client.StopAsync();
-        }
+        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
 
     }
 }
