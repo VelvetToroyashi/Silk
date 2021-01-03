@@ -32,6 +32,13 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         public Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction);
 
+        /// <summary>
+        /// Update a <see cref="UserModel"/>
+        /// </summary>
+        /// <param name="user">The user to update.</param>
+        /// <remarks>Remarks: This differs from <see cref="UpdateGuildUserAsync(UserModel, Action{UserModel})"/> in the sense that
+        /// the object is updated externally, and is updated in the database.</remarks>
+        public Task UpdateGuildUserAsync(UserModel user);
         
         /// <summary>
         /// Get a <see cref="UserModel"/> from the database. Unlike <see cref="GetGuildUserAsync"/>, the object is never null

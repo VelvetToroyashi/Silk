@@ -19,7 +19,7 @@ namespace Silk.Core.Services
         private readonly ILogger<InfractionService> _logger;
         private readonly IDatabaseService _dbService;
         private readonly ConfigService _configService;
-        private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new();
+        private readonly ConcurrentQueue<(DiscordMember, UserInfractionModel)> _infractionQueue = new();
         private readonly Thread _infractionThread;
         // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
         public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
@@ -27,23 +27,17 @@ namespace Silk.Core.Services
             _logger = logger;
             _dbService = dbService;
             _configService = configService;
-            _infractionThread = new(() => ProcessInfractions());
+            _infractionThread = new(async () => await ProcessInfractions());
             InitThread(_infractionThread);
             _logger.LogInformation("Started Infraction Service Thread!");
         }
 
-        public void AddInfraction(UserInfractionModel infraction) => _infractionQueue.Enqueue(infraction);
+        public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
         
-        /// <summary>
-        /// Returns a bool indicating whether an infraction should be added to the queue, and thus applied to a user.
-        /// </summary>
-        /// <param name="member">The user to check.</param>
+        // Return whether or not we should provide and infraction to a member. //
 
-        public async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => 
-            (await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id))?.Flags.Has(UserFlag.AutoModIgnore) ?? false; 
-
-        
-        
+        private async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => 
+            (await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id))?.Flags.Has(UserFlag.AutoModIgnore) ?? false;
         private void InitThread(Thread thread)
         {
             thread.Name = "Infraction Thread";
@@ -51,17 +45,21 @@ namespace Silk.Core.Services
             thread.Start();
         }
         
-        private void ProcessInfractions()
+        private async Task ProcessInfractions()
         {
-            while (true)
+            while (_infractionThread.ThreadState is not ThreadState.StopRequested)
             {
                 if (!_infractionQueue.IsEmpty)
                 {
                     Thread.Sleep(100);
+                    continue;
+                }
+                _ = _infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r);
+                if (await ShouldAddInfractionAsync(r.m))
+                {
+                    
                 }
             }
         }
-
-
     }
 }

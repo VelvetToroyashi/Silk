@@ -57,9 +57,18 @@ namespace Silk.Core.Services
 
             return user;
         }
-        
+
+        // Attatch to the context and save. Easy as that. //
+        public async Task UpdateGuildUserAsync(UserModel user)
+        {
+            SilkDbContext db = this.GetContext();
+            db.Attach(user);
+            await db.SaveChangesAsync();
+        }
+
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
+            
             SilkDbContext db = GetContext();
             db.Attach(user);
             updateAction(user);
