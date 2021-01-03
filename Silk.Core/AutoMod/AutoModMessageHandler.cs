@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
@@ -35,9 +34,7 @@ namespace Silk.Core.AutoMod
 
         private readonly HashSet<string> _blacklistedLinkCache = new();
         
-        
-        public AutoModMessageHandler(ConfigService configService, InfractionService infractionService) => 
-             (_configService, _infractionService) = (configService, infractionService);
+        public AutoModMessageHandler(ConfigService configService, InfractionService infractionService) => (_configService, _infractionService) = (configService, infractionService);
 
 
         public Task CheckForInvites(DiscordClient c, MessageCreateEventArgs e)
