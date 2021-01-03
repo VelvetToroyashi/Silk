@@ -69,7 +69,7 @@ namespace Silk.Core
                 Services = _services,
                 IgnoreExtraArguments = true
             };
-            Client.Ready += async (_, _) => _logger.LogInformation($"Recieved OP 7 - HELLO from Discord on shard 1!");
+            Client.Ready += async (_, _) => _logger.LogInformation($"Recieved OP 10 - HELLO from Discord on shard 1!");
             
             
             await Client.UseCommandsNextAsync(Commands);
