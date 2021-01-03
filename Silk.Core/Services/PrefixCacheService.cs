@@ -24,7 +24,7 @@ namespace Silk.Core.Services
             _dbFactory = dbFactory;
         }
 
-        public string? RetrievePrefix(ulong? guildId)
+        public string RetrievePrefix(ulong? guildId)
         {
             if (guildId == default || guildId == 0) return null;
             if (_cache.TryGetValue(guildId.Value, out string? prefix)) return prefix;

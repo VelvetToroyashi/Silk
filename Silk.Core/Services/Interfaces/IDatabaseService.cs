@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
-
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Interfaces
 {
+    /// <summary>
+    /// Provides database abstractions for command classes, and methods for updating and retrieving
+    /// <see cref="Silk.Core.Database.Models.UserModel"/> and <see cref="Silk.Core.Database.Models.GuildModel"/>.
+    /// </summary>
     public interface IDatabaseService
     {
         /// <summary>
@@ -13,11 +14,17 @@ namespace Silk.Core.Services
         /// </summary>
         /// <returns><see cref="GuildModel"/>with corresponding users.</returns>
         public Task<GuildModel> GetGuildAsync(ulong guildId);
+        /// <summary>
+        /// Get the configuration of a <see cref="GuildModel"/>.
+        /// </summary>
+        /// <param name="configId">The Id of the guild to retrieve a configuration for.</param>
+        /// <returns>The configuration that corresponds to the Id passed in.</returns>
         public Task<GuildConfigModel> GetConfigAsync(ulong configId);
+        
         /// <summary>
         /// Get a <see cref="UserModel"/> from the database.
         /// </summary>
-        /// <returns>A <see cref="UserModel?"/>, or null if the user doesn't exist.</returns>
+        /// <returns>A <see cref="UserModel"/>, or null if the user doesn't exist.</returns>
         public Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId);
 
         /// <summary>

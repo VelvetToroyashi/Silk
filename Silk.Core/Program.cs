@@ -62,16 +62,8 @@ namespace Silk.Core
                            IConfiguration config = context.Configuration;
                            _clientConfig.Token = config.GetConnectionString("BotToken");
                            services.AddSingleton(new DiscordShardedClient(_clientConfig));
-                           services.AddDbContextFactory<SilkDbContext>(
-                               option =>
-                               {
-                                   option.UseNpgsql(config.GetConnectionString("dbConnection"));
-                                   #if  DEBUG
-                                    option.EnableSensitiveDataLogging();
-                                    option.EnableDetailedErrors();                                
-                                    #endif
-                               },
-                               ServiceLifetime.Transient);
+                           Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
+                           
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                            
                            services.AddSingleton<DatabaseService>();

@@ -3,17 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 
 namespace Silk.Core.Services
 {
-    /// <summary>
-    ///     A service class that provides a bridge between <see cref="SilkDbContext" /> and Model classes such as <see cref="UserModel" /> &
-    ///     <see cref="GuildModel" />
-    ///     This class also provides methods for updating models, and handles Database operations, abstracting it from command classes.
-    /// </summary>
+
+    /// <inheritdoc cref="IDatabaseService"/>
     public class DatabaseService : IDatabaseService
     {
         #region Service ctor
@@ -60,12 +57,7 @@ namespace Silk.Core.Services
 
             return user;
         }
-
-
-        /// <summary>
-        ///     Update a <see cref="UserModel" />.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
+        
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
             SilkDbContext db = GetContext();
@@ -86,13 +78,7 @@ namespace Silk.Core.Services
             await db.SaveChangesAsync();
             return user;
         }
-
         
-        /// <summary>
-        /// Remove a user from the database. A user with infractions will not be removed from the database.
-        /// </summary>
-        /// <param name="user">The user to attempt to remove.</param>
-        /// <returns></returns>
         public async Task RemoveUserAsync(UserModel user)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
