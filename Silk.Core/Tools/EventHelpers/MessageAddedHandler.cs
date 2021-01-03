@@ -14,10 +14,10 @@ namespace Silk.Core.Tools.EventHelpers
 {
     public class MessageAddedHandler
     {
-        private readonly TicketHandlerService _ticketService;
+        private readonly TicketService _ticketService;
         private readonly PrefixCacheService _prefixCache;
 
-        public MessageAddedHandler(TicketHandlerService ticketService, PrefixCacheService prefixCache)
+        public MessageAddedHandler(TicketService ticketService, PrefixCacheService prefixCache)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;
@@ -28,7 +28,7 @@ namespace Silk.Core.Tools.EventHelpers
             _ = Task.Run(async () =>
             {
                 if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
-                ulong ticketUser = TicketHandlerService.GetTicketUser(e.Channel);
+                ulong ticketUser = TicketService.GetTicketUser(e.Channel);
                 IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
                 DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUser).Value;
                 if (member is null) return; // Member doesn't exist anymore // 

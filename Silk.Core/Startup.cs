@@ -1,7 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog.Extensions.Logging;
+using Silk.Core.AutoMod;
+using Silk.Core.Commands;
+using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
+using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
+using Silk.Core.Tools;
+using Silk.Core.Tools.EventHelpers;
+using Silk.Core.Utilities;
 
 namespace Silk.Core
 {
@@ -17,5 +26,35 @@ namespace Silk.Core
                 option.EnableDetailedErrors();                                
                 #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
             }, ServiceLifetime.Transient);
+
+        public static void AddServices(IServiceCollection services)
+        {
+            services.AddSingleton<IDatabaseService, DatabaseService>();
+            services.AddSingleton<InfractionService>();
+            services.AddSingleton<TimedEventService>();
+            services.AddSingleton<PrefixCacheService>();
+            services.AddSingleton<TicketService>();
+            services.AddSingleton<ConfigService>();
+
+
+            services.AddSingleton<AutoModMessageHandler>();
+                            
+                           
+            services.AddSingleton<BotExceptionHelper>();
+            services.AddSingleton<BotEventSubscriber>();
+                           
+            services.AddSingleton<GuildAddedHandler>();
+            services.AddSingleton<MessageAddedHandler>();
+            services.AddSingleton<MessageRemovedHandler>();
+
+            services.AddSingleton<MemberRemovedHandler>();
+                           
+            services.AddSingleton<RoleAddedHandler>();
+            services.AddSingleton<RoleRemovedHelper>();
+                           
+            services.AddSingleton<SerilogLoggerFactory>();
+            
+        }
+        
     }
 }

@@ -12,10 +12,10 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Commands.General.Tickets
 {
-    public class TicketHandlerService
+    public class TicketService
     {
         private readonly DiscordShardedClient _client;
-        private readonly ILogger<TicketHandlerService> _logger;
+        private readonly ILogger<TicketService> _logger;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
         private const ulong SILK_GUILD_ID = 721518523704410202;
@@ -24,7 +24,7 @@ namespace Silk.Core.Commands.General.Tickets
         
         // private readonly DatabaseService _dbService;
         // TODO: Complete closing precedure, because apparently I'm an idiot and forgot about it ~Velvet.
-        public TicketHandlerService(DiscordShardedClient client, ILogger<TicketHandlerService> logger, IDbContextFactory<SilkDbContext> dbFactory)
+        public TicketService(DiscordShardedClient client, ILogger<TicketService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _client = client;
             _logger = logger;

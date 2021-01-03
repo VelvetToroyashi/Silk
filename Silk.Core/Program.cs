@@ -45,18 +45,17 @@ namespace Silk.Core
                        .UseConsoleLifetime()
                        .ConfigureAppConfiguration((_, configuration) =>
                        {
-                           
                            configuration.SetBasePath(Directory.GetCurrentDirectory());
                            configuration.AddJsonFile("appSettings.json", true, false);
                            configuration.AddUserSecrets<Program>(true, false);
                        })
                        .ConfigureLogging((_, _) => 
                            Log.Logger = new LoggerConfiguration()
-                                                .WriteTo.Console(
-                                                    outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                                                .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                                .MinimumLevel.Verbose()
-                                                .CreateLogger())
+                               .WriteTo.Console(
+                                   outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                               .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+                               .MinimumLevel.Verbose()
+                               .CreateLogger())
                        .ConfigureServices((context, services) =>
                        {
                            IConfiguration config = context.Configuration;
@@ -66,31 +65,7 @@ namespace Silk.Core
                            
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                            
-                           services.AddSingleton<DatabaseService>();
-                           services.AddSingleton<InfractionService>();
-                           services.AddSingleton<TimedEventService>();
-                           services.AddSingleton<PrefixCacheService>();
-                           services.AddSingleton<TicketHandlerService>();
-                           services.AddSingleton<ConfigService>();
 
-
-                           services.AddSingleton<AutoModMessageHandler>();
-                            
-                           
-                           services.AddSingleton<BotExceptionHelper>();
-                           services.AddSingleton<BotEventSubscriber>();
-                           
-                           services.AddSingleton<GuildAddedHandler>();
-                           services.AddSingleton<MessageAddedHandler>();
-                           services.AddSingleton<MessageRemovedHandler>();
-
-                           services.AddSingleton<MemberRemovedHandler>();
-                           
-                           services.AddSingleton<RoleAddedHandler>();
-                           services.AddSingleton<RoleRemovedHelper>();
-                           
-                           services.AddSingleton<SerilogLoggerFactory>();
-                           services.AddSingleton<CommandProcessorModule>();
 
                            services.AddHttpClient(HttpClientName, client =>
                            {
