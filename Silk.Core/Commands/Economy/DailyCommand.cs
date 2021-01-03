@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
-using Silk.Extensions.DSharpPlus;
+using SilkBot.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Economy
 {

@@ -4,25 +4,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Silk_Items.Components;
+using Silk.Items.Components;
 
 #endregion
 
-namespace Silk_Items.Entities
+namespace Silk.Items.Entities
 {
-    public abstract class Entity : IEnumerable<Icomponent>
+    public abstract class Entity : IEnumerable<IComponent>
     {
         [JsonInclude]
-        private readonly List<Icomponent> Components = new();
+        private readonly List<IComponent> Components = new();
         
-        public IEnumerator<Icomponent> GetEnumerator() => Components.GetEnumerator();
+        public IEnumerator<IComponent> GetEnumerator() => Components.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public bool Has<C>() where C : struct =>
             this.Count(c => c.GetType().Name == typeof(C).Name) > 1;
 
-        public bool Add(Icomponent comp)
+        public bool Add(IComponent comp)
         {
             if (!this.Contains(comp))
             {
@@ -32,7 +32,7 @@ namespace Silk_Items.Entities
             return false;
         }
 
-        public void Remove(Icomponent comp) => Components.Remove(comp);
+        public void Remove(IComponent comp) => Components.Remove(comp);
 
         public TComp Get<TComp>() where TComp : class => this.SingleOrDefault(c => c.GetType().Name == typeof(TComp).Name) as TComp;
     }

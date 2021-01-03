@@ -8,7 +8,7 @@ using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
-using Silk.Extensions;
+using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {

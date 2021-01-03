@@ -1,6 +1,6 @@
-﻿namespace Silk_Items.Components
+﻿namespace Silk.Items.Components
 {
-    public class DamageIcomponent : Icomponent
+    public class DamageIcomponent : IComponent
     {
         public int Damage { get; set; }
     }

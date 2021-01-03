@@ -6,7 +6,7 @@ using DSharpPlus;
 
 #endregion
 
-namespace Silk.Extensions
+namespace SilkBot.Extensions
 {
     public static class IServiceCollectionExtensions
     {

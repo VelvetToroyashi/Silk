@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,7 +8,7 @@ using DSharpPlus.Entities;
 
 #endregion
 
-namespace Silk.Extensions
+namespace SilkBot.Extensions
 {
     public static class CommandContextExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
-using Silk.Extensions.DSharpPlus;
+using SilkBot.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.General.Tickets
 {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Extensions;
+using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {

@@ -10,7 +10,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities;
-using Silk.Extensions;
+using SilkBot.Extensions;
 
 namespace Silk.Core.Commands.Miscellaneous
 {

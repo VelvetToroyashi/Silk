@@ -10,8 +10,8 @@ using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities;
-using Silk.Extensions;
-using Silk.Extensions.DSharpPlus;
+using SilkBot.Extensions;
+using SilkBot.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {

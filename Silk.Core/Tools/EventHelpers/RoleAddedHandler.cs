@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Extensions;
+using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {

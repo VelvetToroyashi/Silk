@@ -4,7 +4,7 @@ using System.Linq;
 
 #endregion
 
-namespace Silk.Extensions
+namespace SilkBot.Extensions
 {
     public static class ArrayExtension
     {

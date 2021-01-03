@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Silk.Extensions.DSharpPlus
+namespace SilkBot.Extensions.DSharpPlus
 {
     public static class DateTimeExtensions
     {
