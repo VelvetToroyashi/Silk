@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Extensions.DSharpPlus;
@@ -19,10 +20,10 @@ namespace Silk.Core.Commands.Moderation
     public class KickCommand : BaseCommandModule
     {
         private readonly ILogger<KickCommand> _logger;
-        private readonly DatabaseService _dbService;
+        private readonly IDatabaseService _dbService;
 
 
-        public KickCommand(ILogger<KickCommand> logger, DatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
+        public KickCommand(ILogger<KickCommand> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
 
         [Command]
         [RequireFlag(UserFlag.Staff)]

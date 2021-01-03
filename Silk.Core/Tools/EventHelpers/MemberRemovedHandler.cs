@@ -7,15 +7,16 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Tools.EventHelpers
 {
     public class MemberRemovedHandler
     {
 
-        private readonly DatabaseService _dbService;
+        private readonly IDatabaseService _dbService;
         private readonly ILogger<MemberRemovedHandler> _logger;
-        public MemberRemovedHandler(DatabaseService dbService, ILogger<MemberRemovedHandler> logger) => (_dbService, _logger) = (dbService, logger);
+        public MemberRemovedHandler(IDatabaseService dbService, ILogger<MemberRemovedHandler> logger) => (_dbService, _logger) = (dbService, logger);
 
         /// <summary>
         /// Event handler responsible for removing user from the database if they leave a guild.

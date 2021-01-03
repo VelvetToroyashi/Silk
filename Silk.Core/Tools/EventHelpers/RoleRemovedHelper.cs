@@ -8,6 +8,7 @@ using Serilog;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
@@ -17,8 +18,8 @@ namespace Silk.Core.Tools.EventHelpers
         //TODO: Implement removing Staff flag from members when their role is removed. 
 
         private readonly ILogger<RoleRemovedHelper> _logger;
-        private readonly DatabaseService _dbService;
-        public RoleRemovedHelper(DatabaseService dbService) => _dbService = dbService;
+        private readonly IDatabaseService _dbService;
+        public RoleRemovedHelper(IDatabaseService dbService) => _dbService = dbService;
         
         public Task CheckStaffRoles(DiscordClient c, GuildMemberUpdateEventArgs e)
         {

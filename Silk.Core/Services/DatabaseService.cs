@@ -10,7 +10,7 @@ using Silk.Core.Database.Models;
 namespace Silk.Core.Services
 {
 
-    /// <inheritdoc cref="IDatabaseService"/>
+    /// <inheritdoc/>
     public class DatabaseService : IDatabaseService
     {
         #region Service ctor
@@ -91,6 +91,7 @@ namespace Silk.Core.Services
         }
         #endregion
 
+        
         #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();

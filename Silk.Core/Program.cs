@@ -62,10 +62,10 @@ namespace Silk.Core
                            _clientConfig.Token = config.GetConnectionString("BotToken");
                            services.AddSingleton(new DiscordShardedClient(_clientConfig));
                            Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
+                           Core.Startup.AddServices(services);
                            
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
                            
-
 
                            services.AddHttpClient(HttpClientName, client =>
                            {

@@ -13,7 +13,8 @@ namespace Silk.Core.Database.Models
         FreeShopOwner   = 32,
         PaidShopOwner   = 64,
         SilkPremiumUser = 128,
-        Staff           = 4096,
+        AutoModIgnore   = 256,
+        Staff           = 4096 | AutoModIgnore,
         EscalatedStaff  = 8192 | Staff
     }
 }
