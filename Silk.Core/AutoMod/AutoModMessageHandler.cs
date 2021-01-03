@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity.Extensions;
 using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
@@ -16,7 +17,7 @@ namespace Silk.Core.AutoMod
     public class AutoModMessageHandler
     {
         private static readonly RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
-
+            
         /*
          * To those unacquinted to Regex, or simply too lazy to plug it into regex101.com,
          * these two Regexes match Discord invites. The reason we don't simply do something like Message.Contains("discord.gg/") || Message.Contains("discord.com/inv..
@@ -42,12 +43,11 @@ namespace Silk.Core.AutoMod
             if (e.Channel.IsPrivate) return Task.CompletedTask;
             _ = Task.Run(async () => //Before you ask: Task.Run() in event handlers because await = block
             {
-                Stopwatch sw = Stopwatch.StartNew();
                 GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);
-                Log.Logger.Verbose($"Grabbed configuration in {sw.ElapsedMilliseconds} ms!");
-                sw.Restart();
                 if (!config.BlacklistInvites) return;
+                
                 Regex matchingPattern = config.UseAggressiveRegex ? AgressiveRegexPattern : LenientRegexPattern;
+                
                 Match match = matchingPattern.Match(e.Message.Content);
                 if (match.Success)
                 {
@@ -56,7 +56,6 @@ namespace Silk.Core.AutoMod
                     if (_blacklistedLinkCache.Contains(code))
                     {
                         AutoModMatchedInvitePrecedureAsync(config, e.Message, code).GetAwaiter();
-                        Log.Logger.Verbose($"Caught and deleted invite in {sw.ElapsedMilliseconds} ms!");
                         return;
                     }
                     if (config.ScanInvites)
