@@ -30,15 +30,25 @@ namespace Silk.Core.Services
             logger.LogInformation("Started Infraction Service Thread!");
         }
 
-        public async Task<bool> ShouldDeleteMessageAsync(DiscordMember member) => 
-            (await _configService.GetConfigAsync(member.Guild.Id)).DeleteMessageOnMatchedInvite && await ShouldAddInfractionAsync(member);
+        public async Task<bool> ShouldDeleteMessageAsync(DiscordMember member)
+        {
+            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            bool deleteInvites = config.DeleteMessageOnMatchedInvite;
+            bool shouldPunish = await ShouldAddInfractionAsync(member);
+            return deleteInvites && shouldPunish;
+        }
         
         public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
         
         
         // Return whether or not we should provide and infraction to a member. //
-        private async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => 
-            (await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id))?.Flags.Has(UserFlag.InfractionExemption) ?? false;
+        private async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
+        {
+            UserModel? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
+            if (user is null) return true;
+            else return !user.Flags.Has(UserFlag.InfractionExemption);
+        }
+            
         private void InitThread(Thread thread)
         {
             thread.Name = "Infraction Thread";
