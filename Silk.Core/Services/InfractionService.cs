@@ -56,23 +56,21 @@ namespace Silk.Core.Services
             thread.Start();
         }
         
-        private async Task ProcessInfractions()
-        {
-            while (_infractionThread.ThreadState is not ThreadState.StopRequested)
+            private async Task ProcessInfractions()
             {
-                if (_infractionQueue.IsEmpty)
+                while (_infractionThread.ThreadState is not ThreadState.StopRequested)
                 {
-                    Thread.Sleep(100);
-                    continue;
-                }
-                _ = _infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r);
-                if (await ShouldAddInfractionAsync(r.m))
-                {
-                    UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
-                    await _dbService.UpdateGuildUserAsync(user);
+                    if (!_infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r))
+                    {
+                        Thread.Sleep(100);
+                    }
+                    else if (await ShouldAddInfractionAsync(r.m))
+                    {
+                        UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
+                        await _dbService.UpdateGuildUserAsync(user);
+                    }
                 }
             }
-        }
         
         
         
