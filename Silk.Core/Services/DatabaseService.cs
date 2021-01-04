@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Database;
@@ -62,13 +63,18 @@ namespace Silk.Core.Services
         public async Task UpdateGuildUserAsync(UserModel user)
         {
             SilkDbContext db = this.GetContext();
-            db.Attach(user);
+            /*
+             * The reason we have to actually assign the attatching to a variable is because this is
+             * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
+             * but DbContext#Attatch() sets the entity to be unmodified by default. 
+             */ 
+            EntityEntry<UserModel> userEntity = db.Attach(user);
+            userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
 
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
-            
             SilkDbContext db = GetContext();
             db.Attach(user);
             updateAction(user);

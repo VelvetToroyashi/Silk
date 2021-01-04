@@ -44,6 +44,7 @@ namespace Silk.Core.AutoMod
             _ = Task.Run(async () => //Before you ask: Task.Run() in event handlers because await = block
             {
                 GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);
+                if (e.Message.MentionedUsers.Distinct().Except(e.MentionedUsers.Where(u => u == e.Author)).Count() >= config.MaxUserMentions) await e.Message.DeleteAsync();
                 if (!config.BlacklistInvites) return;
                 
                 Regex matchingPattern = config.UseAggressiveRegex ? AgressiveRegexPattern : LenientRegexPattern;

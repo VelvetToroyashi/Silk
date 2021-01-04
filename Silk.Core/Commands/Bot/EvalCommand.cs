@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.Bot
 
                 var sopts = ScriptOptions.Default;
                 sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entites", "Silk.Core", "Silk.Extensions", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
+                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
                 sopts = sopts.WithReferences(AppDomain.CurrentDomain.GetAssemblies()
                                                       .Where(xa =>

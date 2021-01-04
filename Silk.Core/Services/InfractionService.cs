@@ -1,13 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using SilkBot.Extensions;
@@ -20,6 +17,8 @@ namespace Silk.Core.Services
         private readonly IDatabaseService _dbService;
         private readonly ConfigService _configService;
         private readonly ConcurrentQueue<(DiscordMember, UserInfractionModel)> _infractionQueue = new();
+        private readonly Dictionary<ulong, Dictionary<int, Action<UserInfractionModel>>> _infractionDictionary = new();
+        
         private readonly Thread _infractionThread;
         // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
         public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
@@ -49,7 +48,7 @@ namespace Silk.Core.Services
         {
             while (_infractionThread.ThreadState is not ThreadState.StopRequested)
             {
-                if (!_infractionQueue.IsEmpty)
+                if (_infractionQueue.IsEmpty)
                 {
                     Thread.Sleep(100);
                     continue;
@@ -57,9 +56,16 @@ namespace Silk.Core.Services
                 _ = _infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r);
                 if (await ShouldAddInfractionAsync(r.m))
                 {
+                    UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
                     
+                    
+                    
+                    await _dbService.UpdateGuildUserAsync(user);
                 }
             }
         }
+        
+        
+        
     }
 }
