@@ -11,7 +11,7 @@ using Silk.Core.Database.Models;
 namespace Silk.Core.Services
 {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IDatabaseService"/>
     public class DatabaseService : IDatabaseService
     {
         #region Service ctor
