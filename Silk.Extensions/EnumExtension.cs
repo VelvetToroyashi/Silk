@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace SilkBot.Extensions
+namespace Silk.Extensions
 {
     public static class EnumerationExtensions
     {

@@ -7,7 +7,7 @@ using System.Linq;
 
 #endregion
 
-namespace SilkBot.Extensions
+namespace Silk.Extensions
 {
     public static class CollectionExtensions
     {

@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Logging;
 using Silk.Core.AutoMod;
 using Silk.Core.Tools.EventHelpers;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {

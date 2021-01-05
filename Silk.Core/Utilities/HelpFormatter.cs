@@ -8,7 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {

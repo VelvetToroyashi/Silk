@@ -15,7 +15,7 @@
     <TieredCompilation>false</TieredCompilation>
     <Authors>VelvetThePanda, CalebABG</Authors>
     <Company>The Silk Devs Team</Company>
-    <PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
     <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
   </PropertyGroup>
 

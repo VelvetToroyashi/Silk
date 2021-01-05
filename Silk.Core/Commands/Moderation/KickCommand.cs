@@ -11,8 +11,8 @@ using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
-using SilkBot.Extensions.DSharpPlus;
+using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {

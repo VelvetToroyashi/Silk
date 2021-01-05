@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Services
 {
