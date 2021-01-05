@@ -25,7 +25,7 @@ namespace Silk.Core.Commands.Server
         {
             
             DiscordGuild guild = ctx.Guild;
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             int staffCount = (await db.Guilds.Include(g => g.Users)
                     .FirstAsync(g => g.Id == guild.Id))
                     .Users

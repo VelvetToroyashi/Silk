@@ -32,56 +32,31 @@ namespace Silk.Core
 
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
-        private readonly BotEventHelper _eventHelper;
-        private readonly PrefixCacheService _prefixService;
+        private readonly BotExceptionHelper _exceptionHelper;
+        private readonly BotEventSubscriber _eventSubscriber;
         private readonly Stopwatch _sw = new();
         
         
-        public Bot(IServiceProvider services, DiscordShardedClient client,
-            ILogger<Bot> logger, BotEventHelper eventHelper,
-            MessageAddedHelper messageAHelper, MessageRemovedHelper messageRHelper, 
-            GuildAddedHelper guildAddedHelper, /* GuildRemovedHelper guildRemovedHelper,*/
-            MemberRemovedHelper memberRemovedHelper,
-            RoleAddedHelper roleAddedHelper, RoleRemovedHelper roleRemovedHelper, 
-            
-            IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHelper exceptionHelper, BotEventSubscriber eventSubscriber, IDbContextFactory<SilkDbContext> dbFactory)
         {
-            
             _sw.Start();
             _services = services;
             _logger = logger;
-            _eventHelper = eventHelper;
-
-            client.MessageCreated += messageAHelper.Commands;
-            client.MessageCreated += messageAHelper.Tickets;
-
-            client.MessageDeleted += messageRHelper.OnRemoved;
-
-            client.GuildMemberRemoved += memberRemovedHelper.OnMemberRemoved;
-            
-            client.GuildDownloadCompleted += guildAddedHelper.OnGuildDownloadComplete;
-            client.GuildAvailable += guildAddedHelper.OnGuildAvailable;
-            client.GuildCreated += guildAddedHelper.OnGuildJoin;
-               
-
-            client.GuildMemberUpdated += roleAddedHelper.CheckStaffRole;
-            client.GuildMemberUpdated += roleRemovedHelper.CheckStaffRoles;
+            _exceptionHelper = exceptionHelper;
+            _eventSubscriber = eventSubscriber;
             
             SilkDBContext = dbFactory.CreateDbContext();
-            SilkDBContext.Database.Migrate();
             Instance = this;
             Client = client;
         }
 
         private void InitializeCommands()
         {
-           
             var sw = Stopwatch.StartNew();
             
             foreach (DiscordClient shard in Client.ShardClients.Values)
                 shard.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
             
-
             sw.Stop();
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shards in {sw.ElapsedMilliseconds} ms.");
         }
@@ -93,14 +68,15 @@ namespace Silk.Core
                 UseDefaultCommandHandler = false,
                 Services = _services,
                 IgnoreExtraArguments = true
-                
             };
+            Client.Ready += async (_, _) => _logger.LogInformation($"Recieved OP 10 - HELLO from Discord on shard 1!");
             
-            await Client.StartAsync();
             
             await Client.UseCommandsNextAsync(Commands);
+            await _exceptionHelper.SubscribeToEventsAsync();
+            _eventSubscriber.SubscribeToEvents();
             InitializeCommands();
-            
+            await Client.StartAsync();
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -109,7 +85,7 @@ namespace Silk.Core
                 Timeout = TimeSpan.FromMinutes(1),
             });
             
-            _eventHelper.CreateHandlers();
+            
             
             var cmdNext = await Client.GetCommandsNextAsync();
             foreach (CommandsNextExtension c in cmdNext.Values)
@@ -117,22 +93,15 @@ namespace Silk.Core
                 c.SetHelpFormatter<HelpFormatter>(); 
                 c.RegisterConverter(new MemberConverter());
             }
-            
-            _logger.LogInformation("Client Initialized.");
+           
             _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
             
-            Client.Ready += async (_, _) => _logger.LogInformation("Client ready to process commands.");
+            
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await InitializeClientAsync();
-        }
+        public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await Client.StopAsync();
-        }
+        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
 
     }
 }

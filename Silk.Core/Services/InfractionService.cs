@@ -1,74 +1,78 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using Microsoft.EntityFrameworkCore;
+using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
+using Silk.Core.Services.Interfaces;
 using SilkBot.Extensions;
 
 namespace Silk.Core.Services
 {
-    public class InfractionService
+    /// <inheritdoc cref="IInfractionService"/>
+    public class InfractionService : IInfractionService
     {
-        private readonly ILogger<InfractionService> _logger;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly DatabaseService _dbService;
-        private readonly ConcurrentQueue<UserInfractionModel> _infractionQueue = new();
-        private readonly Timer _queueDrainTimer = new(30000);
-
-        public InfractionService(ILogger<InfractionService> logger, IDbContextFactory<SilkDbContext> dbFactory)
+        private readonly IDatabaseService _dbService;
+        private readonly ConfigService _configService;
+        private readonly ConcurrentQueue<(DiscordMember, UserInfractionModel)> _infractionQueue = new();
+        private readonly Thread _infractionThread;
+        
+        
+        // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
+        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
         {
-            _logger = logger;
-            _dbFactory = dbFactory;
-            _queueDrainTimer.Elapsed += (_, _) => _ = DrainTimerElapsed();
-            _queueDrainTimer.Start();
+            _dbService = dbService;
+            _configService = configService;
+            _infractionThread = new(async () => await ProcessInfractions());
+            InitThread(_infractionThread);
+            logger.LogInformation("Started Infraction Service Thread!");
         }
 
-        private async Task DrainTimerElapsed()
+        public async Task<bool> ShouldDeleteMessageAsync(DiscordMember member)
         {
-            if (!_infractionQueue.IsEmpty)
+            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            bool deleteInvites = config.DeleteMessageOnMatchedInvite;
+            bool shouldPunish = await ShouldAddInfractionAsync(member);
+            return deleteInvites && shouldPunish;
+        }
+        
+        public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
+        
+        
+        // Return whether or not we should provide and infraction to a member. //
+        private async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
+        {
+            UserModel? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
+            if (user is null) return true;
+            else return !user.Flags.Has(UserFlag.InfractionExemption);
+        }
+            
+        private void InitThread(Thread thread)
+        {
+            thread.Name = "Infraction Thread";
+            thread.Priority = ThreadPriority.BelowNormal;
+            thread.Start();
+        }
+        
+            private async Task ProcessInfractions()
             {
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
-
-                while (_infractionQueue.TryDequeue(out UserInfractionModel? infraction))
+                while (_infractionThread.ThreadState is not ThreadState.StopRequested)
                 {
-                    GuildModel guild = db.Guilds.First(g => g.Id == infraction.GuildId);
-                    UserModel? user = guild.Users.FirstOrDefault(u => u.Id == infraction.UserId);
-                    if (user is null)
+                    if (!_infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r))
                     {
-                        user = new UserModel {Flags = UserFlag.KickedPrior, Id = infraction.UserId, Guild = guild};
-                        user.Infractions.Add(infraction);
-                        await db.Users.AddAsync(user);
-                        int changed = await db.SaveChangesAsync();
-                        if (changed is 0) _logger.LogWarning("Expected to save [1] entity, but saved [0]");
+                        Thread.Sleep(100);
                     }
-                    else
+                    else if (await ShouldAddInfractionAsync(r.m))
                     {
-                        user.Flags.Add(UserFlag.KickedPrior);
-                        user.Infractions.Add(infraction);
-                        int changed = await db.SaveChangesAsync();
-                        if (changed is 0) _logger.LogWarning("Expected to save [1] entity, but saved [0]");
+                        UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
+                        await _dbService.UpdateGuildUserAsync(user);
                     }
                 }
-
-                _logger.LogDebug("Drained infraction queue.");
             }
-        }
-
-        public void QueueInfraction(UserInfractionModel infraction)
-        {
-            _infractionQueue.Enqueue(infraction);
-        }
-
-
-        public IEnumerable<UserInfractionModel> GetInfractions(ulong userId)
-        {
-            SilkDbContext db = _dbFactory.CreateDbContext();
-            UserModel? user = db.Users.Include(u => u.Infractions).FirstOrDefault(u => u.Id == userId);
-            return user?.Infractions!;
-        }
+        
+        
+        
     }
 }

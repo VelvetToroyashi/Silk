@@ -10,18 +10,18 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class MessageRemovedHelper
+    public class MessageRemovedHandler
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
-        public MessageRemovedHelper(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public MessageRemovedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
         
         public async Task OnRemoved(DiscordClient c, MessageDeleteEventArgs e)
         {
-            if (e.Message.Author.IsCurrent) return; // Self-evident. //
-            if (e.Message.Author is null) return;   // Message isn't cached. //
-            if (e.Channel.IsPrivate) return;        // Goes without saying. //
-            if (e.Guild is null) return;            // Message is in private channel. //
+            if (e.Message!.Author is null || e.Message is null) return;   // Message isn't cached. //
+            if (e.Message!.Author!.IsCurrent) return;   // Self-evident. //                       //
+            if (e.Channel.IsPrivate) return;           // Goes without saying.                   //
+            if (e.Guild is null) return;              // Message is in private channel.         //
             
             GuildModel guild = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
 

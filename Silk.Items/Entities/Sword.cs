@@ -1,10 +1,10 @@
 ﻿#region
 
-using Silk_Items.Components;
+using Silk.Items.Components;
 
 #endregion
 
-namespace Silk_Items.Entities
+namespace Silk.Items.Entities
 {
     public class Sword : Entity
     {

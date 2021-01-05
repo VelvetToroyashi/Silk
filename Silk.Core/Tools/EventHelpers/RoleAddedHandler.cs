@@ -10,17 +10,17 @@ using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class RoleAddedHelper
+    public class RoleAddedHandler
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        public RoleAddedHelper(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public RoleAddedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
         
         public async Task CheckStaffRole(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
             if (e.RolesBefore.Count >= e.RolesAfter.Count) return;
             _ = Task.Run(async () =>
             {
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
+                 SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {

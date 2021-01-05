@@ -2,13 +2,12 @@
 {
     public enum InfractionType
     {
-        Ban,
-        Mute,
+        Warn,
         Kick,
-        TemporaryBan,
-        TemporaryMute,
-        TemporaryLockout,
+        Mute,
         NoMeme,
-        Strike
+        SoftBan,
+        TempBan,
+        HardBan
     }
 }

@@ -5,11 +5,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Silk_Items.Components;
+using Silk.Items.Components;
 
 #endregion
 
-namespace Silk_Items.Tools
+namespace Silk.Items.Tools
 {
     public static class ComponentHandler
     {
@@ -27,8 +27,8 @@ namespace Silk_Items.Tools
         /// </summary>
         public static void Init()
         {
-            IEnumerable<Type> comps = Assembly.GetAssembly(typeof(Icomponent))?.GetTypes()
-                                              .Where(c => c.GetType().IsSubclassOf(typeof(Icomponent)));
+            IEnumerable<Type>? comps = Assembly.GetAssembly(typeof(IComponent))?.GetTypes()
+                                              .Where(c => c.IsSubclassOf(typeof(IComponent)));
             foreach (Type c in comps!)
                 componenents.TryAdd(c.Name.ToLower(), c.GetType());
         }

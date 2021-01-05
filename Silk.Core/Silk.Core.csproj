@@ -26,6 +26,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DocumentationFile>bin\Release\Silk_Core.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -92,6 +93,17 @@
 
   <ItemGroup>
     <Compile Remove="Silk!\**" />
+    <Compile Remove="Commands\General\TicketCommand.cs" />
+    <Compile Remove="Commands\General\StatusCommand.cs" />
+    <Compile Remove="Commands\Bot\PrefixValidationResult.cs" />
+    <Compile Remove="Commands\General\DMCommand.cs" />
+    <Compile Remove="Utilities\CommandHelper.cs" />
+    <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
+    <Compile Remove="Commands\Bot\Restart.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations" />
   </ItemGroup>
   
 </Project>

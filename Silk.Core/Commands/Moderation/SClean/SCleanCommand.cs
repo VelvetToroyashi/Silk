@@ -16,7 +16,7 @@ namespace Silk.Core.Commands.Moderation.SClean
         [HelpDescription("Clean messages of a specific type, or from specific people!")]
         public async Task SClean(CommandContext ctx)
         {
-            using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel prefix = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             await ctx.RespondAsync($"Are you looking for `{prefix.Prefix}help SClean`?");
         }

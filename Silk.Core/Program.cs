@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Commands;
 using Silk.Core.Commands.General;
 using Silk.Core.Commands.General.Tickets;
@@ -44,56 +45,27 @@ namespace Silk.Core
                        .UseConsoleLifetime()
                        .ConfigureAppConfiguration((_, configuration) =>
                        {
-                           
                            configuration.SetBasePath(Directory.GetCurrentDirectory());
                            configuration.AddJsonFile("appSettings.json", true, false);
                            configuration.AddUserSecrets<Program>(true, false);
                        })
                        .ConfigureLogging((_, _) => 
                            Log.Logger = new LoggerConfiguration()
-                                                .WriteTo.Console(
-                                                    outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                                                .MinimumLevel.Verbose()
-                                                .CreateLogger())
+                               .WriteTo.Console(
+                                   outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                               .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+                               .MinimumLevel.Verbose()
+                               .CreateLogger())
                        .ConfigureServices((context, services) =>
                        {
                            IConfiguration config = context.Configuration;
                            _clientConfig.Token = config.GetConnectionString("BotToken");
                            services.AddSingleton(new DiscordShardedClient(_clientConfig));
-                           services.AddDbContextFactory<SilkDbContext>(
-                               option =>
-                               {
-                                   option.UseNpgsql(config.GetConnectionString("dbConnection"));
-                                    #if  DEBUG
-                                    option.EnableSensitiveDataLogging();
-                                    option.EnableDetailedErrors();                                
-                                    #endif
-                               },
-                               ServiceLifetime.Transient);
+                           Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
+                           Core.Startup.AddServices(services);
+                           
                            services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
-                
-                           services.AddSingleton<TicketService>();
-                           services.AddSingleton<DatabaseService>();
-                           services.AddSingleton<InfractionService>();
-                           services.AddSingleton<TimedEventService>();
-                           services.AddSingleton<PrefixCacheService>();
-                           services.AddSingleton<TicketHandlerService>();
-                           services.AddSingleton<GuildConfigCacheService>();
                            
-                           
-                           services.AddSingleton<BotEventHelper>();
-                           services.AddSingleton<GuildAddedHelper>();
-                           services.AddSingleton<MessageAddedHelper>();
-                           services.AddSingleton<MessageRemovedHelper>();
-
-                           services.AddSingleton<MemberRemovedHelper>();
-                           
-                           services.AddSingleton<RoleAddedHelper>();
-                           services.AddSingleton<RoleRemovedHelper>();
-                           
-                           services.AddSingleton<SerilogLoggerFactory>();
-                           services.AddSingleton<CommandProcessorModule>();
 
                            services.AddHttpClient(HttpClientName, client =>
                            {

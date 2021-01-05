@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using SilkBot.Extensions;
 using SilkBot.Extensions.DSharpPlus;
@@ -19,27 +20,19 @@ namespace Silk.Core.Commands.Moderation
     public class KickCommand : BaseCommandModule
     {
         private readonly ILogger<KickCommand> _logger;
-        private readonly DatabaseService _dbService;
+        private readonly IDatabaseService _dbService;
 
 
-        public KickCommand(ILogger<KickCommand> logger, DatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
+        public KickCommand(ILogger<KickCommand> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
 
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [RequireBotPermissions(Permissions.KickMembers)]
         [Description("Boot someone from the guild! Requires kick members permission.")]
-        public async Task Kick(CommandContext ctx, [Description("The person to kick.")] DiscordMember user, [RemainingText] string? reason = null)
+        public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string? reason = null)
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-            
 
-            if (!ctx.Guild.CurrentMember.HasPermission(Permissions.KickMembers))
-            {
-                await ctx.RespondAsync(embed: EmbedHelper.CreateEmbed(ctx, "I don't have permission to kick members!",
-                    DiscordColor.Red)).ConfigureAwait(false);
-                return;
-            }
-            
             if (user.IsAbove(bot) || ctx.User == user)
             {
                 bool isBot = user == bot;
@@ -77,7 +70,7 @@ namespace Silk.Core.Commands.Moderation
                 UserModel mUser = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, user.Id);
                 await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
                 {
-                    Enforcer = ctx.User.Id, Reason = reason!, InfractionType = InfractionType.Kick,
+                    Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = InfractionType.Kick,
                     InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id
                 }));
                 
@@ -99,9 +92,7 @@ namespace Silk.Core.Commands.Moderation
                     embed: new DiscordEmbedBuilder()
                            .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                            .WithColor(DiscordColor.SpringGreen)
-                           .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")
-                           .WithFooter("Silk!")
-                           .WithTimestamp(DateTime.Now)).ConfigureAwait(false);
+                           .WithDescription($":boot: Kicked {user.Mention}! (User notified with direct message)")).ConfigureAwait(false);
             }
         }
     }

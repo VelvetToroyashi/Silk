@@ -1,41 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Services
 {
-    public class GuildConfigCacheService
+    public class ConfigService
     {
         private readonly IMemoryCache _cache;
-        private readonly DatabaseService _db;
-        private readonly ILogger<GuildConfigCacheService> _logger;
+        private readonly IDatabaseService _db;
 
-        public GuildConfigCacheService(IMemoryCache cache, DatabaseService db,
-            ILogger<GuildConfigCacheService> logger)
-        {
-            _cache = cache;
-            _db = db;
-            _logger = logger;
-        }
+        public ConfigService(IMemoryCache cache, IDatabaseService db) => (_cache, _db) = (cache, db);
 
-        public async Task<GuildConfigModel> GetConfigAsync(ulong? guildId)
+        public async Task<GuildConfigModel> GetConfigAsync(ulong guildId)
         {
-            if (guildId is null || guildId == 0) return default;
-            if (_cache.TryGetValue(guildId.Value, out GuildConfigModel config)) return config;
-            return await GetConfigFromDatabaseAsync(guildId.Value);
+            if (_cache.TryGetValue(guildId, out GuildConfigModel config)) return config;
+            return await GetConfigFromDatabaseAsync(guildId);
         }
 
         public async Task<GuildConfigModel> GetConfigFromDatabaseAsync(ulong guildId)
         {
-
-            GuildModel config = await _db.GetGuildAsync(guildId);
-            _cache.CreateEntry(guildId).SetValue(config.Configuration)
-                  .SetPriority(CacheItemPriority.Low); // Expires in 1 hour if not accessed. //
-            return config.Configuration;
+            GuildConfigModel configuration = await _db.GetConfigAsync(guildId);
+            _cache.Set(guildId, configuration, TimeSpan.FromHours(1));
+            return configuration;
         }
     }
 }

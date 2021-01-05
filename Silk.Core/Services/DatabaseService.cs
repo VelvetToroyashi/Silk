@@ -2,83 +2,115 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 
 namespace Silk.Core.Services
 {
-    /// <summary>
-    /// A service class that provides a bridge between <see cref="SilkDbContext"/> and Model classes such as <see cref="UserModel"/> & <see cref="GuildModel"/>
-    ///
-    /// This class also provides methods for updating models, and handles Database operations, abstracting it from command classes.
-    /// </summary>
-    public class DatabaseService
+
+    /// <inheritdoc cref="IDatabaseService"/>
+    public class DatabaseService : IDatabaseService
     {
+        #region Service ctor
+
         // This is the only instance of an IDbContextFactory<T> we should need. //
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private ILogger<DatabaseService> _logger;
 
-        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory, ILogger<DatabaseService> logger) => (_dbFactory, _logger) = (dbFactory, logger);
 
-        public async Task<GuildModel> GetGuildAsync(ulong guildId)
+
+        #endregion
+
+        
+        #region Public Guild-Retrieval methods
+
+        public Task<GuildModel> GetGuildAsync(ulong guildId) =>
+            this.GetContext()
+                .Guilds
+                .Include(g => g.Users)
+                .FirstOrDefaultAsync(g => g.Id == guildId);
+
+        public Task<GuildConfigModel> GetConfigAsync(ulong configId) =>
+            this.GetContext()
+                .GuildConfigs
+                .Include(c => c.AllowedInvites)
+                .FirstAsync(g => g.GuildId == configId);
+
+        #endregion
+        
+        
+        #region Public User-Retrieval methods
+
+        public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
-            return await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
-        }
+            SilkDbContext db = this.GetContext();
 
-        public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong? userId)
-        {
-            if (!userId.HasValue) return null;
-            
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
-            
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
-            user ??= new() {Id = userId.Value};
+            user ??= new UserModel {Id = userId};
+            guild.Users.Add(user);
             await db.SaveChangesAsync();
-            
+
             return user;
         }
-        
 
-        /// <summary>
-        /// Update a <see cref="UserModel"/>.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
+        // Attatch to the context and save. Easy as that. //
+        public async Task UpdateGuildUserAsync(UserModel user)
+        {
+            SilkDbContext db = this.GetContext();
+            /*
+             * The reason we have to actually assign the attatching to a variable is because this is
+             * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
+             * but DbContext#Attatch() sets the entity to be unmodified by default. 
+             */ 
+            EntityEntry<UserModel> userEntity = db.Attach(user);
+            userEntity.State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
-            UserModel? trackedUser = await db.Users.FirstOrDefaultAsync(u => u == user);
-            if (trackedUser is null) throw new ArgumentNullException($"{nameof(user)} cannot be null.");
-            updateAction(trackedUser);
+            SilkDbContext db = GetContext();
+            db.Attach(user);
+            updateAction(user);
             await db.SaveChangesAsync();
         }
 
         public async Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
-            user ??= new() {Id = userId};
+            
+            user ??= new UserModel {Id = userId};
+            guild.Users.Add(user);
+            
             await db.SaveChangesAsync();
             return user;
         }
         
         public async Task RemoveUserAsync(UserModel user)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel guild = await db.Guilds.FirstAsync(g => g == user.Guild);
-            UserModel? trackedUser = guild.Users.FirstOrDefault(u => u == user);
-            Log.Logger.Verbose("Grabbed user");
-            if (trackedUser is null) return;
-            Log.Logger.Verbose("User was not null");
-            trackedUser.Guild.Users.Remove(trackedUser);
+            SilkDbContext db = _dbFactory.CreateDbContext();
+            db.Attach(user);
+
+            if (user.Infractions.Any()) return; // If they have infractions, don't remove them. //
+            user.Guild.Users.Remove(user);
+
             await db.SaveChangesAsync();
         }
+        #endregion
 
         
+        #region Internal helper methods
 
+        private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
 
+        #endregion
     }
 }

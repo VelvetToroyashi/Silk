@@ -14,40 +14,38 @@ using SilkBot.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {
-    public class GuildAddedHelper
+    public class GuildAddedHandler
     {
-        public int CurrentGuild { get; set; }
+        private int currentGuild;
+        private bool startupCacheCompleted;
         
-        private readonly ILogger<GuildAddedHelper> _logger;
+        
+        private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         
-        private bool startupCacheCompleted;
-
         private readonly List<DiscordGuild> cacheQueue = new();
 
-        public GuildAddedHelper(ILogger<GuildAddedHelper> logger, IDbContextFactory<SilkDbContext> dbFactory)
-        {
-            _logger = logger;
-            _dbFactory = dbFactory;
-        }
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDbContextFactory<SilkDbContext> dbFactory) => (_logger, _dbFactory) = (logger, dbFactory);
 
         // Run on startup to cache all members //
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
             if (startupCacheCompleted) return Task.CompletedTask; // Prevent double logging when joining a new guild //
-            _logger.LogDebug($"Beginning Cache Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++CurrentGuild}/{c.Guilds.Count}]");
+            _logger.LogDebug($"Beginning Cache. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
             cacheQueue.Add(e.Guild);
-            startupCacheCompleted = CurrentGuild == c.Guilds.Count;
+            startupCacheCompleted = currentGuild == c.Guilds.Count;
             return Task.CompletedTask;
         }
 
         public Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
         {
-            
             Task.Run(async () =>
             {
                 for (int i = 0; i < cacheQueue.Count; i++)
+                {
                     await DoCacheAsync(cacheQueue[i]);
+                }
+                    
             });
             return Task.CompletedTask;
         }
@@ -62,16 +60,12 @@ namespace Silk.Core.Tools.EventHelpers
 
         private async Task DoCacheAsync(DiscordGuild e)
         {
-            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await GetOrCreateGuildAsync(db, e.Id);
             CacheStaffMembers(guild, e.Members.Values); 
             await db.SaveChangesAsync();
         }
-        
 
-        
-        
-       
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
         {
@@ -87,8 +81,7 @@ namespace Silk.Core.Tools.EventHelpers
                                         .WithTitle("Thank you for adding me!")
                                         .WithColor(new DiscordColor("94f8ff"))
                                         .WithThumbnail(c.CurrentUser.AvatarUrl)
-                                        .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3")
-                                        .WithTimestamp(DateTime.Now);
+                                        .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
 
             var sb = new StringBuilder();
             sb.Append("Thank you for choosing Silk! to join your server <3")
@@ -129,7 +122,6 @@ namespace Silk.Core.Tools.EventHelpers
             
             foreach (DiscordMember member in staff)
             {
-                
                 var flags = UserFlag.Staff;
                 if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
 

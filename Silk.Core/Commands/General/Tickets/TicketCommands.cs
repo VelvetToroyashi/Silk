@@ -17,8 +17,8 @@ namespace Silk.Core.Commands.General.Tickets
     [Description("Commands related to tickets; opening tickets can only be performed in DMs.")]
     public class TicketCommands : BaseCommandModule
     {
-        private readonly TicketHandlerService _ticketService;
-        public TicketCommands(TicketHandlerService ticketService) => _ticketService = ticketService;
+        private readonly TicketService _ticketService;
+        public TicketCommands(TicketService ticketService) => _ticketService = ticketService;
         
         [Command]
         [RequireDirectMessage]
@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.General.Tickets
                 return;
             }
             TicketModel ticket = result.Ticket;
-            ulong channelId = TicketHandlerService.GetTicketChannel(ticket!.Opener); // If it succeeded, it's not null. //
+            ulong channelId = TicketService.GetTicketChannel(ticket!.Opener); // If it succeeded, it's not null. //
             DiscordChannel ticketChannel = ctx.Client.Guilds[721518523704410202].GetChannel(channelId);
             DiscordEmbed embed = TicketEmbedHelper.GenerateInboundEmbed(message, ctx.User, ticket);
             await ticketChannel.SendMessageAsync(embed: embed).ConfigureAwait(false);

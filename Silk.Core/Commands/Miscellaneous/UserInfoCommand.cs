@@ -10,26 +10,56 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities;
+using SilkBot.Extensions;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
     [Category(Categories.Misc)]
     public class UserInfo : BaseCommandModule
     {
-        [Command("info")]
+        [Command("role-info")]
+        [Aliases("role_info")]
         public async Task RoleInfo(CommandContext ctx, DiscordRole role)
         {
+            string GetHeirarchy()
+            {
+                string roleString = string.Empty;
+                DiscordRole? rle = null;
+                bool hasAboveRole = false;
+                IOrderedEnumerable<DiscordRole> roles = ctx.Guild.Roles.Values.OrderBy(r => r.Position);
+
+                if (roles.Any(r => r.Position > role.Position))
+                {
+                    hasAboveRole = true;
+                    rle = roles.First(r => r.Position > role.Position);
+                    roleString += $"{rle.Mention}\n";
+                }
+                roleString += $"{(hasAboveRole ? "⠀⠀↑" : "")}\n{role.Mention}\n";
+                if (roles.Any(r => r.Position < role.Position))
+                {
+                    rle = roles.Last(r => r.Position < role.Position);
+                    roleString += $"⠀⠀↑\n{rle.Mention}";
+                }
+                return roleString;
+            }
+
+            IEnumerable<DiscordMember> members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
+            
+            
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithTitle($"Info for {role.Name} ( {role.Id} ) :")
-                                        .AddField("Color:", role.Color.ToString())
-                                        .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
-                                        .AddField("Hoisted:", role.IsHoisted.ToString())
-                                        .AddField("Hierarchy:", role.Position.ToString())
-                                        .AddField("Bot role:", role.IsManaged.ToString())
-                                        .AddField("Permissions:", role.Permissions.ToString())
-                                        .AddField("Mentionable:", role.IsMentionable.ToString())
-                                        .WithColor(role.Color)
-                                        .WithThumbnail(ctx.Guild.IconUrl);
+                .WithTitle($"Info for {role.Name} ( {role.Id} ):")
+                .AddField("Color:", role.Color.ToString())
+                .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
+                .AddField("Hoisted:", role.IsHoisted.ToString())
+                .AddField("Hierarchy:", GetHeirarchy())
+                .AddField("Bot role:", role.IsManaged.ToString())
+                .AddField("Members:", members.Take(members.Count() > 5 ? 5 : members.Count()).Select(m => m.Mention).JoinString(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "")}")
+                .AddField("Mentionable:", role.IsMentionable.ToString())
+                .AddField("Permissions:", role.Permissions.ToString())
+                
+                .WithColor(role.Color)
+                .WithThumbnail(ctx.Guild.IconUrl);
+                
             await ctx.RespondAsync(embed: embed);
             
         }

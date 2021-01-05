@@ -34,7 +34,6 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
                 if (logChannel == default) return;
 
-
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder()
                         .WithAuthor($"{e.Message.Author.Username} ({e.Message.Author.Id})",
@@ -45,9 +44,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
                                          $"📝 **Changed:**\n```\n{e.Message.Content}\n```\n")
                         .AddField("Message ID:", e.Message.Id.ToString(), true)
                         .AddField("Channel ID:", e.Channel.Id.ToString(), true)
-                        .WithColor(DiscordColor.CornflowerBlue)
-                        .WithFooter("Silk!", c.CurrentUser.AvatarUrl)
-                        .WithTimestamp(DateTime.Now);
+                        .WithColor(DiscordColor.CornflowerBlue);
                 DiscordChannel loggingChannel = await c.GetChannelAsync(logChannel);
                 await c.SendMessageAsync(loggingChannel, embed: embed);
             });
@@ -55,7 +52,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
         private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
         {
-            if (config.Configuration.WhitelistInvites)
+            if (config.Configuration.BlacklistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
                 {
                     Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
@@ -63,7 +60,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
 
                     string inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' '))
                                               .Replace("discord.com/invite", "discord.gg/");
-                    if (config.Configuration.WhiteListedLinks.All(link => link.Link != inviteLink))
+                    if (config.Configuration.AllowedInvites.All(link => link.VanityURL != inviteLink))
                         e.Message.DeleteAsync().GetAwaiter();
                 }
         }

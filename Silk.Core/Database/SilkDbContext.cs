@@ -33,14 +33,13 @@ namespace Silk.Core.Database
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<UserModel>().HasOne(g => g.Guild);
-
+            
             builder.Entity<UserInfractionModel>().HasIndex(a => new {a.GuildId, a.UserId});
+            builder.Entity<GuildModel>().HasOne(g => g.Configuration).WithOne(g => g.Guild).HasForeignKey<GuildConfigModel>(g => g.GuildId);
 
             builder.Entity<GuildModel>().Property(g => g.Id).ValueGeneratedNever();
             builder.Entity<GuildModel>().HasMany(u => u.Users);
             builder.Entity<Ban>().HasOne(b => b.UserInfo);
-            
-            //builder.Entity<UserInfractionModel>().HasOne(i => i.User);
             builder.Entity<TicketResponderModel>().HasNoKey();
             builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel)
                    .WithMany(ticket => ticket.History);

@@ -39,38 +39,38 @@ namespace Silk.Core.Commands.Miscellaneous
             await ctx.RespondAsync(embed: embed);
         }
 
-        [Command("Create")]
-        public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
-        {
-            Changelog changelog = CreateChangelog(options);
-            var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
-            DiscordMessage clMessage =
-                await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
-            bool embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
-            if (embedAccepted)
-            {
-                db.Value.ChangeLogs.Add(changelog.ToModel());
-                await db.Value.SaveChangesAsync();
-                await clMessage.DeleteAsync();
-                await clMessage.RespondAsync("Changelog added.");
-            }
-        }
+        // [Command("Create")]
+        // public async Task CreateChangelog(CommandContext ctx, [RemainingText] string options)
+        // {
+        //     Changelog changelog = CreateChangelog(options);
+        //     var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
+        //     DiscordMessage clMessage =
+        //         await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
+        //     bool embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
+        //     if (embedAccepted)
+        //     {
+        //         db.Value.ChangeLogs.Add(changelog.ToModel());
+        //         await db.Value.SaveChangesAsync();
+        //         await clMessage.DeleteAsync();
+        //         await clMessage.RespondAsync("Changelog added.");
+        //     }
+        // }
 
-        private static async Task<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
-        {
-            var creationService = context.Services.Get<DiscordEmojiCreationService>();
-            IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
-            DiscordEmoji confirm = emojis.ElementAt(1);
-            DiscordEmoji deny = emojis.ElementAt(0);
-            InteractivityExtension interactivity = context.Client.GetInteractivity();
-            await message.CreateReactionAsync(confirm);
-            await message.CreateReactionAsync(deny);
-            InteractivityResult<MessageReactionAddEventArgs> result =
-                await interactivity.WaitForReactionAsync(m =>
-                    m.Emoji == confirm || m.Emoji == deny && m.User == context.User);
-            if (result.TimedOut) return false;
-            return result.Result.Emoji == confirm;
-        }
+        // private static async Task<bool> CheckConfirmationAsync(CommandContext context, DiscordMessage message)
+        // {
+        //     var creationService = context.Services.Get<DiscordEmojiCreationService>();
+        //     IEnumerable<DiscordEmoji> emojis = creationService.GetEmoji(":x:", ":white_check_mark:");
+        //     DiscordEmoji confirm = emojis.ElementAt(1);
+        //     DiscordEmoji deny = emojis.ElementAt(0);
+        //     InteractivityExtension interactivity = context.Client.GetInteractivity();
+        //     await message.CreateReactionAsync(confirm);
+        //     await message.CreateReactionAsync(deny);
+        //     InteractivityResult<MessageReactionAddEventArgs> result =
+        //         await interactivity.WaitForReactionAsync(m =>
+        //             m.Emoji == confirm || m.Emoji == deny && m.User == context.User);
+        //     if (result.TimedOut) return false;
+        //     return result.Result.Emoji == confirm;
+        // }
 
         private static Changelog CreateChangelog(string cl)
         {

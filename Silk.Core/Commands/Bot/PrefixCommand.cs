@@ -18,7 +18,7 @@ namespace Silk.Core.Commands.Bot
         private const int PrefixMaxLength = 5;
         private readonly PrefixCacheService _prefixCache;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-
+        private record PrefixValidationResult(bool Valid, string Reason);
 
         public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
         {
@@ -48,23 +48,19 @@ namespace Silk.Core.Commands.Bot
         private PrefixValidationResult IsValidPrefix(string prefix)
         {
             if (prefix.Length > PrefixMaxLength)
-                return new PrefixValidationResult
-                    {Reason = $"Prefix cannot be more than {PrefixMaxLength} characters!"};
+                return new(false, $"Prefix cannot be more than {PrefixMaxLength} characters!");
 
             if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase))
-                return new PrefixValidationResult
-                    {Reason = "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`"};
+                return new(false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
 
-            return new PrefixValidationResult {Valid = true};
+            return new (true, "");
         }
 
         [Command("Prefix")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            string prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
-
-            await ctx.RespondAsync(
-                $"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
+            string? prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
+            await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }
 }

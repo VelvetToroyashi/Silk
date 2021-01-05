@@ -1,11 +1,11 @@
 ﻿#region
 
 using Newtonsoft.Json;
-using Silk_Items.Entities;
+using Silk.Items.Entities;
 
 #endregion
 
-namespace Silk_Items.Tools
+namespace Silk.Items.Tools
 {
     /// <summary>
     /// Wrapper utility class for serializing and deserializing items, which double as models.
