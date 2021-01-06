@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 using Silk.Core.Tools;
 using Silk.Core.Utilities;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation
 {

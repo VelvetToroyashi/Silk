@@ -9,7 +9,7 @@ using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {

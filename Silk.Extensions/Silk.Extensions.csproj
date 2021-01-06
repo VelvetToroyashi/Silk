@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>SilkBot.Extensions</RootNamespace>
+    <RootNamespace>Silk.Extensions</RootNamespace>
     <AssemblyName>Silk.Extensions</AssemblyName>
     <LangVersion>9</LangVersion>
   </PropertyGroup>

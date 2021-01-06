@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using SilkBot.Extensions;
+using Silk.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
 {
@@ -87,7 +87,7 @@ namespace Silk.Core.Tools.EventHelpers
             sb.Append("Thank you for choosing Silk! to join your server <3")
               .AppendLine("I am a relatively lightweight bot with many functions - partially in moderation, ")
               .AppendLine("partially in games, with many more features to come!")
-              .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silkbot/issues), ")
+              .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silk/issues), ")
               .AppendLine("or if you're not familiar with GitHub, feel free")
               .AppendLine($"to message the developers directly via {Bot.DefaultCommandPrefix}`ticket create <your message>`.")
               .Append($"By default, the prefix is `{Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
