@@ -30,7 +30,7 @@ namespace Silk.Core
         public static void AddServices(IServiceCollection services)
         {
             services.AddSingleton<IDatabaseService, DatabaseService>();
-            services.AddSingleton<InfractionService>();
+            services.AddSingleton<IInfractionService, InfractionService>();
             services.AddSingleton<TimedEventService>();
             services.AddSingleton<PrefixCacheService>();
             services.AddSingleton<TicketService>();

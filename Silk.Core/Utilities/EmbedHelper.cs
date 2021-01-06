@@ -7,6 +7,9 @@ namespace Silk.Core.Utilities
 {
     public static class EmbedHelper
     {
+        public static DiscordEmbedBuilder CreateEmbed(string title, string description, DiscordColor color = default) =>
+            new DiscordEmbedBuilder().WithTitle(title).WithDescription(description).WithColor(color);
+        
         public static DiscordEmbedBuilder CreateEmbed(CommandContext ctx, string Title, string Description)
         {
             return new DiscordEmbedBuilder()

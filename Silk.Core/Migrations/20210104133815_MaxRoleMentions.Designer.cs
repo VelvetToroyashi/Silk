@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Database;
@@ -9,9 +10,10 @@ using Silk.Core.Database;
 namespace Silk.Core.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210104133815_MaxRoleMentions")]
+    partial class MaxRoleMentions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,29 +188,6 @@ namespace Silk.Core.Migrations
                         .IsUnique();
 
                     b.ToTable("GuildConfigs");
-                });
-
-            modelBuilder.Entity("Silk.Core.Database.Models.GuildInfractionModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int>("ConfigId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("Expiration")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConfigId");
-
-                    b.ToTable("GuildInfractionModel");
                 });
 
             modelBuilder.Entity("Silk.Core.Database.Models.GuildInviteModel", b =>
@@ -447,17 +426,6 @@ namespace Silk.Core.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Silk.Core.Database.Models.GuildInfractionModel", b =>
-                {
-                    b.HasOne("Silk.Core.Database.Models.GuildConfigModel", "Config")
-                        .WithMany("InfractionDictionary")
-                        .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Config");
-                });
-
             modelBuilder.Entity("Silk.Core.Database.Models.GuildInviteModel", b =>
                 {
                     b.HasOne("Silk.Core.Database.Models.GuildConfigModel", null)
@@ -526,8 +494,6 @@ namespace Silk.Core.Migrations
                     b.Navigation("AllowedInvites");
 
                     b.Navigation("BlackListedWords");
-
-                    b.Navigation("InfractionDictionary");
 
                     b.Navigation("SelfAssignableRoles");
                 });

@@ -95,7 +95,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 Reason = reason,
                 Enforcer = enforcerId,
                 InfractionTime = infractionTime,
-                InfractionType = InfractionType.TempBan
+                InfractionType = Database.Models.InfractionType.SoftBan
             };
         }
 

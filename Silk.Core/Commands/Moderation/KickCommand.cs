@@ -70,7 +70,7 @@ namespace Silk.Core.Commands.Moderation
                 UserModel mUser = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, user.Id);
                 await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
                 {
-                    Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = InfractionType.Kick,
+                    Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = Database.Models.InfractionType.Kick,
                     InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id
                 }));
                 

@@ -17,8 +17,10 @@ namespace Silk.Core.Services.Interfaces
         /// <summary>
         /// Adds an infraction to the queue to be processed.
         /// </summary>
-        /// <param name="member">The member the infraction belongs to.</param>
-        /// <param name="infraction">The infraction.</param>
+        /// <param name="member">The member this infraction belongs to.</param>
+        /// <param name="infraction">Their infraction.</param>
         public void AddInfraction(DiscordMember member, UserInfractionModel infraction);
+        
+        
     }
 }

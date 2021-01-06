@@ -34,10 +34,10 @@ namespace Silk.Core.Services
         {
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
             bool deleteInvites = config.DeleteMessageOnMatchedInvite;
-            bool shouldPunish = await ShouldAddInfractionAsync(member);
-            return deleteInvites && shouldPunish;
+            bool isExempt = await ShouldAddInfractionAsync(member);
+            return deleteInvites && !isExempt;
         }
-        
+
         public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
         
         
@@ -45,10 +45,16 @@ namespace Silk.Core.Services
         private async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
         {
             UserModel? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
-            if (user is null) return true;
+            if (user is null)
+            {
+                await _dbService.GetOrAddUserAsync(member.Guild.Id, member.Id);
+                return true;
+            }
             else return !user.Flags.Has(UserFlag.InfractionExemption);
         }
-            
+
+        public void StopInfractionThread() => _infractionThread.Join();
+        
         private void InitThread(Thread thread)
         {
             thread.Name = "Infraction Thread";
@@ -56,21 +62,21 @@ namespace Silk.Core.Services
             thread.Start();
         }
         
-            private async Task ProcessInfractions()
+        private async Task ProcessInfractions()
+        {
+            while (_infractionThread.ThreadState is not ThreadState.StopRequested)
             {
-                while (_infractionThread.ThreadState is not ThreadState.StopRequested)
+                if (!_infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r))
                 {
-                    if (!_infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r))
-                    {
-                        Thread.Sleep(100);
-                    }
-                    else if (await ShouldAddInfractionAsync(r.m))
-                    {
-                        UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
-                        await _dbService.UpdateGuildUserAsync(user);
-                    }
+                    Thread.Sleep(100);
+                }
+                else if (await ShouldAddInfractionAsync(r.m))
+                {
+                    UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
+                    await _dbService.UpdateGuildUserAsync(user);
                 }
             }
+        }
         
         
         

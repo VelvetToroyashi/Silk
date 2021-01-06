@@ -15,6 +15,7 @@ using Silk.Core.Database;
 using Silk.Core.Services;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
+using Silk.Extensions;
 
 namespace Silk.Core
 {
@@ -101,7 +102,11 @@ namespace Silk.Core
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await Client.StopAsync();
+            _services.Get<InfractionService>().StopInfractionThread();
+        }
 
     }
 }

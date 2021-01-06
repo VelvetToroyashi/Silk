@@ -15,7 +15,7 @@
     <TieredCompilation>false</TieredCompilation>
     <Authors>VelvetThePanda, CalebABG</Authors>
     <Company>The Silk Devs Team</Company>
-    <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/VelvetThePanda/SilkBot</PackageProjectUrl>
     <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
   </PropertyGroup>
 
@@ -100,10 +100,6 @@
     <Compile Remove="Utilities\CommandHelper.cs" />
     <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
     <Compile Remove="Commands\Bot\Restart.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations" />
   </ItemGroup>
   
 </Project>

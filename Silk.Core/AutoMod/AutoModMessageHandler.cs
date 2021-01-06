@@ -11,6 +11,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.AutoMod
 {
@@ -30,12 +31,12 @@ namespace Silk.Core.AutoMod
         private static readonly Regex AgressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/[A-z]+)", flags);
         private static readonly Regex LenientRegexPattern    = new(@"discord.gg\/invite\/.+", flags);
 
-        private readonly InfractionService _infractionService; // I'll implement this soon. //
+        private readonly IInfractionService _infractionService; // I'll implement this soon. //
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
 
         private readonly HashSet<string> _blacklistedLinkCache = new();
         
-        public AutoModMessageHandler(ConfigService configService, InfractionService infractionService) => (_configService, _infractionService) = (configService, infractionService);
+        public AutoModMessageHandler(ConfigService configService, IInfractionService infractionService) => (_configService, _infractionService) = (configService, infractionService);
 
 
         public Task CheckForInvites(DiscordClient c, MessageCreateEventArgs e)

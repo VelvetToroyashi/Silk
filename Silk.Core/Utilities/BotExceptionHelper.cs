@@ -72,7 +72,7 @@ namespace Silk.Core.Utilities
         {
             if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
             else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard.");
-            else _logger.LogInformation($"{e.Exception.Message}");
+            else _logger.LogWarning($"{e.Exception.Message}");
         }
         
         
@@ -89,7 +89,7 @@ namespace Silk.Core.Utilities
         {
             _client.ClientErrored += OnClientErrored;
             _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected."); // Async keyword because I'm lazy, and then I don't need to return anything.
-            TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("An exception was thrown from an unawaited task and thus swallowed.", e.Exception);
+            TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: " + e.Exception);
             IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
             
             foreach (CommandsNextExtension? c in commandsNext)

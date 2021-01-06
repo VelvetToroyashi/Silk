@@ -71,6 +71,11 @@ namespace Silk.Core.Database.Models
         /// </summary>
         public bool UseAggressiveRegex { get; set; }
 
+        /// <summary>
+        /// A list that contians the type of infraction that should be applied, and an expiration if applicable.
+        /// </summary>
+        public List<GuildInfractionModel> InfractionDictionary { get; set; } = new();
+
         #endregion
         
         #region Premium Features
