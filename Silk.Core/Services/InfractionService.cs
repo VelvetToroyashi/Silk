@@ -53,6 +53,9 @@ namespace Silk.Core.Services
             else return !user.Flags.Has(UserFlag.InfractionExemption);
         }
 
+        /// <summary>
+        /// Used to stop the infraction thread properly.
+        /// </summary>
         public void StopInfractionThread() => _infractionThread.Join();
         
         private void InitThread(Thread thread)

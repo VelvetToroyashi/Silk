@@ -106,6 +106,7 @@ namespace Silk.Core
         {
             await Client.StopAsync();
             _services.Get<InfractionService>().StopInfractionThread();
+            
         }
 
     }
