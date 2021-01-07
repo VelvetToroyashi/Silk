@@ -94,19 +94,7 @@ namespace Silk.Core.Tools.EventHelpers
 
             await firstChannel.SendMessageAsync(embed: embed);
         }
-
-        private async Task<GuildModel> GetOrCreateGuildAsync(SilkDbContext db, ulong Id)
-        {
-            GuildModel? guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == Id);
-            if (guild is null)
-            {
-                guild = new();
-                guild.Id = Id;
-                guild.Prefix = Bot.DefaultCommandPrefix;
-                db.Guilds.Add(guild);
-            }
-            return guild;
-        }
+        
         
         
         private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members)

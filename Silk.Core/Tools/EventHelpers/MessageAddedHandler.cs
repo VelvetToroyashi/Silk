@@ -34,13 +34,13 @@ namespace Silk.Core.Tools.EventHelpers
             await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
         });
 
-        public async Task Commands(DiscordClient c, MessageCreateEventArgs e) => // 'async' caused exceptions to get swallowed for some reason. //
-            _ = Task.Run(async () =>
+        public Task Commands(DiscordClient c, MessageCreateEventArgs e) => // 'async' caused exceptions to get swallowed for some reason. //
+            Task.Run(async () =>
             {
                 if (e.Author == c.CurrentUser || e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return Task.CompletedTask;
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
-                string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id) ?? string.Empty;
+                string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id);
 
                 int commandLength = e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id) ? e.Message.GetMentionPrefixLength(c.CurrentUser) : e.Message.GetStringPrefixLength(prefix);
                 if (commandLength is -1) return Task.CompletedTask;
