@@ -11,7 +11,11 @@ namespace Silk.Core.Commands.Tests
         public async Task A(CommandContext c) => await c.RespondAsync("Group: Test | Command : A");
 
         [Group]
-        public class Test2 : BaseCommandModule { [Command] public async Task A(CommandContext c) =>  await c.RespondAsync("Group: Test2 | Command A"); }
+        public class Test2 : BaseCommandModule
+        {
+            [Command]
+            public async Task A(CommandContext c) => await c.RespondAsync("Group: Test2 | Command A");
+        }
     }
 
     public class Test2 : BaseCommandModule

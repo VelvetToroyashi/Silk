@@ -28,6 +28,7 @@ namespace Silk.Core.Services
         {
             if (guildId == default || guildId == 0) return null;
             if (_cache.TryGetValue(guildId.Value, out string? prefix)) return prefix;
+            
             return GetPrefixFromDatabase(guildId.Value);
         }
 
@@ -35,9 +36,9 @@ namespace Silk.Core.Services
         {
             _logger.LogDebug("Prefix not present in cache; querying from database.");
             _sw.Restart();
-            
+
             SilkDbContext db = _dbFactory.CreateDbContext();
-            
+
             GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)
             {
@@ -48,7 +49,7 @@ namespace Silk.Core.Services
             _sw.Stop();
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
             _cache.TryAdd(guildId, guild.Prefix);
-            
+
             return guild.Prefix;
         }
 

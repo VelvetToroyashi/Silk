@@ -8,8 +8,8 @@ namespace Silk.Core.Commands.Tests
 {
     public class Time : BaseCommandModule
     {
-
         public ConfigService Service { private get; set; }
+
         [Command]
         public async Task GetTimeAsync(CommandContext ctx, TimeSpan t)
         {

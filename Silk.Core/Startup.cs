@@ -16,16 +16,16 @@ namespace Silk.Core
 {
     public static class Startup
     {
-        public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString) => 
+        public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString) =>
             services.AddDbContextFactory<SilkDbContext>(
-            option =>
-            {
-                option.UseNpgsql(connectionString);
-                #if  DEBUG
-                option.EnableSensitiveDataLogging();
-                option.EnableDetailedErrors();                                
-                #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-            }, ServiceLifetime.Transient);
+                option =>
+                {
+                    option.UseNpgsql(connectionString);
+                    #if DEBUG
+                    option.EnableSensitiveDataLogging();
+                    option.EnableDetailedErrors();
+                    #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
+                }, ServiceLifetime.Transient);
 
         public static void AddServices(IServiceCollection services)
         {
@@ -36,25 +36,21 @@ namespace Silk.Core
             services.AddSingleton<TicketService>();
             services.AddSingleton<ConfigService>();
 
-
             services.AddSingleton<AutoModMessageHandler>();
-                            
-                           
+
             services.AddSingleton<BotExceptionHelper>();
             services.AddSingleton<BotEventSubscriber>();
-                           
+
             services.AddSingleton<GuildAddedHandler>();
             services.AddSingleton<MessageAddedHandler>();
             services.AddSingleton<MessageRemovedHandler>();
 
             services.AddSingleton<MemberRemovedHandler>();
-                           
+
             services.AddSingleton<RoleAddedHandler>();
             services.AddSingleton<RoleRemovedHelper>();
-                           
+
             services.AddSingleton<SerilogLoggerFactory>();
-            
         }
-        
     }
 }

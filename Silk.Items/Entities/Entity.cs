@@ -29,11 +29,13 @@ namespace Silk.Items.Entities
                 Components.Add(comp);
                 return true;
             }
+
             return false;
         }
 
         public void Remove(IComponent comp) => Components.Remove(comp);
 
-        public TComp Get<TComp>() where TComp : class => this.SingleOrDefault(c => c.GetType().Name == typeof(TComp).Name) as TComp;
+        public TComp Get<TComp>() where TComp : class =>
+            this.SingleOrDefault(c => c.GetType().Name == typeof(TComp).Name) as TComp;
     }
 }

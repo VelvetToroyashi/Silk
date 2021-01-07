@@ -20,8 +20,11 @@ namespace Silk.Core.Utilities
             if (ctx.Guild.Members.Values.Any(m =>
                 m.Username.Contains(value, StringComparison.OrdinalIgnoreCase) ||
                 (m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false)))
+            {
                 return Optional.FromValue(ctx.Guild.Members.Values.First(m =>
                     (m.Nickname ?? m.Username).Contains(value, StringComparison.OrdinalIgnoreCase)));
+            }
+
             return await ConvertMemberAsync(value, ctx);
         }
 
@@ -46,8 +49,8 @@ namespace Silk.Core.Utilities
                 out uid))
             {
                 DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                Optional<DiscordMember> ret =
-                    result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                
                 return ret;
             }
 
@@ -58,12 +61,13 @@ namespace Silk.Core.Utilities
             string dv = di != -1 ? value.Substring(di + 1) : null;
 
             IEnumerable<DiscordMember> us = ctx.Guild.Members.Values
-                                               .Where(xm =>
-                                                   xm.Username.ToLowerInvariant() == un &&
-                                                   (dv != null && xm.Discriminator == dv || dv == null)
-                                                   || xm.Nickname?.ToLowerInvariant() == value);
+                .Where(xm =>
+                    xm.Username.ToLowerInvariant() == un &&
+                    (dv != null && xm.Discriminator == dv || dv == null)
+                    || xm.Nickname?.ToLowerInvariant() == value);
 
             DiscordMember? mbr = us.FirstOrDefault();
+            
             return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();
         }
     }

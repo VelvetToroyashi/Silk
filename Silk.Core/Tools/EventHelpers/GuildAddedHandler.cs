@@ -20,13 +20,13 @@ namespace Silk.Core.Tools.EventHelpers
         private int currentGuild;
         private bool startupCacheCompleted;
         
-        
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IDatabaseService _dbService;
-        
+
         private readonly List<(ulong, IEnumerable<DiscordMember>)> cacheQueue = new();
 
-        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService) =>
+            (_logger, _dbService) = (logger, dbService);
 
         // Run on startup to cache all members //
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
@@ -35,6 +35,7 @@ namespace Silk.Core.Tools.EventHelpers
             _logger.LogDebug($"Beginning Cache. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
             cacheQueue.Add((e.Guild.Id, e.Guild.Members.Values));
             startupCacheCompleted = currentGuild == c.Guilds.Count;
+            
             return Task.CompletedTask;
         }
 
@@ -46,7 +47,7 @@ namespace Silk.Core.Tools.EventHelpers
                     await CacheMembersAsync(cacheQueue[i]);
             });
         }
-        
+
         // Run when Silk! joins a new guild. // 
         public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e) =>
             _ = Task.Run(async () =>
@@ -64,7 +65,7 @@ namespace Silk.Core.Tools.EventHelpers
         }
 
         private Task CacheGuildAsync(DiscordGuild guild) => _dbService.GetOrCreateGuildAsync(guild.Id);
-        
+
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
         {
@@ -76,49 +77,54 @@ namespace Silk.Core.Tools.EventHelpers
                 channel.Type == ChannelType.Text);
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithTitle("Thank you for adding me!")
-                                        .WithColor(new DiscordColor("94f8ff"))
-                                        .WithThumbnail(c.CurrentUser.AvatarUrl)
-                                        .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
+                .WithTitle("Thank you for adding me!")
+                .WithColor(new DiscordColor("94f8ff"))
+                .WithThumbnail(c.CurrentUser.AvatarUrl)
+                .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
 
             var sb = new StringBuilder();
             sb.Append("Thank you for choosing Silk! to join your server <3")
-              .AppendLine("I am a relatively lightweight bot with many functions - partially in moderation, ")
-              .AppendLine("partially in games, with many more features to come!")
-              .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silk/issues), ")
-              .AppendLine("or if you're not familiar with GitHub, feel free")
-              .AppendLine($"to message the developers directly via {Bot.DefaultCommandPrefix}`ticket create <your message>`.")
-              .Append($"By default, the prefix is `{Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
+                .AppendLine("I am a relatively lightweight bot with many functions - partially in moderation, ")
+                .AppendLine("partially in games, with many more features to come!")
+                .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silk/issues), ")
+                .AppendLine("or if you're not familiar with GitHub, feel free")
+                .AppendLine($"to message the developers directly via {Bot.DefaultCommandPrefix}`ticket create <your message>`.")
+                .Append($"By default, the prefix is `{Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
 
             embed.WithDescription(sb.ToString());
 
             await firstChannel.SendMessageAsync(embed: embed);
         }
-        
-        
-        
+
+
         private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            IEnumerable<DiscordMember> staff = members.Where(m => 
-                   ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages) 
-                || m.HasPermission(Permissions.Administrator) 
-                || m.IsOwner) && !m.IsBot));
-            _logger.LogInformation($"{staff.Count()}/{members.Count()} members marked as staff.");
+            IEnumerable<DiscordMember> staff = members.Where(m =>
+                ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)
+                  || m.HasPermission(Permissions.Administrator)
+                  || m.IsOwner) && !m.IsBot));
             
+            _logger.LogInformation($"{staff.Count()}/{members.Count()} members marked as staff.");
+
             foreach (DiscordMember member in staff)
             {
                 var flags = UserFlag.Staff;
-                if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
+                if (member.HasPermission(Permissions.Administrator) || member.IsOwner)
+                    flags.Add(UserFlag.EscalatedStaff);
 
                 UserModel? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.HasFlag(UserFlag.Staff)) // Has flag
                         user.Flags.Add(UserFlag.Staff); // Add flag
+                    
                     if (member.HasPermission(Permissions.Administrator) || member.IsOwner)
                         user.Flags.Add(UserFlag.EscalatedStaff);
                 }
-                else guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
+                else
+                {
+                    guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
+                }
             }
         }
     }

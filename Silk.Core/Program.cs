@@ -36,53 +36,56 @@ namespace Silk.Core
             MinimumLogLevel = LogLevel.Error
         };
 
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        public static async Task Main(string[] args) =>
+            await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
 
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                       .UseConsoleLifetime()
-                       .ConfigureAppConfiguration((_, configuration) =>
-                       {
-                           configuration.SetBasePath(Directory.GetCurrentDirectory());
-                           configuration.AddJsonFile("appSettings.json", true, false);
-                           configuration.AddUserSecrets<Program>(true, false);
-                       })
-                       .ConfigureLogging((_, _) => 
-                           Log.Logger = new LoggerConfiguration()
-                               .WriteTo.Console(
-                                   outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                               .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                               .MinimumLevel.Verbose()
-                               .CreateLogger())
-                       .ConfigureServices((context, services) =>
-                       {
-                           IConfiguration config = context.Configuration;
-                           _clientConfig.Token = config.GetConnectionString("BotToken");
-                           services.AddSingleton(new DiscordShardedClient(_clientConfig));
-                           Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
-                           Core.Startup.AddServices(services);
-                           
-                           services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
-                           
+                .UseConsoleLifetime()
+                .ConfigureAppConfiguration((_, configuration) =>
+                {
+                    configuration.SetBasePath(Directory.GetCurrentDirectory());
+                    configuration.AddJsonFile("appSettings.json", true, false);
+                    configuration.AddUserSecrets<Program>(true, false);
+                })
+                .ConfigureLogging((_, _) =>
+                    Log.Logger = new LoggerConfiguration()
+                        .WriteTo.Console(
+                            outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
+                            theme: SerilogThemes.Bot)
+                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+                        .MinimumLevel.Verbose()
+                        .CreateLogger())
+                .ConfigureServices((context, services) =>
+                {
+                    IConfiguration config = context.Configuration;
+                    _clientConfig.Token = config.GetConnectionString("BotToken");
+                    services.AddSingleton(new DiscordShardedClient(_clientConfig));
+                    Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
+                    Core.Startup.AddServices(services);
 
-                           services.AddHttpClient(HttpClientName, client =>
-                           {
-                               client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.4");
-                           });
-                           
-                           // Sub out the default implementation filter with custom filter
-                           services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
+                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
 
-                           /* Can remove all filters with this line */
-                           // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
-                           services.AddTransient(_ => new BotConfig(config));
-                           
-                           services.AddHostedService<Bot>();
-                       })
-                       .UseSerilog();
+                    services.AddHttpClient(HttpClientName,
+                        client =>
+                        {
+                            client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.4");
+                        });
+
+                    // Sub out the default implementation filter with custom filter
+                    services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
+
+                    /* Can remove all filters with this line */
+                    // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
+
+                    services.AddTransient(_ => new BotConfig(config));
+
+                    services.AddHostedService<Bot>();
+                })
+                .UseSerilog();
         }
     }
 }

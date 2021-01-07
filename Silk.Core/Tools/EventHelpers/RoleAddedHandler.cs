@@ -14,13 +14,14 @@ namespace Silk.Core.Tools.EventHelpers
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         public RoleAddedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
-        
+
         public async Task CheckStaffRole(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
             if (e.RolesBefore.Count >= e.RolesAfter.Count) return;
+            
             _ = Task.Run(async () =>
             {
-                 SilkDbContext db = _dbFactory.CreateDbContext();
+                SilkDbContext db = _dbFactory.CreateDbContext();
                 GuildModel guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {
@@ -39,7 +40,7 @@ namespace Silk.Core.Tools.EventHelpers
                         Log.Logger.Debug("Logged user as staff from role added event.");
                         await db.SaveChangesAsync();
                     }
-                }                
+                }
             });
         }
     }

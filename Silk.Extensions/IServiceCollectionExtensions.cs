@@ -12,7 +12,8 @@ namespace Silk.Extensions
     {
         public static T Get<T>(this IServiceProvider provider)
         {
-            _ = provider ?? throw new ArgumentNullException($"{nameof(provider)} is not initialized!", new NullReferenceException());
+            _ = provider ?? throw new ArgumentNullException($"{nameof(provider)} is not initialized!",
+                new NullReferenceException());
             return (T) provider.GetService(typeof(T));
         }
 
@@ -21,7 +22,6 @@ namespace Silk.Extensions
         {
             foreach (var client in c.ShardClients.Values)
             {
-                
             }
         }
     }

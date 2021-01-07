@@ -34,8 +34,8 @@ namespace Silk.Core.Commands.Economy
 
             if (sender is null && receiver is null)
             {
-                await ctx.RespondAsync(
-                    $"Hmm. Seems like neither of you have an account here. Go ahead and do `{ctx.Prefix}daily` for me and I'll give you some cash to send to your friend *:)*");
+                await ctx.RespondAsync("Hmm. Seems like neither of you have an account here. " +
+                                       $"Go ahead and do `{ctx.Prefix}daily` for me and I'll give you some cash to send to your friend *:)*");
                 return;
             }
 
@@ -50,8 +50,10 @@ namespace Silk.Core.Commands.Economy
                     "I'd love to duplicate money just as much as the next person, but we have an economy!");
             else if (sender.Cash < amount)
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
-            else if (amount >= 1000) await VerifyTransactionAsync(ctx, sender, receiver, amount);
-            else await DoTransactionAsync(ctx, amount, sender, receiver);
+            else if (amount >= 1000)
+                await VerifyTransactionAsync(ctx, sender, receiver, amount);
+            else
+                await DoTransactionAsync(ctx, amount, sender, receiver);
 
             await db.SaveChangesAsync();
         }
@@ -61,12 +63,12 @@ namespace Silk.Core.Commands.Economy
         {
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithThumbnail(ctx.User.AvatarUrl)
-                                        .WithDescription(
-                                            $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                                        .WithColor(DiscordColor.PhthaloGreen);
-            sender.Cash -= (int)amount;
-            receiver.Cash += (int)amount;
+                .WithThumbnail(ctx.User.AvatarUrl)
+                .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! " +
+                                 $"Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                .WithColor(DiscordColor.PhthaloGreen);
+            sender.Cash -= (int) amount;
+            receiver.Cash += (int) amount;
             await ctx.RespondAsync(embed: embed);
         }
 
@@ -75,12 +77,16 @@ namespace Silk.Core.Commands.Economy
         {
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
+            
             int authKey = new Random().Next(1000, 10000);
-            await ctx.RespondAsync(
-                $"Just verifying you want to send money to this person. Could you type `{authKey}` to confirm? (Ignoring this will cancel, since Velvet can't be bothered to write that logic right now.)");
-            InteractivityResult<DiscordMessage> message =
-                await interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.Content == authKey.ToString(),
-                    TimeSpan.FromMinutes(3));
+            await ctx.RespondAsync($"Just verifying you want to send money to this person. " +
+                                   $"Could you type `{authKey}` to confirm? (Ignoring this will cancel, since " +
+                                   "Velvet can't be bothered to write that logic right now.)");
+            
+            InteractivityResult<DiscordMessage> message = await interactivity.WaitForMessageAsync(
+                m => m.Author == ctx.User && m.Content == authKey.ToString(),
+                TimeSpan.FromMinutes(3));
+
             if (message.TimedOut)
             {
                 await ctx.RespondAsync("Timed out :(");
@@ -89,12 +95,14 @@ namespace Silk.Core.Commands.Economy
             {
                 DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                            .WithThumbnail(ctx.User.AvatarUrl)
-                                            .WithDescription(
-                                                $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                                            .WithColor(DiscordColor.PhthaloGreen);
-                sender.Cash -= (int)amount;
-                receiver.Cash += (int)amount;
+                    .WithThumbnail(ctx.User.AvatarUrl)
+                    .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! " +
+                                     $"Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                    .WithColor(DiscordColor.PhthaloGreen);
+                
+                sender.Cash -= (int) amount;
+                receiver.Cash += (int) amount;
+                
                 await ctx.RespondAsync(embed: embed);
             }
         }

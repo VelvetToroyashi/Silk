@@ -1,4 +1,6 @@
 ﻿namespace Silk.Items.Components
 {
-    public interface IComponent { }
+    public interface IComponent
+    {
+    }
 }

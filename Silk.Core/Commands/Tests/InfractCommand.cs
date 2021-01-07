@@ -15,23 +15,24 @@ namespace Silk.Core.Commands.Tests
     {
         private readonly InfractionService _infractionService;
         private readonly IDatabaseService _dbService;
-        
-        public InfractCommand(IInfractionService service, IDatabaseService dbSerivice) => (_infractionService, _dbService) = ((InfractionService)service, dbSerivice);
-        
+
+        public InfractCommand(IInfractionService service, IDatabaseService dbSerivice) =>
+            (_infractionService, _dbService) = ((InfractionService) service, dbSerivice);
+
         [Command]
         public async Task In(CommandContext ctx, DiscordMember member)
         {
+            _infractionService.AddInfraction(ctx.Member, new()
+            {
+                Enforcer = ctx.User.Id,
+                GuildId = ctx.Guild.Id,
+                InfractionTime = DateTime.Now,
+                InfractionType = InfractionType.Mute,
+                User = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, member.Id),
+                Reason = "Infraction Test",
+                UserId = member.Id
+            });
             
-            _infractionService.AddInfraction(ctx.Member, new() 
-                { 
-                    Enforcer = ctx.User.Id, 
-                    GuildId = ctx.Guild.Id,
-                    InfractionTime = DateTime.Now,
-                    InfractionType = InfractionType.Mute,
-                    User = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, member.Id),
-                    Reason = "Infraction Test",
-                    UserId = member.Id
-                });
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(ctx.Client, 795652577038565386));
         }
     }

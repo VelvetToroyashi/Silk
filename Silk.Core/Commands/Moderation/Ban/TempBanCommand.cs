@@ -47,23 +47,28 @@ namespace Silk.Core.Commands.Moderation.Ban
             else
             {
                 DiscordEmbedBuilder banEmbed = new DiscordEmbedBuilder()
-                                               .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
-                                               .WithDescription(
-                                                   $"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
-                                               .AddField("Reason:", reason);
+                    .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
+                    .WithDescription($"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
+                    .AddField("Reason:", reason);
 
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
+                
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
                 UserModel? bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned",
-                    banDuration.TotalDays + " days", user.Mention, reason, guild.Configuration.InfractionFormat ?? defaultFormat);
+                    banDuration.TotalDays + " days", user.Mention, reason,
+                    guild.Configuration.InfractionFormat ?? defaultFormat);
+                
                 UserInfractionModel infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
                     bannedUser = new UserModel
-                        {Infractions = new List<UserInfractionModel>()};
+                    {
+                        Infractions = new List<UserInfractionModel>()
+                    };
+                    
                     db.Users.Add(bannedUser);
                     bannedUser.Infractions.Add(infraction);
                 }
@@ -72,7 +77,8 @@ namespace Silk.Core.Commands.Moderation.Ban
                 {
                     embed.WithDescription(formattedBanReason);
                     embed.WithColor(DiscordColor.Green);
-                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel).SendMessageAsync(embed: embed);
+                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel)
+                        .SendMessageAsync(embed: embed);
                 }
 
                 EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration),
@@ -138,12 +144,13 @@ namespace Silk.Core.Commands.Moderation.Ban
             GuildModel guild = db.Guilds.First(g => g.Id == eventObject.Guild);
             if (guild.Configuration.GeneralLoggingChannel != default)
             {
-                DiscordChannel c =
-                    (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.Configuration.GeneralLoggingChannel);
+                DiscordChannel c = (await Client.GetGuildAsync(eventObject.Guild))
+                    .GetChannel(guild.Configuration.GeneralLoggingChannel);
+                
                 DiscordUser u = await Client.GetUserAsync(eventObject.Id);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithDescription($"{u.Mention}'s ban has expired.")
-                                                                     .WithColor(DiscordColor.PhthaloGreen)
-                                                                     .WithThumbnail(u.AvatarUrl);
+                    .WithColor(DiscordColor.PhthaloGreen)
+                    .WithThumbnail(u.AvatarUrl);
             }
 
             await (await Client.GetGuildAsync(eventObject.Guild)).UnbanMemberAsync(eventObject.Id,

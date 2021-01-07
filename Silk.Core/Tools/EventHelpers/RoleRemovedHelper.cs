@@ -20,12 +20,15 @@ namespace Silk.Core.Tools.EventHelpers
         private readonly ILogger<RoleRemovedHelper> _logger;
         private readonly IDatabaseService _dbService;
         public RoleRemovedHelper(IDatabaseService dbService) => _dbService = dbService;
-        
+
         public Task CheckStaffRoles(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
             if (e.Handled) return Task.CompletedTask;
             if (e.RolesBefore.Count <= e.RolesAfter.Count) return Task.CompletedTask;
-            if (e.RolesAfter.Any(r => r.Permissions.HasPermission(Permissions.KickMembers | Permissions.ManageMessages))) return Task.CompletedTask;
+            if (e.RolesAfter.Any(r =>
+                r.Permissions.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
+                return Task.CompletedTask;
+
             Task.Run(async () =>
             {
                 UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
@@ -34,6 +37,7 @@ namespace Silk.Core.Tools.EventHelpers
                 await _dbService.UpdateGuildUserAsync(user, u => u.Flags.Remove(UserFlag.Staff));
                 Log.Logger.Information($"Removed staff role from {e.Member.Username}");
             });
+
             return Task.CompletedTask;
         }
     }

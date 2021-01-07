@@ -30,10 +30,11 @@ namespace Silk.Core.Commands.Roles
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
 
-            GuildModel guild = await db.Guilds.Include(g => g.Configuration.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
+            GuildModel guild = await db.Guilds.Include(g => g.Configuration.SelfAssignableRoles)
+                .FirstAsync(g => g.Id == ctx.Guild.Id);
 
             IEnumerable<ulong> currentlyAssignableRoles = guild.Configuration.SelfAssignableRoles.Select(r => r.RoleId);
-            
+
             List<string> added = new();
             List<string> removed = new();
 
@@ -54,16 +55,17 @@ namespace Silk.Core.Commands.Roles
                     //await db.SaveChangesAsync();
                 }
             }
+
             await db.SaveChangesAsync();
-   
-            string addedString = string.IsNullOrWhiteSpace(added.Join('\n')) ? "none" :  added.Join('\n');
+
+            string addedString = string.IsNullOrWhiteSpace(added.Join('\n')) ? "none" : added.Join('\n');
             string removedString = string.IsNullOrWhiteSpace(removed.Join('\n')) ? "none" : removed.Join('\n');
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithColor(GetEmbedColor(roles))
-                                        .WithTitle("Self-Assignable roles")
-                                        .AddField("Added:", addedString, true)
-                                        .AddField("Removed:", removedString, true);
+                .WithColor(GetEmbedColor(roles))
+                .WithTitle("Self-Assignable roles")
+                .AddField("Added:", addedString, true)
+                .AddField("Removed:", removedString, true);
         }
 
         private static DiscordColor GetEmbedColor(DiscordRole[] roles) =>

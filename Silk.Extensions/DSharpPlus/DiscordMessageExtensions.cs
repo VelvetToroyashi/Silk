@@ -12,23 +12,24 @@ namespace Silk.Extensions.DSharpPlus
 {
     public static class DiscordMessageExtensions
     {
-
         public static async Task DeleteAsync(this IEnumerable<DiscordMessage> messageCollection)
         {
-            if (messageCollection is null) 
+            if (messageCollection is null)
                 throw new ArgumentNullException(nameof(messageCollection), "Cannot be null!");
-            
+
             DiscordChannel channel = messageCollection.First().Channel;
             await channel.DeleteMessagesAsync(messageCollection);
         }
-        
+
         public static async IAsyncEnumerator<DiscordMessage> GetAsyncEnumerator(this DiscordChannel channel)
         {
             bool hasMorePages = true;
             DiscordMessage last = null;
             do
             {
-                var messages = last != null ? await channel.GetMessagesBeforeAsync(last.Id) : await channel.GetMessagesAsync();
+                var messages = last != null
+                    ? await channel.GetMessagesBeforeAsync(last.Id)
+                    : await channel.GetMessagesAsync();
                 if (messages.Count < 100)
                     hasMorePages = false;
 
@@ -37,7 +38,6 @@ namespace Silk.Extensions.DSharpPlus
                     last = message;
                     yield return message;
                 }
-
             } while (hasMorePages);
         }
     }

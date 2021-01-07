@@ -27,7 +27,8 @@ namespace Silk.Core.Commands.Moderation
         {
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
             GuildModel config = Core.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
-                                       .First(g => g.Id == ctx.Guild.Id);
+                .First(g => g.Id == ctx.Guild.Id);
+            
             if (!bot.HasPermission(Permissions.ManageRoles))
             {
                 DiscordMessage message = await ctx.RespondAsync("Sorry, but I don't have permission to mute members!");
@@ -38,8 +39,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (!ctx.Member.HasPermission(Permissions.ManageRoles))
             {
-                DiscordMessage message =
-                    await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
+                DiscordMessage message = await ctx.RespondAsync("Sorry, but you don't have permission to mute members!");
                 await Task.Delay(10000);
                 await message.DeleteAsync();
                 return;
@@ -50,7 +50,6 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync("Muted role is not set up");
                 return;
             }
-
 
             if (user.IsAbove(bot))
             {
@@ -81,7 +80,8 @@ namespace Silk.Core.Commands.Moderation
                 await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
 
             GuildModel guild = DbFactory.CreateDbContext().Guilds
-                                        .First(g => g.Id == eventObject.Guild);
+                .First(g => g.Id == eventObject.Guild);
+            
             ulong muteRole = guild.Configuration.MuteRoleId;
 
             await unmuteMember.RevokeRoleAsync((await Client.GetGuildAsync(eventObject.Guild)).Roles[muteRole]);

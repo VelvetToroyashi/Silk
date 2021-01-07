@@ -50,7 +50,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildConfigId = table.Column<int>(type: "integer", nullable: false),
                     GuildLevelLink = table.Column<bool>(type: "boolean", nullable: false),
                     Link = table.Column<string>(type: "text", nullable: false)

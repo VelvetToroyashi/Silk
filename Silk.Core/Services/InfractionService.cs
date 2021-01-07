@@ -18,10 +18,11 @@ namespace Silk.Core.Services
         private readonly ConfigService _configService;
         private readonly ConcurrentQueue<(DiscordMember, UserInfractionModel)> _infractionQueue = new();
         private readonly Thread _infractionThread;
-        
-        
+
+
         // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
-        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
+        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService,
+            ConfigService configService)
         {
             _dbService = dbService;
             _configService = configService;
@@ -35,12 +36,14 @@ namespace Silk.Core.Services
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
             bool deleteInvites = config.DeleteMessageOnMatchedInvite;
             bool isExempt = await ShouldAddInfractionAsync(member);
+            
             return deleteInvites && !isExempt;
         }
 
-        public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
-        
-        
+        public void AddInfraction(DiscordMember member, UserInfractionModel infraction) =>
+            _infractionQueue.Enqueue((member, infraction));
+
+
         // Return whether or not we should provide and infraction to a member. //
         private async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
         {
@@ -50,21 +53,22 @@ namespace Silk.Core.Services
                 await _dbService.GetOrAddUserAsync(member.Guild.Id, member.Id);
                 return true;
             }
-            else return !user.Flags.HasFlag(UserFlag.InfractionExemption);
+
+            return !user.Flags.HasFlag(UserFlag.InfractionExemption);
         }
 
         /// <summary>
         /// Used to stop the infraction thread properly.
         /// </summary>
         public void StopInfractionThread() => _infractionThread.Join();
-        
+
         private void InitThread(Thread thread)
         {
             thread.Name = "Infraction Thread";
             thread.Priority = ThreadPriority.BelowNormal;
             thread.Start();
         }
-        
+
         private async Task ProcessInfractions()
         {
             while (_infractionThread.ThreadState is not ThreadState.StopRequested)
@@ -81,8 +85,5 @@ namespace Silk.Core.Services
                 }
             }
         }
-        
-        
-        
     }
 }

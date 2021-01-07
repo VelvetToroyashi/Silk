@@ -28,14 +28,14 @@ namespace Silk.Core.Commands.Economy
             GlobalUserModel? account = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (account is null)
             {
-                await ctx.RespondAsync(
-                    $"Seems you don't have an account. Use `{ctx.Prefix}daily` and I'll set one up for you *:)*");
+                await ctx.RespondAsync($"Seems you don't have an account. Use `{ctx.Prefix}daily` and I'll set one up for you *:)*");
                 return;
             }
 
             DiscordEmbedBuilder eb = EmbedHelper
-                                     .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
-                                     .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
+                .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
+            
             await ctx.RespondAsync(embed: eb);
         }
     }

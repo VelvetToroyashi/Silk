@@ -6,8 +6,8 @@
             string infractionFormat)
         {
             return infractionFormat.Replace("$action", action).Replace("$duration", duration)
-                                   .Replace("$mention", mention).Replace("$reason",
-                                       $"{(reason != "" ? $"for `{reason}`" : "")}");
+                .Replace("$mention", mention).Replace("$reason",
+                    $"{(reason != "" ? $"for `{reason}`" : "")}");
         }
     }
 }

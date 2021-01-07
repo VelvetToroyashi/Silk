@@ -20,6 +20,7 @@ namespace Silk.Core.Commands.Miscellaneous
     public class ChangelogCommand
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+
         public ChangelogCommand(IDbContextFactory<SilkDbContext> dbFactory)
         {
             _dbFactory = dbFactory;
@@ -31,7 +32,11 @@ namespace Silk.Core.Commands.Miscellaneous
             SilkDbContext db = _dbFactory.CreateDbContext();
             if (db.ChangeLogs.Count() is 0)
             {
-                await ctx.RespondAsync("It's quite empty here. Perhaps you're using the internal test bot, or this is a self-hosted instance. There are no changelogs to speak of here. :)").ConfigureAwait(false);
+                await ctx.RespondAsync("It's quite empty here. " +
+                                       "Perhaps you're using the internal test bot, or this is a self-hosted instance. " +
+                                       "There are no changelogs to speak of here. :)")
+                    .ConfigureAwait(false);
+
                 return;
             }
 

@@ -6,5 +6,7 @@ namespace Silk.Core.Utilities
     /// Denotes this command is expiremental, and may not work properly.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class ExpirementalAttribute : Attribute { }
+    public class ExpirementalAttribute : Attribute
+    {
+    }
 }

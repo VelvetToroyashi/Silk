@@ -13,17 +13,15 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Authors = table.Column<string>(type: "text", nullable: false),
                     Version = table.Column<string>(type: "text", nullable: false),
                     Additions = table.Column<string>(type: "text", nullable: false),
                     Removals = table.Column<string>(type: "text", nullable: false),
                     ChangeTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChangeLogs", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_ChangeLogs", x => x.Id); });
 
             migrationBuilder.CreateTable(
                 name: "GlobalUsers",
@@ -33,10 +31,7 @@ namespace Silk.Core.Migrations
                     Cash = table.Column<int>(type: "integer", nullable: false),
                     LastCashOut = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GlobalUsers", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_GlobalUsers", x => x.Id); });
 
             migrationBuilder.CreateTable(
                 name: "Guilds",
@@ -45,10 +40,7 @@ namespace Silk.Core.Migrations
                     Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Prefix = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Guilds", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Guilds", x => x.Id); });
 
             migrationBuilder.CreateTable(
                 name: "TicketResponderModel",
@@ -57,32 +49,29 @@ namespace Silk.Core.Migrations
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                });
+                constraints: table => { });
 
             migrationBuilder.CreateTable(
                 name: "Tickets",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     IsOpen = table.Column<bool>(type: "boolean", nullable: false),
                     Opener = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Opened = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Closed = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tickets", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Tickets", x => x.Id); });
 
             migrationBuilder.CreateTable(
                 name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OwnerId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     State = table.Column<string>(type: "jsonb", nullable: false)
                 },
@@ -102,7 +91,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     ConfigId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     MuteRoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     GreetingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
@@ -134,7 +124,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     DatabaseId = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Flags = table.Column<int>(type: "integer", nullable: false)
@@ -155,7 +146,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Sender = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false),
                     TicketModelId = table.Column<int>(type: "integer", nullable: false)
@@ -176,7 +168,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildConfigId = table.Column<int>(type: "integer", nullable: false),
                     Word = table.Column<string>(type: "text", nullable: false)
                 },
@@ -196,7 +189,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildName = table.Column<string>(type: "text", nullable: false),
                     VanityURL = table.Column<string>(type: "text", nullable: false),
                     GuildConfigModelConfigId = table.Column<int>(type: "integer", nullable: true)
@@ -235,7 +229,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Link = table.Column<string>(type: "text", nullable: false),
                     GuildLevelLink = table.Column<bool>(type: "boolean", nullable: false),
                     GuildConfigId = table.Column<int>(type: "integer", nullable: false)
@@ -256,7 +251,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserInfoDatabaseId = table.Column<long>(type: "bigint", nullable: true),
                     GuildId1 = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     GuildId = table.Column<string>(type: "text", nullable: false),
@@ -285,7 +281,8 @@ namespace Silk.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: false),
@@ -349,7 +346,7 @@ namespace Silk.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_GuildId_UserId",
                 table: "UserInfractionModel",
-                columns: new[] { "GuildId", "UserId" });
+                columns: new[] {"GuildId", "UserId"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_UserDatabaseId",

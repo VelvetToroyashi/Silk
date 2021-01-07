@@ -26,7 +26,8 @@ namespace Silk.Core.Commands.Moderation.Ban
         [Command("Ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
-        public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
+        public async Task Ban(CommandContext ctx, DiscordMember target,
+            [RemainingText] string reason = "No reason given.")
         {
             DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
@@ -39,8 +40,8 @@ namespace Silk.Core.Commands.Moderation.Ban
             async Task DenyBanAsync(string errorReason)
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                                              .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                                              .WithColor(DiscordColor.Red).WithDescription(errorReason));
+                    .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                    .WithColor(DiscordColor.Red).WithDescription(errorReason));
             }
 
             bool CanExecuteCommand(out string errorReason)
@@ -50,15 +51,16 @@ namespace Silk.Core.Commands.Moderation.Ban
                     errorReason = "I can't ban myself!";
                     return false;
                 }
+
                 if (!ctx.Member.HasPermission(Permissions.BanMembers))
                 {
                     errorReason = "You do not have permission to ban members!";
                     return false;
                 }
+
                 if (user.IsAbove(bot))
                 {
-                    errorReason =
-                        $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
+                    errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
                 }
 
@@ -68,20 +70,19 @@ namespace Silk.Core.Commands.Moderation.Ban
 
 
             DiscordEmbedBuilder userBannedEmbed = new DiscordEmbedBuilder()
-                                                  .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                                                  .WithTitle($"You've been banned from {ctx.Guild.Name}!")
-                                                  .AddField("Reason:", $"{reason}")
-                                                  .AddFooter(ctx)
-                                                  .WithColor(new DiscordColor("#cc1400"));
+                .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                .WithTitle($"You've been banned from {ctx.Guild.Name}!")
+                .AddField("Reason:", $"{reason}")
+                .AddFooter(ctx)
+                .WithColor(new DiscordColor("#cc1400"));
 
             (string name, string url) = ctx.GetAuthor();
             DiscordEmbedBuilder logEmbed = new DiscordEmbedBuilder()
-                                           .WithAuthorExtension(name, url)
-                                           .WithColor(DiscordColor.SpringGreen)
-                                           .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
-                                           .AddField("Infraction occured:",
-                                               DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
-                                           .AddField("Reason:", reason).AddFooter(ctx);
+                .WithAuthorExtension(name, url)
+                .WithColor(DiscordColor.SpringGreen)
+                .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
+                .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
+                .AddField("Reason:", reason).AddFooter(ctx);
             try
             {
                 await target.SendMessageAsync(embed: userBannedEmbed);
@@ -90,7 +91,8 @@ namespace Silk.Core.Commands.Moderation.Ban
             {
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
                 ulong? loggingChannel = _dbFactory.CreateDbContext().Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)
-                                                  ?.Configuration.GeneralLoggingChannel;
+                    ?.Configuration.GeneralLoggingChannel;
+                
                 DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel!.Value) ?? ctx.Channel;
 
                 await sendChannel.SendMessageAsync(embed: logEmbed);

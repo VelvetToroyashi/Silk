@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.General.Tickets
     {
         private readonly TicketService _ticketService;
         public TicketCommands(TicketService ticketService) => _ticketService = ticketService;
-        
+
         [Command]
         [RequireDirectMessage]
         public async Task Create(CommandContext ctx, string message = "No message provided")
@@ -30,6 +30,7 @@ namespace Silk.Core.Commands.General.Tickets
                 await ctx.RespondAsync(result.Reason).ConfigureAwait(false);
                 return;
             }
+
             TicketModel ticket = result.Ticket;
             ulong channelId = TicketService.GetTicketChannel(ticket!.Opener); // If it succeeded, it's not null. //
             DiscordChannel ticketChannel = ctx.Client.Guilds[721518523704410202].GetChannel(channelId);
@@ -42,19 +43,28 @@ namespace Silk.Core.Commands.General.Tickets
         [Description("Close the ticket the current channel corresponds to.")]
         public async Task Close(CommandContext ctx)
         {
-            try { await _ticketService.CloseTicket(ctx.Channel); }
-            catch (InvalidOperationException e) { await ctx.RespondAsync(e.Message).ConfigureAwait(false); }
+            try
+            {
+                await _ticketService.CloseTicket(ctx.Channel);
+            }
+            catch (InvalidOperationException e)
+            {
+                await ctx.RespondAsync(e.Message).ConfigureAwait(false);
+            }
         }
 
         [Command]
         [RequireGuild]
         public async Task Close(CommandContext ctx, ulong userId)
         {
-            try { await _ticketService.CloseTicket(userId); }
-            catch (InvalidOperationException e) { await ctx.RespondAsync(e.Message).ConfigureAwait(false); }
+            try
+            {
+                await _ticketService.CloseTicket(userId);
+            }
+            catch (InvalidOperationException e)
+            {
+                await ctx.RespondAsync(e.Message).ConfigureAwait(false);
+            }
         }
-        
-        
-        
     }
 }

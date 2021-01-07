@@ -14,13 +14,12 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         /// <param name="member">The member to check.</param>
         public Task<bool> ShouldDeleteMessageAsync(DiscordMember member);
+
         /// <summary>
         /// Adds an infraction to the queue to be processed.
         /// </summary>
         /// <param name="member">The member this infraction belongs to.</param>
         /// <param name="infraction">Their infraction.</param>
         public void AddInfraction(DiscordMember member, UserInfractionModel infraction);
-        
-        
     }
 }

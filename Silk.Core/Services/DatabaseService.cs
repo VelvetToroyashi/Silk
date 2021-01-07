@@ -10,7 +10,6 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Services
 {
-
     /// <inheritdoc cref="IDatabaseService"/>
     public class DatabaseService : IDatabaseService
     {
@@ -20,12 +19,12 @@ namespace Silk.Core.Services
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private ILogger<DatabaseService> _logger;
 
-        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory, ILogger<DatabaseService> logger) => (_dbFactory, _logger) = (dbFactory, logger);
-
+        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory, ILogger<DatabaseService> logger) =>
+            (_dbFactory, _logger) = (dbFactory, logger);
 
         #endregion
 
-        
+
         #region Public Guild-Retrieval methods
 
         public Task<GuildModel?> GetGuildAsync(ulong guildId)
@@ -49,10 +48,11 @@ namespace Silk.Core.Services
             GuildModel? guild = await this.GetGuildAsync(guildId);
             if (guild is null)
             {
-                guild = new() { Id = guildId, Users = new(),Prefix = Bot.DefaultCommandPrefix, Configuration = new() };
+                guild = new() {Id = guildId, Users = new(), Prefix = Bot.DefaultCommandPrefix, Configuration = new()};
                 db.Guilds.Add(guild);
                 await db.SaveChangesAsync();
             }
+
             return guild;
         }
 
@@ -63,8 +63,8 @@ namespace Silk.Core.Services
                 .FirstAsync(g => g.GuildId == configId);
 
         #endregion
-        
-        
+
+
         #region Public User-Retrieval methods
 
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId)
@@ -89,7 +89,7 @@ namespace Silk.Core.Services
              * The reason we have to actually assign the attatching to a variable is because this is
              * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
              * but DbContext#Attatch() sets the entity to be unmodified by default. 
-             */ 
+             */
             EntityEntry<UserModel> userEntity = db.Attach(user);
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
@@ -108,14 +108,14 @@ namespace Silk.Core.Services
             SilkDbContext db = _dbFactory.CreateDbContext();
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
-            
+
             user ??= new UserModel {Id = userId};
             guild.Users.Add(user);
-            
+
             await db.SaveChangesAsync();
             return user;
         }
-        
+
         public async Task RemoveUserAsync(UserModel user)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
@@ -126,11 +126,11 @@ namespace Silk.Core.Services
 
             await db.SaveChangesAsync();
         }
+
         #endregion
 
-        
-        #region Internal helper methods
 
+        #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
 

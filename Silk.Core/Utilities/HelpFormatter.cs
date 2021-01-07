@@ -38,7 +38,6 @@ namespace Silk.Core.Utilities
 
         public override CommandHelpMessage Build()
         {
-            
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
             if (Command == null)
@@ -47,22 +46,29 @@ namespace Silk.Core.Utilities
 
 
                 IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
-                                                                         .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-                                                                         .Where(x => x.Key is not null)
-                                                                         .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                    .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                    .Where(x => x.Key is not null)
+                    .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                
                 foreach (IGrouping<string?, Command> commands in modules)
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "));
             }
             else
             {
-                if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
-                IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+                if (Command.IsExperimental())
+                    embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                
+                IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority)
+                    .FirstOrDefault()?.Arguments;
 
-                string title = Command.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
+                string title = Command.IsExperimental()
+                    ? $"[EXP] Command: `{Command!.QualifiedName}"
+                    : $"Command: `{Command!.QualifiedName}";
+                
                 var builder = new StringBuilder(title);
                 if (args is not null) builder.Append(GetArgs(args));
                 builder.Append('`');
-                
+
                 embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
                 if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
@@ -77,13 +83,13 @@ namespace Silk.Core.Utilities
                 if (Command.Aliases.Any())
                     embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
                 if (Subcommands is not null)
-                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"), true);
+                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"),
+                        true);
                 if (Command.Overloads.Count > 1)
                     embed.AddField("Command overloads:", Command.Overloads
                         .Skip(1)
                         .Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
                         .JoinString("\n"));
-
             }
 
             return new CommandHelpMessage(null, embed.Build());
@@ -98,8 +104,8 @@ namespace Silk.Core.Utilities
                 argString += arg.Name;
                 argString += arg.IsOptional ? "]" : ">";
             }
+
             return argString;
         }
-        
     }
 }

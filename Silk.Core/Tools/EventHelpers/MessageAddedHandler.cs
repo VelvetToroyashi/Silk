@@ -22,27 +22,38 @@ namespace Silk.Core.Tools.EventHelpers
             _ticketService = ticketService;
             _prefixCache = prefixCache;
         }
-        
+
         public Task Tickets(DiscordClient c, MessageCreateEventArgs e) => Task.Run(async () =>
         {
             if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
+            
             ulong ticketUser = TicketService.GetTicketUser(e.Channel);
+            
             IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
             DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUser).Value;
             if (member is null) return; // Member doesn't exist anymore // 
+            
             DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author);
+            
             await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
         });
 
-        public Task Commands(DiscordClient c, MessageCreateEventArgs e) => // 'async' caused exceptions to get swallowed for some reason. //
+        public Task
+            Commands(DiscordClient c, MessageCreateEventArgs e) => // 'async' caused exceptions to get swallowed for some reason. //
+            
             Task.Run(async () =>
             {
-                if (e.Author == c.CurrentUser || e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return Task.CompletedTask;
+                if (e.Author == c.CurrentUser || e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content))
+                    return Task.CompletedTask;
+                
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
                 string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id);
 
-                int commandLength = e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id) ? e.Message.GetMentionPrefixLength(c.CurrentUser) : e.Message.GetStringPrefixLength(prefix);
+                int commandLength = e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id)
+                    ? e.Message.GetMentionPrefixLength(c.CurrentUser)
+                    : e.Message.GetStringPrefixLength(prefix);
+                
                 if (commandLength is -1) return Task.CompletedTask;
 
                 string commandString = e.Message.Content.Substring(commandLength);
@@ -54,9 +65,8 @@ namespace Silk.Core.Tools.EventHelpers
                 CommandContext context = cnext.CreateContext(e.Message, prefix, command, arguments);
 
                 _ = cnext.ExecuteCommandAsync(context);
+                
                 return Task.CompletedTask;
             });
-
-
     }
 }

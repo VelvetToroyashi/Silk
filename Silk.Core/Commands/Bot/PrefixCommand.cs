@@ -18,6 +18,7 @@ namespace Silk.Core.Commands.Bot
         private const int PrefixMaxLength = 5;
         private readonly PrefixCacheService _prefixCache;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+
         private record PrefixValidationResult(bool Valid, string Reason);
 
         public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
@@ -53,7 +54,7 @@ namespace Silk.Core.Commands.Bot
             if (!Regex.IsMatch(prefix, "[A-Z!@#$%^&*<>?.]+", RegexOptions.IgnoreCase))
                 return new(false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
 
-            return new (true, "");
+            return new(true, "");
         }
 
         [Command("Prefix")]

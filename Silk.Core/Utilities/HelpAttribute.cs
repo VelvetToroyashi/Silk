@@ -3,7 +3,9 @@
 namespace Silk.Core.Utilities
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
-    public class HelpAttribute : Attribute { }
+    public class HelpAttribute : Attribute
+    {
+    }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
     public class HelpDescriptionAttribute : Attribute

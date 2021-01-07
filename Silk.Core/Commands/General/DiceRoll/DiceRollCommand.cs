@@ -23,9 +23,9 @@ namespace Silk.Core.Commands.General.DiceRoll
         {
             var parser = new DiceParser(roll);
             IList<Step> steps = parser.Run();
-            
+
             var embed = InitEmbed(new());
-            var ran = new Random((int)ctx.Message.Id);
+            var ran = new Random((int) ctx.Message.Id);
             var modifiers = new List<int>();
             var rolls = new List<int>();
 
@@ -43,22 +43,22 @@ namespace Silk.Core.Commands.General.DiceRoll
                         int result = ran.Next(1, steps[i].DiceNoSides + 1);
                         localRolls.Add(result);
                     }
+
                     int sum = localRolls.Sum();
                     rolls.Add(sum);
-                    embed.AddField($"🎲{steps[i].TotalNumber}d{steps[i].DiceNoSides}", $"\t{string.Join(", ", localRolls)}   =   {sum}");
+                    embed.AddField($"🎲{steps[i].TotalNumber}d{steps[i].DiceNoSides}",
+                        $"\t{string.Join(", ", localRolls)}   =   {sum}");
                 }
             }
 
-            
-            
-            embed.AddField("Modifiers",$"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
+
+            embed.AddField("Modifiers", $"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
             embed.AddField("Total", $"{(rolls.Sum() + modifiers.Sum())}");
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
         }
 
         private DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>
-            embed
-                .WithColor(DiscordColor.PhthaloGreen)
+            embed.WithColor(DiscordColor.PhthaloGreen)
                 .WithTitle("You rolled:")
                 .WithFooter("Made by alex#6555 with <3");
     }
