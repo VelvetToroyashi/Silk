@@ -65,6 +65,7 @@ namespace Silk.Core.Commands.Furry.Utilities
         {
             if (requireUsername)
                 _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
+            
             _ = apiKey ?? throw new ArgumentNullException($"{nameof(apiKey)} can't be null.");
 
 

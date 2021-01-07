@@ -21,8 +21,7 @@ namespace Silk.Core.Services
 
 
         // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
-        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService,
-            ConfigService configService)
+        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
         {
             _dbService = dbService;
             _configService = configService;

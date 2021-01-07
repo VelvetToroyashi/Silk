@@ -43,6 +43,7 @@ namespace Silk.Core.Commands.Bot
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
             await db.SaveChangesAsync();
+            
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
 

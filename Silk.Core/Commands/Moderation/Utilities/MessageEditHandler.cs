@@ -59,8 +59,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))
             {
                 Match invite = Regex.Match(e.Message.Content, @"discord((app\.com|\.com)\/invite|\.gg\/.+)",
-                    RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled |
-                    RegexOptions.IgnorePatternWhitespace);
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
                     
                 if (!invite.Success) return;
 

@@ -34,11 +34,9 @@ namespace Silk.Core.Commands.Server
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:")
                 .WithColor(DiscordColor.Gold)
-                .WithFooter($"Silk! | Requested by: {ctx.User.Id}",
-                    ctx.Client.CurrentUser.AvatarUrl);
+                .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
 
             embed.WithThumbnail(guild.IconUrl);
-
 
             if (guild.PremiumSubscriptionCount.Value > 0)
                 embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");

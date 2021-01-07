@@ -23,8 +23,7 @@ namespace Silk.Core.Commands.Moderation
 
         [Command("unban")]
         [RequireFlag(UserFlag.Staff)]
-        public async Task UnBan(CommandContext ctx, DiscordUser user,
-            [RemainingText] string reason = "No reason given.")
+        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
             if (!ctx.Member.HasPermission(Permissions.BanMembers))
             {
@@ -46,8 +45,7 @@ namespace Silk.Core.Commands.Moderation
             }
             else
             {
-                DiscordEmbedBuilder embed =
-                    new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
                         .WithColor(new DiscordColor("#d11515"));
                 
                 await ctx.RespondAsync(embed: embed);

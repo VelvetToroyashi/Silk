@@ -26,8 +26,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         [Command("Ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
-        public async Task Ban(CommandContext ctx, DiscordMember target,
-            [RemainingText] string reason = "No reason given.")
+        public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
             DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
@@ -41,7 +40,8 @@ namespace Silk.Core.Commands.Moderation.Ban
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                     .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.Red).WithDescription(errorReason));
+                    .WithColor(DiscordColor.Red)
+                    .WithDescription(errorReason));
             }
 
             bool CanExecuteCommand(out string errorReason)

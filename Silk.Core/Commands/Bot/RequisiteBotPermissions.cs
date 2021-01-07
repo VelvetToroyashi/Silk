@@ -28,8 +28,7 @@ namespace Silk.Core.Commands.Bot
 
             var sb = new StringBuilder();
 
-            sb.AppendLine(
-                $"`Manage Messages`: {GetStatusEmoji(manageMessage)}\nAffected commands: `{prefix}clear`, `{prefix}clean`; __error messages will persist if false.__\n");
+            sb.AppendLine($"`Manage Messages`: {GetStatusEmoji(manageMessage)}\nAffected commands: `{prefix}clear`, `{prefix}clean`; __error messages will persist if false.__\n");
             sb.AppendLine($"`Manage Roles`: {GetStatusEmoji(manageRoles)}\nAffected commands: `{prefix}role`\n");
             sb.AppendLine($"`Kick Members` {GetStatusEmoji(kick)}\nAffected commands: `{prefix}kick`\n");
             sb.AppendLine($"`Ban Members` {GetStatusEmoji(ban)}\nAffected commands: `{prefix}ban`\n");

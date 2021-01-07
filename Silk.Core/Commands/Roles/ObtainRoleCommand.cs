@@ -37,8 +37,7 @@ namespace Silk.Core.Commands.Roles
                                 new DiscordEmbedBuilder()
                                     .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                                     .WithColor(DiscordColor.CornflowerBlue)
-                                    .WithDescription($"Gave you the role {parsedRole.Mention}")
-                            );
+                                    .WithDescription($"Gave you the role {parsedRole.Mention}"));
                         }
                         else
                         {

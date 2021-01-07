@@ -21,7 +21,8 @@ namespace Silk.Core.Commands.General.Tickets
                 .WithAuthor(ticketOpener.Username, null, ticketOpener.AvatarUrl)
                 .WithColor(DiscordColor.DarkBlue)
                 .WithDescription(message)
-                .WithFooter($"Silk! | Ticket Id: {ticket.Id}");
+                .WithFooter($"Silk! | Ticket Id: {ticket.Id}")
+                .Build();
 
         public static DiscordEmbed GenerateTicketClosedEmbed() =>
             new DiscordEmbedBuilder()

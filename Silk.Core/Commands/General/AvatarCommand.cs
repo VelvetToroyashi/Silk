@@ -26,8 +26,7 @@ namespace Silk.Core.Commands.General
         [Command("avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string? user)
         {
-            DiscordMember? u = ctx.Guild.Members.Values.FirstOrDefault(u =>
-                string.Equals(user, u.Username, StringComparison.OrdinalIgnoreCase));
+            DiscordMember? u = ctx.Guild.Members.Values.FirstOrDefault(u => string.Equals(user, u.Username, StringComparison.OrdinalIgnoreCase));
 
             if (u is null)
             {
@@ -35,8 +34,7 @@ namespace Silk.Core.Commands.General
             }
             else
             {
-                await ctx.RespondAsync(embed:
-                    DefaultAvatarEmbed(ctx)
+                await ctx.RespondAsync(embed: DefaultAvatarEmbed(ctx)
                         .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
                         .WithDescription($"{u.Mention}'s Avatar")
                         .WithImageUrl(AvatarImageResizedUrl(u.AvatarUrl)));
@@ -46,7 +44,8 @@ namespace Silk.Core.Commands.General
         private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096&v=1");
 
         private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx) =>
-            new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue)
+            new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter($"Silk! | Requested by {ctx.User.Username}/{ctx.User.Id}", ctx.User.AvatarUrl);
     }
 }

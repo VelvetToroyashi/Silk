@@ -46,8 +46,7 @@ namespace Silk.Core.Commands.Economy
             }
 
             if (receiver == sender)
-                await ctx.RespondAsync(
-                    "I'd love to duplicate money just as much as the next person, but we have an economy!");
+                await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");
             else if (sender.Cash < amount)
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
             else if (amount >= 1000)
@@ -58,8 +57,7 @@ namespace Silk.Core.Commands.Economy
             await db.SaveChangesAsync();
         }
 
-        private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUserModel sender,
-            GlobalUserModel receiver)
+        private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUserModel sender, GlobalUserModel receiver)
         {
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -67,13 +65,14 @@ namespace Silk.Core.Commands.Economy
                 .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! " +
                                  $"Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
                 .WithColor(DiscordColor.PhthaloGreen);
+            
             sender.Cash -= (int) amount;
             receiver.Cash += (int) amount;
+            
             await ctx.RespondAsync(embed: embed);
         }
 
-        private async Task VerifyTransactionAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
-            uint amount)
+        private async Task VerifyTransactionAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver, uint amount)
         {
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();

@@ -83,8 +83,7 @@ namespace Silk.Core.Utilities
                 if (Command.Aliases.Any())
                     embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
                 if (Subcommands is not null)
-                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"),
-                        true);
+                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"), true);
                 if (Command.Overloads.Count > 1)
                     embed.AddField("Command overloads:", Command.Overloads
                         .Skip(1)

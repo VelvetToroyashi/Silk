@@ -22,12 +22,10 @@ namespace Silk.Core.Commands.Moderation
         public DiscordClient Client { private get; set; }
 
         [Command("Mute")]
-        public async Task TempMute(CommandContext ctx, DiscordMember user, string duration,
-            [RemainingText] string reason = "Not Given.")
+        public async Task TempMute(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-            GuildModel config = Core.Bot.Instance.SilkDBContext.Guilds.AsQueryable()
-                .First(g => g.Id == ctx.Guild.Id);
+            GuildModel config = Core.Bot.Instance.SilkDBContext.Guilds.AsQueryable().First(g => g.Id == ctx.Guild.Id);
             
             if (!bot.HasPermission(Permissions.ManageRoles))
             {
@@ -65,7 +63,7 @@ namespace Silk.Core.Commands.Moderation
                 await msg.DeleteAsync();
             }
 
-            var tempMute = new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(_duration), reason,
+            var tempMute = new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(_duration), reason, 
                 e => OnMuteExpired((TimedInfraction) e));
 
             EventService.Events.Add(tempMute);
@@ -76,11 +74,9 @@ namespace Silk.Core.Commands.Moderation
 
         private async void OnMuteExpired(TimedInfraction eventObject)
         {
-            DiscordMember unmuteMember =
-                await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
+            DiscordMember unmuteMember = await (await Client.GetGuildAsync(eventObject.Guild)).GetMemberAsync(eventObject.Id);
 
-            GuildModel guild = DbFactory.CreateDbContext().Guilds
-                .First(g => g.Id == eventObject.Guild);
+            GuildModel guild = DbFactory.CreateDbContext().Guilds.First(g => g.Id == eventObject.Guild);
             
             ulong muteRole = guild.Configuration.MuteRoleId;
 

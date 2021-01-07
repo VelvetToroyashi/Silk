@@ -18,8 +18,10 @@ namespace Silk.Core.Utilities
             Bot = CustomEmoji.Bot + " Bot",
             Economy = CustomEmoji.Money + " Economy";
 
-        public static readonly IReadOnlyList<string> Order
-            = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy};
+        public static readonly IReadOnlyList<string> Order = new[]
+        {
+            Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy
+        };
     }
 
     public static class CustomEmoji

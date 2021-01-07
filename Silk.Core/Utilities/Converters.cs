@@ -39,14 +39,12 @@ namespace Silk.Core.Utilities
             if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong uid))
             {
                 DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
-                Optional<DiscordMember> ret =
-                    result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
+                Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();
                 return ret;
             }
 
             Match m = UserRegex.Match(value);
-            if (m.Success && ulong.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture,
-                out uid))
+            if (m.Success && ulong.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out uid))
             {
                 DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
                 Optional<DiscordMember> ret = result != null ? Optional.FromValue(result) : Optional.FromNoValue<DiscordMember>();

@@ -14,6 +14,12 @@ namespace Silk.Core.Commands.General.Tickets
 {
     public class TicketService
     {
+        // Hold a dictionary of currently open ticket channels. //
+        // UserId, ChannelId //
+        private static readonly ConcurrentDictionary<ulong, ulong> ticketChannels = new();
+
+        private static readonly Permissions requisitePermissions = Permissions.SendMessages | Permissions.AccessChannels | Permissions.EmbedLinks | Permissions.ReadMessageHistory;
+
         private readonly DiscordShardedClient _client;
         private readonly ILogger<TicketService> _logger;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
@@ -24,22 +30,13 @@ namespace Silk.Core.Commands.General.Tickets
 
         // private readonly DatabaseService _dbService;
         // TODO: Complete closing procedure, because apparently I'm an idiot and forgot about it ~Velvet.
-        public TicketService(DiscordShardedClient client, ILogger<TicketService> logger,
-            IDbContextFactory<SilkDbContext> dbFactory)
+        public TicketService(DiscordShardedClient client, ILogger<TicketService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _client = client;
             _logger = logger;
             _dbFactory = dbFactory;
         }
-
-        // Hold a dictionary of currently open ticket channels. //
-        // UserId, ChannelId //
-        private static readonly ConcurrentDictionary<ulong, ulong> ticketChannels = new();
-
-        private static readonly Permissions requisitePermissions =
-            Permissions.SendMessages | Permissions.AccessChannels |
-            Permissions.EmbedLinks | Permissions.ReadMessageHistory;
-
+        
         /// <summary>
         /// Create a TicketModel in the database, and add the message sent as the first piece of history for it. 
         /// </summary>
@@ -70,8 +67,7 @@ namespace Silk.Core.Commands.General.Tickets
             }
 
             // Create the channel and add it to the dictionary //
-            DiscordChannel c = await silk.CreateChannelAsync(user.Username, ChannelType.Text, ticketCategory,
-                $"Ticket opened by {user.Username} on {DateTime.Now}");
+            DiscordChannel c = await silk.CreateChannelAsync(user.Username, ChannelType.Text, ticketCategory, $"Ticket opened by {user.Username} on {DateTime.Now}");
             
             await c.AddOverwriteAsync(c.Guild.GetRole(SILK_CONTRIBUTOR_ID), requisitePermissions);
 
@@ -111,10 +107,17 @@ namespace Silk.Core.Commands.General.Tickets
                 ticket.IsOpen = false;
                 await channel.DeleteAsync();
                 await db.SaveChangesAsync();
+                
                 ticketChannels.TryRemove(userId, out _);
-                IEnumerable<KeyValuePair<ulong, DiscordMember>> members = _client.ShardClients.Values
-                    .SelectMany(s => s.Guilds.Values).SelectMany(g => g.Members);
+                
+                IEnumerable<KeyValuePair<ulong, DiscordMember>> members = _client
+                    .ShardClients
+                    .Values
+                    .SelectMany(s => s.Guilds.Values)
+                    .SelectMany(g => g.Members);
+                
                 DiscordMember member = members.SingleOrDefault(m => m.Key == userId)!.Value;
+                
                 await member.SendMessageAsync(embed: TicketEmbedHelper.GenerateTicketClosedEmbed());
             }
             catch

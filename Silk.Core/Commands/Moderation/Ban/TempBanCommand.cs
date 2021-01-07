@@ -29,16 +29,14 @@ namespace Silk.Core.Commands.Moderation.Ban
 
         [Command("tempban")]
         [RequireGuild]
-        public async Task TempBan(CommandContext ctx, DiscordMember user, string duration,
-            [RemainingText] string reason = "Not provided.")
+        public async Task TempBan(CommandContext ctx, DiscordMember user, string duration, [RemainingText] string reason = "Not provided.")
         {
             SilkDbContext db = DbFactory.CreateDbContext();
             DiscordMember bot = ctx.Guild.CurrentMember;
             DateTime now = DateTime.Now;
             TimeSpan banDuration = GetTimeFromInput(duration);
             BanFailureReason? banFailed = CanBan(bot, ctx.Member, user);
-            DiscordEmbedBuilder embed =
-                new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithAuthor(bot.Username, ctx.GetBotUrl(), ctx.Client.CurrentUser.AvatarUrl);
 
             if (banFailed is not null)
             {
@@ -77,8 +75,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 {
                     embed.WithDescription(formattedBanReason);
                     embed.WithColor(DiscordColor.Green);
-                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel)
-                        .SendMessageAsync(embed: embed);
+                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel).SendMessageAsync(embed: embed);
                 }
 
                 EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration),
@@ -86,8 +83,7 @@ namespace Silk.Core.Commands.Moderation.Ban
             }
         }
 
-        private static async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed,
-            BanFailureReason reason)
+        private static async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed, BanFailureReason reason)
         {
             embed.WithDescription(reason.FailureReason.Replace("$user", user.Mention));
             embed.WithColor(DiscordColor.Red);

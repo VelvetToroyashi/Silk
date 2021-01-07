@@ -16,8 +16,8 @@ namespace Silk.Core.Utilities
         private readonly ILogger<BotEventSubscriber> _logger;
         private IServiceProvider _services;
 
-        public BotEventSubscriber(DiscordShardedClient client, ILogger<BotEventSubscriber> logger,
-            IServiceProvider services) => (_logger, _client, _services) = (logger, client, services);
+        public BotEventSubscriber(DiscordShardedClient client, ILogger<BotEventSubscriber> logger, IServiceProvider services) => 
+            (_logger, _client, _services) = (logger, client, services);
 
         public void SubscribeToEvents()
         {
