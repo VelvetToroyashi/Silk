@@ -28,11 +28,35 @@ namespace Silk.Core.Services
         
         #region Public Guild-Retrieval methods
 
-        public Task<GuildModel> GetGuildAsync(ulong guildId) =>
+        public Task<GuildModel?> GetGuildAsync(ulong guildId) =>
             this.GetContext()
                 .Guilds
                 .Include(g => g.Users)
-                .FirstOrDefaultAsync(g => g.Id == guildId);
+                .FirstOrDefaultAsync(g => g.Id == guildId)!; // This returns GuildModel even though it's actually GuildModel?.
+
+        public Task UpdateGuildAsync(GuildModel guild)
+        {
+            SilkDbContext db = this.GetContext();
+            EntityEntry<GuildModel>? entity = db.Attach(guild);
+            entity.State = EntityState.Modified;
+            return db.SaveChangesAsync();
+        }
+
+        public async Task<GuildModel> GetOrCreateGuildAsync(ulong guildId)
+        {
+            SilkDbContext db = this.GetContext();
+            GuildModel? guild = await this.GetGuildAsync(guildId);
+            if (guild is null)
+                guild = new()
+                {
+                    Users = new(),
+                    Id = guildId,
+                    Prefix = Bot.DefaultCommandPrefix,
+                    Configuration = new()
+                };
+
+            return guild;
+        }
 
         public Task<GuildConfigModel> GetConfigAsync(ulong configId) =>
             this.GetContext()
@@ -108,6 +132,7 @@ namespace Silk.Core.Services
 
         
         #region Internal helper methods
+
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
 

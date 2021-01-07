@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
+using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
 
 namespace Silk.Core.Tools.EventHelpers
@@ -21,57 +22,54 @@ namespace Silk.Core.Tools.EventHelpers
         
         
         private readonly ILogger<GuildAddedHandler> _logger;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDatabaseService _dbService;
         
-        private readonly List<DiscordGuild> cacheQueue = new();
+        private readonly List<(ulong, IEnumerable<DiscordMember>)> cacheQueue = new();
 
-        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDbContextFactory<SilkDbContext> dbFactory) => (_logger, _dbFactory) = (logger, dbFactory);
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
 
         // Run on startup to cache all members //
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
             if (startupCacheCompleted) return Task.CompletedTask; // Prevent double logging when joining a new guild //
             _logger.LogDebug($"Beginning Cache. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
-            cacheQueue.Add(e.Guild);
+            cacheQueue.Add((e.Guild.Id, e.Guild.Members.Values));
             startupCacheCompleted = currentGuild == c.Guilds.Count;
             return Task.CompletedTask;
         }
 
-        public Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
+        public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
         {
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 for (int i = 0; i < cacheQueue.Count; i++)
-                {
-                    await DoCacheAsync(cacheQueue[i]);
-                }
-                    
+                    await CacheMembersAsync(cacheQueue[i]);
             });
-            return Task.CompletedTask;
         }
         
-        // Run when Silk! joins a new guild // 
-        public  Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e) =>
-            Task.Run(async () =>
+        // Run when Silk! joins a new guild. // 
+        public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e) =>
+            _ = Task.Run(async () =>
             {
-                await DoCacheAsync(e.Guild);
+                await CacheGuildAsync(e.Guild);
+                await CacheMembersAsync((e.Guild.Id, e.Guild.Members.Values));
                 await SendWelcomeMessage(c, e);
             });
 
-        private async Task DoCacheAsync(DiscordGuild e)
+        private async Task CacheMembersAsync((ulong id, IEnumerable<DiscordMember> members) guildT)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel guild = await GetOrCreateGuildAsync(db, e.Id);
-            CacheStaffMembers(guild, e.Members.Values); 
-            await db.SaveChangesAsync();
+            GuildModel guild = await _dbService.GetOrCreateGuildAsync(guildT.id);
+            CacheMembersAsync(guild, guildT.members);
+            await _dbService.UpdateGuildAsync(guild);
         }
 
+        private Task CacheGuildAsync(DiscordGuild guild) => _dbService.GetOrCreateGuildAsync(guild.Id);
+        
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
         {
-            IOrderedEnumerable<DiscordChannel> allChannels =
-                (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
-            DiscordMember botAsMember = await e.Guild.GetMemberAsync(c.CurrentUser.Id);
+            IOrderedEnumerable<DiscordChannel> allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            DiscordMember botAsMember = e.Guild.CurrentMember;
 
             DiscordChannel firstChannel = allChannels.First(channel =>
                 channel.PermissionsFor(botAsMember).HasPermission(Permissions.SendMessages) &&
@@ -111,9 +109,8 @@ namespace Silk.Core.Tools.EventHelpers
         }
         
         
-        private void CacheStaffMembers(GuildModel guild, IEnumerable<DiscordMember> members)
+        private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members)
         {
-            
             IEnumerable<DiscordMember> staff = members.Where(m => 
                    ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages) 
                 || m.HasPermission(Permissions.Administrator) 
@@ -128,7 +125,7 @@ namespace Silk.Core.Tools.EventHelpers
                 UserModel? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
-                    if (!user.Flags.Has(UserFlag.Staff)) // Has flag
+                    if (!user.Flags.HasFlag(UserFlag.Staff)) // Has flag
                         user.Flags.Add(UserFlag.Staff); // Add flag
                     if (member.HasPermission(Permissions.Administrator) || member.IsOwner)
                         user.Flags.Add(UserFlag.EscalatedStaff);

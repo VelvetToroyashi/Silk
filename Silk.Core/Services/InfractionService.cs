@@ -50,7 +50,7 @@ namespace Silk.Core.Services
                 await _dbService.GetOrAddUserAsync(member.Guild.Id, member.Id);
                 return true;
             }
-            else return !user.Flags.Has(UserFlag.InfractionExemption);
+            else return !user.Flags.HasFlag(UserFlag.InfractionExemption);
         }
 
         /// <summary>
@@ -69,13 +69,14 @@ namespace Silk.Core.Services
         {
             while (_infractionThread.ThreadState is not ThreadState.StopRequested)
             {
-                if (!_infractionQueue.TryDequeue(out (DiscordMember m, UserInfractionModel i) r))
+                if (!_infractionQueue.TryDequeue(out (DiscordMember member, UserInfractionModel infraction) result))
                 {
                     Thread.Sleep(100);
                 }
-                else if (await ShouldAddInfractionAsync(r.m))
+                else if (await ShouldAddInfractionAsync(result.member))
                 {
-                    UserModel user = await _dbService.GetOrAddUserAsync(r.m.Guild.Id, r.m.Id);
+                    UserModel user = await _dbService.GetOrAddUserAsync(result.member.Guild.Id, result.member.Id);
+                    user.Infractions.Add(result.infraction);
                     await _dbService.UpdateGuildUserAsync(user);
                 }
             }

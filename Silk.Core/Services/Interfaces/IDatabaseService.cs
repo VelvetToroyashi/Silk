@@ -13,14 +13,29 @@ namespace Silk.Core.Services.Interfaces
         /// Get a <see cref="GuildModel"/> from the database.
         /// </summary>
         /// <returns><see cref="GuildModel"/>with corresponding users.</returns>
-        public Task<GuildModel> GetGuildAsync(ulong guildId);
+        public Task<GuildModel?> GetGuildAsync(ulong guildId);
+
+        /// <summary>
+        /// This method is used for initializing a guild in case it doesn't exist, in the case of caching,
+        /// or any other situation that a guild needs to be used, but may not exist in the database.
+        /// </summary>
+        /// <param name="guildId">The id of the guild to get, or create if it doesn't exist.</param>
+        /// <returns>A <see cref="GuildModel"/>, which will have default properties if it did not exist.</returns>
+        public Task<GuildModel> GetOrCreateGuildAsync(ulong guildId);
+        
+        /// <summary>
+        /// This method is used to update a <see cref="GuildModel"/>.
+        /// </summary>
+        /// <param name="guild">The guild to update.</param>
+        public Task UpdateGuildAsync(GuildModel guild);
+        
         /// <summary>
         /// Get the configuration of a <see cref="GuildModel"/>.
         /// </summary>
         /// <param name="configId">The Id of the guild to retrieve a configuration for.</param>
         /// <returns>The configuration that corresponds to the Id passed in.</returns>
         public Task<GuildConfigModel> GetConfigAsync(ulong configId);
-        
+
         /// <summary>
         /// Get a <see cref="UserModel"/> from the database.
         /// </summary>

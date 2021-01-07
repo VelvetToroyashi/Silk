@@ -39,8 +39,8 @@ namespace Silk.Core.Utilities
             GuildModel guild = db.Guilds.Include(d => d.Users).First(g => g.Id == ctx.Guild.Id);
             UserModel? member = guild.Users.FirstOrDefault(m => m.Id == ctx.User.Id);
             if (member is null) return false;
-            if (member.Flags.Has(RequisiteUserFlag)) _cachedStaff.Add(member.Id);
-            return member.Flags.Has(RequisiteUserFlag);
+            if (member.Flags.HasFlag(RequisiteUserFlag)) _cachedStaff.Add(member.Id);
+            return member.Flags.HasFlag(RequisiteUserFlag);
         }
     }
 }
