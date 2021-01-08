@@ -56,7 +56,5 @@ namespace Silk.Core.Tools.EventHelpers
                 _ = cnext.ExecuteCommandAsync(context);
                 return Task.CompletedTask;
             });
-
-
     }
 }

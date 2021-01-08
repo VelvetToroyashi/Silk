@@ -11,6 +11,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.Tools;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
+using MessageAddedHandler = Silk.Core.AutoMod.MessageAddedHandler;
 
 namespace Silk.Core
 {
@@ -37,14 +38,14 @@ namespace Silk.Core
             services.AddSingleton<ConfigService>();
 
 
-            services.AddSingleton<AutoModMessageHandler>();
+            services.AddSingleton<MessageAddedHandler>();
                             
                            
             services.AddSingleton<BotExceptionHelper>();
             services.AddSingleton<BotEventSubscriber>();
                            
             services.AddSingleton<GuildAddedHandler>();
-            services.AddSingleton<MessageAddedHandler>();
+            services.AddSingleton<Tools.EventHelpers.MessageAddedHandler>();
             services.AddSingleton<MessageRemovedHandler>();
 
             services.AddSingleton<MemberRemovedHandler>();

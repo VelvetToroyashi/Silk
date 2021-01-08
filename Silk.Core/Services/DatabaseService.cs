@@ -28,24 +28,24 @@ namespace Silk.Core.Services
         
         #region Public Guild-Retrieval methods
 
-        public Task<GuildModel?> GetGuildAsync(ulong guildId)
+        public async Task<GuildModel?> GetGuildAsync(ulong guildId)
         {
-            SilkDbContext db = this.GetContext();
+            await using SilkDbContext db = this.GetContext();
             var guildQuery = db.Guilds.Include(g => g.Users);
-            return guildQuery.FirstAsync(g => g.Id == guildId)!;
+            return await guildQuery.FirstAsync(g => g.Id == guildId)!;
         }
 
-        public Task UpdateGuildAsync(GuildModel guild)
+        public async Task UpdateGuildAsync(GuildModel guild)
         {
-            SilkDbContext db = this.GetContext();
+            await using SilkDbContext db = this.GetContext();
             EntityEntry<GuildModel>? entity = db.Attach(guild);
             entity.State = EntityState.Modified;
-            return db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         public async Task<GuildModel> GetOrCreateGuildAsync(ulong guildId)
         {
-            SilkDbContext db = this.GetContext();
+            await using SilkDbContext db = this.GetContext();
             GuildModel? guild = await this.GetGuildAsync(guildId);
             if (guild is null)
             {
@@ -56,11 +56,14 @@ namespace Silk.Core.Services
             return guild;
         }
 
-        public Task<GuildConfigModel> GetConfigAsync(ulong configId) =>
-            this.GetContext()
-                .GuildConfigs
+        public async Task<GuildConfigModel> GetConfigAsync(ulong configId)
+        {
+            await using SilkDbContext db = this.GetContext();
+            GuildConfigModel config = await db.GuildConfigs
                 .Include(c => c.AllowedInvites)
                 .FirstAsync(g => g.GuildId == configId);
+            return config;
+        }
 
         #endregion
         
@@ -69,7 +72,7 @@ namespace Silk.Core.Services
 
         public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId)
         {
-            SilkDbContext db = this.GetContext();
+            await using SilkDbContext db = this.GetContext();
 
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
@@ -84,7 +87,7 @@ namespace Silk.Core.Services
         // Attatch to the context and save. Easy as that. //
         public async Task UpdateGuildUserAsync(UserModel user)
         {
-            SilkDbContext db = this.GetContext();
+            await using SilkDbContext db = this.GetContext();
             /*
              * The reason we have to actually assign the attatching to a variable is because this is
              * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
@@ -97,7 +100,7 @@ namespace Silk.Core.Services
 
         public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
         {
-            SilkDbContext db = GetContext();
+            await using SilkDbContext db = this.GetContext();
             db.Attach(user);
             updateAction(user);
             await db.SaveChangesAsync();
@@ -105,7 +108,7 @@ namespace Silk.Core.Services
 
         public async Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            await using SilkDbContext db = this.GetContext();
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             
@@ -118,7 +121,7 @@ namespace Silk.Core.Services
         
         public async Task RemoveUserAsync(UserModel user)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            await using SilkDbContext db = this.GetContext();
             db.Attach(user);
 
             if (user.Infractions.Any()) return; // If they have infractions, don't remove them. //

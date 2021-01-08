@@ -9,7 +9,6 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// The Primary Key (PK) of the model.
         /// </summary>
-        [Key] 
         public int ConfigId { get; set; }
         /// <summary>
         /// Requisite property to form a Foreign Key (FK)

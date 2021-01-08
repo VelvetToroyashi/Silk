@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
-using Silk.Extensions;
 
 namespace Silk.Core.Services
 {
@@ -81,8 +78,5 @@ namespace Silk.Core.Services
                 }
             }
         }
-        
-        
-        
     }
 }
