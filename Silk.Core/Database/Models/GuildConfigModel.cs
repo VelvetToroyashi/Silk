@@ -28,7 +28,7 @@ namespace Silk.Core.Database.Models
         public ulong GreetingChannel { get; set; }
         
         //This will be used eventually.
-        public string InfractionFormat { get; set; }
+        public string InfractionFormat { get; set; } = string.Empty;
         
         #region AutoMod/Moderation
 

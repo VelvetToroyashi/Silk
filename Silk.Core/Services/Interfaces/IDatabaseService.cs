@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Silk.Core.Database.Models;
 namespace Silk.Core.Services.Interfaces
@@ -60,7 +61,7 @@ namespace Silk.Core.Services.Interfaces
         /// as it's created internally before returning, if it's null.
         /// </summary>
         /// <returns>A <see cref="UserModel"/></returns>
-        public Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId);
+        public Task<UserModel> GetOrCreateUserAsync(ulong guildId, ulong userId);
 
         /// <summary>
         /// Remove a user from the database. A user with infractions will not be removed from the database.
@@ -69,6 +70,11 @@ namespace Silk.Core.Services.Interfaces
         /// <returns></returns>
         public Task RemoveUserAsync(UserModel user);
 
-        
+        /// <summary>
+        /// Get all users that match a predicate.
+        /// </summary>
+        /// <param name="predicate">The function to apply to all users</param>
+        /// <returns>A collection of users that match the supplied predicate.</returns>
+        public Task<IEnumerable<UserModel>> GetAllUsersAsync(Func<UserModel, bool> predicate);
     }
 }

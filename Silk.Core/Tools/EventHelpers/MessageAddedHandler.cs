@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Serilog;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
 
@@ -23,38 +24,45 @@ namespace Silk.Core.Tools.EventHelpers
             _prefixCache = prefixCache;
         }
         
-        public Task Tickets(DiscordClient c, MessageCreateEventArgs e) => Task.Run(async () =>
+        public Task Tickets(DiscordClient c, MessageCreateEventArgs e) => 
+            _ = Task.Run(async () =>
         {
             if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
-            ulong ticketUser = TicketService.GetTicketUser(e.Channel);
+            
+            ulong ticketUserId = TicketService.GetTicketUser(e.Channel);
             IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
-            DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUser).Value;
+            DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUserId).Value;
+            
             if (member is null) return; // Member doesn't exist anymore // 
+            
             DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author);
+            
             await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
         });
 
-        public Task Commands(DiscordClient c, MessageCreateEventArgs e) => // 'async' caused exceptions to get swallowed for some reason. //
-            Task.Run(async () =>
+        public  Task Commands(DiscordClient c, MessageCreateEventArgs e) => 
+            _ = Task.Run(async () =>
             {
-                if (e.Author == c.CurrentUser || e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return Task.CompletedTask;
+                if (e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return;
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
                 string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id);
 
                 int commandLength = e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id) ? e.Message.GetMentionPrefixLength(c.CurrentUser) : e.Message.GetStringPrefixLength(prefix);
-                if (commandLength is -1) return Task.CompletedTask;
+                if (commandLength is -1) return;
 
                 string commandString = e.Message.Content.Substring(commandLength);
 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
 
-                if (command is null) throw new CommandNotFoundException(commandString);
-
+                if (command is null)
+                {
+                    Log.Logger.Warning($"Command not found: {commandString}");
+                    return;
+                }
                 CommandContext context = cnext.CreateContext(e.Message, prefix, command, arguments);
 
-                _ = cnext.ExecuteCommandAsync(context);
-                return Task.CompletedTask;
+                await cnext.ExecuteCommandAsync(context);
             });
     }
 }

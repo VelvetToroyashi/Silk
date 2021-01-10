@@ -34,7 +34,7 @@ namespace Silk.Extensions.DSharpPlus
             return null;
         }
 
-        public static DiscordUser GetUser(this DiscordShardedClient c, ulong u)
+        public static DiscordMember GetUser(this DiscordShardedClient c, ulong u)
         {
             foreach (DiscordGuild g in c.ShardClients.Values.SelectMany(c => c.Guilds.Values))
             {
@@ -42,7 +42,6 @@ namespace Silk.Extensions.DSharpPlus
                     if (m.Id == u)
                         return m;
             }
-
             return null;
         }
     }

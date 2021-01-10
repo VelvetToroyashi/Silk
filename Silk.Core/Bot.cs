@@ -105,8 +105,6 @@ namespace Silk.Core
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             await Client.StopAsync();
-            _services.Get<InfractionService>().StopInfractionThread();
-            
         }
 
     }

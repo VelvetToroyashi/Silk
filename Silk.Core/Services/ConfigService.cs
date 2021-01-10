@@ -17,7 +17,7 @@ namespace Silk.Core.Services
 
         public ConfigService(IMemoryCache cache, IDatabaseService db) => (_cache, _db) = (cache, db);
 
-        public async Task<GuildConfigModel> GetConfigAsync(ulong guildId)
+        public async ValueTask<GuildConfigModel> GetConfigAsync(ulong guildId)
         {
             if (_cache.TryGetValue(guildId, out GuildConfigModel config)) return config;
             return await GetConfigFromDatabaseAsync(guildId);

@@ -29,15 +29,15 @@ namespace Silk.Core.Utilities
             if (e.Exception is CommandNotFoundException)
                 _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
             
-            if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
+            else if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
             {
                 _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
             
-            if (e.Exception is ArgumentException) _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+            else if (e.Exception is ArgumentException) _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             
-            if (e.Exception is ChecksFailedException cf)
+            else if (e.Exception is ChecksFailedException cf)
             {
                 switch (cf.FailedChecks[0])
                 {
@@ -66,6 +66,7 @@ namespace Silk.Core.Utilities
                     
                 }
             }
+            else _logger.LogWarning(e.Exception.Message);
         }
 
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)

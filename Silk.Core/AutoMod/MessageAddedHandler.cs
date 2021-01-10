@@ -76,9 +76,8 @@ namespace Silk.Core.AutoMod
         private async Task AutoModMatchedInvitePrecedureAsync(GuildConfigModel config, DiscordMessage message, string invite)
         {
             if (!_blacklistedLinkCache.Contains(invite)) _blacklistedLinkCache.Add(invite);
-            if (await _infractionService.ShouldDeleteMessageAsync((DiscordMember) message.Author)) await message.DeleteAsync();
+            //if (await _infractionService.ShouldDeleteMessageAsync((DiscordMember) message.Author)) await message.DeleteAsync();
             else return;
-            _infractionService.AddInfraction((DiscordMember)message.Author, new());
             // Coming Soon™️ //
         }
         

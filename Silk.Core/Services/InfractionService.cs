@@ -1,82 +1,123 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Commands.Tests;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Utilities;
+using Silk.Extensions.DSharpPlus;
+using ILogger = Serilog.ILogger;
+using Timer = System.Timers.Timer;
 
 namespace Silk.Core.Services
 {
     /// <inheritdoc cref="IInfractionService"/>
-    public class InfractionService : IInfractionService
+    public sealed class InfractionService : IInfractionService
     {
-        private readonly IDatabaseService _dbService;
+        private readonly Timer _timer;
         private readonly ConfigService _configService;
-        private readonly ConcurrentQueue<(DiscordMember, UserInfractionModel)> _infractionQueue = new();
-        private readonly Thread _infractionThread;
+        private readonly IDatabaseService _dbService;
+        private readonly ILogger<InfractionService> _logger;
         
-        
-        // Do I *really* have justification to use a full blown thread for this? Eh, absolutely not, but I don't care. ~Velvet //
-        public InfractionService(ILogger<InfractionService> logger, IDatabaseService dbService, ConfigService configService)
+        private readonly List<UserInfractionModel> _tempInfractions = new();
+        public InfractionService(ConfigService configService, IDatabaseService dbService, ILogger<InfractionService> logger)
         {
-            _dbService = dbService;
             _configService = configService;
-            _infractionThread = new(async () => await ProcessInfractions());
-            InitThread(_infractionThread);
-            logger.LogInformation("Started Infraction Service Thread!");
+            _dbService = dbService;
+            _logger = logger;
+            _timer = new(TimeSpan.FromSeconds(30).TotalMilliseconds);
+            _timer.Elapsed += (_, _) => OnTick();
         }
 
-        public async Task<bool> ShouldDeleteMessageAsync(DiscordMember member)
+
+        public async Task KickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
+            await member.RemoveAsync(infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
-            bool deleteInvites = config.DeleteMessageOnMatchedInvite;
-            bool isExempt = await ShouldAddInfractionAsync(member);
-            return deleteInvites && !isExempt;
-        }
-
-        public void AddInfraction(DiscordMember member, UserInfractionModel infraction) => _infractionQueue.Enqueue((member, infraction));
-        
-        
-        // Return whether or not we should provide and infraction to a member. //
-        private async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
-        {
-            UserModel? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
-            if (user is null)
+            if (config.GeneralLoggingChannel is 0)
             {
-                await _dbService.GetOrAddUserAsync(member.Guild.Id, member.Id);
-                return true;
+                _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
+                await channel.SendMessageAsync($"Kicked **{member.Username}#{member.Discriminator}**!");
             }
-            else return !user.Flags.HasFlag(UserFlag.InfractionExemption);
-        }
-
-        /// <summary>
-        /// Used to stop the infraction thread properly.
-        /// </summary>
-        public void StopInfractionThread() => _infractionThread.Join();
-        
-        private void InitThread(Thread thread)
-        {
-            thread.Name = "Infraction Thread";
-            thread.Priority = ThreadPriority.BelowNormal;
-            thread.Start();
-        }
-        
-        private async Task ProcessInfractions()
-        {
-            while (_infractionThread.ThreadState is not ThreadState.StopRequested)
+            else
             {
-                if (!_infractionQueue.TryDequeue(out (DiscordMember member, UserInfractionModel infraction) result))
-                {
-                    Thread.Sleep(100);
-                }
-                else if (await ShouldAddInfractionAsync(result.member))
-                {
-                    UserModel user = await _dbService.GetOrAddUserAsync(result.member.Guild.Id, result.member.Id);
-                    user.Infractions.Add(result.infraction);
-                    await _dbService.UpdateGuildUserAsync(user);
-                }
+                GuildModel guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
+                DiscordEmbedBuilder embed = EmbedHelper
+                    .CreateEmbed($"Case #{null} | User {member.Mention}",
+                    $"{member.Mention} was kicked from the server by for ```{infraction.Reason}```", DiscordColor.PhthaloGreen);
+                embed.WithFooter($"Staff member: <@{infraction.Enforcer}> | {infraction.Enforcer}");
+
+                await channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
             }
         }
+
+        public async Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
+        {
+
+            
+            await member.BanAsync(0, infraction.Reason);
+            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            if (config.GeneralLoggingChannel is 0)
+            {
+                _logger.LogWarning($"No available logging channel for guild! | {member.Guild.Id}");
+                await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
+            }
+            else
+            {
+                GuildModel guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
+                int infractions = guild.Users.Sum(u => u.Infractions.Count);
+                DiscordEmbedBuilder embed = EmbedHelper
+                    .CreateEmbed($"Case #{infractions} | User {member.Username}",
+                        $"{member.Mention} was banned from the server by for ```{infraction.Reason}```", DiscordColor.IndianRed);
+                embed.WithFooter($"Staff member: {infraction.Enforcer}");
+
+                await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
+                await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
+            }
+        }
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction) { }
+        public async Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction) { }
+        public async Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
+        {
+            UserModel user = await _dbService.GetOrCreateUserAsync(member.Guild.Id, member.Id);
+            UserInfractionModel infraction = new()
+            {
+                Enforcer = enforcer.Id,
+                Reason = reason,
+                InfractionTime = DateTime.Now,
+                UserId = member.Id,
+                InfractionType = type,
+            };
+            user.Infractions.Add(infraction);
+            // We will handle having automatic infractions later //
+            // This will have a method to accompany it soon:tm: //
+            await _dbService.UpdateGuildUserAsync(user);
+            return infraction;
+        }
+        public async Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
+        {
+            if (type is not InfractionType.SoftBan or InfractionType.Mute) 
+                throw new ArgumentException("Is not a temporary infraction type!", nameof(type));
+            
+            UserInfractionModel infraction = await CreateInfractionAsync(member, enforcer, type, reason);
+            infraction.Expiration = expiration;
+            return infraction;
+        }
+        public async Task<bool> ShouldAddInfractionAsync(DiscordMember member) { return false; }
+        public void AddTemporaryInfraction(UserInfractionModel infraction)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        private void OnTick() { }
     }
 }

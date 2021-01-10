@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Database;
@@ -9,9 +10,10 @@ using Silk.Core.Database;
 namespace Silk.Core.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210109085421_Infraction_Update_3")]
+    partial class Infraction_Update_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -327,6 +329,12 @@ namespace Silk.Core.Migrations
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal?>("GuildModelId")
+                        .HasColumnType("numeric(20,0)");
+
                     b.Property<DateTime>("InfractionTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -342,9 +350,11 @@ namespace Silk.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id");
+                    b.HasIndex("GuildModelId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("GuildId", "UserId");
 
                     b.ToTable("UserInfractionModel");
                 });
@@ -442,6 +452,10 @@ namespace Silk.Core.Migrations
 
             modelBuilder.Entity("Silk.Core.Database.Models.UserInfractionModel", b =>
                 {
+                    b.HasOne("Silk.Core.Database.Models.GuildModel", null)
+                        .WithMany("Infractions")
+                        .HasForeignKey("GuildModelId");
+
                     b.HasOne("Silk.Core.Database.Models.UserModel", "User")
                         .WithMany("Infractions")
                         .HasForeignKey("UserId")
@@ -482,6 +496,8 @@ namespace Silk.Core.Migrations
                 {
                     b.Navigation("Configuration")
                         .IsRequired();
+
+                    b.Navigation("Infractions");
 
                     b.Navigation("Users");
                 });

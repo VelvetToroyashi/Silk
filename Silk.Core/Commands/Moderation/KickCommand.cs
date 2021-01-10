@@ -67,11 +67,11 @@ namespace Silk.Core.Commands.Moderation
                                             .AddField("Reason:", reason ?? "No reason has been attached to this infraction.");
 
 
-                UserModel mUser = await _dbService.GetOrAddUserAsync(ctx.Guild.Id, user.Id);
+                UserModel mUser = await _dbService.GetOrCreateUserAsync(ctx.Guild.Id, user.Id);
                 await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
                 {
                     Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = Database.Models.InfractionType.Kick,
-                    InfractionTime = DateTime.Now, GuildId = ctx.Guild.Id
+                    InfractionTime = DateTime.Now
                 }));
                 
                 try

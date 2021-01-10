@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -46,11 +47,12 @@ namespace Silk.Core.Services
         public async Task<GuildModel> GetOrCreateGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = this.GetContext();
-            GuildModel? guild = await this.GetGuildAsync(guildId);
+            GuildModel? guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
+            
             if (guild is null)
             {
                 guild = new() { Id = guildId, Users = new(),Prefix = Bot.DefaultCommandPrefix, Configuration = new() };
-                db.Guilds.Add(guild);
+                db.Guilds.Add(guild); 
                 await db.SaveChangesAsync();
             }
             return guild;
@@ -106,16 +108,19 @@ namespace Silk.Core.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task<UserModel> GetOrAddUserAsync(ulong guildId, ulong userId)
+        public async Task<UserModel> GetOrCreateUserAsync(ulong guildId, ulong userId)
         {
             await using SilkDbContext db = this.GetContext();
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
-            
-            user ??= new UserModel {Id = userId};
-            guild.Users.Add(user);
-            
-            await db.SaveChangesAsync();
+            if (user is null)
+            {
+                user = new UserModel {Id = userId, Flags = UserFlag.None, Guild = guild};
+                db.Users.Add(user);
+                //db.Update(guild);
+                int l = await db.SaveChangesAsync();
+                if(l is 0) _logger.LogError("Didn't update Velv :(");
+            }
             return user;
         }
         
@@ -129,6 +134,13 @@ namespace Silk.Core.Services
 
             await db.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<UserModel>> GetAllUsersAsync(Func<UserModel, bool> predicate)
+        {
+            await using SilkDbContext db = this.GetContext();
+            return db.Users.Where(predicate);
+        }
+
         #endregion
 
         

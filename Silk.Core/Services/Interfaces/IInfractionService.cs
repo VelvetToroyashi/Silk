@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 
@@ -9,18 +10,13 @@ namespace Silk.Core.Services.Interfaces
     /// </summary>
     public interface IInfractionService
     {
-        /// <summary>
-        /// Checks whether a member is exempt from their message being deleted by Auto-Mod.
-        /// </summary>
-        /// <param name="member">The member to check.</param>
-        public Task<bool> ShouldDeleteMessageAsync(DiscordMember member);
-        /// <summary>
-        /// Adds an infraction to the queue to be processed.
-        /// </summary>
-        /// <param name="member">The member this infraction belongs to.</param>
-        /// <param name="infraction">Their infraction.</param>
-        public void AddInfraction(DiscordMember member, UserInfractionModel infraction);
-        
-        
+        public Task KickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
+        public Task BanAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
+        public Task TempBanAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
+        public Task MuteAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
+        public Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.");
+        public Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null);
+        public Task<bool> ShouldAddInfractionAsync(DiscordMember member);
+        public void AddTemporaryInfraction(UserInfractionModel infraction);
     }
 }

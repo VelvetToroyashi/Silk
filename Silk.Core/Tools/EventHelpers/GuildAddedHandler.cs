@@ -24,7 +24,7 @@ namespace Silk.Core.Tools.EventHelpers
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IDatabaseService _dbService;
         
-        private readonly List<(ulong, IEnumerable<DiscordMember>)> cacheQueue = new();
+        private readonly List<(ulong Id, IEnumerable<DiscordMember> members)> cacheQueue = new();
 
         public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
 
@@ -43,7 +43,10 @@ namespace Silk.Core.Tools.EventHelpers
             _ = Task.Run(async () =>
             {
                 for (int i = 0; i < cacheQueue.Count; i++)
+                {
+                    await CacheGuildAsync(c.Guilds[cacheQueue[i].Id]);
                     await CacheMembersAsync(cacheQueue[i]);
+                }
             });
         }
         
