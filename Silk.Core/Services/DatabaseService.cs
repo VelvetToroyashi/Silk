@@ -78,10 +78,6 @@ namespace Silk.Core.Services
             GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
-            user ??= new UserModel {Id = userId};
-            guild.Users.Add(user);
-            await db.SaveChangesAsync();
-
             return user;
         }
 
@@ -117,8 +113,7 @@ namespace Silk.Core.Services
                 user = new UserModel {Id = userId, Flags = UserFlag.None, Guild = guild};
                 db.Users.Add(user);
                 //db.Update(guild);
-                int l = await db.SaveChangesAsync();
-                if (l is 0) _logger.LogError("Didn't update Velv :(");
+                await db.SaveChangesAsync();
             }
             return user;
         }
