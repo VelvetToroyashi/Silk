@@ -27,7 +27,7 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 - To manage storage of the needed ```Discord Token``` and ```Database Connection String```, Silk uses an ```appSettings.json``` file.
 
 #### **Default**
-1. When you clone Silk, before running the Visual Studio solution, you'll need to create this ```appSettings.json``` file in the following directory: ```SilkBot\Silk_Core```
+1. When you clone Silk, before running the Visual Studio solution, you'll need to create this ```appSettings.json``` file in the following directory: ```Silk\Silk.Core```
 
 2. Now that the configuration file has been created, you'll need to fill out the structure:
     - ```
