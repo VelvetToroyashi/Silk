@@ -54,7 +54,7 @@ namespace Silk.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_GuildId_UserId",
                 table: "UserInfractionModel",
-                columns: new[] { "GuildId", "UserId" });
+                columns: new[] {"GuildId", "UserId"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_GuildModelId",

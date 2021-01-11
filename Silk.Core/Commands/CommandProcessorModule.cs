@@ -15,7 +15,7 @@ namespace Silk.Core.Commands
         private static readonly ConcurrentDictionary<ulong, List<string>> disabledCommandsCache = new();
         private static ConcurrentDictionary<ulong, List<ulong>> whitelistedChannelsCache = new();
         private readonly PrefixCacheService _prefixCache;
-        
+
         public CommandProcessorModule(PrefixCacheService prefixCache)
         {
             _prefixCache = prefixCache;
@@ -39,10 +39,10 @@ namespace Silk.Core.Commands
         {
             if (e.Author == c.CurrentUser) return;
             _ = Task.Run(async () =>
-            { 
-                
+            {
+
                 string? prefix = _prefixCache.RetrievePrefix(e.Guild?.Id) ?? string.Empty;
-                
+
                 CommandsNextExtension? cnext = c.GetCommandsNext();
                 int commandLength =
                     e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id)
@@ -52,14 +52,14 @@ namespace Silk.Core.Commands
                 string? split = commandString?.Split()?[0];
                 if (e.Guild is not null &&
                     (disabledCommandsCache.GetValueOrDefault(e.Guild.Id)?.Contains(split) ?? false)) return;
-                
+
                 Command command = cnext.FindCommand(commandString, out string arguments);
-                
-                if (command is null) 
+
+                if (command is null)
                     throw new CommandNotFoundException(commandString);
-                
+
                 CommandContext context = cnext.CreateContext(e.Message, prefix, command, arguments);
-                
+
                 await cnext.ExecuteCommandAsync(context);
             });
         }

@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Core.Services;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Miscellaneous
@@ -75,11 +70,11 @@ namespace Silk.Core.Commands.Miscellaneous
         private static Changelog CreateChangelog(string cl)
         {
             var delimiter = "|";
-            string[] splitOptions   = cl.Split(delimiter);
-            string additions        = splitOptions[0];
-            string removals         = splitOptions.GetNext();
-            string authors          =  splitOptions.GetNext();
-            string version          =  splitOptions.GetNext();
+            string[] splitOptions = cl.Split(delimiter);
+            string additions = splitOptions[0];
+            string removals = splitOptions.GetNext();
+            string authors = splitOptions.GetNext();
+            string version = splitOptions.GetNext();
             DateTime time = DateTime.Now;
             var changelog = new Changelog
                 {Additions = additions, Removals = removals, Authors = authors, Version = version, Time = time};

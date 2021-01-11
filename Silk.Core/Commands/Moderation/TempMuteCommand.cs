@@ -7,7 +7,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
-using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 
@@ -24,8 +23,8 @@ namespace Silk.Core.Commands.Moderation
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-            if (user.IsAbove(bot)) 
-            { 
+            if (user.IsAbove(bot))
+            {
                 await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} roles above me!").ConfigureAwait(false);
                 return;
             }
@@ -36,12 +35,12 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync("You haven't setup the mute role :(").ConfigureAwait(false);
                 return;
             }
-            
-            
+
+
             await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleId), reason);
         }
 
-        
+
 
 
     }

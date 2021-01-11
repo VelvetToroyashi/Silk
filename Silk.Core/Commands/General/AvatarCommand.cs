@@ -16,28 +16,27 @@ namespace Silk.Core.Commands.General
         public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
         {
             DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                 .WithDescription($"{user.Mention}'s Avatar")
                 .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
-            
+
             await ctx.RespondAsync(embed: embedBuilder);
         }
-        
+
         [Command("avatar")]
-        
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string? user)
         {
-            DiscordMember? u = ctx.Guild.Members.Values.FirstOrDefault(u => string.Equals(user, u.Username, StringComparison.OrdinalIgnoreCase));
+            DiscordMember? userObj = ctx.Guild.Members.Values.FirstOrDefault(u => string.Equals(user, u.Username, StringComparison.OrdinalIgnoreCase));
 
-            if (u is null)
+            if (userObj is null)
                 await ctx.RespondAsync("Sorry, I couldn't find anyone with a name matching the text provided.");
             else
             {
-                await ctx.RespondAsync(embed: 
+                await ctx.RespondAsync(embed:
                     DefaultAvatarEmbed(ctx)
-                        .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.AvatarUrl)
-                        .WithDescription($"{u.Mention}'s Avatar")
-                        .WithImageUrl(AvatarImageResizedUrl(u.AvatarUrl)));
+                        .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
+                        .WithDescription($"{userObj.Mention}'s Avatar")
+                        .WithImageUrl(AvatarImageResizedUrl(userObj.AvatarUrl)));
             }
         }
 
@@ -46,6 +45,6 @@ namespace Silk.Core.Commands.General
         private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx) =>
             new DiscordEmbedBuilder().WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter($"Silk! | Requested by {ctx.User.Username}/{ctx.User.Id}", ctx.User.AvatarUrl);
-        
+
     }
 }

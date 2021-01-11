@@ -1,9 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
@@ -35,9 +32,9 @@ namespace Silk.Core.Services
         {
             _logger.LogDebug("Prefix not present in cache; querying from database.");
             _sw.Restart();
-            
+
             SilkDbContext db = _dbFactory.CreateDbContext();
-            
+
             GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)
             {
@@ -48,7 +45,7 @@ namespace Silk.Core.Services
             _sw.Stop();
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
             _cache.TryAdd(guildId, guild.Prefix);
-            
+
             return guild.Prefix;
         }
 

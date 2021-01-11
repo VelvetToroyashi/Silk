@@ -58,10 +58,10 @@ namespace Silk.Core.Utilities
             string dv = di != -1 ? value.Substring(di + 1) : null;
 
             IEnumerable<DiscordMember> us = ctx.Guild.Members.Values
-                                               .Where(xm =>
-                                                   xm.Username.ToLowerInvariant() == un &&
-                                                   (dv != null && xm.Discriminator == dv || dv == null)
-                                                   || xm.Nickname?.ToLowerInvariant() == value);
+                .Where(xm =>
+                    xm.Username.ToLowerInvariant() == un &&
+                    (dv != null && xm.Discriminator == dv || dv == null)
+                    || xm.Nickname?.ToLowerInvariant() == value);
 
             DiscordMember? mbr = us.FirstOrDefault();
             return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();

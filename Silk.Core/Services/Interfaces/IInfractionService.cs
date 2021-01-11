@@ -11,9 +11,9 @@ namespace Silk.Core.Services.Interfaces
     public interface IInfractionService
     {
         public Task KickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
-        public Task BanAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
-        public Task TempBanAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
-        public Task MuteAsync(DiscordMember member, DiscordChannel channel,  UserInfractionModel infraction);
+        public Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
+        public Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
+        public Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
         public Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.");
         public Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null);
         public Task<bool> ShouldAddInfractionAsync(DiscordMember member);

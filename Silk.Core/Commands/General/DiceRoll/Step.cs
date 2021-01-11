@@ -1,6 +1,11 @@
 ﻿namespace Silk.Core.Commands.General.DiceRoll
 {
-    internal enum StepType { Roll, Addition }
+    internal enum StepType
+    {
+        Roll,
+        Addition
+    }
+
     internal struct Step
     {
         public StepType Type;

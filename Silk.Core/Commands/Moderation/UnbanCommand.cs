@@ -30,7 +30,7 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync("[You] Can't ban, can't unban. Sorry.").ConfigureAwait(false);
                 return;
             }
-            
+
             if ((await ctx.Guild.GetBansAsync()).Select(b => b.User.Id).Contains(user.Id))
             {
                 await user.UnbanAsync(ctx.Guild, reason);

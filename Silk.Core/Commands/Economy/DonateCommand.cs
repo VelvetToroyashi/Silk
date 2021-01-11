@@ -56,21 +56,23 @@ namespace Silk.Core.Commands.Economy
             await db.SaveChangesAsync();
         }
 
-        private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUserModel sender,
+        private async Task DoTransactionAsync(
+            CommandContext ctx, uint amount, GlobalUserModel sender,
             GlobalUserModel receiver)
         {
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithThumbnail(ctx.User.AvatarUrl)
-                                        .WithDescription(
-                                            $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                                        .WithColor(DiscordColor.PhthaloGreen);
-            sender.Cash -= (int)amount;
-            receiver.Cash += (int)amount;
+                .WithThumbnail(ctx.User.AvatarUrl)
+                .WithDescription(
+                    $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                .WithColor(DiscordColor.PhthaloGreen);
+            sender.Cash -= (int) amount;
+            receiver.Cash += (int) amount;
             await ctx.RespondAsync(embed: embed);
         }
 
-        private async Task VerifyTransactionAsync(CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
+        private async Task VerifyTransactionAsync(
+            CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
             uint amount)
         {
             // 'Complicated async logic here' //
@@ -89,12 +91,12 @@ namespace Silk.Core.Commands.Economy
             {
                 DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                            .WithThumbnail(ctx.User.AvatarUrl)
-                                            .WithDescription(
-                                                $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
-                                            .WithColor(DiscordColor.PhthaloGreen);
-                sender.Cash -= (int)amount;
-                receiver.Cash += (int)amount;
+                    .WithThumbnail(ctx.User.AvatarUrl)
+                    .WithDescription(
+                        $"Successfully donated {amount} dollars to {member.Mention}! Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
+                    .WithColor(DiscordColor.PhthaloGreen);
+                sender.Cash -= (int) amount;
+                receiver.Cash += (int) amount;
                 await ctx.RespondAsync(embed: embed);
             }
         }

@@ -23,7 +23,8 @@ namespace Silk.Core.Commands.Moderation.SClean
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [HelpDescription("Clean images from chat.")]
-        public async Task Images(CommandContext ctx,
+        public async Task Images(
+            CommandContext ctx,
             [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")]
             int amount = 10)
         {

@@ -23,9 +23,9 @@ namespace Silk.Core.Commands.General.DiceRoll
         {
             var parser = new DiceParser(roll);
             IList<Step> steps = parser.Run();
-            
+
             var embed = InitEmbed(new());
-            var ran = new Random((int)ctx.Message.Id);
+            var ran = new Random((int) ctx.Message.Id);
             var modifiers = new List<int>();
             var rolls = new List<int>();
 
@@ -49,9 +49,9 @@ namespace Silk.Core.Commands.General.DiceRoll
                 }
             }
 
-            
-            
-            embed.AddField("Modifiers",$"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
+
+
+            embed.AddField("Modifiers", $"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
             embed.AddField("Total", $"{(rolls.Sum() + modifiers.Sum())}");
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
         }

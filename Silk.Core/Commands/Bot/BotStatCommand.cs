@@ -25,15 +25,15 @@ namespace Silk.Core.Commands.Bot
             int guildCount = ctx.Client.Guilds.Count;
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                        .WithTitle("Stats for Silk!:")
-                                        .WithColor(DiscordColor.Gold)
-                                        .AddField("Latency", $"{ctx.Client.Ping}ms", true)
-                                        .AddField("Total guilds", $"{guildCount}", true)
-                                        .AddField("Shards",  $"{ctx.Client.ShardCount}", true)
-                                        .AddField("Memory",  $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB", true)
-                                        .AddField("Threads", $"{process.Threads.Count}", true)
-                                        .AddField("Uptime",
-                                            (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second));
+                .WithTitle("Stats for Silk!:")
+                .WithColor(DiscordColor.Gold)
+                .AddField("Latency", $"{ctx.Client.Ping}ms", true)
+                .AddField("Total guilds", $"{guildCount}", true)
+                .AddField("Shards", $"{ctx.Client.ShardCount}", true)
+                .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB", true)
+                .AddField("Threads", $"{process.Threads.Count}", true)
+                .AddField("Uptime",
+                    (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second));
             await ctx.RespondAsync(embed: embed);
         }
     }

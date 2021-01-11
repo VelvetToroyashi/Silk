@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using IniParser;
 using IniParser.Model;
 using IniParser.Model.Configuration;
 using IniParser.Parser;
@@ -18,7 +16,7 @@ namespace Silk.Core.Utilities
         private readonly ConfigService _configService;
 
         public ConfigParser(ConfigService configService) => _configService = configService;
-        
+
         public void GetConfigInfo(string file)
         {
             var parser = new IniDataParser(_config);
@@ -31,16 +29,16 @@ namespace Silk.Core.Utilities
             MethodInfo[] methods = typeof(T).GetMethods();
             MethodInfo? tryParseMethod = methods.FirstOrDefault(m => m.Name is "TryParse");
             if (tryParseMethod is null) throw new ArgumentException("Not a supported type!");
-            
-            object[] @params = new object[] {input, null! };
+
+            object[] @params = {input, null!};
 
             bool? success = tryParseMethod.Invoke(null, @params) as bool?;
             if (!success!.Value) throw new InvalidOperationException($"Cannot convert from {typeof(string)} to {typeof(T)}");
 
-            return (T)@params[1];
+            return (T) @params[1];
         }
-        
-        
+
+
     }
-    
+
 }

@@ -38,7 +38,7 @@ namespace Silk.Core.Utilities
 
         public override CommandHelpMessage Build()
         {
-            
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
             if (Command == null)
@@ -47,9 +47,9 @@ namespace Silk.Core.Utilities
 
 
                 IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
-                                                                         .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-                                                                         .Where(x => x.Key is not null)
-                                                                         .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                    .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                    .Where(x => x.Key is not null)
+                    .OrderBy(x => Categories.Order.IndexOf(x.Key));
                 foreach (IGrouping<string?, Command> commands in modules)
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "));
             }
@@ -62,7 +62,7 @@ namespace Silk.Core.Utilities
                 var builder = new StringBuilder(title);
                 if (args is not null) builder.Append(GetArgs(args));
                 builder.Append('`');
-                
+
                 embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
                 if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
@@ -100,6 +100,6 @@ namespace Silk.Core.Utilities
             }
             return argString;
         }
-        
+
     }
 }

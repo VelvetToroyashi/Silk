@@ -2,12 +2,9 @@
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
 
@@ -20,7 +17,7 @@ namespace Silk.Core.Tools.EventHelpers
         private readonly ILogger<RoleRemovedHelper> _logger;
         private readonly IDatabaseService _dbService;
         public RoleRemovedHelper(IDatabaseService dbService) => _dbService = dbService;
-        
+
         public Task CheckStaffRoles(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
             if (e.Handled) return Task.CompletedTask;

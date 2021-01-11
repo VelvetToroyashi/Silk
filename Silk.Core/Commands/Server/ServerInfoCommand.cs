@@ -23,20 +23,20 @@ namespace Silk.Core.Commands.Server
         [Command]
         public async Task ServerInfo(CommandContext ctx)
         {
-            
+
             DiscordGuild guild = ctx.Guild;
             SilkDbContext db = _dbFactory.CreateDbContext();
             int staffCount = (await db.Guilds.Include(g => g.Users)
                     .FirstAsync(g => g.Id == guild.Id))
-                    .Users
-                        .Where(u => u.Flags.HasFlag(UserFlag.Staff))
-                            .Count();
+                .Users
+                .Where(u => u.Flags.HasFlag(UserFlag.Staff))
+                .Count();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithTitle($"Guild info for {guild.Name}:")
-                                                                 .WithColor(DiscordColor.Gold)
-                                                                 .WithFooter($"Silk! | Requested by: {ctx.User.Id}",
-                                                                     ctx.Client.CurrentUser.AvatarUrl);
+                .WithColor(DiscordColor.Gold)
+                .WithFooter($"Silk! | Requested by: {ctx.User.Id}",
+                    ctx.Client.CurrentUser.AvatarUrl);
             embed.WithThumbnail(guild.IconUrl);
-            
+
 
             if (guild.PremiumSubscriptionCount.Value > 0)
                 embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");

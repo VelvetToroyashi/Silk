@@ -67,7 +67,8 @@ namespace Silk.Core.Commands.Furry.NSFW
                     .AddField("Source:",
                         GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
                         "No source available")
-                    .WithColor(DiscordColor.PhthaloBlue).WithImageUrl(post.File.Url)
+                    .WithColor(DiscordColor.PhthaloBlue)
+                    .WithImageUrl(post.File.Url)
                     .WithFooter("Limit: 10 img / 10sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);

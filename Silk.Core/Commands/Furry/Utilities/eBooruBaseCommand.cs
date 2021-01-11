@@ -16,7 +16,7 @@ namespace Silk.Core.Commands.Furry.Utilities
         private protected string? baseUrl;
         // Needed for e621.net //
         private protected string? username;
-        
+
         private protected readonly HttpClient _client;
 
         public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
@@ -69,11 +69,11 @@ namespace Silk.Core.Commands.Furry.Utilities
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
 
             var cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
-            request.Headers.Add("Authorization",$"Basic {Convert.ToBase64String(cred)}");
+            request.Headers.Add("Authorization", $"Basic {Convert.ToBase64String(cred)}");
             // TODO: Log if API key is rejected.
             string result = await _client.Send(request).Content.ReadAsStringAsync();
             var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
-            
+
             for (var i = 0; i < posts.Posts?.Count; i++)
                 if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                     posts.Posts.Remove(posts.Posts[i]);

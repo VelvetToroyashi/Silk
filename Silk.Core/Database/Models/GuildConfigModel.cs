@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Silk.Core.Database.Models
 {
@@ -26,10 +25,10 @@ namespace Silk.Core.Database.Models
         /// Id of the channel to greet members in.
         /// </summary>
         public ulong GreetingChannel { get; set; }
-        
+
         //This will be used eventually.
         public string InfractionFormat { get; set; } = string.Empty;
-        
+
         #region AutoMod/Moderation
 
         /// <summary>
@@ -76,8 +75,9 @@ namespace Silk.Core.Database.Models
         public List<GuildInfractionModel> InfractionDictionary { get; set; } = new();
 
         #endregion
-        
+
         #region Premium Features
+
         /// <summary>
         /// Whether a guild is considered premium.
         /// </summary>

@@ -20,7 +20,8 @@ namespace Silk.Core.Utilities
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             if (request == null)

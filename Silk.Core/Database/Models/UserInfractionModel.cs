@@ -1,5 +1,4 @@
 ﻿using System;
-using Silk.Core.Commands.Moderation.Utilities;
 
 namespace Silk.Core.Database.Models
 {

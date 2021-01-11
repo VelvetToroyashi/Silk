@@ -11,6 +11,6 @@ namespace Silk.Core.Utilities
         public string Name { get; }
 
         public CategoryAttribute(string name) => Name = name;
-        
+
     }
 }

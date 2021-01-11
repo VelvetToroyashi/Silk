@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -18,15 +17,15 @@ namespace Silk.Core.Commands.General
         [Description("Cleans all messages from all users.")]
         public async Task Clear(CommandContext ctx, int messages = 5)
         {
-            
+
             // Anyone who's got permission to manage channels might not be staff, so adding [RequireFlag(UserFlag.Staff)] needlessly permwalls it. //
             if (!ctx.Member.HasPermission(Permissions.ManageMessages))
             {
                 await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
-                                              .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                                              .WithColor(DiscordColor.Red)
-                                              .WithDescription(
-                                                  "Sorry, but you need to be able to manage messages to use this command!"));
+                    .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                    .WithColor(DiscordColor.Red)
+                    .WithDescription(
+                        "Sorry, but you need to be able to manage messages to use this command!"));
                 return;
             }
 

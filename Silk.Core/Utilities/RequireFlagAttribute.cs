@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
@@ -35,10 +32,10 @@ namespace Silk.Core.Utilities
             if (help) return help;
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
-            
+
             IDatabaseService db = ctx.Services.Get<IDatabaseService>();
             UserModel? member = await db.GetGuildUserAsync(ctx.Guild!.Id, ctx.User.Id);
-            
+
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag.Staff)) _cachedStaff.Add(member.Id);
             return member.Flags.HasFlag(UserFlag.Staff);

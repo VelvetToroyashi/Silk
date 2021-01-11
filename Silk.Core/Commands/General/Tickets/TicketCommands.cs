@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.General.Tickets
     {
         private readonly TicketService _ticketService;
         public TicketCommands(TicketService ticketService) => _ticketService = ticketService;
-        
+
         [Command]
         [RequireDirectMessage]
         public async Task Create(CommandContext ctx, string message = "No message provided")
@@ -53,8 +53,8 @@ namespace Silk.Core.Commands.General.Tickets
             try { await _ticketService.CloseTicket(userId); }
             catch (InvalidOperationException e) { await ctx.RespondAsync(e.Message).ConfigureAwait(false); }
         }
-        
-        
-        
+
+
+
     }
 }

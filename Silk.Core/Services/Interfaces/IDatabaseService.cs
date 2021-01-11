@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Silk.Core.Database.Models;
+
 namespace Silk.Core.Services.Interfaces
 {
     /// <summary>
@@ -23,13 +24,13 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="guildId">The id of the guild to get, or create if it doesn't exist.</param>
         /// <returns>A <see cref="GuildModel"/>, which will have default properties if it did not exist.</returns>
         public Task<GuildModel> GetOrCreateGuildAsync(ulong guildId);
-        
+
         /// <summary>
         /// This method is used to update a <see cref="GuildModel"/>.
         /// </summary>
         /// <param name="guild">The guild to update.</param>
         public Task UpdateGuildAsync(GuildModel guild);
-        
+
         /// <summary>
         /// Get the configuration of a <see cref="GuildModel"/>.
         /// </summary>
@@ -55,7 +56,7 @@ namespace Silk.Core.Services.Interfaces
         /// <remarks>Remarks: This differs from <see cref="UpdateGuildUserAsync(UserModel, Action{UserModel})"/> in the sense that
         /// the object is updated externally, and is updated in the database.</remarks>
         public Task UpdateGuildUserAsync(UserModel user);
-        
+
         /// <summary>
         /// Get a <see cref="UserModel"/> from the database. Unlike <see cref="GetGuildUserAsync"/>, the object is never null
         /// as it's created internally before returning, if it's null.

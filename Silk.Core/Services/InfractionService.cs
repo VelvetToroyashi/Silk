@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,6 @@ using Silk.Core.Database.Models;
 using Silk.Core.Exceptions;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
-using Timer = System.Timers.Timer;
 
 namespace Silk.Core.Services
 {
@@ -21,7 +21,7 @@ namespace Silk.Core.Services
         private readonly IDatabaseService _dbService;
         private readonly ILogger<InfractionService> _logger;
         private readonly DiscordShardedClient _client;
-        
+
         private readonly List<UserInfractionModel> _tempInfractions = new();
         public InfractionService(ConfigService configService, IDatabaseService dbService, ILogger<InfractionService> logger, DiscordShardedClient client)
         {
@@ -49,7 +49,7 @@ namespace Silk.Core.Services
                 GuildModel guild = (await _dbService.GetGuildAsync(channel.Guild.Id))!;
                 DiscordEmbedBuilder embed = EmbedHelper
                     .CreateEmbed($"Case #{guild.Users.Sum(u => u.Infractions.Count)} | User {member.Mention}",
-                    $"{member.Mention} was kicked from the server by for ```{infraction.Reason}```", DiscordColor.PhthaloGreen);
+                        $"{member.Mention} was kicked from the server by for ```{infraction.Reason}```", DiscordColor.PhthaloGreen);
                 embed.WithFooter($"Staff member: <@{infraction.Enforcer}> | {infraction.Enforcer}");
 
                 await channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
@@ -59,7 +59,7 @@ namespace Silk.Core.Services
         public async Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
 
-            
+
             await member.BanAsync(0, infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
             if (config.GeneralLoggingChannel is 0)
@@ -117,9 +117,9 @@ namespace Silk.Core.Services
         }
         public async Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
         {
-            if (type is not (InfractionType.SoftBan or InfractionType.Mute)) 
+            if (type is not (InfractionType.SoftBan or InfractionType.Mute))
                 throw new ArgumentException("Is not a temporary infraction type!", nameof(type));
-            
+
             UserInfractionModel infraction = await CreateInfractionAsync(member, enforcer, type, reason);
             infraction.Expiration = expiration;
             return infraction;
@@ -136,7 +136,7 @@ namespace Silk.Core.Services
                 _logger.LogTrace($"Logging channel not configured for {guild.Id}.");
                 return;
             }
-            
+
             DiscordEmbed embed = EmbedHelper.CreateEmbed("Ban expired!", $"<@{inf.UserId}>'s ban has expired.", DiscordColor.Goldenrod);
             await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
         }
@@ -153,8 +153,8 @@ namespace Silk.Core.Services
                 _logger.LogTrace($"Unmuted {inf.UserId} | TempMute expired.");
             }
         }
-        
-        
+
+
         // I feel this is even worse than the abomination than I had before, which can be found here: //
         // https://haste.velvetthepanda.dev/biduliloze.cs //
         // Though it is smaller and less clunky, objectively speaking. //
@@ -162,7 +162,7 @@ namespace Silk.Core.Services
         {
             if (_tempInfractions.Count is 0) return;
             IEnumerable<IGrouping<ulong, UserInfractionModel>> infractions = _tempInfractions
-                .Where(i => ((DateTime)i.Expiration!).Subtract(DateTime.Now).Seconds < 0)
+                .Where(i => ((DateTime) i.Expiration!).Subtract(DateTime.Now).Seconds < 0)
                 .GroupBy(x => x.User.Guild.Id);
             foreach (var inf in infractions)
             {

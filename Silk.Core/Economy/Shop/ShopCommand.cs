@@ -23,7 +23,7 @@ namespace Silk.Core.Economy.Shop
         [Command]
         public async Task Global(CommandContext ctx)
         {
-            
+
             await ctx.RespondAsync("Placeholder global shop goes here");
         }
     }

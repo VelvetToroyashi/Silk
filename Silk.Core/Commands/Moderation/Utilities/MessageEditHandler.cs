@@ -59,7 +59,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
                     if (!invite.Success) return;
 
                     string inviteLink = string.Join("", e.Message.Content.Skip(invite.Index).TakeWhile(c => c != ' '))
-                                              .Replace("discord.com/invite", "discord.gg/");
+                        .Replace("discord.com/invite", "discord.gg/");
                     if (config.Configuration.AllowedInvites.All(link => link.VanityURL != inviteLink))
                         e.Message.DeleteAsync().GetAwaiter();
                 }

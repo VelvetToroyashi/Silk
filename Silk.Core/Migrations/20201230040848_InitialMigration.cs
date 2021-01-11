@@ -57,9 +57,7 @@ namespace Silk.Core.Migrations
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                });
+                constraints: table => { });
 
             migrationBuilder.CreateTable(
                 name: "Tickets",
@@ -349,7 +347,7 @@ namespace Silk.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_GuildId_UserId",
                 table: "UserInfractionModel",
-                columns: new[] { "GuildId", "UserId" });
+                columns: new[] {"GuildId", "UserId"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserInfractionModel_UserDatabaseId",

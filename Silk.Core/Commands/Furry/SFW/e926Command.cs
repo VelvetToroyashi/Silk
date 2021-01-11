@@ -48,13 +48,13 @@ namespace Silk.Core.Commands.Furry.SFW
             foreach (Post post in posts)
             {
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                            .WithTitle(query)
-                                            .WithDescription(
-                                                $"[Direct Link](https://e926.net/posts/{post.Id})\nDescription: {post.Description.Truncate(200)}")
-                                            .AddField("Score:", post.Score.Total.ToString())
-                                            .WithColor(DiscordColor.PhthaloBlue)
-                                            .WithImageUrl(post.File.Url)
-                                            .WithFooter("Limit: 7 img / 15 sec");
+                    .WithTitle(query)
+                    .WithDescription(
+                        $"[Direct Link](https://e926.net/posts/{post.Id})\nDescription: {post.Description.Truncate(200)}")
+                    .AddField("Score:", post.Score.Total.ToString())
+                    .WithColor(DiscordColor.PhthaloBlue)
+                    .WithImageUrl(post.File.Url)
+                    .WithFooter("Limit: 7 img / 15 sec");
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }

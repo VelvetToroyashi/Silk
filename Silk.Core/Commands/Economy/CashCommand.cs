@@ -34,8 +34,8 @@ namespace Silk.Core.Commands.Economy
             }
 
             DiscordEmbedBuilder eb = EmbedHelper
-                                     .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
-                                     .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
+                .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
             await ctx.RespondAsync(embed: eb);
         }
     }

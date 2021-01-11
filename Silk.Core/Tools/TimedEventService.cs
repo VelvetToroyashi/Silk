@@ -14,10 +14,11 @@ namespace Silk.Core.Tools
         public TimedEventService()
         {
             _timer.Start();
-            _timer.Elapsed += (s, o) => Events.ToList().ForEach(e =>
-            {
-                if (DateTime.Now > e.Expiration) e.Callback.Invoke(e);
-            });
+            _timer.Elapsed += (s, o) => Events.ToList()
+                .ForEach(e =>
+                {
+                    if (DateTime.Now > e.Expiration) e.Callback.Invoke(e);
+                });
         }
     }
 }

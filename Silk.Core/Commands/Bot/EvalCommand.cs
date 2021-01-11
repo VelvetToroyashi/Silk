@@ -33,10 +33,11 @@ namespace Silk.Core.Commands.Bot
             string cs = code.Substring(cs1, cs2 - cs1);
 
             msg = await ctx.RespondAsync("", embed: new DiscordEmbedBuilder()
-                                                    .WithColor(new DiscordColor("#FF007F"))
-                                                    .WithDescription("Evaluating...")
-                                                    .Build()).ConfigureAwait(false);
-                
+                    .WithColor(new DiscordColor("#FF007F"))
+                    .WithDescription("Evaluating...")
+                    .Build())
+                .ConfigureAwait(false);
+
             try
             {
                 var globals = new TestVariables(ctx.Message, ctx.Client, ctx);
@@ -46,8 +47,8 @@ namespace Silk.Core.Commands.Bot
                     "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
                 sopts = sopts.WithReferences(AppDomain.CurrentDomain.GetAssemblies()
-                                                      .Where(xa =>
-                                                          !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)));
+                    .Where(xa =>
+                        !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)));
 
                 Script<object> script = CSharpScript.Create(cs, sopts, typeof(TestVariables));
                 script.Compile();
@@ -55,39 +56,42 @@ namespace Silk.Core.Commands.Bot
 
                 if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-                    {
-                        Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
-                        Color = new DiscordColor("#007FFF")
-                    }.Build()).ConfigureAwait(false);
+                        {
+                            Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
+                            Color = new DiscordColor("#007FFF")
+                        }.Build())
+                        .ConfigureAwait(false);
                 else
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-                    {
-                        Title = "Evaluation Successful", Description = "No result was returned.",
-                        Color = new DiscordColor("#007FFF")
-                    }.Build()).ConfigureAwait(false);
+                        {
+                            Title = "Evaluation Successful", Description = "No result was returned.",
+                            Color = new DiscordColor("#007FFF")
+                        }.Build())
+                        .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-                {
-                    Title = "Evaluation Failure",
-                    Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
-                    Color = new DiscordColor("#FF0000")
-                }.Build()).ConfigureAwait(false);
+                    {
+                        Title = "Evaluation Failure",
+                        Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
+                        Color = new DiscordColor("#FF0000")
+                    }.Build())
+                    .ConfigureAwait(false);
             }
         }
-        
+
         private record TestVariables
         {
-            public DiscordMessage Message { get; set; }
-            public DiscordChannel Channel { get; set; }
-            public DiscordGuild Guild { get; set; }
-            public DiscordUser User { get; set; }
-            public DiscordMember Member { get; set; }
-            public CommandContext Context { get; set; }
-        
-            public DiscordClient Client { get; set; }
-        
+            public DiscordMessage Message { get; }
+            public DiscordChannel Channel { get; }
+            public DiscordGuild Guild { get; }
+            public DiscordUser User { get; }
+            public DiscordMember Member { get; }
+            public CommandContext Context { get; }
+
+            public DiscordClient Client { get; }
+
             public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
             {
                 Client = client;
@@ -96,7 +100,7 @@ namespace Silk.Core.Commands.Bot
                 Channel = msg.Channel;
                 Guild = Channel.Guild;
                 User = Message.Author;
-                
+
                 if (Guild != null) Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }

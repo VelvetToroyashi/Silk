@@ -29,7 +29,8 @@ namespace Silk.Core.Commands.Moderation.Ban
 
         [Command("tempban")]
         [RequireGuild]
-        public async Task TempBan(CommandContext ctx, DiscordMember user, string duration,
+        public async Task TempBan(
+            CommandContext ctx, DiscordMember user, string duration,
             [RemainingText] string reason = "Not provided.")
         {
             SilkDbContext db = DbFactory.CreateDbContext();
@@ -47,10 +48,10 @@ namespace Silk.Core.Commands.Moderation.Ban
             else
             {
                 DiscordEmbedBuilder banEmbed = new DiscordEmbedBuilder()
-                                               .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
-                                               .WithDescription(
-                                                   $"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
-                                               .AddField("Reason:", reason);
+                    .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
+                    .WithDescription(
+                        $"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
+                    .AddField("Reason:", reason);
 
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
@@ -80,7 +81,8 @@ namespace Silk.Core.Commands.Moderation.Ban
             }
         }
 
-        private static async Task SendFailureMessage(CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed,
+        private static async Task SendFailureMessage(
+            CommandContext ctx, DiscordUser user, DiscordEmbedBuilder embed,
             BanFailureReason reason)
         {
             embed.WithDescription(reason.FailureReason.Replace("$user", user.Mention));
@@ -142,8 +144,8 @@ namespace Silk.Core.Commands.Moderation.Ban
                     (await Client.GetGuildAsync(eventObject.Guild)).GetChannel(guild.Configuration.GeneralLoggingChannel);
                 DiscordUser u = await Client.GetUserAsync(eventObject.Id);
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithDescription($"{u.Mention}'s ban has expired.")
-                                                                     .WithColor(DiscordColor.PhthaloGreen)
-                                                                     .WithThumbnail(u.AvatarUrl);
+                    .WithColor(DiscordColor.PhthaloGreen)
+                    .WithThumbnail(u.AvatarUrl);
             }
 
             await (await Client.GetGuildAsync(eventObject.Guild)).UnbanMemberAsync(eventObject.Id,
