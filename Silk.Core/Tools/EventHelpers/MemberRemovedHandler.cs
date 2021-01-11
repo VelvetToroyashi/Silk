@@ -23,24 +23,24 @@ namespace Silk.Core.Tools.EventHelpers
         /// However a member with a case history will not be removed from the database.
         /// </summary>
         
-        public Task OnMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
+        public async Task OnMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
         {
-            
-            // This will be handled if a ban has been added, in which case we don't do anything //
-            try { }
-            catch (KeyNotFoundException) { } // DSP didn't cache this member //
-            if (e.Handled || e.Member.IsBot) return Task.CompletedTask;
+            if (e.Handled || e.Member.IsBot) return;
             e.Handled = true;
-            _ = Task.Run(async () =>
+            // This will be handled if a ban has been added, in which case we don't do anything //
+            try
             {
-                UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
-                if (user is null) return; // Doesn't exist in the DB. No point in continuing. //
-                if(user.Infractions.Any()) return; // They have infractions, and shouldn't be removed from the DB. //
+                _ = Task.Run(async () =>
+                {
+                    UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
+                    if (user is null) return; // Doesn't exist in the DB. No point in continuing. //
+                    if(user.Infractions.Any()) return; // They have infractions, and shouldn't be removed from the DB. //
 
-                await _dbService.RemoveUserAsync(user);
-                _logger.LogInformation($"{e.Member.Username} was removed from {e.Guild.Name}!");
-            });
-            return Task.CompletedTask;
+                    await _dbService.RemoveUserAsync(user);
+                    _logger.LogInformation($"{e.Member.Username} was removed from {e.Guild.Name}!");
+                });
+            }
+            catch (KeyNotFoundException) { } // DSP didn't cache this member //
         }
     }
 }

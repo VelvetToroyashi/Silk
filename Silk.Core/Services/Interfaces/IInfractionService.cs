@@ -17,6 +17,6 @@ namespace Silk.Core.Services.Interfaces
         public Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.");
         public Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null);
         public Task<bool> ShouldAddInfractionAsync(DiscordMember member);
-        public void AddTemporaryInfraction(UserInfractionModel infraction);
+        public Task<bool> HasActiveMuteAsync(DiscordMember member);
     }
 }

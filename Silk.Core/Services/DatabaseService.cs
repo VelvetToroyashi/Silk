@@ -19,7 +19,7 @@ namespace Silk.Core.Services
 
         // This is the only instance of an IDbContextFactory<T> we should need. //
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private ILogger<DatabaseService> _logger;
+        private readonly ILogger<DatabaseService> _logger;
 
         public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory, ILogger<DatabaseService> logger) => (_dbFactory, _logger) = (dbFactory, logger);
 
