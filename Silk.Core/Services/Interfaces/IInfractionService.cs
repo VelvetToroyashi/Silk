@@ -10,7 +10,16 @@ namespace Silk.Core.Services.Interfaces
     /// </summary>
     public interface IInfractionService
     {
-        public Task KickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
+        /// <summary>
+        /// Kick a member silently. No message is sent to the channel, but it is logged if the guild has it configured.
+        /// </summary>
+        public Task SilentKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
+        
+        /// <summary>
+        /// Kick a member verbosely, by logging to the appropriate log channel (if any), and the chanel the command was run in.
+        /// </summary>
+        public Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction, DiscordEmbed embed);
+        
         public Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
         public Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);
         public Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction);

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Database;
@@ -9,9 +10,10 @@ using Silk.Core.Database;
 namespace Silk.Core.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210112015308_RetroActiveNonEnforcement")]
+    partial class RetroActiveNonEnforcement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,7 +28,7 @@ namespace Silk.Core.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<int>("GuildId")
+                    b.Property<int>("GuildConfigId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Word")
@@ -35,7 +37,7 @@ namespace Silk.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("GuildConfigId");
 
                     b.ToTable("BlackListedWord");
                 });
@@ -90,7 +92,7 @@ namespace Silk.Core.Migrations
 
             modelBuilder.Entity("Silk.Core.Database.Models.GuildConfigModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ConfigId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
@@ -147,7 +149,7 @@ namespace Silk.Core.Migrations
                     b.Property<bool>("WarnOnMatchedInvite")
                         .HasColumnType("boolean");
 
-                    b.HasKey("Id");
+                    b.HasKey("ConfigId");
 
                     b.HasIndex("GuildId")
                         .IsUnique();
@@ -185,7 +187,7 @@ namespace Silk.Core.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<int?>("GuildConfigModelId")
+                    b.Property<int?>("GuildConfigModelConfigId")
                         .HasColumnType("integer");
 
                     b.Property<string>("GuildName")
@@ -198,7 +200,7 @@ namespace Silk.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildConfigModelId");
+                    b.HasIndex("GuildConfigModelConfigId");
 
                     b.ToTable("GuildInviteModel");
                 });
@@ -241,15 +243,15 @@ namespace Silk.Core.Migrations
 
             modelBuilder.Entity("Silk.Core.Database.Models.SelfAssignableRole", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<decimal>("RoleId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<int?>("GuildConfigModelId")
+                    b.Property<int?>("GuildConfigModelConfigId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("RoleId");
 
-                    b.HasIndex("GuildConfigModelId");
+                    b.HasIndex("GuildConfigModelConfigId");
 
                     b.ToTable("SelfAssignableRole");
                 });
@@ -340,25 +342,24 @@ namespace Silk.Core.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("UserDatabaseId")
-                        .HasColumnType("bigint");
-
                     b.Property<decimal>("UserId")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserDatabaseId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserInfractionModel");
                 });
 
             modelBuilder.Entity("Silk.Core.Database.Models.UserModel", b =>
                 {
-                    b.Property<long>("DatabaseId")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityByDefaultColumn();
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<long>("DatabaseId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Flags")
                         .HasColumnType("integer");
@@ -366,10 +367,7 @@ namespace Silk.Core.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("DatabaseId");
+                    b.HasKey("Id");
 
                     b.HasIndex("GuildId");
 
@@ -380,7 +378,7 @@ namespace Silk.Core.Migrations
                 {
                     b.HasOne("Silk.Core.Database.Models.GuildConfigModel", "Guild")
                         .WithMany("BlackListedWords")
-                        .HasForeignKey("GuildId")
+                        .HasForeignKey("GuildConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -413,7 +411,7 @@ namespace Silk.Core.Migrations
                 {
                     b.HasOne("Silk.Core.Database.Models.GuildConfigModel", null)
                         .WithMany("AllowedInvites")
-                        .HasForeignKey("GuildConfigModelId");
+                        .HasForeignKey("GuildConfigModelConfigId");
                 });
 
             modelBuilder.Entity("Silk.Core.Database.Models.ItemModel", b =>
@@ -431,7 +429,7 @@ namespace Silk.Core.Migrations
                 {
                     b.HasOne("Silk.Core.Database.Models.GuildConfigModel", null)
                         .WithMany("SelfAssignableRoles")
-                        .HasForeignKey("GuildConfigModelId");
+                        .HasForeignKey("GuildConfigModelConfigId");
                 });
 
             modelBuilder.Entity("Silk.Core.Database.Models.TicketMessageHistoryModel", b =>
@@ -449,7 +447,7 @@ namespace Silk.Core.Migrations
                 {
                     b.HasOne("Silk.Core.Database.Models.UserModel", "User")
                         .WithMany("Infractions")
-                        .HasForeignKey("UserDatabaseId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

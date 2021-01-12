@@ -19,11 +19,11 @@ namespace Silk.Core.Utilities
         {
             _logger.LogInformation("Subscribing to events.");
 
-            _client.MessageCreated += _services.Get<Tools.EventHelpers.MessageAddedHandler>().Commands;
+            _client.MessageCreated += (c, e) => _services.Get<Tools.EventHelpers.MessageAddedHandler>().Commands(c, e);
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
-            _client.MessageCreated += _services.Get<Tools.EventHelpers.MessageAddedHandler>().Tickets;
+            _client.MessageCreated += (c, e) =>  _services.Get<Tools.EventHelpers.MessageAddedHandler>().Tickets(c, e);
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            _client.MessageCreated += _services.Get<MessageAddedHandler>().Invites;
+            _client.MessageCreated += (c, e) => _services.Get<MessageAddedHandler>().Invites(c, e);
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckForInvites".PadLeft(40));
             _client.MessageDeleted += _services.Get<MessageRemovedHandler>().OnRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));

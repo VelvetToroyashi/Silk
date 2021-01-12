@@ -34,7 +34,11 @@ namespace Silk.Core.Utilities
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
 
-            else if (e.Exception is ArgumentException) _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+            else if (e.Exception.Message is "Could not find a suitable overload for the command.")
+            {
+                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+                _logger.LogWarning($"Invalid command paremeters {e.Command.Name} | {e.Context.RawArgumentString}");
+            }
 
             else if (e.Exception is ChecksFailedException cf)
             {

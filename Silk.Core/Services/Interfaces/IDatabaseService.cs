@@ -70,7 +70,7 @@ namespace Silk.Core.Services.Interfaces
         /// <summary>
         /// Get all users that match a predicate.
         /// </summary>
-        /// <param name="predicate">The function to apply to all users</param>
+        /// <param name="predicate">The expression to apply to all users</param>
         /// <returns>A collection of users that match the supplied predicate.</returns>
         public Task<IEnumerable<UserModel>> GetAllUsersAsync(Expression<Func<UserModel, bool>> predicate);
     }

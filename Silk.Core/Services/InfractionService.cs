@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -35,31 +36,26 @@ namespace Silk.Core.Services
         }
 
 
-        public async Task KickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
-        {
-            await member.RemoveAsync(infraction.Reason);
-            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
-            if (config.GeneralLoggingChannel is 0)
-            {
-                _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
-                await channel.SendMessageAsync($"Kicked **{member.Username}#{member.Discriminator}**!");
-            }
-            else
-            {
-                GuildModel guild = (await _dbService.GetGuildAsync(channel.Guild.Id))!;
-                DiscordEmbedBuilder embed = EmbedHelper
-                    .CreateEmbed($"Case #{guild.Users.Sum(u => u.Infractions.Count)} | User {member.Mention}",
-                        $"{member.Mention} was kicked from the server by for ```{infraction.Reason}```", DiscordColor.PhthaloGreen);
-                embed.WithFooter($"Staff member: <@{infraction.Enforcer}> | {infraction.Enforcer}");
+        public async Task SilentKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction) { throw new NotImplementedException(); }
 
-                await channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
-            }
+        public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction, DiscordEmbed embed)
+        {
+            var sw = Stopwatch.StartNew();
+            _ = member.RemoveAsync(infraction.Reason);
+            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+
+            if (config.GeneralLoggingChannel is 0)
+                _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
+            else
+                _ = channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
+
+            _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
+            sw.Stop();
+            _logger.LogTrace($"{sw.ElapsedMilliseconds} ms");
         }
 
         public async Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
-
-
             await member.BanAsync(0, infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
             if (config.GeneralLoggingChannel is 0)

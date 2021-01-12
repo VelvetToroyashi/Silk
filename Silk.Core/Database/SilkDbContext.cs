@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database.Models;
 
@@ -6,7 +7,6 @@ namespace Silk.Core.Database
 {
     public class SilkDbContext : DbContext
     {
-        #pragma warning disable 
         [NotNull]
         public DbSet<GuildModel> Guilds { get; set; }
         [NotNull]
@@ -32,29 +32,11 @@ namespace Silk.Core.Database
         public DbSet<GuildConfigModel> GuildConfigs { get; set; }
 
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
-
-
-        // TODO: Clean this up
-
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<UserModel>().HasOne(g => g.Guild);
-
-            builder.Entity<UserInfractionModel>().HasIndex(a => a.Id);
-            builder.Entity<GuildModel>().HasOne(g => g.Configuration).WithOne(g => g.Guild).HasForeignKey<GuildConfigModel>(g => g.GuildId);
-
-            builder.Entity<GuildModel>().HasKey(g => g.Id);
-            builder.Entity<GuildModel>().Property(g => g.Id).ValueGeneratedNever();
-
-            builder.Entity<GuildConfigModel>().HasKey(c => c.ConfigId);
-            builder.Entity<SelfAssignableRole>().HasKey(r => r.RoleId);
-            builder.Entity<UserModel>().HasMany(u => u.Infractions).WithOne(i => i.User);
-            builder.Entity<GuildModel>().HasMany(u => u.Users);
-            builder.Entity<TicketResponderModel>().HasNoKey();
-            builder.Entity<TicketMessageHistoryModel>()
-                .HasOne(ticket => ticket.TicketModel)
-                .WithMany(ticket => ticket.History);
-            builder.Entity<SelfAssignableRole>().Property(r => r.RoleId).ValueGeneratedNever();
+            builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel).WithMany(ticket => ticket.History);
+            builder.Entity<SelfAssignableRole>().Property(r => r.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }
     }

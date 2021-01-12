@@ -7,28 +7,33 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Tools.EventHelpers
 {
     public class MessageRemovedHandler
     {
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDatabaseService _dbService;
 
-        public MessageRemovedHandler(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public MessageRemovedHandler(IDatabaseService dbService) => _dbService = dbService;
 
         public async Task OnRemoved(DiscordClient c, MessageDeleteEventArgs e)
         {
-            if (e.Message!.Author is null || e.Message is null) return; // Message isn't cached. //
-            if (e.Message!.Author!.IsCurrent) return; // Self-evident. //                       //
-            if (e.Channel.IsPrivate) return; // Goes without saying.                   //
-            if (e.Guild is null) return; // Message is in private channel.         //
+            if (e.Message?.Author is null || e.Message is null) return; // Message isn't cached. //
+            if (e.Message.Author.IsCurrent) return; // Self-evident.                  //
+            if (e.Channel.IsPrivate) return; // Goes without saying.                           //
+            _ = Task.Run(async () =>
+            {
+                GuildConfigModel config = await _dbService.GetConfigAsync(e.Guild.Id);
 
-            GuildModel guild = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
-
-            if (!guild.Configuration.LogMessageChanges) return;
-            DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
-            DiscordChannel channel = await c.GetChannelAsync(guild.Configuration.GeneralLoggingChannel);
-            await channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                if (!config.LogMessageChanges) return;
+                if (config.GeneralLoggingChannel is 0) return;
+            
+                DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
+                DiscordChannel channel = await c.GetChannelAsync(config.GeneralLoggingChannel);
+                await channel.SendMessageAsync(embed).ConfigureAwait(false);
+            });
+            
         }
 
         private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e, DateTime now) => new DiscordEmbedBuilder()

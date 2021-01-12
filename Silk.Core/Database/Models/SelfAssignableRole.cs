@@ -2,6 +2,6 @@
 {
     public class SelfAssignableRole
     {
-        public ulong RoleId { get; set; }
+        public ulong Id { get; set; }
     }
 }

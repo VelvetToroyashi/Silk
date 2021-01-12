@@ -32,7 +32,7 @@ namespace Silk.Core.Commands.Roles
 
             GuildModel guild = await db.Guilds.Include(g => g.Configuration.SelfAssignableRoles).FirstAsync(g => g.Id == ctx.Guild.Id);
 
-            IEnumerable<ulong> currentlyAssignableRoles = guild.Configuration.SelfAssignableRoles.Select(r => r.RoleId);
+            IEnumerable<ulong> currentlyAssignableRoles = guild.Configuration.SelfAssignableRoles.Select(r => r.Id);
 
             List<string> added = new();
             List<string> removed = new();
@@ -42,14 +42,14 @@ namespace Silk.Core.Commands.Roles
                 if (currentlyAssignableRoles.Any(r => r == role.Id))
                 {
                     removed.Add(role.Mention);
-                    var r = guild.Configuration.SelfAssignableRoles.Single(ro => ro.RoleId == role.Id);
+                    var r = guild.Configuration.SelfAssignableRoles.Single(ro => ro.Id == role.Id);
                     guild.Configuration.SelfAssignableRoles.Remove(r);
                     //await db.SaveChangesAsync();
                 }
                 else
                 {
                     added.Add(role.Mention);
-                    var r = new SelfAssignableRole {RoleId = role.Id};
+                    var r = new SelfAssignableRole {Id = role.Id};
                     guild.Configuration.SelfAssignableRoles.Add(r);
                     //await db.SaveChangesAsync();
                 }

@@ -105,7 +105,7 @@ namespace Silk.Core.Services
             if (user is null)
             {
                 //VALID
-                user = new UserModel {Id = userId, Flags = UserFlag.None, Guild = guild};
+                user = new UserModel {Id = userId, Flags = UserFlag.None };
                 guild.Users.Add(user);
                 await db.SaveChangesAsync();
             }
