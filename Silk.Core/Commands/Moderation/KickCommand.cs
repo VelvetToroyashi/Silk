@@ -66,11 +66,7 @@ namespace Silk.Core.Commands.Moderation
 
 
                 UserModel mUser = await _dbService.GetOrCreateUserAsync(ctx.Guild.Id, user.Id);
-                await _dbService.UpdateGuildUserAsync(mUser, u => u.Infractions.Add(new()
-                {
-                    Enforcer = ctx.User.Id, Reason = reason ?? "Not provided", InfractionType = Database.Models.InfractionType.Kick,
-                    InfractionTime = DateTime.Now
-                }));
+                // Todo: use IInfractionService.cs 
 
                 try
                 {

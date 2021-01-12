@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -94,14 +95,7 @@ namespace Silk.Core.Services
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
-
-        public async Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction)
-        {
-            await using SilkDbContext db = GetContext();
-            db.Attach(user);
-            updateAction(user);
-            await db.SaveChangesAsync();
-        }
+        
 
         public async Task<UserModel> GetOrCreateUserAsync(ulong guildId, ulong userId)
         {
@@ -110,9 +104,9 @@ namespace Silk.Core.Services
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             if (user is null)
             {
+                //VALID
                 user = new UserModel {Id = userId, Flags = UserFlag.None, Guild = guild};
-                db.Users.Add(user);
-                //db.Update(guild);
+                guild.Users.Add(user);
                 await db.SaveChangesAsync();
             }
             return user;
@@ -129,7 +123,7 @@ namespace Silk.Core.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<UserModel>> GetAllUsersAsync(Func<UserModel, bool> predicate)
+        public async Task<IEnumerable<UserModel>> GetAllUsersAsync(Expression<Func<UserModel, bool>> predicate)
         {
             await using SilkDbContext db = GetContext();
             return db.Users.Where(predicate);

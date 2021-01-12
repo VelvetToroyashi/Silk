@@ -81,7 +81,7 @@ namespace Silk.Core.Commands.Bot
             }
         }
 
-        private record TestVariables
+        public record TestVariables
         {
             public DiscordMessage Message { get; }
             public DiscordChannel Channel { get; }

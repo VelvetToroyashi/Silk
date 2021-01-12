@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Silk.Core.Database.Models;
 
@@ -43,12 +44,7 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         /// <returns>A <see cref="UserModel"/>, or null if the user doesn't exist.</returns>
         public Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId);
-
-        /// <summary>
-        ///     Update a <see cref="UserModel" />.
-        /// </summary>
-        public Task UpdateGuildUserAsync(UserModel user, Action<UserModel> updateAction);
-
+        
         /// <summary>
         /// Update a <see cref="UserModel"/>
         /// </summary>
@@ -76,6 +72,6 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         /// <param name="predicate">The function to apply to all users</param>
         /// <returns>A collection of users that match the supplied predicate.</returns>
-        public Task<IEnumerable<UserModel>> GetAllUsersAsync(Func<UserModel, bool> predicate);
+        public Task<IEnumerable<UserModel>> GetAllUsersAsync(Expression<Func<UserModel, bool>> predicate);
     }
 }

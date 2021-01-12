@@ -28,7 +28,7 @@ namespace Silk.Core.Tools.EventHelpers
                 UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
                 if (user is null) return;
                 user.Flags.Remove(UserFlag.Staff);
-                await _dbService.UpdateGuildUserAsync(user, u => u.Flags.Remove(UserFlag.Staff));
+                await _dbService.UpdateGuildUserAsync(user);
                 Log.Logger.Information($"Removed staff role from {e.Member.Username}");
             });
             return Task.CompletedTask;
