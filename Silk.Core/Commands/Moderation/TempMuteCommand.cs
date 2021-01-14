@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 
@@ -16,7 +17,12 @@ namespace Silk.Core.Commands.Moderation
     public class TempMuteCommand : BaseCommandModule
     {
         private readonly ConfigService _dbService;
-        public TempMuteCommand(ConfigService dbService) => _dbService = dbService;
+        private readonly IInfractionService _infractionService;
+        public TempMuteCommand(ConfigService dbService, IInfractionService infractionService)
+        {
+            _dbService = dbService;
+            _infractionService = infractionService;
+        }
 
         [Command("Mute")]
         [RequirePermissions(Permissions.ManageRoles)]
@@ -32,16 +38,12 @@ namespace Silk.Core.Commands.Moderation
 
             if (config.MuteRoleId is 0)
             {
-                await ctx.RespondAsync("You haven't setup the mute role :(").ConfigureAwait(false);
+                await ErrorHelper.MuteRoleNotFoundInDatabase(ctx.Channel);
                 return;
             }
 
-
-            await user.GrantRoleAsync(ctx.Guild.GetRole(config.MuteRoleId), reason);
+            UserInfractionModel infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member, InfractionType.Mute, reason, DateTime.Now.Add(duration));
+            await _infractionService.MuteAsync(user, ctx.Channel, infraction);
         }
-
-
-
-
-    }
+        }
 }

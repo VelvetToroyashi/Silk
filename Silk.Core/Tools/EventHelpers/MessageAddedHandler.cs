@@ -38,7 +38,7 @@ namespace Silk.Core.Tools.EventHelpers
                 await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
             });
 
-        public Task Commands(DiscordClient c, MessageCreateEventArgs e) =>
+        public async Task Commands(DiscordClient c, MessageCreateEventArgs e) =>
             _ = Task.Run(async () =>
             {
                 if (e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return;

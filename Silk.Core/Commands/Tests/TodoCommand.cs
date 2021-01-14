@@ -24,8 +24,11 @@ namespace Silk.Core.Commands.Tests
                     .WithDescription(message)
                     .WithTimestamp(DateTime.Now.ToUniversalTime())
                     .Build();
+                await new DiscordMessageBuilder().WithReply(ctx.Message.Id).WithEmbed(embed).SendAsync(channel);
                 
-                await channel.SendMessageAsync(embed);
+                
+                
+                //await channel.SendMessageAsync(embed);
             }
         }
     }

@@ -7,6 +7,7 @@ using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Exceptions;
 using Silk.Core.Services.Interfaces;
@@ -58,6 +59,7 @@ namespace Silk.Core.Services
         {
             await member.BanAsync(0, infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            await ApplyInfractionAsync(infraction.User, infraction);
             if (config.GeneralLoggingChannel is 0)
             {
                 _logger.LogWarning($"No available logging channel for guild! | {member.Guild.Id}");
@@ -67,16 +69,19 @@ namespace Silk.Core.Services
             {
                 GuildModel guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
                 int infractions = guild.Users.Sum(u => u.Infractions.Count);
-                DiscordEmbedBuilder embed = EmbedHelper
-                    .CreateEmbed($"Case #{infractions} | User {member.Username}",
-                        $"{member.Mention} was banned from the server by for ```{infraction.Reason}```", DiscordColor.IndianRed);
-                embed.WithFooter($"Staff member: {infraction.Enforcer}");
+                
+                DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed($"Case #{infractions} | User {member.Username}",
+                    $"{member.Mention} was banned from the server by for ```{infraction.Reason}```", DiscordColor.IndianRed)
+                    .WithFooter($"Staff member: {infraction.Enforcer}");
 
                 await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
-                await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
+                await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
             }
         }
-        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction) { }
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
+        {
+            
+        }
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
             GuildConfigModel config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
@@ -148,6 +153,12 @@ namespace Silk.Core.Services
                 await mutedMember.RevokeRoleAsync(guild.Roles[config.MuteRoleId], "Temporary mute expired.");
                 _logger.LogTrace($"Unmuted {inf.UserId} | TempMute expired.");
             }
+        }
+
+        private async Task ApplyInfractionAsync(UserModel user, UserInfractionModel infraction)
+        {
+            user.Infractions.Add(infraction);
+            await _dbService.UpdateGuildUserAsync(user);
         }
 
 

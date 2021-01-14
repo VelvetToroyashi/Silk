@@ -50,7 +50,7 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.11" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00773" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00777" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00773" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00773" />
     <PackageReference Include="Humanizer" Version="2.8.26" />

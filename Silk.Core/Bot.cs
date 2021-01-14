@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,12 +53,16 @@ namespace Silk.Core
         private void InitializeCommands()
         {
             var sw = Stopwatch.StartNew();
-
-            foreach (DiscordClient shard in Client.ShardClients.Values)
-                shard.GetCommandsNext().RegisterCommands(Assembly.GetExecutingAssembly());
+            Assembly asm = Assembly.GetExecutingAssembly();
+            IReadOnlyDictionary<int, CommandsNextExtension> cNext = Client.GetCommandsNextAsync().GetAwaiter().GetResult();
+            CommandsNextExtension[] extension = cNext.Select(c => c.Value).ToArray();
+            
+            
+            // The compiler can unwrap(?) this I believe. Either way for > foreach anyway. //
+            for(var i = 0; i < extension.Length; i++) { extension[i].RegisterCommands(asm); }
 
             sw.Stop();
-            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shards in {sw.ElapsedMilliseconds} ms.");
+            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shard(s) in {sw.ElapsedMilliseconds} ms.");
         }
 
         private async Task InitializeClientAsync()
@@ -68,13 +74,13 @@ namespace Silk.Core
                 IgnoreExtraArguments = true
             };
             Client.Ready += async (_, _) => _logger.LogInformation("Recieved OP 10 - HELLO from Discord on shard 1!");
-
+            await Client.StartAsync();
 
             await Client.UseCommandsNextAsync(Commands);
             await _exceptionHelper.SubscribeToEventsAsync();
             _eventSubscriber.SubscribeToEvents();
             InitializeCommands();
-            await Client.StartAsync();
+            
             await Client.UseInteractivityAsync(new InteractivityConfiguration
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -83,16 +89,18 @@ namespace Silk.Core
                 Timeout = TimeSpan.FromMinutes(1),
             });
 
-
-
-            var cmdNext = await Client.GetCommandsNextAsync();
-            foreach (CommandsNextExtension c in cmdNext.Values)
+            
+            IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
+            CommandsNextExtension[] cmd = cmdNext.Select(c => c.Value).ToArray();
+            var memberConverter = new MemberConverter();
+            
+            for (int i = 0; i < cmd.Length; i++)
             {
-                c.SetHelpFormatter<HelpFormatter>();
-                c.RegisterConverter(new MemberConverter());
+                cmd[i].SetHelpFormatter<HelpFormatter>();
+                cmd[i].RegisterConverter(memberConverter);
             }
 
-            _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Seconds} seconds.");
+            _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Milliseconds} ms.");
 
 
         }

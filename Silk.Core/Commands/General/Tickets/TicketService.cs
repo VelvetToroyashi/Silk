@@ -23,7 +23,6 @@ namespace Silk.Core.Commands.General.Tickets
 
 
         // private readonly DatabaseService _dbService;
-        // TODO: Complete closing precedure, because apparently I'm an idiot and forgot about it ~Velvet.
         public TicketService(DiscordShardedClient client, ILogger<TicketService> logger, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _client = client;
@@ -111,7 +110,7 @@ namespace Silk.Core.Commands.General.Tickets
                 ticketChannels.TryRemove(userId, out _);
                 IEnumerable<KeyValuePair<ulong, DiscordMember>> members = _client.ShardClients.Values.SelectMany(s => s.Guilds.Values).SelectMany(g => g.Members);
                 DiscordMember member = members.SingleOrDefault(m => m.Key == userId)!.Value;
-                await member.SendMessageAsync(embed: TicketEmbedHelper.GenerateTicketClosedEmbed());
+                await member.SendMessageAsync(TicketEmbedHelper.GenerateTicketClosedEmbed());
             }
             catch
             {
@@ -154,9 +153,8 @@ namespace Silk.Core.Commands.General.Tickets
         public static ulong GetTicketUser(DiscordChannel channel)
         {
             foreach ((ulong k, ulong v) in ticketChannels)
-            {
                 if (v == channel.Id) return k;
-            }
+            
             throw new KeyNotFoundException("Invalid ticket channel.");
         }
 
@@ -170,14 +168,7 @@ namespace Silk.Core.Commands.General.Tickets
         {
             // If the message is sent on a guild, check if it's a ticket channel, else follow normal check flow. //
             if (!c.IsPrivate)
-            {
-                try
-                {
-                    _ = ticketChannels[id];
-                }
-                catch (KeyNotFoundException) { return false; }
-                return true;
-            }
+                return ticketChannels.ContainsKey(id);
 
             SilkDbContext db = _dbFactory.CreateDbContext();
 
@@ -190,12 +181,11 @@ namespace Silk.Core.Commands.General.Tickets
 
         private async ValueTask<DiscordChannel> GetOrCreateTicketCategoryAsync()
         {
-            if (!TryGetSilkGuild(out DiscordGuild silk))
-            {
+            if (!TryGetSilkGuild(out DiscordGuild? silk))
                 throw new KeyNotFoundException("Tickets aren't supported on self-hosted builds :(");
-            }
+            
 
-            DiscordChannel? ticketCategory = silk.Channels.Values.FirstOrDefault(x => x.Name == "Silk! Tickets" && x.IsCategory);
+            DiscordChannel? ticketCategory = silk!.Channels.Values.FirstOrDefault(x => x.Name == "Silk! Tickets" && x.IsCategory);
 
             if (ticketCategory is not null) return ticketCategory;
 
