@@ -35,6 +35,7 @@ namespace Silk.Core.Database
         
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.ApplyConfigurationsFromAssembly(typeof(SilkDbContext).Assembly);
             builder.Entity<TicketMessageHistoryModel>().HasOne(ticket => ticket.TicketModel).WithMany(ticket => ticket.History);
             builder.Entity<SelfAssignableRole>().Property(r => r.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);

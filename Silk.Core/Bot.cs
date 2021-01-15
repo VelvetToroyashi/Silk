@@ -101,8 +101,7 @@ namespace Silk.Core
             }
 
             _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Milliseconds} ms.");
-
-
+            
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
