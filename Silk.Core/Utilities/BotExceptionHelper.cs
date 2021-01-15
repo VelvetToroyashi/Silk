@@ -39,7 +39,11 @@ namespace Silk.Core.Utilities
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
                 _logger.LogWarning($"Invalid command paremeters {e.Command.Name} | {e.Context.RawArgumentString}");
             }
-
+            else if (e.Exception is ArgumentException ae)
+            {
+                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+                _logger.LogWarning(ae.Message);
+            }
             else if (e.Exception is ChecksFailedException cf)
             {
                 switch (cf.FailedChecks[0])

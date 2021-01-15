@@ -50,9 +50,9 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00773" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00779" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00779" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00779" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
@@ -103,10 +103,6 @@
     <Compile Remove="Utilities\CommandHelper.cs" />
     <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
     <Compile Remove="Commands\Bot\Restart.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\Tests" />
   </ItemGroup>
   
 </Project>

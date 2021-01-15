@@ -15,7 +15,7 @@ namespace Silk.Extensions.DSharpPlus
         /// <returns>The builder to allow more calls to be chained.</returns>
         public static DiscordMessageBuilder WithoutMentions(this DiscordMessageBuilder builder)
         {
-            builder.WithAllowedMentions(new List<IMention>());
+            builder.WithAllowedMentions(Mentions.None);
             return builder;
         }
         /// <summary>
