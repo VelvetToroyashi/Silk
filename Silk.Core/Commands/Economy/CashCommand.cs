@@ -21,7 +21,7 @@ namespace Silk.Core.Commands.Economy
         }
 
         [Command("Cash")]
-        [Aliases("Money")]
+        [Aliases("Money", "bal", "balance", "bank")]
         public async Task Cash(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
