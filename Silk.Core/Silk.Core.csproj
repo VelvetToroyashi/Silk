@@ -104,5 +104,9 @@
     <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
     <Compile Remove="Commands\Bot\Restart.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\Tests" />
+  </ItemGroup>
   
 </Project>
