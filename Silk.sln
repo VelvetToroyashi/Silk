@@ -3,20 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silk.Extensions", "Silk.Extensions\Silk.Extensions.csproj", "{C1BFAFBB-9E7B-468E-8E03-B5789926FE31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silk.Extensions", "src\Silk.Extensions\Silk.Extensions.csproj", "{C1BFAFBB-9E7B-468E-8E03-B5789926FE31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8ED19367-810B-4E78-B1B5-6B81E9E01718}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Items", "Silk.Items\Silk.Items.csproj", "{A0532438-6CC0-4C98-85D1-EAA6E010D86C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Items", "src\Silk.Items\Silk.Items.csproj", "{A0532438-6CC0-4C98-85D1-EAA6E010D86C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core", "Silk.Core\Silk.Core.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core", "src\Silk.Core\Silk.Core.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Dashboard", "Silk.Dashboard\Silk.Dashboard.csproj", "{EDCE6CD1-EA9F-4912-9C18-ACE8CD56E27B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.UnitTests", "Silk.UnitTests\Silk.UnitTests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.UnitTests", "src\Silk.UnitTests\Silk.UnitTests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FE9BF140-0795-4CBE-A5A1-E37A36081587}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,5 +106,11 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C9325801-41C7-49BC-B6E2-D5AC05A6AA0C}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B3A34F01-C1B1-4081-B19A-E24821105683} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
+		{C1BFAFBB-9E7B-468E-8E03-B5789926FE31} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
+		{A0532438-6CC0-4C98-85D1-EAA6E010D86C} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
+		{C8175039-89F8-4798-9282-98BDF91FD0C5} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 	EndGlobalSection
 EndGlobal
