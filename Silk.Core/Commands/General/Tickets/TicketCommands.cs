@@ -42,8 +42,7 @@ namespace Silk.Core.Commands.General.Tickets
         [Description("Close the ticket the current channel corresponds to.")]
         public async Task Close(CommandContext ctx)
         {
-            try { await _ticketService.CloseTicket(ctx.Channel); }
-            catch (InvalidOperationException e) { await ctx.RespondAsync(e.Message).ConfigureAwait(false); }
+            await _ticketService.CloseTicket(ctx.Message);
         }
 
         [Command]

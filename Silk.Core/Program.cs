@@ -17,7 +17,7 @@ namespace Silk.Core
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
-        public static string HttpClientName { get; } = "SilkBot";
+        public static string HttpClientName { get; } = "Silk";
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {

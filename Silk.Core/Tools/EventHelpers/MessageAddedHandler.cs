@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using Serilog;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
@@ -26,7 +27,6 @@ namespace Silk.Core.Tools.EventHelpers
 
         public Task Tickets(DiscordClient c, MessageCreateEventArgs e)
         {
-            
             _ = Task.Run(async () =>
             {
                 if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
@@ -38,8 +38,18 @@ namespace Silk.Core.Tools.EventHelpers
                 if (member is null) return; // Member doesn't exist anymore // 
 
                 DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author);
-
-                await member.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                try
+                {
+                    await member.SendMessageAsync(embed).ConfigureAwait(false);
+                }
+                catch (UnauthorizedException)
+                {
+                    var builder = new DiscordMessageBuilder();
+                    builder.WithReply(e.Message.Id, true);
+                    builder.WithContent("I couldn't message that user! They've either closed their DMs or left all mutual servers!");
+                    
+                    await e.Channel.SendMessageAsync(builder);
+                }
             });
             return Task.CompletedTask;
         }

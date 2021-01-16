@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -83,8 +84,10 @@ namespace Silk.Core.Commands.General.Tickets
         /// <returns></returns>
         public async Task AddHistoryAsync(string message, ulong user, TicketModel ticket)
         {
-            ticket.History.Add(new TicketMessageHistoryModel {Message = message, Sender = user});
-            await _dbFactory.CreateDbContext().SaveChangesAsync();
+            ticket.History.Add(new TicketMessageHistoryModel {Message = message, Sender = user, TicketModel = ticket});
+            await using var db = _dbFactory.CreateDbContext();
+            db.Attach(ticket);
+            await db.SaveChangesAsync();
         }
 
 
@@ -96,16 +99,16 @@ namespace Silk.Core.Commands.General.Tickets
             .Last()
             .IsOpen;
 
-        public async Task CloseTicket(DiscordChannel channel)
+        public async Task CloseTicket(DiscordMessage message)
         {
             try
             {
-                ulong userId = GetTicketUser(channel);
-                SilkDbContext db = _dbFactory.CreateDbContext();
+                ulong userId = GetTicketUser(message.Channel);
+                await using SilkDbContext db = _dbFactory.CreateDbContext();
                 TicketModel ticket = await GetTicketAsync(userId, db);
                 ticket.Closed = DateTime.Now;
                 ticket.IsOpen = false;
-                await channel.DeleteAsync();
+                await message.Channel.DeleteAsync();
                 await db.SaveChangesAsync();
                 ticketChannels.TryRemove(userId, out _);
                 IEnumerable<KeyValuePair<ulong, DiscordMember>> members = _client.ShardClients.Values.SelectMany(s => s.Guilds.Values).SelectMany(g => g.Members);
@@ -114,7 +117,10 @@ namespace Silk.Core.Commands.General.Tickets
             }
             catch
             {
-                throw new InvalidOperationException("Not a ticket channel!");
+                var builder = new DiscordMessageBuilder()
+                    .WithContent("This isn't a ticket channel!")
+                    .WithReply(message.Id, true);
+                await message.Channel.SendMessageAsync(builder);
             }
         }
 
