@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Silk.Core\Silk.Core.csproj" />
+      <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj" />
     </ItemGroup>
 
 </Project>
