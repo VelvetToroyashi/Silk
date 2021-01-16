@@ -8,6 +8,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using Silk.Core.Database.Models;
+using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
@@ -17,6 +19,7 @@ namespace Silk.Core.Commands.Tests
     public class RoleMenuCommand : BaseCommandModule
     {
         [Command("create")]
+        [RequireFlag(UserFlag.Staff)]
         public async Task CreateCommand(CommandContext ctx, [RemainingText] params DiscordRole[] roles)
         {
             var builder = new DiscordMessageBuilder();
@@ -82,7 +85,7 @@ namespace Silk.Core.Commands.Tests
                 await ctx.RespondAsync(builder);
                 return;
             }
-
+            builder.WithReply(default);
             for (int i = 0; i < roles.Length; i++)
             {
                 builder.WithReply(0);

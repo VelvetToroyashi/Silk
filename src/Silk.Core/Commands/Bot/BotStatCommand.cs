@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -23,17 +24,18 @@ namespace Silk.Core.Commands.Bot
         {
             using var process = Process.GetCurrentProcess();
             int guildCount = ctx.Client.Guilds.Count;
-
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+            int memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+            embed
                 .WithTitle("Stats for Silk!:")
                 .WithColor(DiscordColor.Gold)
                 .AddField("Latency", $"{ctx.Client.Ping}ms", true)
                 .AddField("Total guilds", $"{guildCount}", true)
+                .AddField("Total Members", $"{memberCount}", true)
                 .AddField("Shards", $"{ctx.Client.ShardCount}", true)
                 .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB", true)
                 .AddField("Threads", $"{process.Threads.Count}", true)
-                .AddField("Uptime",
-                    (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second));
+                .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
             await ctx.RespondAsync(embed: embed);
         }
     }
