@@ -43,7 +43,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="docker-compose.yml" />
     <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
@@ -88,10 +87,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
     <ProjectReference Include="..\Silk.Items\Silk.Items.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
