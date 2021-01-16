@@ -61,6 +61,27 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 
 <br/>
 
+### Running the Project
+
+- If you're starting fresh, just cloned the repo, then you'll need to make sure you've done the needed [configuration](#configuration--secrets-management), before running or debugging Silk.
+
+- If you're already using Silk, you may need to do any or all of the following to ensure that you have everything you need to run the latest and greatest!
+
+<br/>
+
+#### Update your PostgeSQL database to the latest migration
+1. If you have `dotnet ef` command line tools installed, you can run the following command in the ```src/Silk.Core``` folder to apply the latest migration
+   - ```
+     dotnet ef database update
+     ``` 
+   - You can install the `dotnet ef` command line tool by following this document [Entity Framework Core Tools CLI](https://docs.microsoft.com/en-us/ef/core/cli/dotnet)
+
+2. If you're using Visual Studio you can this command using the ` Package Manager Console`
+   - ```
+     Update-Database
+     ``` 
+   - You can install the `Package Manager Console` tools by following this document [Entity Framework Core Tools - Package Manager Console in Visual Studio](https://docs.microsoft.com/en-us/ef/core/cli/powershell)
+
 ---
 
 <br/>
