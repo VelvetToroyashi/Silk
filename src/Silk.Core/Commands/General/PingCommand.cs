@@ -18,14 +18,17 @@ namespace Silk.Core.Commands.General
         public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
         [Command("ping")]
+        [Description("Check the responsiveness of Silk")]
         public async Task Ping(CommandContext ctx)
         {
             Core.Bot.CommandTimer.Stop();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blue);
+            
             var sw = Stopwatch.StartNew();
             DiscordMessage message = await ctx.RespondAsync(embed: embed);
             sw.Stop();
+            
             await Task.Delay(100);
             var silkAPIResponse = await new Ping().SendPingAsync("velvetthepanda.dev");
             embed
@@ -37,6 +40,7 @@ namespace Silk.Core.Commands.General
                 .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("​", "​", true)
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
+            
             await message.ModifyAsync(embed: embed.Build());
         }
 

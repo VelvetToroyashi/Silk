@@ -10,7 +10,8 @@ namespace Silk.Core.Commands.General
     [Category(Categories.General)]
     public class Enbiggen : BaseCommandModule
     {
-        [Command("Enlarge")]
+        [Command("enlarge")]
+        [Description("Enlarge an emoji!")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
         {
             // _ = emoji.Id == 0:
@@ -33,6 +34,7 @@ namespace Silk.Core.Commands.General
                     .WithDescription($"Emoji Name: {emoji.GetDiscordName()}")
                     .WithImageUrl(emoji.Url)
                     .WithColor(new DiscordColor("42d4f5"));
+                
                 builder.WithEmbed(embed).WithReply(ctx.Message.Id, true);
                 await builder.SendAsync(ctx.Channel);
             }

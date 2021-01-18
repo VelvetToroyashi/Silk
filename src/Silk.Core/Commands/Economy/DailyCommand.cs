@@ -21,7 +21,8 @@ namespace Silk.Core.Commands.Economy
 
         public DailyCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
-        [Command("Daily")]
+        [Command("daily")]
+        [Description("Collect daily economy account cash!")]
         public async Task DailyMoney(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
@@ -32,12 +33,14 @@ namespace Silk.Core.Commands.Economy
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.Green)
-                    .WithDescription(
-                        "It appears this is your first time I've seen you. I'm feeling extra generous, and have given you an extra three hundred dollars" +
-                        " on top of normal daily rates *:)* Don't spend it all in one place~")
+                    .WithDescription("It appears this is your first time I've seen you. " +
+                                     "I'm feeling extra generous, and have given you an extra three hundred dollars" +
+                                     " on top of normal daily rates *:)* Don't spend it all in one place~")
                     .WithTitle("Collected $500, come back in 24h for $200 more!");
-                await ctx.RespondAsync(embed: embed);
+
                 db.GlobalUsers.Add(user);
+                
+                await ctx.RespondAsync(embed: embed);
                 await db.SaveChangesAsync();
             }
             else
@@ -47,7 +50,9 @@ namespace Silk.Core.Commands.Economy
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                         .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                         .WithColor(DiscordColor.Red)
-                        .WithDescription($"You're a little too early! Check back in {user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
+                        .WithDescription("You're a little too early! Check back in " +
+                                         $"{user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
+                    
                     await ctx.RespondAsync(embed: embed);
                 }
                 else
@@ -57,6 +62,7 @@ namespace Silk.Core.Commands.Economy
                         .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
+                    
                     await ctx.RespondAsync(embed: embed);
                     await db.SaveChangesAsync();
                 }

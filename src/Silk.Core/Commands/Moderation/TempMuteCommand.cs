@@ -18,22 +18,26 @@ namespace Silk.Core.Commands.Moderation
     {
         private readonly ConfigService _dbService;
         private readonly IInfractionService _infractionService;
+
         public TempMuteCommand(ConfigService dbService, IInfractionService infractionService)
         {
             _dbService = dbService;
             _infractionService = infractionService;
         }
 
-        [Command("Mute")]
+        [Command("mute")]
         [RequirePermissions(Permissions.ManageRoles)]
+        [Description("Temporarily mute a guild member")]
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
             if (user.IsAbove(bot))
             {
-                await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} roles above me!").ConfigureAwait(false);
+                await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} roles above me!")
+                    .ConfigureAwait(false);
                 return;
             }
+
             GuildConfigModel config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
 
             if (config.MuteRoleId is 0)
@@ -42,8 +46,10 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            UserInfractionModel infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member, InfractionType.Mute, reason, DateTime.Now.Add(duration));
+            UserInfractionModel infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member,
+                InfractionType.Mute, reason, DateTime.Now.Add(duration));
+            
             await _infractionService.MuteAsync(user, ctx.Channel, infraction);
         }
-        }
+    }
 }

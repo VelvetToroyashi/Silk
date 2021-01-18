@@ -20,22 +20,24 @@ namespace Silk.Core.Commands.Economy
             _dbFactory = dbContextFactory;
         }
 
-        [Command("Cash")]
-        [Aliases("Money", "bal", "balance", "bank")]
+        [Command("cash")]
+        [Aliases("money", "bal", "balance", "bank")]
+        [Description("See how much cash you have in your economy account :)")]
         public async Task Cash(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
             GlobalUserModel? account = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (account is null)
             {
-                await ctx.RespondAsync(
-                    $"Seems you don't have an account. Use `{ctx.Prefix}daily` and I'll set one up for you *:)*");
+                await ctx.RespondAsync("Seems you don't have an account. " +
+                                       $"Use `{ctx.Prefix}daily` and I'll set one up for you *:)*");
                 return;
             }
 
             DiscordEmbedBuilder eb = EmbedHelper
                 .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
                 .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
+            
             await ctx.RespondAsync(embed: eb);
         }
     }

@@ -20,6 +20,7 @@ namespace Silk.Core.Commands.Bot
     {
         [Command("botstats")]
         [Aliases("botinfo")]
+        [Description("Get the current stats for Silk")]
         public async Task BotStat(CommandContext ctx)
         {
             using var process = Process.GetCurrentProcess();
@@ -27,10 +28,10 @@ namespace Silk.Core.Commands.Bot
             int memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             embed
-                .WithTitle("Stats for Silk!:")
+                .WithTitle("Stats for Silk!")
                 .WithColor(DiscordColor.Gold)
                 .AddField("Latency", $"{ctx.Client.Ping}ms", true)
-                .AddField("Total guilds", $"{guildCount}", true)
+                .AddField("Total Guilds", $"{guildCount}", true)
                 .AddField("Total Members", $"{memberCount}", true)
                 .AddField("Shards", $"{ctx.Client.ShardCount}", true)
                 .AddField("Memory", $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB", true)

@@ -34,7 +34,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (user.IsAbove(bot) || ctx.User == user)
             {
-                DiscordEmbed embed = await this.CreateHeiarchyEmbedAsync(ctx, bot, user);
+                DiscordEmbed embed = await this.CreateHierarchyEmbedAsync(ctx, bot, user);
                 await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
             }
             else
@@ -70,7 +70,7 @@ namespace Silk.Core.Commands.Moderation
             }
         }
 
-        private async Task<DiscordEmbedBuilder> CreateHeiarchyEmbedAsync(CommandContext ctx, DiscordMember bot, DiscordMember user)
+        private async Task<DiscordEmbedBuilder> CreateHierarchyEmbedAsync(CommandContext ctx, DiscordMember bot, DiscordMember user)
         {
             bool isBot = user == bot;
             bool isOwner = user == ctx.Guild.Owner;
