@@ -23,6 +23,7 @@ namespace Silk.Core.Commands.Moderation
 
         [Command("unban")]
         [RequireFlag(UserFlag.Staff)]
+        [Description("Unban a member from the Guild")]
         public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
             if (!ctx.Member.HasPermission(Permissions.BanMembers))
@@ -40,6 +41,7 @@ namespace Silk.Core.Commands.Moderation
                 var infraction =
                     (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
                 if (infraction is not null) _eventService.Events.TryRemove(infraction);
+                
                 await ctx.RespondAsync(embed: embed);
             }
             else
@@ -47,6 +49,7 @@ namespace Silk.Core.Commands.Moderation
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
                         .WithColor(new DiscordColor("#d11515"));
+                
                 await ctx.RespondAsync(embed: embed);
             }
         }

@@ -16,9 +16,9 @@ namespace Silk.Core.AutoMod
         private static readonly RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /*
-         * To those unacquinted to Regex, or simply too lazy to plug it into regex101.com,
+         * To those unacquainted to Regex, or simply too lazy to plug it into regex101.com,
          * these two Regexes match Discord invites. The reason we don't simply do something like Message.Contains("discord.gg/") || Message.Contains("discord.com/inv..
-         * is because that's not only bulky, but its also ugly, and *possibly* slighty slower thanks to extra if-statements. Granted, still probably blazing fast, but
+         * is because that's not only bulky, but its also ugly, and *possibly* slightly slower thanks to extra if-statements. Granted, still probably blazing fast, but
          * I can't be asked to implement that abomination of a pattern when we can just use a regex, and conveniently get what we want out of it without any extra work.
          *
          * And again, for the curious ones, the former regex will match anything that resembles an invite.

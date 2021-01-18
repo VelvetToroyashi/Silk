@@ -20,6 +20,7 @@ namespace Silk.Core.Commands.Tests
     {
         [Command("create")]
         [RequireFlag(UserFlag.Staff)]
+        [Description("Create a menu of assignable roles")]
         public async Task CreateCommand(CommandContext ctx, [RemainingText] params DiscordRole[] roles)
         {
             var builder = new DiscordMessageBuilder();
