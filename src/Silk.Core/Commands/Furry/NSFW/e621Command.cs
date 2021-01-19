@@ -26,8 +26,8 @@ namespace Silk.Core.Commands.Furry.NSFW
         }
 
         [RequireNsfw]
-        [Aliases("e6")]
         [Command("e621")]
+        [Aliases("e6")]
         [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
         public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null)
         {

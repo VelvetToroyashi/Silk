@@ -22,6 +22,7 @@ namespace Silk.Core.Commands.General.Tickets
 
         [Command]
         [RequireDirectMessage]
+        [Description("Open a ticket for an issue, bug or other reason.")]
         public async Task Create(CommandContext ctx, string message = "No message provided")
         {
             TicketCreationResult? result = await _ticketService.CreateAsync(ctx.User, message).ConfigureAwait(false);

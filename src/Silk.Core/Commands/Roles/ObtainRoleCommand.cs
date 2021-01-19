@@ -18,6 +18,7 @@ namespace Silk.Core.Commands.Roles
         }
 
         [Command("get_role")]
+        [Description("Get some awesome roles")]
         public async Task ObtainRole(CommandContext ctx, params DiscordRole[] roles)
         {
             
