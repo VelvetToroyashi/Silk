@@ -47,7 +47,7 @@ namespace Silk.Core.Commands.Moderation
                     .AddField("Reason:", reason);
 
 
-                UserModel databaseUser = await _dbService.GetOrCreateUserAsync(ctx.Guild.Id, user.Id);
+                UserModel databaseUser = await _dbService.GetOrCreateGuildUserAsync(ctx.Guild.Id, user.Id);
                 UserInfractionModel infraction = await _infractionService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
                 string messaged;
                 try

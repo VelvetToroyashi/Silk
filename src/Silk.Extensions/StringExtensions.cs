@@ -20,7 +20,7 @@ namespace Silk.Extensions
         {
             for (var i = 0; i < s.Length; i++)
                 if (s[i] == delimeter)
-                    yield return s[i..^s.Length].TakeWhile(c => c != delimeter).JoinString();
+                    yield return s[i..^s.Length].TakeWhile(c => c != delimeter).Join();
         }
     }
 }

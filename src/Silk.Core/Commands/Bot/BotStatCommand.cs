@@ -25,7 +25,7 @@ namespace Silk.Core.Commands.Bot
             using var process = Process.GetCurrentProcess();
             int guildCount = ctx.Client.Guilds.Count;
             int memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+            DiscordEmbedBuilder embed = new();
             embed
                 .WithTitle("Stats for Silk!:")
                 .WithColor(DiscordColor.Gold)

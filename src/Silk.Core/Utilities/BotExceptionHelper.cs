@@ -26,8 +26,9 @@ namespace Silk.Core.Utilities
         {
 
             if (e.Exception is CommandNotFoundException)
+            {
                 _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
-
+            }
             else if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
             {
                 _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
@@ -41,7 +42,6 @@ namespace Silk.Core.Utilities
             }
             else if (e.Exception is ArgumentException ae)
             {
-                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
                 _logger.LogWarning(ae.Message);
             }
             else if (e.Exception is ChecksFailedException cf)

@@ -7,7 +7,6 @@ using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Exceptions;
 using Silk.Core.Services.Interfaces;
@@ -101,7 +100,7 @@ namespace Silk.Core.Services
         }
         public async Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
-            UserModel user = await _dbService.GetOrCreateUserAsync(member.Guild.Id, member.Id);
+            UserModel user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
             UserInfractionModel infraction = new()
             {
                 Enforcer = enforcer.Id,

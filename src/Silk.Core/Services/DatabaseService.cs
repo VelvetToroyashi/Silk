@@ -32,7 +32,7 @@ namespace Silk.Core.Services
         public async Task<GuildModel?> GetGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = GetContext();
-            var guildQuery = db.Guilds.Include(g => g.Users);
+            IQueryable<GuildModel>? guildQuery = db.Guilds.Include(g => g.Users).AsSplitQuery();
             return await guildQuery.FirstAsync(g => g.Id == guildId)!;
         }
 
@@ -49,12 +49,11 @@ namespace Silk.Core.Services
             await using SilkDbContext db = GetContext();
             GuildModel? guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
 
-            if (guild is null)
-            {
-                guild = new() {Id = guildId, Users = new(), Prefix = Bot.DefaultCommandPrefix, Configuration = new()};
-                db.Guilds.Add(guild);
-                await db.SaveChangesAsync();
-            }
+            if (guild is not null) return guild;
+            
+            guild = new() {Id = guildId, Users = new(), Prefix = Bot.DefaultCommandPrefix, Configuration = new()};
+            db.Guilds.Add(guild);
+            await db.SaveChangesAsync();
             return guild;
         }
 
@@ -63,6 +62,8 @@ namespace Silk.Core.Services
             await using SilkDbContext db = GetContext();
             GuildConfigModel config = await db.GuildConfigs
                 .Include(c => c.AllowedInvites)
+                .Include(c => c.SelfAssignableRoles)
+                .AsSplitQuery()
                 .FirstAsync(g => g.GuildId == configId);
             return config;
         }
@@ -76,11 +77,38 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetContext();
 
-            GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
+            GuildModel guild = await db.Guilds.Include(g => g.Users).AsSplitQuery().FirstOrDefaultAsync(g => g.Id == guildId);
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
             return user;
         }
+        public async Task<GlobalUserModel?> GetGlobalUserAsync(ulong userId)
+        {
+            await using SilkDbContext db = GetContext();
+
+            GlobalUserModel? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user;
+        }
+        
+        public async Task<GlobalUserModel> GetOrCreateGlobalUserAsync(ulong userId)
+        {
+            await using SilkDbContext db = GetContext();
+            GlobalUserModel? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user is null)
+            {
+                user = new()
+                {
+                    Id = userId,
+                    Cash = 0,
+                    Items = new(),
+                    LastCashOut = DateTime.MinValue
+                };
+                await db.SaveChangesAsync();
+            }
+            return user;
+        }
+        
 
         // Attatch to the context and save. Easy as that. //
         public async Task UpdateGuildUserAsync(UserModel user)
@@ -95,22 +123,35 @@ namespace Silk.Core.Services
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
-        
 
-        public async Task<UserModel> GetOrCreateUserAsync(ulong guildId, ulong userId)
+        public async Task UpdateGlobalUserAsync(GlobalUserModel user)
         {
             await using SilkDbContext db = GetContext();
-            GuildModel guild = await db.Guilds.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == guildId);
+            
+            EntityEntry<GlobalUserModel> userEntity = db.Attach(user);
+            userEntity.State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
+        public async Task<UserModel> GetOrCreateGuildUserAsync(ulong guildId, ulong userId)
+        {
+            await using SilkDbContext db = GetContext();
+            GuildModel guild = await db.Guilds
+                .Include(g => g.Users)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(g => g.Id == guildId);
+            
             UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             if (user is null)
             {
                 //VALID
-                user = new UserModel {Id = userId, Flags = UserFlag.None };
+                user = CreateUser(guild, userId);
                 guild.Users.Add(user);
                 await db.SaveChangesAsync();
             }
             return user;
         }
+
 
         public async Task RemoveUserAsync(UserModel user)
         {
@@ -135,6 +176,7 @@ namespace Silk.Core.Services
         #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
+        private UserModel CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
 
         #endregion
     }

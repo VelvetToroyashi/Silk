@@ -11,15 +11,10 @@ namespace Silk.Core.Commands.Tests
         public async Task Reply(CommandContext ctx)
         {
             var builder = new DiscordMessageBuilder();
-            builder.WithContent("This is with a reply!");
-            builder.WithReply(ctx.Message.Id, true);
-            await builder.SendAsync(ctx.Channel);
-
-            
-            
-            builder.WithContent("This is without a reply!");
-            builder.WithReply(0);
-            await builder.SendAsync(ctx.Channel);
+            builder.WithContent("OwO");
+            var msg = await ctx.RespondAsync(builder);
+            builder.WithReply(ctx.Message.Id);
+            await msg.ModifyAsync(builder);
         }
     }
 }

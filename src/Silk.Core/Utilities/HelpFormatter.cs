@@ -51,7 +51,7 @@ namespace Silk.Core.Utilities
                     .Where(x => x.Key is not null)
                     .OrderBy(x => Categories.Order.IndexOf(x.Key));
                 foreach (IGrouping<string?, Command> commands in modules)
-                    embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").JoinString(", "));
+                    embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").Join(", "));
             }
             else
             {
@@ -75,14 +75,14 @@ namespace Silk.Core.Utilities
                 if (userPerms is not null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())
-                    embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").JoinString(", "), true);
+                    embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").Join(", "), true);
                 if (Subcommands is not null)
-                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").JoinString("\n"), true);
+                    embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").Join("\n"), true);
                 if (Command.Overloads.Count > 1)
                     embed.AddField("Command overloads:", Command.Overloads
                         .Skip(1)
                         .Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
-                        .JoinString("\n"));
+                        .Join("\n"));
 
             }
 
