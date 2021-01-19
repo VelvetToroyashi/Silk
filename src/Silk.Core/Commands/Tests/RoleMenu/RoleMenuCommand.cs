@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -43,7 +44,7 @@ namespace Silk.Core.Commands.Tests
             }
             if (!await ShouldContinueAsync(ctx, roles)) return;
 
-
+            
             DiscordMessage confirmationMessage;
             DiscordMessage menuMessage;
             DiscordMessage responseMessage; 

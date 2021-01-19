@@ -1,7 +1,7 @@
 # Build it
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 
-WORKDIR /silk
+WORKDIR /Silk
 COPY . ./
 RUN dotnet restore
 
@@ -15,8 +15,8 @@ RUN apk upgrade --update-cache --available && \
     apk add openssl && \
     rm -rf /var/cache/apk/*
 
-WORKDIR /silk
-COPY --from=build /silk/out .
+WORKDIR /Silk
+COPY --from=build /Silk/out .
 
 RUN chmod +x ./Silk.Core
 
