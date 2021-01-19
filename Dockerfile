@@ -5,7 +5,7 @@ WORKDIR /silk
 COPY . ./
 RUN dotnet restore
 
-RUN dotnet publish /src/Silk.Core/Silk.Core.csproj -c Release -o out 
+RUN dotnet publish ./src/Silk.Core/Silk.Core.csproj -c Release -o out 
 
 # Run it
 FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine
@@ -18,6 +18,6 @@ RUN apk upgrade --update-cache --available && \
 WORKDIR /silk
 COPY --from=build /silk/out .
 
-RUN chmod +x ./Silk!
+RUN chmod +x ./Silk.Core
 
-CMD ["./Silk!"]
+CMD ["./Silk.Core"]
