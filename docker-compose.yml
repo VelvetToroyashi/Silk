@@ -3,22 +3,25 @@ version: "3.8"
 services:
     postgres:
       image: postgres:latest
-      container_name: pg-docker
       restart: always
       environment:
-        POSTGRES_PASSWORD: "default"
-        POSTGRES_USER: "silk" #This MUST match appSettings.json
-      ports:
-        - 5432:5432
-      expose:
-        - 5432
+        - POSTGRES_PASSWORD: "password"
+        - POSTGRES_USER: "silk" #Make sure this reflects appSettings.json!
+      networks:
+        - silk_net
       volumes:
         - ./postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf
         - ./postgres/data:/var/lib/postgresql/data:delegated
 
     silk:
-      image: silk:latest
-      container_name: silk-docker
-      build: .
+      image: velvetthepanda/silk:latest
+      depends_on:
+        - postgres
+      networks:
+        - silk_net
       volumes:
         - ./src/Silk.Core/appSettings.json:/Silk/appSettings.json
+
+networks:
+    silk_net:
+        internal: true
