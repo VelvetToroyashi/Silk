@@ -5,16 +5,17 @@ services:
       image: postgres:latest
       container_name: pg-docker
       restart: always
-      ports:
-        - 5400:5432
       environment:
-        - "POSTGRES_USER=docker"
-        - "POSTGRES_PASSWORD=docker"
+        POSTGRES_PASSWORD: owo
+        POSTGRES_USER: silk
+      ports:
+        - 5432:5432
+      expose:
+        - 5432
       volumes:
         - ./postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf
         - ./postgres/data:/var/lib/postgresql/data:delegated
-      command: postgres -c config_file=/postgres/postgres.conf
-    
+
     silk:
       image: silk:latest
       container_name: silk-docker
