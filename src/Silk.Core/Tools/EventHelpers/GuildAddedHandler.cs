@@ -29,7 +29,7 @@ namespace Silk.Core.Tools.EventHelpers
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
             if (startupCacheCompleted) return Task.CompletedTask; // Prevent double logging when joining a new guild //
-            _logger.LogDebug($"Beginning Cache. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
+            _logger.LogDebug($"Adding guild to cache queue. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
             cacheQueue.Add((e.Guild.Id, e.Guild.Members.Values));
             startupCacheCompleted = currentGuild == c.Guilds.Count;
             return Task.CompletedTask;
@@ -63,7 +63,7 @@ namespace Silk.Core.Tools.EventHelpers
             await _dbService.UpdateGuildAsync(guild);
         }
 
-        private Task CacheGuildAsync(DiscordGuild guild) => _dbService.GetOrCreateGuildAsync(guild.Id);
+        private async Task CacheGuildAsync(DiscordGuild guild) => await _dbService.GetOrCreateGuildAsync(guild.Id);
 
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)

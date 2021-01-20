@@ -13,6 +13,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Silk.Core.Database;
 using Silk.Core.Utilities;
 
@@ -44,8 +45,12 @@ namespace Silk.Core
             _logger = logger;
             _exceptionHelper = exceptionHelper;
             _eventSubscriber = eventSubscriber;
-
+            
             SilkDBContext = dbFactory.CreateDbContext();
+            
+            try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
+            catch (PostgresException) { SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult(); }
+            
             Instance = this;
             Client = client;
         }

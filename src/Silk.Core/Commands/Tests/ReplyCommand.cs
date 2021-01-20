@@ -8,6 +8,7 @@ namespace Silk.Core.Commands.Tests
     public class ReplyCommand : BaseCommandModule
     {
         [Command]
+        [Hidden]
         public async Task Reply(CommandContext ctx)
         {
             var builder = new DiscordMessageBuilder();

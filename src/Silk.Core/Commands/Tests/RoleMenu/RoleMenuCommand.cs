@@ -24,6 +24,7 @@ namespace Silk.Core.Commands.Tests
     {
         
         [Command("create")]
+        [Hidden]
         [Description("Create a role menu! \n(Note, if you're adding roles with spaces, you must put them in quotes (`\"\"`)!")]
         [RequireFlag(UserFlag.Staff)]
         public async Task CreateCommand(CommandContext ctx, [RemainingText] params DiscordRole[] roles)
