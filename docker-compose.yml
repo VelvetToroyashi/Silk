@@ -6,7 +6,7 @@ services:
       container_name: pg-docker
       restart: always
       ports:
-        "5400:5432"
+        - 5400:5432
       environment:
         POSTGRES_USER: "docker"
         POSTGRES_PASSWORD: "docker"
@@ -15,9 +15,9 @@ services:
         - ./postgres/data:/var/lib/postgresql/data:delegated
       command: postgres -c config_file=/postgres/postgres.conf
     
-      silk:
-        image: silk:latest
-        container_name: silk-docker
-        build: .
-        volumes:
-          - ./src/Silk.Core/appSettings.json:/out/appSettings.json
+    silk:
+      image: silk:latest
+      container_name: silk-docker
+      build: .
+      volumes:
+        - ./src/Silk.Core/appSettings.json:/out/appSettings.json
