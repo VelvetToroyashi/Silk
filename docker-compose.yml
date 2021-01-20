@@ -6,8 +6,8 @@ services:
       container_name: pg-docker
       restart: always
       environment:
-        POSTGRES_PASSWORD: owo
-        POSTGRES_USER: silk
+        POSTGRES_PASSWORD: "default"
+        POSTGRES_USER: "silk" #This MUST match appSettings.json
       ports:
         - 5432:5432
       expose:
@@ -21,4 +21,4 @@ services:
       container_name: silk-docker
       build: .
       volumes:
-        - ./src/Silk.Core/appSettings.json:/out/appSettings.json
+        - ./src/Silk.Core/appSettings.json:/Silk/appSettings.json
