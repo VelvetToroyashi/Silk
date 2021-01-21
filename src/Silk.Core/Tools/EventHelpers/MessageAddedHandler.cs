@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -23,9 +24,10 @@ namespace Silk.Core.Tools.EventHelpers
             _prefixCache = prefixCache;
             _logger = logger;
         }
-
+        
         public Task Tickets(DiscordClient c, MessageCreateEventArgs e)
         {
+            
             _ = Task.Run(async () =>
             {
                 if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
@@ -70,7 +72,7 @@ namespace Silk.Core.Tools.EventHelpers
                     
                 if (prefixLength is -1) return;
 
-                string commandString = e.Message.Content.Substring(prefixLength);
+                string commandString = e.Message.Content[0..--prefixLength];
 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
 

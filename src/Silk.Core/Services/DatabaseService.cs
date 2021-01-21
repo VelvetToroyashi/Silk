@@ -48,11 +48,16 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetContext();
             GuildModel? guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
-            bool guildWasNull = guild is null;
-            guild ??= new() {Id = guildId, Users = new(), Prefix = Bot.DefaultCommandPrefix, Configuration = new() { Guild = guild!, GuildId = guildId}};
-            if (guildWasNull)
+            
+            if (guild is null)
             {
-                _logger.LogTrace("Guild was null");
+                guild = new()
+                {
+                    Id = guildId, 
+                    Users = new(), 
+                    Prefix = Bot.DefaultCommandPrefix, 
+                    Configuration = new() { GuildId = guildId }
+                };
                 db.Guilds.Add(guild);
                 await db.SaveChangesAsync();
             }

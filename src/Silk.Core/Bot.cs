@@ -47,9 +47,13 @@ namespace Silk.Core
             _eventSubscriber = eventSubscriber;
             
             SilkDBContext = dbFactory.CreateDbContext();
-            
+
             try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
-            catch (PostgresException) { SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult(); }
+            catch
+            {
+                SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult(); 
+                _logger.LogInformation("Database not set up! Migrating...");
+            }
             
             Instance = this;
             Client = client;
