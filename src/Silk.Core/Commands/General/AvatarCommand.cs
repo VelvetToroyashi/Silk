@@ -25,7 +25,6 @@ namespace Silk.Core.Commands.General
         }
         
         [Command("avatar")]
-        [Priority(2)]
         [Description("Show your, or someone else's avatar!")]
         public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
         {
@@ -34,11 +33,10 @@ namespace Silk.Core.Commands.General
                 .WithDescription($"{user.Mention}'s Avatar")
                 .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
 
-            await ctx.RespondAsync(embed: embedBuilder);
+            await ctx.RespondAsync(embedBuilder);
         }
 
         [Command("avatar")]
-        [Priority(3)]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string user)
         {
             

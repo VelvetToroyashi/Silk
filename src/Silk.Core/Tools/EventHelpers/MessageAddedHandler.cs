@@ -72,7 +72,7 @@ namespace Silk.Core.Tools.EventHelpers
                     
                 if (prefixLength is -1) return;
 
-                string commandString = e.Message.Content[0..--prefixLength];
+                string commandString = e.Message.Content[prefixLength..^1];
 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
 
