@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.General
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
             builder.WithEmbed(DefaultAvatarEmbed(ctx).WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-                .WithDescription($"Your Avatar")
+                .WithTitle($"Your Avatar!")
                 .WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
             await ctx.RespondAsync(builder);
         }
