@@ -56,6 +56,8 @@ namespace Silk.Core.Commands.Tests.RoleMenu
             
             await confirmationMessage.DeleteAllReactionsAsync();
 
+            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message }));
+            
             builder.WithContent("Alright. This menu should have a name. What should it be?");
             await confirmationMessage.ModifyAsync(builder);
 
@@ -63,7 +65,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
             menuMessage = await ctx.RespondAsync(builder);
 
             inputResultObject = await RoleMenuInputResult.GetInputAsync(interactivity, ctx, confirmationMessage);
-            if (!inputResultObject.Succeeded) return;
+            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message, menuMessage }));
 
             responseMessage = (DiscordMessage) inputResultObject.Result!;
             builder.WithContent($"Role menu: **{responseMessage.Content}**");
@@ -82,7 +84,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
                 }
                 inputResultObject = await RoleMenuInputResult.GetReactionAsync(interactivity, ctx, confirmationMessage);
                 
-                if (!inputResultObject.Succeeded) await CleanupAsync(new[] {confirmationMessage, responseMessage, menuMessage, ctx.Message});
+                if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message, menuMessage, confirmationMessage, responseMessage }));
 
                 var emoji = (DiscordEmoji) inputResultObject.Result!;
                 if (emoji.Id is not 0)
