@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Silk.Core.Commands.Tests.RoleMenu;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Commands.Tests
+namespace Silk.Core.Commands.Tests.RoleMenu
 {
-    [Group("role_menu"), Aliases("rolemenu")]
+    [Group("rolemenu"), Aliases("role_menu")]
     public class RoleMenuCommand : BaseCommandModule
     {
         

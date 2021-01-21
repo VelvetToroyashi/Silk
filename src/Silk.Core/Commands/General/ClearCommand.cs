@@ -29,7 +29,7 @@ namespace Silk.Core.Commands.General
 
             IReadOnlyList<DiscordMessage> queriedMessages = await ctx.Channel.GetMessagesAsync(messages + 1);
             await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{ctx.User.Username}{ctx.User.Discriminator} called clear command.");
-
+            
             DiscordMessage deleteConfirmationMessage = await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
                 .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
                 .WithColor(DiscordColor.SpringGreen)

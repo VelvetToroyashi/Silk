@@ -64,9 +64,7 @@ namespace Silk.Core.Commands.Furry.NSFW
                     .WithDescription(
                         $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}")
                     .AddField("Score:", post.Score.Total.ToString())
-                    .AddField("Source:",
-                        GetSource(post.Sources.FirstOrDefault()?.ToString()) ??
-                        "No source available")
+                    .AddField("Source:", GetSource(post.Sources.FirstOrDefault()?.ToString()) ?? "No source available")
                     .WithColor(DiscordColor.PhthaloBlue)
                     .WithImageUrl(post.File.Url)
                     .WithFooter("Limit: 10 img / 10sec");
