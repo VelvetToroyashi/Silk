@@ -18,7 +18,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
     [Group("rolemenu"), Aliases("role_menu")]
     public class RoleMenuCommand : BaseCommandModule
     {
-        
+
         [Command("create")]
         [Hidden]
         [Description("Create a role menu! \n(Note, if you're adding roles with spaces, you must put them in quotes (`\"\"`)!")]
@@ -27,9 +27,9 @@ namespace Silk.Core.Commands.Tests.RoleMenu
         {
             var builder = new DiscordMessageBuilder();
             builder.WithoutMentions();
-            
+
             if (!roles.Any()) throw new ArgumentException("Must provide roles to create role menu!");
-            
+
             // Small easter egg for anyone that tries to add @everyone, I guess. Lol. //
             if (ctx.Message.MentionEveryone) // Not that iterating over a couple of elements is expensive, but checking a bool is still faster, and we use that instead. //
             {
@@ -41,80 +41,92 @@ namespace Silk.Core.Commands.Tests.RoleMenu
             }
             if (!await ShouldContinueAsync(ctx, roles)) return;
 
-            
+
             DiscordMessage confirmationMessage;
             DiscordMessage menuMessage;
-            DiscordMessage responseMessage; 
-            
+            DiscordMessage responseMessage;
+
             RoleMenuInputResult inputResultObject;
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
-            
+
             builder.WithContent($"So, {roles.Select(r => r.Mention).Join(", ")}, right?");
-            
+
             confirmationMessage = await ctx.RespondAsync(builder);
             inputResultObject = await RoleMenuInputResult.GetConfirmationAsync(interactivity, ctx, confirmationMessage);
             
-            if (!inputResultObject.Succeeded) return;
-
             await confirmationMessage.DeleteAllReactionsAsync();
-            
+
             builder.WithContent("Alright. This menu should have a name. What should it be?");
             await confirmationMessage.ModifyAsync(builder);
-            
+
             builder.WithContent("Role menu: **Unammed**");
             menuMessage = await ctx.RespondAsync(builder);
-            
+
             inputResultObject = await RoleMenuInputResult.GetInputAsync(interactivity, ctx, confirmationMessage);
             if (!inputResultObject.Succeeded) return;
-            
+
             responseMessage = (DiscordMessage) inputResultObject.Result!;
             builder.WithContent($"Role menu: **{responseMessage.Content}**");
             await responseMessage.DeleteAsync();
             await menuMessage.ModifyAsync(builder);
 
             IReadOnlyList<DiscordEmoji> emojis = await ctx.Guild.GetEmojisAsync();
-            for (int i = 0; i < roles.Length; i++)
+            for (var i = 0; i < roles.Length; i++)
             {
                 string currentMessage = $"What emoji should I use for {roles[i].Mention}? (React to this message!)";
-                
+
                 if (confirmationMessage.Content != currentMessage)
                 {
                     builder.WithContent(currentMessage);
                     await confirmationMessage.ModifyAsync(builder);
                 }
                 inputResultObject = await RoleMenuInputResult.GetReactionAsync(interactivity, ctx, confirmationMessage);
-                if (!inputResultObject.Succeeded)
+                
+                if (!inputResultObject.Succeeded) await CleanupAsync(new[] {confirmationMessage, responseMessage, menuMessage, ctx.Message});
+
+                var emoji = (DiscordEmoji) inputResultObject.Result!;
+                if (emoji.Id is not 0)
                 {
-                    try
+                    if (emojis.All(e => e.Id != emoji.Id))
                     {
-                        await responseMessage.DeleteAsync();
-                        await confirmationMessage.DeleteAsync();
-                    }
-                    catch (NotFoundException) { }
-                }
-                var result = (DiscordEmoji)inputResultObject.Result!;
-                if (result.Id is not 0)
-                {
-                    if (emojis.All(e => e.Id != result.Id))
-                    {
+                        await confirmationMessage.DeleteReactionAsync(emoji, ctx.User, "Invalid emoji");
                         builder.WithContent($"I can't use that emoji {ctx.User.Mention}!");
-                        var forbiddenEmojiMessage = await ctx.RespondAsync(builder);
-                        await Task.Delay(4000);
-                        await forbiddenEmojiMessage.DeleteAsync();
+                        builder.WithAllowedMention(new UserMention(ctx.User.Id));
+
+                        _ = Task.Run(async () =>
+                        {
+                            var forbiddenEmojiMessage = await ctx.RespondAsync(builder);
+                            await Task.Delay(4000);
+                            await forbiddenEmojiMessage.DeleteAsync();
+                        });
+
                         i--;
                         continue;
                     }
-                    await menuMessage.CreateReactionAsync(emojis.Single(e => e.Id == result.Id));
-                    //Add emoji name + id here //
+                    await menuMessage.CreateReactionAsync(emojis.Single(e => e.Id == emoji.Id));
+                    //Impl adding emoji to model here. //
                 }
-                else {}
+                else
+                {
+                    await menuMessage.CreateReactionAsync(emoji);
+                    await confirmationMessage.DeleteReactionAsync(emoji, ctx.User);
+                }
             }
-            
 
-            // Cleanup setup message //
-            await confirmationMessage.DeleteAsync();
         }
-        private async Task<bool> ShouldContinueAsync(CommandContext ctx, DiscordRole[] roles)
+        private async Task CleanupAsync(IEnumerable<DiscordMessage> messages)
+        {
+            try
+            {
+                foreach(DiscordMessage message in messages)
+                {
+                    await message.DeleteAsync("Role-Menu cleanup.");
+                }
+            }
+            catch (NotFoundException) {} 
+        }   
+
+    private async Task<bool> ShouldContinueAsync(CommandContext ctx, DiscordRole[] roles)
         {
             var builder = new DiscordMessageBuilder();
             IEnumerable<DiscordRole> higherBotRoles = roles.Where(r => r.Position >= ctx.Guild.CurrentMember.Hierarchy);

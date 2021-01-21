@@ -24,6 +24,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
         /// </summary>
         public bool Succeeded { get; private set; }
 
+        public static List<DiscordMessage> _messages { get; }= new();
         private const string Canceled = "Canceled (User Requested).";
         private const string TimedOut = "Canceled (Timed out).";
         
@@ -38,7 +39,8 @@ namespace Silk.Core.Commands.Tests.RoleMenu
             if (inputResult.TimedOut)
             {
                 builder.WithContent(TimedOut);
-                await ctx.RespondAsync(builder);
+                var msg = await ctx.RespondAsync(builder);
+                _messages.Add(msg);
             }
             else
             {
@@ -68,12 +70,14 @@ namespace Silk.Core.Commands.Tests.RoleMenu
             if (inputResult.TimedOut)
             {
                 builder.WithContent(TimedOut);
-                await ctx.RespondAsync(builder);
+                var msg = await ctx.RespondAsync(builder);
+                _messages.Add(msg);
             }
             else if (inputResult.Result.Emoji == decline)
             {
                 builder.WithContent(Canceled);
-                await ctx.RespondAsync(builder);
+                var msg = await ctx.RespondAsync(builder);
+                _messages.Add(msg);
             }
             else
             {
@@ -97,7 +101,8 @@ namespace Silk.Core.Commands.Tests.RoleMenu
                 var builder = new DiscordMessageBuilder()
                     .WithReply(message.Id)
                     .WithContent(TimedOut);
-                await ctx.RespondAsync(builder);
+                var msg = await ctx.RespondAsync(builder);
+                _messages.Add(msg);
             }
             else
             {
