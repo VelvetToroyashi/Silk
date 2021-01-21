@@ -165,7 +165,6 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetContext();
             db.Attach(user);
-
             if (user.Infractions.Any()) return; // If they have infractions, don't remove them. //
             user.Guild.Users.Remove(user);
 

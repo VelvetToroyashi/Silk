@@ -93,9 +93,9 @@ namespace Silk.Core.Commands.Furry.Utilities
         {
             var rand = new Random(seed);
             var posts = new List<Post?>();
-
             for (var i = 0; i < amount; i++)
             {
+                if (post?.Posts?.Count is 0) break;
                 int r = rand.Next(post?.Posts?.Count ?? 0);
                 if (post?.Posts?[i] is null) continue;
                 posts.Add(post.Posts?[r]);
