@@ -71,7 +71,7 @@ namespace Silk.Core.Services
             GuildConfigModel config = await db.GuildConfigs
                 .Include(c => c.AllowedInvites)
                 .Include(c => c.SelfAssignableRoles)
-                .AsSplitQuery()
+                //.AsSplitQuery()
                 .FirstAsync(g => g.GuildId == configId);
             return config;
         }

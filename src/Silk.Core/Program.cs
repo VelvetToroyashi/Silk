@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -17,6 +18,8 @@ namespace Silk.Core
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
+        public static Stopwatch Sw { get; } = Stopwatch.StartNew();
+
         public static string HttpClientName { get; } = "Silk";
 
         private static readonly DiscordConfiguration _clientConfig = new()

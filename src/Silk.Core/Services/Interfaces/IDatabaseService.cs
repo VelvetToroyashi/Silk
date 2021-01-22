@@ -68,8 +68,7 @@ namespace Silk.Core.Services.Interfaces
         public Task UpdateGlobalUserAsync(GlobalUserModel user);
 
         /// <summary>
-        /// Get a <see cref="UserModel"/> from the database. Unlike <see cref="GetGuildUserAsync"/>, the object is never null
-        /// as it's created internally before returning, if it's null.
+        /// Get a <see cref="UserModel"/> from the database. Unlike <see cref="GetGuildUserAsync"/>, the object is guarunteed to be non-null.
         /// </summary>
         /// <returns>A <see cref="UserModel"/></returns>
         public Task<UserModel> GetOrCreateGuildUserAsync(ulong guildId, ulong userId);

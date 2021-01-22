@@ -42,15 +42,21 @@ namespace Silk.Core.Utilities
 
             if (Command == null)
             {
-                embed.WithTitle("Silk Commands:");
-                
+                embed.WithTitle("Silk Commands:")
+                    .WithFooter("* = Group | ** = Executable group");
                 IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
                     .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
                     .Where(x => x.Key is not null)
                     .OrderBy(x => Categories.Order.IndexOf(x.Key));
-                
+
                 foreach (IGrouping<string?, Command> commands in modules)
-                    embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").Join(", "));
+                    embed.AddField(commands.Key ?? "Uncategorized", 
+                        commands
+                            .Select(x => $"`{x.Name}" +
+                                         $"{(x is CommandGroup g ? g.IsExecutableWithoutSubcommands ? "**" : "*" : "")}`")
+                            .Join(", "));
+                
+                
             }
             else
             {
@@ -86,7 +92,7 @@ namespace Silk.Core.Utilities
 
             }
 
-            return new CommandHelpMessage(null, embed.Build());
+            return new(null, embed.Build());
         }
 
         private string GetArgs(IReadOnlyList<CommandArgument> args)

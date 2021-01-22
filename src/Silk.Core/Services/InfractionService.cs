@@ -40,7 +40,6 @@ namespace Silk.Core.Services
 
         public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction, DiscordEmbed embed)
         {
-            var sw = Stopwatch.StartNew();
             // Validation is handled by the command class. //
             _ = member.RemoveAsync(infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
@@ -51,8 +50,6 @@ namespace Silk.Core.Services
                 _ = channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
 
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
-            sw.Stop();
-            _logger.LogTrace($"{sw.ElapsedMilliseconds} ms");
         }
 
         public async Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
@@ -76,7 +73,7 @@ namespace Silk.Core.Services
 
                 await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
                 await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
-            }
+            } 
         }
         public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
@@ -85,17 +82,18 @@ namespace Silk.Core.Services
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
         {
             GuildConfigModel config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
-            if (config.GeneralLoggingChannel is 0)
-            {
-                await channel.SendMessageAsync("Mute role not set up!");
-                return;
-            }
+            
             if (!channel.Guild.Roles.TryGetValue(config.MuteRoleId, out DiscordRole? muteRole))
             {
                 await channel.SendMessageAsync("Mute role doesn't exist on server!");
                 return;
             }
+            
             await member.GrantRoleAsync(muteRole);
+            
+            UserModel user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
+            await ApplyInfractionAsync(user, infraction);
+            
             _tempInfractions.Add(infraction);
             _logger.LogTrace($"Added temporary infraction to {member.Id}!");
         }

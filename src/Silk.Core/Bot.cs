@@ -109,8 +109,10 @@ namespace Silk.Core
                 cmd[i].RegisterConverter(memberConverter);
             }
 
-            _logger.LogInformation($"Startup time: {DateTime.Now.Subtract(Program.Startup).Milliseconds} ms.");
-            
+            Program.Sw.Stop();
+            var startupDT = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
+            _logger.LogInformation($"Startup time: {startupDT:N0} ms.");
+            _logger.LogInformation($"Stopwatch reports {Program.Sw.ElapsedMilliseconds} ms.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();

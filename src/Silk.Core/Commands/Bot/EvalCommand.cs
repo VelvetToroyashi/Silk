@@ -72,7 +72,7 @@ namespace Silk.Core.Commands.Bot
             }
             catch (Exception ex)
             {
-                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
                         Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
