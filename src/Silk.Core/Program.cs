@@ -31,7 +31,7 @@ namespace Silk.Core
                       DiscordIntents.DirectMessages | // DM Commands
                       DiscordIntents.DirectMessageReactions |
                       DiscordIntents.GuildPresences, // Auto-mod
-            MessageCacheSize = 100,
+            MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.Error
         };
 

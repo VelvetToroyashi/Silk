@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Timers;
 using DSharpPlus;
@@ -11,6 +13,7 @@ using Silk.Core.Database.Models;
 using Silk.Core.Exceptions;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Extensions;
 
 namespace Silk.Core.Services
 {
@@ -33,6 +36,8 @@ namespace Silk.Core.Services
             _timer = new(TimeSpan.FromSeconds(30).TotalMilliseconds);
             _timer.Elapsed += async (_, _) => await OnTick();
             _timer.Start();
+
+            LoadInfractions();
         }
 
 
@@ -188,7 +193,18 @@ namespace Silk.Core.Services
                 }
             }
         }
-        private void ValidateInfraction(UserInfractionModel infraction)
+
+        private void LoadInfractions()
+        {
+            _logger.LogTrace("Building InfractionService cache");
+
+            IEnumerable<UserInfractionModel> infractions = _dbService.GetActiveInfractionsAsync().GetAwaiter().GetResult();
+            
+            _tempInfractions.AddRange(infractions);
+            _logger.LogTrace("Loaded all applicable infractions!");
+        }
+        
+        private static void ValidateInfraction(UserInfractionModel infraction)
         {
             if (infraction.Enforcer is 0) throw new ArgumentNullException();
             if (infraction.Reason is "") throw new ArgumentNullException();

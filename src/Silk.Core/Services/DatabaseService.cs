@@ -181,14 +181,38 @@ namespace Silk.Core.Services
             return db.Users.Where(predicate);
         }
 
+        public async Task<IEnumerable<UserInfractionModel>> GetActiveInfractionsAsync()
+        {
+            await using SilkDbContext db = GetContext();
+            return await db.Infractions
+                .AsNoTracking()
+                .Where(i =>
+                    i.HeldAgainstUser &&
+                    i.Expiration > DateTime.Now &&
+                    i.InfractionType == InfractionType.Mute ||
+                    i.InfractionType == InfractionType.SoftBan ||
+                    i.InfractionType == InfractionType.AutoModMute)
+                .ToListAsync();
+        }
+
         #endregion
 
 
         #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
-        private UserModel CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
+        private static UserModel CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
 
+        private static Expression<Func<UserInfractionModel, bool>> HasTempInfraction(UserInfractionModel infraction)
+        {
+            return i => 
+                   i.HeldAgainstUser &&
+                   i.Expiration > DateTime.Now &&
+                   i.InfractionType == InfractionType.Mute ||
+                   i.InfractionType == InfractionType.SoftBan ||
+                   i.InfractionType == InfractionType.AutoModMute;
+        }
+        
         #endregion
     }
 }

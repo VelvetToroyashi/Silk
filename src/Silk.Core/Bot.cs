@@ -112,7 +112,6 @@ namespace Silk.Core
             Program.Sw.Stop();
             var startupDT = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
             _logger.LogInformation($"Startup time: {startupDT:N0} ms.");
-            _logger.LogInformation($"Stopwatch reports {Program.Sw.ElapsedMilliseconds} ms.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();

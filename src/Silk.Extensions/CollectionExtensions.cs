@@ -24,8 +24,8 @@ namespace Silk.Extensions
         {
             if (list.IsReadOnly) throw new InvalidOperationException($"Cannot push onto readonly list {nameof(list)}");
             if (list.Count == 0) throw new ArgumentOutOfRangeException($"List cannot be empty {nameof(list)}");
-            T lastElement = list[list.Count - 1];
-            list[list.Count - 1] = obj;
+            T lastElement = list[^1];
+            list[^1] = obj;
             return lastElement;
         }
 

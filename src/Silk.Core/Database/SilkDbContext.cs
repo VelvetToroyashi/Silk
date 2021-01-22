@@ -21,7 +21,8 @@ namespace Silk.Core.Database
         /// </summary>
         [NotNull]
         public DbSet<UserModel> Users { get; set; }
-
+        
+        public DbSet<UserInfractionModel> Infractions { get; set; }
 
         /// <summary>
         /// Users on a bot level; contains information that should have a globally persisted state.
