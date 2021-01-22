@@ -1,9 +1,0 @@
-version: "3"
-
-services:
-    bot:
-        image: silk:latest
-        build: .
-        volumes:
-            - ./Token.txt:/silk/Token.txt
-            - ./config:/silk/SilkBot/ServerConfigs

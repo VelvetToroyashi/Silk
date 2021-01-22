@@ -1,8 +1,0 @@
-version: "3"
-
-services:
-    bot:
-        image: velvetthepanda/silk:latest
-        volumes:
-            - ./Token.txt:/silk/Token.txt
-            - ./config:/silk/SilkBot/ServerConfigs
