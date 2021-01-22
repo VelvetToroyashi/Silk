@@ -38,24 +38,24 @@ namespace Silk.Core.Utilities
 
         public override CommandHelpMessage Build()
         {
-
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
             if (Command == null)
             {
                 embed.WithTitle("Silk Commands:");
-
-
+                
                 IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
                     .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
                     .Where(x => x.Key is not null)
                     .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                
                 foreach (IGrouping<string?, Command> commands in modules)
                     embed.AddField(commands.Key, commands.Select(x => $"`{x.Name}`").Join(", "));
             }
             else
             {
                 if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                
                 IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
                 string title = Command.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";

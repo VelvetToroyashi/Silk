@@ -41,13 +41,14 @@ namespace Silk.Core.Services
         public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction, DiscordEmbed embed)
         {
             var sw = Stopwatch.StartNew();
+            // Validation is handled by the command class. //
             _ = member.RemoveAsync(infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
 
             if (config.GeneralLoggingChannel is 0)
                 _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
             else
-                _ = channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
+                _ = channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
 
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
             sw.Stop();

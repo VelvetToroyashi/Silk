@@ -91,21 +91,21 @@ namespace Silk.Core.Commands.Tests.RoleMenu
                 {
                     if (emojis.All(e => e.Id != emoji.Id))
                     {
-                        await confirmationMessage.DeleteReactionAsync(emoji, ctx.User, "Invalid emoji");
-                        builder.WithContent($"I can't use that emoji {ctx.User.Mention}!");
-                        builder.WithAllowedMention(new UserMention(ctx.User.Id));
-
-                        _ = Task.Run(async () =>
+                        /*_ = Task.Run(async () =>
                         {
+                            await confirmationMessage.DeleteReactionAsync(emoji, ctx.User, "Invalid emoji");
+                            builder.WithContent($"I can't use that emoji {ctx.User.Mention}!");
+                            builder.WithAllowedMention(new UserMention(ctx.User.Id));
                             var forbiddenEmojiMessage = await ctx.RespondAsync(builder);
                             await Task.Delay(4000);
                             await forbiddenEmojiMessage.DeleteAsync();
                         });
 
-                        i--;
-                        continue;
+                        i--; // Return to where we are, but essentially reset. //
+                        continue;*/
                     }
-                    await menuMessage.CreateReactionAsync(emojis.Single(e => e.Id == emoji.Id));
+                    await confirmationMessage.DeleteReactionAsync(emoji, ctx.User);
+                    await menuMessage.CreateReactionAsync(emoji);
                     //Impl adding emoji to model here. //
                 }
                 else
