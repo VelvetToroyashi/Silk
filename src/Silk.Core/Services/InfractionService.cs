@@ -188,5 +188,12 @@ namespace Silk.Core.Services
                 }
             }
         }
+        private void ValidateInfraction(UserInfractionModel infraction)
+        {
+            if (infraction.Enforcer is 0) throw new ArgumentNullException();
+            if (infraction.Reason is "") throw new ArgumentNullException();
+            if (infraction.User is null) throw new ArgumentNullException();
+        }
+        
     }
 }

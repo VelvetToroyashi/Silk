@@ -47,7 +47,10 @@ namespace Silk.Core.Services
         public async Task<GuildModel> GetOrCreateGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = GetContext();
-            GuildModel? guild = await db.Guilds.FirstOrDefaultAsync(g => g.Id == guildId);
+            GuildModel? guild = await db.Guilds
+                .Include(g => g.Users)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(g => g.Id == guildId);
             
             if (guild is null)
             {
@@ -130,6 +133,7 @@ namespace Silk.Core.Services
             EntityEntry<UserModel> userEntity = db.Attach(user);
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
+            return;
         }
 
         public async Task UpdateGlobalUserAsync(GlobalUserModel user)
