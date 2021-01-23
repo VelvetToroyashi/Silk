@@ -22,11 +22,10 @@ namespace Silk.Core.Commands.General
         public async Task Ping(CommandContext ctx)
         {
             Core.Bot.CommandTimer.Stop();
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blue);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Blue);
             
             var sw = Stopwatch.StartNew();
-            DiscordMessage message = await ctx.RespondAsync(embed: embed);
+            DiscordMessage message = await ctx.RespondAsync(embed);
             sw.Stop();
             
             await Task.Delay(100);
@@ -50,7 +49,7 @@ namespace Silk.Core.Commands.General
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             var sw = Stopwatch.StartNew();
-            db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") over () FROM \"Guilds\"");
+            db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"Guilds\"");
             sw.Stop();
             return (int) sw.ElapsedMilliseconds;
         }
