@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,56 +15,80 @@ namespace Silk.Core.Tools.EventHelpers
 {
     public class GuildAddedHandler
     {
-        private int currentGuild;
+        //private int currentGuild;
         private bool startupCacheCompleted;
 
-
-        private readonly ILogger<GuildAddedHandler> _logger;
+        
         private readonly IDatabaseService _dbService;
+        private readonly ILogger<GuildAddedHandler> _logger;
+        
+        private readonly Dictionary<int, int> _shards = new();
+        private readonly Dictionary<int, List<CacheObject>> _cacheQueue = new();
+        private readonly Dictionary<int, (int, int)> _guildCounters = new();
+        
+        private record CacheObject(ulong Id, IEnumerable<DiscordMember> Members);
+        
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService)
+        {
+            _logger = logger;
+            _dbService = dbService;
+            // Initialize the dictionary so we can have simple event handlers. //
 
-        private readonly List<(ulong Id, IEnumerable<DiscordMember> members)> cacheQueue = new();
-
-        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService) => (_logger, _dbService) = (logger, dbService);
+            for (int i = 0; i < Bot.Instance!.Client.ShardClients.Count; i++)
+            {
+                _cacheQueue.TryAdd(i, new());
+                _shards.TryAdd(i, 0);
+                _guildCounters.TryAdd(i, new());
+            }
+        }
 
         // Run on startup to cache all members //
         public Task OnGuildAvailable(DiscordClient c, GuildCreateEventArgs e)
         {
-            if (startupCacheCompleted) return Task.CompletedTask; // Prevent double logging when joining a new guild //
-            _logger.LogDebug($"Adding guild to cache queue. Shard [{c.ShardId + 1}/{c.ShardCount}] | Guild [{++currentGuild}/{c.Guilds.Count}]");
-            cacheQueue.Add((e.Guild.Id, e.Guild.Members.Values));
-            startupCacheCompleted = currentGuild == c.Guilds.Count;
+            if (startupCacheCompleted) return Task.CompletedTask; // Don't re-cache. //
+
+            int currentGuild = ++_shards[c.ShardId];
+            
+            _logger.LogTrace($"Adding cache object to queue: Shard [{c.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] | Guild [{currentGuild}/{c.Guilds.Count}]");
+            _cacheQueue[c.ShardId].Add(new(e.Guild.Id, e.Guild.Members.Values));
             return Task.CompletedTask;
         }
 
-        public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
+        public Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
         {
+            _logger.LogTrace($"Guild download complete for shard {c.ShardId + 1}");
+            _logger.LogTrace("Preparing to iterate over cache objects");
             _ = Task.Run(async () =>
             {
-                for (int i = 0; i < cacheQueue.Count; i++)
+                for (var i = 0; i < _cacheQueue[c.ShardId].Count; i++)
                 {
-                    await CacheGuildAsync(c.Guilds[cacheQueue[i].Id]);
-                    await CacheMembersAsync(cacheQueue[i]);
+                    await CacheGuildAsync(c.Guilds[_cacheQueue[c.ShardId][i].Id].Id);
+                    await CacheMembersAsync(_cacheQueue[c.ShardId][i], c.ShardId);
                 }
+                _logger.LogInformation($"Iterated over {_guildCounters[c.ShardId].Item1} members | Collected {_guildCounters[c.ShardId].Item2} Staff members.");
             });
+            return Task.CompletedTask;
         }
 
         // Run when Silk! joins a new guild. // 
-        public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e) =>
+        public async Task OnGuildJoin(DiscordClient c, GuildCreateEventArgs e)
+        {
             _ = Task.Run(async () =>
             {
-                await CacheGuildAsync(e.Guild);
-                await CacheMembersAsync((e.Guild.Id, e.Guild.Members.Values));
+                await CacheGuildAsync(e.Guild.Id);
+                await CacheMembersAsync(new(e.Guild.Id, e.Guild.Members.Values), c.ShardId);
                 await SendWelcomeMessage(c, e);
             });
+        }
 
-        private async Task CacheMembersAsync((ulong id, IEnumerable<DiscordMember> members) guildT)
+        private async Task CacheMembersAsync(CacheObject guildT, int shardId)
         {
-            GuildModel guild = await _dbService.GetOrCreateGuildAsync(guildT.id);
-            CacheMembersAsync(guild, guildT.members);
+            GuildModel guild = await _dbService.GetOrCreateGuildAsync(guildT.Id);
+            CacheMembersAsync(guild, guildT.Members, shardId);
             await _dbService.UpdateGuildAsync(guild);
         }
 
-        private async Task CacheGuildAsync(DiscordGuild guild) => await _dbService.GetOrCreateGuildAsync(guild.Id);
+        private async Task CacheGuildAsync(ulong guild) => await _dbService.GetOrCreateGuildAsync(guild);
 
         // Used in conjunction with OnGuildJoin() //
         private async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
@@ -77,7 +102,7 @@ namespace Silk.Core.Tools.EventHelpers
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
-                .WithColor(new DiscordColor("94f8ff"))
+                .WithColor(new("94f8ff"))
                 .WithThumbnail(c.CurrentUser.AvatarUrl)
                 .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
 
@@ -92,19 +117,17 @@ namespace Silk.Core.Tools.EventHelpers
 
             embed.WithDescription(sb.ToString());
 
-            await firstChannel.SendMessageAsync(embed: embed);
+            await firstChannel.SendMessageAsync(embed);
         }
-
-
-
-        private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members)
+        private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members, int shardId)
         {
             IEnumerable<DiscordMember> staff = members.Where(m =>
-                ((m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)
+                (m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)
                   || m.HasPermission(Permissions.Administrator)
-                  || m.IsOwner) && !m.IsBot));
-            _logger.LogInformation($"{staff.Count()}/{members.Count()} members marked as staff.");
-
+                  || m.IsOwner) && !m.IsBot);
+            IEnumerable<UserModel> currentStaff = guild.Users.Where(u => u.Flags.Has(UserFlag.Staff));
+            
+            
             foreach (DiscordMember member in staff)
             {
                 var flags = UserFlag.Staff;
@@ -118,8 +141,14 @@ namespace Silk.Core.Tools.EventHelpers
                     if (member.HasPermission(Permissions.Administrator) || member.IsOwner)
                         user.Flags.Add(UserFlag.EscalatedStaff);
                 }
-                else guild.Users.Add(new UserModel {Id = member.Id, Flags = flags});
+                else guild.Users.Add(new() {Id = member.Id, Flags = flags});
             }
+            
+            int totalMembers =  _guildCounters[shardId].Item1 + members.Count();
+            int totalStaff = _guildCounters[shardId].Item2 + guild.Users.Except(currentStaff).Count();
+            
+            _guildCounters[shardId] = (totalMembers, totalStaff);
+
         }
     }
 }

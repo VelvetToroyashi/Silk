@@ -31,6 +31,7 @@ namespace Silk.Core
                       DiscordIntents.DirectMessages | // DM Commands
                       DiscordIntents.DirectMessageReactions |
                       DiscordIntents.GuildPresences, // Auto-mod
+            ShardCount = 3,
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.Error
         };
@@ -48,13 +49,23 @@ namespace Silk.Core
                     configuration.AddJsonFile("appSettings.json", true, false);
                     configuration.AddUserSecrets<Program>(true, false);
                 })
-                .ConfigureLogging((_, _) =>
-                    Log.Logger = new LoggerConfiguration()
-                        .WriteTo.Console(
-                            outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                        .MinimumLevel.Verbose()
-                        .CreateLogger())
+                .ConfigureLogging((builder, _) =>
+                {
+                    var logger = new LoggerConfiguration()
+                        .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
+
+                    Log.Logger = builder.Configuration["LogLevel"] switch
+                    {
+                        "All"  => logger.MinimumLevel.Verbose().CreateLogger(),
+                        "Info"  => logger.MinimumLevel.Information().CreateLogger(),
+                        "Debug"  => logger.MinimumLevel.Debug().CreateLogger(),
+                        "Warning" => logger.MinimumLevel.Warning().CreateLogger(),
+                        "Error"    => logger.MinimumLevel.Error().CreateLogger(),
+                        "Panic"     => logger.MinimumLevel.Fatal().CreateLogger(),
+                        _            => logger.MinimumLevel.Information().CreateLogger()
+                    };
+                })
                 .ConfigureServices((context, services) =>
                 {
                     IConfiguration config = context.Configuration;
