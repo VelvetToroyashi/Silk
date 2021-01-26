@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.Bot
                 
                 totalPing += shard.Ping;
             }
-            embed.AddField(embedTitle, sb.ToString());
+            embed.WithDescription($"**{embedTitle}** \n{sb}");
             //embed.AddField()
             sb.Clear();
             

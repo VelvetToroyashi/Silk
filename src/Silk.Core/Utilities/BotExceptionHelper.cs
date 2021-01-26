@@ -85,7 +85,7 @@ namespace Silk.Core.Utilities
 
 
 
-        private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
+        public static  async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();
             Command? cmd = cnext.RegisteredCommands["help"];

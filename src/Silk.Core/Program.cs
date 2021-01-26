@@ -18,7 +18,7 @@ namespace Silk.Core
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
-        public static Stopwatch Sw { get; } = Stopwatch.StartNew();
+        
 
         public static string HttpClientName { get; } = "Silk";
 
@@ -30,8 +30,7 @@ namespace Silk.Core
                       DiscordIntents.GuildMessageReactions | // Role-menu
                       DiscordIntents.DirectMessages | // DM Commands
                       DiscordIntents.DirectMessageReactions |
-                      DiscordIntents.GuildPresences, // Auto-mod
-            ShardCount = 3,
+                      DiscordIntents.GuildPresences, // Auto-mod,
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.Error
         };

@@ -23,6 +23,7 @@ namespace Silk.Core.Tools.EventHelpers
         private readonly ILogger<GuildAddedHandler> _logger;
         
         private readonly Dictionary<int, int> _shards = new();
+        private readonly Dictionary<int, bool> _completedShards = new(); 
         private readonly Dictionary<int, List<CacheObject>> _cacheQueue = new();
         private readonly Dictionary<int, (int, int)> _guildCounters = new();
         
@@ -38,6 +39,7 @@ namespace Silk.Core.Tools.EventHelpers
             {
                 _cacheQueue.TryAdd(i, new());
                 _shards.TryAdd(i, 0);
+                _completedShards.TryAdd(i, false);
                 _guildCounters.TryAdd(i, new());
             }
         }
@@ -58,6 +60,14 @@ namespace Silk.Core.Tools.EventHelpers
         {
             _logger.LogTrace($"Guild download complete for shard {c.ShardId + 1}");
             _logger.LogTrace("Preparing to iterate over cache objects");
+            
+            bool[] completedShards = new bool[Bot.Instance!.Client.ShardClients.Count];
+
+            for (int i = 0; i < Bot.Instance!.Client.ShardClients.Count; i++)
+                completedShards[i] = _completedShards[i];
+            startupCacheCompleted = completedShards.All(s => s);
+            
+            
             _ = Task.Run(async () =>
             {
                 for (var i = 0; i < _cacheQueue[c.ShardId].Count; i++)
@@ -113,7 +123,7 @@ namespace Silk.Core.Tools.EventHelpers
                 .Append("If there's an issue, feel free to [Open an issue on GitHub](https://github.com/VelvetThePanda/Silk/issues), ")
                 .AppendLine("or if you're not familiar with GitHub, feel free")
                 .AppendLine($"to message the developers directly via {Bot.DefaultCommandPrefix}`ticket create <your message>`.")
-                .Append($"By default, the prefix is `{Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by !setprefix <your prefix here>.");
+                .Append($"By default, the prefix is `{Bot.DefaultCommandPrefix}`, or <@{c.CurrentUser.Id}>, but this can be changed by {Bot.DefaultCommandPrefix}setprefix <your prefix here>.");
 
             embed.WithDescription(sb.ToString());
 

@@ -65,7 +65,7 @@ namespace Silk.Core
             Assembly asm = Assembly.GetExecutingAssembly();
             IReadOnlyDictionary<int, CommandsNextExtension> cNext = Client.GetCommandsNextAsync().GetAwaiter().GetResult();
             CommandsNextExtension[] extension = cNext.Select(c => c.Value).ToArray();
-            
+
             var sw = Stopwatch.StartNew();
             foreach (CommandsNextExtension c in extension)
                 c.RegisterCommands(asm);
@@ -80,7 +80,8 @@ namespace Silk.Core
             {
                 UseDefaultCommandHandler = false,
                 Services = _services,
-                IgnoreExtraArguments = true
+                IgnoreExtraArguments = true,
+                
             };
             Client.Ready += async (c, _) => _logger.LogInformation($"Recieved OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
 
@@ -95,7 +96,7 @@ namespace Silk.Core
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
                 PaginationDeletion = PaginationDeletion.DeleteMessage,
                 PollBehaviour = PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromMinutes(1),
+                Timeout = TimeSpan.FromMinutes(1)
             });
 
             
@@ -109,17 +110,14 @@ namespace Silk.Core
                 t.RegisterConverter(memberConverter);
             }
             await Client.StartAsync();
-            Program.Sw.Stop();
+            
             double startupDt = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
             _logger.LogInformation($"Startup time: {startupDt:N0} ms.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await Client.StopAsync();
-        }
+        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
 
     }
 }
