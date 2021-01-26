@@ -61,16 +61,16 @@ namespace Silk.Core
 
         private void InitializeCommands()
         {
-            var sw = Stopwatch.StartNew();
+            
             Assembly asm = Assembly.GetExecutingAssembly();
             IReadOnlyDictionary<int, CommandsNextExtension> cNext = Client.GetCommandsNextAsync().GetAwaiter().GetResult();
             CommandsNextExtension[] extension = cNext.Select(c => c.Value).ToArray();
-            
-            
-            // The compiler can unwrap(?) this I believe. Either way for > foreach anyway. //
-            for(var i = 0; i < extension.Length; i++) { extension[i].RegisterCommands(asm); }
 
+            var sw = Stopwatch.StartNew();
+            foreach (CommandsNextExtension c in extension)
+                c.RegisterCommands(asm);
             sw.Stop();
+            
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shard(s) in {sw.ElapsedMilliseconds} ms.");
         }
 
@@ -80,22 +80,23 @@ namespace Silk.Core
             {
                 UseDefaultCommandHandler = false,
                 Services = _services,
-                IgnoreExtraArguments = true
+                IgnoreExtraArguments = true,
+                
             };
-            Client.Ready += async (_, _) => _logger.LogInformation("Recieved OP 10 - HELLO from Discord on shard 1!");
-            await Client.StartAsync();
+            Client.Ready += async (c, _) => _logger.LogInformation($"Recieved OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
+
 
             await Client.UseCommandsNextAsync(Commands);
             await _exceptionHelper.SubscribeToEventsAsync();
             _eventSubscriber.SubscribeToEvents();
             InitializeCommands();
             
-            await Client.UseInteractivityAsync(new InteractivityConfiguration
+            await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
                 PaginationDeletion = PaginationDeletion.DeleteMessage,
                 PollBehaviour = PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromMinutes(1),
+                Timeout = TimeSpan.FromMinutes(1)
             });
 
             
@@ -103,23 +104,20 @@ namespace Silk.Core
             CommandsNextExtension[] cmd = cmdNext.Select(c => c.Value).ToArray();
             var memberConverter = new MemberConverter();
             
-            for (int i = 0; i < cmd.Length; i++)
+            foreach (CommandsNextExtension t in cmd)
             {
-                cmd[i].SetHelpFormatter<HelpFormatter>();
-                cmd[i].RegisterConverter(memberConverter);
+                t.SetHelpFormatter<HelpFormatter>();
+                t.RegisterConverter(memberConverter);
             }
-
-            Program.Sw.Stop();
-            var startupDT = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
-            _logger.LogInformation($"Startup time: {startupDT:N0} ms.");
+            await Client.StartAsync();
+            
+            double startupDt = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
+            _logger.LogInformation($"Startup time: {startupDt:N0} ms.");
         }
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await Client.StopAsync();
-        }
+        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
 
     }
 }

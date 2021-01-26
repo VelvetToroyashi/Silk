@@ -142,7 +142,7 @@ namespace Silk.Core.Services
             }
 
             DiscordEmbed embed = EmbedHelper.CreateEmbed("Ban expired!", $"<@{inf.UserId}>'s ban has expired.", DiscordColor.Goldenrod);
-            await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed: embed);
+            await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
         }
 
         private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfigModel config, UserInfractionModel inf)
@@ -163,11 +163,7 @@ namespace Silk.Core.Services
             user.Infractions.Add(infraction);
             await _dbService.UpdateGuildUserAsync(user);
         }
-
-
-        // I feel this is even worse than the abomination than I had before, which can be found here: //
-        // https://haste.velvetthepanda.dev/biduliloze.cs //
-        // Though it is smaller and less clunky, objectively speaking. //
+        
         private async Task OnTick()
         {
             if (_tempInfractions.Count is 0) return;

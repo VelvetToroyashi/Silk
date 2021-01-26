@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -81,7 +82,7 @@ namespace Silk.Core.Tools.EventHelpers
                 }
                 CommandContext context = cnext.CreateContext(e.Message, prefix, command, arguments);
 
-                await cnext.ExecuteCommandAsync(context);
+                await cnext.ExecuteCommandAsync(context).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }

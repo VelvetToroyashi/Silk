@@ -42,7 +42,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (config.MuteRoleId is 0)
             {
-                await ErrorHelper.MuteRoleNotFoundInDatabase(ctx.Channel);
+                await ThrowHelper.MuteRoleNotFoundInDatabase(ctx.Channel);
                 return;
             }
 

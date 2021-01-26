@@ -18,6 +18,7 @@ namespace Silk.Core.Commands.General
         public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
 
         [Command("ping")]
+        [Aliases("pong")]
         [Description("Check the responsiveness of Silk")]
         public async Task Ping(CommandContext ctx)
         {
