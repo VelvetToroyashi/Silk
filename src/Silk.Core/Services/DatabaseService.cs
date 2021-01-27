@@ -79,6 +79,14 @@ namespace Silk.Core.Services
             return config;
         }
 
+        public async Task UpdateConfigAsync(GuildConfigModel config)
+        {
+            await using SilkDbContext db = GetContext();
+            EntityEntry<GuildConfigModel>? entity = db.Attach(config);
+            entity.State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
         #endregion
 
 
@@ -97,26 +105,24 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetContext();
 
-            GlobalUserModel? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
-
-            return user;
+            return await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
         }
         
         public async Task<GlobalUserModel> GetOrCreateGlobalUserAsync(ulong userId)
         {
             await using SilkDbContext db = GetContext();
             GlobalUserModel? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user is null)
+            
+            if (user is not null) return user;
+            
+            user = new()
             {
-                user = new()
-                {
-                    Id = userId,
-                    Cash = 0,
-                    Items = new(),
-                    LastCashOut = DateTime.MinValue
-                };
-                await db.SaveChangesAsync();
-            }
+                Id = userId,
+                Cash = 0,
+                Items = new(),
+                LastCashOut = DateTime.MinValue
+            };
+            await db.SaveChangesAsync();
             return user;
         }
         

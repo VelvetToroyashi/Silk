@@ -11,20 +11,24 @@ using Svg.Skia;
 namespace Silk.Core.Commands.General
 {
     [Category(Categories.General)]
+    
     public class EnlargeCommand : BaseCommandModule
     {
+        [Expiremental]
         [Command("enlarge"), Aliases("enbiggen", "emoji", "emote")]
         [Description("Displays a larger version of the provided emoji or custom emote.")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
         {
-            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor("36393F"));
+            var embed = new DiscordEmbedBuilder().WithColor(new("36393F"));
 
             if (emoji.Id != 0) // Guild emote.
             {
+                var message = new DiscordMessageBuilder();
                 embed.WithFooter(emoji.Name);
-                embed.WithImageUrl(emoji.Url);
-
-                await ctx.RespondAsync(embed);
+                embed.WithImageUrl(emoji.Url + "?size=2048");
+                message.WithEmbed(embed)
+                    .WithReply(ctx.Message.Id);
+                await ctx.RespondAsync(message);
             }
             else // Unicode emote.
             {
@@ -37,7 +41,8 @@ namespace Silk.Core.Commands.General
 
                 var message = new DiscordMessageBuilder()
                     .WithEmbed(embed)
-                    .WithFile("emote.jpeg", image);
+                    .WithFile("emote.jpeg", image)
+                    .WithReply(ctx.Message.Id);
 
                 await message.SendAsync(ctx.Channel);
             }
@@ -53,7 +58,7 @@ namespace Silk.Core.Commands.General
 
             var svg = new SKSvg();
             svg.Load(svgStream);
-            svg.Save(imageStream, SKColor.Empty, scaleX: 4.0f, scaleY: 4.0f);
+            svg.Save(imageStream, SKColor.Empty, scaleX: 16.0f, scaleY: 16.0f);
 
             imageStream.Position = 0;
             return imageStream;

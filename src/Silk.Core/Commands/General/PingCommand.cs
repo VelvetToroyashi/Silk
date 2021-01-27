@@ -22,7 +22,6 @@ namespace Silk.Core.Commands.General
         [Description("Check the responsiveness of Silk")]
         public async Task Ping(CommandContext ctx)
         {
-            Core.Bot.CommandTimer.Stop();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Blue);
             
             var sw = Stopwatch.StartNew();

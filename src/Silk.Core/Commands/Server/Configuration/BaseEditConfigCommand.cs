@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -15,8 +16,7 @@ namespace Silk.Core.Commands.Server.Configuration
                 await new DiscordMessageBuilder()
                     .WithReply(ctx.Message.Id, true)
                     .WithContent($"See `{ctx.Prefix}help config edit`.")
-                    .SendAsync(ctx.Channel); 
+                    .SendAsync(ctx.Channel);
         }
     }
-    
 }

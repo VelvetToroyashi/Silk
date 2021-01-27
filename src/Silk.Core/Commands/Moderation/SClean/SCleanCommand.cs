@@ -8,8 +8,9 @@ using Silk.Core.Utilities;
 
 namespace Silk.Core.Commands.Moderation.SClean
 {
-    [Category(Categories.Mod)]
+    [Hidden]
     [Group("SClean")]
+    [Category(Categories.Mod)]
     public partial class SCleanCommand : BaseCommandModule
     {
         [Command]

@@ -3,12 +3,14 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Utilities;
 
 namespace Silk.Core.Commands.Server.Configuration
 {
     
     [RequireGuild]
     [Group("config")] 
+    [Category(Categories.Server)]
     [Aliases("configuration")] 
     [RequireUserPermissions(Permissions.ManageGuild)]
     [Description("Edit configurations the caveman way!\nOr perhaps we just haven't launched the dashboard yet..")]

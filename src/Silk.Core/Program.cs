@@ -72,8 +72,8 @@ namespace Silk.Core
                     services.AddSingleton(new DiscordShardedClient(_clientConfig));
                     Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
                     Core.Startup.AddServices(services);
-
-                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
+                    
+                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
 
                     services.AddHttpClient(HttpClientName, client =>

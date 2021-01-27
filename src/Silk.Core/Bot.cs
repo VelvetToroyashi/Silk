@@ -26,7 +26,6 @@ namespace Silk.Core
         public DiscordShardedClient Client { get; set; }
         public static Bot? Instance { get; private set; }
         public static string DefaultCommandPrefix { get; } = "s!";
-        public static Stopwatch CommandTimer { get; } = new();
         public SilkDbContext SilkDBContext { get; }
 
         public CommandsNextConfiguration? Commands { get; private set; }

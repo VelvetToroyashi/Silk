@@ -23,12 +23,15 @@ namespace Silk.Core.Commands.Bot
         {
             DiscordMessage msg = ctx.Message;
 
-            int cs1 = code.IndexOf("```") + 3;
+            int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;
-            int cs2 = code.LastIndexOf("```");
+            int cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
 
             if (cs1 is -1 || cs2 is -1)
-                throw new ArgumentException("You need to wrap the code into a code block.");
+            {
+                cs1 = 0;
+                cs2 = code.Length;
+            }
 
             string cs = code.Substring(cs1, cs2 - cs1);
 

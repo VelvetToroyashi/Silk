@@ -39,6 +39,11 @@ namespace Silk.Core.Services.Interfaces
         /// <returns>The configuration that corresponds to the Id passed in.</returns>
         public Task<GuildConfigModel> GetConfigAsync(ulong configId);
 
+        /// <summary>
+        /// Update a <see cref="GuildConfigModel"/>.
+        /// </summary>
+        /// <param name="config">The configuration to update.</param>
+        public Task UpdateConfigAsync(GuildConfigModel config);
         
         /// <summary>
         /// Get a <see cref="UserModel"/> from the database.

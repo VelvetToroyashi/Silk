@@ -33,7 +33,7 @@ namespace Silk.Core
             services.AddSingleton<PrefixCacheService>();
             services.AddSingleton<TicketService>();
             services.AddSingleton<ConfigService>();
-
+            services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
             services.AddSingleton<MessageAddedHandler>();
 

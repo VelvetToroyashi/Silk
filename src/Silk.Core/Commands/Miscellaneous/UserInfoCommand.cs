@@ -17,8 +17,8 @@ namespace Silk.Core.Commands.Miscellaneous
     [Category(Categories.Misc)]
     public class UserInfo : BaseCommandModule
     {
-        [Command("role-info")]
-        [Aliases("role_info")]
+        [Command("roleinfo")]
+        [Aliases("role_info", "role-info")]
         [Description("Get info about a role")]
         public async Task RoleInfo(CommandContext ctx, DiscordRole role)
         {

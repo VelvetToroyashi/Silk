@@ -1,5 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -19,23 +22,27 @@ namespace Silk.Core.Services
         private readonly ConcurrentDictionary<ulong, string> _cache = new();
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
         private readonly Stopwatch _sw = new();
-
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory)
+        private readonly IServiceCacheUpdaterService _cacheUpdater;
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory, IMemoryCache memoryCache, IServiceCacheUpdaterService cacheUpdater)
         {
             _logger = logger;
             _dbFactory = dbFactory;
+            _memoryCache = memoryCache;
+            _cacheUpdater = cacheUpdater;
+
+            _cacheUpdater.ConfigUpdated += PurgeCache;
         }
 
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         public string RetrievePrefix(ulong? guildId)
         {
             if (guildId == default || guildId == 0) return string.Empty;
-            if (_cache.TryGetValue(guildId.Value, out string? prefix)) return prefix;
+            if (_memoryCache.TryGetValue(guildId.Value, out string? prefix)) return prefix!;
             return GetPrefixFromDatabase(guildId.Value);
         }
-
+        
         private string GetPrefixFromDatabase(ulong guildId)
         {
-            _logger.LogDebug("Prefix not present in cache; querying from database.");
             _sw.Restart();
 
             SilkDbContext db = _dbFactory.CreateDbContext();
@@ -43,15 +50,22 @@ namespace Silk.Core.Services
             GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)
             {
-                _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database.");
+                _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database");
                 return Bot.DefaultCommandPrefix;
             }
 
             _sw.Stop();
-            _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms.");
-            _cache.TryAdd(guildId, guild.Prefix);
+            
+            //_memoryCache.Set(guildId, guild.Prefix, DateTimeOffset.UtcNow.AddSeconds(1));
+            _memoryCache
+                .CreateEntry(guildId)
+                .SetValue(guild.Prefix)
+                .SetSlidingExpiration(TimeSpan.FromMinutes(10))
+                //.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddMinutes(10))
+                .RegisterPostEvictionCallback((key, _, reason, _) => _logger.LogInformation($"{key} was evicted from cache for {reason}"));
+            _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms");
 
-            return guild.Prefix;
+        return guild.Prefix;
         }
 
         public void UpdatePrefix(ulong id, string prefix)
@@ -60,9 +74,12 @@ namespace Silk.Core.Services
             _cache.AddOrUpdate(id, prefix, (_, _) => prefix);
             _logger.LogDebug($"Updated prefix for {id} - {currentPrefix} -> {prefix}");
         }
-        public async Task InvalidateAsync(ulong guildId)
+
+        public void PurgeCache(ulong id)
         {
-            //if (!_ca)
+            _memoryCache.Remove(id);
+            _ = GetPrefixFromDatabase(id);
+            _logger.LogDebug("Purged prefix from recached from database");
         }
     }
 }
