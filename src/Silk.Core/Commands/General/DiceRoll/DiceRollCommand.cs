@@ -21,17 +21,22 @@ namespace Silk.Core.Commands.General.DiceRoll
         [Description("Roll die like it's DnD! Example: 2d4 + 10 + d7")]
         public async Task Roll(CommandContext ctx, [RemainingText] string roll)
         {
+            if (string.IsNullOrEmpty(roll))
+            {
+                await ThrowHelper.EmptyArgument(ctx);
+                return;
+            }
             var parser = new DiceParser(roll);
             IList<Step> steps = parser.Run();
 
-            var embed = InitEmbed(new());
+            DiscordEmbedBuilder embed = InitEmbed(new());
             var ran = new Random((int) ctx.Message.Id);
             var modifiers = new List<int>();
             var rolls = new List<int>();
 
             for (int i = 0; i < steps.Count; i++)
             {
-                if (steps[i].Type == StepType.Addition)
+                if (steps[i].Type is StepType.Addition)
                 {
                     modifiers.Add(steps[i].TotalNumber);
                 }
@@ -52,11 +57,11 @@ namespace Silk.Core.Commands.General.DiceRoll
 
 
             embed.AddField("Modifiers", $"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
-            embed.AddField("Total", $"{(rolls.Sum() + modifiers.Sum())}");
+            embed.AddField("Total", $"{rolls.Sum() + modifiers.Sum()}");
             await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
         }
 
-        private DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>
+        private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>
             embed
                 .WithColor(DiscordColor.PhthaloGreen)
                 .WithTitle("You rolled:")

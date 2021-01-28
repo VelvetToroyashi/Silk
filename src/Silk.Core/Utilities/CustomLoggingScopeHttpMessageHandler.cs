@@ -65,17 +65,17 @@ namespace Silk.Core.Utilities
 
             public static IDisposable BeginRequestPipelineScope(ILogger logger, HttpRequestMessage request)
             {
-                return _beginRequestPipelineScope(logger, request.Method, request.RequestUri);
+                return _beginRequestPipelineScope(logger, request.Method, request.RequestUri!);
             }
 
             public static void RequestPipelineStart(ILogger logger, HttpRequestMessage request)
             {
-                _requestPipelineStart(logger, request.Method, request.RequestUri, null);
+                _requestPipelineStart(logger, request.Method, request.RequestUri!, null!);
             }
 
             public static void RequestPipelineEnd(ILogger logger, HttpResponseMessage response)
             {
-                _requestPipelineEnd(logger, response.StatusCode, null);
+                _requestPipelineEnd(logger, response.StatusCode, null!);
             }
         }
     }

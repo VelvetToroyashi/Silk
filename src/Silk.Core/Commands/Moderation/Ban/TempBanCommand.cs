@@ -29,6 +29,7 @@ namespace Silk.Core.Commands.Moderation.Ban
 
         [Command("tempban")]
         [RequireGuild]
+        [Description("Temporarily ban a member from the Guild")]
         public async Task TempBan(
             CommandContext ctx, DiscordMember user, string duration,
             [RemainingText] string reason = "Not provided.")
@@ -49,8 +50,7 @@ namespace Silk.Core.Commands.Moderation.Ban
             {
                 DiscordEmbedBuilder banEmbed = new DiscordEmbedBuilder()
                     .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
-                    .WithDescription(
-                        $"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
+                    .WithDescription($"You've been temporarily banned from {ctx.Guild.Name} for {duration} days.")
                     .AddField("Reason:", reason);
 
                 await user.SendMessageAsync(embed: banEmbed);

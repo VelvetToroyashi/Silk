@@ -23,12 +23,15 @@ namespace Silk.Core.Commands.Bot
         {
             DiscordMessage msg = ctx.Message;
 
-            int cs1 = code.IndexOf("```") + 3;
+            int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;
-            int cs2 = code.LastIndexOf("```");
+            int cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
 
             if (cs1 is -1 || cs2 is -1)
-                throw new ArgumentException("You need to wrap the code into a code block.");
+            {
+                cs1 = 0;
+                cs2 = code.Length;
+            }
 
             string cs = code.Substring(cs1, cs2 - cs1);
 
@@ -44,7 +47,8 @@ namespace Silk.Core.Commands.Bot
 
                 var sopts = ScriptOptions.Default;
                 sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
+                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions",
+                    "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
                 sopts = sopts.WithReferences(AppDomain.CurrentDomain.GetAssemblies()
                     .Where(xa =>
@@ -71,7 +75,7 @@ namespace Silk.Core.Commands.Bot
             }
             catch (Exception ex)
             {
-                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
                         Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
@@ -79,6 +83,7 @@ namespace Silk.Core.Commands.Bot
                     }.Build())
                     .ConfigureAwait(false);
             }
+            
         }
 
         public record TestVariables

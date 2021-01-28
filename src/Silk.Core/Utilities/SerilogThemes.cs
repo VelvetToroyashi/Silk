@@ -36,7 +36,6 @@ namespace Silk.Core.Utilities
             };
             Console.ForegroundColor = foreground;
             Console.BackgroundColor = background;
-            if (style == ConsoleThemeStyle.LevelFatal) Console.Beep();
             return 0;
         }
     }

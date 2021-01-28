@@ -4,6 +4,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using DSharpPlus.Entities;
 
 #endregion
 
@@ -22,8 +24,8 @@ namespace Silk.Extensions
         {
             if (list.IsReadOnly) throw new InvalidOperationException($"Cannot push onto readonly list {nameof(list)}");
             if (list.Count == 0) throw new ArgumentOutOfRangeException($"List cannot be empty {nameof(list)}");
-            T lastElement = list[list.Count - 1];
-            list[list.Count - 1] = obj;
+            T lastElement = list[^1];
+            list[^1] = obj;
             return lastElement;
         }
 
@@ -38,7 +40,7 @@ namespace Silk.Extensions
         }
 
         /// <summary>Fluid method that joins the members of a collection using the specified separator between them.</summary>
-        public static string JoinString<T>(this IEnumerable<T> values, string separator = "")
+        public static string Join<T>(this IEnumerable<T> values, string separator = "")
         {
             return string.Join(separator, values);
         }
@@ -47,6 +49,25 @@ namespace Silk.Extensions
         public static string Join<T>(this IEnumerable<T> values, char separator)
         {
             return string.Join(separator, values);
+        }
+
+        /// <summary>Attempts to parse a unicode or guild emoji from its mention</summary>
+        public static DiscordEmoji ToEmoji(this string text)
+        {
+            var match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
+            return DiscordEmoji.FromUnicode(match.Success ? match.Groups[1].Value : text.Trim());
+        }
+
+        public static ulong ToEmojiId(this string emoji)
+        {
+            var match = Regex.Match(emoji.Trim(), @"^<?a?:([a-zA-Z0-9_]+:[0-9]+)>$");
+            if (!match.Success) throw new ArgumentException("Not a valid emoji!");
+            int matchIndex = match.Value.LastIndexOf(':');
+            string subMatch = emoji.Trim()[++matchIndex..^1];
+            
+            if (!ulong.TryParse(subMatch, out ulong result)) throw new ArgumentException("Invalid emoji Id!");
+            
+            return result;
         }
 
         public static void AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key,

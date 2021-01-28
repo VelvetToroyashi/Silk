@@ -87,6 +87,10 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 <br/>
 
 ## ⚠️ A NOTE ABOUT SELF-HOSTING ⚠️
-### Planning to self-host the bot? Glad to hear. Unfortunately, as it stands right now, we're a small team, and cannot provide active support for self-hosting.
-### Pre-requisites and requisite resources will be listed as the bot changes, which are the bare minimum for the bot to run. 
+### Self-hosting Silk! is easy. Instructions have been provided to self-host locally.
+## Docker: 
+To run Silk! as a docker container, you can simply create an `appSettings.json` file in the root directory, and run `docker pull velvetthepanda/silk`, assuming you have a postgres database running already. If not, you can download a pre-configured `docker-compose` file [here](https://files.velvetthepanda.dev/docker-compose.yml). 
+
+Both Postgres and Silk! will have to initialize on the first run, and if run without the `-d` flag, you will see an exception thrown as Silk! tries to access tables that don't exist (signifying it needs to migrate). Fear not, running `docker-compose up -d` again will have Postgres configured, and Silk! will create requisite tables if they do not already exist upon startup.
+
 ![](https://velvet.is-ne.at/mQW3nC.png)

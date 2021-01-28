@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 

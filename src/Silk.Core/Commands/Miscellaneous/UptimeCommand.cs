@@ -13,6 +13,7 @@ namespace Silk.Core.Commands.Miscellaneous
     public class UptimeCommand : BaseCommandModule
     {
         [Command]
+        [Description("See how long Silk has been running!")]
         public async Task UpTime(CommandContext ctx)
         {
             DateTime now = DateTime.Now;

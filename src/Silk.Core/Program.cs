@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -17,6 +18,8 @@ namespace Silk.Core
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
+        
+
         public static string HttpClientName { get; } = "Silk";
 
         private static readonly DiscordConfiguration _clientConfig = new()
@@ -27,12 +30,12 @@ namespace Silk.Core
                       DiscordIntents.GuildMessageReactions | // Role-menu
                       DiscordIntents.DirectMessages | // DM Commands
                       DiscordIntents.DirectMessageReactions |
-                      DiscordIntents.GuildPresences, // Auto-mod
-            MessageCacheSize = 4096,
+                      DiscordIntents.GuildPresences, // Auto-mod,
+            MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.Error
         };
 
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).RunConsoleAsync().ConfigureAwait(false);
+        public static async Task Main(string[] args) => await CreateHostBuilder(args).UseConsoleLifetime().StartAsync().ConfigureAwait(false);
 
 
         public static IHostBuilder CreateHostBuilder(string[] args)
@@ -45,13 +48,23 @@ namespace Silk.Core
                     configuration.AddJsonFile("appSettings.json", true, false);
                     configuration.AddUserSecrets<Program>(true, false);
                 })
-                .ConfigureLogging((_, _) =>
-                    Log.Logger = new LoggerConfiguration()
-                        .WriteTo.Console(
-                            outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                        .MinimumLevel.Verbose()
-                        .CreateLogger())
+                .ConfigureLogging((builder, _) =>
+                {
+                    var logger = new LoggerConfiguration()
+                        .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
+
+                    Log.Logger = builder.Configuration["LogLevel"] switch
+                    {
+                        "All"  => logger.MinimumLevel.Verbose().CreateLogger(),
+                        "Info"  => logger.MinimumLevel.Information().CreateLogger(),
+                        "Debug"  => logger.MinimumLevel.Debug().CreateLogger(),
+                        "Warning" => logger.MinimumLevel.Warning().CreateLogger(),
+                        "Error"    => logger.MinimumLevel.Error().CreateLogger(),
+                        "Panic"     => logger.MinimumLevel.Fatal().CreateLogger(),
+                        _            => logger.MinimumLevel.Information().CreateLogger()
+                    };
+                })
                 .ConfigureServices((context, services) =>
                 {
                     IConfiguration config = context.Configuration;
@@ -59,8 +72,8 @@ namespace Silk.Core
                     services.AddSingleton(new DiscordShardedClient(_clientConfig));
                     Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
                     Core.Startup.AddServices(services);
-
-                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromHours(1));
+                    
+                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
 
                     services.AddHttpClient(HttpClientName, client =>

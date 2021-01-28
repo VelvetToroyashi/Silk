@@ -23,9 +23,10 @@ namespace Silk.Core.Commands.Moderation.Ban
             _dbFactory = dbFactory;
         }
 
-        [Command("Ban")]
+        [Command("ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
+        [Description("Ban a member from the Guild")]
         public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
             DiscordMember user = await ctx.Guild.GetMemberAsync(target.Id);
@@ -58,15 +59,13 @@ namespace Silk.Core.Commands.Moderation.Ban
                 }
                 if (user.IsAbove(bot))
                 {
-                    errorReason =
-                        $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
+                    errorReason = $"{target.Mention} has a role {user.GetHighestRoleMention()} that is above mine, and I cannot ban them!";
                     return false;
                 }
 
                 errorReason = null!;
                 return true;
             }
-
 
             DiscordEmbedBuilder userBannedEmbed = new DiscordEmbedBuilder()
                 .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
@@ -80,8 +79,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .WithAuthorExtension(name, url)
                 .WithColor(DiscordColor.SpringGreen)
                 .WithDescription($":hammer: {ctx.Member.Mention} banned {target.Mention}!")
-                .AddField("Infraction occured:",
-                    DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
+                .AddField("Infraction occured:", DateTime.UtcNow.ToString("dd/MM/yy - HH:mm UTC"))
                 .AddField("Reason:", reason)
                 .AddFooter(ctx);
             try

@@ -17,7 +17,7 @@ namespace Silk.Core.Migrations
             modelBuilder
                 .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("Silk.Core.Database.Models.BlackListedWord", b =>
                 {
@@ -350,7 +350,7 @@ namespace Silk.Core.Migrations
 
                     b.HasIndex("UserDatabaseId");
 
-                    b.ToTable("UserInfractionModel");
+                    b.ToTable("Infractions");
                 });
 
             modelBuilder.Entity("Silk.Core.Database.Models.UserModel", b =>

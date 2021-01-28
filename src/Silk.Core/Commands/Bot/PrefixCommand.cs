@@ -29,6 +29,7 @@ namespace Silk.Core.Commands.Bot
 
         [Command("setprefix")]
         [RequireFlag(UserFlag.Staff)]
+        [Description("Sets the command prefix for Silk to use on the current Guild")]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
@@ -42,8 +43,17 @@ namespace Silk.Core.Commands.Bot
             GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
+            
             await db.SaveChangesAsync();
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
+        }
+
+        [Command("prefix")]
+        [Description("Gets Silk's command prefix for the current Guild")]
+        public async Task SetPrefix(CommandContext ctx)
+        {
+            string? prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
+            await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
 
         private PrefixValidationResult IsValidPrefix(string prefix)
@@ -55,13 +65,6 @@ namespace Silk.Core.Commands.Bot
                 return new(false, "Invalid prefix! `[Valid symbols: ! @ # $ % ^ & * < > ? / and A-Z (Case insensitive)]`");
 
             return new(true, "");
-        }
-
-        [Command("Prefix")]
-        public async Task SetPrefix(CommandContext ctx)
-        {
-            string? prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
-            await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
     }
 }

@@ -25,8 +25,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile>bin\Release\Silk_Core.xml</DocumentationFile>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile></DocumentationFile>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,7 +49,7 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00779" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00783" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00779" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00779" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
@@ -78,6 +78,7 @@
     <PackageReference Include="Serilog.Extensions.Hosting" Version="4.0.0-dev-00051" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0-dev-00264" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
+    <PackageReference Include="Svg.Skia" Version="0.5.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
@@ -98,6 +99,10 @@
     <Compile Remove="Utilities\CommandHelper.cs" />
     <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
     <Compile Remove="Commands\Bot\Restart.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\Server\Roles" />
   </ItemGroup>
   
 </Project>

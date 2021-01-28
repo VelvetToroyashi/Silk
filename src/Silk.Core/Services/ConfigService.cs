@@ -19,7 +19,7 @@ namespace Silk.Core.Services
             return await GetConfigFromDatabaseAsync(guildId);
         }
 
-        public async Task<GuildConfigModel> GetConfigFromDatabaseAsync(ulong guildId)
+        private async Task<GuildConfigModel> GetConfigFromDatabaseAsync(ulong guildId)
         {
             GuildConfigModel configuration = await _db.GetConfigAsync(guildId);
             _cache.Set(guildId, configuration, TimeSpan.FromHours(1));

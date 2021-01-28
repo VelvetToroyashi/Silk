@@ -37,24 +37,25 @@ namespace Silk.Core.Commands.Furry.SFW
                 return;
             }
 
-            eBooruPostResult result = await DoQueryAsync(query);
+            eBooruPostResult? result = await DoQueryAsync(query);
             if (result is null)
             {
                 await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
                 return;
             }
 
-            List<Post> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
+            List<Post?> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
             foreach (Post post in posts)
             {
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithTitle(query)
-                    .WithDescription(
-                        $"[Direct Link](https://e926.net/posts/{post.Id})\nDescription: {post.Description.Truncate(200)}")
+                    .WithDescription($"[Direct Link](https://e926.net/posts/{post.Id})\n" +
+                                     $"Description: {post.Description.Truncate(200)}")
                     .AddField("Score:", post.Score.Total.ToString())
                     .WithColor(DiscordColor.PhthaloBlue)
                     .WithImageUrl(post.File.Url)
                     .WithFooter("Limit: 7 img / 15 sec");
+                
                 await ctx.RespondAsync(embed: embed);
                 await Task.Delay(300);
             }

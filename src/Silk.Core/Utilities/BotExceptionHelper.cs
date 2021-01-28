@@ -11,6 +11,8 @@ using DSharpPlus.EventArgs;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Services.Interfaces;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {
@@ -26,8 +28,9 @@ namespace Silk.Core.Utilities
         {
 
             if (e.Exception is CommandNotFoundException)
+            {
                 _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
-
+            }
             else if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
             {
                 _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
@@ -41,7 +44,6 @@ namespace Silk.Core.Utilities
             }
             else if (e.Exception is ArgumentException ae)
             {
-                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
                 _logger.LogWarning(ae.Message);
             }
             else if (e.Exception is ChecksFailedException cf)
@@ -49,8 +51,8 @@ namespace Silk.Core.Utilities
                 switch (cf.FailedChecks[0])
                 {
                     case RequireOwnerAttribute:
-                        DiscordUser owner = c.Client.CurrentApplication.Owners.First();
-                        await e.Context.RespondAsync($"{e.Context.User.Username} doesn't look like {owner.Username}#{owner.Discriminator} to me!");
+                        string owners = c.Client.CurrentApplication.Owners.Select(owner => $"{owner.Username}#{owner.Discriminator}").Join(", or");
+                        await e.Context.RespondAsync($"{e.Context.User.Username} doesn't look like {owners} to me!");
                         break;
                     case RequireNsfwAttribute:
                         await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");
@@ -85,7 +87,7 @@ namespace Silk.Core.Utilities
 
 
 
-        private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
+        public static  async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();
             Command? cmd = cnext.RegisteredCommands["help"];
