@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
@@ -15,10 +17,14 @@ namespace Silk.Core.Commands.Economy
     public class BalTopCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly ILogger<BalTopCommand> _logger;
 
-        public BalTopCommand(IDbContextFactory<SilkDbContext> dbContextFactory)
+        public BalTopCommand(
+            IDbContextFactory<SilkDbContext> dbContextFactory,
+            ILogger<BalTopCommand> logger)
         {
             _dbFactory = dbContextFactory;
+            _logger = logger;
         }
 
         [RequireGuild]
@@ -44,16 +50,40 @@ namespace Silk.Core.Commands.Economy
                 .WithTitle("Members with the Highest Economy Balances! :money_with_wings:")
                 .WithColor(DiscordColor.Gold);
 
+            bool addedTopMember = false;
+            int position = 0;
+
             for (var i = 0; i < economyUsers.Count; ++i)
             {
-                var position = i + 1;
-                var economyUser = economyUsers[i];
-                var displayName = ctx.Guild.Members[economyUser.Id].DisplayName;
+                GlobalUserModel? economyUser = economyUsers[i];
 
-                embed.AddField(i == 0 ? $"{position}. :crown:" : $"{position}. ", $"{displayName}", true);
+                bool exceptionOccurred = false;
+                DiscordUser? ctxUser = null;
+
+                try
+                {
+                    ctxUser = await ctx.Client.GetUserAsync(economyUser.Id);
+                }
+                catch (Exception e)
+                {
+                    exceptionOccurred = true;
+                    _logger.LogInformation(e.Message);
+                }
+                
+                if (ctxUser is null || exceptionOccurred) continue;
+                
+                position++;
+
+                var displayName = ctxUser.Username;
+                var fieldHeader = addedTopMember == false ? $"{position}. :crown:" : $"{position}. ";
+                var fieldValue = $"{displayName} - ${economyUser.Cash}";
+                
+                embed.AddField(fieldHeader, fieldValue);
+                
+                addedTopMember = true;
             }
 
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
     }
 }
