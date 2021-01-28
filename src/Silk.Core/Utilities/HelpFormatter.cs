@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -17,10 +18,25 @@ namespace Silk.Core.Utilities
         public Command? Command { get; private set; }
         public Command[]? Subcommands { get; private set; }
 
+        private readonly IOrderedEnumerable<IGrouping<string?, Command>> _commands;
+        
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Command = null;
             Subcommands = null;
+            var cNext = Bot.Instance!.Client.ShardClients[0].GetCommandsNext();
+            if (cNext is null) 
+                throw new ArgumentNullException(nameof(cNext), "CommandsNext must be setup before configuring Help Formatter!");
+            if (cNext.RegisteredCommands?.Count is 0) 
+                throw new ArgumentNullException(nameof(cNext), "CommandsNext must have registered commands!");
+            
+            _commands = cNext.RegisteredCommands!.Values
+                .Distinct()
+                .Where(c => !c.IsHidden)
+                .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+                .Where(x => x.Key is not null)
+                .OrderBy(x => Categories.Order.IndexOf(x.Key));
+            
         }
 
         public override BaseHelpFormatter WithCommand(Command command)
@@ -39,23 +55,20 @@ namespace Silk.Core.Utilities
         public override CommandHelpMessage Build()
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
-
+            
+            
             if (Command == null)
             {
                 embed.WithTitle("Silk Commands:")
                     .WithFooter("* = Group | ** = Executable group");
-                IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
-                    .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-                    .Where(x => x.Key is not null)
-                    .OrderBy(x => Categories.Order.IndexOf(x.Key));
 
-                foreach (IGrouping<string?, Command> commands in modules)
+                foreach (IGrouping<string?, Command> commands in _commands)
                     embed.AddField(commands.Key ?? "Uncategorized", 
                         commands
+                            .OrderBy(c => c.Name)
                             .Select(x => $"`{x.Name}" +
                                          $"{(x is CommandGroup g ? g.IsExecutableWithoutSubcommands ? "**" : "*" : "")}`")
                             .Join(", "));
-                
                 
             }
             else
