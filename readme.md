@@ -27,7 +27,7 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 - To manage storage of the needed ```Discord Token``` and ```Database Connection String```, Silk uses an ```appSettings.json``` file.
 
 #### **Default**
-1. When you clone Silk, before running the Visual Studio solution, you'll need to create this ```appSettings.json``` file in the following directory: ```Silk\Silk.Core```
+1. When you clone Silk, before running the Visual Studio solution, you'll need to create this ```appSettings.json``` file in the following directory: ```Silk\src\Silk.Core```
 
 2. Now that the configuration file has been created, you'll need to fill out the structure:
     - ```
@@ -59,11 +59,11 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 3. The structure is the same for the [Default](#default) - ```appSettings.json``` approach
    - Just fill out the skeleton and you're good to go!
 
-<br/>
 
 ### Running the Project
 
 - If you're starting fresh, just cloned the repo, then you'll need to make sure you've done the needed [configuration](#configuration--secrets-management), before running or debugging Silk.
+
 
 - If you're already using Silk, you may need to do any or all of the following to ensure that you have everything you need to run the latest and greatest!
 
