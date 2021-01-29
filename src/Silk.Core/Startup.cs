@@ -29,7 +29,6 @@ namespace Silk.Core
         {
             services.AddSingleton<IDatabaseService, DatabaseService>();
             services.AddSingleton<IInfractionService, InfractionService>();
-            services.AddSingleton<TimedEventService>();
             services.AddSingleton<PrefixCacheService>();
             services.AddSingleton<TicketService>();
             services.AddSingleton<ConfigService>();

@@ -15,13 +15,12 @@ namespace Silk.Core.Commands.Server.Configuration
     {
         public partial class BaseEditConfigCommand
         {
-            
-            
             [Group("moderation")]
             public class EditModerationConfigCommand : BaseCommandModule
             {
                 //Does nested class ctor injection work???? //
                 private readonly IDatabaseService? _dbService;
+                private readonly IServiceCacheUpdaterService _cacheUpdaterService;
                 
                 [GroupCommand]
                 public async Task EditConfig(CommandContext ctx) =>
@@ -52,10 +51,14 @@ namespace Silk.Core.Commands.Server.Configuration
                     builder.WithContent($"Alrighty, muted role is now {role.Mention}!");
                     await ctx.Message.CreateReactionAsync(Emojis.EConfirm);
                     await ctx.RespondAsync(builder);
-                    // Fire event here //
+                    _cacheUpdaterService.UpdateGuild(ctx.Guild.Id);
                 }
-                
-                public EditModerationConfigCommand(IDatabaseService dbService) => _dbService = dbService;
+
+                public EditModerationConfigCommand(IDatabaseService dbService, IServiceCacheUpdaterService cacheUpdaterService)
+                {
+                    _dbService = dbService;
+                    _cacheUpdaterService = cacheUpdaterService;
+                }
             }
         } 
     }

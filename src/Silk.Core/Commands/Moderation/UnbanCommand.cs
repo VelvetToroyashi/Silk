@@ -14,12 +14,7 @@ namespace Silk.Core.Commands.Moderation
     [Category(Categories.Mod)]
     public class UnbanCommand : BaseCommandModule
     {
-        private readonly TimedEventService _eventService;
 
-        public UnbanCommand(TimedEventService eventService)
-        {
-            _eventService = eventService;
-        }
 
         [Command("unban")]
         [RequireFlag(UserFlag.Staff)]
@@ -38,9 +33,12 @@ namespace Silk.Core.Commands.Moderation
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "",
                         $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
-                var infraction =
-                    (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
-                if (infraction is not null) _eventService.Events.TryRemove(infraction);
+                
+                //TODO: Refactor this to use IInfractionService
+                
+                // var infraction =
+                //     (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
+                // if (infraction is not null) _eventService.Events.TryRemove(infraction);
                 
                 await ctx.RespondAsync(embed: embed);
             }

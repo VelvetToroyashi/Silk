@@ -75,7 +75,6 @@ namespace Silk.Core.Services
             _cache.AddOrUpdate(id, prefix, (_, _) => prefix);
             _logger.LogDebug($"Updated prefix for {id} - {currentPrefix} -> {prefix}");
         }
- 
         public void PurgeCache(ulong id)
         {
             _cache.TryRemove(id, out _);

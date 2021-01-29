@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Economy
 {
@@ -17,19 +18,12 @@ namespace Silk.Core.Commands.Economy
     public class BalTopCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly ILogger<BalTopCommand> _logger;
 
-        public BalTopCommand(
-            IDbContextFactory<SilkDbContext> dbContextFactory,
-            ILogger<BalTopCommand> logger)
-        {
-            _dbFactory = dbContextFactory;
-            _logger = logger;
-        }
+        public BalTopCommand(IDbContextFactory<SilkDbContext> dbContextFactory) => _dbFactory = dbContextFactory;
 
         [RequireGuild]
-        [Command("baltop")]
-        [Aliases("highroller")]
+        [Command("top")]
+        [Aliases("topbal")]
         [Description("See which members have the most money!")]
         public async Task BalTop(CommandContext ctx)
         {
@@ -41,46 +35,52 @@ namespace Silk.Core.Commands.Economy
 
             if (!economyUsers.Any())
             {
-                await ctx.RespondAsync("Seems you don't have any members with economy accounts. " +
+                await ctx.RespondAsync("Seems we don't have any members with accounts. " +
                                        $"Ask some members to use `{ctx.Prefix}daily` and I'll set up accounts for them *:)*");
                 return;
             }
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithTitle("Members with the Highest Economy Balances! :money_with_wings:")
+                .WithTitle("Members with the biggest stacks! :money_with_wings:")
                 .WithColor(DiscordColor.Gold);
+            var position = 1;
 
-            bool addedTopMember = false;
-            int position = 0;
-
-            for (var i = 0; i < economyUsers.Count; ++i)
+            if (economyUsers.Count > 3)
             {
-                GlobalUserModel? economyUser = economyUsers[i];
+                position = 4;
+                GlobalUserModel? firstGlobalUser = economyUsers.First();
+                DiscordUser? firstUser = await ctx.Client.GetUserAsync(firstGlobalUser.Id);
+                
+                GlobalUserModel? secondGlobalUser = economyUsers.Skip(1).First();
+                DiscordUser? secondUser = await ctx.Client.GetUserAsync(secondGlobalUser.Id);
+                
+                GlobalUserModel? thirdGlobalUser = economyUsers.Skip(2).First();
+                DiscordUser? thirdUser = await ctx.Client.GetUserAsync(thirdGlobalUser.Id);
 
-                bool exceptionOccurred = false;
-                DiscordUser? ctxUser = null;
-
-                try
+                embed.AddField(":first_place:", $"{firstUser.Username} ({firstUser.Mention}) - ${firstGlobalUser.Cash}");
+                embed.AddField(":second_place:", $"{secondUser.Username} ({secondUser.Mention}) - ${secondGlobalUser.Cash}");
+                embed.AddField(":third_place:", $"{thirdUser.Username} ({thirdUser.Mention}) - ${thirdGlobalUser.Cash}");
+                
+                IEnumerable<string> remainingUsers = economyUsers.Skip(3).Select(u =>
                 {
-                    ctxUser = await ctx.Client.GetUserAsync(economyUser.Id);
-                }
-                catch (Exception e)
+                    DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
+                    return $"{user.Username} ({user.Mention}) - ${u.Cash}";
+                });
+                
+                foreach (var user in remainingUsers)
+                    embed.AddField($"{position++}.", user);
+                
+            }
+            else
+            {
+                IEnumerable<string> formattedUsers = economyUsers.Select(u =>
                 {
-                    exceptionOccurred = true;
-                    _logger.LogInformation(e.Message);
-                }
+                    DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
+                    return $"{user.Username} ({user.Mention}) - ${u.Cash}";
+                });
                 
-                if (ctxUser is null || exceptionOccurred) continue;
-                
-                position++;
-
-                var displayName = ctxUser.Username;
-                var fieldHeader = addedTopMember == false ? $"{position}. :crown:" : $"{position}. ";
-                var fieldValue = $"{displayName} - ${economyUser.Cash}";
-                
-                embed.AddField(fieldHeader, fieldValue);
-                
-                addedTopMember = true;
+                foreach (var user in formattedUsers)
+                    embed.AddField($"{position++}.", user);
             }
 
             await ctx.RespondAsync(embed);
