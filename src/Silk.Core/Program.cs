@@ -38,7 +38,7 @@ namespace Silk.Core
         public static async Task Main(string[] args) => await CreateHostBuilder(args).UseConsoleLifetime().StartAsync().ConfigureAwait(false);
 
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime()
@@ -50,8 +50,10 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
+                    string logFormat = "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
                     var logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SerilogThemes.Bot)
+                        .WriteTo.Console(outputTemplate: logFormat, theme: SerilogThemes.Bot)
+                        .WriteTo.File("silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch
