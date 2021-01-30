@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -18,7 +18,13 @@ namespace Silk.Core.Commands.Bot
         {
             string prefix = ctx.Prefix;
 
-            DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed(ctx, "Permissions:", DiscordColor.CornflowerBlue);
+            var description = ctx.Command.Description;
+
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.CornflowerBlue)
+                .WithTitle("Silk's Permissions:")
+                .WithDescription(description + "\n");
+
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
             bool manageMessage = bot.HasPermission(Permissions.ManageMessages);
@@ -26,17 +32,13 @@ namespace Silk.Core.Commands.Bot
             bool ban = bot.HasPermission(Permissions.BanMembers);
             bool manageRoles = bot.HasPermission(Permissions.ManageRoles);
 
-            var sb = new StringBuilder();
+            // Todo: Match / Collect commands with permissions the bot needs (could be based on Attribute), so the command names below can be updated dynamically
 
-            sb.AppendLine($"`Manage Messages`: {GetStatusEmoji(manageMessage)}\nAffected commands: `{prefix}clear`, " +
-                          $"`{prefix}clean`; __error messages will persist if false.__\n");
-            sb.AppendLine($"`Manage Roles`: {GetStatusEmoji(manageRoles)}\nAffected commands: `{prefix}role`\n");
-            sb.AppendLine($"`Kick Members` {GetStatusEmoji(kick)}\nAffected commands: `{prefix}kick`\n");
-            sb.AppendLine($"`Ban Members` {GetStatusEmoji(ban)}\nAffected commands: `{prefix}ban`\n");
-
-            embed.WithTitle("Permissions:");
-            embed.WithDescription(sb.ToString());
-
+            embed.AddField($"`Manage Messages` {GetStatusEmoji(manageMessage)}\n", $"Affected commands: `{prefix} clear`, " + $"`{prefix} clean`; __error messages will persist if false.__\n");
+            embed.AddField($"`Manage Roles` {GetStatusEmoji(manageRoles)}\n", $"Affected commands: `{prefix} role-info`\n");
+            embed.AddField($"`Kick Members` {GetStatusEmoji(kick)}\n", $"Affected commands: `{prefix} kick`\n");
+            embed.AddField($"`Ban Members` {GetStatusEmoji(ban)}\n", $"Affected commands: `{prefix} ban`\n");
+            
             await ctx.RespondAsync(embed: embed);
         }
 
