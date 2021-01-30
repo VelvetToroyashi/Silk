@@ -18,13 +18,12 @@ namespace Silk.Core.Commands.Bot
         {
             string prefix = ctx.Prefix;
 
-            var descriptionAttribute = GetType().GetMethod(nameof(GetRequiredPermissions))!
-                .GetCustomAttribute<DescriptionAttribute>();
+            var description = ctx.Command.Description;
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithTitle("Silk's Permissions:")
-                .WithDescription(descriptionAttribute?.Description + "\n");
+                .WithDescription(description + "\n");
 
             DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
