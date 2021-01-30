@@ -34,7 +34,7 @@ namespace Silk.Core.Commands.Bot
                 .AddField("Total Guilds", $"{guildCount}", true)
                 .AddField("Total Members", $"{memberCount}", true)
                 .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-                .AddField("Memory", $"{GC.GetTotalMemory(false) / 1024 / 1024:n2} MB", true)
+                .AddField("Memory", $"{process.PrivateMemorySize64 / 1000 / 1000:n2} MB", true)
                 .AddField("Threads", $"{process.Threads.Count}", true)
                 .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
             await ctx.RespondAsync(embed: embed);

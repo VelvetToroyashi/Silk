@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Constants;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
@@ -44,8 +47,7 @@ namespace Silk.Core.Commands.Server.Configuration
                     }
                     if (role.Permissions.HasFlag(Permissions.SendMessages))
                     {
-                        builder.WithContent("This doesn't restrict members!");
-                        await ctx.RespondAsync(builder);
+                        await ConfigureRoleAsync(ctx, builder);
                         return; 
                     }
                     builder.WithContent($"Alrighty, muted role is now {role.Mention}!");
@@ -54,12 +56,21 @@ namespace Silk.Core.Commands.Server.Configuration
                     _cacheUpdaterService.UpdateGuild(ctx.Guild.Id);
                 }
 
+                private async Task ConfigureRoleAsync(CommandContext ctx, DiscordMessageBuilder builder)
+                {
+                    builder.WithContent("This role doesn't restrict members! Would you like me to configure it for you?");
+                    var interactivity = ctx.Client.GetInteractivity();
+                    var no = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Decline.ToEmojiId());
+                    var yes = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Confirm.ToEmojiId());
+                    
+                }
+
                 public EditModerationConfigCommand(IDatabaseService dbService, IServiceCacheUpdaterService cacheUpdaterService)
                 {
                     _dbService = dbService;
                     _cacheUpdaterService = cacheUpdaterService;
                 }
             }
-        } 
+        }
     }
 }

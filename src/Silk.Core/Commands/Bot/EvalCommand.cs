@@ -65,6 +65,7 @@ namespace Silk.Core.Commands.Bot
                             Color = new DiscordColor("#007FFF")
                         }.Build())
                         .ConfigureAwait(false);
+                
                 else
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder
                         {
