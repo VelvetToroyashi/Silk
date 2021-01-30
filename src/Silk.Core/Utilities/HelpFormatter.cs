@@ -60,7 +60,7 @@ namespace Silk.Core.Utilities
             }
             else
             {
-                if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("This command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("\nThis command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
                 
                 IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 

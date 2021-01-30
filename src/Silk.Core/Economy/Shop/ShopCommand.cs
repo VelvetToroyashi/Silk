@@ -6,7 +6,7 @@ using Silk.Core.Utilities;
 namespace Silk.Core.Economy.Shop
 {
     [Category(Categories.Economy)]
-    [Expiremental]
+    [Experimental]
     [Group("shop")]
     public partial class ShopCommand : BaseCommandModule
     {

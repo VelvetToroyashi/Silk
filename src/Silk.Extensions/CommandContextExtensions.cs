@@ -17,9 +17,6 @@ namespace Silk.Extensions
             return (ctx.Member.DisplayName, ctx.Member.AvatarUrl);
         }
 
-        public static bool IsExperimental(this Command c) =>
-            c.CustomAttributes.Any(a => a.GetType().Name is "ExpirementalAttribute");
-        
         public static DiscordEmbedBuilder WithAuthorExtension(this DiscordEmbedBuilder builder, string name,
             string avatarUrl)
         {
