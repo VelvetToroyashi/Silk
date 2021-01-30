@@ -9,7 +9,7 @@ using Silk.Core.Utilities;
 
 namespace Silk.Core.Commands.Moderation
 {
-    [Expiremental]
+    [Experimental]
     public class CasesCommand : BaseCommandModule
     {
         private readonly IDatabaseService _dbService;

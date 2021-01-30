@@ -14,7 +14,7 @@ namespace Silk.Core.Commands.General
     
     public class EnlargeCommand : BaseCommandModule
     {
-        [Expiremental]
+        [Experimental]
         [Command("enlarge"), Aliases("enbiggen", "emoji", "emote")]
         [Description("Displays a larger version of the provided emoji or custom emote.")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
