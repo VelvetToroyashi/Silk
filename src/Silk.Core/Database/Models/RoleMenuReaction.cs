@@ -1,6 +1,6 @@
 ﻿namespace Silk.Core.Database.Models
 {
-    public class RoleMenuReactionModel
+    public class RoleMenuReaction
     {
         public int Id { get; set; }
         public string Name { get; set; }

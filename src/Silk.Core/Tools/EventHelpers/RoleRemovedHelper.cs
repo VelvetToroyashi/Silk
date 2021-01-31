@@ -25,7 +25,7 @@ namespace Silk.Core.Tools.EventHelpers
             if (e.RolesAfter.Any(r => r.Permissions.HasPermission(Permissions.KickMembers | Permissions.ManageMessages))) return Task.CompletedTask;
             Task.Run(async () =>
             {
-                UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
+                User? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
                 if (user is null) return;
                 user.Flags.Remove(UserFlag.Staff);
                 await _dbService.UpdateGuildUserAsync(user);

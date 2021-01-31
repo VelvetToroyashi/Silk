@@ -60,11 +60,14 @@ namespace Silk.Core.Utilities
             }
             else
             {
-                if (Command.IsExperimental()) embed.WithColor(DiscordColor.DarkRed).WithFooter("\nThis command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                if (Command.IsExperimental()) 
+                    embed.WithColor(DiscordColor.DarkRed)
+                        .WithFooter("\nThis command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                
                 
                 IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
-                string title = Command.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
+                string title = Command!.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
                 var builder = new StringBuilder(title);
                 if (args is not null) builder.Append(GetArgs(args));
                 builder.Append('`');
@@ -77,7 +80,11 @@ namespace Silk.Core.Utilities
                     embed.AddField("\\👻 Hidden", "How did you find it?", true);
 
                 RequireUserPermissionsAttribute? userPerms =
-                    Command.ExecutionChecks.OfType<RequireUserPermissionsAttribute>().FirstOrDefault();
+                    Command
+                        .ExecutionChecks
+                        .OfType<RequireUserPermissionsAttribute>()
+                        .FirstOrDefault();
+                
                 if (userPerms is not null)
                     embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
                 if (Command.Aliases.Any())

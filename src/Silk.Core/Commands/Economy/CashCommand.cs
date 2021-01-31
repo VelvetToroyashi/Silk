@@ -26,7 +26,7 @@ namespace Silk.Core.Commands.Economy
         public async Task Cash(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GlobalUserModel? account = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
+            GlobalUser? account = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (account is null)
             {
                 await ctx.RespondAsync("Seems you don't have an account. " +

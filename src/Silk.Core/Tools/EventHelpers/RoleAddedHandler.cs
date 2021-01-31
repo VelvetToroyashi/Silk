@@ -25,7 +25,7 @@ namespace Silk.Core.Tools.EventHelpers
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {
                     // I was really stupid to make the oversight of picking the first user in the Database instead of the first user in the guild. ~Velvet. //
-                    UserModel? user = guild.Users.FirstOrDefault(u => u.Id == e.Member.Id);
+                    User? user = guild.Users.FirstOrDefault(u => u.Id == e.Member.Id);
                     if (user is not null)
                     {
                         user.Flags.Add(UserFlag.Staff);

@@ -89,7 +89,7 @@ namespace Silk.Core.Commands.Miscellaneous
             public string Version { get; set; }
             public DateTime Time { get; set; }
 
-            public ChangelogModel ToModel()
+            public Database.Models.Changelog ToModel()
             {
                 return new()
                 {
@@ -115,7 +115,7 @@ namespace Silk.Core.Commands.Miscellaneous
             return embed;
         }
 
-        private static DiscordEmbed BuildChangeLog(ChangelogModel cl)
+        private static DiscordEmbed BuildChangeLog(Database.Models.Changelog cl)
         {
             var embed = new DiscordEmbedBuilder();
             embed

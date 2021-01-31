@@ -34,7 +34,7 @@ namespace Silk.Core.Utilities
             if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
 
             IDatabaseService db = ctx.Services.Get<IDatabaseService>();
-            UserModel? member = await db.GetGuildUserAsync(ctx.Guild!.Id, ctx.User.Id);
+            User? member = await db.GetGuildUserAsync(ctx.Guild!.Id, ctx.User.Id);
 
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag.Staff)) _cachedStaff.Add(member.Id);

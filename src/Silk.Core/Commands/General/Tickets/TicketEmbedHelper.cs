@@ -15,7 +15,7 @@ namespace Silk.Core.Commands.General.Tickets
                 .WithColor(DiscordColor.Goldenrod)
                 .Build();
 
-        public static DiscordEmbed GenerateInboundEmbed(string message, DiscordUser ticketOpener, TicketModel ticket) =>
+        public static DiscordEmbed GenerateInboundEmbed(string message, DiscordUser ticketOpener, Ticket ticket) =>
             new DiscordEmbedBuilder()
                 .WithAuthor(ticketOpener.Username, null, ticketOpener.AvatarUrl)
                 .WithColor(DiscordColor.DarkBlue)

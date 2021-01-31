@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Database.Models
 {
-    public class UserInfractionModel
+    public class Infraction
     {
         public int Id { get; set; } //Requisite Id for DB purposes
         /// <summary>
@@ -20,7 +20,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// The user object this infraction belongs to, to form the Foreign Key (FK).
         /// </summary>
-        public UserModel User { get; set; } //Who's this affecting
+        public User User { get; set; } //Who's this affecting
         /// <summary>
         /// The time this infraction was added.
         /// </summary>

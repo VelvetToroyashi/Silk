@@ -56,14 +56,14 @@ namespace Silk.Core.Commands.Moderation.Ban
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
                 GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
-                UserModel? bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
+                User? bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned",
                     duration.TotalDays + " days", user.Mention, reason, guild.Configuration.InfractionFormat ?? defaultFormat);
-                UserInfractionModel infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
+                Infraction infraction = CreateInfraction(formattedBanReason, ctx.User.Id, now);
                 if (bannedUser is null)
                 {
-                    bannedUser = new UserModel
-                        {Infractions = new List<UserInfractionModel>()};
+                    bannedUser = new User
+                        {Infractions = new List<Infraction>()};
                     db.Users.Add(bannedUser);
                     bannedUser.Infractions.Add(infraction);
                 }
@@ -89,7 +89,7 @@ namespace Silk.Core.Commands.Moderation.Ban
             await ctx.RespondAsync(embed: embed);
         }
 
-        private static UserInfractionModel CreateInfraction(string reason, ulong enforcerId, DateTime infractionTime)
+        private static Infraction CreateInfraction(string reason, ulong enforcerId, DateTime infractionTime)
         {
             return new()
             {

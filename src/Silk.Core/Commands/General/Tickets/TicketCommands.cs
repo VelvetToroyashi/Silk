@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.General.Tickets
                 await ctx.RespondAsync(result.Reason).ConfigureAwait(false);
                 return;
             }
-            TicketModel ticket = result.Ticket;
+            Ticket ticket = result.Ticket;
             ulong channelId = TicketService.GetTicketChannel(ticket!.Opener); // If it succeeded, it's not null. //
             DiscordChannel ticketChannel = ctx.Client.Guilds[721518523704410202].GetChannel(channelId);
             DiscordEmbed embed = TicketEmbedHelper.GenerateInboundEmbed(message, ctx.User, ticket);

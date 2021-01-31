@@ -65,9 +65,8 @@ namespace Silk.Core.Commands.Bot
                             Color = new DiscordColor("#007FFF")
                         }.Build())
                         .ConfigureAwait(false);
-                
                 else
-                    await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                    await msg.ModifyAsync(new DiscordEmbedBuilder
                         {
                             Title = "Evaluation Successful", Description = "No result was returned.",
                             Color = new DiscordColor("#007FFF")
@@ -79,7 +78,7 @@ namespace Silk.Core.Commands.Bot
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
-                        Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message),
+                        Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message, '\n', ex.StackTrace),
                         Color = new DiscordColor("#FF0000")
                     }.Build())
                     .ConfigureAwait(false);

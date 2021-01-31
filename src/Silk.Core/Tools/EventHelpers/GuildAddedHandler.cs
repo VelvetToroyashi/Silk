@@ -135,7 +135,7 @@ namespace Silk.Core.Tools.EventHelpers
                 (m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)
                   || m.HasPermission(Permissions.Administrator)
                   || m.IsOwner) && !m.IsBot);
-            IEnumerable<UserModel> currentStaff = guild.Users.Where(u => u.Flags.Has(UserFlag.Staff));
+            IEnumerable<User> currentStaff = guild.Users.Where(u => u.Flags.Has(UserFlag.Staff));
             
             
             foreach (DiscordMember member in staff)
@@ -143,7 +143,7 @@ namespace Silk.Core.Tools.EventHelpers
                 var flags = UserFlag.Staff;
                 if (member.HasPermission(Permissions.Administrator) || member.IsOwner) flags.Add(UserFlag.EscalatedStaff);
 
-                UserModel? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
+                User? user = guild.Users.FirstOrDefault(u => u.Id == member.Id);
                 if (user is not null) //If user exists
                 {
                     if (!user.Flags.HasFlag(UserFlag.Staff)) // Has flag

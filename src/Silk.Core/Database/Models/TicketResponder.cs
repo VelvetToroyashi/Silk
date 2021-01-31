@@ -1,6 +1,6 @@
 ﻿namespace Silk.Core.Database.Models
 {
-    public class TicketResponderModel
+    public class TicketResponder
     {
         public ulong ResponderId { get; set; }
         public string Name { get; set; }

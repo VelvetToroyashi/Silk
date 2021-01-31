@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Database.Models
 {
-    public class GuildInfractionModel
+    public class InfractionStep
     {
         public int Id { get; set; }
         public GuildConfigModel Config { get; set; }

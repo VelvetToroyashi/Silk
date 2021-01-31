@@ -1,6 +1,6 @@
 ﻿namespace Silk.Core.Database.Models
 {
-    public class GuildInviteModel
+    public class Invite
     {
         public int Id { get; set; }
         public string GuildName { get; set; }

@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Economy
         public async Task BalTop(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            List<GlobalUserModel> economyUsers = db.GlobalUsers
+            List<GlobalUser> economyUsers = db.GlobalUsers
                 .OrderByDescending(user => user.Cash)
                 .Take(10)
                 .ToList();
@@ -48,13 +48,13 @@ namespace Silk.Core.Commands.Economy
             if (economyUsers.Count > 3)
             {
                 position = 4;
-                GlobalUserModel? firstGlobalUser = economyUsers.First();
+                GlobalUser? firstGlobalUser = economyUsers.First();
                 DiscordUser? firstUser = await ctx.Client.GetUserAsync(firstGlobalUser.Id);
                 
-                GlobalUserModel? secondGlobalUser = economyUsers.Skip(1).First();
+                GlobalUser? secondGlobalUser = economyUsers.Skip(1).First();
                 DiscordUser? secondUser = await ctx.Client.GetUserAsync(secondGlobalUser.Id);
                 
-                GlobalUserModel? thirdGlobalUser = economyUsers.Skip(2).First();
+                GlobalUser? thirdGlobalUser = economyUsers.Skip(2).First();
                 DiscordUser? thirdUser = await ctx.Client.GetUserAsync(thirdGlobalUser.Id);
 
                 embed.AddField(":first_place:", $"{firstUser.Username} ({firstUser.Mention}) - ${firstGlobalUser.Cash}");

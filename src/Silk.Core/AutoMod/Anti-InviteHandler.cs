@@ -35,25 +35,25 @@ namespace Silk.Core.AutoMod
         public MessageAddedHandler(ConfigService configService, IInfractionService infractionService) => (_configService, _infractionService) = (configService, infractionService);
 
 
-        public Task Invites(DiscordClient c, MessageCreateEventArgs e)
+        public Task Invites(DiscordClient client, MessageCreateEventArgs eventArgs)
         {
-            if (e.Channel.IsPrivate || e.Message is null) return Task.CompletedTask;
+            if (eventArgs.Channel.IsPrivate || eventArgs.Message is null) return Task.CompletedTask;
             _ = Task.Run(async () =>
             {
-                GuildConfigModel config = await _configService.GetConfigAsync(e.Guild.Id);
+                GuildConfigModel config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
                 if (!config.BlacklistInvites) return;
 
                 Regex matchingPattern = config.UseAggressiveRegex ? AgressiveRegexPattern : LenientRegexPattern;
 
-                Match match = matchingPattern.Match(e.Message.Content);
+                Match match = matchingPattern.Match(eventArgs.Message.Content);
                 if (match.Success)
                 {
                     int codeStart = match.Value.LastIndexOf('/');
                     string code = match.Value[(codeStart + 1)..];
 
                     if (_blacklistedLinkCache.Contains(code))
-                        AutoModMatchedInvitePrecedureAsync(config, e.Message, code).GetAwaiter();
-                    else CheckForInvite(c, e.Message, config, code);
+                        AutoModMatchedInvitePrecedureAsync(config, eventArgs.Message, code).GetAwaiter();
+                    else CheckForInvite(client, eventArgs.Message, config, code);
                 }
             });
             return Task.CompletedTask;

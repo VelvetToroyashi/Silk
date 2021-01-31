@@ -29,8 +29,8 @@ namespace Silk.Core.Commands.Economy
         public async Task Donate(CommandContext ctx, uint amount, DiscordMember recipient)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GlobalUserModel? sender = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
-            GlobalUserModel? receiver = db.GlobalUsers.FirstOrDefault(u => u.Id == recipient.Id);
+            GlobalUser? sender = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
+            GlobalUser? receiver = db.GlobalUsers.FirstOrDefault(u => u.Id == recipient.Id);
 
 
             if (sender is null && receiver is null)
@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.Economy
 
             if (receiver is null)
             {
-                receiver = new GlobalUserModel {Id = recipient.Id};
+                receiver = new GlobalUser {Id = recipient.Id};
                 db.GlobalUsers.Add(receiver);
             }
 
@@ -60,8 +60,8 @@ namespace Silk.Core.Commands.Economy
         }
 
         private async Task DoTransactionAsync(
-            CommandContext ctx, uint amount, GlobalUserModel sender,
-            GlobalUserModel receiver)
+            CommandContext ctx, uint amount, GlobalUser sender,
+            GlobalUser receiver)
         {
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -77,7 +77,7 @@ namespace Silk.Core.Commands.Economy
         }
 
         private async Task VerifyTransactionAsync(
-            CommandContext ctx, GlobalUserModel sender, GlobalUserModel receiver,
+            CommandContext ctx, GlobalUser sender, GlobalUser receiver,
             uint amount)
         {
             // 'Complicated async logic here' //

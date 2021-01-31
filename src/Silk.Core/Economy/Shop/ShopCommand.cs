@@ -21,6 +21,7 @@ namespace Silk.Core.Economy.Shop
 
     public partial class ShopCommand
     {
+        
         [Command]
         public async Task Global(CommandContext ctx)
         {

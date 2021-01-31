@@ -29,7 +29,7 @@ namespace Silk.Core.Tools.EventHelpers
             {
                 _ = Task.Run(async () =>
                 {
-                    UserModel? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
+                    User? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
                     if (user is null) return; // Doesn't exist in the DB. No point in continuing. //
                     if (user.Infractions.Any()) return; // They have infractions, and shouldn't be removed from the DB. //
 

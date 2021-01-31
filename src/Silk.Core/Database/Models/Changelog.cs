@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Database.Models
 {
-    public class ChangelogModel
+    public class Changelog
     {
         public int Id { get; set; }
         public string Authors { get; set; }

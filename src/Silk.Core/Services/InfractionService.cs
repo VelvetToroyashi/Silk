@@ -26,7 +26,7 @@ namespace Silk.Core.Services
         private readonly ILogger<InfractionService> _logger;
         private readonly DiscordShardedClient _client;
 
-        private readonly List<UserInfractionModel> _tempInfractions = new();
+        private readonly List<Infraction> _tempInfractions = new();
         public InfractionService(ConfigService configService, IDatabaseService dbService, ILogger<InfractionService> logger, DiscordShardedClient client)
         {
             _configService = configService;
@@ -41,9 +41,9 @@ namespace Silk.Core.Services
         }
 
 
-        public async Task SilentKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction) { throw new NotImplementedException(); }
+        public async Task SilentKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction) { throw new NotImplementedException(); }
 
-        public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction, DiscordEmbed embed)
+        public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed)
         {
             // Validation is handled by the command class. //
             _ = member.RemoveAsync(infraction.Reason);
@@ -57,7 +57,7 @@ namespace Silk.Core.Services
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
         }
 
-        public async Task BanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
+        public async Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             await member.BanAsync(0, infraction.Reason);
             GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
@@ -80,11 +80,11 @@ namespace Silk.Core.Services
                 await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
             } 
         }
-        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             
         }
-        public async Task MuteAsync(DiscordMember member, DiscordChannel channel, UserInfractionModel infraction)
+        public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             GuildConfigModel config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
             
@@ -96,16 +96,16 @@ namespace Silk.Core.Services
             
             await member.GrantRoleAsync(muteRole);
             
-            UserModel user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
+            User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
             await ApplyInfractionAsync(user, infraction);
             
             _tempInfractions.Add(infraction);
             _logger.LogTrace($"Added temporary infraction to {member.Id}!");
         }
-        public async Task<UserInfractionModel> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
+        public async Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
-            UserModel user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
-            UserInfractionModel infraction = new()
+            User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
+            Infraction infraction = new()
             {
                 Enforcer = enforcer.Id,
                 Reason = reason,
@@ -119,19 +119,19 @@ namespace Silk.Core.Services
             await _dbService.UpdateGuildUserAsync(user);
             return infraction;
         }
-        public async Task<UserInfractionModel> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
+        public async Task<Infraction> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
         {
             if (type is not (InfractionType.SoftBan or InfractionType.Mute))
                 throw new ArgumentException("Is not a temporary infraction type!", nameof(type));
 
-            UserInfractionModel infraction = await CreateInfractionAsync(member, enforcer, type, reason);
+            Infraction infraction = await CreateInfractionAsync(member, enforcer, type, reason);
             infraction.Expiration = expiration;
             return infraction;
         }
         public async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => false;
         public async Task<bool> HasActiveMuteAsync(DiscordMember member) => false;
 
-        private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfigModel config, UserInfractionModel inf)
+        private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfigModel config, Infraction inf)
         {
             await guild.UnbanMemberAsync(inf.UserId);
             _logger.LogTrace($"Unbanned {inf.UserId} | SoftBan expired.");
@@ -145,7 +145,7 @@ namespace Silk.Core.Services
             await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
         }
 
-        private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfigModel config, UserInfractionModel inf)
+        private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfigModel config, Infraction inf)
         {
             if (!guild.Members.TryGetValue(inf.UserId, out DiscordMember? mutedMember))
             {
@@ -158,7 +158,7 @@ namespace Silk.Core.Services
             }
         }
 
-        private async Task ApplyInfractionAsync(UserModel user, UserInfractionModel infraction)
+        private async Task ApplyInfractionAsync(User user, Infraction infraction)
         {
             user.Infractions.Add(infraction);
             await _dbService.UpdateGuildUserAsync(user);
@@ -167,7 +167,7 @@ namespace Silk.Core.Services
         private async Task OnTick()
         {
             if (_tempInfractions.Count is 0) return;
-            IEnumerable<IGrouping<ulong, UserInfractionModel>> infractions = _tempInfractions
+            IEnumerable<IGrouping<ulong, Infraction>> infractions = _tempInfractions
                 .Where(i => ((DateTime) i.Expiration!).Subtract(DateTime.Now).Seconds < 0)
                 .GroupBy(x => x.User.Guild.Id);
             foreach (var inf in infractions)
@@ -175,7 +175,7 @@ namespace Silk.Core.Services
                 _logger.LogTrace($"Processing infraction in guild {inf.Key}");
                 DiscordGuild guild = _client.ShardClients.Values.SelectMany(s => s.Guilds.Values).First(g => g.Id == inf.Key);
                 GuildConfigModel config = await _configService.GetConfigAsync(guild.Id);
-                foreach (UserInfractionModel infraction in inf)
+                foreach (Infraction infraction in inf)
                 {
                     _logger.LogTrace($"Infraction {infraction.Id} | User {infraction.UserId}");
                     Task task = infraction.InfractionType switch
@@ -194,13 +194,13 @@ namespace Silk.Core.Services
         {
             _logger.LogTrace("Building InfractionService cache");
 
-            IEnumerable<UserInfractionModel> infractions = _dbService.GetActiveInfractionsAsync().GetAwaiter().GetResult();
+            IEnumerable<Infraction> infractions = _dbService.GetActiveInfractionsAsync().GetAwaiter().GetResult();
             
             _tempInfractions.AddRange(infractions);
             _logger.LogTrace("Loaded all applicable infractions!");
         }
         
-        private static void ValidateInfraction(UserInfractionModel infraction)
+        private static void ValidateInfraction(Infraction infraction)
         {
             if (infraction.Enforcer is 0) throw new ArgumentNullException();
             if (infraction.Reason is "") throw new ArgumentNullException();

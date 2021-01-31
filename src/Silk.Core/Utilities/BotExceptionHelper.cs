@@ -27,55 +27,62 @@ namespace Silk.Core.Utilities
         public async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
 
-            if (e.Exception is CommandNotFoundException)
+            switch (e.Exception)
             {
-                _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
-            }
-            else if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
-            {
-                _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
-                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
-            }
-
-            else if (e.Exception.Message is "Could not find a suitable overload for the command.")
-            {
-                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
-                _logger.LogWarning($"Invalid command paremeters {e.Command.Name} | {e.Context.RawArgumentString}");
-            }
-            else if (e.Exception is ArgumentException ae)
-            {
-                _logger.LogWarning(ae.Message);
-            }
-            else if (e.Exception is ChecksFailedException cf)
-            {
-                switch (cf.FailedChecks[0])
+                case CommandNotFoundException:
+                    _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
+                    break;
+                case InvalidOperationException when e.Exception.Message.Contains("command"):
+                    _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
+                    _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+                    break;
+                default:
                 {
-                    case RequireOwnerAttribute:
-                        string owners = c.Client.CurrentApplication.Owners.Select(owner => $"{owner.Username}#{owner.Discriminator}").Join(", or");
-                        await e.Context.RespondAsync($"{e.Context.User.Username} doesn't look like {owners} to me!");
-                        break;
-                    case RequireNsfwAttribute:
-                        await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");
-                        break;
-                    case RequireFlagAttribute f:
-                        await e.Context.RespondAsync($"Heh. You need to be {f.RequisiteUserFlag} for that.");
-                        break;
-                    case CooldownAttribute cd:
-                        await e.Context.RespondAsync($"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!");
-                        break;
-                    case RequireUserPermissionsAttribute p:
-                        await e.Context.RespondAsync($"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!");
-                        break;
-                    case RequireDirectMessageAttribute:
-                        await e.Context.RespondAsync("Psst. You need to be in DMs to run this!");
-                        break;
-                    case RequireGuildAttribute:
-                        await e.Context.RespondAsync("Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.");
-                        break;
+                    if (e.Exception.Message is "Could not find a suitable overload for the command.")
+                    {
+                        _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+                        _logger.LogWarning($"Invalid command paremeters {e.Command.Name} | {e.Context.RawArgumentString}");
+                    }
+                    else switch (e.Exception)
+                    {
+                        case ArgumentException ae:
+                            _logger.LogWarning(ae.Message);
+                            break;
+                        case ChecksFailedException cf:
+                            switch (cf.FailedChecks[0])
+                            {
+                                case RequireOwnerAttribute:
+                                    string owners = c.Client.CurrentApplication.Owners.Select(owner => $"{owner.Username}#{owner.Discriminator}").Join(", or");
+                                    await e.Context.RespondAsync($"{e.Context.User.Username} doesn't look like {owners} to me!");
+                                    break;
+                                case RequireNsfwAttribute:
+                                    await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");
+                                    break;
+                                case RequireFlagAttribute f:
+                                    await e.Context.RespondAsync($"Heh. You need to be {f.RequisiteUserFlag} for that.");
+                                    break;
+                                case CooldownAttribute cd:
+                                    await e.Context.RespondAsync($"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!");
+                                    break;
+                                case RequireUserPermissionsAttribute p:
+                                    await e.Context.RespondAsync($"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!");
+                                    break;
+                                case RequireDirectMessageAttribute:
+                                    await e.Context.RespondAsync("Psst. You need to be in DMs to run this!");
+                                    break;
+                                case RequireGuildAttribute:
+                                    await e.Context.RespondAsync("Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.");
+                                    break;
 
+                            }
+                            break;
+                        default:
+                            _logger.LogWarning(e.Exception.Message);
+                            break;
+                    }
+                    break;
                 }
             }
-            else _logger.LogWarning(e.Exception.Message);
         }
 
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)

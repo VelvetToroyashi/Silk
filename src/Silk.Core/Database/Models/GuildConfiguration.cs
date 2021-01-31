@@ -72,7 +72,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// A list that contians the type of infraction that should be applied, and an expiration if applicable.
         /// </summary>
-        public List<GuildInfractionModel> InfractionDictionary { get; set; } = new();
+        public List<Infraction> InfractionDictionary { get; set; } = new();
 
         #endregion
 
@@ -95,7 +95,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// A list of whitlisted invites.
         /// </summary>
-        public List<GuildInviteModel> AllowedInvites { get; set; } = new();
+        public List<Invite> AllowedInvites { get; set; } = new();
         /// <summary>
         /// A list of blacklisted words.
         /// </summary>

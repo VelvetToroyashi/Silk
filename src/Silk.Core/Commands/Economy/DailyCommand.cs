@@ -26,10 +26,10 @@ namespace Silk.Core.Commands.Economy
         public async Task DailyMoney(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GlobalUserModel? user = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
+            GlobalUser? user = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
             if (user is null)
             {
-                user = new GlobalUserModel {Id = ctx.User.Id, Cash = 500, LastCashOut = DateTime.Now};
+                user = new GlobalUser {Id = ctx.User.Id, Cash = 500, LastCashOut = DateTime.Now};
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.Green)

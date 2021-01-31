@@ -92,26 +92,26 @@ namespace Silk.Core.Services
 
         #region Public User-Retrieval methods
 
-        public async Task<UserModel?> GetGuildUserAsync(ulong guildId, ulong userId)
+        public async Task<User?> GetGuildUserAsync(ulong guildId, ulong userId)
         {
             await using SilkDbContext db = GetContext();
 
             GuildModel guild = await db.Guilds.Include(g => g.Users).AsSplitQuery().FirstOrDefaultAsync(g => g.Id == guildId);
-            UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
+            User? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
             return user;
         }
-        public async Task<GlobalUserModel?> GetGlobalUserAsync(ulong userId)
+        public async Task<GlobalUser?> GetGlobalUserAsync(ulong userId)
         {
             await using SilkDbContext db = GetContext();
 
             return await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
         }
         
-        public async Task<GlobalUserModel> GetOrCreateGlobalUserAsync(ulong userId)
+        public async Task<GlobalUser> GetOrCreateGlobalUserAsync(ulong userId)
         {
             await using SilkDbContext db = GetContext();
-            GlobalUserModel? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
+            GlobalUser? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
             
             if (user is not null) return user;
             
@@ -128,7 +128,7 @@ namespace Silk.Core.Services
         
 
         // Attatch to the context and save. Easy as that. //
-        public async Task UpdateGuildUserAsync(UserModel user)
+        public async Task UpdateGuildUserAsync(User user)
         {
             await using SilkDbContext db = GetContext();
             /*
@@ -136,22 +136,22 @@ namespace Silk.Core.Services
              * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
              * but DbContext#Attatch() sets the entity to be unmodified by default. 
              */
-            EntityEntry<UserModel> userEntity = db.Attach(user);
+            EntityEntry<User> userEntity = db.Attach(user);
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
             return;
         }
 
-        public async Task UpdateGlobalUserAsync(GlobalUserModel user)
+        public async Task UpdateGlobalUserAsync(GlobalUser user)
         {
             await using SilkDbContext db = GetContext();
             
-            EntityEntry<GlobalUserModel> userEntity = db.Attach(user);
+            EntityEntry<GlobalUser> userEntity = db.Attach(user);
             userEntity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
 
-        public async Task<UserModel> GetOrCreateGuildUserAsync(ulong guildId, ulong userId)
+        public async Task<User> GetOrCreateGuildUserAsync(ulong guildId, ulong userId)
         {
             await using SilkDbContext db = GetContext();
             GuildModel guild = await db.Guilds
@@ -159,7 +159,7 @@ namespace Silk.Core.Services
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == guildId);
             
-            UserModel? user = guild.Users.FirstOrDefault(u => u.Id == userId);
+            User? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             if (user is null)
             {
                 //VALID
@@ -171,7 +171,7 @@ namespace Silk.Core.Services
         }
 
 
-        public async Task RemoveUserAsync(UserModel user)
+        public async Task RemoveUserAsync(User user)
         {
             await using SilkDbContext db = GetContext();
             db.Attach(user);
@@ -181,13 +181,13 @@ namespace Silk.Core.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<UserModel>> GetAllUsersAsync(Expression<Func<UserModel, bool>> predicate)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(Expression<Func<User, bool>> predicate)
         {
             await using SilkDbContext db = GetContext();
             return db.Users.Where(predicate);
         }
 
-        public async Task<IEnumerable<UserInfractionModel>> GetActiveInfractionsAsync()
+        public async Task<IEnumerable<Infraction>> GetActiveInfractionsAsync()
         {
             await using SilkDbContext db = GetContext();
             return await db.Infractions
@@ -207,9 +207,9 @@ namespace Silk.Core.Services
         #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
-        private static UserModel CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
+        private static User CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
 
-        private static Expression<Func<UserInfractionModel, bool>> HasTempInfraction(UserInfractionModel infraction)
+        private static Expression<Func<Infraction, bool>> HasTempInfraction(Infraction infraction)
         {
             return i => 
                    i.HeldAgainstUser &&

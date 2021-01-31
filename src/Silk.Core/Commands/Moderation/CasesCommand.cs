@@ -25,7 +25,7 @@ namespace Silk.Core.Commands.Moderation
             var mBuilder = new DiscordMessageBuilder();
             var eBuilder = new DiscordEmbedBuilder();
             
-            UserModel? userModel = await _dbService.GetGuildUserAsync(ctx.Guild.Id, user.Id);
+            User? userModel = await _dbService.GetGuildUserAsync(ctx.Guild.Id, user.Id);
             if (userModel is null || !userModel.Infractions.Any())
             {
                 mBuilder.WithReply(ctx.Message.Id);
