@@ -15,7 +15,7 @@ namespace Silk.Core.Constants
             EConfirm = Confirm.ToEmoji(),
             EDecline = Decline.ToEmoji();
         //Todo: load these from JSON
-        public static string
+        public const string
             Confirm = "<:check:777724297627172884>",
             Decline = "<:cross:777724316115796011>";
 

@@ -6,6 +6,8 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Constants;
 using Silk.Core.Services.Interfaces;
@@ -24,13 +26,14 @@ namespace Silk.Core.Commands.Server.Configuration
                 //Does nested class ctor injection work???? //
                 private readonly IDatabaseService? _dbService;
                 private readonly IServiceCacheUpdaterService _cacheUpdaterService;
-                
+
                 [GroupCommand]
-                public async Task EditConfig(CommandContext ctx) =>
-                    await new DiscordMessageBuilder()
-                        .WithReply(ctx.Message.Id, true)
-                        .WithContent($"See `{ctx.Prefix}help config edit moderation`.")
-                        .SendAsync(ctx.Channel);
+                public async Task EditConfig(CommandContext ctx)
+                {
+                    Command? cmd = ctx.CommandsNext.RegisteredCommands["help"];
+                    CommandContext? context = ctx.CommandsNext.CreateContext(ctx.Message, null, cmd, "config edit moderation");
+                    _ = ctx.CommandsNext.ExecuteCommandAsync(context);
+                }
 
                 [Command]
                 public async Task Mute(CommandContext ctx, DiscordRole role)
@@ -47,7 +50,7 @@ namespace Silk.Core.Commands.Server.Configuration
                     }
                     if (role.Permissions.HasFlag(Permissions.SendMessages))
                     {
-                        await ConfigureRoleAsync(ctx, builder);
+                        await ConfigureRoleAsync(ctx, builder, role);
                         return; 
                     }
                     builder.WithContent($"Alrighty, muted role is now {role.Mention}!");
@@ -56,13 +59,45 @@ namespace Silk.Core.Commands.Server.Configuration
                     _cacheUpdaterService.UpdateGuild(ctx.Guild.Id);
                 }
 
-                private async Task ConfigureRoleAsync(CommandContext ctx, DiscordMessageBuilder builder)
+                private async Task ConfigureRoleAsync(CommandContext ctx, DiscordMessageBuilder builder, DiscordRole role)
                 {
                     builder.WithContent("This role doesn't restrict members! Would you like me to configure it for you?");
-                    var interactivity = ctx.Client.GetInteractivity();
-                    var no = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Decline.ToEmojiId());
-                    var yes = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Confirm.ToEmojiId());
+                    InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
+                    DiscordEmoji? no = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Decline.ToEmojiId());
+                    DiscordEmoji? yes = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.Confirm.ToEmojiId());
+                    DiscordMessage? msg = await ctx.RespondAsync(builder);
+
+                    await msg.CreateReactionAsync(yes);
+                    await msg.CreateReactionAsync(no);
                     
+                    var result = await interactivity.WaitForReactionAsync(x =>
+                    {
+                        bool isCorrectEmoji = x.Emoji == yes || x.Emoji == no;
+                        bool isCorrectMessage = x.Message == msg;
+                        return isCorrectEmoji && isCorrectMessage;
+                    });
+
+                    if (result.TimedOut)
+                    {
+                        builder.WithContent("I'll take your silence as a no :o");
+                        await ctx.RespondAsync(builder);
+                        return;
+                    }
+                    else if (result.Result.Emoji == no)
+                    {
+                        builder.WithContent("Alrighty, cancled.");
+                        await ctx.RespondAsync(builder);
+                        return;
+                    }
+                    else
+                    {
+                        builder.WithContent("Alright, give me a second to configure this role!");
+                        DiscordMessage waitMessage = await ctx.RespondAsync(builder);
+                        role.Permissions.Revoke(Permissions.SendMessages);
+                        await ctx.Guild.GetRole(role.Id).ModifyAsync(x => x.Permissions = role.Permissions & ~Permissions.SendMessages);
+                        builder.WithContent("Done!");
+                        await waitMessage.ModifyAsync(builder);
+                    }
                 }
 
                 public EditModerationConfigCommand(IDatabaseService dbService, IServiceCacheUpdaterService cacheUpdaterService)

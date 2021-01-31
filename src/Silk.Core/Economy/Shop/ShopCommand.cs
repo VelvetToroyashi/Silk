@@ -7,6 +7,7 @@ namespace Silk.Core.Economy.Shop
 {
     [Category(Categories.Economy)]
     [Experimental]
+    [Hidden]
     [Group("shop")]
     public partial class ShopCommand : BaseCommandModule
     {
