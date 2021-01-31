@@ -32,7 +32,7 @@ namespace Silk.Core
                       DiscordIntents.DirectMessageReactions |
                       DiscordIntents.GuildPresences, // Auto-mod,
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.Error
+            MinimumLogLevel = LogLevel.None
         };
 
         public static async Task Main(string[] args) => await CreateHostBuilder(args).UseConsoleLifetime().StartAsync().ConfigureAwait(false);
