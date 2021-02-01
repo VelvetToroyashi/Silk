@@ -14,12 +14,12 @@ using Silk.Extensions;
 namespace Silk.Core.Commands.Moderation
 {
     [Category(Categories.Mod)]
-    public class TempMuteCommand : BaseCommandModule
+    public class MuteCommand : BaseCommandModule
     {
         private readonly ConfigService _dbService;
         private readonly IInfractionService _infractionService;
 
-        public TempMuteCommand(ConfigService dbService, IInfractionService infractionService)
+        public MuteCommand(ConfigService dbService, IInfractionService infractionService)
         {
             _dbService = dbService;
             _infractionService = infractionService;

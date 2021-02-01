@@ -11,6 +11,7 @@ using Silk.Core.Utilities;
 
 namespace Silk.Core.Commands.Bot
 {
+    // THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
     [Category(Categories.Bot)]
     public class EvalCommand : BaseCommandModule
     {
@@ -22,7 +23,7 @@ namespace Silk.Core.Commands.Bot
         public async Task EvalCS(CommandContext ctx, [RemainingText] string code)
         {
             DiscordMessage msg = ctx.Message;
-
+            
             int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;
             int cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
