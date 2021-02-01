@@ -79,13 +79,13 @@ namespace Silk.Core.Utilities
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
-            else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard.");
+            else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard");
             else _logger.LogWarning($"{e.Exception.Message}");
         }
 
 
 
-        private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
+        public static async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();
             Command? cmd = cnext.RegisteredCommands["help"];

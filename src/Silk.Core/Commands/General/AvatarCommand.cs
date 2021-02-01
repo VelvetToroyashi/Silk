@@ -12,10 +12,26 @@ namespace Silk.Core.Commands.General
     [Category(Categories.General)]
     public class AvatarCommand : BaseCommandModule
     {
+
+        
+        [Command("avatar")]
+        public async Task GetAvatar(CommandContext ctx, DiscordMember member) => await GetAvatarAsync(ctx, member);
+
+        [Command("avatar")]
+        [Description("Show your, or someone else's avatar!")]
+        public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
+        {
+            DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
+                .WithDescription($"{user.Mention}'s Avatar")
+                .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
+
+            await ctx.RespondAsync(embedBuilder);
+        }
+
         [Command]
         [Description("Show your, or someone else's avatar!")]
         [Aliases("av")]
-        [Priority(3)]
         public async Task Avatar(CommandContext ctx)
         {
             var builder = new DiscordMessageBuilder();
@@ -27,20 +43,6 @@ namespace Silk.Core.Commands.General
         }
         
         [Command("avatar")]
-        [Description("Show your, or someone else's avatar!")]
-        [Priority(2)]
-        public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
-        {
-            DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
-                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-                .WithDescription($"{user.Mention}'s Avatar")
-                .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
-
-            await ctx.RespondAsync(embedBuilder);
-        }
-
-        [Command("avatar")]
-        [Priority(1)]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string user)
         {
             

@@ -10,6 +10,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Constants;
+using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
@@ -24,6 +25,7 @@ namespace Silk.Core.Commands.Server.Configuration
             public class EditModerationConfigCommand : BaseCommandModule
             {
                 //Does nested class ctor injection work???? //
+                // Yes! //
                 private readonly IDatabaseService? _dbService;
                 private readonly IServiceCacheUpdaterService _cacheUpdaterService;
 
@@ -56,6 +58,11 @@ namespace Silk.Core.Commands.Server.Configuration
                     builder.WithContent($"Alrighty, muted role is now {role.Mention}!");
                     await ctx.Message.CreateReactionAsync(Emojis.EConfirm);
                     await ctx.RespondAsync(builder);
+                    
+                    GuildConfig config = await _dbService!.GetConfigAsync(ctx.Guild.Id);
+                    config.MuteRoleId = role.Id;
+                    await _dbService.UpdateConfigAsync(config);
+                    
                     _cacheUpdaterService.UpdateGuild(ctx.Guild.Id);
                 }
 
