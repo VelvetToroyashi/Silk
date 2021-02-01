@@ -93,7 +93,7 @@ namespace Silk.Core.Tools.EventHelpers
 
         private async Task CacheMembersAsync(CacheObject guildT, int shardId)
         {
-            GuildModel guild = await _dbService.GetOrCreateGuildAsync(guildT.Id);
+            Guild guild = await _dbService.GetOrCreateGuildAsync(guildT.Id);
             CacheMembersAsync(guild, guildT.Members, shardId);
             await _dbService.UpdateGuildAsync(guild);
         }
@@ -129,7 +129,7 @@ namespace Silk.Core.Tools.EventHelpers
 
             await firstChannel.SendMessageAsync(embed);
         }
-        private void CacheMembersAsync(GuildModel guild, IEnumerable<DiscordMember> members, int shardId)
+        private void CacheMembersAsync(Guild guild, IEnumerable<DiscordMember> members, int shardId)
         {
             IEnumerable<DiscordMember> staff = members.Where(m =>
                 (m.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)

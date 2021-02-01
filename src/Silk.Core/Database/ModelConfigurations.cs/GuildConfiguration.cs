@@ -4,10 +4,10 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Database.ModelConfigurations.cs
 {
-    public class GuildConfiguration : IEntityTypeConfiguration<GuildModel>
+    public class GuildConfiguration : IEntityTypeConfiguration<Guild>
     {
 
-        public void Configure(EntityTypeBuilder<GuildModel> builder)
+        public void Configure(EntityTypeBuilder<Guild> builder)
         {
             builder.Property(g => g.Id).ValueGeneratedNever();
             
@@ -18,7 +18,7 @@ namespace Silk.Core.Database.ModelConfigurations.cs
             builder
                 .HasOne(g => g.Configuration)
                 .WithOne(g => g.Guild)
-                .HasForeignKey<GuildConfigModel>(g => g.GuildId);
+                .HasForeignKey<GuildConfig>(g => g.GuildId);
         }
     }
 }

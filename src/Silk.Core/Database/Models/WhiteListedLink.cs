@@ -6,6 +6,6 @@
         public string Link { get; set; }
 
         public bool GuildLevelLink { get; set; }
-        public GuildConfigModel Guild { get; set; }
+        public GuildConfig Guild { get; set; }
     }
 }

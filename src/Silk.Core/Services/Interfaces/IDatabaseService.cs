@@ -8,42 +8,42 @@ namespace Silk.Core.Services.Interfaces
 {
     /// <summary>
     /// Provides database abstractions for command classes, and methods for updating and retrieving
-    /// <see cref="User"/> and <see cref="Silk.Core.Database.Models.GuildModel"/>.
+    /// <see cref="User"/> and <see cref="Guild"/>.
     /// </summary>
     public interface IDatabaseService
     {
         /// <summary>
-        /// Get a <see cref="GuildModel"/> from the database.
+        /// Get a <see cref="Guild"/> from the database.
         /// </summary>
-        /// <returns><see cref="GuildModel"/>with corresponding users.</returns>
-        public Task<GuildModel?> GetGuildAsync(ulong guildId);
+        /// <returns><see cref="Guild"/>with corresponding users.</returns>
+        public Task<Guild?> GetGuildAsync(ulong guildId);
 
         /// <summary>
         /// This method is used for initializing a guild in case it doesn't exist, in the case of caching,
         /// or any other situation that a guild needs to be used, but may not exist in the database.
         /// </summary>
         /// <param name="guildId">The id of the guild to get, or create if it doesn't exist.</param>
-        /// <returns>A <see cref="GuildModel"/>, which will have default properties if it did not exist.</returns>
-        public Task<GuildModel> GetOrCreateGuildAsync(ulong guildId);
+        /// <returns>A <see cref="Guild"/>, which will have default properties if it did not exist.</returns>
+        public Task<Guild> GetOrCreateGuildAsync(ulong guildId);
         
         /// <summary>
-        /// This method is used to update a <see cref="GuildModel"/>.
+        /// This method is used to update a <see cref="Guild"/>.
         /// </summary>
         /// <param name="guild">The guild to update.</param>
-        public Task UpdateGuildAsync(GuildModel guild);
+        public Task UpdateGuildAsync(Guild guild);
 
         /// <summary>
-        /// Get the configuration of a <see cref="GuildModel"/>.
+        /// Get the configuration of a <see cref="Guild"/>.
         /// </summary>
         /// <param name="configId">The Id of the guild to retrieve a configuration for.</param>
         /// <returns>The configuration that corresponds to the Id passed in.</returns>
-        public Task<GuildConfigModel> GetConfigAsync(ulong configId);
+        public Task<GuildConfig> GetConfigAsync(ulong configId);
 
         /// <summary>
-        /// Update a <see cref="GuildConfigModel"/>.
+        /// Update a <see cref="GuildConfig"/>.
         /// </summary>
         /// <param name="config">The configuration to update.</param>
-        public Task UpdateConfigAsync(GuildConfigModel config);
+        public Task UpdateConfigAsync(GuildConfig config);
         
         /// <summary>
         /// Get a <see cref="User"/> from the database.

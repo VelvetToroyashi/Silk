@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Database.Models
 {
-    public class GuildConfigModel
+    public class GuildConfig
     {
         // Database requisites. //
         /// <summary>
@@ -16,7 +16,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// Requisite property to form a Foreign Key (FK)
         /// </summary>
-        public GuildModel Guild { get; set; }
+        public Guild Guild { get; set; }
         /// <summary>
         /// Id of the role to apply when muting members.
         /// </summary>

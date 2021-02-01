@@ -8,7 +8,7 @@ namespace Silk.Core.Database
     public class SilkDbContext : DbContext
     {
         [NotNull]
-        public DbSet<GuildModel> Guilds { get; set; }
+        public DbSet<Guild> Guilds { get; set; }
         [NotNull]
         public DbSet<Ticket> Tickets { get; set; }
         //public DbSet<BaseShop> Shops { get; set; }
@@ -30,7 +30,7 @@ namespace Silk.Core.Database
         [NotNull]
         public DbSet<GlobalUser> GlobalUsers { get; set; }
         [NotNull]
-        public DbSet<GuildConfigModel> GuildConfigs { get; set; }
+        public DbSet<GuildConfig> GuildConfigs { get; set; }
 
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
         

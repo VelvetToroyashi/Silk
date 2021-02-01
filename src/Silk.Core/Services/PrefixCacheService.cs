@@ -47,7 +47,7 @@ namespace Silk.Core.Services
 
             SilkDbContext db = _dbFactory.CreateDbContext();
 
-            GuildModel? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
+            Guild? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)
             {
                 _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database");

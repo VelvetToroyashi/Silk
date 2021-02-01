@@ -29,25 +29,25 @@ namespace Silk.Core.Services
 
         #region Public Guild-Retrieval methods
 
-        public async Task<GuildModel?> GetGuildAsync(ulong guildId)
+        public async Task<Guild?> GetGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = GetContext();
-            IQueryable<GuildModel>? guildQuery = db.Guilds.Include(g => g.Users).AsSplitQuery();
+            IQueryable<Guild>? guildQuery = db.Guilds.Include(g => g.Users).AsSplitQuery();
             return await guildQuery.FirstAsync(g => g.Id == guildId)!;
         }
 
-        public async Task UpdateGuildAsync(GuildModel guild)
+        public async Task UpdateGuildAsync(Guild guild)
         {
             await using SilkDbContext db = GetContext();
-            EntityEntry<GuildModel>? entity = db.Attach(guild);
+            EntityEntry<Guild>? entity = db.Attach(guild);
             entity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
 
-        public async Task<GuildModel> GetOrCreateGuildAsync(ulong guildId)
+        public async Task<Guild> GetOrCreateGuildAsync(ulong guildId)
         {
             await using SilkDbContext db = GetContext();
-            GuildModel? guild = await db.Guilds
+            Guild? guild = await db.Guilds
                 .Include(g => g.Users)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == guildId);
@@ -68,10 +68,10 @@ namespace Silk.Core.Services
             return guild;
         }
 
-        public async Task<GuildConfigModel> GetConfigAsync(ulong configId)
+        public async Task<GuildConfig> GetConfigAsync(ulong configId)
         {
             await using SilkDbContext db = GetContext();
-            GuildConfigModel config = await db.GuildConfigs
+            GuildConfig config = await db.GuildConfigs
                 .Include(c => c.AllowedInvites)
                 .Include(c => c.SelfAssignableRoles)
                 //.AsSplitQuery()
@@ -79,10 +79,10 @@ namespace Silk.Core.Services
             return config;
         }
 
-        public async Task UpdateConfigAsync(GuildConfigModel config)
+        public async Task UpdateConfigAsync(GuildConfig config)
         {
             await using SilkDbContext db = GetContext();
-            EntityEntry<GuildConfigModel>? entity = db.Attach(config);
+            EntityEntry<GuildConfig>? entity = db.Attach(config);
             entity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
@@ -96,7 +96,7 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetContext();
 
-            GuildModel guild = await db.Guilds.Include(g => g.Users).AsSplitQuery().FirstOrDefaultAsync(g => g.Id == guildId);
+            Guild guild = await db.Guilds.Include(g => g.Users).AsSplitQuery().FirstOrDefaultAsync(g => g.Id == guildId);
             User? user = guild.Users.FirstOrDefault(u => u.Id == userId);
 
             return user;
@@ -154,7 +154,7 @@ namespace Silk.Core.Services
         public async Task<User> GetOrCreateGuildUserAsync(ulong guildId, ulong userId)
         {
             await using SilkDbContext db = GetContext();
-            GuildModel guild = await db.Guilds
+            Guild guild = await db.Guilds
                 .Include(g => g.Users)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == guildId);
@@ -207,7 +207,7 @@ namespace Silk.Core.Services
         #region Internal helper methods
 
         private SilkDbContext GetContext() => _dbFactory.CreateDbContext();
-        private static User CreateUser(GuildModel guild, ulong userId) => new() {Id = userId, Guild = guild};
+        private static User CreateUser(Guild guild, ulong userId) => new() {Id = userId, Guild = guild};
 
         private static Expression<Func<Infraction, bool>> HasTempInfraction(Infraction infraction)
         {

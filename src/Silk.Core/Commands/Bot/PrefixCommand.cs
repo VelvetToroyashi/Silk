@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Bot
                 return;
             }
 
-            GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
+            Guild guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
             

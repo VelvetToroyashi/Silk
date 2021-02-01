@@ -21,7 +21,7 @@ namespace Silk.Core.Tools.EventHelpers
             _ = Task.Run(async () =>
             {
                 SilkDbContext db = _dbFactory.CreateDbContext();
-                GuildModel guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
+                Guild guild = await db.Guilds.Include(g => g.Users).FirstAsync(g => g.Id == e.Guild.Id);
                 if (e.RolesAfter.Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
                 {
                     // I was really stupid to make the oversight of picking the first user in the Database instead of the first user in the guild. ~Velvet. //

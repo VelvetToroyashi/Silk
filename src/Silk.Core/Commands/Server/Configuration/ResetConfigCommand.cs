@@ -32,8 +32,8 @@ namespace Silk.Core.Commands.Server.Configuration
                 
                 if (result.Result?.Content == confirmationCode)
                 {
-                    GuildConfigModel config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
-                    GuildConfigModel temp = config;
+                    GuildConfig config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
+                    GuildConfig temp = config;
                     config = new() {Id = temp.Id, GuildId = temp.GuildId};
                     
                     await _dbService.UpdateConfigAsync(config);

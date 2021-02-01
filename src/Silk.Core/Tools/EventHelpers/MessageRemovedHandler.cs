@@ -21,7 +21,7 @@ namespace Silk.Core.Tools.EventHelpers
             if (e.Channel.IsPrivate) return; // Goes without saying.                           //
             _ = Task.Run(async () =>
             {
-                GuildConfigModel config = await _dbService.GetConfigAsync(e.Guild.Id);
+                GuildConfig config = await _dbService.GetConfigAsync(e.Guild.Id);
 
                 if (!config.LogMessageChanges) return;
                 if (config.GeneralLoggingChannel is 0) return;

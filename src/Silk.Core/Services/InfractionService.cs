@@ -47,7 +47,7 @@ namespace Silk.Core.Services
         {
             // Validation is handled by the command class. //
             _ = member.RemoveAsync(infraction.Reason);
-            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
 
             if (config.GeneralLoggingChannel is 0)
                 _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
@@ -60,7 +60,7 @@ namespace Silk.Core.Services
         public async Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             await member.BanAsync(0, infraction.Reason);
-            GuildConfigModel config = await _configService.GetConfigAsync(member.Guild.Id);
+            GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
             await ApplyInfractionAsync(infraction.User, infraction);
             if (config.GeneralLoggingChannel is 0)
             {
@@ -69,7 +69,7 @@ namespace Silk.Core.Services
             }
             else
             {
-                GuildModel guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
+                Guild guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
                 int infractions = guild.Users.Sum(u => u.Infractions.Count);
                 
                 DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed($"Case #{infractions} | User {member.Username}",
@@ -86,7 +86,7 @@ namespace Silk.Core.Services
         }
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
-            GuildConfigModel config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
+            GuildConfig config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
             
             if (!channel.Guild.Roles.TryGetValue(config.MuteRoleId, out DiscordRole? muteRole))
             {
@@ -131,7 +131,7 @@ namespace Silk.Core.Services
         public async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => false;
         public async Task<bool> HasActiveMuteAsync(DiscordMember member) => false;
 
-        private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfigModel config, Infraction inf)
+        private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfig config, Infraction inf)
         {
             await guild.UnbanMemberAsync(inf.UserId);
             _logger.LogTrace($"Unbanned {inf.UserId} | SoftBan expired.");
@@ -145,7 +145,7 @@ namespace Silk.Core.Services
             await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
         }
 
-        private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfigModel config, Infraction inf)
+        private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfig config, Infraction inf)
         {
             if (!guild.Members.TryGetValue(inf.UserId, out DiscordMember? mutedMember))
             {
@@ -174,7 +174,7 @@ namespace Silk.Core.Services
             {
                 _logger.LogTrace($"Processing infraction in guild {inf.Key}");
                 DiscordGuild guild = _client.ShardClients.Values.SelectMany(s => s.Guilds.Values).First(g => g.Id == inf.Key);
-                GuildConfigModel config = await _configService.GetConfigAsync(guild.Id);
+                GuildConfig config = await _configService.GetConfigAsync(guild.Id);
                 foreach (Infraction infraction in inf)
                 {
                     _logger.LogTrace($"Infraction {infraction.Id} | User {infraction.UserId}");

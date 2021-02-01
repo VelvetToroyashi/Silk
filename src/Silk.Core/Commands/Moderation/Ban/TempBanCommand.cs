@@ -54,7 +54,7 @@ namespace Silk.Core.Commands.Moderation.Ban
 
                 await user.SendMessageAsync(embed: banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
-                GuildModel guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
+                Guild guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
                 User? bannedUser = db.Users.FirstOrDefault(u => u.Id == user.Id);
                 string formattedBanReason = InfractionFormatHandler.ParseInfractionFormat("temporarily banned",

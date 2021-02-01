@@ -38,7 +38,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            GuildConfigModel config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
+            GuildConfig config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
 
             if (config.MuteRoleId is 0)
             {

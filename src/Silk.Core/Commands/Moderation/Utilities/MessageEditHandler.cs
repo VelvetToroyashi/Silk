@@ -27,7 +27,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             if (e.Channel.IsPrivate) return;
             _ = Task.Run(async () =>
             {
-                GuildModel config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
+                Guild config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
                 CheckForInvite(e, config);
                 ulong logChannel = config.Configuration.GeneralLoggingChannel;
                 if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
@@ -50,7 +50,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             });
         }
 
-        private void CheckForInvite(MessageUpdateEventArgs e, GuildModel config)
+        private void CheckForInvite(MessageUpdateEventArgs e, Guild config)
         {
             if (config.Configuration.BlacklistInvites)
                 if (e.Message.Content.Contains("discord.gg") || e.Message.Content.Contains("discord.com/invite"))

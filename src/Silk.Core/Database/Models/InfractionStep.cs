@@ -5,7 +5,7 @@ namespace Silk.Core.Database.Models
     public class InfractionStep
     {
         public int Id { get; set; }
-        public GuildConfigModel Config { get; set; }
+        public GuildConfig Config { get; set; }
         public InfractionType Type { get; set; }
         public DateTime? Expiration { get; set; }
     }

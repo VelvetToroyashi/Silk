@@ -24,7 +24,7 @@ namespace Silk.Core.AutoMod
          * And again, for the curious ones, the former regex will match anything that resembles an invite.
          * For instance, discord.gg/HZfZb95, discord.com/invite/HZfZb95, discordapp.com/invite/HZfZb95
          */
-        private static readonly Regex AgressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/[A-z]+)", flags);
+        private static readonly Regex AgressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/([A-z]|[0-9])+)", flags);
         private static readonly Regex LenientRegexPattern = new(@"discord.gg\/invite\/.+", flags);
 
         private readonly IInfractionService _infractionService;
@@ -40,7 +40,7 @@ namespace Silk.Core.AutoMod
             if (eventArgs.Channel.IsPrivate || eventArgs.Message is null) return Task.CompletedTask;
             _ = Task.Run(async () =>
             {
-                GuildConfigModel config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
+                GuildConfig config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
                 if (!config.BlacklistInvites) return;
 
                 Regex matchingPattern = config.UseAggressiveRegex ? AgressiveRegexPattern : LenientRegexPattern;
@@ -48,8 +48,8 @@ namespace Silk.Core.AutoMod
                 Match match = matchingPattern.Match(eventArgs.Message.Content);
                 if (match.Success)
                 {
-                    int codeStart = match.Value.LastIndexOf('/');
-                    string code = match.Value[(codeStart + 1)..];
+                    int codeStart = match.Value.LastIndexOf('/') + 1;
+                    string code = match.Value[codeStart..];
 
                     if (_blacklistedLinkCache.Contains(code))
                         AutoModMatchedInvitePrecedureAsync(config, eventArgs.Message, code).GetAwaiter();
@@ -59,24 +59,24 @@ namespace Silk.Core.AutoMod
             return Task.CompletedTask;
         }
 
-        private void CheckForInvite(DiscordClient c, DiscordMessage message, GuildConfigModel config, string inviteCode)
+        private void CheckForInvite(DiscordClient c, DiscordMessage message, GuildConfig config, string inviteCode)
         {
             if (config.ScanInvites)
             {
                 DiscordInvite invite = c.GetInviteByCodeAsync(inviteCode).GetAwaiter().GetResult();
                 if (invite.Inviter is null && config.AllowedInvites.All(i => i.VanityURL != invite.Code))
                     AutoModMatchedInvitePrecedureAsync(config, message, inviteCode).GetAwaiter();
-                else if (invite.Inviter is null && config.AllowedInvites.All(i => i.VanityURL != invite.Code))
+                else if (invite.Inviter is null && config.AllowedInvites.All(i => i.GuildName != invite.Guild.Name))
                     AutoModMatchedInvitePrecedureAsync(config, message, inviteCode).GetAwaiter();
             }
             else AutoModMatchedInvitePrecedureAsync(config, message, inviteCode).GetAwaiter();
         }
 
 
-        private async Task AutoModMatchedInvitePrecedureAsync(GuildConfigModel config, DiscordMessage message, string invite)
+        private async Task AutoModMatchedInvitePrecedureAsync(GuildConfig config, DiscordMessage message, string invite)
         {
             if (!_blacklistedLinkCache.Contains(invite)) _blacklistedLinkCache.Add(invite);
-            //if (await _infractionService.ShouldDeleteMessageAsync((DiscordMember) message.Author)) await message.DeleteAsync();
+            if (config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
             else return;
             // Coming Soon™️ //
         }

@@ -4,7 +4,7 @@ using Silk.Core.Database.Models;
 
 namespace Silk.Core.Database.ModelConfigurations.cs
 {
-    public class UserModelConfiguration : IEntityTypeConfiguration<User>
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
 
         public void Configure(EntityTypeBuilder<User> builder)

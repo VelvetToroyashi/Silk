@@ -18,7 +18,7 @@ namespace Silk.Core.Commands.Moderation.SClean
         public async Task SClean(CommandContext ctx)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
-            GuildModel prefix = db.Guilds.First(g => g.Id == ctx.Guild.Id);
+            Guild prefix = db.Guilds.First(g => g.Id == ctx.Guild.Id);
             await ctx.RespondAsync($"Are you looking for `{prefix.Prefix}help SClean`?");
         }
     }

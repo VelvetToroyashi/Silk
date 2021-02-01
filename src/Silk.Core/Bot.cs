@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -50,17 +51,15 @@ namespace Silk.Core
             try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
             catch
             {
-                SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult(); 
+                SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult();
                 _logger.LogInformation("Database not set up! Migrating...");
             }
-            
             Instance = this;
             Client = client;
         }
-
+        
         private void InitializeCommands()
         {
-            
             Assembly asm = Assembly.GetExecutingAssembly();
             IReadOnlyDictionary<int, CommandsNextExtension> cNext = Client.GetCommandsNextAsync().GetAwaiter().GetResult();
             CommandsNextExtension[] extension = cNext.Select(c => c.Value).ToArray();

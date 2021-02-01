@@ -21,7 +21,7 @@ namespace Silk.Core.Utilities
         {
             var parser = new IniDataParser(_config);
             IniData parseResult = parser.Parse(file);
-            GuildConfigModel model = new();
+            GuildConfig model = new();
         }
 
         public T ParseResult<T>(string input) where T : struct
