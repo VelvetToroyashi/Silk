@@ -17,11 +17,10 @@ namespace Silk.Core.Utilities
 
         public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
         {
-            if (ctx.Guild.Members.Values.Any(m =>
-                m.Username.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                (m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false)))
-                return Optional.FromValue(ctx.Guild.Members.Values.First(m =>
-                    (m.Nickname ?? m.Username).Contains(value, StringComparison.OrdinalIgnoreCase)));
+            
+            var user = ctx.Guild.Members.Values.FirstOrDefault(m =>
+                m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
+            if (user is not null) return Optional.FromValue(user);
             return await ConvertMemberAsync(value, ctx);
         }
 

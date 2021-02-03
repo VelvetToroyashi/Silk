@@ -11,6 +11,7 @@ using DSharpPlus.EventArgs;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
+using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {
@@ -49,8 +50,8 @@ namespace Silk.Core.Utilities
                 switch (cf.FailedChecks[0])
                 {
                     case RequireOwnerAttribute:
-                        DiscordUser owner = c.Client.CurrentApplication.Owners.First();
-                        await e.Context.RespondAsync($"{e.Context.User.Username} doesn't look like {owner.Username}#{owner.Discriminator} to me!");
+                        string owner = c.Client.CurrentApplication.Owners.Select(o => $"{o.Username}#{o.Discriminator}").Join(", ");
+                        await e.Context.RespondAsync($"My owners consist of: {owner}. {cf.Context.User.Username}#{cf.Context.User.Discriminator} doesn't look like any of those names!");
                         break;
                     case RequireNsfwAttribute:
                         await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");

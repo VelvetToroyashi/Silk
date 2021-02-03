@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -58,7 +60,6 @@ namespace Silk.Core.Commands.Bot
                 Script<object> script = CSharpScript.Create(cs, sopts, typeof(TestVariables));
                 script.Compile();
                 ScriptState<object> result = await script.RunAsync(globals).ConfigureAwait(false);
-
                 if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
                     await msg.ModifyAsync(new DiscordEmbedBuilder
                         {

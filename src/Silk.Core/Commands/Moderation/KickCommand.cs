@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -31,6 +32,8 @@ namespace Silk.Core.Commands.Moderation
         public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
+
+            
 
             if (user.IsAbove(bot) || ctx.User == user)
             {

@@ -211,6 +211,10 @@ namespace Silk.Core.Services
             if (infraction.Reason is "") throw new ArgumentNullException();
             if (infraction.User is null) throw new ArgumentNullException();
         }
-        
+
+        public Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

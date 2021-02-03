@@ -14,7 +14,7 @@ namespace Silk.Core.AutoMod
 {
     public class AutoModInviteHandler
     {
-        private static readonly RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
+        private const RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /*
          * To those unacquainted to Regex, or simply too lazy to plug it into regex101.com,
@@ -33,7 +33,11 @@ namespace Silk.Core.AutoMod
 
         private readonly HashSet<string> _blacklistedLinkCache = new();
 
-        public AutoModInviteHandler(ConfigService configService, IInfractionService infractionService) => (_configService, _infractionService) = (configService, infractionService);
+        public AutoModInviteHandler(ConfigService configService, IInfractionService infractionService)
+        {
+            _configService = configService;
+            _infractionService = infractionService;
+        }
 
 
         public Task Invites(DiscordClient client, MessageCreateEventArgs eventArgs)
@@ -62,8 +66,7 @@ namespace Silk.Core.AutoMod
 
         private async Task CheckForInvite(DiscordClient c, DiscordMessage message, GuildConfig config, string inviteCode)
         {
-            
-            if (config.ScanInvites)
+            if (config.ScanInvites) // If invites should be scanned for their origin
             {
                 try
                 {
@@ -72,23 +75,23 @@ namespace Silk.Core.AutoMod
 
                     Task action = invite.Inviter switch
                     {
-                        null when config.AllowedInvites.All(i => i.VanityURL != invite.Code) =>
+                        null when config.AllowedInvites.All(i => i.VanityURL != invite.Code) => // Vanity invite; no inviter
                             AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
-                        null when config.AllowedInvites.All(i => i.GuildName != invite.Guild.Name) =>
+                        null when config.AllowedInvites.All(i => i.GuildName != invite.Guild.Name) => // Not a vanity invite, but doesn't point to a recognized guild
                             AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
-                        _ when config.AllowedInvites.All(i => i.GuildId != invite.Guild.Id) =>
+                        _ when config.AllowedInvites.All(i => i.GuildId != invite.Guild.Id) => // Guild Id doesn't match either
                             AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
                         _ => Task.CompletedTask
                     };
 
                     await action;
                 }
-                catch
+                catch // The invite was either a false-positive, or has garbage behind the actual invite code, making it impossible to match, so it will be deleted as a failsafe.
                 {
                     await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
                 }
             }
-            else await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
+            else await AutoModMatchedInviteProcedureAsync(config, message, inviteCode); // Don't scan invites; just delete them
         }
 
 
@@ -96,10 +99,15 @@ namespace Silk.Core.AutoMod
         {
             if (!_blacklistedLinkCache.Contains(invite)) _blacklistedLinkCache.Add(invite);
 
-            bool delete = await _infractionService.ShouldAddInfractionAsync((DiscordMember) message.Author);
-            if (config.DeleteMessageOnMatchedInvite && delete) _ = message.DeleteAsync();
-            //else return;
-            // Coming Soon™️ //
+            bool shouldPunish = await _infractionService.ShouldAddInfractionAsync((DiscordMember) message.Author);
+            if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
+            if (shouldPunish && config.WarnOnMatchedInvite)
+            {
+                var infraction = await _infractionService.CreateInfractionAsync((DiscordMember)message.Author,
+                    message.Channel.Guild.CurrentMember, InfractionType.Ignore, "Sent an invite");
+                
+            }
+            
         }
 
 

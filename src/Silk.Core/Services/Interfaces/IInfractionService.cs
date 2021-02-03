@@ -23,6 +23,13 @@ namespace Silk.Core.Services.Interfaces
         public Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
+        /// <summary>
+        /// Automatically determines the next course of action given the user's current amount of 
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="infraction"></param>
+        /// <returns></returns>
+        public Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction);
         public Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.");
         public Task<Infraction> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null);
         public Task<bool> ShouldAddInfractionAsync(DiscordMember member);
