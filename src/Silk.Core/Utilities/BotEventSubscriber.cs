@@ -1,9 +1,9 @@
 ﻿using System;
 using DSharpPlus;
 using Microsoft.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Extensions;
-using MessageAddedHandler = Silk.Core.AutoMod.MessageAddedHandler;
 
 namespace Silk.Core.Utilities
 {
@@ -23,7 +23,7 @@ namespace Silk.Core.Utilities
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
             _client.MessageCreated += (c, e) =>  _services.Get<Tools.EventHelpers.MessageAddedHandler>().Tickets(c, e);
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            _client.MessageCreated += (c, e) => _services.Get<MessageAddedHandler>().Invites(c, e);
+            _client.MessageCreated += (c, e) => _services.Get<AutoModInviteHandler>().Invites(c, e);
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckForInvites".PadLeft(40));
             _client.MessageDeleted += _services.Get<MessageRemovedHandler>().OnRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));

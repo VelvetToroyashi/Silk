@@ -120,21 +120,22 @@ namespace Silk.Core.Services
                 Id = userId,
                 Cash = 0,
                 Items = new(),
-                LastCashOut = DateTime.MinValue
+                LastCashOut = new(2020, 1, 1)
             };
+            db.GlobalUsers.Add(user);
             await db.SaveChangesAsync();
             return user;
         }
         
 
-        // Attatch to the context and save. Easy as that. //
+        // Attach to the context and save. Easy as that. //
         public async Task UpdateGuildUserAsync(User user)
         {
             await using SilkDbContext db = GetContext();
             /*
-             * The reason we have to actually assign the attatching to a variable is because this is
+             * The reason we have to actually assign the attaching to a variable is because this is
              * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
-             * but DbContext#Attatch() sets the entity to be unmodified by default. 
+             * but DbContext#Attach() sets the entity to be unmodified by default. 
              */
             EntityEntry<User> userEntity = db.Attach(user);
             userEntity.State = EntityState.Modified;
@@ -145,9 +146,13 @@ namespace Silk.Core.Services
         public async Task UpdateGlobalUserAsync(GlobalUser user)
         {
             await using SilkDbContext db = GetContext();
+            GlobalUser dbUser = (await GetGlobalUserAsync(user.Id))!;
             
-            EntityEntry<GlobalUser> userEntity = db.Attach(user);
-            userEntity.State = EntityState.Modified;
+            dbUser.Cash = user.Cash;
+            dbUser.Items = user.Items;
+            dbUser.LastCashOut = user.LastCashOut;
+
+            db.GlobalUsers.Update(dbUser);
             await db.SaveChangesAsync();
         }
 

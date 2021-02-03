@@ -128,7 +128,12 @@ namespace Silk.Core.Services
             infraction.Expiration = expiration;
             return infraction;
         }
-        public async Task<bool> ShouldAddInfractionAsync(DiscordMember member) => false;
+
+        public async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
+        {
+            User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
+            return !user?.Flags.HasFlag(UserFlag.Staff) ?? true;
+        }
         public async Task<bool> HasActiveMuteAsync(DiscordMember member) => false;
 
         private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfig config, Infraction inf)

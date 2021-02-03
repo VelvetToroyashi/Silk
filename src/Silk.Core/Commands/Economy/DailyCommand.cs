@@ -58,6 +58,7 @@ namespace Silk.Core.Commands.Economy
                 else
                 {
                     user.Cash += 200;
+                    user.LastCashOut = DateTime.Now;
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                         .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                         .WithColor(DiscordColor.Green)

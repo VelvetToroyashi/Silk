@@ -50,10 +50,10 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
-                    string logFormat = "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                    const string logFormat = "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: logFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch

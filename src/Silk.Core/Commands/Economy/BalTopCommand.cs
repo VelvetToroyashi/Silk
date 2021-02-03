@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using FluentAssertions;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
@@ -57,14 +59,14 @@ namespace Silk.Core.Commands.Economy
                 GlobalUser? thirdGlobalUser = economyUsers.Skip(2).First();
                 DiscordUser? thirdUser = await ctx.Client.GetUserAsync(thirdGlobalUser.Id);
 
-                embed.AddField(":first_place:", $"{firstUser.Username} ({firstUser.Mention}) - ${firstGlobalUser.Cash}");
-                embed.AddField(":second_place:", $"{secondUser.Username} ({secondUser.Mention}) - ${secondGlobalUser.Cash}");
-                embed.AddField(":third_place:", $"{thirdUser.Username} ({thirdUser.Mention}) - ${thirdGlobalUser.Cash}");
+                embed.AddField(":first_place:", $"{firstUser.Username} ({firstUser.Mention}) - {firstGlobalUser.Cash:C0}");
+                embed.AddField(":second_place:", $"{secondUser.Username} ({secondUser.Mention}) - {secondGlobalUser.Cash:C0}");
+                embed.AddField(":third_place:", $"{thirdUser.Username} ({thirdUser.Mention}) - {thirdGlobalUser.Cash:C0}");
                 
                 IEnumerable<string> remainingUsers = economyUsers.Skip(3).Select(u =>
                 {
                     DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
-                    return $"{user.Username} ({user.Mention}) - ${u.Cash}";
+                    return $"{user.Username} ({user.Mention}) - {u.Cash:C0}";
                 });
                 
                 foreach (var user in remainingUsers)

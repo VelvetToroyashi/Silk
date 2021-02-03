@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
 using Silk.Core.Services;
@@ -8,7 +9,6 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.Tools;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
-using MessageAddedHandler = Silk.Core.AutoMod.MessageAddedHandler;
 
 namespace Silk.Core
 {
@@ -34,7 +34,7 @@ namespace Silk.Core
             services.AddSingleton<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
-            services.AddSingleton<MessageAddedHandler>();
+            services.AddSingleton<AutoModInviteHandler>();
 
 
             services.AddSingleton<BotExceptionHelper>();

@@ -48,7 +48,7 @@ namespace Silk.Core
             
             SilkDBContext = dbFactory.CreateDbContext();
 
-            try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
+            try { _ = SilkDBContext.Guilds.FirstOrDefaultAsync(); }
             catch
             {
                 SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult();
