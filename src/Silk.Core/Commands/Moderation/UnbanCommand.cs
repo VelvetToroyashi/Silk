@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Moderation
                 //     (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
                 // if (infraction is not null) _eventService.Events.TryRemove(infraction);
                 
-                await ctx.RespondAsync(embed: embed);
+                await ctx.RespondAsync(embed);
             }
             else
             {
@@ -48,7 +48,7 @@ namespace Silk.Core.Commands.Moderation
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
                         .WithColor(new DiscordColor("#d11515"));
                 
-                await ctx.RespondAsync(embed: embed);
+                await ctx.RespondAsync(embed);
             }
         }
     }

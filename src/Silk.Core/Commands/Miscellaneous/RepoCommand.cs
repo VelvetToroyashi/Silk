@@ -20,7 +20,7 @@ namespace Silk.Core.Commands.Miscellaneous
                 .WithDescription("I'm an FOSS bot, so feel free to [look at the source code](https://github.com/VelvetThePanda/Silk), " +
                                  "or if there's a bug or issue, [open an issue!](https://github.com/VelvetThePanda/Silk/issues).")
                 .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.User.AvatarUrl);
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
     }
 }

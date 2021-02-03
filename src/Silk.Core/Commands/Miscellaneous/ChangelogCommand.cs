@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Miscellaneous
             }
 
             DiscordEmbed embed = BuildChangeLog(db.ChangeLogs.OrderBy(c => c.ChangeTime).Last());
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
 
         // [Command("Create")]
@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Miscellaneous
         //     Changelog changelog = CreateChangelog(options);
         //     var db = new Lazy<SilkDbContext>(() => _dbFactory.CreateDbContext());
         //     DiscordMessage clMessage =
-        //         await ctx.RespondAsync("Does this look correct?", embed: BuildChangeLog(changelog));
+        //         await ctx.RespondAsync("Does this look correct?", BuildChangeLog(changelog));
         //     bool embedAccepted = await CheckConfirmationAsync(ctx, clMessage);
         //     if (embedAccepted)
         //     {

@@ -35,7 +35,7 @@ namespace Silk.Core.Commands.Moderation
             if (user.IsAbove(bot) || ctx.User == user)
             {
                 DiscordEmbed embed = await this.CreateHierarchyEmbedAsync(ctx, bot, user);
-                await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
+                await ctx.RespondAsync(embed).ConfigureAwait(false);
             }
             else
             {
@@ -52,7 +52,7 @@ namespace Silk.Core.Commands.Moderation
                 string messaged;
                 try
                 {
-                    await user.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                    await user.SendMessageAsync(embed).ConfigureAwait(false);
                     messaged = "(User notified with Direct message)";
                 }
                 catch (InvalidOperationException)

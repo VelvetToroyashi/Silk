@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.General
                 .AddField("​", "​", true)
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
             
-            await message.ModifyAsync(embed: embed.Build());
+            await message.ModifyAsync(embed.Build());
         }
 
         private int GetDbLatency()

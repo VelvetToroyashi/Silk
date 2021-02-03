@@ -52,7 +52,7 @@ namespace Silk.Core.Commands.Server
             embed.AddField("Owner:", guild.Owner.Mention);
             embed.AddField("Approximate staff member count:", staffCount.ToString());
 
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
     }
 }

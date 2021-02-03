@@ -58,7 +58,7 @@ namespace Silk.Core.Commands.General.DiceRoll
 
             embed.AddField("Modifiers", $"\t{string.Join(", ", modifiers)} | {modifiers.Sum()}");
             embed.AddField("Total", $"{rolls.Sum() + modifiers.Sum()}");
-            await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
+            await ctx.RespondAsync(embed).ConfigureAwait(false);
         }
 
         private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>

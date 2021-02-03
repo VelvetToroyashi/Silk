@@ -38,7 +38,7 @@ namespace Silk.Core.Commands.Economy
                 .CreateEmbed(ctx, "Account balance:", $"You have {account.Cash} dollars!")
                 .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl);
             
-            await ctx.RespondAsync(embed: eb);
+            await ctx.RespondAsync(eb);
         }
     }
 }

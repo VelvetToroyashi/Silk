@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Economy
 
                 db.GlobalUsers.Add(user);
                 
-                await ctx.RespondAsync(embed: embed);
+                await ctx.RespondAsync(embed);
                 await db.SaveChangesAsync();
             }
             else
@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Economy
                         .WithDescription("You're a little too early! Check back in " +
                                          $"{user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
                     
-                    await ctx.RespondAsync(embed: embed);
+                    await ctx.RespondAsync(embed);
                 }
                 else
                 {
@@ -64,7 +64,7 @@ namespace Silk.Core.Commands.Economy
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
                     
-                    await ctx.RespondAsync(embed: embed);
+                    await ctx.RespondAsync(embed);
                     await db.SaveChangesAsync();
                 }
             }

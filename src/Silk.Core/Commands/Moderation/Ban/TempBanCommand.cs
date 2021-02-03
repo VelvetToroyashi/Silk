@@ -52,7 +52,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                     .WithDescription($"You've been temporarily banned from {ctx.Guild.Name} for {duration.TotalDays} days.")
                     .AddField("Reason:", reason);
 
-                await user.SendMessageAsync(embed: banEmbed);
+                await user.SendMessageAsync(banEmbed);
                 await ctx.Guild.BanMemberAsync(user, 0, reason);
                 Guild guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
 
@@ -72,7 +72,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 {
                     embed.WithDescription(formattedBanReason);
                     embed.WithColor(DiscordColor.Green);
-                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel).SendMessageAsync(embed: embed);
+                    await ctx.Guild.GetChannel(guild.Configuration.GeneralLoggingChannel).SendMessageAsync(embed);
                 }
 
                 // EventService.Events.Add(new TimedInfraction(user.Id, ctx.Guild.Id, DateTime.Now.Add(banDuration),
@@ -86,7 +86,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         {
             embed.WithDescription(reason.FailureReason.Replace("$user", user.Mention));
             embed.WithColor(DiscordColor.Red);
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
 
         private static Infraction CreateInfraction(string reason, ulong enforcerId, DateTime infractionTime)

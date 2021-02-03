@@ -39,7 +39,7 @@ namespace Silk.Core.Commands.Moderation.Ban
 
             async Task DenyBanAsync(string errorReason)
             {
-                await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
+                await ctx.RespondAsync(new DiscordEmbedBuilder()
                     .WithAuthorExtension(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.Red)
                     .WithDescription(errorReason));
@@ -84,7 +84,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .AddFooter(ctx);
             try
             {
-                await target.SendMessageAsync(embed: userBannedEmbed);
+                await target.SendMessageAsync(userBannedEmbed);
             }
             finally
             {
@@ -94,7 +94,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                     ?.Configuration.GeneralLoggingChannel;
                 DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel!.Value) ?? ctx.Channel;
 
-                await sendChannel.SendMessageAsync(embed: logEmbed);
+                await sendChannel.SendMessageAsync(logEmbed);
             }
         }
     }

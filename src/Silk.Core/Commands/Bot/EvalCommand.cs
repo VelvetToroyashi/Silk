@@ -36,7 +36,7 @@ namespace Silk.Core.Commands.Bot
 
             string cs = code.Substring(cs1, cs2 - cs1);
 
-            msg = await ctx.RespondAsync("", embed: new DiscordEmbedBuilder()
+            msg = await ctx.RespondAsync("", new DiscordEmbedBuilder()
                     .WithColor(new DiscordColor("#FF007F"))
                     .WithDescription("Evaluating...")
                     .Build())
@@ -60,7 +60,7 @@ namespace Silk.Core.Commands.Bot
                 ScriptState<object> result = await script.RunAsync(globals).ConfigureAwait(false);
 
                 if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
-                    await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                    await msg.ModifyAsync(new DiscordEmbedBuilder
                         {
                             Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
                             Color = new DiscordColor("#007FFF")

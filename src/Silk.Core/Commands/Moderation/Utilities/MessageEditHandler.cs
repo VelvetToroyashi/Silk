@@ -46,7 +46,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
                         .AddField("Channel ID:", e.Channel.Id.ToString(), true)
                         .WithColor(DiscordColor.CornflowerBlue);
                 DiscordChannel loggingChannel = await c.GetChannelAsync(logChannel);
-                await c.SendMessageAsync(loggingChannel, embed: embed);
+                await c.SendMessageAsync(loggingChannel, embed);
             });
         }
 

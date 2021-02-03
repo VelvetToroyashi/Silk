@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.Miscellaneous
                 .WithColor(role.Color)
                 .WithThumbnail(ctx.Guild.IconUrl);
 
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
         
         [Command("info")]
@@ -69,7 +69,7 @@ namespace Silk.Core.Commands.Miscellaneous
 
             embed.AddField("Flags:", member.Flags.ToString() == "" ? "None" : member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
-            await ctx.RespondAsync(embed: embed);
+            await ctx.RespondAsync(embed);
         }
 
         [Command("info")]
@@ -106,7 +106,7 @@ namespace Silk.Core.Commands.Miscellaneous
             embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
             embed.AddField("Flags:", member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
-            await ctx.RespondAsync(embed: embed).ConfigureAwait(false);
+            await ctx.RespondAsync(embed).ConfigureAwait(false);
         }
 
         private static string GetHierarchy(CommandContext ctx, DiscordRole role)
