@@ -92,7 +92,7 @@ namespace Silk.Core.Commands.Server.Configuration
                     }
                     else if (result.Result.Emoji == no)
                     {
-                        builder.WithContent("Alrighty, cancled.");
+                        builder.WithContent("Alrighty, canceled.");
                         await ctx.RespondAsync(builder);
                         return;
                     }

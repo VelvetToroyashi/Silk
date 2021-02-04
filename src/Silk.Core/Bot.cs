@@ -99,13 +99,15 @@ namespace Silk.Core
 
             
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
-            CommandsNextExtension[] cmd = cmdNext.Select(c => c.Value).ToArray();
+            CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();
             var memberConverter = new MemberConverter();
-            
-            foreach (CommandsNextExtension t in cmd)
+            var replyConverter = new DiscordReplyConverter();
+
+            foreach (CommandsNextExtension extension in cnextExtensions)
             {
-                t.SetHelpFormatter<HelpFormatter>();
-                t.RegisterConverter(memberConverter);
+                extension.SetHelpFormatter<HelpFormatter>();
+                extension.RegisterConverter(memberConverter);
+                extension.RegisterConverter(replyConverter);
             }
             await Client.StartAsync();
             

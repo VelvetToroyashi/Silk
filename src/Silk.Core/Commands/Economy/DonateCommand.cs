@@ -34,18 +34,27 @@ namespace Silk.Core.Commands.Economy
             GlobalUser receiver = await _dbService.GetOrCreateGlobalUserAsync(recipient.Id);
 
             if (receiver == sender)
+            {
                 await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");
+            }
             else if (sender!.Cash < amount)
+            {
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
+
+            }
             else if (amount >= 1000)
+            {
                 await VerifyTransactionAsync(ctx, sender, receiver!, amount);
+
+            }
             else
+            {
                 await DoTransactionAsync(ctx, amount, sender, receiver!);
-
-            await _dbService.UpdateGlobalUserAsync(receiver!);
-            await _dbService.UpdateGlobalUserAsync(sender!);
+                await _dbService.UpdateGlobalUserAsync(receiver!);
+                await _dbService.UpdateGlobalUserAsync(sender!);
+            }
         }
-
+        
         private static async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
         {
             // We use uint as an easier way of anti fraud protection; people would put a negative number and essentially steal money from others. //

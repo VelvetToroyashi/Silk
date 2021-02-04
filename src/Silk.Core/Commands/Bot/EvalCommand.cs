@@ -22,9 +22,28 @@ namespace Silk.Core.Commands.Bot
         [Description("Evaluates C# code.")]
         [Hidden]
         [RequireOwner]
+        [Priority(1)]
+        public async Task EvalCS(CommandContext ctx)
+        {
+            if (ctx.Message.ReferencedMessage is null) await EvalCS(ctx, ctx.RawArgumentString);
+            else
+            {
+                var code = ctx.Message.ReferencedMessage.Content;
+                if (code.Contains(ctx.Prefix))
+                {
+                    var index = code.IndexOf(' ');
+                    code = code[++index..];
+                }
+                await EvalCS(ctx, code);
+            }
+        }
+        
+        
+        [Command("eval")]
+        [Priority(0)]
         public async Task EvalCS(CommandContext ctx, [RemainingText] string code)
         {
-            DiscordMessage msg = ctx.Message;
+            DiscordMessage msg;
             
             int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;
