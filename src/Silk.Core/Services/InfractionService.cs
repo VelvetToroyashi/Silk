@@ -39,9 +39,7 @@ namespace Silk.Core.Services
 
             LoadInfractions();
         }
-
-
-        public async Task SilentKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction) { throw new NotImplementedException(); }
+        
 
         public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed)
         {
@@ -80,10 +78,12 @@ namespace Silk.Core.Services
                 await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
             } 
         }
+        
         public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             
         }
+        
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             GuildConfig config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
@@ -102,6 +102,7 @@ namespace Silk.Core.Services
             _tempInfractions.Add(infraction);
             _logger.LogTrace($"Added temporary infraction to {member.Id}!");
         }
+        
         public async Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
             User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
@@ -115,10 +116,11 @@ namespace Silk.Core.Services
             };
             user.Infractions.Add(infraction);
             // We will handle having automatic infractions later //
-            // This will have a method to accompany it soon:tm: //
+            // This will have a method to accompany it soon™️ //
             await _dbService.UpdateGuildUserAsync(user);
             return infraction;
         }
+        
         public async Task<Infraction> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
         {
             if (type is not (InfractionType.SoftBan or InfractionType.Mute))
@@ -134,7 +136,12 @@ namespace Silk.Core.Services
             User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
             return !user?.Flags.HasFlag(UserFlag.InfractionExemption) ?? true;
         }
-        public async Task<bool> HasActiveMuteAsync(DiscordMember member) => false;
+        
+        public async Task<bool> HasActiveMuteAsync(DiscordMember member)
+        {
+            User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
+            return user?.Flags.HasFlag(UserFlag.ActivelyMuted) ?? false;
+        }
 
         private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfig config, Infraction inf)
         {
@@ -207,9 +214,8 @@ namespace Silk.Core.Services
         
         private static void ValidateInfraction(Infraction infraction)
         {
-            if (infraction.Enforcer is 0) throw new ArgumentNullException();
-            if (infraction.Reason is "") throw new ArgumentNullException();
-            if (infraction.User is null) throw new ArgumentNullException();
+            if (infraction.Enforcer is 0 || infraction.Reason is "" || infraction.User is null) 
+                throw new ArgumentNullException();
         }
 
         public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
