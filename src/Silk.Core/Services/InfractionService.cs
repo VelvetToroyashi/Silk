@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Timers;
 using DSharpPlus;
@@ -13,7 +10,6 @@ using Silk.Core.Database.Models;
 using Silk.Core.Exceptions;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
-using Silk.Extensions;
 
 namespace Silk.Core.Services
 {
@@ -93,16 +89,37 @@ namespace Silk.Core.Services
                 await channel.SendMessageAsync("Mute role doesn't exist on server!");
                 return;
             }
+            User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
+            if (user.Flags.HasFlag(UserFlag.ActivelyMuted))
+            {
+                Infraction inf = user.Infractions.Last(i => i.HeldAgainstUser && 
+                                                             i.InfractionType is (InfractionType.AutoModMute or InfractionType.Mute) &&
+                                                             i.Expiration > DateTime.Now);
+                inf.Expiration = infraction.Expiration;
+                await _dbService.UpdateGuildUserAsync(user);
+                return;
+            }
             
             await member.GrantRoleAsync(muteRole);
             
-            User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
+            
             await ApplyInfractionAsync(user, infraction);
+            
             
             _tempInfractions.Add(infraction);
             _logger.LogTrace($"Added temporary infraction to {member.Id}!");
         }
         
+        /// <summary>
+        /// Creates an infraction that's marked as temporary. Only <see cref="InfractionType.SoftBan"/> and <see cref="InfractionType.Mute"/> can be passed.
+        /// </summary>
+        /// <returns>The infraction that was created.</returns>
+        /// <remarks>
+        ///     <para>
+        ///     Remarks: Temporary infractions are not passed into the infraction queue, and it is up to
+        ///     the delegated methods that handle infractions to add them to the queue.
+        ///     </para>
+        /// </remarks>
         public async Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
             User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
@@ -173,6 +190,13 @@ namespace Silk.Core.Services
         private async Task ApplyInfractionAsync(User user, Infraction infraction)
         {
             user.Infractions.Add(infraction);
+            user.Flags = infraction.InfractionType switch
+            {
+                InfractionType.AutoModMute or InfractionType.Mute => user.Flags | UserFlag.ActivelyMuted,
+                InfractionType.Ban => user.Flags | UserFlag.BannedPrior,
+                InfractionType.Kick => user.Flags | UserFlag.KickedPrior,
+                _ => user.Flags
+            };
             await _dbService.UpdateGuildUserAsync(user);
         }
         

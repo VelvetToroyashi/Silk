@@ -1,6 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
 using Silk.Extensions;
 
 namespace Silk.Core.Constants

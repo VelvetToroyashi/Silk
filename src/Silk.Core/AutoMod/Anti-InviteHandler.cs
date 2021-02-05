@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;

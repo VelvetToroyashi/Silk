@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Silk.Core.Services.Interfaces
+﻿namespace Silk.Core.Services.Interfaces
 {
     ///<summary>Interface for all cache-like services, to allow a specific guild's cache to be invalidated</summary>
     public interface ICacheService 

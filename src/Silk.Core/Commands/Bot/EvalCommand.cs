@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;

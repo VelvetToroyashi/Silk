@@ -5,7 +5,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Database.Models;
-using Silk.Core.Tools;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 

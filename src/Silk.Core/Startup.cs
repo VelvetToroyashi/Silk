@@ -6,7 +6,6 @@ using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Tools;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
 

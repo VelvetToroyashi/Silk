@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 

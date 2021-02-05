@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using Silk.Core.Constants;
 using Silk.Extensions;
