@@ -132,7 +132,7 @@ namespace Silk.Core.Services
         public async Task<bool> ShouldAddInfractionAsync(DiscordMember member)
         {
             User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
-            return !user?.Flags.HasFlag(UserFlag.Staff) ?? true;
+            return !user?.Flags.HasFlag(UserFlag.InfractionExemption) ?? true;
         }
         public async Task<bool> HasActiveMuteAsync(DiscordMember member) => false;
 
@@ -212,9 +212,9 @@ namespace Silk.Core.Services
             if (infraction.User is null) throw new ArgumentNullException();
         }
 
-        public Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
+        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

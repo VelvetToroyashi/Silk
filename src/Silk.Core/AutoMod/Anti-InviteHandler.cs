@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
@@ -25,18 +27,20 @@ namespace Silk.Core.AutoMod
          * And again, for the curious ones, the former regex will match anything that resembles an invite.
          * For instance, discord.gg/HZfZb95, discord.com/invite/HZfZb95, discordapp.com/invite/HZfZb95
          */
-        private static readonly Regex AggressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/([A-z]?[0-9]?-?)+)", flags);
+        private static readonly Regex AggressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/([A-z]|[0-9]-?)+)", flags);
         private static readonly Regex LenientRegexPattern = new(@"discord.gg\/invite\/.+", flags);
 
         private readonly IInfractionService _infractionService;
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
 
         private readonly HashSet<string> _blacklistedLinkCache = new();
+        private readonly ILogger<AutoModInviteHandler> _logger;
 
-        public AutoModInviteHandler(ConfigService configService, IInfractionService infractionService)
+        public AutoModInviteHandler(ConfigService configService, IInfractionService infractionService, ILogger<AutoModInviteHandler> logger)
         {
             _configService = configService;
             _infractionService = infractionService;
+            _logger = logger;
         }
 
 
@@ -64,37 +68,42 @@ namespace Silk.Core.AutoMod
             return Task.CompletedTask;
         }
 
-        private async Task CheckForInvite(DiscordClient c, DiscordMessage message, GuildConfig config, string inviteCode)
+        /// <summary>
+        /// Automod method called when the guild configred regex (be it 'lenient' or 'aggressive' matches anything that resembles an invite.
+        /// </summary>
+        private async Task CheckForInvite(DiscordClient client, DiscordMessage message, GuildConfig config, string inviteCode)
         {
-            if (config.ScanInvites) // If invites should be scanned for their origin
+            var handleInvite = true;
+            if (config.ScanInvites)
             {
                 try
                 {
-                    DiscordInvite invite = await c.GetInviteByCodeAsync(inviteCode);
-                    if (invite.Guild.Id == message.Channel.GuildId) return;
-
-                    Task action = invite.Inviter switch
+                    DiscordInvite apiInvite = await client.GetInviteByCodeAsync(inviteCode);
+                    
+                    if (apiInvite.Guild.Id != message.Channel.GuildId)
                     {
-                        null when config.AllowedInvites.All(i => i.VanityURL != invite.Code) => // Vanity invite; no inviter
-                            AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
-                        null when config.AllowedInvites.All(i => i.GuildName != invite.Guild.Name) => // Not a vanity invite, but doesn't point to a recognized guild
-                            AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
-                        _ when config.AllowedInvites.All(i => i.GuildId != invite.Guild.Id) => // Guild Id doesn't match either
-                            AutoModMatchedInviteProcedureAsync(config, message, inviteCode),
-                        _ => Task.CompletedTask
-                    };
-
-                    await action;
+                        handleInvite = !config.AllowedInvites.Any(invite => apiInvite.Code == invite.VanityURL || 
+                                                                           apiInvite.Guild.Id == invite.GuildId);
+                    }
+                    else
+                    {
+                        handleInvite = false;
+                        _logger.LogTrace("Matched invite points to current guild; skipping");
+                    }
                 }
-                catch // The invite was either a false-positive, or has garbage behind the actual invite code, making it impossible to match, so it will be deleted as a failsafe.
+                catch(NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
                 {
-                    await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
+                    _logger.LogTrace("Matched invalid or corrupt invite");
                 }
             }
-            else await AutoModMatchedInviteProcedureAsync(config, message, inviteCode); // Don't scan invites; just delete them
+
+            if (handleInvite) await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
         }
 
-
+        /// <summary>
+        /// Method responsible for determining what the appropriate action is to take, if any depending on
+        /// how the guild is configured.
+        /// </summary>
         private async Task AutoModMatchedInviteProcedureAsync(GuildConfig config, DiscordMessage message, string invite)
         {
             if (!_blacklistedLinkCache.Contains(invite)) _blacklistedLinkCache.Add(invite);
@@ -105,7 +114,7 @@ namespace Silk.Core.AutoMod
             {
                 var infraction = await _infractionService.CreateInfractionAsync((DiscordMember)message.Author,
                     message.Channel.Guild.CurrentMember, InfractionType.Ignore, "Sent an invite");
-                
+                await _infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, infraction);
             }
             
         }

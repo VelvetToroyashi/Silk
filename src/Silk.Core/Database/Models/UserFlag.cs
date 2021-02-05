@@ -6,15 +6,16 @@ namespace Silk.Core.Database.Models
     public enum UserFlag
     {
         None = 0,
-        WarnedPrior = 2,
-        KickedPrior = 4 | WarnedPrior,
-        BannedPrior = 8 | WarnedPrior,
-        Blacklisted = 16,
-        FreeShopOwner = 32,
-        PaidShopOwner = 64 | FreeShopOwner,
-        SilkPremiumUser = 128,
-        InfractionExemption = 256,
-        Staff = 4096 | InfractionExemption,
-        EscalatedStaff = 8192 | Staff
+        ActivelyMuted = 2,
+        ActivelyBanned = 4,
+        WarnedPrior = 8,
+        KickedPrior = 16,
+        BannedPrior = 32,
+        Blacklisted = 64,
+        FreeShopOwner = 128,
+        PaidShopOwner = 256,
+        InfractionExemption = 512,
+        Staff = 1024 | InfractionExemption,
+        EscalatedStaff = 2048 | Staff
     }
 }

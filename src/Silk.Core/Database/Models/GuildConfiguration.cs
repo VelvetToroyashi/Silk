@@ -72,7 +72,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// A list that contians the type of infraction that should be applied, and an expiration if applicable.
         /// </summary>
-        public List<Infraction> InfractionDictionary { get; set; } = new();
+        public List<InfractionType> InfractionDictionary { get; set; } = new();
 
         #endregion
 
