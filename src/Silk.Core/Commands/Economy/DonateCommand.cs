@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -15,7 +16,7 @@ namespace Silk.Core.Commands.Economy
     public class DonateCommand : BaseCommandModule
     {
         private readonly IDatabaseService _dbService;
-
+        private readonly HashSet<ulong> _activeTransactions = new();
         public DonateCommand(IDatabaseService dbService)
         {
             _dbService = dbService;
@@ -32,23 +33,26 @@ namespace Silk.Core.Commands.Economy
             if (receiver == sender)
             {
                 await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");
-            }
-            else if (sender!.Cash < amount)
+                return;
+            } 
+            if (sender!.Cash < amount)
             {
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
-
+                return;
             }
-            else if (amount >= 1000)
+            
+            if (amount >= 1000)
             {
                 await VerifyTransactionAsync(ctx, sender, receiver!, amount);
-
             }
             else
             {
                 await DoTransactionAsync(ctx, amount, sender, receiver!);
-                await _dbService.UpdateGlobalUserAsync(receiver!);
-                await _dbService.UpdateGlobalUserAsync(sender!);
             }
+            
+            
+            await _dbService.UpdateGlobalUserAsync(receiver!);
+            await _dbService.UpdateGlobalUserAsync(sender!);
         }
         
         private static async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
@@ -96,5 +100,21 @@ namespace Silk.Core.Commands.Economy
                 await ctx.RespondAsync(embed);
             }
         }
+
+        public async override Task BeforeExecutionAsync(CommandContext ctx)
+        {
+            if (_activeTransactions.Contains(ctx.User.Id))
+            {
+                await ctx.RespondAsync("You have an active transaction! Complete the first one before donating to someone else!");
+                throw new("Donate command does not support concurrent transactions!");
+                // I can't think of a better exception to throw; InvalidOp gets typed-matched in the exception handler and prints the help message
+                // Which is not ideal.
+            }
+            
+            _activeTransactions.Add(ctx.User.Id);
+        }
+
+        public async override Task AfterExecutionAsync(CommandContext ctx) => _activeTransactions.Remove(ctx.User.Id);
+
     }
 }

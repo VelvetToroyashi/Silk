@@ -48,7 +48,7 @@ namespace Silk.Core.Commands.Economy
                 if (DateTime.Now.Subtract(user.LastCashOut).TotalDays < 1)
                 {
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
+                        .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
                         .WithColor(DiscordColor.Red)
                         .WithDescription("You're a little too early! Check back in " +
                                          $"{user.LastCashOut.AddDays(1).Subtract(DateTime.Now).Humanize(2, minUnit: TimeUnit.Second)}.");
@@ -60,7 +60,7 @@ namespace Silk.Core.Commands.Economy
                     user.Cash += 200;
                     user.LastCashOut = DateTime.Now;
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                        .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
+                        .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
                     

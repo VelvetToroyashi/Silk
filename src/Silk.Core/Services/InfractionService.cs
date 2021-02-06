@@ -236,14 +236,9 @@ namespace Silk.Core.Services
             _logger.LogTrace("Loaded all applicable infractions!");
         }
         
-        private static void ValidateInfraction(Infraction infraction)
-        {
-            if (infraction.Enforcer is 0 || infraction.Reason is "" || infraction.User is null) 
-                throw new ArgumentNullException();
-        }
-
         public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
         {
+            
 
         }
     }
