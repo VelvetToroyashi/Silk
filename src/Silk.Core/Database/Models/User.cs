@@ -10,4 +10,4 @@ namespace Silk.Core.Database.Models
         public UserFlag Flags { get; set; }
         public List<Infraction> Infractions { get; set; } = new();
     }
-}
+}  

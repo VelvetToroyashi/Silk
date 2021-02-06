@@ -33,6 +33,7 @@
     <EmbeddedResource Remove="config\**" />
     <EmbeddedResource Remove="Migrations\**" />
     <EmbeddedResource Remove="Silk!\**" />
+    <EmbeddedResource Remove="logs\**" />
   </ItemGroup>
 
 
@@ -40,6 +41,7 @@
     <None Remove="config.ini" />
     <None Remove="docker-compose.yml" />
     <None Remove="Silk!\**" />
+    <None Remove="logs\**" />
   </ItemGroup>
   
   <ItemGroup>
@@ -102,6 +104,7 @@
     <Compile Remove="Utilities\CommandHelper.cs" />
     <Compile Remove="Commands\Bot\GuildJoinHandler.cs" />
     <Compile Remove="Commands\Bot\Restart.cs" />
+    <Compile Remove="logs\**" />
   </ItemGroup>
 
   <ItemGroup>
