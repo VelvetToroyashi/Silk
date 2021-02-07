@@ -16,7 +16,6 @@ namespace Silk.Core.Utilities
 {
     public class BotExceptionHelper
     {
-
         private readonly ILogger<BotExceptionHelper> _logger;
         private readonly DiscordShardedClient _client;
 
@@ -24,21 +23,19 @@ namespace Silk.Core.Utilities
 
         public async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
-
-            if (e.Exception is CommandNotFoundException)
+            if (e.Exception is CommandNotFoundException cnfe)
             {
-                _logger.LogWarning($"Command not found: Message: {e.Context.Message.Content}");
+                _logger.LogWarning($"Command Not Found: Message: {e.Context.Message.Content}\nException: {cnfe.Message}");
             }
-            else if (e.Exception is InvalidOperationException && e.Exception.Message.Contains("command"))
+            else if (e.Exception is InvalidOperationException iope && iope.Message.Contains("command"))
             {
-                _logger.LogWarning($"Command not found: Message {e.Context.Message.Content}");
+                _logger.LogWarning($"Invalid Command Operation: Message {e.Context.Message.Content}\nException: {iope.Message}");
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
-
             else if (e.Exception.Message is "Could not find a suitable overload for the command.")
             {
+                _logger.LogWarning($"Invalid Command Parameters {e.Command.Name} | {e.Context.RawArgumentString}");
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
-                _logger.LogWarning($"Invalid command paremeters {e.Command.Name} | {e.Context.RawArgumentString}");
             }
             else if (e.Exception is ArgumentException ae)
             {
@@ -70,7 +67,6 @@ namespace Silk.Core.Utilities
                     case RequireGuildAttribute:
                         await e.Context.RespondAsync("Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.");
                         break;
-
                 }
             }
             else _logger.LogWarning(e.Exception.Message);
@@ -82,9 +78,7 @@ namespace Silk.Core.Utilities
             else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard");
             else _logger.LogWarning($"{e.Exception.Message}");
         }
-
-
-
+        
         public static async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();
@@ -98,7 +92,7 @@ namespace Silk.Core.Utilities
             _client.ClientErrored += OnClientErrored;
             _client.SocketClosed += async (_, _) => _logger.LogWarning("Disconnected");
             _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected"); // Async keyword because I'm lazy, and then I don't need to return anything.
-            
+
             TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: " + e.Exception);
             IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
 
