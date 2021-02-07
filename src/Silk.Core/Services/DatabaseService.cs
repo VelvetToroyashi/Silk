@@ -165,13 +165,11 @@ namespace Silk.Core.Services
                 .FirstOrDefaultAsync(g => g.Id == guildId);
             
             User? user = guild.Users.FirstOrDefault(u => u.Id == userId);
-            if (user is null)
-            {
-                //VALID
-                user = CreateUser(guild, userId);
-                guild.Users.Add(user);
-                await db.SaveChangesAsync();
-            }
+            if (user is not null) return user;
+            //VALID
+            user = CreateUser(guild, userId);
+            guild.Users.Add(user);
+            await db.SaveChangesAsync();
             return user;
         }
 
@@ -188,6 +186,7 @@ namespace Silk.Core.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync(Expression<Func<User, bool>> predicate)
         {
+            
             await using SilkDbContext db = GetContext();
             return db.Users.Where(predicate);
         }

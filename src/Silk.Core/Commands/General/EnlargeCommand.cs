@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.General
         [Description("Displays a larger version of the provided emoji or custom emote.")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
         {
-            var embed = new DiscordEmbedBuilder().WithColor(new("36393F"));
+            var embed = new DiscordEmbedBuilder().WithColor(new("2F3136"));
 
             if (emoji.Id != 0) // Guild emote.
             {

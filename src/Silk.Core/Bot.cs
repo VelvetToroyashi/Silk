@@ -45,11 +45,11 @@ namespace Silk.Core
             
             SilkDBContext = dbFactory.CreateDbContext();
 
-            try { _ = SilkDBContext.Guilds.FirstOrDefaultAsync(); }
+            try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
             catch
             {
-                SilkDBContext.Database.MigrateAsync().GetAwaiter().GetResult();
                 _logger.LogInformation("Database not set up! Migrating...");
+                SilkDBContext.Database.Migrate();
             }
             Instance = this;
             Client = client;

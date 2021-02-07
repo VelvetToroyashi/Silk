@@ -23,13 +23,13 @@ namespace Silk.Core
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
-            Intents = DiscordIntents.All, //DiscordIntents.Guilds | // Caching
-                      //DiscordIntents.GuildMembers | //Auto-mod/Auto-greet
-                      //DiscordIntents.GuildMessages | // Commands & Auto-Mod
-                      //DiscordIntents.GuildMessageReactions | // Role-menu
-                      //DiscordIntents.DirectMessages | // DM Commands
-                      //DiscordIntents.DirectMessageReactions |
-                      //DiscordIntents.GuildPresences, // Auto-mod,
+            Intents = DiscordIntents.Guilds                 | // Caching
+                      DiscordIntents.GuildMembers           |   //Auto-mod/Auto-greet
+                      DiscordIntents.DirectMessages         | // Commands & Auto-Mod
+                      DiscordIntents.GuildPresences         | // Role-menu
+                      DiscordIntents.GuildMessages          | // DM Commands
+                      DiscordIntents.GuildMessageReactions  | 
+                      DiscordIntents.DirectMessageReactions ,   // Auto-mod,
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None
         };
@@ -75,7 +75,6 @@ namespace Silk.Core
                     Core.Startup.AddServices(services);
                     
                     services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
-
 
                     services.AddHttpClient(HttpClientName, client =>
                     {

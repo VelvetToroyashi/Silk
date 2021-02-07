@@ -51,9 +51,9 @@
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00792" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00792" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00792" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00794" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00794" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00794" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />

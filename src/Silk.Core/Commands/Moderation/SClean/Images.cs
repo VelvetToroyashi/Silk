@@ -25,14 +25,14 @@ namespace Silk.Core.Commands.Moderation.SClean
         [Description("Clean images from chat.")]
         public async Task Images(
             CommandContext ctx,
-            [HelpDescription("How many messages to scan for messages; defaults to 10, limit of 100.")]
+            [Description("How many messages to scan for messages; defaults to 10, limit of 100.")]
             int amount = 10)
         {
             SilkDbContext db = _dbFactory.CreateDbContext();
 
             amount = amount > 99 ? 100 : ++amount;
             IEnumerable<DiscordMessage> images = await GetImages(ctx.Channel, amount);
-            if (images.Count() == 0)
+            if (!images.Any())
             {
                 await ctx.RespondAsync($"Failed to query images in the last {amount} messages.");
                 return;

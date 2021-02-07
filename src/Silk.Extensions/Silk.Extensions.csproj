@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00792" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00792" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00792" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00794" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00794" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00794" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
