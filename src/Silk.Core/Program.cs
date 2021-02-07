@@ -23,13 +23,13 @@ namespace Silk.Core
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
-            Intents = DiscordIntents.Guilds | // Caching
-                      DiscordIntents.GuildMembers | //Auto-mod/Auto-greet
-                      DiscordIntents.GuildMessages | // Commands & Auto-Mod
-                      DiscordIntents.GuildMessageReactions | // Role-menu
-                      DiscordIntents.DirectMessages | // DM Commands
-                      DiscordIntents.DirectMessageReactions |
-                      DiscordIntents.GuildPresences, // Auto-mod,
+            Intents = DiscordIntents.All, //DiscordIntents.Guilds | // Caching
+                      //DiscordIntents.GuildMembers | //Auto-mod/Auto-greet
+                      //DiscordIntents.GuildMessages | // Commands & Auto-Mod
+                      //DiscordIntents.GuildMessageReactions | // Role-menu
+                      //DiscordIntents.DirectMessages | // DM Commands
+                      //DiscordIntents.DirectMessageReactions |
+                      //DiscordIntents.GuildPresences, // Auto-mod,
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None
         };

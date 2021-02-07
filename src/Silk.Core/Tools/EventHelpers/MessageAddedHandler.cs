@@ -60,7 +60,7 @@ namespace Silk.Core.Tools.EventHelpers
                 if (e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return;
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
-                string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id);
+                string prefix = _prefixCache.RetrievePrefix(e?.Guild?.Id);
                 
                 int prefixLength = 
                     e.Channel.IsPrivate ? 0 : // No prefix in DMs, else try to get the string prefix length. //

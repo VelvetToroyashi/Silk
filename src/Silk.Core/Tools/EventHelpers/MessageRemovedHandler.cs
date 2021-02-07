@@ -14,7 +14,7 @@ namespace Silk.Core.Tools.EventHelpers
 
         public MessageRemovedHandler(IDatabaseService dbService) => _dbService = dbService;
 
-        public async Task OnRemoved(DiscordClient c, MessageDeleteEventArgs e)
+        public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
         {
             if (e.Message?.Author is null || e.Message is null) return; // Message isn't cached. //
             if (e.Message.Author.IsCurrent) return; // Self-evident.                  //
@@ -38,11 +38,12 @@ namespace Silk.Core.Tools.EventHelpers
             .WithDescription(
                 $"User: {e.Message.Author.Mention}\n" +
                 $"Channel: {e.Channel.Mention}\n" +
-                $"Time: {now:HH:mm}\n" +
                 $"Message Contents: ```\n{e.Message.Content}```")
             .AddField("Message ID:", e.Message.Id.ToString(), true)
             .AddField("User ID:", e.Message.Author.Id.ToString(), true)
             .WithThumbnail(e.Message.Author.AvatarUrl)
+            .WithFooter("Message deleted at (UTC)")
+            .WithTimestamp(now.ToUniversalTime())
             .WithColor(DiscordColor.Red);
     }
 }

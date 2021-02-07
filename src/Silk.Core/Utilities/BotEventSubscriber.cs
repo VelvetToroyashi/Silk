@@ -17,25 +17,27 @@ namespace Silk.Core.Utilities
 
         public void SubscribeToEvents()
         {
-            _logger.LogInformation("Subscribing to events.");
+            _logger.LogDebug("Subscribing to events");
 
-            _client.MessageCreated += (c, e) => _services.Get<Tools.EventHelpers.MessageAddedHandler>().Commands(c, e);
+            _client.MessageCreated          += _services.Get<MessageAddedHandler>().Commands;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
-            _client.MessageCreated += (c, e) =>  _services.Get<Tools.EventHelpers.MessageAddedHandler>().Tickets(c, e);
+            _client.MessageCreated          +=  _services.Get<MessageAddedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            _client.MessageCreated += (c, e) => _services.Get<AutoModInviteHandler>().Invites(c, e);
-            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckForInvites".PadLeft(40));
-            _client.MessageDeleted += _services.Get<MessageRemovedHandler>().OnRemoved;
+            _client.MessageCreated          += _services.Get<AutoModInviteHandler>().MessageAddInvites;
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites");
+            _client.MessageUpdated          += _services.Get<AutoModInviteHandler>().MessageEditInvites;
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));
+            _client.MessageDeleted          += _services.Get<MessageRemovedHandler>().MessageRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
-            _client.GuildMemberRemoved += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
+            _client.GuildMemberRemoved      += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
             _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
-            _client.GuildCreated += _services.Get<GuildAddedHandler>().OnGuildJoin;
+            _client.GuildCreated            += _services.Get<GuildAddedHandler>().OnGuildJoin;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAdded".PadLeft(40));
-            _client.GuildAvailable += _services.Get<GuildAddedHandler>().OnGuildAvailable;
+            _client.GuildAvailable          += _services.Get<GuildAddedHandler>().OnGuildAvailable;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(40));
-            _client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
+            _client.GuildDownloadCompleted  += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
             _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete");
-            _client.GuildMemberUpdated += _services.Get<RoleAddedHandler>().CheckStaffRole;
+            _client.GuildMemberUpdated      += _services.Get<RoleAddedHandler>().CheckStaffRole;
             _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(40));
             _logger.LogInformation("Subscribed to all events!");
         }

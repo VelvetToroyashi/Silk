@@ -6,6 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
@@ -42,10 +43,29 @@ namespace Silk.Core.AutoMod
             _logger = logger;
         }
 
+        private record UnifiedEventArgs(DiscordChannel Channel, DiscordMessage Message, DiscordGuild Guild);
 
-        public Task Invites(DiscordClient client, MessageCreateEventArgs eventArgs)
+
+        // Can't be DRY compliant here because they take two different types of event args, hence why we make one unified object, and call that method instead.
+        public Task MessageEditInvites(DiscordClient client, MessageUpdateEventArgs eventArgs)
         {
-            if (eventArgs.Channel.IsPrivate || eventArgs.Message is null) return Task.CompletedTask;
+            
+            if (eventArgs.Channel.IsPrivate) return Task.CompletedTask;
+            _ = MatchInvite(client, new(eventArgs.Channel, eventArgs.Message, eventArgs.Guild));
+            return Task.CompletedTask;
+        }
+        
+        public Task MessageAddInvites(DiscordClient client, MessageCreateEventArgs eventArgs)
+        {
+            if (eventArgs.Channel.IsPrivate) return Task.CompletedTask;
+            _ = MatchInvite(client, new(eventArgs.Channel, eventArgs.Message, eventArgs.Guild));
+            return Task.CompletedTask;
+        }
+
+        private async Task MatchInvite(DiscordClient client, UnifiedEventArgs eventArgs)
+        {
+            if (eventArgs.Channel.IsPrivate) return;
+            
             _ = Task.Run(async () =>
             {
                 GuildConfig config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
@@ -64,8 +84,8 @@ namespace Silk.Core.AutoMod
                     else await CheckForInvite(client, eventArgs.Message, config, code);
                 }
             });
-            return Task.CompletedTask;
         }
+        
 
         /// <summary>
         /// Automod method called when the guild configred regex (be it 'lenient' or 'aggressive' matches anything that resembles an invite.
@@ -115,11 +135,6 @@ namespace Silk.Core.AutoMod
                     message.Channel.Guild.CurrentMember, InfractionType.Ignore, "Sent an invite");
                 await _infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, infraction);
             }
-            
         }
-
-
-
-
     }
 }
