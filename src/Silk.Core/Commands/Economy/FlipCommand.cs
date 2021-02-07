@@ -55,21 +55,21 @@ namespace Silk.Core.Commands.Economy
 
             int nextRan = ran.Next(10000);
 
-            won = nextRan % 20 > 2;
+            won = nextRan % 20 < 2;
 
             if (won)
             {
                 embedBuilder.WithColor(DiscordColor.SapGreen)
                     .WithTitle(_winningMessages[ran.Next(_winningMessages.Length)])
-                    .WithDescription($"Congragulations! You've doubled your money {user.Cash} -> {user.Cash * 2}");
+                    .WithDescription($"Congragulations! You've doubled your money {user.Cash} -> {user.Cash + (amount * 2)}");
                 builder.WithEmbed(embedBuilder);
-                user.Cash *= 2;
+                user.Cash += (int)amount * 2;
                 await ctx.RespondAsync(builder);
                 await _dbService.UpdateGlobalUserAsync(user);
             }
             else
             {
-                embedBuilder.WithColor(DiscordColor.SapGreen)
+                embedBuilder.WithColor(DiscordColor.DarkRed)
                     .WithTitle(_losingMessages[ran.Next(_losingMessages.Length)])
                     .WithDescription($"Darn. Seems like you've lost your bet! {user.Cash} -> {user.Cash - amount}");
                 builder.WithEmbed(embedBuilder);
