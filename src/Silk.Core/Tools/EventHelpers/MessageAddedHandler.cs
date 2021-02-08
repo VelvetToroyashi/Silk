@@ -74,7 +74,7 @@ namespace Silk.Core.Tools.EventHelpers
                 string commandString = e.Message.Content.Substring(prefixLength);
 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
-
+                
                 if (command is null)
                 {
                     _logger.LogWarning($"Command not found: {e.Message.Content}");
