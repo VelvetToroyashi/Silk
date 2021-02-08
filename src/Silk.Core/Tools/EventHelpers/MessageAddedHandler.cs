@@ -86,6 +86,5 @@ namespace Silk.Core.Tools.EventHelpers
             });
             return Task.CompletedTask;
         }
-            
     }
 }
