@@ -42,9 +42,9 @@ namespace Silk.Core.Tools.EventHelpers
                     {
                         user = new() {Id = e.Member.Id, Flags = UserFlag.Staff, Guild = guild};
                         guild.Users.Add(user);
-                        await _dbService.UpdateGuildAsync(guild);
                     }
                     _logger.LogDebug("Logged user as staff from role added event");
+                    await _dbService.UpdateGuildAsync(guild);
                     await _dbService.UpdateGuildUserAsync(user);
                 }
             });

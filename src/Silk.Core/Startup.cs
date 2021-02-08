@@ -46,7 +46,7 @@ namespace Silk.Core
             services.AddSingleton<MemberRemovedHandler>();
 
             services.AddSingleton<RoleAddedHandler>();
-            services.AddSingleton<RoleRemovedHelper>();
+            services.AddSingleton<RoleRemovedHandler>();
 
             services.AddSingleton<SerilogLoggerFactory>();
 

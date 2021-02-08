@@ -41,7 +41,7 @@ namespace Silk.Core.Commands.Economy
             builder.WithReply(ctx.Message.Id);
             
             GlobalUser user = await _dbService.GetOrCreateGlobalUserAsync(ctx.User.Id);
-
+            
             if (amount > user.Cash)
             {
                 builder.WithContent("Ah ah ah... You can't gamble more than what you've got in your pockets!");
@@ -60,22 +60,22 @@ namespace Silk.Core.Commands.Economy
             {
                 embedBuilder.WithColor(DiscordColor.SapGreen)
                     .WithTitle(_winningMessages[ran.Next(_winningMessages.Length)])
-                    .WithDescription($"Congragulations! You've doubled your money {user.Cash} -> {user.Cash + (amount * 2)}");
+                    .WithDescription($"Congragulations! Bet: ${amount}, winnings ${amount * 2}");
                 builder.WithEmbed(embedBuilder);
-                user.Cash += (int)amount * 2;
-                await ctx.RespondAsync(builder);
-                await _dbService.UpdateGlobalUserAsync(user);
+                user.Cash += (int)amount;
+                
             }
             else
             {
                 embedBuilder.WithColor(DiscordColor.DarkRed)
                     .WithTitle(_losingMessages[ran.Next(_losingMessages.Length)])
-                    .WithDescription($"Darn. Seems like you've lost your bet! {user.Cash} -> {user.Cash - amount}");
+                    .WithDescription("Darn. Seems like you've lost your bet!");
                 builder.WithEmbed(embedBuilder);
                 user.Cash -= (int)amount;
-                await ctx.RespondAsync(builder);
-                await _dbService.UpdateGlobalUserAsync(user);
             }
+            
+            await ctx.RespondAsync(builder);
+            await _dbService.UpdateGlobalUserAsync(user);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Miscellaneous
                 .AddField("Hoisted:", role.IsHoisted.ToString())
                 .AddField("Hierarchy:", GetHierarchy(ctx, role))
                 .AddField("Bot role:", role.IsManaged.ToString())
-                .AddField("Members:", members.Take(members.Count() > 5 ? 5 : members.Count()).Select(m => m.Mention).Join(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "")}")
+                .AddField("Members:", members.Count() is 0 ? "This role isn't assigned to anyone!" : members.Take(members.Count() > 5 ? 5 : members.Count()).Select(m => m.Mention).Join(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "")}")
                 .AddField("Mentionable:", role.IsMentionable.ToString())
                 .AddField("Permissions:", role.Permissions.ToString())
                 .WithColor(role.Color)

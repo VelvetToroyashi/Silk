@@ -26,10 +26,10 @@ namespace Silk.Core.Commands.Bot
             if (ctx.Message.ReferencedMessage is null) await EvalCS(ctx, ctx.RawArgumentString);
             else
             {
-                var code = ctx.Message.ReferencedMessage.Content;
+                string? code = ctx.Message.ReferencedMessage.Content;
                 if (code.Contains(ctx.Prefix))
                 {
-                    var index = code.IndexOf(' ');
+                    int index = code.IndexOf(' ');
                     code = code[++index..];
                 }
                 await EvalCS(ctx, code);
@@ -97,7 +97,7 @@ namespace Silk.Core.Commands.Bot
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
-                        Description = string.Concat("**", ex.GetType().ToString(), "**: ", ex.Message, '\n', ex.StackTrace),
+                        Description = $"**{ex.GetType()}**: {ex.Message}\n{Formatter.Sanitize(ex.StackTrace)}",
                         Color = new DiscordColor("#FF0000")
                     }.Build())
                     .ConfigureAwait(false);
