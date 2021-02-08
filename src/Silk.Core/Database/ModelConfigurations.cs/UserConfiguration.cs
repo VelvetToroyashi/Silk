@@ -6,7 +6,6 @@ namespace Silk.Core.Database.ModelConfigurations.cs
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
-
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.Property(u => u.DatabaseId).ValueGeneratedOnAdd();

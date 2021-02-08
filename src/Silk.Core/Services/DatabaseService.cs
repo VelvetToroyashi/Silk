@@ -137,10 +137,10 @@ namespace Silk.Core.Services
              * the only way we can externally get an EntityEntry<T> as far as I'm aware. EFCore holds one internally,
              * but DbContext#Attach() sets the entity to be unmodified by default. 
              */
-            EntityEntry<User> userEntity = db.Attach(user);
-            userEntity.State = EntityState.Modified;
+            User dbUser = (await GetGuildUserAsync(user.Guild.Id, user.Id))!;
+            dbUser = user;
+
             await db.SaveChangesAsync();
-            return;
         }
 
         public async Task UpdateGlobalUserAsync(GlobalUser user)
