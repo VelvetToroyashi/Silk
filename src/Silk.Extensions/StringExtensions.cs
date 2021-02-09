@@ -25,14 +25,31 @@ namespace Silk.Extensions
 
         public static string Center(this string text, string anchor)
         {
-            int refLength = anchor.Length + anchor.Count(c => c == '\t') * 3;
+            int refLength = anchor.Length + text.Where(c => c is '\t').Sum(c => 3);
             int start = (refLength - text.Length) / 2;
-            return string.Create(refLength, (start, text), (Span<char> span, (int start, string str) state) => {
+            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-        
+        [Obsolete("Used for benchmark purposes only.")]
+        public static string Center_OLD(this string s, string reference)
+        {
+            int padLength = reference.Length;
+            if (s.Contains('\t'))
+                foreach (char c in s)
+                    if (c is '\t')
+                        padLength += 3;
+            return s.PadLeft(padLength / 2).PadRight(padLength / 2);
+        }
+        [Obsolete("Used for benchmark purposes only.")]
+        public static string Center_OLD_LINQ(this string s, string reference)
+        {
+            int padLength = reference.Length;
+            if (!s.Contains('\t')) return s.PadLeft(padLength / 2).PadRight(padLength / 2);
+            padLength += s.Where(c => c is '\t').Sum(c => 3);
+            return s.PadLeft(padLength / 2).PadRight(padLength / 2);
+        }
         public static IEnumerable<string> Split(this string s, char delimeter)
         {
             for (var i = 0; i < s.Length; i++)

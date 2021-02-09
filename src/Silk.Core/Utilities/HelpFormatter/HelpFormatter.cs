@@ -55,8 +55,6 @@ namespace Silk.Core.Utilities
                             .Select(x => $"`{x.Name}" +
                                          $"{(x is CommandGroup g ? g.IsExecutableWithoutSubcommands ? "**" : "*" : "")}`")
                             .Join(", "));
-                
-                
             }
             else
             {
