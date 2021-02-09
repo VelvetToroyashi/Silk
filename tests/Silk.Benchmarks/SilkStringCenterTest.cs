@@ -5,7 +5,6 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Silk.Extensions;
 
-
 namespace Silk.Benchmarks
 {
     [MemoryDiagnoser]
