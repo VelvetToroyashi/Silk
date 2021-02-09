@@ -1,3 +1,4 @@
+
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
-                    const string logFormat = "[{Timestamp:h:mm:ss-ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                    const string logFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: logFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)

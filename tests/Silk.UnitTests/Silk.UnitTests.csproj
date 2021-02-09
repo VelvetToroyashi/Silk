@@ -24,4 +24,8 @@
       <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Silk.Core.Tests\Services" />
+    </ItemGroup>
+
 </Project>

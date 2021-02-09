@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 #endregion
 
@@ -22,34 +23,69 @@ namespace Silk.Extensions
             string left = s.PadLeft(totalLength / 2);
             return left.PadRight(totalLength / 2);
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static string Center(this string text, string anchor)
         {
-            int refLength = anchor.Length + text.Where(c => c is '\t').Sum(c => 3);
+            int refLength = anchor.Length;
+            if (text.Contains('\t'))
+            {
+                refLength += text.Where(c => c == '\t').Sum(c => 3);
+            }
+
+            if (text.Length >= refLength)
+                return text;
+            
             int start = (refLength - text.Length) / 2;
-            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => {
+            
+            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => 
+                {
+                    span.Fill(' ');
+                    state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+                });
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static string CenterWhereSum(this string text, string anchor)
+        {
+            int refLength = anchor.Length;
+            if (text.Contains('\t'))
+            {
+                refLength += text.Sum(c => c is '\t' ? 3 : 0);
+
+            }
+
+            if (text.Length >= refLength) return text;
+            
+            int start = (refLength - text.Length) / 2;
+            
+            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => 
+            {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-        [Obsolete("Used for benchmark purposes only.")]
-        public static string Center_OLD(this string s, string reference)
+        
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static string CenterSum(this string text, string anchor)
         {
-            int padLength = reference.Length;
-            if (s.Contains('\t'))
-                foreach (char c in s)
-                    if (c is '\t')
-                        padLength += 3;
-            return s.PadLeft(padLength / 2).PadRight(padLength / 2);
+            int refLength = anchor.Length;
+            if (text.Contains('\t'))
+            {
+                refLength += text.Sum(c => c is '\t' ? 3 : 0);
+            }
+
+            if (text.Length >= refLength) return text;
+            
+            int start = (refLength - text.Length) / 2;
+            
+            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => 
+            {
+                span.Fill(' ');
+                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+            });
         }
-        [Obsolete("Used for benchmark purposes only.")]
-        public static string Center_OLD_LINQ(this string s, string reference)
-        {
-            int padLength = reference.Length;
-            if (!s.Contains('\t')) return s.PadLeft(padLength / 2).PadRight(padLength / 2);
-            padLength += s.Where(c => c is '\t').Sum(c => 3);
-            return s.PadLeft(padLength / 2).PadRight(padLength / 2);
-        }
+        
         public static IEnumerable<string> Split(this string s, char delimeter)
         {
             for (var i = 0; i < s.Length; i++)

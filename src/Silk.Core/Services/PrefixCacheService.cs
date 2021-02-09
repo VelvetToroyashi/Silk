@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Silk.Core.Services
         public string RetrievePrefix(ulong? guildId)
         {
             if (guildId == default || guildId == 0) return string.Empty;
-            if (_cache.TryGetValue(guildId.Value, out string? prefix)) return prefix!;
+            if (_memoryCache.TryGetValue(guildId.Value, out GuildConfig config)) return config!.Guild.Prefix;
             return GetPrefixFromDatabase(guildId.Value);
         }
         
@@ -52,15 +53,13 @@ namespace Silk.Core.Services
             }
 
             _sw.Stop();
-            _cache.TryAdd(guild.Id, guild.Prefix);
-            //_memoryCache.Set(guildId, guild.Prefix, DateTimeOffset.UtcNow.AddSeconds(1));
-            // _memoryCache
-            //     .CreateEntry(guildId)
-            //     .SetValue(guild.Prefix)
-            //     .SetSlidingExpiration(TimeSpan.FromMinutes(10))
-            //     //.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddMinutes(10))
-            //     .RegisterPostEvictionCallback((key, _, reason, _) => _logger.LogInformation($"{key} was evicted from cache for {reason}"));
-            //
+            
+            _memoryCache
+                 .CreateEntry(guildId)
+                 .SetValue(guild.Prefix)
+                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(4))
+                 .RegisterPostEvictionCallback((key, _, reason, _) => _logger.LogInformation($"{key} was evicted from cache for {reason}"));
+            
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms");
 
             return guild.Prefix;

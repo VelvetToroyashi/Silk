@@ -1,4 +1,7 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Silk.Extensions;
 
@@ -9,22 +12,12 @@ namespace Silk.Benchmarks
     [TailCallDiagnoser]
     public class SilkStringCenterTest
     {
-        private const string Input = "Center";
-        private const string Anchor = "Longer Center";
-        
-        
+        private string input = "Center";
+        private string anchor = "Longer\tCenter";
         
         [Benchmark]
-        public string NewStringCenter() => Input.Replace("\t", "    ").PadLeft(Anchor.Length / 2 - Input.Length / 2).PadRight(Anchor.Length / 2 - Input.Length / 2);
+        public string BaseCenter() => input.Center(anchor);
 
-        [Benchmark]
-        public string SpanStringCenterWithLinq() => Input.Center(Anchor);
-
-        [Benchmark]
-        public string OldStringCenter() => Input.Center_OLD(Anchor);
-
-        [Benchmark]
-        public string OldStringCenterWithLinq() => Input.Center_OLD_LINQ(Anchor);
 
     }
 }
