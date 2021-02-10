@@ -9,6 +9,7 @@ namespace Silk.Core.Commands.Server.Configuration
 {
     
     [RequireGuild]
+    [Hidden]
     [Group("config")] 
     [Category(Categories.Server)]
     [Aliases("configuration")] 

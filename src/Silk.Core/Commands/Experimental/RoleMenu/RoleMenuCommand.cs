@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
     public class RoleMenuCommand : BaseCommandModule
     {
 
-        [Command("create")]
+        //[Command("create")]
         [Hidden]
         [Description("Create a role menu! \n(Note, if you're adding roles with spaces, you must put them in quotes (`\"\"`)!")]
         [RequireFlag(UserFlag.Staff)]
@@ -148,13 +148,10 @@ namespace Silk.Core.Commands.Tests.RoleMenu
                 await ctx.RespondAsync(builder);
                 roles = roles.Except(higherUserRoles).OrderByDescending(r => r.Position).ToArray();
             }
-            if (!roles.Any())
-            {
-                builder.WithContent("Looks like there aren't any roles to add :(");
-                await ctx.RespondAsync(builder);
-                return false;
-            }
-            return true;
+            if (roles.Any()) return true;
+            builder.WithContent("Looks like there aren't any roles to add :(");
+            await ctx.RespondAsync(builder);
+            return false;
         }
     }
 }

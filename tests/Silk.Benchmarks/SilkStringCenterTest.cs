@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Silk.Extensions;
 
@@ -16,7 +13,8 @@ namespace Silk.Benchmarks
         
         [Benchmark]
         public string BaseCenter() => input.Center(anchor);
-
+        
+        
 
     }
 }

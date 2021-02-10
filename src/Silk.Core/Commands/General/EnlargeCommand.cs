@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -18,8 +19,8 @@ namespace Silk.Core.Commands.General
         [Description("Displays a larger version of the provided emoji or custom emote.")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
         {
-            var embed = new DiscordEmbedBuilder().WithColor(new("2F3136"));
 
+            var embed = new DiscordEmbedBuilder().WithColor(new("2F3136"));
             if (emoji.Id != 0) // Guild emote.
             {
                 var message = new DiscordMessageBuilder();
@@ -49,6 +50,7 @@ namespace Silk.Core.Commands.General
 
         private Stream RenderEmoji(string unicodeEmoji)
         {
+            
             Stream svgStream, imageStream = new MemoryStream();
 
             var emojiHex = char.ConvertToUtf32(unicodeEmoji, 0).ToString("X4");
