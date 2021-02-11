@@ -146,7 +146,7 @@ namespace Silk.Core.Commands.Tests.RoleMenu
                 builder.WithContent($"I can't give out {higherUserRoles.Select(r => r.Mention).Join(", ")}, as they're higher than me!\n" +
                                     "The rest of the roles will be put into the menu, however.");
                 await ctx.RespondAsync(builder);
-                roles = roles.Except(higherUserRoles).OrderByDescending(r => r.Position).ToArray();
+                roles = roles.Except(higherUserRoles).OrderByDescending(static r => r.Position).ToArray();
             }
             if (roles.Any()) return true;
             builder.WithContent("Looks like there aren't any roles to add :(");

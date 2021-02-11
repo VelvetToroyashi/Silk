@@ -24,15 +24,13 @@ namespace Silk.Extensions
             return left.PadRight(totalLength / 2);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static string Center(this string text, string anchor)
         {
             int refLength = anchor.Length;
-            if (text.Contains('\t'))
-            {
-                refLength += text.Where(c => c == '\t').Sum(c => 3);
-            }
 
+            if (anchor.Contains('\t'))
+                refLength += anchor.Count(c => c is '\t') * 3;
+            
             if (text.Length >= refLength)
                 return text;
             
@@ -44,29 +42,7 @@ namespace Silk.Extensions
                     state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
                 });
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static string CenterWhereSum(this string text, string anchor)
-        {
-            int refLength = anchor.Length;
-            if (text.Contains('\t'))
-            {
-                refLength += text.Sum(c => c is '\t' ? 3 : 0);
 
-            }
-
-            if (text.Length >= refLength) return text;
-            
-            int start = (refLength - text.Length) / 2;
-            
-            return string.Create(refLength, (start, text), static (Span<char> span, (int start, string str) state) => 
-            {
-                span.Fill(' ');
-                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
-            });
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static string CenterSum(this string text, string anchor)
         {
             int refLength = anchor.Length;

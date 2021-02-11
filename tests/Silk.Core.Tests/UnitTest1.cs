@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Silk.UnitTests
+namespace Silk.Core.Tests
 {
     public class UnitTest1
     {

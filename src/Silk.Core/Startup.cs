@@ -13,7 +13,8 @@ namespace Silk.Core
 {
     public static class Startup
     {
-        public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString) =>
+        public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString)
+        {
             services.AddDbContextFactory<SilkDbContext>(
                 option =>
                 {
@@ -22,7 +23,18 @@ namespace Silk.Core
                     option.EnableSensitiveDataLogging();
                     option.EnableDetailedErrors();
                     #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-                }, ServiceLifetime.Transient);
+                }, ServiceLifetime.Scoped);
+            services.AddDbContext<SilkDbContext>(option =>
+            {
+                option.UseNpgsql(connectionString);
+                #if DEBUG
+                option.EnableSensitiveDataLogging();
+                option.EnableDetailedErrors();
+                #endif
+            });
+
+        return services;
+        }
 
         public static void AddServices(IServiceCollection services)
         {

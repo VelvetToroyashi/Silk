@@ -15,13 +15,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Items", "src\Silk.Item
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core", "src\Silk.Core\Silk.Core.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.UnitTests", "tests\Silk.UnitTests\Silk.UnitTests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Tests", "tests\Silk.Core.Tests\Silk.Core.Tests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FE9BF140-0795-4CBE-A5A1-E37A36081587}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Benchmarks", "tests\Silk.Benchmarks\Silk.Benchmarks.csproj", "{708442D6-A90A-4BF6-BFA3-4D2B21C2269F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Extensions.Tests", "tests\Silk.Extensions.Tests\Silk.Extensions.Tests.csproj", "{832DCD90-034E-4282-B6A7-627D7FC51EB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,14 @@ Global
 		{708442D6-A90A-4BF6-BFA3-4D2B21C2269F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{708442D6-A90A-4BF6-BFA3-4D2B21C2269F}.Release|x64.ActiveCfg = Release|Any CPU
 		{708442D6-A90A-4BF6-BFA3-4D2B21C2269F}.Release|x64.Build.0 = Release|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Debug|x64.Build.0 = Debug|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|x64.ActiveCfg = Release|Any CPU
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,5 +94,6 @@ Global
 		{A0532438-6CC0-4C98-85D1-EAA6E010D86C} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 		{C8175039-89F8-4798-9282-98BDF91FD0C5} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
 		{708442D6-A90A-4BF6-BFA3-4D2B21C2269F} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
+		{832DCD90-034E-4282-B6A7-627D7FC51EB7} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
 	EndGlobalSection
 EndGlobal

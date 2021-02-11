@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -39,7 +41,7 @@ namespace Silk.Core.Commands.Server.Configuration
                     var builder = new DiscordMessageBuilder();
                     builder.WithoutMentions();
                     builder.WithReply(ctx.Message.Id);
-                    
+
                     if (role.IsManaged)
                     {
                         builder.WithContent("This is a bot role!");
