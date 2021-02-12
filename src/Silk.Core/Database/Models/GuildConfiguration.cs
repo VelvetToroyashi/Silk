@@ -59,7 +59,6 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// Whether to send a greeting message in the server when someone joins.
         /// </summary>
-
         public bool GreetMembers { get; set; }
         /// <summary>
         /// Blacklist certain invites.
