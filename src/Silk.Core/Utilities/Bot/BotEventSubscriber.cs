@@ -29,6 +29,8 @@ namespace Silk.Core.Utilities
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));
             _client.MessageDeleted          += _services.Get<MessageRemovedHandler>().MessageRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
+            _client.GuildMemberAdded        += _services.Get<MemberAddedHandler>().OnMemberAdded;
+            _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(40));
             _client.GuildMemberRemoved      += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
             _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
             _client.GuildCreated            += _services.Get<GuildAddedHandler>().OnGuildJoin;

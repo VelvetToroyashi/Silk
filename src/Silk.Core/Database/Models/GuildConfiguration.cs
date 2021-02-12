@@ -25,6 +25,11 @@ namespace Silk.Core.Database.Models
         /// Id of the channel to greet members in.
         /// </summary>
         public ulong GreetingChannel { get; set; }
+        /// <summary>
+        /// The text that will be used to greet new members,
+        /// @u will be replaced with a mention of the new member.
+        /// </summary>
+        public string GreetingText { get; set; }
 
         //This will be used eventually.
         public string InfractionFormat { get; set; } = string.Empty;
@@ -48,9 +53,17 @@ namespace Silk.Core.Database.Models
         /// </summary>
         public bool LogMessageChanges { get; set; }
         /// <summary>
+        /// Whether to log members joining or not.
+        /// </summary>
+        public bool LogMemberJoing { get; set; }
+        /// <summary>
         /// Whether to send a greeting message in the server when someone joins.
         /// </summary>
+
         public bool GreetMembers { get; set; }
+        /// <summary>
+        /// Blacklist certain invites.
+        /// </summary>
         public bool BlacklistInvites { get; set; }
         /// <summary>
         /// Blacklist certain words.
