@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Database;
@@ -11,9 +12,10 @@ using Silk.Core.Database.Models;
 namespace Silk.Core.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210212012306_logjoin")]
+    partial class logjoin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
