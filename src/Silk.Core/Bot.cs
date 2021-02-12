@@ -78,7 +78,7 @@ namespace Silk.Core
                 IgnoreExtraArguments = true,
                 
             };
-            Client.Ready += async (c, _) => _logger.LogInformation($"Recieved OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
+            Client.Ready += async (c, _) => _logger.LogInformation($"Received OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
 
 
             await Client.UseCommandsNextAsync(Commands);

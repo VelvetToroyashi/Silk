@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Silk.Core.Tests\Services" />
+      <Folder Include="Services" />
     </ItemGroup>
 
 </Project>
