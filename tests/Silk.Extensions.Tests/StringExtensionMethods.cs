@@ -1,12 +1,15 @@
-﻿using Silk.Extensions;
+﻿using System.Linq;
+using Silk.Extensions;
 using Xunit;
 namespace Silk.Extensions.Tests
 {
     
     public class StringExtensionMethods
     {
-        private const string BaseInputString = "This string should center!";
-        
+        private const string CenterInputString = "This string should center!";
+
+
+
         [Fact]
         public void CenterWithoutTabs()
         {
@@ -15,7 +18,7 @@ namespace Silk.Extensions.Tests
             const string expectedWithoutTabs = "              This string should center!              ";
 
             //Act
-            string actualCenterWithoutTabs = BaseInputString.Center(inputAnchorWithoutTabs);
+            string actualCenterWithoutTabs = CenterInputString.Center(inputAnchorWithoutTabs);
 
             
             //Assert
@@ -31,10 +34,13 @@ namespace Silk.Extensions.Tests
             const string expectedWithTabs = "             This string should center!             ";
             
             //Act
-            string actualCenterWithTabs = BaseInputString.Center(inputAnchorWithTabs);
+            string actualCenterWithTabs = CenterInputString.Center(inputAnchorWithTabs);
             
             //Assert
             Assert.Equal(expectedWithTabs, actualCenterWithTabs);
         }
+        
+        
+        
     }
 }

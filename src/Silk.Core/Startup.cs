@@ -15,15 +15,6 @@ namespace Silk.Core
     {
         public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString)
         {
-            services.AddDbContextFactory<SilkDbContext>(
-                option =>
-                {
-                    option.UseNpgsql(connectionString);
-                    #if DEBUG
-                    option.EnableSensitiveDataLogging();
-                    option.EnableDetailedErrors();
-                    #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-                }, ServiceLifetime.Scoped);
             services.AddDbContext<SilkDbContext>(option =>
             {
                 option.UseNpgsql(connectionString);
