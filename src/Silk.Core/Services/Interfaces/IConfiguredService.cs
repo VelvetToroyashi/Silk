@@ -5,7 +5,7 @@ namespace Silk.Core.Services.Interfaces
     public interface IConfiguredService
     {
         /// <summary>
-        /// True or false value set by <see cref="Configure"/> indicating if the service has been configured already.
+        /// True or false value set by <see cref="Configure"/> indicating if the service has been configued already.
         /// </summary>
         public bool HasConfigured { get; protected set; }
         

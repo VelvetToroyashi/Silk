@@ -2,7 +2,7 @@
 using Silk.Core.Database.Models;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Services.Tickets
+namespace Silk.Core.Commands.General.Tickets
 {
     public static class TicketEmbedHelper
     {

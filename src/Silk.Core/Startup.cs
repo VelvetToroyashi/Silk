@@ -2,10 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
 using Silk.Core.AutoMod;
+using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Services.Tickets;
 using Silk.Core.Tools.EventHelpers;
 using Silk.Core.Utilities;
 
@@ -29,7 +29,7 @@ namespace Silk.Core
             services.AddSingleton<IDatabaseService, DatabaseService>();
             services.AddSingleton<IInfractionService, InfractionService>();
             services.AddSingleton<PrefixCacheService>();
-            services.AddSingleton<ITicketService, TicketService>();
+            services.AddSingleton<TicketService>();
             services.AddSingleton<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
