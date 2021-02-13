@@ -14,12 +14,12 @@ using Silk.Extensions;
 
 namespace Silk.Core.Utilities
 {
-    public class BotExceptionHelper
+    public class BotExceptionHandler
     {
-        private readonly ILogger<BotExceptionHelper> _logger;
+        private readonly ILogger<BotExceptionHandler> _logger;
         private readonly DiscordShardedClient _client;
 
-        public BotExceptionHelper(ILogger<BotExceptionHelper> logger, DiscordShardedClient client) => (_logger, _client) = (logger, client);
+        public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client) => (_logger, _client) = (logger, client);
 
         public async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {

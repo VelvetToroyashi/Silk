@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Silk.Core.Database.Models;
 
 namespace Silk.Core.Tools.EventHelpers
 {
@@ -20,19 +21,23 @@ namespace Silk.Core.Tools.EventHelpers
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
-            var config = await _configService.GetConfigAsync(e.Guild.Id);
-            if (config is null) return;
+            GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
 
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
-                await (await c.GetChannelAsync(config.GeneralLoggingChannel)).SendMessageAsync(GetJoinEmbed(e, DateTime.Now));
+            {
+                await (await c.GetChannelAsync(config.GeneralLoggingChannel)).SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
+            }
 
             if (config.GreetMembers
                 && config.GreetingChannel is not 0
-                && config.GreetingText != "")
-                await (await c.GetChannelAsync(config.GreetingChannel)).SendMessageAsync(config.GreetingText.Replace("@u", e.Member.Mention));
+                && !string.IsNullOrWhiteSpace(config.GreetingText))
+            {
+                DiscordChannel channel = await c.GetChannelAsync(config.GreetingChannel);
+                await channel.SendMessageAsync(config.GreetingText.Replace("@u", e.Member.Mention));
+            }
         }
 
-        private DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now) => new DiscordEmbedBuilder()
+        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now) => new DiscordEmbedBuilder()
             .WithTitle("User joined:")
             .WithDescription($"User: {e.Member.Mention}")
             .AddField("User ID:", e.Member.Id.ToString(), true)

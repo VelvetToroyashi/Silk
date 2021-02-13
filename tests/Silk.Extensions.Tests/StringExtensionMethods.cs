@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Silk.Extensions;
-using Xunit;
+﻿using Xunit;
 namespace Silk.Extensions.Tests
 {
     
@@ -39,7 +37,7 @@ namespace Silk.Extensions.Tests
             //Assert
             Assert.Equal(expectedWithTabs, actualCenterWithTabs);
         }
-        
+           
         
         
     }

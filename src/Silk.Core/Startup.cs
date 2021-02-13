@@ -36,13 +36,14 @@ namespace Silk.Core
             services.AddSingleton<AutoModInviteHandler>();
 
 
-            services.AddSingleton<BotExceptionHelper>();
+            services.AddSingleton<BotExceptionHandler>();
             services.AddSingleton<BotEventSubscriber>();
 
             services.AddSingleton<GuildAddedHandler>();
-            services.AddSingleton<Tools.EventHelpers.MessageAddedHandler>();
+            services.AddSingleton<MessageAddedHandler>();
             services.AddSingleton<MessageRemovedHandler>();
 
+            services.AddSingleton<MemberAddedHandler>();
             services.AddSingleton<MemberRemovedHandler>();
 
             services.AddSingleton<RoleAddedHandler>();

@@ -30,17 +30,17 @@ namespace Silk.Core
 
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
-        private readonly BotExceptionHelper _exceptionHelper;
+        private readonly BotExceptionHandler _exceptionHandler;
         private readonly BotEventSubscriber _eventSubscriber;
         private readonly Stopwatch _sw = new();
 
 
-        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHelper exceptionHelper, BotEventSubscriber eventSubscriber, IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHandler exceptionHandler, BotEventSubscriber eventSubscriber, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _sw.Start();
             _services = services;
             _logger = logger;
-            _exceptionHelper = exceptionHelper;
+            _exceptionHandler = exceptionHandler;
             _eventSubscriber = eventSubscriber;
             
             SilkDBContext = dbFactory.CreateDbContext();
@@ -82,7 +82,7 @@ namespace Silk.Core
 
 
             await Client.UseCommandsNextAsync(Commands);
-            await _exceptionHelper.SubscribeToEventsAsync();
+            await _exceptionHandler.SubscribeToEventsAsync();
             _eventSubscriber.SubscribeToEvents();
             InitializeCommands();
             

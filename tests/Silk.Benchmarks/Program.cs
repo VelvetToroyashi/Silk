@@ -7,7 +7,7 @@ namespace Silk.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<SilkStringBlockSplitTest>();
+            BenchmarkRunner.Run<RegexTest>();
         }
     }
 }
