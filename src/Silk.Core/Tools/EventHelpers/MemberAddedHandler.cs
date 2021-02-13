@@ -4,9 +4,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Silk.Core.Database.Models;
 
@@ -25,14 +22,14 @@ namespace Silk.Core.Tools.EventHelpers
 
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
             {
-                await (await c.GetChannelAsync(config.GeneralLoggingChannel)).SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
+                DiscordChannel channel = await c.GetChannelAsync(config.GeneralLoggingChannel);
+                await channel.SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
             }   
 
             if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
             {
-                
                 DiscordChannel channel = await c.GetChannelAsync(config.GreetingChannel);
-                await channel.SendMessageAsync(config.GreetingText.Replace("{@u}", e.Member.Mention));
+                await channel.SendMessageAsync(config.GreetingText.Replace("@u", e.Member.Mention));
             }
         }
 
