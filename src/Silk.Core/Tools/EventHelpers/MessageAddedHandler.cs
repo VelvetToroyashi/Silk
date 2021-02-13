@@ -8,17 +8,18 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
+using Silk.Core.Services.Tickets;
 
 namespace Silk.Core.Tools.EventHelpers
 {
     public class MessageAddedHandler
     {
-        private readonly TicketService _ticketService;
+        private readonly ITicketService _ticketService;
         private readonly PrefixCacheService _prefixCache;
         private readonly ILogger<MessageAddedHandler> _logger;
-        public MessageAddedHandler(TicketService ticketService, PrefixCacheService prefixCache, ILogger<MessageAddedHandler> logger)
+        public MessageAddedHandler(ITicketService ticketService, PrefixCacheService prefixCache, ILogger<MessageAddedHandler> logger)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;
@@ -29,9 +30,10 @@ namespace Silk.Core.Tools.EventHelpers
         {
             _ = Task.Run(async () =>
             {
-                if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
+                var userHasOpenTicket = await _ticketService.UserHasOpenTicketAsync(e.Author.Id); 
+                if (!userHasOpenTicket) return;
 
-                ulong ticketUserId = TicketService.GetTicketUser(e.Channel);
+                ulong ticketUserId = await _ticketService.GetUserIdByChannel(e.Channel);
                 IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
                 DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUserId).Value;
 
