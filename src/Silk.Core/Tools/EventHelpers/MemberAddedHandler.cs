@@ -26,14 +26,13 @@ namespace Silk.Core.Tools.EventHelpers
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
             {
                 await (await c.GetChannelAsync(config.GeneralLoggingChannel)).SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
-            }
+            }   
 
-            if (config.GreetMembers
-                && config.GreetingChannel is not 0
-                && !string.IsNullOrWhiteSpace(config.GreetingText))
+            if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
             {
+                
                 DiscordChannel channel = await c.GetChannelAsync(config.GreetingChannel);
-                await channel.SendMessageAsync(config.GreetingText.Replace("@u", e.Member.Mention));
+                await channel.SendMessageAsync(config.GreetingText.Replace("{@u}", e.Member.Mention));
             }
         }
 
@@ -43,7 +42,7 @@ namespace Silk.Core.Tools.EventHelpers
             .AddField("User ID:", e.Member.Id.ToString(), true)
             .WithThumbnail(e.Member.AvatarUrl)
             .WithFooter("Joined at (UTC)")
-            .WithTimestamp(now.ToUniversalTime())
+            .WithTimestamp(now)
             .WithColor(DiscordColor.Green);
     }
 }

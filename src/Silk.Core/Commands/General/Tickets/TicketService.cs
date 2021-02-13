@@ -32,8 +32,8 @@ namespace Silk.Core.Commands.General.Tickets
 
         // Hold a dictionary of currently open ticket channels. //
         // UserId, ChannelId //
-        private static readonly ConcurrentDictionary<ulong, ulong> ticketChannels = new();
-        private static readonly Permissions requisitePermissions = Permissions.SendMessages | Permissions.AccessChannels |
+        private static readonly ConcurrentDictionary<ulong, ulong> _ticketChannels = new();
+        private const Permissions RequisitePermissions = Permissions.SendMessages | Permissions.AccessChannels |
                                                                    Permissions.EmbedLinks | Permissions.ReadMessageHistory;
 
         /// <summary>
@@ -67,9 +67,9 @@ namespace Silk.Core.Commands.General.Tickets
             // Create the channel and add it to the dictionary //
             DiscordChannel c = await silk.CreateChannelAsync(user.Username, ChannelType.Text, ticketCategory,
                 $"Ticket opened by {user.Username} on {DateTime.Now}");
-            await c.AddOverwriteAsync(c.Guild.GetRole(SILK_CONTRIBUTOR_ID), requisitePermissions);
+            await c.AddOverwriteAsync(c.Guild.GetRole(SILK_CONTRIBUTOR_ID), RequisitePermissions);
 
-            ticketChannels.TryAdd(user.Id, c.Id);
+            _ticketChannels.TryAdd(user.Id, c.Id);
 
             return new TicketCreationResult(true, null, ticket);
         }
@@ -109,7 +109,7 @@ namespace Silk.Core.Commands.General.Tickets
                 ticket.IsOpen = false;
                 await message.Channel.DeleteAsync();
                 await db.SaveChangesAsync();
-                ticketChannels.TryRemove(userId, out _);
+                _ticketChannels.TryRemove(userId, out _);
                 IEnumerable<KeyValuePair<ulong, DiscordMember>> members = _client.ShardClients.Values.SelectMany(s => s.Guilds.Values).SelectMany(g => g.Members);
                 DiscordMember member = members.SingleOrDefault(m => m.Key == userId)!.Value;
                 await member.SendMessageAsync(TicketEmbedHelper.GenerateTicketClosedEmbed());
@@ -130,8 +130,8 @@ namespace Silk.Core.Commands.General.Tickets
             ticket.Closed = DateTime.Now;
             ticket.IsOpen = false;
             DiscordChannel ticketCategory = await GetOrCreateTicketCategoryAsync();
-            await ticketCategory.Children.SingleOrDefault(c => c.Id == ticketChannels[id])!.DeleteAsync();
-            ticketChannels.TryRemove(id, out _);
+            await ticketCategory.Children.SingleOrDefault(c => c.Id == _ticketChannels[id])!.DeleteAsync();
+            _ticketChannels.TryRemove(id, out _);
         }
 
         public async Task CloseTicketById(int ticketId)
@@ -157,7 +157,7 @@ namespace Silk.Core.Commands.General.Tickets
         /// <exception cref="KeyNotFoundException">The channel Id is not a valid ticket channel.</exception>
         public static ulong GetTicketUser(DiscordChannel channel)
         {
-            foreach ((ulong k, ulong v) in ticketChannels)
+            foreach ((ulong k, ulong v) in _ticketChannels)
                 if (v == channel.Id) return k;
             
             throw new KeyNotFoundException("Invalid ticket channel.");
@@ -165,7 +165,7 @@ namespace Silk.Core.Commands.General.Tickets
 
         public static ulong GetTicketChannel(ulong userId)
         {
-            ticketChannels.TryGetValue(userId, out ulong channelId);
+            _ticketChannels.TryGetValue(userId, out ulong channelId);
             return channelId;
         }
 
@@ -173,7 +173,7 @@ namespace Silk.Core.Commands.General.Tickets
         {
             // If the message is sent on a guild, check if it's a ticket channel, else follow normal check flow. //
             if (!c.IsPrivate)
-                return ticketChannels.ContainsKey(id);
+                return _ticketChannels.ContainsKey(id);
 
             SilkDbContext db = _dbFactory.CreateDbContext();
 
@@ -197,8 +197,8 @@ namespace Silk.Core.Commands.General.Tickets
 
             ticketCategory = await silk.CreateChannelCategoryAsync("Silk! Tickets");
 
-            await ticketCategory.AddOverwriteAsync(silk.GetRole(SILK_CONTRIBUTOR_ID), requisitePermissions);
-            await ticketCategory.AddOverwriteAsync(silk.EveryoneRole, Permissions.None, requisitePermissions);
+            await ticketCategory.AddOverwriteAsync(silk.GetRole(SILK_CONTRIBUTOR_ID), RequisitePermissions);
+            await ticketCategory.AddOverwriteAsync(silk.EveryoneRole, Permissions.None, RequisitePermissions);
 
             return ticketCategory;
         }

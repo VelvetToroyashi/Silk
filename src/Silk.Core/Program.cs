@@ -75,6 +75,7 @@ namespace Silk.Core
                     Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
                     Core.Startup.AddServices(services);
                     
+                    
                     services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
                     services.AddHttpClient(HttpClientName, client =>

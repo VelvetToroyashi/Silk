@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Services.Interfaces;
@@ -19,7 +20,7 @@ namespace Silk.Core.AutoMod
             //Init blacklist
         }
 
-        private void InitializeBlacklistCache()
+        public async Task Initialize()
         {
             var a = _db.GuildConfigs.Where(c => c.BlackListedWords.Count > 0).ToList();
             //Do other shit here

@@ -10,9 +10,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 
 namespace Silk.Core
@@ -53,8 +55,13 @@ namespace Silk.Core
             }
             Instance = this;
             Client = client;
+            InitializeServices();
         }
-        
+        private void InitializeServices()
+        {
+            var configuredServices = _services.GetServices<IConfiguredService>();
+        }
+
         private void InitializeCommands()
         {
             Assembly asm = Assembly.GetExecutingAssembly();
