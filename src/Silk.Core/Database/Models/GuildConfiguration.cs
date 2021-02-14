@@ -25,11 +25,12 @@ namespace Silk.Core.Database.Models
         /// Id of the channel to greet members in.
         /// </summary>
         public ulong GreetingChannel { get; set; }
+
         /// <summary>
         /// The text that will be used to greet new members,
         /// @u will be replaced with a mention of the new member.
         /// </summary>
-        public string GreetingText { get; set; }
+        public string GreetingText { get; set; } = string.Empty;
 
         //This will be used eventually.
         public string InfractionFormat { get; set; } = string.Empty;
