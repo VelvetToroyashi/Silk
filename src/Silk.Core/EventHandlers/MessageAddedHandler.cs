@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
 
-namespace Silk.Core.Tools.EventHelpers
+namespace Silk.Core.EventHandlers
 {
     public class MessageAddedHandler
     {

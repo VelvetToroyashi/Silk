@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
@@ -16,18 +15,12 @@ namespace Silk.Core.Services
     /// <inheritdoc cref="IDatabaseService"/>
     public class DatabaseService : IDatabaseService
     {
-        #region Service ctor
-
-        // This is the only instance of an IDbContextFactory<T> we should need. //
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-        private readonly ILogger<DatabaseService> _logger;
 
-        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory, ILogger<DatabaseService> logger) => (_dbFactory, _logger) = (dbFactory, logger);
-
-        #endregion
-
-
-        #region Public Guild-Retrieval methods
+        public DatabaseService(IDbContextFactory<SilkDbContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         public async Task<Guild?> GetGuildAsync(ulong guildId)
         {
@@ -51,20 +44,19 @@ namespace Silk.Core.Services
                 .Include(g => g.Users)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == guildId);
+
+            if (guild is not null) return guild;
             
-            if (guild is null)
+            guild = new()
             {
-                guild = new()
-                {
-                    Id = guildId, 
-                    Users = new(), 
-                    Prefix = Bot.DefaultCommandPrefix, 
-                    Configuration = new() { GuildId = guildId }
-                };
-                db.Guilds.Add(guild);
-                await db.SaveChangesAsync();
-            }
-            
+                Id = guildId, 
+                Users = new(), 
+                Prefix = Bot.DefaultCommandPrefix,
+                Configuration = new() { GuildId = guildId, GreetingText = "" }
+            };
+            db.Guilds.Add(guild);
+            await db.SaveChangesAsync();
+
             return guild;
         }
 
@@ -86,11 +78,6 @@ namespace Silk.Core.Services
             entity.State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
-
-        #endregion
-
-
-        #region Public User-Retrieval methods
 
         public async Task<User?> GetGuildUserAsync(ulong guildId, ulong userId)
         {
@@ -119,7 +106,6 @@ namespace Silk.Core.Services
             {
                 Id = userId,
                 Cash = 0,
-                Items = new(),
                 LastCashOut = new(2020, 1, 1)
             };
             db.GlobalUsers.Add(user);
@@ -149,7 +135,6 @@ namespace Silk.Core.Services
             GlobalUser dbUser = (await GetGlobalUserAsync(user.Id))!;
             
             dbUser.Cash = user.Cash;
-            dbUser.Items = user.Items;
             dbUser.LastCashOut = user.LastCashOut;
 
             db.GlobalUsers.Update(dbUser);
@@ -205,15 +190,9 @@ namespace Silk.Core.Services
                 .ToListAsync();
         }
 
-        #endregion
-
-
-        #region Internal helper methods
 
         private SilkDbContext GetDbContext() => _dbFactory.CreateDbContext();
         private static User CreateUser(Guild guild, ulong userId) => new() {Id = userId, Guild = guild};
-
-
-        #endregion
+        
     }
 }

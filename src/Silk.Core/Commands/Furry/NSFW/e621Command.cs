@@ -7,7 +7,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Silk.Core.Commands.Furry.Utilities;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.Bot;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Furry.NSFW
 {

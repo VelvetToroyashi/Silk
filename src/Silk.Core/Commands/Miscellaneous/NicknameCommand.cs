@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous
 {

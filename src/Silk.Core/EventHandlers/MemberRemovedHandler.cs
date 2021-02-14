@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 
-namespace Silk.Core.Tools.EventHelpers
+namespace Silk.Core.EventHandlers
 {
     public class MemberRemovedHandler
     {

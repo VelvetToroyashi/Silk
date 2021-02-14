@@ -3,9 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
-using Silk.Core.Services.Interfaces;
 
-namespace Silk.Core.AutoMod
+namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
 {
     public class AutoModBlacklistHandler
     {

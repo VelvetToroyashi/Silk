@@ -8,6 +8,7 @@ using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Bot
 {

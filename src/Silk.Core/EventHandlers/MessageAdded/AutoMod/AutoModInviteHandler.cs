@@ -6,13 +6,12 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
-using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 
-namespace Silk.Core.AutoMod
+namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
 {
     public class AutoModInviteHandler
     {

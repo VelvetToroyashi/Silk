@@ -19,7 +19,7 @@ namespace Silk.Items.Tools
         {
             if (componenents.IsEmpty)
                 throw new InvalidOperationException("Init must be called before accessing component dictionary!");
-            return componenents.TryGetValue(name.ToLower(), out type);
+            return componenents.TryGetValue(name.ToLower(), out type!);
         }
         
         /// <summary>

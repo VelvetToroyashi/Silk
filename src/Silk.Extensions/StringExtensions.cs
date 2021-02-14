@@ -1,23 +1,11 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-
-#endregion
 
 namespace Silk.Extensions
 {
     public static class StringExtensions
     {
-        public static IEnumerable<string> BlockSplit(this string s, string seperator, int blockSize)
-        {
-            string[] split = s.Split(seperator);
-            for (var i = 0; i < split.Length / blockSize; i++)
-                yield return string.Join(string.Empty, split.Skip(i * blockSize).Take(blockSize));
-        }
-        
         public static string Center(this string text, string anchor)
         {
             int refLength = anchor.Length;

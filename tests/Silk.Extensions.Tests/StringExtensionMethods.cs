@@ -1,43 +1,33 @@
-﻿using Xunit;
+﻿using System.ComponentModel;
+using Xunit;
 namespace Silk.Extensions.Tests
 {
     
     public class StringExtensionMethods
     {
         private const string CenterInputString = "This string should center!";
-
-
+        
+        [Theory]
+        [InlineData("This is a\ttest string that\tshould be centered!", "             This string should center!             ")] 
+        [InlineData("This is a test string that should be centered against!", "              This string should center!              ")]
+        public void Center_ReturnsCenteredString(string input, string expected)
+        {
+            //Act
+            string actualCenterWithTabs = CenterInputString.Center(input);
+            //Assert
+            Assert.Equal(expected, actualCenterWithTabs);
+        }
 
         [Fact]
-        public void CenterWithoutTabs()
+        public void Center_WhenOversizedInput_ReturnsOriginalString()
         {
             //Arrange
-            const string inputAnchorWithoutTabs = "This is a test string that should be centered against!";
-            const string expectedWithoutTabs = "              This string should center!              ";
-
+            string input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            string anchor = "This string is too short!";
             //Act
-            string actualCenterWithoutTabs = CenterInputString.Center(inputAnchorWithoutTabs);
-
-            
-            //Assert
-            Assert.Equal(expectedWithoutTabs, actualCenterWithoutTabs);
-            
-        }
-
-        [Fact]
-        public void CenterWithTabs()
-        {
-            //Arange
-            const string inputAnchorWithTabs = "This is a\ttest string that\tshould be centered!";
-            const string expectedWithTabs = "             This string should center!             ";
-            
-            //Act
-            string actualCenterWithTabs = CenterInputString.Center(inputAnchorWithTabs);
-            
-            //Assert
-            Assert.Equal(expectedWithTabs, actualCenterWithTabs);
-        }
-           
+            string actual = input.Center(anchor);
+            Assert.Equal(input, actual);
+        }   
         
         
     }

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Silk.Core.Commands.Moderation.Utilities;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 

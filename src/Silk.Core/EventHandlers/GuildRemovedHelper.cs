@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Silk.Core.Tools.EventHelpers
+namespace Silk.Core.EventHandlers
 {
     public class GuildRemovedHelper
     {

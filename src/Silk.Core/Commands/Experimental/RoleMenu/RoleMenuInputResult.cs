@@ -6,7 +6,7 @@ using DSharpPlus.Interactivity;
 using Silk.Core.Constants;
 using Silk.Extensions;
 
-namespace Silk.Core.Commands.Tests.RoleMenu
+namespace Silk.Core.Commands.Experimental.RoleMenu
 {
     /// <summary>
     /// Helper object to abstract interactivity and provide convenience methods for gathering user input when making a role-menu.

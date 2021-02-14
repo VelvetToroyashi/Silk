@@ -13,7 +13,7 @@ using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Commands.Tests.RoleMenu
+namespace Silk.Core.Commands.Experimental.RoleMenu
 {
     [Group("rolemenu"), Aliases("role_menu")]
     public class RoleMenuCommand : BaseCommandModule

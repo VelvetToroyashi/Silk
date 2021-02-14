@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General
 {

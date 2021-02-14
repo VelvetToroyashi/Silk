@@ -10,7 +10,7 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
 using Silk.Extensions;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.HelpFormatter
 {
     public class HelpFormatter : BaseHelpFormatter
     {

@@ -1,16 +1,13 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Silk.Core.Database.Models;
+using Silk.Core.Services;
 
-namespace Silk.Core.Tools.EventHelpers
+namespace Silk.Core.EventHandlers.MessageAdded
 {
     class MemberAddedHandler
     {

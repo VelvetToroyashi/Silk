@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Bot
 {

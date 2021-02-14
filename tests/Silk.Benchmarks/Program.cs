@@ -1,5 +1,4 @@
-﻿using System;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Running;
 
 namespace Silk.Benchmarks
 {
@@ -7,7 +6,7 @@ namespace Silk.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<RegexTest>();
+            BenchmarkRunner.Run<CollectionTests>();
         }
     }
 }

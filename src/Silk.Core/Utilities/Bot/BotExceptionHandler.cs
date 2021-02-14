@@ -12,7 +12,7 @@ using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Silk.Extensions;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.Bot
 {
     public class BotExceptionHandler
     {

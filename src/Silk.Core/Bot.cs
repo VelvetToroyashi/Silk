@@ -14,8 +14,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
+using Silk.Core.EventHandlers;
+using Silk.Core.EventHandlers.MessageAdded;
+using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.Bot;
+using Silk.Core.Utilities.HelpFormatter;
+using Silk.Extensions;
 
 namespace Silk.Core
 {
@@ -33,18 +38,16 @@ namespace Silk.Core
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
         private readonly BotExceptionHandler _exceptionHandler;
-        private readonly BotEventSubscriber _eventSubscriber;
         private readonly Stopwatch _sw = new();
 
 
-        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHandler exceptionHandler, BotEventSubscriber eventSubscriber, IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHandler exceptionHandler, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _sw.Start();
             _services = services;
             _logger = logger;
             _exceptionHandler = exceptionHandler;
-            _eventSubscriber = eventSubscriber;
-            
+
             SilkDBContext = dbFactory.CreateDbContext();
 
             try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
@@ -55,11 +58,13 @@ namespace Silk.Core
             }
             Instance = this;
             Client = client;
-            InitializeServices();
         }
         private void InitializeServices()
         {
-            var configuredServices = _services.GetServices<IConfiguredService>();
+            IEnumerable<IConfiguredService> configuredServices = _services.GetServices<IConfiguredService>();
+            foreach(IConfiguredService service in configuredServices) 
+                if(!service.HasConfigured)
+                    service.Configure().GetAwaiter().GetResult();
         }
 
         private void InitializeCommands()
@@ -87,12 +92,13 @@ namespace Silk.Core
             };
             Client.Ready += async (c, _) => _logger.LogInformation($"Received OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
 
-
+            await Client.StartAsync();
             await Client.UseCommandsNextAsync(Commands);
             await _exceptionHandler.SubscribeToEventsAsync();
-            _eventSubscriber.SubscribeToEvents();
-            InitializeCommands();
             
+            InitializeCommands();
+            InitializeServices();
+            SubscribeToEvents();
             await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -111,11 +117,43 @@ namespace Silk.Core
                 extension.SetHelpFormatter<HelpFormatter>();
                 extension.RegisterConverter(memberConverter);
             }
-            await Client.StartAsync();
+            
             
             double startupDt = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
             _logger.LogInformation($"Startup time: {startupDt:N0} ms.");
         }
+
+
+        // Cluserfuck of a method. I know. //
+        private void SubscribeToEvents()
+        {
+            _logger.LogDebug("Subscribing to events");
+
+            Client.MessageCreated          += _services.Get<MessageAddedHandler>().Commands;
+            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
+            Client.MessageCreated          +=  _services.Get<MessageAddedHandler>().Tickets;
+            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
+            Client.MessageCreated          += _services.Get<AutoModInviteHandler>().MessageAddInvites;
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites");
+            Client.MessageUpdated          += _services.Get<AutoModInviteHandler>().MessageEditInvites;
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));
+            Client.MessageDeleted          += _services.Get<MessageRemovedHandler>().MessageRemoved;
+            _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
+            Client.GuildMemberAdded        += _services.Get<MemberAddedHandler>().OnMemberAdded;
+            _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(40));
+            Client.GuildMemberRemoved      += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
+            _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
+            Client.GuildCreated            += _services.Get<GuildAddedHandler>().SendWelcomeMessage;
+            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(40));
+            Client.GuildAvailable          += _services.Get<GuildAddedHandler>().OnGuildAvailable;
+            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(40));
+            Client.GuildDownloadCompleted  += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
+            _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete");
+            Client.GuildMemberUpdated      += _services.Get<RoleAddedHandler>().CheckStaffRole;
+            _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(40));
+            _logger.LogInformation("Subscribed to all events!");
+        }
+        
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 

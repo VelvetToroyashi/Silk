@@ -10,8 +10,13 @@ namespace Silk.Core.Services
     {
         private readonly IMemoryCache _cache;
         private readonly IDatabaseService _db;
+        public ConfigService(IMemoryCache cache, IDatabaseService db)
+        {
+            _cache = cache;
+            _db = db;
+        }
 
-        public ConfigService(IMemoryCache cache, IDatabaseService db) => (_cache, _db) = (cache, db);
+
 
         public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
         {
@@ -19,7 +24,7 @@ namespace Silk.Core.Services
             return await GetConfigFromDatabaseAsync(guildId);
         }
 
-        private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
+        public async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
         {
             GuildConfig configuration = await _db.GetConfigAsync(guildId);
             _cache.Set(guildId, configuration, TimeSpan.FromHours(1));

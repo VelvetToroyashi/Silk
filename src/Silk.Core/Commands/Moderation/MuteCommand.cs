@@ -9,6 +9,7 @@ using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation

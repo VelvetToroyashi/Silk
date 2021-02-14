@@ -4,7 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation.SClean
 {

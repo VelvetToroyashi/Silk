@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.Bot
 {
     public record BotConfig
     {

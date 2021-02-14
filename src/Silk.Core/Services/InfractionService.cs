@@ -7,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
-using Silk.Core.Exceptions;
+
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 
@@ -16,7 +16,6 @@ namespace Silk.Core.Services
     /// <inheritdoc cref="IInfractionService"/>
     public sealed class InfractionService : IInfractionService
     {
-        private readonly Timer _timer;
         private readonly ConfigService _configService;
         private readonly IDatabaseService _dbService;
         private readonly ILogger<InfractionService> _logger;
@@ -29,9 +28,9 @@ namespace Silk.Core.Services
             _dbService = dbService;
             _logger = logger;
             _client = client;
-            _timer = new(TimeSpan.FromSeconds(30).TotalMilliseconds);
-            _timer.Elapsed += async (_, _) => await OnTick();
-            _timer.Start();
+            Timer timer = new(TimeSpan.FromSeconds(30).TotalMilliseconds);
+            timer.Elapsed += async (_, _) => await OnTick();
+            timer.Start();
 
             LoadInfractions();
         }
@@ -218,7 +217,7 @@ namespace Silk.Core.Services
                     {
                         InfractionType.SoftBan => ProcessSoftBanAsync(guild, config, infraction),
                         InfractionType.AutoModMute or InfractionType.Mute => ProcessTempMuteAsync(guild, config, infraction),
-                        _ => throw new ArgumentTypeException("Type is not temporary infraction!")
+                        _ => throw new ArgumentException("Type is not temporary infraction!")
                     };
                     await task;
                     _tempInfractions.Remove(infraction);

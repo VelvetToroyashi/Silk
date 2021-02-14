@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
-namespace Silk.Core.Commands.Experimental
+namespace Silk.Core.Commands.Bot
 {
     public class SudoCommand : BaseCommandModule
     {

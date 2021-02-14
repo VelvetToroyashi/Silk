@@ -8,7 +8,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.Bot
 {
     public class MemberConverter : IArgumentConverter<DiscordMember>
     {

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 

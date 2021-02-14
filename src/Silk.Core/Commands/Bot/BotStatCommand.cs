@@ -9,7 +9,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 #pragma warning disable 1591
 

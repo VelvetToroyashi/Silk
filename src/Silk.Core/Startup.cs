@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
-using Silk.Core.AutoMod;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
+using Silk.Core.EventHandlers;
+using Silk.Core.EventHandlers.MessageAdded;
+using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Tools.EventHelpers;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.Bot;
 
 namespace Silk.Core
 {
@@ -37,7 +38,6 @@ namespace Silk.Core
 
 
             services.AddSingleton<BotExceptionHandler>();
-            services.AddSingleton<BotEventSubscriber>();
 
             services.AddSingleton<GuildAddedHandler>();
             services.AddSingleton<MessageAddedHandler>();

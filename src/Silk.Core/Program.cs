@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.Bot;
 
 namespace Silk.Core
 {
@@ -34,7 +35,7 @@ namespace Silk.Core
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None
         };
-
+        
         public static async Task Main(string[] args) => await CreateHostBuilder(args).UseConsoleLifetime().StartAsync().ConfigureAwait(false);
 
 

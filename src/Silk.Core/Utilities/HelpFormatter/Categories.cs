@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.HelpFormatter
 {
     public static class Categories
     {

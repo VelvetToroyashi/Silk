@@ -8,7 +8,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Economy
 {
