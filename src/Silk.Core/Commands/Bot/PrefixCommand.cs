@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Silk.Core.Database;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
@@ -17,12 +18,12 @@ namespace Silk.Core.Commands.Bot
     public class PrefixCommand : BaseCommandModule
     {
         private const int PrefixMaxLength = 5;
-        private readonly PrefixCacheService _prefixCache;
+        private readonly IPrefixCacheService _prefixCache;
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
 
         private record PrefixValidationResult(bool Valid, string Reason);
 
-        public PrefixCommand(PrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
+        public PrefixCommand(IPrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
         {
             _prefixCache = prefixCache;
             _dbFactory = dbFactory;

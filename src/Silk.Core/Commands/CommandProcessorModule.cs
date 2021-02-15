@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.EventArgs;
 using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Commands
 {
@@ -14,9 +15,9 @@ namespace Silk.Core.Commands
     {
         private static readonly ConcurrentDictionary<ulong, List<string>> disabledCommandsCache = new();
         private static ConcurrentDictionary<ulong, List<ulong>> whitelistedChannelsCache = new();
-        private readonly PrefixCacheService _prefixCache;
+        private readonly IPrefixCacheService _prefixCache;
 
-        public CommandProcessorModule(PrefixCacheService prefixCache)
+        public CommandProcessorModule(IPrefixCacheService prefixCache)
         {
             _prefixCache = prefixCache;
         }

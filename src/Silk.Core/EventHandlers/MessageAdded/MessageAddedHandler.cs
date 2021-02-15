@@ -60,10 +60,10 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 if (e.Author.IsBot || string.IsNullOrEmpty(e.Message.Content)) return;
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
-                string prefix = _prefixCache.RetrievePrefix(e?.Guild?.Id);
+                string prefix = _prefixCache.RetrievePrefix(e.Guild?.Id);
 
                 int prefixLength =
-                    e.Channel.IsPrivate ? 0 : // No prefix in DMs, else try to get the string prefix length. //
+                    e!.Channel.IsPrivate ? 0 : // No prefix in DMs, else try to get the string prefix length. //
                         e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id) ?
                             e.Message.GetMentionPrefixLength(c.CurrentUser) :
                             e.Message.GetStringPrefixLength(prefix);
