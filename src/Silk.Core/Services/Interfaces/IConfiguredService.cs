@@ -7,8 +7,8 @@ namespace Silk.Core.Services.Interfaces
         /// <summary>
         /// True or false value set by <see cref="Configure"/> indicating if the service has been configued already.
         /// </summary>
-        public bool HasConfigured { get; protected set; }
-        
+        public bool HasConfigured { get; }
+
         /// <summary>
         /// Method called during startup to configure the service asynchronously.
         /// </summary>

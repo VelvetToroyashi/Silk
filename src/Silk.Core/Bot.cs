@@ -10,7 +10,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
@@ -18,7 +17,6 @@ using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Core.EventHandlers.MessageAdded.AutoMod;
-using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -60,13 +58,7 @@ namespace Silk.Core
             Instance = this;
             Client = client;
         }
-        private void InitializeServices()
-        {
-            IEnumerable<IConfiguredService> configuredServices = _services.GetServices<IConfiguredService>();
-            foreach(IConfiguredService service in configuredServices) 
-                if(!service.HasConfigured)
-                    service.Configure().GetAwaiter().GetResult();
-        }
+        private void InitializeServices() { }
 
         private void InitializeCommands()
         {
@@ -78,7 +70,7 @@ namespace Silk.Core
             foreach (CommandsNextExtension c in extension)
                 c.RegisterCommands(asm);
             sw.Stop();
-            
+
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shard(s) in {sw.ElapsedMilliseconds} ms.");
         }
 
@@ -89,38 +81,41 @@ namespace Silk.Core
                 UseDefaultCommandHandler = false,
                 Services = _services,
                 IgnoreExtraArguments = true,
-                
+
             };
 
             await Client.UseCommandsNextAsync(Commands);
             await _exceptionHandler.SubscribeToEventsAsync();
-            
+
             InitializeCommands();
             InitializeServices();
             SubscribeToEvents();
-            
+
             await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
                 PaginationDeletion = PaginationDeletion.DeleteMessage,
-                PollBehaviour = PollBehaviour.KeepEmojis,
+                PollBehaviour = PollBehaviour.DeleteEmojis,
                 Timeout = TimeSpan.FromMinutes(1)
             });
 
-            
+
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
             CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();
-            var memberConverter = new MemberConverter();
-            
+
+
             foreach (CommandsNextExtension extension in cnextExtensions)
             {
                 extension.SetHelpFormatter<HelpFormatter>();
-                extension.RegisterConverter(memberConverter);
+                extension.RegisterConverter(new MemberConverter());
             }
 
             _logger.LogInformation($"Services + Commands initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
             await Client.StartAsync();
-            
+
+            // Client.StartAsync() returns as soon as all shards are ready, which means we log before
+            // The client is *actually* ready.
+            while (!GuildAddedHandler.StartupCompleted) { }
             _logger.LogInformation($"All shards initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
         }
 
@@ -130,31 +125,31 @@ namespace Silk.Core
         {
             _logger.LogDebug("Subscribing to events");
 
-            Client.MessageCreated          += _services.Get<MessageAddedHandler>().Commands;
+            Client.MessageCreated += _services.Get<MessageAddedHandler>().Commands;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
-            Client.MessageCreated          +=  _services.Get<MessageAddedHandler>().Tickets;
+            Client.MessageCreated += _services.Get<MessageAddedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            Client.MessageCreated          += _services.Get<AutoModInviteHandler>().MessageAddInvites;
-            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites");
-            Client.MessageUpdated          += _services.Get<AutoModInviteHandler>().MessageEditInvites;
+            Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(40));
+            Client.MessageUpdated += _services.Get<AutoModInviteHandler>().MessageEditInvites;
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));
-            Client.MessageDeleted          += _services.Get<MessageRemovedHandler>().MessageRemoved;
+            Client.MessageDeleted += _services.Get<MessageRemovedHandler>().MessageRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
-            Client.GuildMemberAdded        += _services.Get<MemberAddedHandler>().OnMemberAdded;
+            Client.GuildMemberAdded += _services.Get<MemberAddedHandler>().OnMemberAdded;
             _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(40));
-            Client.GuildMemberRemoved      += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
+            Client.GuildMemberRemoved += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
             _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
-            Client.GuildCreated            += _services.Get<GuildAddedHandler>().SendWelcomeMessage;
+            Client.GuildCreated += _services.Get<GuildAddedHandler>().SendWelcomeMessage;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(40));
-            Client.GuildAvailable          += _services.Get<GuildAddedHandler>().OnGuildAvailable;
+            Client.GuildAvailable += _services.Get<GuildAddedHandler>().OnGuildAvailable;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(40));
-            Client.GuildDownloadCompleted  += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
+            Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
             _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete");
-            Client.GuildMemberUpdated      += _services.Get<RoleAddedHandler>().CheckStaffRole;
+            Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>().CheckStaffRole;
             _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(40));
             _logger.LogInformation("Subscribed to all events!");
         }
-        
+
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 

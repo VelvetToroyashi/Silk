@@ -5,11 +5,11 @@ using BenchmarkDotNet.Diagnostics.Windows.Configs;
 namespace Silk.Benchmarks
 {
     [MemoryDiagnoser]
-    [TailCallDiagnoser()]
+    [TailCallDiagnoser]
     public class RegexTest
     {
         private const string input = "This is a string that contains Users ({u}), Server name {s} and mentions {@u}!";
-        private const string 
+        private const string
             server = "Silk!",
             user = "Silk Canary",
             mention = "@Silk Canary";
@@ -17,9 +17,9 @@ namespace Silk.Benchmarks
         private readonly Regex userRegex = new Regex(@"({u[ser]?)}", RegexOptions.Compiled);
         private readonly Regex mentionRegex = new(@"({@u[ser]?})", RegexOptions.Compiled);
         private readonly Regex serverRegex = new(@"({s[erver]?})", RegexOptions.Compiled);
-        
-        
-        
+
+
+
         [Benchmark]
         public void StringReplace() => _ = input.Replace("{u}", user).Replace("{@u}", mention).Replace("{s}", server);
 

@@ -15,7 +15,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Experimental.RoleMenu
 {
-    [Group("rolemenu"), Aliases("role_menu")]
+    [Group("rolemenu")] [Aliases("role_menu")]
     public class RoleMenuCommand : BaseCommandModule
     {
 
@@ -53,11 +53,11 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
 
             confirmationMessage = await ctx.RespondAsync(builder);
             inputResultObject = await RoleMenuInputResult.GetConfirmationAsync(interactivity, ctx, confirmationMessage);
-            
+
             await confirmationMessage.DeleteAllReactionsAsync();
 
-            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message }));
-            
+            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] {ctx.Message}));
+
             builder.WithContent("Alright. This menu should have a name. What should it be?");
             await confirmationMessage.ModifyAsync(builder);
 
@@ -65,7 +65,7 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
             menuMessage = await ctx.RespondAsync(builder);
 
             inputResultObject = await RoleMenuInputResult.GetInputAsync(interactivity, ctx, confirmationMessage);
-            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message, menuMessage }));
+            if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] {ctx.Message, menuMessage}));
 
             responseMessage = (DiscordMessage) inputResultObject.Result!;
             builder.WithContent($"Role menu: **{responseMessage.Content}**");
@@ -83,8 +83,8 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
                     await confirmationMessage.ModifyAsync(builder);
                 }
                 inputResultObject = await RoleMenuInputResult.GetReactionAsync(interactivity, ctx, confirmationMessage);
-                
-                if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] { ctx.Message, menuMessage, confirmationMessage, responseMessage }));
+
+                if (!inputResultObject.Succeeded) await CleanupAsync(RoleMenuInputResult.Messages.Union(new[] {ctx.Message, menuMessage, confirmationMessage, responseMessage}));
 
                 var emoji = (DiscordEmoji) inputResultObject.Result!;
                 if (emoji.Id is not 0)
@@ -120,15 +120,15 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
         {
             try
             {
-                foreach(DiscordMessage message in messages)
+                foreach (DiscordMessage message in messages)
                 {
                     await message.DeleteAsync("Role-Menu cleanup.");
                 }
             }
-            catch (NotFoundException) {} 
-        }   
+            catch (NotFoundException) { }
+        }
 
-    private async Task<bool> ShouldContinueAsync(CommandContext ctx, DiscordRole[] roles)
+        private async Task<bool> ShouldContinueAsync(CommandContext ctx, DiscordRole[] roles)
         {
             var builder = new DiscordMessageBuilder();
             IEnumerable<DiscordRole> higherBotRoles = roles.Where(r => r.Position >= ctx.Guild.CurrentMember.Hierarchy);
@@ -136,11 +136,11 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
             if (higherBotRoles.Any())
             {
                 builder.WithContent($"I can't give out {higherBotRoles.Select(r => r.Mention).Join(", ")}, as they're higher than me!\n" +
-                                    $"The rest of the roles will be put into the menu, however.");
+                                    "The rest of the roles will be put into the menu, however.");
                 await ctx.RespondAsync(builder);
                 roles = roles.Except(higherBotRoles).ToArray();
             }
-            
+
             if (higherUserRoles.Any())
             {
                 builder.WithContent($"I can't give out {higherUserRoles.Select(r => r.Mention).Join(", ")}, as they're higher than me!\n" +

@@ -12,7 +12,7 @@ namespace Silk.Core.Commands.General
     public class AvatarCommand : BaseCommandModule
     {
 
-        
+
         [Command("avatar")]
         public async Task GetAvatar(CommandContext ctx, DiscordMember member) => await GetAvatarAsync(ctx, member);
 
@@ -35,16 +35,17 @@ namespace Silk.Core.Commands.General
         {
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
-            builder.WithEmbed(DefaultAvatarEmbed(ctx).WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-                .WithTitle($"Your Avatar!")
+            builder.WithEmbed(DefaultAvatarEmbed(ctx)
+                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
+                .WithTitle("Your Avatar!")
                 .WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
             await ctx.RespondAsync(builder);
         }
-        
+
         [Command("avatar")]
         public async Task GetAvatarAsync(CommandContext ctx, [RemainingText] string user)
         {
-            
+
             DiscordMember? userObj = ctx.Guild.Members.Values.FirstOrDefault(u => u.Username.Contains(user, StringComparison.OrdinalIgnoreCase));
 
             if (userObj is null)

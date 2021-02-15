@@ -46,13 +46,13 @@ namespace Silk.Core.Services
                 .FirstOrDefaultAsync(g => g.Id == guildId);
 
             if (guild is not null) return guild;
-            
+
             guild = new()
             {
-                Id = guildId, 
-                Users = new(), 
+                Id = guildId,
+                Users = new(),
                 Prefix = Bot.DefaultCommandPrefix,
-                Configuration = new() { GuildId = guildId, GreetingText = "" }
+                Configuration = new() {GuildId = guildId, GreetingText = ""}
             };
             db.Guilds.Add(guild);
             await db.SaveChangesAsync();
@@ -94,14 +94,14 @@ namespace Silk.Core.Services
 
             return await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
         }
-        
+
         public async Task<GlobalUser> GetOrCreateGlobalUserAsync(ulong userId)
         {
             await using SilkDbContext db = GetDbContext();
             GlobalUser? user = await db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == userId);
-            
+
             if (user is not null) return user;
-            
+
             user = new()
             {
                 Id = userId,
@@ -112,7 +112,7 @@ namespace Silk.Core.Services
             await db.SaveChangesAsync();
             return user;
         }
-        
+
 
         // Attach to the context and save. Easy as that. //
         public async Task UpdateGuildUserAsync(User user)
@@ -133,7 +133,7 @@ namespace Silk.Core.Services
         {
             await using SilkDbContext db = GetDbContext();
             GlobalUser dbUser = (await GetGlobalUserAsync(user.Id))!;
-            
+
             dbUser.Cash = user.Cash;
             dbUser.LastCashOut = user.LastCashOut;
 
@@ -148,7 +148,7 @@ namespace Silk.Core.Services
                 .Include(g => g.Users)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == guildId);
-            
+
             User? user = guild.Users.FirstOrDefault(u => u.Id == userId);
             if (user is not null) return user;
             //VALID
@@ -171,7 +171,7 @@ namespace Silk.Core.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync(Expression<Func<User, bool>> predicate)
         {
-            
+
             await using SilkDbContext db = GetDbContext();
             return db.Users.Where(predicate);
         }
@@ -193,6 +193,6 @@ namespace Silk.Core.Services
 
         private SilkDbContext GetDbContext() => _dbFactory.CreateDbContext();
         private static User CreateUser(Guild guild, ulong userId) => new() {Id = userId, Guild = guild};
-        
+
     }
 }

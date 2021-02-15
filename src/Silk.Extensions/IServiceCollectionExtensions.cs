@@ -19,10 +19,7 @@ namespace Silk.Extensions
 
         public static async Task RegisterServices(this IServiceProvider provider, DiscordShardedClient c)
         {
-            foreach (var client in c.ShardClients.Values)
-            {
-                
-            }
+            foreach (var client in c.ShardClients.Values) { }
         }
     }
 }

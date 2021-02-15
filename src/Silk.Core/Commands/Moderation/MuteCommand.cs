@@ -49,7 +49,7 @@ namespace Silk.Core.Commands.Moderation
 
             Infraction infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member,
                 InfractionType.Mute, reason, DateTime.Now.Add(duration));
-            
+
             await _infractionService.MuteAsync(user, ctx.Channel, infraction);
         }
     }

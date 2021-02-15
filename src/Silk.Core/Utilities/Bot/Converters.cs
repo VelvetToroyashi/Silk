@@ -17,7 +17,7 @@ namespace Silk.Core.Utilities.Bot
 
         public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
         {
-            
+
             var user = ctx.Guild.Members.Values.FirstOrDefault(m =>
                 m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
             if (user is not null) return Optional.FromValue(user);

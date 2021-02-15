@@ -15,13 +15,13 @@ namespace Silk.Extensions.DSharpPlus
 
         public static async Task DeleteAsync(this IEnumerable<DiscordMessage> messageCollection)
         {
-            if (messageCollection is null) 
+            if (messageCollection is null)
                 throw new ArgumentNullException(nameof(messageCollection), "Cannot be null!");
-            
+
             DiscordChannel channel = messageCollection.First().Channel;
             await channel.DeleteMessagesAsync(messageCollection);
         }
-        
+
         public static async IAsyncEnumerator<DiscordMessage> GetAsyncEnumerator(this DiscordChannel channel)
         {
             bool hasMorePages = true;

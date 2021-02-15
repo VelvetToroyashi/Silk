@@ -20,12 +20,12 @@ namespace Silk.Core.Migrations
                 table: "UserInfractionModel");
 
             migrationBuilder.AlterColumn<long>(
-                name: "DatabaseId",
-                table: "Users",
-                type: "bigint",
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "bigint")
+                    name: "DatabaseId",
+                    table: "Users",
+                    type: "bigint",
+                    nullable: false,
+                    oldClrType: typeof(long),
+                    oldType: "bigint")
                 .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             migrationBuilder.AddColumn<long>(
@@ -73,12 +73,12 @@ namespace Silk.Core.Migrations
                 table: "UserInfractionModel");
 
             migrationBuilder.AlterColumn<long>(
-                name: "DatabaseId",
-                table: "Users",
-                type: "bigint",
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "bigint")
+                    name: "DatabaseId",
+                    table: "Users",
+                    type: "bigint",
+                    nullable: false,
+                    oldClrType: typeof(long),
+                    oldType: "bigint")
                 .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             migrationBuilder.AddPrimaryKey(

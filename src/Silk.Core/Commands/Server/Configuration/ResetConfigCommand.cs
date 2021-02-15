@@ -16,7 +16,7 @@ namespace Silk.Core.Commands.Server.Configuration
         {
             private readonly IDatabaseService _dbService;
             public ResetConfigCommand(IDatabaseService dbService) => _dbService = dbService;
-            
+
             [Command]
             [Description("Reset your configuration!")]
             public async Task Reset(CommandContext ctx)
@@ -29,15 +29,15 @@ namespace Silk.Core.Commands.Server.Configuration
 
                 InteractivityExtension interactivity = ctx.Client.GetInteractivity();
                 InteractivityResult<DiscordMessage> result = await interactivity.WaitForMessageAsync(m => m.Content.Equals("cancel", StringComparison.CurrentCultureIgnoreCase) || m.Content.Equals(confirmationCode));
-                
+
                 if (result.Result?.Content == confirmationCode)
                 {
                     GuildConfig config = (await _dbService.GetConfigAsync(ctx.Guild.Id))!;
                     GuildConfig temp = config;
                     config = new() {Id = temp.Id, GuildId = temp.GuildId};
-                    
+
                     await _dbService.UpdateConfigAsync(config);
-                    
+
                     builder.WithContent("Guild settings have been reset!");
                     await ctx.RespondAsync(builder);
                 }

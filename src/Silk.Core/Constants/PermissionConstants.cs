@@ -1,7 +1,9 @@
-﻿namespace Silk.Core.Constants
+﻿using DSharpPlus;
+
+namespace Silk.Core.Constants
 {
     public static class PermissionConstants
     {
-        public const DSharpPlus.Permissions CacheFlag = DSharpPlus.Permissions.KickMembers | DSharpPlus.Permissions.ManageMessages;
+        public const Permissions CacheFlag = Permissions.KickMembers | Permissions.ManageMessages;
     }
 }

@@ -11,10 +11,9 @@ using Svg.Skia;
 namespace Silk.Core.Commands.General
 {
     [Category(Categories.General)]
-    
     public class EnlargeCommand : BaseCommandModule
     {
-        [Command("enlarge"), Aliases("enbiggen", "emoji", "emote")]
+        [Command("enlarge")] [Aliases("enbiggen", "emoji", "emote")]
         [Description("Displays a larger version of the provided emoji or custom emote.")]
         public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
         {
@@ -49,8 +48,9 @@ namespace Silk.Core.Commands.General
 
         private Stream RenderEmoji(string unicodeEmoji)
         {
-            
-            Stream svgStream, imageStream = new MemoryStream();
+
+            Stream svgStream,
+                imageStream = new MemoryStream();
 
             var emojiHex = char.ConvertToUtf32(unicodeEmoji, 0).ToString("X4");
             var url = $"https://twemoji.maxcdn.com/2/svg/{emojiHex.ToLower()}.svg";

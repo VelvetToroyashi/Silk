@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.Bot
             embed.AddField($"`Manage Roles` {GetStatusEmoji(manageRoles)}\n", $"Affected commands: `{prefix} role-info`\n");
             embed.AddField($"`Kick Members` {GetStatusEmoji(kick)}\n", $"Affected commands: `{prefix} kick`\n");
             embed.AddField($"`Ban Members` {GetStatusEmoji(ban)}\n", $"Affected commands: `{prefix} ban`\n");
-            
+
             await ctx.RespondAsync(embed);
         }
 

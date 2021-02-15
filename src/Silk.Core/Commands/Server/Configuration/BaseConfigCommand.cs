@@ -7,12 +7,12 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Server.Configuration
 {
-    
+
     [RequireGuild]
     [Hidden]
-    [Group("config")] 
+    [Group("config")]
     [Category(Categories.Server)]
-    [Aliases("configuration")] 
+    [Aliases("configuration")]
     [RequireUserPermissions(Permissions.ManageGuild)]
     [Description("Edit configurations the caveman way!\nOr perhaps we just haven't launched the dashboard yet..")]
     public partial class BaseConfigCommand : BaseCommandModule

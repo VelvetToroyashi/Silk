@@ -28,25 +28,25 @@ namespace Silk.Core.Commands.Server
             SilkDbContext db = _dbFactory.CreateDbContext();
 
             var staffMembers = db.Guilds.Include(g => g.Users)
-                    .First(g => g.Id == guild.Id)
-                    .Users
-                    .Where(u => u.Flags.HasFlag(UserFlag.Staff));
-            
+                .First(g => g.Id == guild.Id)
+                .Users
+                .Where(u => u.Flags.HasFlag(UserFlag.Staff));
+
             int staffCount = staffMembers.Count();
-            
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle($"Guild info for {guild.Name}:")
                 .WithColor(DiscordColor.Gold)
                 .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
-            
+
             embed.WithThumbnail(guild.IconUrl);
 
             if (guild.PremiumSubscriptionCount.Value > 0)
                 embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");
-            
-            if (guild.Features.Count > 0) 
+
+            if (guild.Features.Count > 0)
                 embed.AddField("Enabled guild features: ", string.Join(", ", guild.Features));
-            
+
             embed.AddField("Verification Level:", guild.VerificationLevel.ToString().ToUpper());
             embed.AddField("Member Count:", guild.MemberCount.ToString());
             embed.AddField("Owner:", guild.Owner.Mention);

@@ -24,6 +24,6 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
             var a = _db.GuildConfigs.Where(c => c.BlackListedWords.Count > 0).ToList();
             //Do other shit here
         }
-        
+
     }
 }

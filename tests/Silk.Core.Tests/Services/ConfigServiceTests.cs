@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Silk.Core.Database.Models;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Xunit;
@@ -14,10 +12,10 @@ namespace Silk.Core.Tests
         private readonly Mock<IMemoryCache> _cache;
         private readonly Mock<IDatabaseService> _db;
         private readonly ConfigService _configService;
-        
+
         public ConfigServiceTests()
         {
-            
+
             _cache = new();
             _cache.Setup(cache => cache.CreateEntry(0ul)).Returns(Mock.Of<ICacheEntry>);
             _db = new();

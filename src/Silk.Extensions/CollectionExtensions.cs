@@ -62,13 +62,14 @@ namespace Silk.Extensions
             if (!match.Success) throw new ArgumentException("Not a valid emoji!");
             int matchIndex = match.Value.LastIndexOf(':');
             string subMatch = emoji.Trim()[++matchIndex..^1];
-            
+
             if (!ulong.TryParse(subMatch, out ulong result)) throw new ArgumentException("Invalid emoji Id!");
-            
+
             return result;
         }
 
-        public static void AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key,
+        public static void AddOrUpdate<TKey, TValue>(
+            this ConcurrentDictionary<TKey, TValue> dict, TKey key,
             TValue value)
         {
             dict.AddOrUpdate(key, value, (k, v) => v = value);

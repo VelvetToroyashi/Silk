@@ -12,7 +12,7 @@ namespace Silk.Core.Commands.Bot
     public class ShardsCommand : BaseCommandModule
     {
         private const string embedTitle = "`|\t[Shard]\t|\t[Ping]\t|\t[Guilds]\t|\t[Members]\t|`";
-        
+
         [Command]
         public async Task Shards(CommandContext ctx)
         {
@@ -30,26 +30,26 @@ namespace Silk.Core.Commands.Bot
             {
                 int members = shard.Guilds.SelectMany(g => g.Value.Members).Count();
                 sb.Append("`|");
-                sb.Append($" {id + 1}"            .Center("\t[Shard]\t"));
+                sb.Append($" {id + 1}".Center("\t[Shard]\t"));
                 sb.Append('|');
-                sb.Append($"{shard.Ping}ms"       .Center("\t[Ping]\t"));
+                sb.Append($"{shard.Ping}ms".Center("\t[Ping]\t"));
                 sb.Append('|');
-                sb.Append($"{shard.Guilds.Count}" .Center("\t[Guilds]\t"));
+                sb.Append($"{shard.Guilds.Count}".Center("\t[Guilds]\t"));
                 sb.Append('|');
-                sb.Append($" {members}"           .Center("\t[Members]\t"));
+                sb.Append($" {members}".Center("\t[Members]\t"));
                 sb.Append("|`");
                 sb.AppendLine();
-                
+
                 totalPing += shard.Ping;
             }
             embed.WithDescription($"**{embedTitle}** \n{sb}");
             //embed.AddField()
             sb.Clear();
-            
+
             sb.Append("`|");
-            sb.Append($" {ctx.Client.ShardId + 1}"  .Center("\t[Shard]\t"));
+            sb.Append($" {ctx.Client.ShardId + 1}".Center("\t[Shard]\t"));
             sb.Append('|');
-            sb.Append($"{totalPing / shards.Count}"       .Center("\t[Ping]\t"));
+            sb.Append($"{totalPing / shards.Count}".Center("\t[Ping]\t"));
             sb.Append('|');
             sb.Append($"{Core.Bot.Instance!.Client.ShardClients.SelectMany(c => c.Value.Guilds.Keys).Count()}".Center("\t[Guilds]\t"));
             sb.Append('|');
@@ -61,6 +61,6 @@ namespace Silk.Core.Commands.Bot
             builder.WithEmbed(embed);
             await ctx.RespondAsync(builder);
         }
-        
+
     }
 }

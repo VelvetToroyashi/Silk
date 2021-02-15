@@ -55,7 +55,7 @@ namespace Silk.Core.Commands.Furry.SFW
                     .WithColor(DiscordColor.PhthaloBlue)
                     .WithImageUrl(post.File.Url)
                     .WithFooter("Limit: 7 img / 15 sec");
-                
+
                 await ctx.RespondAsync(embed);
                 await Task.Delay(300);
             }

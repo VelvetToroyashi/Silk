@@ -7,21 +7,23 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
-
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 
 namespace Silk.Core.Services
 {
     /// <inheritdoc cref="IInfractionService"/>
-    public sealed class InfractionService : IInfractionService
+    public sealed class InfractionService : IInfractionService, IConfiguredService
     {
+        public bool HasConfigured { get; private set; }
+
         private readonly ConfigService _configService;
         private readonly IDatabaseService _dbService;
         private readonly ILogger<InfractionService> _logger;
         private readonly DiscordShardedClient _client;
 
         private readonly List<Infraction> _tempInfractions = new();
+
         public InfractionService(ConfigService configService, IDatabaseService dbService, ILogger<InfractionService> logger, DiscordShardedClient client)
         {
             _configService = configService;
@@ -34,9 +36,9 @@ namespace Silk.Core.Services
 
             LoadInfractions();
         }
-        
 
-        public async Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed)
+
+        public async Task KickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed)
         {
             // Validation is handled by the command class. //
             _ = member.RemoveAsync(infraction.Reason);
@@ -64,25 +66,22 @@ namespace Silk.Core.Services
             {
                 Guild guild = (await _dbService.GetGuildAsync(member.Guild.Id))!;
                 int infractions = guild.Users.Sum(u => u.Infractions.Count);
-                
+
                 DiscordEmbedBuilder embed = EmbedHelper.CreateEmbed($"Case #{infractions} | User {member.Username}",
-                    $"{member.Mention} was banned from the server by for ```{infraction.Reason}```", DiscordColor.IndianRed)
+                        $"{member.Mention} was banned from the server by for ```{infraction.Reason}```", DiscordColor.IndianRed)
                     .WithFooter($"Staff member: {infraction.Enforcer}");
 
                 await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
                 await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
-            } 
+            }
         }
-        
-        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
-        {
-            
-        }
-        
+
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction) { }
+
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
             GuildConfig config = await _configService.GetConfigAsync(infraction.User.Guild.Id);
-            
+
             if (!channel.Guild.Roles.TryGetValue(config.MuteRoleId, out DiscordRole? muteRole))
             {
                 await channel.SendMessageAsync("Mute role doesn't exist on server!");
@@ -91,24 +90,24 @@ namespace Silk.Core.Services
             User user = await _dbService.GetOrCreateGuildUserAsync(member.Guild.Id, member.Id);
             if (user.Flags.HasFlag(UserFlag.ActivelyMuted))
             {
-                Infraction inf = user.Infractions.Last(i => i.HeldAgainstUser && 
-                                                             i.InfractionType is (InfractionType.AutoModMute or InfractionType.Mute) &&
-                                                             i.Expiration > DateTime.Now);
+                Infraction inf = user.Infractions.Last(i => i.HeldAgainstUser &&
+                                                            i.InfractionType is (InfractionType.AutoModMute or InfractionType.Mute) &&
+                                                            i.Expiration > DateTime.Now);
                 inf.Expiration = infraction.Expiration;
                 await _dbService.UpdateGuildUserAsync(user);
                 return;
             }
-            
+
             await member.GrantRoleAsync(muteRole);
-            
-            
+
+
             await ApplyInfractionAsync(user, infraction);
-            
-            
+
+
             _tempInfractions.Add(infraction);
             _logger.LogTrace($"Added temporary infraction to {member.Id}!");
         }
-        
+
         /// <summary>
         /// Creates an infraction that's marked as temporary. Only <see cref="InfractionType.SoftBan"/> and <see cref="InfractionType.Mute"/> can be passed.
         /// </summary>
@@ -136,7 +135,7 @@ namespace Silk.Core.Services
             await _dbService.UpdateGuildUserAsync(user);
             return infraction;
         }
-        
+
         public async Task<Infraction> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
         {
             if (type is not (InfractionType.SoftBan or InfractionType.Mute))
@@ -152,7 +151,7 @@ namespace Silk.Core.Services
             User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
             return !user?.Flags.HasFlag(UserFlag.InfractionExemption) ?? true;
         }
-        
+
         public async Task<bool> HasActiveMuteAsync(DiscordMember member)
         {
             User? user = await _dbService.GetGuildUserAsync(member.Guild.Id, member.Id);
@@ -198,7 +197,7 @@ namespace Silk.Core.Services
             };
             await _dbService.UpdateGuildUserAsync(user);
         }
-        
+
         private async Task OnTick()
         {
             if (_tempInfractions.Count is 0) return;
@@ -230,15 +229,18 @@ namespace Silk.Core.Services
             _logger.LogTrace("Building InfractionService cache");
 
             IEnumerable<Infraction> infractions = _dbService.GetActiveInfractionsAsync().GetAwaiter().GetResult();
-            
+
             _tempInfractions.AddRange(infractions);
             _logger.LogTrace("Loaded all applicable infractions!");
         }
-        
-        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
-        {
-            
 
+        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction) { }
+
+
+
+        public async Task Configure()
+        {
+            _logger.LogTrace("This service is being configured!");
         }
     }
 }

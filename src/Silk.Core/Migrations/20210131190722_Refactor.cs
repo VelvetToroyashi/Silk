@@ -75,9 +75,7 @@ namespace Silk.Core.Migrations
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                });
+                constraints: table => { });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Infractions_GuildConfigModelId",
@@ -196,9 +194,7 @@ namespace Silk.Core.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
-                constraints: table =>
-                {
-                });
+                constraints: table => { });
 
             migrationBuilder.CreateIndex(
                 name: "IX_GuildInfractionModel_ConfigId",

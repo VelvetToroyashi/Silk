@@ -22,7 +22,7 @@ namespace Silk.Core.Commands.Moderation
         private readonly IDatabaseService _dbService;
         private readonly IInfractionService _infractionService;
 
-        public KickCommand(ILogger<KickCommand> logger, IDatabaseService dbService, IInfractionService incractionService) => 
+        public KickCommand(ILogger<KickCommand> logger, IDatabaseService dbService, IInfractionService incractionService) =>
             (_logger, _dbService, _infractionService) = (logger, dbService, incractionService);
 
         [Command]
@@ -33,11 +33,11 @@ namespace Silk.Core.Commands.Moderation
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
 
-            
+
 
             if (user.IsAbove(bot) || ctx.User == user)
             {
-                DiscordEmbed embed = await this.CreateHierarchyEmbedAsync(ctx, bot, user);
+                DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
                 await ctx.RespondAsync(embed).ConfigureAwait(false);
             }
             else
@@ -63,8 +63,8 @@ namespace Silk.Core.Commands.Moderation
                     _logger.LogWarning("Couldn't DM member when notifying kick.");
                     messaged = "(Could not message user.)";
                 }
-                
-                await _infractionService.VerboseKickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
+
+                await _infractionService.KickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)
                     .WithDescription($":boot: Kicked {user.Mention}! {messaged}")

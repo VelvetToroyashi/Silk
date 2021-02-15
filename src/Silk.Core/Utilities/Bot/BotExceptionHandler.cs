@@ -78,7 +78,7 @@ namespace Silk.Core.Utilities.Bot
             else if (e.Exception.Message.Contains("intents")) _logger.LogCritical("Missing intents! Enabled them on the developer dashboard");
             else _logger.LogWarning($"{e.Exception.Message}");
         }
-        
+
         public static async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();

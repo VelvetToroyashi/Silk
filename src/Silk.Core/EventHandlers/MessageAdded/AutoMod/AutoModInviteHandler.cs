@@ -48,12 +48,12 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         // Can't be DRY compliant here because they take two different types of event args, hence why we make one unified object, and call that method instead.
         public Task MessageEditInvites(DiscordClient client, MessageUpdateEventArgs eventArgs)
         {
-            
+
             if (eventArgs.Channel.IsPrivate) return Task.CompletedTask;
             _ = MatchInvite(client, new(eventArgs.Channel, eventArgs.Message, eventArgs.Guild));
             return Task.CompletedTask;
         }
-        
+
         public Task MessageAddInvites(DiscordClient client, MessageCreateEventArgs eventArgs)
         {
             if (eventArgs.Channel.IsPrivate) return Task.CompletedTask;
@@ -64,7 +64,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         private async Task MatchInvite(DiscordClient client, UnifiedEventArgs eventArgs)
         {
             if (eventArgs.Channel.IsPrivate) return;
-            
+
             _ = Task.Run(async () =>
             {
                 GuildConfig config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
@@ -84,7 +84,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
                 }
             });
         }
-        
+
 
         /// <summary>
         /// Automod method called when the guild configred regex (be it 'lenient' or 'aggressive' matches anything that resembles an invite.
@@ -97,11 +97,11 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
                 try
                 {
                     DiscordInvite apiInvite = await client.GetInviteByCodeAsync(inviteCode);
-                    
+
                     if (apiInvite.Guild.Id != message.Channel.GuildId)
                     {
-                        handleInvite = !config.AllowedInvites.Any(invite => apiInvite.Code == invite.VanityURL || 
-                                                                           apiInvite.Guild.Id == invite.GuildId);
+                        handleInvite = !config.AllowedInvites.Any(invite => apiInvite.Code == invite.VanityURL ||
+                                                                            apiInvite.Guild.Id == invite.GuildId);
                     }
                     else
                     {
@@ -109,7 +109,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
                         _logger.LogTrace("Matched invite points to current guild; skipping");
                     }
                 }
-                catch(NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
+                catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
                 {
                     _logger.LogTrace("Matched invalid or corrupt invite");
                 }
@@ -130,7 +130,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
             if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
             if (shouldPunish && config.WarnOnMatchedInvite)
             {
-                var infraction = await _infractionService.CreateInfractionAsync((DiscordMember)message.Author,
+                var infraction = await _infractionService.CreateInfractionAsync((DiscordMember) message.Author,
                     message.Channel.Guild.CurrentMember, InfractionType.Ignore, "Sent an invite");
                 await _infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, infraction);
             }

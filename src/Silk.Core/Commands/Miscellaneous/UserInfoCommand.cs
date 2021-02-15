@@ -23,7 +23,7 @@ namespace Silk.Core.Commands.Miscellaneous
         public async Task RoleInfo(CommandContext ctx, DiscordRole role)
         {
             IEnumerable<DiscordMember> members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
-            
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle($"Info for {role.Name} ( {role.Id} ):")
                 .AddField("Color:", role.Color.ToString())
@@ -39,7 +39,7 @@ namespace Silk.Core.Commands.Miscellaneous
 
             await ctx.RespondAsync(embed);
         }
-        
+
         [Command("info")]
         [Description("Get info about a member")]
         public async Task GetUserInfo(CommandContext ctx, DiscordUser member)
@@ -131,10 +131,10 @@ namespace Silk.Core.Commands.Miscellaneous
                 rle = roles.Last(r => r.Position < role.Position);
                 roleString += $"⠀⠀↑\n{rle.Mention}";
             }
-            
+
             return roleString;
         }
-        
+
         private static string GetCreationTime(DateTimeOffset offset)
         {
             TimeSpan creationTime = DateTime.Now.Subtract(offset.DateTime);

@@ -25,12 +25,12 @@ namespace Silk.Core.EventHandlers
 
                 if (!config.LogMessageChanges) return;
                 if (config.GeneralLoggingChannel is 0) return;
-            
+
                 DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
                 DiscordChannel channel = await c.GetChannelAsync(config.GeneralLoggingChannel);
                 await channel.SendMessageAsync(embed).ConfigureAwait(false);
             });
-            
+
         }
 
         private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e, DateTime now) => new DiscordEmbedBuilder()

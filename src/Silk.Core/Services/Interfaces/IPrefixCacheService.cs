@@ -21,6 +21,6 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="guildId">The Id of the guild to update.</param>
         /// <param name="prefix">The prefix to assign to the guild.</param>
         public void UpdatePrefix(ulong guildId, string prefix);
-        
+
     }
 }

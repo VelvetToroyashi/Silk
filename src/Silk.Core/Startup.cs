@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
@@ -28,15 +29,14 @@ namespace Silk.Core
 
         public static void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<IDatabaseService, DatabaseService>();
+            services.AddScoped<IDatabaseService, DatabaseService>();
             services.AddSingleton<IInfractionService, InfractionService>();
-            services.AddSingleton<PrefixCacheService>();
+            services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
             services.AddSingleton<TicketService>();
             services.AddSingleton<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
             services.AddSingleton<AutoModInviteHandler>();
-
 
             services.AddSingleton<BotExceptionHandler>();
 
@@ -51,6 +51,7 @@ namespace Silk.Core
             services.AddSingleton<RoleRemovedHandler>();
 
             services.AddSingleton<SerilogLoggerFactory>();
+            services.AddSingleton<List<IConfiguredService>>();
 
         }
 

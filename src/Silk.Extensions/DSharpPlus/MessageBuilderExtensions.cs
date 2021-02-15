@@ -26,7 +26,7 @@ namespace Silk.Extensions.DSharpPlus
         /// <exception cref="ArgumentException">The message does not mention any users.</exception>
         public static DiscordMessageBuilder WithoutUserMention(this DiscordMessageBuilder builder, ulong mention)
         {
-            IEnumerable<IMention> userMentions = builder.Mentions.Where(m=> m is UserMention);
+            IEnumerable<IMention> userMentions = builder.Mentions.Where(m => m is UserMention);
             if (userMentions.Count() is 0) throw new ArgumentException("Message does not contain any user mentions!");
             IEnumerable<IMention> userMention = userMentions.Where(m => ((UserMention) m).Id == mention);
             if (userMention.Count() is 0) return builder; // User wasn't in the mentions to begin with //
@@ -64,7 +64,7 @@ namespace Silk.Extensions.DSharpPlus
                 IEnumerable<IMention> allMentions = builder.Mentions.Union(mentionCollection);
                 builder.WithAllowedMentions(allMentions);
             }
-            
+
             return builder;
         }
     }

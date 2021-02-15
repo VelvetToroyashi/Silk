@@ -13,6 +13,7 @@ using Silk.Core.Database.Models;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
+using InfractionType = Silk.Core.Database.Models.InfractionType;
 
 namespace Silk.Core.Commands.Moderation.Ban
 {
@@ -95,7 +96,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 Reason = reason,
                 Enforcer = enforcerId,
                 InfractionTime = infractionTime,
-                InfractionType = Database.Models.InfractionType.SoftBan
+                InfractionType = InfractionType.SoftBan
             };
         }
 
@@ -130,6 +131,6 @@ namespace Silk.Core.Commands.Moderation.Ban
                 throw new InvalidOperationException("Couldn't determine duration from message!")
                 : throw new InvalidOperationException("Couldn't determine duration from message!");
         }
-        
+
     }
 }

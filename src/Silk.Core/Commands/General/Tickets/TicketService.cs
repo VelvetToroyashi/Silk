@@ -34,7 +34,7 @@ namespace Silk.Core.Commands.General.Tickets
         // UserId, ChannelId //
         private static readonly ConcurrentDictionary<ulong, ulong> _ticketChannels = new();
         private const Permissions RequisitePermissions = Permissions.SendMessages | Permissions.AccessChannels |
-                                                                   Permissions.EmbedLinks | Permissions.ReadMessageHistory;
+                                                         Permissions.EmbedLinks | Permissions.ReadMessageHistory;
 
         /// <summary>
         /// Create a TicketModel in the database, and add the message sent as the first piece of history for it. 
@@ -158,8 +158,9 @@ namespace Silk.Core.Commands.General.Tickets
         public static ulong GetTicketUser(DiscordChannel channel)
         {
             foreach ((ulong k, ulong v) in _ticketChannels)
-                if (v == channel.Id) return k;
-            
+                if (v == channel.Id)
+                    return k;
+
             throw new KeyNotFoundException("Invalid ticket channel.");
         }
 
@@ -188,7 +189,7 @@ namespace Silk.Core.Commands.General.Tickets
         {
             if (!TryGetSilkGuild(out DiscordGuild? silk))
                 throw new KeyNotFoundException("Tickets aren't supported on self-hosted builds :(");
-            
+
 
             DiscordChannel? ticketCategory = silk!.Channels.Values.FirstOrDefault(x => x.Name == "Silk! Tickets" && x.IsCategory);
 

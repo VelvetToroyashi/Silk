@@ -10,8 +10,8 @@ namespace Silk.Benchmarks
     [TailCallDiagnoser]
     public class SilkStringCenterTest
     {
-        private string input = "Center";
-        private string anchor = "Longer\tCenter";
+        private readonly string input = "Center";
+        private readonly string anchor = "Longer\tCenter";
 
         [Benchmark]
         public string CenterWithPad()
@@ -19,7 +19,7 @@ namespace Silk.Benchmarks
             var interpretedAnchor = anchor.Replace("\t", "    ");
             return (input.PadLeft((interpretedAnchor.Length - input.Length) / 2)).PadRight(interpretedAnchor.Length);
         }
-        
+
         [Benchmark]
         public string CenterWithExtensionMethod() => input.Center(anchor);
 
@@ -34,10 +34,10 @@ namespace Silk.Benchmarks
             }
 
             if (input.Length >= refLength) return input;
-            
+
             int start = (refLength - input.Length) / 2;
-            
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) => 
+
+            return string.Create(refLength, (start, input), static(Span<char> span, (int start, string str) state) =>
             {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
@@ -55,10 +55,10 @@ namespace Silk.Benchmarks
             }
 
             if (input.Length >= refLength) return input;
-            
+
             int start = (refLength - input.Length) / 2;
-            
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) => 
+
+            return string.Create(refLength, (start, input), static(Span<char> span, (int start, string str) state) =>
             {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
@@ -71,17 +71,17 @@ namespace Silk.Benchmarks
             int refLength = anchor.Length;
             if (input.Contains('\t'))
             {
-                for(int i = 0; i < anchor.Length; i++)
+                for (int i = 0; i < anchor.Length; i++)
                     if (anchor[i] is '\t')
                         refLength += 3;
 
             }
 
             if (input.Length >= refLength) return input;
-            
+
             int start = (refLength - input.Length) / 2;
-            
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) => 
+
+            return string.Create(refLength, (start, input), static(Span<char> span, (int start, string str) state) =>
             {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
@@ -101,10 +101,10 @@ namespace Silk.Benchmarks
             }
 
             if (input.Length >= refLength) return input;
-            
+
             int start = (refLength - input.Length) / 2;
-            
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) => 
+
+            return string.Create(refLength, (start, input), static(Span<char> span, (int start, string str) state) =>
             {
                 span.Fill(' ');
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));

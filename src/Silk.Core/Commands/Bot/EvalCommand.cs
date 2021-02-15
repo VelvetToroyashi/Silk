@@ -35,14 +35,14 @@ namespace Silk.Core.Commands.Bot
                 await EvalCS(ctx, code);
             }
         }
-        
-        
+
+
         [Command("eval")]
         [Priority(0)]
         public async Task EvalCS(CommandContext ctx, [RemainingText] string code)
         {
             DiscordMessage msg;
-            
+
             int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;
             int cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
@@ -102,7 +102,7 @@ namespace Silk.Core.Commands.Bot
                     }.Build())
                     .ConfigureAwait(false);
             }
-            
+
         }
 
         public record TestVariables

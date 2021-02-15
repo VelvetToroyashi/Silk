@@ -34,13 +34,13 @@ namespace Silk.Core.Commands.Economy
             {
                 await ctx.RespondAsync("I'd love to duplicate money just as much as the next person, but we have an economy!");
                 return;
-            } 
+            }
             if (sender!.Cash < amount)
             {
                 await ctx.RespondAsync($"You're {amount - sender.Cash} dollars too short for that, I'm afraid.");
                 return;
             }
-            
+
             if (amount >= 1000)
             {
                 await VerifyTransactionAsync(ctx, sender, receiver!, amount);
@@ -49,12 +49,12 @@ namespace Silk.Core.Commands.Economy
             {
                 await DoTransactionAsync(ctx, amount, sender, receiver!);
             }
-            
-            
+
+
             await _dbService.UpdateGlobalUserAsync(receiver!);
             await _dbService.UpdateGlobalUserAsync(sender!);
         }
-        
+
         private static async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
         {
             // We use uint as an easier way of anti fraud protection; people would put a negative number and essentially steal money from others. //
@@ -73,7 +73,7 @@ namespace Silk.Core.Commands.Economy
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)
         {
-            
+
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             int authKey = new Random().Next(1000, 10000);
@@ -94,10 +94,10 @@ namespace Silk.Core.Commands.Economy
                     .WithDescription($"Successfully donated {amount} dollars to {member.Mention}! " +
                                      $"Feel free to do `{ctx.Prefix}cash` to ensure you've received the funds.")
                     .WithColor(DiscordColor.PhthaloGreen);
-                
+
                 sender.Cash -= (int) amount;
                 receiver.Cash += (int) amount;
-                
+
                 await ctx.RespondAsync(embed);
             }
         }
@@ -111,7 +111,7 @@ namespace Silk.Core.Commands.Economy
                 // I can't think of a better exception to throw; InvalidOp gets typed-matched in the exception handler and prints the help message
                 // Which is not ideal.
             }
-            
+
             _activeTransactions.Add(ctx.User.Id);
         }
 

@@ -17,7 +17,7 @@ namespace Silk.Benchmarks
         public void BlockSplitLINQSkipTake() => _ = BlockSplitLINQSkipAndTake();
         [Benchmark]
         public void BlockSplitWithRange() => _ = BlockSplitRangeOperator();
-        
+
         public IEnumerable<string> BlockSplitLINQSkipAndTake()
         {
             string[] split = LoremIpsum.Split(',');
@@ -25,14 +25,14 @@ namespace Silk.Benchmarks
                 yield return string.Join(string.Empty, split.Skip(i * 4).Take(4));
         }
 
-        
+
         public IEnumerable<string> BlockSplitRangeOperator()
         {
             string[] split = LoremIpsum.Split(',');
             for (int i = 0; i < split.Length / 4; i++)
                 yield return string.Join(string.Empty, split[(i * 4)..(i * 4 + (4 + 1))]);
         }
-        
-        
+
+
     }
 }

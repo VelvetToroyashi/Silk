@@ -25,7 +25,7 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="guildId">The id of the guild to get, or create if it doesn't exist.</param>
         /// <returns>A <see cref="Guild"/>, which will have default properties if it did not exist.</returns>
         public Task<Guild> GetOrCreateGuildAsync(ulong guildId);
-        
+
         /// <summary>
         /// This method is used to update a <see cref="Guild"/>.
         /// </summary>
@@ -44,7 +44,7 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         /// <param name="config">The configuration to update.</param>
         public Task UpdateConfigAsync(GuildConfig config);
-        
+
         /// <summary>
         /// Get a <see cref="User"/> from the database.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="userId">The Id of the user to retrieve.</param>
         /// <returns>A <see cref="GlobalUser"/>, or null if the user doesn't exist.</returns>
         public Task<GlobalUser?> GetGlobalUserAsync(ulong userId);
-        
+
         /// <summary>
         /// Update a <see cref="User"/>
         /// </summary>
@@ -84,7 +84,7 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="userId">The Id of the user to retreive.</param>
         /// <returns>A <see cref="GlobalUser"/>, which will have default properties if it did not exist in the databsae.</returns>
         public Task<GlobalUser> GetOrCreateGlobalUserAsync(ulong userId);
-        
+
         /// <summary>
         /// Remove a user from the database. A user with infractions will not be removed from the database.
         /// </summary>
@@ -104,7 +104,7 @@ namespace Silk.Core.Services.Interfaces
         /// </summary>
         /// <returns>A collection of active, temporary infractions.</returns>
         public Task<IEnumerable<Infraction>> GetActiveInfractionsAsync();
-        
+
 
     }
 }

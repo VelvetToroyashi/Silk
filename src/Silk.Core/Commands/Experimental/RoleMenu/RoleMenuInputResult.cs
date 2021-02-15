@@ -17,23 +17,23 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
         /// The result of a GetInput method, which remains null if the operation did not succeed.
         /// </summary>
         public object? Result { get; private set; }
-        
+
         /// <summary>
         /// Whether or not the operation succeeded. Timing out will cause it to fail.
         /// </summary>
         public bool Succeeded { get; private set; }
 
-        public static List<DiscordMessage> Messages { get; }= new();
+        public static List<DiscordMessage> Messages { get; } = new();
         private const string Canceled = "Canceled (User Requested).";
         private const string TimedOut = "Canceled (Timed out).";
-        
+
         private RoleMenuInputResult() { } // prevent instantiation //
 
         public static async Task<RoleMenuInputResult> GetReactionAsync(InteractivityExtension interactivity, CommandContext ctx, DiscordMessage message)
         {
             var result = new RoleMenuInputResult();
             var builder = new DiscordMessageBuilder();
-            
+
             var inputResult = await interactivity.WaitForReactionAsync(message, ctx.User);
             if (inputResult.TimedOut)
             {
@@ -49,7 +49,7 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
 
             return result;
         }
-        
+
         /// <summary>
         /// Get a confirmation from user input with a check and cross reaction.
         /// </summary>
@@ -82,7 +82,7 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
             {
                 result.Succeeded = true;
             }
-            
+
             return result;
         }
 
@@ -109,7 +109,7 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
                 result.Succeeded = true;
             }
             return result;
-            
+
         }
     }
 }

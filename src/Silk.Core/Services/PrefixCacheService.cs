@@ -35,7 +35,7 @@ namespace Silk.Core.Services
         {
 
             if (guildId == default || guildId == 0) return string.Empty;
-            if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string)prefix;
+            if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string) prefix;
             return GetPrefixFromDatabase(guildId.Value);
         }
 
@@ -57,8 +57,8 @@ namespace Silk.Core.Services
             _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms");
             return guild.Prefix;
         }
-        
-        
+
+
         // I don't know if updating a reference will update 
         public void UpdatePrefix(ulong id, string prefix)
         {
@@ -70,7 +70,7 @@ namespace Silk.Core.Services
         }
 
         private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
-        
+
         public void PurgeCache(ulong id)
         {
             _cache.TryRemove(id, out _);

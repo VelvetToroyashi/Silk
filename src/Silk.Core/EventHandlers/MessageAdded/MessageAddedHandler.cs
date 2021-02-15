@@ -8,16 +8,16 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
-using Silk.Core.Services;
+using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.MessageAdded
 {
     public class MessageAddedHandler
     {
         private readonly TicketService _ticketService;
-        private readonly PrefixCacheService _prefixCache;
+        private readonly IPrefixCacheService _prefixCache;
         private readonly ILogger<MessageAddedHandler> _logger;
-        public MessageAddedHandler(TicketService ticketService, PrefixCacheService prefixCache, ILogger<MessageAddedHandler> logger)
+        public MessageAddedHandler(TicketService ticketService, IPrefixCacheService prefixCache, ILogger<MessageAddedHandler> logger)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;
@@ -46,13 +46,13 @@ namespace Silk.Core.EventHandlers.MessageAdded
                     var builder = new DiscordMessageBuilder();
                     builder.WithReply(e.Message.Id, true);
                     builder.WithContent("I couldn't message that user! They've either closed their DMs or left all mutual servers!");
-                    
+
                     await e.Channel.SendMessageAsync(builder);
                 }
             });
             return Task.CompletedTask;
         }
-        
+
         public Task Commands(DiscordClient c, MessageCreateEventArgs e)
         {
             _ = Task.Run(async () =>
@@ -61,19 +61,19 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 CommandsNextExtension cnext = c.GetCommandsNext();
 
                 string prefix = _prefixCache.RetrievePrefix(e?.Guild?.Id);
-                
-                int prefixLength = 
+
+                int prefixLength =
                     e.Channel.IsPrivate ? 0 : // No prefix in DMs, else try to get the string prefix length. //
                         e.MentionedUsers.Any(u => u.Id == c.CurrentUser.Id) ?
-                            e.Message.GetMentionPrefixLength(c.CurrentUser) : 
+                            e.Message.GetMentionPrefixLength(c.CurrentUser) :
                             e.Message.GetStringPrefixLength(prefix);
-                    
+
                 if (prefixLength is -1) return;
 
                 string commandString = e.Message.Content.Substring(prefixLength);
 
                 Command? command = cnext.FindCommand(commandString, out string arguments);
-                
+
                 if (command is null)
                 {
                     _logger.LogWarning($"Command not found: {e.Message.Content}");

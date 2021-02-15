@@ -15,7 +15,7 @@ namespace Silk.Core.Services
             _cache = cache;
             _db = db;
         }
-        
+
         public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
         {
             if (_cache.TryGetValue(guildId, out GuildConfig config)) return config;

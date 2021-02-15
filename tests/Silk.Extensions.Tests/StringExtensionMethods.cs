@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
-using Xunit;
+﻿using Xunit;
+
 namespace Silk.Extensions.Tests
 {
-    
+
     public class StringExtensionMethods
     {
         private const string CenterInputString = "This string should center!";
-        
+
         [Theory]
-        [InlineData("This is a\ttest string that\tshould be centered!", "             This string should center!             ")] 
+        [InlineData("This is a\ttest string that\tshould be centered!", "             This string should center!             ")]
         [InlineData("This is a test string that should be centered against!", "              This string should center!              ")]
         public void Center_ReturnsCenteredString(string input, string expected)
         {
@@ -27,8 +27,8 @@ namespace Silk.Extensions.Tests
             //Act
             string actual = input.Center(anchor);
             Assert.Equal(input, actual);
-        }   
-        
-        
+        }
+
+
     }
 }

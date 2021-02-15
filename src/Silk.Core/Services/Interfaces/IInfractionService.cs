@@ -13,8 +13,8 @@ namespace Silk.Core.Services.Interfaces
         /// <summary>
         /// Kick a member verbosely, by logging to the appropriate log channel (if any), and the chanel the command was run in.
         /// </summary>
-        public Task VerboseKickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed);
-        
+        public Task KickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed);
+
         public Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);

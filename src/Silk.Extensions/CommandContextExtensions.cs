@@ -17,7 +17,8 @@ namespace Silk.Extensions
             return (ctx.Member.DisplayName, ctx.Member.AvatarUrl);
         }
 
-        public static DiscordEmbedBuilder WithAuthorExtension(this DiscordEmbedBuilder builder, string name,
+        public static DiscordEmbedBuilder WithAuthorExtension(
+            this DiscordEmbedBuilder builder, string name,
             string avatarUrl)
         {
             return builder.WithAuthor(name, iconUrl: avatarUrl);
@@ -31,15 +32,16 @@ namespace Silk.Extensions
         public static IEnumerable<DiscordMember> GetMemberByName(this CommandContext ctx, string input)
         {
             return ctx.Guild.Members
-                      .Where(member => member.Value.DisplayName.ToLowerInvariant()
-                                             .Contains(input.ToLowerInvariant())).Select(m => m.Value);
+                .Where(member => member.Value.DisplayName.ToLowerInvariant()
+                    .Contains(input.ToLowerInvariant()))
+                .Select(m => m.Value);
         }
 
         public static IEnumerable<DiscordMember> GetUserByName(this CommandContext ctx, string input)
         {
             IEnumerable<DiscordMember> members = ctx.Client.Guilds.SelectMany(g => g.Value.Members.Values);
             return members.Where(m => m.Username.ToLower().Contains(input.ToLower()) && !m.IsBot)
-                          .Distinct(new DiscordMemberComparer());
+                .Distinct(new DiscordMemberComparer());
         }
 
         public static string GetBotUrl(this CommandContext ctx)

@@ -12,12 +12,12 @@ namespace Silk.Items.Tools
     /// </summary>
     public static class ItemDatabaseHelper
     {
-        
+
 
         public static string Serialize(Entity entity) =>
-        JsonConvert.SerializeObject(entity, Formatting.Indented);
-        
+            JsonConvert.SerializeObject(entity, Formatting.Indented);
+
         public static T Deserialize<T>(string obj) where T : Entity => JsonConvert.DeserializeObject<T>(obj);
-        
+
     }
 }

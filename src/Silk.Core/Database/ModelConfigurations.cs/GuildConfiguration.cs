@@ -10,11 +10,11 @@ namespace Silk.Core.Database.ModelConfigurations.cs
         public void Configure(EntityTypeBuilder<Guild> builder)
         {
             builder.Property(g => g.Id).ValueGeneratedNever();
-            
+
             builder
                 .HasMany(u => u.Users)
                 .WithOne(u => u.Guild);
-            
+
             builder
                 .HasOne(g => g.Configuration)
                 .WithOne(g => g.Guild)

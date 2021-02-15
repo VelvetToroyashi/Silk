@@ -18,7 +18,7 @@ namespace Silk.Benchmarks
 
         [Benchmark]
         public void ListLookup() => list.Contains(5000);
-        
+
         [Benchmark]
         public void HashLookup() => hashSet.Contains(5000);
 
@@ -27,6 +27,6 @@ namespace Silk.Benchmarks
 
         [Benchmark]
         public void LinkedLookup() => linkedList.Contains(5000);
-        
+
     }
 }

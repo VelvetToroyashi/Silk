@@ -30,7 +30,7 @@ namespace Silk.Core.Database.Models
         /// The type of infraction. Infractions of type <see cref="Silk.Core.Database.Models.InfractionType.SoftBan"/> and <see cref="Silk.Core.Database.Models.InfractionType.Mute"/> are loaded into memory upon startup.
         /// </summary>
         public InfractionType InfractionType { get; set; } //What happened
-        
+
         /// <summary>
         /// Whether or not this infraction will be held against the user in question; this is used by the <see cref="Silk.Core.Services.Interfaces.IInfractionService"/>
         /// to determine whether or not to take a higher action.

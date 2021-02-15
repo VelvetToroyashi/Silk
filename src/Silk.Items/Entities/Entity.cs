@@ -14,7 +14,7 @@ namespace Silk.Items.Entities
     {
         [JsonInclude]
         private readonly List<IComponent> Components = new();
-        
+
         public IEnumerator<IComponent> GetEnumerator() => Components.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

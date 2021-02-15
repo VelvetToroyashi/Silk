@@ -47,26 +47,27 @@ namespace Silk.Core.Commands.Economy
                 position = 4;
                 GlobalUser? firstGlobalUser = economyUsers.First();
                 DiscordUser? firstUser = await ctx.Client.GetUserAsync(firstGlobalUser.Id);
-                
+
                 GlobalUser? secondGlobalUser = economyUsers.Skip(1).First();
                 DiscordUser? secondUser = await ctx.Client.GetUserAsync(secondGlobalUser.Id);
-                
+
                 GlobalUser? thirdGlobalUser = economyUsers.Skip(2).First();
                 DiscordUser? thirdUser = await ctx.Client.GetUserAsync(thirdGlobalUser.Id);
 
                 embed.AddField(":first_place:", $"{firstUser.Username} ({firstUser.Mention}) - {firstGlobalUser.Cash:C0}");
                 embed.AddField(":second_place:", $"{secondUser.Username} ({secondUser.Mention}) - {secondGlobalUser.Cash:C0}");
                 embed.AddField(":third_place:", $"{thirdUser.Username} ({thirdUser.Mention}) - {thirdGlobalUser.Cash:C0}");
-                
-                IEnumerable<string> remainingUsers = economyUsers.Skip(3).Select(u =>
-                {
-                    DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
-                    return $"{user.Username} ({user.Mention}) - {u.Cash:C0}";
-                });
-                
+
+                IEnumerable<string> remainingUsers = economyUsers.Skip(3)
+                    .Select(u =>
+                    {
+                        DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
+                        return $"{user.Username} ({user.Mention}) - {u.Cash:C0}";
+                    });
+
                 foreach (var user in remainingUsers)
                     embed.AddField($"{position++}.", user);
-                
+
             }
             else
             {
@@ -75,7 +76,7 @@ namespace Silk.Core.Commands.Economy
                     DiscordUser? user = ctx.Client.GetUserAsync(u.Id).GetAwaiter().GetResult();
                     return $"{user.Username} ({user.Mention}) - ${u.Cash}";
                 });
-                
+
                 foreach (var user in formattedUsers)
                     embed.AddField($"{position++}.", user);
             }

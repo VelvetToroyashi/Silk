@@ -27,7 +27,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
             {
                 await (await c.GetChannelAsync(config.GeneralLoggingChannel)).SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
-            }   
+            }
 
             if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
             {

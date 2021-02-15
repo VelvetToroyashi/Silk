@@ -33,13 +33,13 @@ namespace Silk.Core.Commands.Moderation
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "",
                         $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
-                
+
                 //TODO: Refactor this to use IInfractionService
-                
+
                 // var infraction =
                 //     (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
                 // if (infraction is not null) _eventService.Events.TryRemove(infraction);
-                
+
                 await ctx.RespondAsync(embed);
             }
             else
@@ -47,7 +47,7 @@ namespace Silk.Core.Commands.Moderation
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
                         .WithColor(new DiscordColor("#d11515"));
-                
+
                 await ctx.RespondAsync(embed);
             }
         }
