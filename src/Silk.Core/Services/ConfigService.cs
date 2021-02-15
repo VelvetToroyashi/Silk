@@ -15,16 +15,14 @@ namespace Silk.Core.Services
             _cache = cache;
             _db = db;
         }
-
-
-
+        
         public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
         {
             if (_cache.TryGetValue(guildId, out GuildConfig config)) return config;
             return await GetConfigFromDatabaseAsync(guildId);
         }
 
-        public async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
+        private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
         {
             GuildConfig configuration = await _db.GetConfigAsync(guildId);
             _cache.Set(guildId, configuration, TimeSpan.FromHours(1));

@@ -25,15 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Services\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Services\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Services\**" />
+      <Compile Include="Services\ConfigServiceTests.cs" />
     </ItemGroup>
 
 </Project>

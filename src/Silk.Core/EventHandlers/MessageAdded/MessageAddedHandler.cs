@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Services;
 
-namespace Silk.Core.EventHandlers
+namespace Silk.Core.EventHandlers.MessageAdded
 {
     public class MessageAddedHandler
     {

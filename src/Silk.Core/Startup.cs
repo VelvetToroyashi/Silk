@@ -4,6 +4,7 @@ using Serilog.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
 using Silk.Core.Database;
 using Silk.Core.EventHandlers;
+using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Services;

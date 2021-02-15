@@ -108,6 +108,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Abstractions" />
     <Folder Include="Commands\Server\Roles" />
   </ItemGroup>
   

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database;
 using Silk.Core.EventHandlers;
+using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Services.Interfaces;

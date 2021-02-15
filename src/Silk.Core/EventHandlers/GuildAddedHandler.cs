@@ -34,7 +34,7 @@ namespace Silk.Core.EventHandlers
         {
             _logger = logger;
             _dbService = dbService;
-            var shards = Bot.Instance!.Client.ShardClients;
+            IReadOnlyDictionary<int, DiscordClient> shards = Bot.Instance!.Client.ShardClients;
             if (shards.Count is 0)
             {
                 _logger.LogCritical("Shard count is 0. Cache running requires at least 1 shard!");
@@ -101,9 +101,9 @@ namespace Silk.Core.EventHandlers
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
+                
                 .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
             await availableChannel.SendMessageAsync(builder);
-
         }
         private static int CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
         {

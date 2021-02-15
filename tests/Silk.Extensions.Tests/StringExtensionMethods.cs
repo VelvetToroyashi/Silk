@@ -22,8 +22,8 @@ namespace Silk.Extensions.Tests
         public void Center_WhenOversizedInput_ReturnsOriginalString()
         {
             //Arrange
-            string input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-            string anchor = "This string is too short!";
+            const string input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            const string anchor = "This string is too short!";
             //Act
             string actual = input.Center(anchor);
             Assert.Equal(input, actual);

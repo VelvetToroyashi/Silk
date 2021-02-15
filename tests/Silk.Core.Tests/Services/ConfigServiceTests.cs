@@ -36,11 +36,9 @@ namespace Silk.Core.Tests
         [Fact]
         public async Task GetConfigAsync_WhenValidId_RetrievesFromCache()
         {
-            object expected = new GuildConfig();
-            _cache.Setup(cache => cache.TryGetValue(0ul, out expected)).Returns(true);
-            var example = await _configService.GetConfigAsync(0);
-
-            Assert.Equal(expected, example);
+            object discard;
+            _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(true);
+            _db.Verify(db => db.GetConfigAsync(0), Times.Never);
         }
     }
 }

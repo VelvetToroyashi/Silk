@@ -7,15 +7,19 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 
-namespace Silk.Core.EventHandlers.MessageAdded
+namespace Silk.Core.EventHandlers.MemberAdded
 {
     class MemberAddedHandler
     {
         private readonly ConfigService _configService;
         private readonly ILogger<MemberAddedHandler> _logger;
 
-        public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger) => (_configService, _logger) = (configService, logger);
 
+        public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
+        {
+            _configService = configService;
+            _logger = logger;
+        }
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
@@ -27,7 +31,6 @@ namespace Silk.Core.EventHandlers.MessageAdded
 
             if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
             {
-                
                 DiscordChannel channel = await c.GetChannelAsync(config.GreetingChannel);
                 await channel.SendMessageAsync(config.GreetingText.Replace("{@u}", e.Member.Mention));
             }
@@ -38,8 +41,6 @@ namespace Silk.Core.EventHandlers.MessageAdded
             .WithDescription($"User: {e.Member.Mention}")
             .AddField("User ID:", e.Member.Id.ToString(), true)
             .WithThumbnail(e.Member.AvatarUrl)
-            .WithFooter("Joined at (UTC)")
-            .WithTimestamp(now)
             .WithColor(DiscordColor.Green);
     }
 }
