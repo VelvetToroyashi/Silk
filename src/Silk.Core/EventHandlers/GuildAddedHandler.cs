@@ -16,10 +16,10 @@ namespace Silk.Core.EventHandlers
 {
     public class GuildAddedHandler
     {
+        public static bool StartupCompleted { get; private set; }
         
         private readonly IDatabaseService _dbService;
         private readonly ILogger<GuildAddedHandler> _logger;
-        private volatile bool _startupCompleted;
         private readonly Dictionary<int, ShardState> _shardStates = new();
         private readonly object _lock = new();
         
@@ -64,7 +64,7 @@ namespace Silk.Core.EventHandlers
                     state.CachedMembers += cachedMembers; 
                     ++state.CachedGuilds;
                     _shardStates[client.ShardId] = state;
-                    if (!_startupCompleted)
+                    if (!StartupCompleted)
                     {
                         string message = $"Cached Guild! Shard [{client.ShardId + 1}/{client.ShardCount}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
                         message += cachedMembers is 0 ? 
@@ -81,8 +81,8 @@ namespace Silk.Core.EventHandlers
         {
             ShardState state = _shardStates[c.ShardId]; 
             state.Completed = true;
-            _startupCompleted = _shardStates.Values.All(s => s.Completed);
-            if(_startupCompleted) _logger.LogDebug("All shard(s) cache runs complete!");
+            StartupCompleted = _shardStates.Values.All(s => s.Completed);
+            if(StartupCompleted) _logger.LogDebug("All shard(s) cache runs complete!");
         }
        
 

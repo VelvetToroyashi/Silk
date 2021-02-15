@@ -91,15 +91,14 @@ namespace Silk.Core
                 IgnoreExtraArguments = true,
                 
             };
-            Client.Ready += async (c, _) => _logger.LogInformation($"Received OP 10 - HELLO from Discord on shard {c.ShardId + 1}!");
 
-            await Client.StartAsync();
             await Client.UseCommandsNextAsync(Commands);
             await _exceptionHandler.SubscribeToEventsAsync();
             
             InitializeCommands();
             InitializeServices();
             SubscribeToEvents();
+            
             await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -118,10 +117,11 @@ namespace Silk.Core
                 extension.SetHelpFormatter<HelpFormatter>();
                 extension.RegisterConverter(memberConverter);
             }
+
+            _logger.LogInformation($"Services + Commands initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
+            await Client.StartAsync();
             
-            
-            double startupDt = DateTime.Now.Subtract(Program.Startup).TotalMilliseconds;
-            _logger.LogInformation($"Startup time: {startupDt:N0} ms.");
+            _logger.LogInformation($"All shards initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
         }
 
 

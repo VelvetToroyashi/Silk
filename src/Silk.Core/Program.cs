@@ -33,6 +33,7 @@ namespace Silk.Core
                       DiscordIntents.GuildMessageReactions  | 
                       DiscordIntents.DirectMessageReactions ,   // Auto-mod,
             MessageCacheSize = 1024,
+            ShardCount = 3,
             MinimumLogLevel = LogLevel.None
         };
         
