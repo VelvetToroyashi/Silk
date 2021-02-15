@@ -93,4 +93,4 @@ To run Silk! as a docker container, you can simply create an `appSettings.json` 
 
 Both Postgres and Silk! will have to initialize on the first run, and if run without the `-d` flag, you will see an exception thrown as Silk! tries to access tables that don't exist (signifying it needs to migrate). Fear not, running `docker-compose up -d` again will have Postgres configured, and Silk! will create requisite tables if they do not already exist upon startup.
 
-![](https://velvet.is-ne.at/mQW3nC.png)
+![](https://files.velvetthepanda.dev/silk.png)
