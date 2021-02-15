@@ -65,7 +65,7 @@ namespace Silk.Core.EventHandlers
                     _shardStates[client.ShardId] = state;
                     if (!StartupCompleted)
                     {
-                        string message = $"Cached Guild! Shard [{client.ShardId + 1}/{client.ShardCount}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
+                        string message = $"Cached Guild! Shard [{client.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
                         message += cachedMembers is 0 ?
                             " → Staff [No new staff!]" :
                             $" → Staff [{cachedMembers}/{eventArgs.Guild.Members.Count}]";
@@ -80,6 +80,7 @@ namespace Silk.Core.EventHandlers
         {
             ShardState state = _shardStates[c.ShardId];
             state.Completed = true;
+            _shardStates[c.ShardId] = state;
             StartupCompleted = _shardStates.Values.All(s => s.Completed);
             if (StartupCompleted) _logger.LogDebug("All shard(s) cache runs complete!");
         }
