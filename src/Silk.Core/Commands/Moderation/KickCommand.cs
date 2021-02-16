@@ -49,25 +49,23 @@ namespace Silk.Core.Commands.Moderation
                     .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
                     .AddField("Reason:", reason);
 
-
-                User databaseUser = await _dbService.GetOrCreateGuildUserAsync(ctx.Guild.Id, user.Id);
                 Infraction infraction = await _infractionService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
-                string messaged;
+                string message;
                 try
                 {
                     await user.SendMessageAsync(embed).ConfigureAwait(false);
-                    messaged = "(User notified with Direct message)";
+                    message = "(User notified with Direct Message).";
                 }
                 catch (InvalidOperationException)
                 {
-                    _logger.LogWarning("Couldn't DM member when notifying kick.");
-                    messaged = "(Could not message user.)";
+                    _logger.LogWarning("Couldn't DM member when notifying kick");
+                    message = "(Could not message user).";
                 }
 
                 await _infractionService.KickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)
-                    .WithDescription($":boot: Kicked {user.Mention}! {messaged}")
+                    .WithDescription($":boot: Kicked {user.Mention}! {message}")
                     .AddField("Reason:", reason)
                     .AddField("Time:", DateTime.UtcNow.ToString("MM/dd/yyyy - h:mm UTC")));
             }
@@ -84,8 +82,8 @@ namespace Silk.Core.Commands.Moderation
             {
                 _ when isBot => "I wish I could kick myself, but I sadly cannot.",
                 _ when isOwner => $"I can't kick the owner ({user.Mention}) out of their own server!",
-                _ when isMod => $"I can't kick {user.Mention}! They're a moderator! ({user.Roles.Last().Mention})",
-                _ when isAdmin => $"I can't kick {user.Mention}! They're an admin! ({user.Roles.Last().Mention})",
+                _ when isMod => $"I can't kick {user.Mention}! They're a staff! ({user.Roles.Last().Mention})",
+                _ when isAdmin => $"I can't kick {user.Mention}! They're staff! ({user.Roles.Last().Mention})",
                 _ when isCurrent => "Very funny, I like you, but no, you can't kick yourself.",
                 _ => "Something has gone really wrong, and I don't know what *:(*"
             };

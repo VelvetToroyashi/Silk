@@ -10,6 +10,7 @@ using DSharpPlus.EventArgs;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities.Bot
@@ -32,15 +33,15 @@ namespace Silk.Core.Utilities.Bot
                 _logger.LogWarning($"Invalid Command Operation: Message {e.Context.Message.Content}\nException: {iope.Message}");
                 _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
             }
-            else if (e.Exception.Message is "Could not find a suitable overload for the command.")
-            {
-                _logger.LogWarning($"Invalid Command Parameters {e.Command.Name} | {e.Context.RawArgumentString}");
-                _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
-            }
-            else if (e.Exception is ArgumentException ae)
-            {
-                _logger.LogWarning(ae.Message);
-            }
+            // else if (e.Exception.Message is "Could not find a suitable overload for the command.")
+            // {
+            //     _logger.LogWarning($"Invalid Command Parameters {e.Command.Name} | {e.Context.RawArgumentString}");
+            //     _ = SendHelpAsync(c.Client, e.Command.QualifiedName, e.Context);
+            // }
+            // else if (e.Exception is ArgumentException ae)
+            // {
+            //     _logger.LogWarning(ae.Message);
+            // }
             else if (e.Exception is ChecksFailedException cf)
             {
                 switch (cf.FailedChecks[0])
@@ -69,9 +70,9 @@ namespace Silk.Core.Utilities.Bot
                         break;
                 }
             }
-            else _logger.LogWarning(e.Exception.Message);
+            else Log.Logger.ForContext(e.Exception.TargetSite!.ReflectedType).Warning(e.Exception, "Soemthing went wrong:"); 
         }
-
+        
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
