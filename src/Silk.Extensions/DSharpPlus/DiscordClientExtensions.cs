@@ -1,12 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using DSharpPlus;
 using DSharpPlus.Entities;
-
-#endregion
 
 namespace Silk.Extensions.DSharpPlus
 {
