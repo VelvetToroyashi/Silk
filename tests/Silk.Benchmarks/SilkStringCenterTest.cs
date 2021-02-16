@@ -23,11 +23,6 @@ namespace Silk.Benchmarks
         [Benchmark]
         public string CenterWithExtensionMethod() => input.Center(anchor);
 
-        [Benchmark]
-        public string CenterWithoutContains() => input.Center2(anchor);
-
-
-
         public string CenterWithCountInsteadOfSum()
         {
             int refLength = anchor.Length;
