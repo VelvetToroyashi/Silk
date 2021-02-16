@@ -50,30 +50,27 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            _ = Task.Run(async () =>
+            Guild guild = await _dbService.GetOrCreateGuildAsync(eventArgs.Guild.Id);
+            int cachedMembers = CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
+            await _dbService.UpdateGuildAsync(guild);
+            // Create a state object and update values. 
+
+            lock (_lock)
             {
-                Guild guild = await _dbService.GetOrCreateGuildAsync(eventArgs.Guild.Id);
-                int cachedMembers = CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
-                await _dbService.UpdateGuildAsync(guild);
-                // Create a state object and update values. 
-
-                lock (_lock)
+                ShardState state = _shardStates[client.ShardId];
+                state.CachedMembers += cachedMembers;
+                ++state.CachedGuilds;
+                _shardStates[client.ShardId] = state;
+                if (!StartupCompleted)
                 {
-                    ShardState state = _shardStates[client.ShardId];
-                    state.CachedMembers += cachedMembers;
-                    ++state.CachedGuilds;
-                    _shardStates[client.ShardId] = state;
-                    if (!StartupCompleted)
-                    {
-                        string message = $"Cached Guild! Shard [{client.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
-                        message += cachedMembers is 0 ?
-                            " → Staff [No new staff!]" :
-                            $" → Staff [{cachedMembers}/{eventArgs.Guild.Members.Count}]";
+                    string message = $"Cached Guild! Shard [{client.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
+                    message += cachedMembers is 0 ?
+                        " → Staff [No new staff!]" :
+                        $" → Staff [{cachedMembers}/{eventArgs.Guild.Members.Count}]";
 
-                        _logger.LogDebug(message);
-                    }
+                    _logger.LogDebug(message);
                 }
-            });
+            }
         }
 
         public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)

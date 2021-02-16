@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace Silk.Extensions
 {
@@ -10,7 +9,9 @@ namespace Silk.Extensions
             int refLength = anchor.Length;
 
             if (anchor.Contains('\t'))
-                refLength += anchor.Count(c => c is '\t') * 3;
+                foreach (char t in anchor)
+                    if (t is '\t')
+                        refLength += 3;
 
             if (text.Length >= refLength)
                 return text;
@@ -23,6 +24,5 @@ namespace Silk.Extensions
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-
     }
 }

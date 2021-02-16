@@ -1,24 +1,22 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.Extensions.Logging;
+using Humanizer;
 using Silk.Core.Database.Models;
 using Silk.Core.Services;
 
 namespace Silk.Core.EventHandlers.MemberAdded
 {
-    class MemberAddedHandler
+    public class MemberAddedHandler
     {
         private readonly ConfigService _configService;
-        private readonly ILogger<MemberAddedHandler> _logger;
-
-
-        public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
+        public MemberAddedHandler(ConfigService configService)
         {
             _configService = configService;
-            _logger = logger;
         }
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
@@ -32,7 +30,12 @@ namespace Silk.Core.EventHandlers.MemberAdded
             if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
             {
                 DiscordChannel channel = await c.GetChannelAsync(config.GreetingChannel);
-                await channel.SendMessageAsync(config.GreetingText.Replace("{@u}", e.Member.Mention));
+                string formattedMessage = config.GreetingText
+                    .Replace("{u}", e.Member.Username)
+                    .Replace("{s}", e.Guild.Name)
+                    .Replace("{@u}", e.Member.Mention);
+
+                await channel.SendMessageAsync(formattedMessage);
             }
         }
 

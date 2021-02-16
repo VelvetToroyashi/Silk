@@ -13,7 +13,7 @@ namespace Silk.Benchmarks
         private readonly string input = "Center";
         private readonly string anchor = "Longer\tCenter";
 
-        [Benchmark]
+
         public string CenterWithPad()
         {
             var interpretedAnchor = anchor.Replace("\t", "    ");
@@ -24,6 +24,10 @@ namespace Silk.Benchmarks
         public string CenterWithExtensionMethod() => input.Center(anchor);
 
         [Benchmark]
+        public string CenterWithoutContains() => input.Center2(anchor);
+
+
+
         public string CenterWithCountInsteadOfSum()
         {
             int refLength = anchor.Length;
@@ -44,7 +48,6 @@ namespace Silk.Benchmarks
             });
         }
 
-        [Benchmark]
         public string CenterWithWhereCount()
         {
             int refLength = anchor.Length;
@@ -64,8 +67,7 @@ namespace Silk.Benchmarks
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-
-        [Benchmark]
+        
         public string CenterWithForLoop()
         {
             int refLength = anchor.Length;
@@ -87,8 +89,7 @@ namespace Silk.Benchmarks
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-
-        [Benchmark]
+        
         public string CenterWithForeach()
         {
             int refLength = anchor.Length;

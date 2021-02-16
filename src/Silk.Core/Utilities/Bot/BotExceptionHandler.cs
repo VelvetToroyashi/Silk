@@ -90,9 +90,7 @@ namespace Silk.Core.Utilities.Bot
         public async Task SubscribeToEventsAsync()
         {
             _client.ClientErrored += OnClientErrored;
-            _client.SocketClosed += async (_, _) => _logger.LogWarning("Disconnected");
-            _client.Resumed += async (_, _) => _logger.LogInformation("Reconnected"); // Async keyword because I'm lazy, and then I don't need to return anything.
-
+            
             TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: " + e.Exception);
             IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
 
