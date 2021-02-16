@@ -70,7 +70,7 @@ namespace Silk.Core.Utilities.Bot
                         break;
                 }
             }
-            else Log.Logger.ForContext(e.Exception.TargetSite!.ReflectedType).Warning(e.Exception, "Soemthing went wrong:"); 
+            else Log.Logger.ForContext(e.Command.GetType()).Warning(e.Exception, "Soemthing went wrong:"); 
         }
         
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)

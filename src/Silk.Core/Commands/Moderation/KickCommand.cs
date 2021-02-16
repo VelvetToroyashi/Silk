@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
@@ -19,12 +20,14 @@ namespace Silk.Core.Commands.Moderation
     public class KickCommand : BaseCommandModule
     {
         private readonly ILogger<KickCommand> _logger;
-        private readonly IDatabaseService _dbService;
         private readonly IInfractionService _infractionService;
-
-        public KickCommand(ILogger<KickCommand> logger, IDatabaseService dbService, IInfractionService incractionService) =>
-            (_logger, _dbService, _infractionService) = (logger, dbService, incractionService);
-
+        
+        public KickCommand(ILogger<KickCommand> logger, IInfractionService infractionService)
+        {
+            _logger = logger;
+            _infractionService = infractionService;
+        }
+        
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [RequireBotPermissions(Permissions.KickMembers)]
@@ -33,12 +36,10 @@ namespace Silk.Core.Commands.Moderation
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
 
-
-
-            if (user.IsAbove(bot) || ctx.User == user)
+            if (user.IsAbove(bot) || user.IsAbove(ctx.Member)|| ctx.User == user)
             {
                 DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
-                await ctx.RespondAsync(embed).ConfigureAwait(false);
+                await ctx.RespondAsync(embed);
             }
             else
             {
@@ -50,13 +51,14 @@ namespace Silk.Core.Commands.Moderation
                     .AddField("Reason:", reason);
 
                 Infraction infraction = await _infractionService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
-                string message;
+                string message = string.Empty;
                 try
                 {
-                    await user.SendMessageAsync(embed).ConfigureAwait(false);
+                    await user.SendMessageAsync(embed);
                     message = "(User notified with Direct Message).";
                 }
-                catch (InvalidOperationException)
+                catch (ArgumentException) { }
+                catch (UnauthorizedException)
                 {
                     _logger.LogWarning("Couldn't DM member when notifying kick");
                     message = "(Could not message user).";
