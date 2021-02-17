@@ -21,17 +21,37 @@ namespace Silk.Core.Database.Models
         /// Id of the role to apply when muting members.
         /// </summary>
         public ulong MuteRoleId { get; set; }
+        
+        /// <summary>
+        /// Whether to send a greeting message in the server when someone joins.
+        /// </summary>
+        public bool GreetMembers { get; set; }
+        
+        /// <summary>
+        /// Whether to wait for the newly joined member to complete guild membership screening
+        /// </summary>
+        public bool GreetOnScreeningComplete { get; set; }
+
+        /// <summary>
+        /// Whether to greet when a specific role is granted to the user, rather than when they complete membership screening (if applicable).
+        /// </summary>
+        public bool GreetOnVerificationRole { get; set; }
+        
+        /// <summary>
+        /// The Id of the role to wait for to be granted while
+        /// </summary>
+        public ulong VerificationRole { get; set; }
+
         /// <summary>
         /// Id of the channel to greet members in.
         /// </summary>
         public ulong GreetingChannel { get; set; }
-
+        
         /// <summary>
-        /// The text that will be used to greet new members,
-        /// @u will be replaced with a mention of the new member.
+        /// The text that will be used to greet new members.
         /// </summary>
         public string GreetingText { get; set; } = string.Empty;
-
+        
         //This will be used eventually.
         public string InfractionFormat { get; set; } = string.Empty;
 
@@ -57,10 +77,7 @@ namespace Silk.Core.Database.Models
         /// Whether to log members joining or not.
         /// </summary>
         public bool LogMemberJoing { get; set; }
-        /// <summary>
-        /// Whether to send a greeting message in the server when someone joins.
-        /// </summary>
-        public bool GreetMembers { get; set; }
+
         /// <summary>
         /// Blacklist certain invites.
         /// </summary>
@@ -87,14 +104,6 @@ namespace Silk.Core.Database.Models
         /// </summary>
         public List<InfractionType> InfractionDictionary { get; set; } = new();
 
-        #endregion
-
-        #region Premium Features
-
-        /// <summary>
-        /// Whether a guild is considered premium.
-        /// </summary>
-        public bool IsPremium { get; set; }
         /// <summary>
         /// Whether to automatically dehoist members. Guild must be premium.
         /// </summary>
@@ -104,7 +113,10 @@ namespace Silk.Core.Database.Models
         /// </summary>
         public bool ScanInvites { get; set; }
 
+        
         #endregion
+        
+
         /// <summary>
         /// A list of whitlisted invites.
         /// </summary>

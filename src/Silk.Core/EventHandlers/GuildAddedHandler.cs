@@ -88,7 +88,7 @@ namespace Silk.Core.EventHandlers
         {
             var allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             DiscordMember bot = e.Guild.CurrentMember;
-            var availableChannel =
+            DiscordChannel? availableChannel =
                 allChannels.Where(c => c.Type is ChannelType.Text)
                     .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
             if (availableChannel is null) return;
@@ -122,7 +122,9 @@ namespace Silk.Core.EventHandlers
                     guild.Users.Add(new() {Id = member.Id, Flags = flag});
                 }
             }
-            return guild.Users.Count - staffBefore;
+            int staffNow = guild.Users.Count(us => us.Flags.HasFlag(UserFlag.Staff));
+            int staffCount = staffNow - staffBefore;
+            return staffCount < 1 ? 0 : staffCount;
         }
     }
 }

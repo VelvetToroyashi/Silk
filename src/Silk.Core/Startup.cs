@@ -30,28 +30,27 @@ namespace Silk.Core
         public static void AddServices(IServiceCollection services)
         {
             services.AddScoped<IDatabaseService, DatabaseService>();
-            services.AddSingleton<IInfractionService, InfractionService>();
-            services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
-            services.AddSingleton<TicketService>();
-            services.AddSingleton<ConfigService>();
+            services.AddTransient<IInfractionService, InfractionService>();
+            services.AddTransient<IPrefixCacheService, PrefixCacheService>();
+            services.AddTransient<TicketService>();
+            services.AddTransient<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
-            services.AddSingleton<AutoModInviteHandler>();
+            services.AddTransient<AutoModInviteHandler>();
 
             services.AddSingleton<BotExceptionHandler>();
 
-            services.AddSingleton<GuildAddedHandler>();
-            services.AddSingleton<MessageAddedHandler>();
-            services.AddSingleton<MessageRemovedHandler>();
+            services.AddTransient<GuildAddedHandler>();
+            services.AddTransient<MessageAddedHandler>();
+            services.AddTransient<MessageRemovedHandler>();
 
-            services.AddSingleton<MemberAddedHandler>();
-            services.AddSingleton<MemberRemovedHandler>();
+            services.AddTransient<MemberAddedHandler>();
+            services.AddTransient<MemberRemovedHandler>();
 
-            services.AddSingleton<RoleAddedHandler>();
-            services.AddSingleton<RoleRemovedHandler>();
+            services.AddTransient<RoleAddedHandler>();
+            services.AddTransient<RoleRemovedHandler>();
 
             services.AddSingleton<SerilogLoggerFactory>();
-            services.AddSingleton<List<IConfiguredService>>();
 
         }
 

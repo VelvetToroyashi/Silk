@@ -23,9 +23,4 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="Services\ConfigServiceTests.cs" />
-    </ItemGroup>
-
 </Project>
