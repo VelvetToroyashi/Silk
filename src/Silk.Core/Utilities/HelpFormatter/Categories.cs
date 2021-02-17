@@ -7,19 +7,16 @@ namespace Silk.Core.Utilities.HelpFormatter
     public static class Categories
     {
         public const string
-            Dev = CustomEmoji.Discord + " Developer",
-            Mod = CustomEmoji.Staff + " Mod",
-            General = "📁 General",
-            Games = "🎮 Games",
-            Misc = "💡 Misc",
-            // Todo: Add Emoji's for Categories
-            Server = CustomEmoji.Server + " Server",
-            Roles = " Roles",
-            Bot = CustomEmoji.Bot + " Bot",
-            Economy = CustomEmoji.Money + " Economy";
+            Dev = "`✏️ Developer`",
+            Mod = "`⚒️ Mod`",
+            General = "`📁 General`",
+            Games = "`🎮 Games`",
+            Misc = "`💡 Misc`",
+            Server = "`🖥️ Server`",
+            Bot = "`🤖 Bot`",
+            Economy = "`💰 Economy`";
 
-        public static readonly IReadOnlyList<string> Order
-            = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Roles, Economy};
+        public static readonly IReadOnlyList<string> Order = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Economy};
     }
 
     public static class CustomEmoji
@@ -35,7 +32,7 @@ namespace Silk.Core.Utilities.HelpFormatter
         public static DiscordEmoji ToEmoji(this string text)
         {
             Match match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
-            return DiscordEmoji.FromUnicode(match.Success ? match.Groups[1].Value : text.Trim());
+            return DiscordEmoji.FromUnicode(match.Success ? match.Groups[0].Value : text.Trim());
         }
 
 

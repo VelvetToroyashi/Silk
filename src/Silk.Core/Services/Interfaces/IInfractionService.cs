@@ -11,10 +11,22 @@ namespace Silk.Core.Services.Interfaces
     public interface IInfractionService
     {
         /// <summary>
-        /// Kick a member verbosely, by logging to the appropriate log channel (if any), and the chanel the command was run in.
+        /// Kick a member and log to the appropriate log channel (if any), and the chanel the command was run in.
         /// </summary>
+        /// <param name="member">The member to kick.</param>
+        /// <param name="channel">The channel the command was run in.</param>
+        /// <param name="infraction">The infraction to apply to the user.</param>
+        /// <param name="embed"></param>
+        /// <returns></returns>
         public Task KickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="member"></param>
+        /// <param name="channel"></param>
+        /// <param name="infraction"></param>
+        /// <returns></returns>
         public Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
         public Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
