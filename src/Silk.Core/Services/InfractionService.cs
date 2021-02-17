@@ -13,10 +13,9 @@ using Silk.Core.Utilities;
 namespace Silk.Core.Services
 {
     /// <inheritdoc cref="IInfractionService"/>
-    public sealed class InfractionService : IInfractionService, IConfiguredService
+    public sealed class InfractionService : IInfractionService
     {
-        public bool HasConfigured { get; private set; }
-
+        
         private readonly ConfigService _configService;
         private readonly IDatabaseService _dbService;
         private readonly ILogger<InfractionService> _logger;
@@ -226,21 +225,16 @@ namespace Silk.Core.Services
 
         private void LoadInfractions()
         {
-            _logger.LogTrace("Building InfractionService cache");
-
             IEnumerable<Infraction> infractions = _dbService.GetActiveInfractionsAsync().GetAwaiter().GetResult();
-
             _tempInfractions.AddRange(infractions);
-            _logger.LogTrace("Loaded all applicable infractions!");
         }
 
-        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction) { }
+        /// <summary>
+        /// Used to perform the correct step depending on guild settings.
+        /// </summary>
+        /// <param name="member">The member in question</param>
+        /// <param name="infraction">The infraction object to be attached to the member</param>
+        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction) => throw new NotImplementedException();
 
-
-
-        public async Task Configure()
-        {
-            _logger.LogTrace("This service is being configured!");
-        }
     }
 }
