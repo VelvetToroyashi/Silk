@@ -20,8 +20,7 @@ namespace Silk.Core.Commands.Server.Configuration
             [Group("moderation")]
             public class EditModerationConfigCommand : BaseCommandModule
             {
-                //Does nested class ctor injection work???? //
-                // Yes! //
+                
                 private readonly IDatabaseService? _dbService;
                 private readonly IServiceCacheUpdaterService _cacheUpdaterService;
 

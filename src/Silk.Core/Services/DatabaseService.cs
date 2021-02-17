@@ -60,14 +60,14 @@ namespace Silk.Core.Services
             return guild;
         }
 
-        public async Task<GuildConfig> GetConfigAsync(ulong configId)
+        public async Task<GuildConfig> GetConfigAsync(ulong guildId)
         {
             await using SilkDbContext db = GetDbContext();
             GuildConfig config = await db.GuildConfigs
                 .Include(c => c.AllowedInvites)
                 .Include(c => c.SelfAssignableRoles)
                 //.AsSplitQuery()
-                .FirstAsync(g => g.GuildId == configId);
+                .FirstAsync(g => g.GuildId == guildId);
             return config;
         }
 

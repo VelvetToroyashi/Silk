@@ -35,9 +35,9 @@ namespace Silk.Core.Services.Interfaces
         /// <summary>
         /// Get the configuration of a <see cref="Guild"/>.
         /// </summary>
-        /// <param name="configId">The Id of the guild to retrieve a configuration for.</param>
+        /// <param name="guildId">The Id of the guild to retrieve a configuration for.</param>
         /// <returns>The configuration that corresponds to the Id passed in.</returns>
-        public Task<GuildConfig> GetConfigAsync(ulong configId);
+        public Task<GuildConfig> GetConfigAsync(ulong guildId);
 
         /// <summary>
         /// Update a <see cref="GuildConfig"/>.
