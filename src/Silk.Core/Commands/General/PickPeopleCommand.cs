@@ -16,7 +16,8 @@ namespace Silk.Core.Commands.General
         [Description("Pick random members on your server! Useful for...something.")]
         public async Task PickRandom(CommandContext ctx, uint sampleSize)
         {
-            if (sampleSize is 0) throw new ArgumentOutOfRangeException();
+            if (sampleSize is 0) 
+                    throw new ArgumentOutOfRangeException(nameof(sampleSize), "Sample size must be > 1");
             
             List<DiscordMember> users = ctx.Guild.Members.Values.Where(u => !u.IsBot).ToList();
             sampleSize = (uint) Math.Min(sampleSize, users.Count);
