@@ -5,6 +5,6 @@ namespace Silk.Core.Database.MediatR
 {
     public class UpdateGuildRequest : IRequest<Guild>
     {
-        public Guild Guild { get; init; }
+        public Guild Guild { get; init; } = null!;
     }
 }
