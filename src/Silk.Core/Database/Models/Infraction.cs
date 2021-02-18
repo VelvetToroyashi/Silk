@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Database.Models
 {
-    public class 
+    public class
         Infraction
     {
         public int Id { get; set; } //Requisite Id for DB purposes

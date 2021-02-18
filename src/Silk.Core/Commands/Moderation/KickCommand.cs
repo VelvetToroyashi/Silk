@@ -21,13 +21,13 @@ namespace Silk.Core.Commands.Moderation
     {
         private readonly ILogger<KickCommand> _logger;
         private readonly IInfractionService _infractionService;
-        
+
         public KickCommand(ILogger<KickCommand> logger, IInfractionService infractionService)
         {
             _logger = logger;
             _infractionService = infractionService;
         }
-        
+
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [RequireBotPermissions(Permissions.KickMembers)]
@@ -35,8 +35,8 @@ namespace Silk.Core.Commands.Moderation
         public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-            
-            if (user.IsAbove(bot) || user.IsAbove(ctx.Member)|| ctx.User == user)
+
+            if (user.IsAbove(bot) || user.IsAbove(ctx.Member) || ctx.User == user)
             {
                 DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
                 await ctx.RespondAsync(embed);

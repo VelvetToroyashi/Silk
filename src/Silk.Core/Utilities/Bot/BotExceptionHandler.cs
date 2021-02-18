@@ -70,9 +70,9 @@ namespace Silk.Core.Utilities.Bot
                         break;
                 }
             }
-            else Log.Logger.ForContext(e.Command.GetType()).Warning(e.Exception, "Soemthing went wrong:"); 
+            else Log.Logger.ForContext(e.Command.GetType()).Warning(e.Exception, "Soemthing went wrong:");
         }
-        
+
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             if (e.Exception.Message.Contains("event")) _logger.LogWarning($"[{e.EventName}] Timed out!");
@@ -91,7 +91,7 @@ namespace Silk.Core.Utilities.Bot
         public async Task SubscribeToEventsAsync()
         {
             _client.ClientErrored += OnClientErrored;
-            
+
             TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: " + e.Exception);
             IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
 

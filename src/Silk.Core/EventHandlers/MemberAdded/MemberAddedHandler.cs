@@ -38,7 +38,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
             bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetOnScreeningComplete;
             bool verifyMembers = config.GreetOnVerificationRole && config.VerificationRole is not 0;
-            
+
             if (screenMembers || verifyMembers)
                 MemberQueue.Add(e.Member);
         }
@@ -67,7 +67,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
                 if (config.GreetOnScreeningComplete && member.IsPending is true) return;
                 if (config.GreetOnVerificationRole && member.Roles.All(r => r.Id != config.VerificationRole)) return;
-                
+
                 verifiedMembers.Add(member);
                 await GreetMemberAsync(member, config);
             }
@@ -77,7 +77,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
                 MemberQueue = MemberQueue.Except(verifiedMembers).ToList();
             }
         }
-        
+
         private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now) => new DiscordEmbedBuilder()
             .WithTitle("User joined:")
             .WithDescription($"User: {e.Member.Mention}")

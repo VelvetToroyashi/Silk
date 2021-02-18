@@ -62,7 +62,7 @@ namespace Silk.Benchmarks
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-        
+
         public string CenterWithForLoop()
         {
             int refLength = anchor.Length;
@@ -84,7 +84,7 @@ namespace Silk.Benchmarks
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-        
+
         public string CenterWithForeach()
         {
             int refLength = anchor.Length;

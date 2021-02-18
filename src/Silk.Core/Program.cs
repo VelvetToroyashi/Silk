@@ -36,7 +36,7 @@ namespace Silk.Core
             MinimumLogLevel = LogLevel.None
         };
 
-        public static async Task Main(string[] args) => 
+        public static async Task Main(string[] args) =>
             await CreateHostBuilder(args)
                 .UseConsoleLifetime()
                 .StartAsync()

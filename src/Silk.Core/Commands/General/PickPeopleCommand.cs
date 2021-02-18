@@ -16,17 +16,17 @@ namespace Silk.Core.Commands.General
         [Description("Pick random members on your server! Useful for...something.")]
         public async Task PickRandom(CommandContext ctx, uint sampleSize)
         {
-            if (sampleSize is 0) 
-                    throw new ArgumentOutOfRangeException(nameof(sampleSize), "Sample size must be > 1");
-            
+            if (sampleSize is 0)
+                throw new ArgumentOutOfRangeException(nameof(sampleSize), "Sample size must be > 1");
+
             List<DiscordMember> users = ctx.Guild.Members.Values.Where(u => !u.IsBot).ToList();
             sampleSize = (uint) Math.Min(sampleSize, users.Count);
-            
+
             int seed = DateTime.UtcNow.Millisecond + DateTime.UtcNow.Second;
             var random = new Random(seed);
             var selectedUsers = new List<string>();
-            
-            
+
+
             for (var i = 0; i < sampleSize; i++)
             {
                 DiscordMember selectedUser = users[random.Next(users.Count)];
@@ -35,7 +35,7 @@ namespace Silk.Core.Commands.General
             }
 
             string result = string.Join('\n', selectedUsers);
-            
+
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"Selected {sampleSize} random users!")
                 .WithDescription($"Result:\n{result}")

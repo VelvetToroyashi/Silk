@@ -15,7 +15,7 @@ namespace Silk.Core.Services
     /// <inheritdoc cref="IInfractionService"/>
     public sealed class InfractionService : IInfractionService
     {
-        
+
         private readonly ConfigService _configService;
         private readonly IDatabaseService _dbService;
         private readonly ILogger<InfractionService> _logger;

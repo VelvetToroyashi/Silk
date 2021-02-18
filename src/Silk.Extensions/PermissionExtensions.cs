@@ -14,7 +14,7 @@ namespace Silk.Extensions
                 ? member.Guild.EveryoneRole.HasPermission(perm)
                 : member.Roles.Any(role => role.HasPermission(perm));
         }
-        
+
         public static bool IsAdministrator(this DiscordMember member) =>
             member.Roles.Any(role => role.Permissions.HasPermission(Permissions.Administrator));
 
@@ -22,8 +22,8 @@ namespace Silk.Extensions
         public static string GetRoleMention(this DiscordMember member) => member.Roles.Last().Mention;
 
         public static bool IsAbove(this DiscordMember target, DiscordMember comparison) =>
-            target.Roles.Any() && 
-            target.Roles.OrderBy(r => r.Position).Last().Position >= 
+            target.Roles.Any() &&
+            target.Roles.OrderBy(r => r.Position).Last().Position >=
             comparison.Roles.OrderBy(r => r.Position).Last().Position;
     }
 }

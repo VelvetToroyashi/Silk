@@ -77,7 +77,7 @@ namespace Silk.Core.Utilities
 
                         if (fieldInfo is null && propertyInfo is null)
                             continue;
-                        
+
                         Type? type = fieldInfo is not null ? fieldInfo.FieldType : propertyInfo!.PropertyType;
                         object? value = fieldInfo is not null
                             ? fieldInfo.GetValue(element)

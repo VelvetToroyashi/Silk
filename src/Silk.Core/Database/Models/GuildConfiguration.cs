@@ -21,12 +21,12 @@ namespace Silk.Core.Database.Models
         /// Id of the role to apply when muting members.
         /// </summary>
         public ulong MuteRoleId { get; set; }
-        
+
         /// <summary>
         /// Whether to send a greeting message in the server when someone joins.
         /// </summary>
         public bool GreetMembers { get; set; }
-        
+
         /// <summary>
         /// Whether to wait for the newly joined member to complete guild membership screening
         /// </summary>
@@ -36,7 +36,7 @@ namespace Silk.Core.Database.Models
         /// Whether to greet when a specific role is granted to the user, rather than when they complete membership screening (if applicable).
         /// </summary>
         public bool GreetOnVerificationRole { get; set; }
-        
+
         /// <summary>
         /// The Id of the role to wait for to be granted while
         /// </summary>
@@ -46,12 +46,12 @@ namespace Silk.Core.Database.Models
         /// Id of the channel to greet members in.
         /// </summary>
         public ulong GreetingChannel { get; set; }
-        
+
         /// <summary>
         /// The text that will be used to greet new members.
         /// </summary>
         public string GreetingText { get; set; } = string.Empty;
-        
+
         //This will be used eventually.
         public string InfractionFormat { get; set; } = string.Empty;
 
@@ -113,9 +113,8 @@ namespace Silk.Core.Database.Models
         /// </summary>
         public bool ScanInvites { get; set; }
 
-        
         #endregion
-        
+
 
         /// <summary>
         /// A list of whitlisted invites.

@@ -69,7 +69,7 @@ namespace Silk.Core
             var sw = Stopwatch.StartNew();
             foreach (CommandsNextExtension c in extension)
                 c.RegisterCommands(asm);
-            
+
             sw.Stop();
 
             _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shard(s) in {sw.ElapsedMilliseconds} ms.");

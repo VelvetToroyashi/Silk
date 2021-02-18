@@ -5,7 +5,7 @@ namespace Silk.Core.Database.MediatR.Handlers.Users
 {
     public class UpdateUserRequest : IRequest<User>
     {
-        
-        public UserFlag? Flags { get; init; }   
+
+        public UserFlag? Flags { get; init; }
     }
 }
