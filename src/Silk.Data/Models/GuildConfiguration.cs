@@ -68,7 +68,7 @@ namespace Silk.Data.Models
         /// <summary>
         /// Channel Id to log moderation/message changes to.
         /// </summary>
-        public ulong GeneralLoggingChannel { get; set; }
+        public ulong LoggingChannel { get; set; }
         /// <summary>
         /// Whether to log when messages are edited/deleted.
         /// </summary>

@@ -26,11 +26,11 @@ namespace Silk.Data.MediatR.Handlers
         }
         
         
-        public class GuildGetOrCreateHandler : IRequestHandler<GuildRequest.GetOrCreateGuildRequest, Guild>
+        public class GuildGetOrCreateRequestHandler : IRequestHandler<GuildRequest.GetOrCreateGuildRequest, Guild>
         {
             private readonly SilkDbContext _db;
 
-            public GuildGetOrCreateHandler(SilkDbContext db)
+            public GuildGetOrCreateRequestHandler(SilkDbContext db)
             {
                 _db = db;
             }

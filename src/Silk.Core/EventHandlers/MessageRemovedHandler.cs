@@ -24,10 +24,10 @@ namespace Silk.Core.EventHandlers
                 GuildConfig config = await _dbService.GetConfigAsync(e.Guild.Id);
 
                 if (!config.LogMessageChanges) return;
-                if (config.GeneralLoggingChannel is 0) return;
+                if (config.LoggingChannel is 0) return;
 
                 DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
-                DiscordChannel channel = await c.GetChannelAsync(config.GeneralLoggingChannel);
+                DiscordChannel channel = await c.GetChannelAsync(config.LoggingChannel);
                 await channel.SendMessageAsync(embed).ConfigureAwait(false);
             });
 

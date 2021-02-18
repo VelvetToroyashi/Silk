@@ -92,7 +92,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 await ctx.Guild.BanMemberAsync(user, 7, reason);
                 ulong? loggingChannel = _dbFactory.CreateDbContext()
                     .Guilds.FirstOrDefault(g => g.Id == ctx.Guild.Id)
-                    ?.Configuration.GeneralLoggingChannel;
+                    ?.Configuration.LoggingChannel;
                 DiscordChannel sendChannel = ctx.Guild.GetChannel(loggingChannel!.Value) ?? ctx.Channel;
 
                 await sendChannel.SendMessageAsync(logEmbed);

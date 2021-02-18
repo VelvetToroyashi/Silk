@@ -29,7 +29,7 @@ namespace Silk.Core.Commands.Moderation.Utilities
             {
                 Guild config = _dbFactory.CreateDbContext().Guilds.First(g => g.Id == e.Guild.Id);
                 CheckForInvite(e, config);
-                ulong logChannel = config.Configuration.GeneralLoggingChannel;
+                ulong logChannel = config.Configuration.LoggingChannel;
                 if (e.Message!.Author.IsCurrent || e.Message.Author!.IsBot || !e.Message.IsEdited) return;
 
                 if (logChannel == default) return;

@@ -43,10 +43,10 @@ namespace Silk.Core.Services
             _ = member.RemoveAsync(infraction.Reason);
             GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
 
-            if (config.GeneralLoggingChannel is 0)
+            if (config.LoggingChannel is 0)
                 _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
             else
-                _ = channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
+                _ = channel.Guild.Channels[config.LoggingChannel].SendMessageAsync(embed);
 
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
         }
@@ -56,7 +56,7 @@ namespace Silk.Core.Services
             await member.BanAsync(0, infraction.Reason);
             GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
             await ApplyInfractionAsync(infraction.User, infraction);
-            if (config.GeneralLoggingChannel is 0)
+            if (config.LoggingChannel is 0)
             {
                 _logger.LogWarning($"No available logging channel for guild! | {member.Guild.Id}");
                 await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
@@ -71,7 +71,7 @@ namespace Silk.Core.Services
                     .WithFooter($"Staff member: {infraction.Enforcer}");
 
                 await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
-                await channel.Guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
+                await channel.Guild.Channels[config.LoggingChannel].SendMessageAsync(embed);
             }
         }
 
@@ -161,14 +161,14 @@ namespace Silk.Core.Services
         {
             await guild.UnbanMemberAsync(inf.UserId);
             _logger.LogTrace($"Unbanned {inf.UserId} | SoftBan expired.");
-            if (config.GeneralLoggingChannel is 0)
+            if (config.LoggingChannel is 0)
             {
                 _logger.LogTrace($"Logging channel not configured for {guild.Id}.");
                 return;
             }
 
             DiscordEmbed embed = EmbedHelper.CreateEmbed("Ban expired!", $"<@{inf.UserId}>'s ban has expired.", DiscordColor.Goldenrod);
-            await guild.Channels[config.GeneralLoggingChannel].SendMessageAsync(embed);
+            await guild.Channels[config.LoggingChannel].SendMessageAsync(embed);
         }
 
         private async Task ProcessTempMuteAsync(DiscordGuild guild, GuildConfig config, Infraction inf)
