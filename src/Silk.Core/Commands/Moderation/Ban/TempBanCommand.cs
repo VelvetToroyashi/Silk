@@ -107,7 +107,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         /// <param name="caller">The member that's executing the command</param>
         /// <param name="recipient">The member to be banned.</param>
         /// <returns>A <see cref="BanFailureReason"></see> if some check fails, else null.</returns>
-        private static BanFailureReason CanBan(DiscordMember bot, DiscordMember caller, DiscordMember recipient)
+        private static BanFailureReason? CanBan(DiscordMember bot, DiscordMember caller, DiscordMember recipient)
         {
             if (!bot.Roles.Any(r => r.Permissions.HasFlag(Permissions.BanMembers)))
                 return new BanFailureReason(BanFailureReason.INSUFFICIENT_BOT_PERMISSIONS);

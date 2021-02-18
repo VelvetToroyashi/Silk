@@ -114,7 +114,6 @@
   <ItemGroup>
     <Folder Include="Abstractions" />
     <Folder Include="Commands\Server\Roles" />
-    <Folder Include="Database" />
   </ItemGroup>
   
 </Project>
