@@ -16,7 +16,7 @@ namespace Silk.Data.Models
         /// <summary>
         /// Requisite property to form a Foreign Key (FK)
         /// </summary>
-        public Guild Guild { get; set; } = null!;
+        public Guild Guild { get; set; }
         /// <summary>
         /// Id of the role to apply when muting members.
         /// </summary>
