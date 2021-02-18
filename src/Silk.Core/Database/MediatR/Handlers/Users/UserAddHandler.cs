@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,8 @@ namespace Silk.Core.Database.MediatR.Handlers.Users
         public async Task<User> Handle(AddUserRequest request, CancellationToken cancellationToken)
         {
             var user = new User { Id = request.UserId, GuildId = request.GuildId, Flags = request.Flags ?? UserFlag.None };
+            _db.Attach(user);
+            
             await _db.SaveChangesAsync(cancellationToken);
             return user;
         }

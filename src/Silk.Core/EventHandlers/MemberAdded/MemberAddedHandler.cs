@@ -30,7 +30,6 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
-
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
 
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
