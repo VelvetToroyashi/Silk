@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities

@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.General.Tickets
 {

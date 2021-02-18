@@ -6,9 +6,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
 {

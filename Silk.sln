@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Benchmarks", "tests\Si
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Extensions.Tests", "tests\Silk.Extensions.Tests\Silk.Extensions.Tests.csproj", "{832DCD90-034E-4282-B6A7-627D7FC51EB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Data", "src\Silk.Data\Silk.Data.csproj", "{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,14 @@ Global
 		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|x64.ActiveCfg = Release|Any CPU
 		{832DCD90-034E-4282-B6A7-627D7FC51EB7}.Release|x64.Build.0 = Release|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Debug|x64.Build.0 = Debug|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Release|x64.ActiveCfg = Release|Any CPU
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,5 +105,6 @@ Global
 		{C8175039-89F8-4798-9282-98BDF91FD0C5} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
 		{708442D6-A90A-4BF6-BFA3-4D2B21C2269F} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
 		{832DCD90-034E-4282-B6A7-627D7FC51EB7} = {C9E5F7D9-B12E-4A1A-949C-FDFF08A46A67}
+		{A75A61EE-D0BD-4536-B6C6-26A26D8062F2} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 	EndGlobalSection
 EndGlobal

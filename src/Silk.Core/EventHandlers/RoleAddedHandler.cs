@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers

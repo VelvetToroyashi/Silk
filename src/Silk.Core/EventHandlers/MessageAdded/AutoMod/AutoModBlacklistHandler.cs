@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
+using Silk.Data;
 
 namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
 {

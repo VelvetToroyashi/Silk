@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
-namespace Silk.Core.Database.MediatR.Handlers
+namespace Silk.Data.MediatR.Handlers
 {
     public class GuildRequestHandler
     {
@@ -19,7 +19,7 @@ namespace Silk.Core.Database.MediatR.Handlers
 
             public async Task<Guild> Handle(GuildRequest.AddGuildRequest request, CancellationToken cancellationToken)
             {
-                var guild = new Guild {Id = request.GuildId, Configuration = new(), Prefix = Bot.DefaultCommandPrefix};
+                var guild = new Guild {Id = request.GuildId, Configuration = new(), Prefix = request.Prefix};
                 await _db.SaveChangesAsync(cancellationToken);
                 return guild;
             }
@@ -46,7 +46,7 @@ namespace Silk.Core.Database.MediatR.Handlers
                 guild = new()
                 {
                     Id = request.GuildId,
-                    Prefix = Bot.DefaultCommandPrefix
+                    Prefix = request.Prefix
                 };
                 _db.Attach(guild);
                 await _db.SaveChangesAsync(cancellationToken);

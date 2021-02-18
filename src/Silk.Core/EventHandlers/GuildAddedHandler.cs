@@ -8,8 +8,8 @@ using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Constants;
-using Silk.Core.Database.MediatR;
-using Silk.Core.Database.Models;
+using Silk.Data.MediatR;
+using Silk.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers

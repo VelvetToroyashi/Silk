@@ -8,12 +8,12 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Commands.Moderation.Utilities;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data;
+using Silk.Data.Models;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
-using InfractionType = Silk.Core.Database.Models.InfractionType;
+using InfractionType = Silk.Data.Models.InfractionType;
 
 namespace Silk.Core.Commands.Moderation.Ban
 {

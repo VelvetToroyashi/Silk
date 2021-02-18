@@ -8,8 +8,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
+using Silk.Data.Models;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 

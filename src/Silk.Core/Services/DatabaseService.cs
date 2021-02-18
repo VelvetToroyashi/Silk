@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Data;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

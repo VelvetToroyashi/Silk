@@ -1,4 +1,4 @@
-﻿namespace Silk.Core.Database.Models
+﻿namespace Silk.Data.Models
 {
     public class TicketMessage
     {

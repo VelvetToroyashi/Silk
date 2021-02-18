@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using MediatR;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
-namespace Silk.Core.Database.MediatR
+namespace Silk.Data.MediatR
 {
     public class UserRequest
     {
@@ -14,6 +14,7 @@ namespace Silk.Core.Database.MediatR
         
         public class UpdateUserRequest : IRequest<User>
         {
+            public ulong UserId { get; init; }
             public UserFlag? Flags { get; init; }
             public List<Infraction>? Infractions { get; init; }
         }

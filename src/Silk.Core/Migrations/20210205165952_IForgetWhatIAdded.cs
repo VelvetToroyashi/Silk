@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
 namespace Silk.Core.Migrations
 {

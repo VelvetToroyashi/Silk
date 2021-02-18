@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services.Interfaces
 {

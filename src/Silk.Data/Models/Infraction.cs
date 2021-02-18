@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Silk.Core.Database.Models
+namespace Silk.Data.Models
 {
     public class
         Infraction
@@ -28,7 +28,7 @@ namespace Silk.Core.Database.Models
         /// <remarks>This is also used for the infraction service to check</remarks>
         public DateTime InfractionTime { get; set; } //When it happened
         /// <summary>
-        /// The type of infraction. Infractions of type <see cref="Silk.Core.Database.Models.InfractionType.SoftBan"/> and <see cref="Silk.Core.Database.Models.InfractionType.Mute"/> are loaded into memory upon startup.
+        /// The type of infraction. Infractions of type <see cref="Models.InfractionType.SoftBan"/> and <see cref="Models.InfractionType.Mute"/> are loaded into memory upon startup.
         /// </summary>
         public InfractionType InfractionType { get; set; } //What happened
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Silk.Core.Database.Models
+namespace Silk.Data.Models
 {
     public class GuildConfig
     {
@@ -16,7 +16,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// Requisite property to form a Foreign Key (FK)
         /// </summary>
-        public Guild Guild { get; set; }
+        public Guild Guild { get; set; } = null!;
         /// <summary>
         /// Id of the role to apply when muting members.
         /// </summary>
@@ -50,10 +50,10 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// The text that will be used to greet new members.
         /// </summary>
-        public string GreetingText { get; set; } = string.Empty;
+        public string GreetingText { get; set; } = "";
 
         //This will be used eventually.
-        public string InfractionFormat { get; set; } = string.Empty;
+        public string InfractionFormat { get; set; } = "";
 
         #region AutoMod/Moderation
 
@@ -123,6 +123,7 @@ namespace Silk.Core.Database.Models
         /// <summary>
         /// A list of blacklisted words.
         /// </summary>
+        // ReSharper disable once CollectionNeverUpdated.Global
         public List<BlackListedWord> BlackListedWords { get; set; } = new();
         /// <summary>
         /// A list of roles that can be obtained from Silk!.

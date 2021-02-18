@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
-namespace Silk.Core.Database
+namespace Silk.Data
 {
     public class SilkDbContext : DbContext
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services.Interfaces
 {

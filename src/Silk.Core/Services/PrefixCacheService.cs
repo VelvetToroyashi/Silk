@@ -5,9 +5,9 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Data;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

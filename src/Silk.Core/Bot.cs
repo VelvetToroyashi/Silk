@@ -13,13 +13,13 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data;
 using Silk.Extensions;
 
 namespace Silk.Core
@@ -30,9 +30,8 @@ namespace Silk.Core
         public DiscordShardedClient Client { get; set; }
         public static Bot? Instance { get; private set; }
         public static string DefaultCommandPrefix { get; } = "s!";
-        public SilkDbContext SilkDBContext { get; }
 
-        public CommandsNextConfiguration? Commands { get; private set; }
+        private CommandsNextConfiguration? _commands;
 
         private readonly IMediator _mediator;
         private readonly IServiceProvider _services;
@@ -55,13 +54,13 @@ namespace Silk.Core
             _exceptionHandler = exceptionHandler;
             _mediator = mediator;
 
-            SilkDBContext = dbFactory.CreateDbContext();
+            SilkDbContext silkDbContext = dbFactory.CreateDbContext();
 
-            try { _ = SilkDBContext.Guilds.FirstOrDefault(); }
+            try { _ = silkDbContext.Guilds.FirstOrDefault(); }
             catch
             {
                 _logger.LogInformation("Database not set up! Migrating...");
-                SilkDBContext.Database.Migrate();
+                silkDbContext.Database.Migrate();
             }
             Instance = this;
             Client = client;
@@ -85,7 +84,7 @@ namespace Silk.Core
 
         private async Task InitializeClientAsync()
         {
-            Commands = new CommandsNextConfiguration
+            _commands = new CommandsNextConfiguration
             {
                 UseDefaultCommandHandler = false,
                 Services = _services,
@@ -93,7 +92,7 @@ namespace Silk.Core
 
             };
 
-            await Client.UseCommandsNextAsync(Commands);
+            await Client.UseCommandsNextAsync(_commands);
             await _exceptionHandler.SubscribeToEventsAsync();
 
             InitializeCommands();
@@ -130,6 +129,7 @@ namespace Silk.Core
 
 
         // Cluserfuck of a method. I know. //
+        //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
         {
             _logger.LogDebug("Subscribing to events");

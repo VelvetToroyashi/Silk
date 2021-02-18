@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Silk.Core.Database.Models
+namespace Silk.Data.Models
 {
     public class Guild
     {

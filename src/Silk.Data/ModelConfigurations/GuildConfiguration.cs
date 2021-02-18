@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
-namespace Silk.Core.Database.ModelConfigurations.cs
+namespace Silk.Data.ModelConfigurations.cs
 {
     public class GuildConfiguration : IEntityTypeConfiguration<Guild>
     {

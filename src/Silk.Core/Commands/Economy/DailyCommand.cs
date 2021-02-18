@@ -7,9 +7,9 @@ using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data;
+using Silk.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Economy

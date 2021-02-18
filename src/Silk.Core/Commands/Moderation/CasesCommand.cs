@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Moderation
 {

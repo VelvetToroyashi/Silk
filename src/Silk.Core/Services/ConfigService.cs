@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

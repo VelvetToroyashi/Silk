@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
+using Silk.Data;
+using Silk.Data.Models;
 
 namespace Silk.Core.Migrations
 {

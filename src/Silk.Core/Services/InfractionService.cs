@@ -6,9 +6,9 @@ using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

@@ -2,21 +2,17 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database.Models;
+using Silk.Data.Models;
 
-namespace Silk.Core.Database.MediatR.Handlers
+namespace Silk.Data.MediatR.Handlers
 {
     public class UserHandler
     {
         public class UserGetRequestHandler : IRequestHandler<UserRequest.GetUserRequest, User?>
         {
             private readonly SilkDbContext _db;
+            public UserGetRequestHandler(SilkDbContext db) => _db = db;
 
-            public UserGetRequestHandler(SilkDbContext db)
-            {
-                _db = db;
-            }
-        
             public async Task<User?> Handle(UserRequest.GetUserRequest request, CancellationToken cancellationToken)
             {
                 User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
@@ -28,10 +24,7 @@ namespace Silk.Core.Database.MediatR.Handlers
         {
             private readonly SilkDbContext _db;
 
-            public UserAddRequestHandler(SilkDbContext db)
-            {
-                _db = db;
-            }
+            public UserAddRequestHandler(SilkDbContext db) => _db = db;
 
             public async Task<User> Handle(UserRequest.AddUserRequest request, CancellationToken cancellationToken)
             {

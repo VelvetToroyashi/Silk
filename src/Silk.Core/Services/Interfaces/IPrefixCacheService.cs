@@ -1,4 +1,4 @@
-﻿using Silk.Core.Database.Models;
+﻿using Silk.Data.Models;
 
 namespace Silk.Core.Services.Interfaces
 {

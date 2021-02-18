@@ -4,9 +4,9 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Database.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Miscellaneous
 {

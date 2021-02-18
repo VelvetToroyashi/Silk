@@ -6,8 +6,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Database;
-using Silk.Core.Database.Models;
+using Silk.Data;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Moderation.Utilities
 {
