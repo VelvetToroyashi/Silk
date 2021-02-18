@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
@@ -29,6 +28,7 @@ namespace Silk.Core
 
         public static void AddServices(IServiceCollection services)
         {
+            services.AddScoped<SilkDbContext>();
             services.AddScoped<IDatabaseService, DatabaseService>();
             services.AddTransient<IInfractionService, InfractionService>();
             services.AddTransient<IPrefixCacheService, PrefixCacheService>();

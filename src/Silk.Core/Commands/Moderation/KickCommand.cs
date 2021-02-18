@@ -35,7 +35,7 @@ namespace Silk.Core.Commands.Moderation
         public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-
+            
             if (user.IsAbove(bot) || user.IsAbove(ctx.Member)|| ctx.User == user)
             {
                 DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);

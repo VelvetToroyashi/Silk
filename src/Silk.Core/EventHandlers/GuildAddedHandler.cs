@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Constants;
+using Silk.Core.Database.MediatR;
 using Silk.Core.Database.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
@@ -17,6 +19,7 @@ namespace Silk.Core.EventHandlers
     {
         public static bool StartupCompleted { get; private set; }
 
+        private readonly IMediator _mediator;
         private readonly IDatabaseService _dbService;
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly Dictionary<int, ShardState> _shardStates = new();
@@ -29,10 +32,11 @@ namespace Silk.Core.EventHandlers
             public int CachedMembers { get; set; }
         }
 
-        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService)
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService, IMediator mediator)
         {
             _logger = logger;
             _dbService = dbService;
+            _mediator = mediator;
             IReadOnlyDictionary<int, DiscordClient> shards = Bot.Instance!.Client.ShardClients;
             if (shards.Count is 0)
             {
@@ -50,6 +54,7 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
+            
             Guild guild = await _dbService.GetOrCreateGuildAsync(eventArgs.Guild.Id);
             int cachedMembers = CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
             await _dbService.UpdateGuildAsync(guild);
@@ -65,7 +70,7 @@ namespace Silk.Core.EventHandlers
                 {
                     string message = $"Cached Guild! Shard [{client.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
                     message += cachedMembers is 0 ?
-                        " → Staff [No new staff!]" :
+                         " → Staff [No new staff!]" :
                         $" → Staff [{cachedMembers}/{eventArgs.Guild.Members.Count}]";
 
                     _logger.LogDebug(message);
@@ -101,30 +106,30 @@ namespace Silk.Core.EventHandlers
                 .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
             await availableChannel.SendMessageAsync(builder);
         }
-        private static int CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
+        
+        
+        private int CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
-            int staffBefore = guild.Users.Count(u => u.Flags.HasFlag(UserFlag.Staff));
+            int staffCount = 0;
             IEnumerable<DiscordMember> staff = members.Where(m => !m.IsBot);
-
+        
             foreach (var member in staff)
             {
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-                if (guild.Users.FirstOrDefault(u => u.Id == member.Id) is var user and not null)
+                if (guild.Users.FirstOrDefault(u => u.Id == member.Id) is User user)
                 {
-                    user.Flags =
-                        user.Flags.Has(flag) ?
+                    user.Flags = user.Flags.Has(flag) ?
                             user.Flags.Remove(flag) :
                             user.Flags.Add(flag);
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
-                    guild.Users.Add(new() {Id = member.Id, Flags = flag});
+                    _mediator.Send(new AddUserRequest {UserId = member.Id, GuildId = member.Guild.Id, Flags = flag}).GetAwaiter().GetResult();
+                    staffCount++;
                 }
             }
-            int staffNow = guild.Users.Count(us => us.Flags.HasFlag(UserFlag.Staff));
-            int staffCount = staffNow - staffBefore;
-            return staffCount < 1 ? 0 : staffCount;
+            return Math.Max(staffCount, 0);
         }
     }
 }

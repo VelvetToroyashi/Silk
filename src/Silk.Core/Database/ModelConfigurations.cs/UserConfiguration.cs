@@ -8,7 +8,7 @@ namespace Silk.Core.Database.ModelConfigurations.cs
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.Property(u => u.DatabaseId).ValueGeneratedOnAdd();
+            //builder.Property(u => u.DatabaseId).ValueGeneratedOnAdd();
             builder.HasKey(u => u.DatabaseId);
             builder.HasMany(u => u.Infractions).WithOne(i => i.User);
         }

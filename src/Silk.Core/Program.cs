@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -35,7 +36,11 @@ namespace Silk.Core
             MinimumLogLevel = LogLevel.None
         };
 
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).UseConsoleLifetime().StartAsync().ConfigureAwait(false);
+        public static async Task Main(string[] args) => 
+            await CreateHostBuilder(args)
+                .UseConsoleLifetime()
+                .StartAsync()
+                .ConfigureAwait(false);
 
 
         private static IHostBuilder CreateHostBuilder(string[] args)
@@ -92,6 +97,7 @@ namespace Silk.Core
                     services.AddTransient(_ => new BotConfig(config));
 
                     services.AddHostedService<Bot>();
+                    services.AddMediatR(typeof(Program));
                 })
                 .UseSerilog();
         }

@@ -6,7 +6,6 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.EventArgs;
-using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Commands

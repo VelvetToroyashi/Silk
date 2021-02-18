@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +30,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
+
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
 
             if (config.LogMemberJoing && config.GeneralLoggingChannel is not 0)
