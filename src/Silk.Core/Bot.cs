@@ -9,6 +9,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,6 @@ namespace Silk.Core
 
     public class Bot : IHostedService
     {
-        //TODO: Fix all these usages, because they should be pulling from ctx.Services if possible. //
         public DiscordShardedClient Client { get; set; }
         public static Bot? Instance { get; private set; }
         public static string DefaultCommandPrefix { get; } = "s!";
@@ -34,18 +34,26 @@ namespace Silk.Core
 
         public CommandsNextConfiguration? Commands { get; private set; }
 
+        private readonly IMediator _mediator;
         private readonly IServiceProvider _services;
         private readonly ILogger<Bot> _logger;
         private readonly BotExceptionHandler _exceptionHandler;
         private readonly Stopwatch _sw = new();
 
 
-        public Bot(IServiceProvider services, DiscordShardedClient client, ILogger<Bot> logger, BotExceptionHandler exceptionHandler, IDbContextFactory<SilkDbContext> dbFactory)
+        public Bot(            
+            IMediator mediator,
+            ILogger<Bot> logger, 
+            IServiceProvider services, 
+            DiscordShardedClient client, 
+            BotExceptionHandler exceptionHandler, 
+            IDbContextFactory<SilkDbContext> dbFactory)
         {
             _sw.Start();
             _services = services;
             _logger = logger;
             _exceptionHandler = exceptionHandler;
+            _mediator = mediator;
 
             SilkDBContext = dbFactory.CreateDbContext();
 
@@ -125,7 +133,7 @@ namespace Silk.Core
         private void SubscribeToEvents()
         {
             _logger.LogDebug("Subscribing to events");
-
+            
             Client.MessageCreated += _services.Get<MessageAddedHandler>().Commands;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
             Client.MessageCreated += _services.Get<MessageAddedHandler>().Tickets;
@@ -140,7 +148,7 @@ namespace Silk.Core
             _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(40));
             Client.GuildMemberRemoved += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
             _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
-            Client.GuildCreated += _services.Get<GuildAddedHandler>().SendWelcomeMessage;
+            Client.GuildCreated += _services.Get<GuildAddedHandler>().SendThankYouMessage;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(40));
             Client.GuildAvailable += _services.Get<GuildAddedHandler>().OnGuildAvailable;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(40));

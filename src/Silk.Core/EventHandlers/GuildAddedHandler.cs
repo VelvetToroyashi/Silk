@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Constants;
 using Silk.Core.Database.MediatR;
 using Silk.Core.Database.Models;
-using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers
@@ -20,7 +19,6 @@ namespace Silk.Core.EventHandlers
         public static bool StartupCompleted { get; private set; }
 
         private readonly IMediator _mediator;
-        private readonly IDatabaseService _dbService;
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly Dictionary<int, ShardState> _shardStates = new();
         private readonly object _lock = new();
@@ -32,17 +30,13 @@ namespace Silk.Core.EventHandlers
             public int CachedMembers { get; set; }
         }
 
-        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IDatabaseService dbService, IMediator mediator)
+        public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IMediator mediator)
         {
             _logger = logger;
-            _dbService = dbService;
             _mediator = mediator;
             IReadOnlyDictionary<int, DiscordClient> shards = Bot.Instance!.Client.ShardClients;
             if (shards.Count is 0)
-            {
-                _logger.LogCritical("Shard count is 0. Cache running requires at least 1 shard!");
                 throw new ArgumentOutOfRangeException(nameof(DiscordClient.ShardCount), "Shards must be > 0");
-            }
 
             foreach ((int key, _) in shards)
                 _shardStates.Add(key, new());
@@ -54,12 +48,9 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-
-            Guild guild = await _dbService.GetOrCreateGuildAsync(eventArgs.Guild.Id);
+            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreateGuildRequest {GuildId = eventArgs.Guild.Id});
             int cachedMembers = CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
-            await _dbService.UpdateGuildAsync(guild);
-            // Create a state object and update values. 
-
+            
             lock (_lock)
             {
                 ShardState state = _shardStates[client.ShardId];
@@ -89,7 +80,7 @@ namespace Silk.Core.EventHandlers
 
 
         // Used in conjunction with OnGuildJoin() //
-        public async Task SendWelcomeMessage(DiscordClient c, GuildCreateEventArgs e)
+        public async Task SendThankYouMessage(DiscordClient c, GuildCreateEventArgs e)
         {
             var allChannels = (await e.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             DiscordMember bot = e.Guild.CurrentMember;
@@ -106,7 +97,6 @@ namespace Silk.Core.EventHandlers
                 .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
             await availableChannel.SendMessageAsync(builder);
         }
-
 
         private int CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
@@ -125,7 +115,7 @@ namespace Silk.Core.EventHandlers
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
-                    _mediator.Send(new AddUserRequest {UserId = member.Id, GuildId = member.Guild.Id, Flags = flag}).GetAwaiter().GetResult();
+                    _mediator.Send(new UserRequest.AddUserRequest {UserId = member.Id, GuildId = member.Guild.Id, Flags = flag}).GetAwaiter().GetResult();
                     staffCount++;
                 }
             }
