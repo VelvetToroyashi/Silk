@@ -24,7 +24,7 @@ using Silk.Extensions;
 
 namespace Silk.Core
 {
-
+    //Lorum Ipsum, or something.
     public class Bot : IHostedService
     {
         public DiscordShardedClient Client { get; set; }
