@@ -50,7 +50,7 @@ namespace Silk.Core.Commands.Server
             
             if (config.GreetingChannel is 0) 
                 await SetupGreetingChannelAsync(ctx, interactivity, builder, config);
-            new List<object>().Sort();
+
             if (ctx.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED"))
                 await PromptScreeningConfirmationAsync(ctx, builder, interactivity, msg, message, confirm, deny);
             else
