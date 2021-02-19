@@ -2,29 +2,12 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Silk.Core.Migrations
+namespace Silk.Data.Migrations
 {
     public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "ChangeLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Authors = table.Column<string>(type: "text", nullable: false),
-                    Version = table.Column<string>(type: "text", nullable: false),
-                    Additions = table.Column<string>(type: "text", nullable: false),
-                    Removals = table.Column<string>(type: "text", nullable: false),
-                    ChangeTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChangeLogs", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "GlobalUsers",
                 columns: table => new
@@ -51,13 +34,15 @@ namespace Silk.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TicketResponderModel",
+                name: "TicketResponder",
                 columns: table => new
                 {
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table => { });
+                constraints: table =>
+                {
+                });
 
             migrationBuilder.CreateTable(
                 name: "Tickets",
@@ -76,49 +61,37 @@ namespace Silk.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Items",
+                name: "GuildConfigs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OwnerId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    State = table.Column<string>(type: "jsonb", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Items", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Items_GlobalUsers_OwnerId",
-                        column: x => x.OwnerId,
-                        principalTable: "GlobalUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GuildConfigs",
-                columns: table => new
-                {
-                    ConfigId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     MuteRoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GreetingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GeneralLoggingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    LogMessageChanges = table.Column<bool>(type: "boolean", nullable: false),
                     GreetMembers = table.Column<bool>(type: "boolean", nullable: false),
-                    LogRoleChange = table.Column<bool>(type: "boolean", nullable: false),
+                    GreetOnScreeningComplete = table.Column<bool>(type: "boolean", nullable: false),
+                    GreetOnVerificationRole = table.Column<bool>(type: "boolean", nullable: false),
+                    VerificationRole = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    GreetingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    GreetingText = table.Column<string>(type: "text", nullable: false),
+                    InfractionFormat = table.Column<string>(type: "text", nullable: false),
+                    MaxUserMentions = table.Column<int>(type: "integer", nullable: false),
+                    MaxRoleMentions = table.Column<int>(type: "integer", nullable: false),
+                    LoggingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    LogMessageChanges = table.Column<bool>(type: "boolean", nullable: false),
+                    LogMemberJoing = table.Column<bool>(type: "boolean", nullable: false),
                     BlacklistInvites = table.Column<bool>(type: "boolean", nullable: false),
                     BlacklistWords = table.Column<bool>(type: "boolean", nullable: false),
+                    WarnOnMatchedInvite = table.Column<bool>(type: "boolean", nullable: false),
+                    DeleteMessageOnMatchedInvite = table.Column<bool>(type: "boolean", nullable: false),
                     UseAggressiveRegex = table.Column<bool>(type: "boolean", nullable: false),
-                    IsPremium = table.Column<bool>(type: "boolean", nullable: false),
+                    InfractionDictionary = table.Column<int[]>(type: "integer[]", nullable: false),
                     AutoDehoist = table.Column<bool>(type: "boolean", nullable: false),
-                    ScanInvites = table.Column<bool>(type: "boolean", nullable: false),
-                    InfractionFormat = table.Column<string>(type: "text", nullable: false)
+                    ScanInvites = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GuildConfigs", x => x.ConfigId);
+                    table.PrimaryKey("PK_GuildConfigs", x => x.Id);
                     table.ForeignKey(
                         name: "FK_GuildConfigs_Guilds_GuildId",
                         column: x => x.GuildId,
@@ -149,21 +122,21 @@ namespace Silk.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TicketMessageHistoryModel",
+                name: "TicketMessage",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Sender = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false),
-                    TicketModelId = table.Column<int>(type: "integer", nullable: false)
+                    TicketId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TicketMessageHistoryModel", x => x.Id);
+                    table.PrimaryKey("PK_TicketMessage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TicketMessageHistoryModel_Tickets_TicketModelId",
-                        column: x => x.TicketModelId,
+                        name: "FK_TicketMessage_Tickets_TicketId",
+                        column: x => x.TicketId,
                         principalTable: "Tickets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -175,38 +148,38 @@ namespace Silk.Core.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GuildConfigId = table.Column<int>(type: "integer", nullable: false),
+                    GuildId = table.Column<int>(type: "integer", nullable: false),
                     Word = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlackListedWord", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlackListedWord_GuildConfigs_GuildConfigId",
-                        column: x => x.GuildConfigId,
+                        name: "FK_BlackListedWord_GuildConfigs_GuildId",
+                        column: x => x.GuildId,
                         principalTable: "GuildConfigs",
-                        principalColumn: "ConfigId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "GuildInviteModel",
+                name: "Invite",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GuildName = table.Column<string>(type: "text", nullable: false),
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     VanityURL = table.Column<string>(type: "text", nullable: false),
-                    GuildConfigModelConfigId = table.Column<int>(type: "integer", nullable: true)
+                    GuildConfigId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GuildInviteModel", x => x.Id);
+                    table.PrimaryKey("PK_Invite", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GuildInviteModel_GuildConfigs_GuildConfigModelConfigId",
-                        column: x => x.GuildConfigModelConfigId,
+                        name: "FK_Invite_GuildConfigs_GuildConfigId",
+                        column: x => x.GuildConfigId,
                         principalTable: "GuildConfigs",
-                        principalColumn: "ConfigId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -214,89 +187,40 @@ namespace Silk.Core.Migrations
                 name: "SelfAssignableRole",
                 columns: table => new
                 {
-                    RoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GuildConfigModelConfigId = table.Column<int>(type: "integer", nullable: true)
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    GuildConfigId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SelfAssignableRole", x => x.RoleId);
+                    table.PrimaryKey("PK_SelfAssignableRole", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SelfAssignableRole_GuildConfigs_GuildConfigModelConfigId",
-                        column: x => x.GuildConfigModelConfigId,
-                        principalTable: "GuildConfigs",
-                        principalColumn: "ConfigId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WhiteListedLink",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Link = table.Column<string>(type: "text", nullable: false),
-                    GuildLevelLink = table.Column<bool>(type: "boolean", nullable: false),
-                    GuildConfigId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WhiteListedLink", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_WhiteListedLink_GuildConfigs_GuildConfigId",
+                        name: "FK_SelfAssignableRole_GuildConfigs_GuildConfigId",
                         column: x => x.GuildConfigId,
                         principalTable: "GuildConfigs",
-                        principalColumn: "ConfigId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Ban",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserInfoDatabaseId = table.Column<long>(type: "bigint", nullable: true),
-                    GuildId1 = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GuildId = table.Column<string>(type: "text", nullable: false),
-                    Reason = table.Column<string>(type: "text", nullable: false),
-                    Expiration = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ban", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Ban_Guilds_GuildId1",
-                        column: x => x.GuildId1,
-                        principalTable: "Guilds",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ban_Users_UserInfoDatabaseId",
-                        column: x => x.UserInfoDatabaseId,
-                        principalTable: "Users",
-                        principalColumn: "DatabaseId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserInfractionModel",
+                name: "Infractions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: false),
                     Enforcer = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     UserDatabaseId = table.Column<long>(type: "bigint", nullable: false),
                     InfractionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    InfractionType = table.Column<int>(type: "integer", nullable: false)
+                    InfractionType = table.Column<int>(type: "integer", nullable: false),
+                    HeldAgainstUser = table.Column<bool>(type: "boolean", nullable: false),
+                    Expiration = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInfractionModel", x => x.Id);
+                    table.PrimaryKey("PK_Infractions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserInfractionModel_Users_UserDatabaseId",
+                        name: "FK_Infractions_Users_UserDatabaseId",
                         column: x => x.UserDatabaseId,
                         principalTable: "Users",
                         principalColumn: "DatabaseId",
@@ -304,19 +228,9 @@ namespace Silk.Core.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ban_GuildId1",
-                table: "Ban",
-                column: "GuildId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ban_UserInfoDatabaseId",
-                table: "Ban",
-                column: "UserInfoDatabaseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BlackListedWord_GuildConfigId",
+                name: "IX_BlackListedWord_GuildId",
                 table: "BlackListedWord",
-                column: "GuildConfigId");
+                column: "GuildId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GuildConfigs_GuildId",
@@ -325,89 +239,62 @@ namespace Silk.Core.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_GuildInviteModel_GuildConfigModelConfigId",
-                table: "GuildInviteModel",
-                column: "GuildConfigModelConfigId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Items_OwnerId",
-                table: "Items",
-                column: "OwnerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SelfAssignableRole_GuildConfigModelConfigId",
-                table: "SelfAssignableRole",
-                column: "GuildConfigModelConfigId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TicketMessageHistoryModel_TicketModelId",
-                table: "TicketMessageHistoryModel",
-                column: "TicketModelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInfractionModel_GuildId_UserId",
-                table: "UserInfractionModel",
-                columns: new[] {"GuildId", "UserId"});
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInfractionModel_UserDatabaseId",
-                table: "UserInfractionModel",
+                name: "IX_Infractions_UserDatabaseId",
+                table: "Infractions",
                 column: "UserDatabaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Invite_GuildConfigId",
+                table: "Invite",
+                column: "GuildConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SelfAssignableRole_GuildConfigId",
+                table: "SelfAssignableRole",
+                column: "GuildConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketMessage_TicketId",
+                table: "TicketMessage",
+                column: "TicketId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_GuildId",
                 table: "Users",
                 column: "GuildId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WhiteListedLink_GuildConfigId",
-                table: "WhiteListedLink",
-                column: "GuildConfigId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Ban");
-
-            migrationBuilder.DropTable(
                 name: "BlackListedWord");
-
-            migrationBuilder.DropTable(
-                name: "ChangeLogs");
-
-            migrationBuilder.DropTable(
-                name: "GuildInviteModel");
-
-            migrationBuilder.DropTable(
-                name: "Items");
-
-            migrationBuilder.DropTable(
-                name: "SelfAssignableRole");
-
-            migrationBuilder.DropTable(
-                name: "TicketMessageHistoryModel");
-
-            migrationBuilder.DropTable(
-                name: "TicketResponderModel");
-
-            migrationBuilder.DropTable(
-                name: "UserInfractionModel");
-
-            migrationBuilder.DropTable(
-                name: "WhiteListedLink");
 
             migrationBuilder.DropTable(
                 name: "GlobalUsers");
 
             migrationBuilder.DropTable(
-                name: "Tickets");
+                name: "Infractions");
+
+            migrationBuilder.DropTable(
+                name: "Invite");
+
+            migrationBuilder.DropTable(
+                name: "SelfAssignableRole");
+
+            migrationBuilder.DropTable(
+                name: "TicketMessage");
+
+            migrationBuilder.DropTable(
+                name: "TicketResponder");
 
             migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
                 name: "GuildConfigs");
+
+            migrationBuilder.DropTable(
+                name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "Guilds");

@@ -43,13 +43,17 @@ namespace Silk.Data.MediatR.Handlers
                     .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
                 if (guild is not null) return guild;
+
                 guild = new()
                 {
                     Id = request.GuildId,
-                    Prefix = request.Prefix
+                    Users = new(),
+                    Prefix = request.Prefix,
+                    Configuration = new() { GuildId = request.GuildId }
                 };
-                _db.Attach(guild);
+                _db.Guilds.Add(guild);
                 await _db.SaveChangesAsync(cancellationToken);
+
                 return guild;
             }
         }

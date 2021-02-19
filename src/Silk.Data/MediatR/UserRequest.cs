@@ -15,6 +15,7 @@ namespace Silk.Data.MediatR
         public class UpdateUserRequest : IRequest<User>
         {
             public ulong UserId { get; init; }
+            public ulong GuildId { get; init; }
             public UserFlag? Flags { get; init; }
             public List<Infraction>? Infractions { get; init; }
         }

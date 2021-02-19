@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Commands.Furry.Utilities;
 using Silk.Core.Constants;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
@@ -48,8 +49,8 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreateGuildRequest {GuildId = eventArgs.Guild.Id});
-            int cachedMembers = CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
+            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreateGuildRequest { GuildId = eventArgs.Guild.Id, Prefix = Bot.DefaultCommandPrefix });
+            int cachedMembers = await CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
             
             lock (_lock)
             {
@@ -98,7 +99,7 @@ namespace Silk.Core.EventHandlers
             await availableChannel.SendMessageAsync(builder);
         }
 
-        private int CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
+        private async Task<int> CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
         {
             int staffCount = 0;
             IEnumerable<DiscordMember> staff = members.Where(m => !m.IsBot);
@@ -107,11 +108,12 @@ namespace Silk.Core.EventHandlers
             {
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-                if (guild.Users.FirstOrDefault(u => u.Id == member.Id) is User user)
+                if ((await _mediator.Send(new UserRequest.GetUserRequest())) is var user and not null)
                 {
                     user.Flags = user.Flags.Has(flag) ?
                         user.Flags.Remove(flag) :
                         user.Flags.Add(flag);
+                    await _mediator.Send(new UserRequest.UpdateUserRequest {UserId = user.Id, Flags = user.Flags});
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {

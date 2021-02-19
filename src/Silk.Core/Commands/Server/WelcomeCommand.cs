@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Silk.Core.Services.Interfaces;
@@ -15,8 +16,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Server
 {
-    [RequireFlag(UserFlag.Staff)]
-    [Description("Welcome message settings! Currently supported substitutions:\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
+    
     public class WelcomeCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
@@ -29,83 +29,39 @@ namespace Silk.Core.Commands.Server
         }
         
         [Command]
-        [Description("Set the welcome message for the server!")]
+        [RequireFlag(UserFlag.Staff)]
+        [Description("Welcome message settings! Currently supported substitutions:\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
         public async Task SetWelcome(CommandContext ctx, [RemainingText] string message)
         {
-            var builder = new DiscordMessageBuilder().WithoutMentions().WithReply(ctx.Message.Id);
-            var one = DiscordEmoji.FromUnicode(":one:");
-            var two = DiscordEmoji.FromUnicode(":two:");
-            var three = DiscordEmoji.FromUnicode(":three:");
+            DiscordMessageBuilder builder = new DiscordMessageBuilder().WithoutMentions().WithReply(ctx.Message.Id);
+            InteractivityExtension interactivity = ctx.Client.GetInteractivity();
+            GuildConfig config = await _mediator.Send(new GuildConfigRequest.GetGuildConfigRequest {GuildId = ctx.Guild.Id});
 
-            var interactivity = ctx.Client.GetInteractivity();
-
+            if (config.GreetingChannel is 0) 
+                await SetupGreetingChannelAsync(ctx, interactivity, builder, config);
+            
             if (ctx.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED"))
             {
-                builder.WithContent("Great! Would you like me to greet people as soon as they join (1), when they pass membership screening (2), or when you give them a role? (3)");
-                var msg = await ctx.RespondAsync(builder);
-                await msg.CreateReactionAsync(one);
-                await msg.CreateReactionAsync(two);
-                await msg.CreateReactionAsync(three);
-
-                var result = await interactivity.WaitForReactionAsync(m => m.Emoji == one || m.Emoji == two || m.Emoji == three, msg, ctx.Member);
-
-                if (result.TimedOut)
-                {
-                    builder.WithContent("Timed out!");
-                    await ctx.RespondAsync(builder);
-                }
-                else
-                {
-                    if (result.Result.Emoji == one)
-                    {
-                        builder.WithContent("Great! I'll greet people as they join :)");
-                        await _mediator.Send(new GuildConfigRequest.UpdateGuildConfigRequest {GuildId = ctx.Guild.Id, GreetMembers = true});
-                        _updater.UpdateGuild(ctx.Guild.Id);
-                    }
-                    else if (result.Result.Emoji == two)
-                    {
-                        builder.WithContent("Great! I'll greet people as soon as they agree to the rules!");
-                        await _mediator.Send(new GuildConfigRequest.UpdateGuildConfigRequest {GuildId = ctx.Guild.Id, GreetMembers = true, GreetOnScreeningComplete = true});
-                        _updater.UpdateGuild(ctx.Guild.Id);
-                    }
-                    else
-                    {
-                        DiscordRole role = null!;
-                        var gotValidRole = false;
-                        builder.WithContent("Alrighty, what role do you want me to check for? (type `cancel` to cancel)");
-                        while (!gotValidRole)
-                        {
-                            msg = (await interactivity.WaitForMessageAsync(m => 
-                                string.Equals(m.Content, "cancel", StringComparison.OrdinalIgnoreCase) || 
-                                Regex.IsMatch(m.Content, @"^<?@?&?[0-9]{10,}>?$"))).Result;
-                            
-                            var roleId = ulong.Parse(msg.Content.Replace("<@&", null).Replace(">", null));
-
-                            gotValidRole = ctx.Guild.Roles.ContainsKey(roleId);
-                            if (gotValidRole) role = ctx.Guild.Roles[roleId];
-                        }
-                        
-                        
-                        builder.WithContent($"Great! I'll greet people as they get {role.Mention}!");
-                        await _mediator.Send(new GuildConfigRequest.UpdateGuildConfigRequest {GuildId = ctx.Guild.Id, GreetMembers = true});
-                        _updater.UpdateGuild(ctx.Guild.Id);
-                    }
-                }
                 
+            }
+            
+        }
+        private async Task SetupGreetingChannelAsync(CommandContext ctx, InteractivityExtension interactivity, DiscordMessageBuilder builder, GuildConfig config)
+        {
+            builder.WithContent("You need to set up a greeting channel! Simply mention the channel you want to set as the greeting channel, and I'll handle the rest! :)");
+            _ = await ctx.RespondAsync(builder);
+            var result = await interactivity.WaitForMessageAsync(m => m.MentionedChannels.Count is 1);
+
+            if (result.TimedOut)
+            {
+                throw new TimeoutException();
             }
             else
             {
-                builder.WithContent("Great! Would you like me to greet people as soon as they join (1), or when you give them a role? (2)");
-                var msg = await ctx.RespondAsync(builder);
-                await msg.CreateReactionAsync(one);
-                await msg.CreateReactionAsync(two);
-                var result = await interactivity.WaitForReactionAsync(m => m.Emoji == one || m.Emoji == two, msg, ctx.Member);
+                config.GreetingChannel = result.Result.MentionedChannels[0].Id;
+                builder.WithContent($"Alright, {result.Result.MentionedChannels[0].Mention} it is :)").WithReply(result.Result.Id);
+                await ctx.RespondAsync(builder);
             }
-            
-            
-            
-
         }
-        
     }
 }
