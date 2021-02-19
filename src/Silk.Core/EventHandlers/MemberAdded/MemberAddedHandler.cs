@@ -67,7 +67,6 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
                 if (config.GreetOnScreeningComplete && member.IsPending is true) return;
                 if (config.GreetOnVerificationRole && member.Roles.All(r => r.Id != config.VerificationRole)) return;
-
                 verifiedMembers.Add(member);
                 await GreetMemberAsync(member, config);
             }

@@ -5,7 +5,7 @@ using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Xunit;
 
-namespace Silk.Core.Tests
+namespace Silk.Core.Tests.Services
 {
     public class ConfigServiceTests
     {

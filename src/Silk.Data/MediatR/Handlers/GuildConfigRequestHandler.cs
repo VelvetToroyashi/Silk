@@ -57,6 +57,8 @@ namespace Silk.Data.MediatR.Handlers
                 config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
                 config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
 
+                config.GreetingText = request.GreetingText ?? config.GreetingText;
+                
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
 

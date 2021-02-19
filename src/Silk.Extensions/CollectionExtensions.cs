@@ -58,7 +58,7 @@ namespace Silk.Extensions
         
         public static string ToEmojiString(this string text)
         {
-            var match = Regex.Match(text.Trim(), @"^<?a?(:?[a-zA-Z0-9_]+:[0-9]+)>?$");
+            var match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
             return match.Success ? match.Groups[1].Value : text.Trim();
         }
         public static ulong ToEmojiId(this string emoji)

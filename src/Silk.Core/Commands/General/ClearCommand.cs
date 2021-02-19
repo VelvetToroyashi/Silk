@@ -26,7 +26,7 @@ namespace Silk.Core.Commands.General
 
             //Change to whatever.//
             await Task.Delay(5000);
-            if (deleteConfirmationMessage is not null)
+            if (await ctx.Channel.GetMessageAsync(deleteConfirmationMessage.Id) is not null)
                 await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
         }
     }
