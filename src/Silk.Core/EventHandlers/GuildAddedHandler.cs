@@ -108,16 +108,17 @@ namespace Silk.Core.EventHandlers
             {
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-                if ((await _mediator.Send(new UserRequest.GetUserRequest())) is var user and not null)
+                User? user = await _mediator.Send(new UserRequest.GetUserRequest { UserId = member.Id, GuildId = member.Guild.Id });
+                if (user is not null)
                 {
                     user.Flags = user.Flags.Has(flag) ?
                         user.Flags.Remove(flag) :
                         user.Flags.Add(flag);
-                    await _mediator.Send(new UserRequest.UpdateUserRequest {UserId = user.Id, Flags = user.Flags});
+                    await _mediator.Send(new UserRequest.UpdateUserRequest { UserId = member.Id, GuildId = member.Guild.Id, Flags = user.Flags });
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
-                    _mediator.Send(new UserRequest.AddUserRequest {UserId = member.Id, GuildId = member.Guild.Id, Flags = flag}).GetAwaiter().GetResult();
+                    await _mediator.Send(new UserRequest.AddUserRequest { UserId = member.Id, GuildId = member.Guild.Id, Flags = flag });
                     staffCount++;
                 }
             }

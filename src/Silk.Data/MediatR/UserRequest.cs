@@ -6,7 +6,7 @@ namespace Silk.Data.MediatR
 {
     public class UserRequest
     {
-        public class GetUserRequest : IRequest<User>
+        public class GetUserRequest : IRequest<User?>
         {
             public ulong UserId { get; init; }
             public ulong GuildId { get; init; }
