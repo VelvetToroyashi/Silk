@@ -8,10 +8,12 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
+using Silk.Core.Constants;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
+using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Server
@@ -30,18 +32,32 @@ namespace Silk.Core.Commands.Server
         
         [Command]
         [RequireFlag(UserFlag.Staff)]
-        [Description("Welcome message settings! Currently supported substitutions:\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
+        [Description
+            ("Welcome message settings! Currently supported substitutions:" +
+             "\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
         public async Task SetWelcome(CommandContext ctx, [RemainingText] string message)
         {
+            DiscordEmoji confirm = DiscordEmoji.FromName(ctx.Client, Emojis.Confirm.ToEmojiString());
+            DiscordEmoji deny = DiscordEmoji.FromName(ctx.Client, Emojis.Decline.ToEmojiString());
+            DiscordMessage msg;
+            
             DiscordMessageBuilder builder = new DiscordMessageBuilder().WithoutMentions().WithReply(ctx.Message.Id);
-            InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.GetGuildConfigRequest {GuildId = ctx.Guild.Id});
-
+            InteractivityExtension interactivity = ctx.Client.GetInteractivity();
+            
+            
             if (config.GreetingChannel is 0) 
                 await SetupGreetingChannelAsync(ctx, interactivity, builder, config);
             
             if (ctx.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED"))
             {
+                builder.WithContent("It seems you have membership gating enabled on this server!\n" +
+                                    "Would you like me to greet people after they complete screening?");
+                
+                msg = await ctx.RespondAsync(builder);
+                
+                await msg.CreateReactionAsync(confirm);
+                await msg.CreateReactionAsync(deny);
                 
             }
             

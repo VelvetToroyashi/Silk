@@ -55,7 +55,12 @@ namespace Silk.Extensions
             var match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
             return DiscordEmoji.FromUnicode(match.Success ? match.Groups[1].Value : text.Trim());
         }
-
+        
+        public static string ToEmojiString(this string text)
+        {
+            var match = Regex.Match(text.Trim(), @"^<?a?(:?[a-zA-Z0-9_]+:[0-9]+)>?$")
+            return match.Success ? match.Groups[1].Value : text.Trim();
+        }
         public static ulong ToEmojiId(this string emoji)
         {
             var match = Regex.Match(emoji.Trim(), @"^<?a?:([a-zA-Z0-9_]+:[0-9]+)>$");
