@@ -6,12 +6,12 @@ namespace Silk.Data.MediatR
 {
     public class GuildConfigRequest
     {
-        public class GetGuildConfigRequest : IRequest<GuildConfig>
+        public class Get : IRequest<GuildConfig>
         {
             public ulong GuildId { get; init; }
         }
 
-        public class UpdateGuildConfigRequest : IRequest<GuildConfig?>
+        public class Update : IRequest<GuildConfig?>
         {
             public ulong GuildId { get; init; } = default;
 

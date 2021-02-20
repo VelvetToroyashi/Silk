@@ -21,6 +21,10 @@ namespace Silk.Data
         /// </summary>
         public DbSet<GlobalUser> GlobalUsers { get; set; } = null!;
 
+        public DbSet<CommandInvocation> CommandInvocations { get; set; } = null!;
+
+        public DbSet<Command> Commands { get; set; } = null!;
+
         public DbSet<GuildConfig> GuildConfigs { get; set; } = null!;
 
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }

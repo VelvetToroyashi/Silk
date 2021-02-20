@@ -8,16 +8,16 @@ namespace Silk.Data.MediatR.Handlers
 {
     public class GuildRequestHandler
     {
-        public class GuildAddRequestHandler : IRequestHandler<GuildRequest.AddGuildRequest, Guild>
+        public class AddHandler : IRequestHandler<GuildRequest.Add, Guild>
         {
             private readonly SilkDbContext _db;
 
-            public GuildAddRequestHandler(SilkDbContext db)
+            public AddHandler(SilkDbContext db)
             {
                 _db = db;
             }
 
-            public async Task<Guild> Handle(GuildRequest.AddGuildRequest request, CancellationToken cancellationToken)
+            public async Task<Guild> Handle(GuildRequest.Add request, CancellationToken cancellationToken)
             {
                 var guild = new Guild {Id = request.GuildId, Configuration = new(), Prefix = request.Prefix};
                 await _db.SaveChangesAsync(cancellationToken);
@@ -26,16 +26,16 @@ namespace Silk.Data.MediatR.Handlers
         }
         
         
-        public class GuildGetOrCreateRequestHandler : IRequestHandler<GuildRequest.GetOrCreateGuildRequest, Guild>
+        public class GetOrCreateHandler : IRequestHandler<GuildRequest.GetOrCreate, Guild>
         {
             private readonly SilkDbContext _db;
 
-            public GuildGetOrCreateRequestHandler(SilkDbContext db)
+            public GetOrCreateHandler(SilkDbContext db)
             {
                 _db = db;
             }
         
-            public async Task<Guild> Handle(GuildRequest.GetOrCreateGuildRequest request, CancellationToken cancellationToken)
+            public async Task<Guild> Handle(GuildRequest.GetOrCreate request, CancellationToken cancellationToken)
             {
                 Guild? guild = await _db.Guilds
                     .Include(g => g.Users)

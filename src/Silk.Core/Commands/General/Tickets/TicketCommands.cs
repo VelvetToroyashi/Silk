@@ -15,7 +15,7 @@ namespace Silk.Core.Commands.General.Tickets
     [Experimental]
     [Group("ticket")]
     [Category(Categories.Bot)]
-    [Description("Commands related to tickets; opening tickets can only be performed in DMs.")]
+    [Description("CommandInvocations related to tickets; opening tickets can only be performed in DMs.")]
     public class TicketCommands : BaseCommandModule
     {
         private readonly TicketService _ticketService;

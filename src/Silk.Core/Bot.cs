@@ -119,7 +119,7 @@ namespace Silk.Core
                 extension.RegisterConverter(new MemberConverter());
             }
 
-            _logger.LogInformation($"Services + Commands initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
+            _logger.LogInformation($"Services + CommandInvocations initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
             await Client.StartAsync();
 
             // Client.StartAsync() returns as soon as all shards are ready, which means we log before
@@ -136,8 +136,8 @@ namespace Silk.Core
             _logger.LogDebug("Subscribing to events");
 
             Client.MessageCreated += async (c, e) => { _ =_mediator.Publish(new MessageCreated(c, e)); };
-            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
-            Client.MessageCreated += _services.Get<MessageAddedHandler>().Tickets;
+            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/CommandInvocations".PadLeft(40));
+            Client.MessageCreated += _services.Get<MessageCreatedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
             

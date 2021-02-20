@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+	  <OutputType>Exe</OutputType>
+	  <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Silk.Core</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>
     <IsPackable>false</IsPackable>
@@ -12,20 +12,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TieredCompilation>false</TieredCompilation>
-    <Authors>VelvetThePanda, CalebABG97, NatsumiHB</Authors>
-    <Company>The Silk Devs Team</Company>
-    <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
-    <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
+	  <Authors>VelvetThePanda, CalebABG97, NatsumiHB</Authors>
+	  <Company>The Silk Devs Team</Company>
+	  <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
+	  <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>false</Optimize>
-    <WarningLevel>2</WarningLevel>
+	  <Optimize>false</Optimize>
+	  <WarningLevel>2</WarningLevel>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+	  <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

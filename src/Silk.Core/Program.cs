@@ -28,9 +28,9 @@ namespace Silk.Core
         {
             Intents = DiscordIntents.Guilds | // Caching
                       DiscordIntents.GuildMembers | //Auto-mod/Auto-greet
-                      DiscordIntents.DirectMessages | // Commands & Auto-Mod
+                      DiscordIntents.DirectMessages | // CommandInvocations & Auto-Mod
                       DiscordIntents.GuildPresences | // Role-menu
-                      DiscordIntents.GuildMessages | // DM Commands
+                      DiscordIntents.GuildMessages | // DM CommandInvocations
                       DiscordIntents.GuildMessageReactions |
                       DiscordIntents.DirectMessageReactions, // Auto-mod,
             MessageCacheSize = 1024,

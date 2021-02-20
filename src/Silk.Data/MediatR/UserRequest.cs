@@ -6,13 +6,13 @@ namespace Silk.Data.MediatR
 {
     public class UserRequest
     {
-        public class GetUserRequest : IRequest<User?>
+        public class Get : IRequest<User?>
         {
             public ulong UserId { get; init; }
             public ulong GuildId { get; init; }
         }
         
-        public class UpdateUserRequest : IRequest<User>
+        public class Update : IRequest<User>
         {
             public ulong UserId { get; init; }
             public ulong GuildId { get; init; }
@@ -20,7 +20,7 @@ namespace Silk.Data.MediatR
             public List<Infraction>? Infractions { get; init; }
         }
         
-        public class AddUserRequest : IRequest<User>
+        public class Add : IRequest<User>
         {
             public ulong GuildId { get; init; }
             public ulong UserId { get; init; }

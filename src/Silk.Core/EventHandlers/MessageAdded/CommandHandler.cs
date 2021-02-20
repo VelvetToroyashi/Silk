@@ -7,15 +7,18 @@ using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Services.Interfaces;
+using Silk.Data.MediatR;
 
-namespace Silk.Core.EventHandlers
+namespace Silk.Core.EventHandlers.MessageAdded
 {
         public class CommandHandler : INotificationHandler<MessageCreated>
         {
             private readonly IPrefixCacheService _prefixService;
-            public CommandHandler(IPrefixCacheService prefixService)
+            private readonly IMediator _mediator;
+            public CommandHandler(IPrefixCacheService prefixService, IMediator mediator)
             {
                 _prefixService = prefixService;
+                _mediator = mediator;
             }
 
             public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
@@ -44,7 +47,11 @@ namespace Silk.Core.EventHandlers
                     throw new CommandNotFoundException($"Invalid command {commandString}") :
                     commandsNext.CreateContext(notification.EventArgs.Message, prefix, command, arguments);
                 
-                _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context), CancellationToken.None)
+                _ = Task.Run(async () =>
+                    {
+                        await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.Name), CancellationToken.None);
+                        await commandsNext.ExecuteCommandAsync(context);
+                    }, CancellationToken.None)
                     .ContinueWith(t =>
                     {
                         if (t.IsFaulted && t.Exception?.InnerException is not null) throw t.Exception.InnerException;

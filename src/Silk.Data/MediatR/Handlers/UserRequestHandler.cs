@@ -9,25 +9,25 @@ namespace Silk.Data.MediatR.Handlers
 {
     public class UserHandler
     {
-        public class UserGetRequestHandler : IRequestHandler<UserRequest.GetUserRequest, User?>
+        public class GetHandler : IRequestHandler<UserRequest.Get, User?>
         {
             private readonly SilkDbContext _db;
-            public UserGetRequestHandler(SilkDbContext db) => _db = db;
+            public GetHandler(SilkDbContext db) => _db = db;
 
-            public async Task<User?> Handle(UserRequest.GetUserRequest request, CancellationToken cancellationToken)
+            public async Task<User?> Handle(UserRequest.Get request, CancellationToken cancellationToken)
             {
                 User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
                 return user;
             }
         }
         
-        public class UserAddRequestHandler : IRequestHandler<UserRequest.AddUserRequest, User>
+        public class AddHandler : IRequestHandler<UserRequest.Add, User>
         {
             private readonly SilkDbContext _db;
 
-            public UserAddRequestHandler(SilkDbContext db) => _db = db;
+            public AddHandler(SilkDbContext db) => _db = db;
 
-            public async Task<User> Handle(UserRequest.AddUserRequest request, CancellationToken cancellationToken)
+            public async Task<User> Handle(UserRequest.Add request, CancellationToken cancellationToken)
             {
                 var user = new User {Id = request.UserId, GuildId = request.GuildId, Flags = request.Flags ?? UserFlag.None};
                 _db.Users.Add(user);
@@ -36,16 +36,16 @@ namespace Silk.Data.MediatR.Handlers
             }
         }
 
-        public class UserUpdateRequestHandler : IRequestHandler<UserRequest.UpdateUserRequest, User>
+        public class UpdateHandler : IRequestHandler<UserRequest.Update, User>
         {
             private readonly SilkDbContext _db;
 
-            public UserUpdateRequestHandler(SilkDbContext db)
+            public UpdateHandler(SilkDbContext db)
             {
                 _db = db;
             }
             
-            public async Task<User> Handle(UserRequest.UpdateUserRequest request, CancellationToken cancellationToken)
+            public async Task<User> Handle(UserRequest.Update request, CancellationToken cancellationToken)
             {
                 User user = await _db.Users.FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
                 

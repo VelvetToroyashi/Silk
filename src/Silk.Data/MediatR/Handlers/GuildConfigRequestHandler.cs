@@ -8,33 +8,33 @@ namespace Silk.Data.MediatR.Handlers
 {
     public class GuildConfigRequestHandler
     {
-        public class GuildConfigGetRequestHandler : IRequestHandler<GuildConfigRequest.GetGuildConfigRequest, GuildConfig?>
+        public class GetHandler : IRequestHandler<GuildConfigRequest.Get, GuildConfig?>
         {
             private readonly SilkDbContext _db;
 
 
-            public GuildConfigGetRequestHandler(SilkDbContext db)
+            public GetHandler(SilkDbContext db)
             {
                 _db = db;
             }
             
-            public async Task<GuildConfig?> Handle(GuildConfigRequest.GetGuildConfigRequest request, CancellationToken cancellationToken)
+            public async Task<GuildConfig?> Handle(GuildConfigRequest.Get request, CancellationToken cancellationToken)
             {
                 GuildConfig config = await _db.GuildConfigs.FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
                 return config;
             }
         }
 
-        public class GuildConfigUpdateRequestHandler : IRequestHandler<GuildConfigRequest.UpdateGuildConfigRequest, GuildConfig?>
+        public class UpdateHandler : IRequestHandler<GuildConfigRequest.Update, GuildConfig?>
         {
             private readonly SilkDbContext _db;
 
-            public GuildConfigUpdateRequestHandler(SilkDbContext db)
+            public UpdateHandler(SilkDbContext db)
             {
                 _db = db;
             }
             
-            public async Task<GuildConfig?> Handle(GuildConfigRequest.UpdateGuildConfigRequest request, CancellationToken cancellationToken)
+            public async Task<GuildConfig?> Handle(GuildConfigRequest.Update request, CancellationToken cancellationToken)
             {
                 GuildConfig config = await _db.GuildConfigs.FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 

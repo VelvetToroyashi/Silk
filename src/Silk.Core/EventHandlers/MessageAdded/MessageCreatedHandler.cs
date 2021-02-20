@@ -15,12 +15,12 @@ using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.MessageAdded
 {
-    public class MessageAddedHandler
+    public class MessageCreatedHandler
     {
         private readonly TicketService _ticketService;
         private readonly IPrefixCacheService _prefixCache;
-        private readonly ILogger<MessageAddedHandler> _logger;
-        public MessageAddedHandler(TicketService ticketService, IPrefixCacheService prefixCache, ILogger<MessageAddedHandler> logger)
+        private readonly ILogger<MessageCreatedHandler> _logger;
+        public MessageCreatedHandler(TicketService ticketService, IPrefixCacheService prefixCache, ILogger<MessageCreatedHandler> logger)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;

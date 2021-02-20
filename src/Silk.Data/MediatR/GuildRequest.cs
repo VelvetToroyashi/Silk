@@ -5,18 +5,8 @@ namespace Silk.Data.MediatR
 {
     public class GuildRequest
     {
-        public class AddGuildRequest : IRequest<Guild>
-        {
-            public ulong GuildId { get; init; }
-            public string Prefix { get; init; } = null!;
-        }
+        public record Add(ulong GuildId, string Prefix) : IRequest<Guild>;
         
-        
-        public class GetOrCreateGuildRequest : IRequest<Guild>
-        {
-            public ulong GuildId { get; init; }
-            public string Prefix { get; init; } = null!;
-            
-        }
+        public record GetOrCreate(ulong GuildId, string Prefix) : IRequest<Guild>;
     }
 }

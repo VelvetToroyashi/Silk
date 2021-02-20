@@ -49,8 +49,8 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreateGuildRequest { GuildId = eventArgs.Guild.Id, Prefix = Bot.DefaultCommandPrefix });
-            int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
+            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreate(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
+        int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
             
             lock (_lock)
             {
@@ -108,17 +108,17 @@ namespace Silk.Core.EventHandlers
             {
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-                User? user = await _mediator.Send(new UserRequest.GetUserRequest { UserId = member.Id, GuildId = member.Guild.Id });
+                User? user = await _mediator.Send(new UserRequest.Get { UserId = member.Id, GuildId = member.Guild.Id });
                 if (user is not null)
                 {
                     user.Flags = user.Flags.Has(flag) ?
                         user.Flags.Remove(flag) :
                         user.Flags.Add(flag);
-                    await _mediator.Send(new UserRequest.UpdateUserRequest { UserId = member.Id, GuildId = member.Guild.Id, Flags = user.Flags });
+                    await _mediator.Send(new UserRequest.Update { UserId = member.Id, GuildId = member.Guild.Id, Flags = user.Flags });
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
-                    await _mediator.Send(new UserRequest.AddUserRequest { UserId = member.Id, GuildId = member.Guild.Id, Flags = flag });
+                    await _mediator.Send(new UserRequest.Add { UserId = member.Id, GuildId = member.Guild.Id, Flags = flag });
                     staffCount++;
                 }
             }
