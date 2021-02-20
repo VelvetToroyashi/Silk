@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Commands.Furry.Utilities;
 using Silk.Core.Constants;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
@@ -15,6 +14,7 @@ using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers
 {
+    //This relies on multiple events to update its state, so we can't implement INotificationHandler.
     public class GuildAddedHandler
     {
         public static bool StartupCompleted { get; private set; }
@@ -37,7 +37,7 @@ namespace Silk.Core.EventHandlers
             _mediator = mediator;
             IReadOnlyDictionary<int, DiscordClient> shards = Bot.Instance!.Client.ShardClients;
             if (shards.Count is 0)
-                throw new ArgumentOutOfRangeException(nameof(DiscordClient.ShardCount), "Shards must be > 0");
+                throw new ArgumentOutOfRangeException(nameof(DiscordClient.ShardCount), "Shards must be greater than 0");
 
             foreach ((int key, _) in shards)
                 _shardStates.Add(key, new());
@@ -50,7 +50,7 @@ namespace Silk.Core.EventHandlers
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
             Guild guild = await _mediator.Send(new GuildRequest.GetOrCreateGuildRequest { GuildId = eventArgs.Guild.Id, Prefix = Bot.DefaultCommandPrefix });
-            int cachedMembers = await CacheGuildMembers(guild, eventArgs.Guild.Members.Values);
+            int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
             
             lock (_lock)
             {
@@ -99,7 +99,7 @@ namespace Silk.Core.EventHandlers
             await availableChannel.SendMessageAsync(builder);
         }
 
-        private async Task<int> CacheGuildMembers(Guild guild, IEnumerable<DiscordMember> members)
+        private async Task<int> CacheGuildMembers(IEnumerable<DiscordMember> members)
         {
             int staffCount = 0;
             IEnumerable<DiscordMember> staff = members.Where(m => !m.IsBot);

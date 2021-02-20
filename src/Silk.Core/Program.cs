@@ -13,7 +13,6 @@ using Serilog;
 using Serilog.Events;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
-using Silk.Data;
 using Silk.Data.MediatR;
 
 namespace Silk.Core
@@ -99,6 +98,7 @@ namespace Silk.Core
                     services.AddTransient(_ => new BotConfig(config));
 
                     services.AddHostedService<Bot>();
+                    
                     services.AddMediatR(typeof(Program));
                     services.AddMediatR(typeof(GuildRequest));
                 })

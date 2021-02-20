@@ -36,7 +36,6 @@ namespace Silk.Core.Commands.General
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
             builder.WithEmbed(DefaultAvatarEmbed(ctx)
-                .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                 .WithTitle("Your Avatar!")
                 .WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
             await ctx.RespondAsync(builder);
@@ -54,7 +53,6 @@ namespace Silk.Core.Commands.General
             {
                 await ctx.RespondAsync(
                     DefaultAvatarEmbed(ctx)
-                        .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
                         .WithDescription($"{userObj.Mention}'s Avatar")
                         .WithImageUrl(AvatarImageResizedUrl(userObj.AvatarUrl)));
             }

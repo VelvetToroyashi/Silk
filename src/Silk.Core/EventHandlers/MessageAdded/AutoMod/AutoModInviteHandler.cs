@@ -48,7 +48,6 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         // Can't be DRY compliant here because they take two different types of event args, hence why we make one unified object, and call that method instead.
         public Task MessageEditInvites(DiscordClient client, MessageUpdateEventArgs eventArgs)
         {
-
             if (eventArgs.Channel.IsPrivate) return Task.CompletedTask;
             _ = MatchInvite(client, new(eventArgs.Channel, eventArgs.Message, eventArgs.Guild));
             return Task.CompletedTask;

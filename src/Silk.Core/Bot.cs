@@ -17,6 +17,7 @@ using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Core.EventHandlers.MessageAdded.AutoMod;
+using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data;
@@ -133,12 +134,14 @@ namespace Silk.Core
         private void SubscribeToEvents()
         {
             _logger.LogDebug("Subscribing to events");
-            
-            Client.MessageCreated += _services.Get<MessageAddedHandler>().Commands;
+
+            Client.MessageCreated += async (c, e) => { _ =_mediator.Publish(new MessageCreated(c, e)); };
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Commands".PadLeft(40));
             Client.MessageCreated += _services.Get<MessageAddedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
+            //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
+            
+            
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(40));
             Client.MessageUpdated += _services.Get<AutoModInviteHandler>().MessageEditInvites;
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));

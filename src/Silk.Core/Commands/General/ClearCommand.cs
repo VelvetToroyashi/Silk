@@ -4,6 +4,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General
@@ -26,8 +27,9 @@ namespace Silk.Core.Commands.General
 
             //Change to whatever.//
             await Task.Delay(5000);
-            if (await ctx.Channel.GetMessageAsync(deleteConfirmationMessage.Id) is not null)
-                await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage);
+            try { await ctx.Channel.DeleteMessageAsync(deleteConfirmationMessage); }
+            catch(NotFoundException) { }
+            
         }
     }
 }
