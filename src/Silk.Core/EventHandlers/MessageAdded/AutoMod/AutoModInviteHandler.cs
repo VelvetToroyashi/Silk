@@ -26,8 +26,8 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
          * And again, for the curious ones, the former regex will match anything that resembles an invite.
          * For instance, discord.gg/HZfZb95, discord.com/invite/HZfZb95, discordapp.com/invite/HZfZb95
          */
-        private static readonly Regex AggressiveRegexPattern = new(@"(discord((app\.com|.com)\/invite|\.gg)\/([A-z]|[0-9]-?)+)", flags);
-        private static readonly Regex LenientRegexPattern = new(@"discord.gg\/invite\/.+", flags);
+        private static readonly Regex AggressiveRegexPattern = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z]*-*[0-9]*){2,}", flags);
+        private static readonly Regex LenientRegexPattern = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", flags);
 
         private readonly IInfractionService _infractionService;
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
@@ -63,7 +63,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         private async Task MatchInvite(DiscordClient client, UnifiedEventArgs eventArgs)
         {
             if (eventArgs.Channel.IsPrivate) return;
-
+            
             _ = Task.Run(async () =>
             {
                 GuildConfig config = await _configService.GetConfigAsync(eventArgs.Guild.Id);
