@@ -17,7 +17,7 @@ namespace Silk.Core.Commands.Furry.Utilities
         // Needed for e621.net //
         private protected string? username;
 
-        private protected readonly HttpClient _client;
+        private readonly HttpClient _client;
 
         public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
         {
@@ -30,7 +30,7 @@ namespace Silk.Core.Commands.Furry.Utilities
         /// <param name="ctx">The command context to execute this command in.</param>
         /// <param name="amount">Amount of images to return.</param>
         /// <param name="query">Query sent to the booru site.</param>
-        public abstract Task Search(CommandContext ctx, int amount = 1, [RemainingText] string query = null);
+        public abstract Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null);
 
         /// <summary>
         /// Make a GET request to the booru site (e6/e9), and return the result.
@@ -99,7 +99,7 @@ namespace Silk.Core.Commands.Furry.Utilities
                 int r = rand.Next(post?.Posts?.Count ?? 0);
                 if (post?.Posts?[i] is null) continue;
                 posts.Add(post.Posts?[r]);
-                post?.Posts?.RemoveAt(r);
+                post.Posts?.RemoveAt(r);
             }
             return posts;
         }

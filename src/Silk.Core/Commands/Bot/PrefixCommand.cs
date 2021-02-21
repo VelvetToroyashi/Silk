@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Bot
         [Description("Gets Silk's command prefix for the current Guild")]
         public async Task SetPrefix(CommandContext ctx)
         {
-            string? prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
+            string prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
             await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
         }
 

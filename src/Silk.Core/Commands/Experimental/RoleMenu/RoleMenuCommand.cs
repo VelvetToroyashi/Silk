@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.Experimental.RoleMenu
     public class RoleMenuCommand : BaseCommandModule
     {
 
-        //[Command("create")]
+        [Command("create")]
         [Hidden]
         [Description("Create a role menu! \n(Note, if you're adding roles with spaces, you must put them in quotes (`\"\"`)!")]
         [RequireFlag(UserFlag.Staff)]

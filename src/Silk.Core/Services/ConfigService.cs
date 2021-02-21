@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using Silk.Core.Services.Interfaces;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Core.Services
@@ -9,11 +11,11 @@ namespace Silk.Core.Services
     public class ConfigService
     {
         private readonly IMemoryCache _cache;
-        private readonly IDatabaseService _db;
-        public ConfigService(IMemoryCache cache, IDatabaseService db)
+        private readonly IMediator _mediator;
+        public ConfigService(IMemoryCache cache, IMediator mediator)
         {
             _cache = cache;
-            _db = db;
+            _mediator = mediator;
         }
 
         public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
@@ -24,7 +26,7 @@ namespace Silk.Core.Services
 
         private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
         {
-            GuildConfig configuration = await _db.GetConfigAsync(guildId);
+            GuildConfig configuration = await _mediator.Send(new GuildConfigRequest.Get {GuildId = guildId}, CancellationToken.None);
             _cache.Set(guildId, configuration, TimeSpan.FromHours(1));
             return configuration;
         }

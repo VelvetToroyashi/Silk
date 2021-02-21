@@ -15,7 +15,7 @@ namespace Silk.Data.Models
         FreeShopOwner = 128,
         PaidShopOwner = 256,
         InfractionExemption = 512,
-        Staff = 1024 | InfractionExemption,
-        EscalatedStaff = 2048 | Staff
+        Staff = 1024 | InfractionExemption, //1536
+        EscalatedStaff = 2048 | Staff  // 3584
     }
 }

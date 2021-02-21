@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Microsoft.Extensions.Logging;
-using Silk.Core.Services.Interfaces;
+using MediatR;
+using Silk.Core.Constants;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions;
 
@@ -11,40 +12,30 @@ namespace Silk.Core.EventHandlers
 {
     public class RoleAddedHandler
     {
-        private readonly IDatabaseService _dbService;
-        private readonly ILogger<RoleAddedHandler> _logger;
-        public RoleAddedHandler(IDatabaseService dbService, ILogger<RoleAddedHandler> logger)
+        private readonly IMediator _mediator;
+        public RoleAddedHandler(IMediator mediator)
         {
-            _dbService = dbService;
-            _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task CheckStaffRole(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
-            if (e.RolesBefore.Count >= e.RolesAfter.Count) return;
-            _ = Task.Run(async () =>
+            if (e.RolesBefore.Count >= e.RolesAfter.Count || e.Member.IsBot) return;
+            var isStaff = e.RolesAfter.Except(e.RolesBefore).Any(r => r.HasPermission(PermissionConstants.CacheFlag));
+            var isAdmin = e.Member.HasPermission(Permissions.Administrator);
+            if (isStaff)
             {
-
-                Guild guild = (await _dbService.GetGuildAsync(e.Guild.Id))!;
-                if (e.RolesAfter.Except(e.RolesBefore).Any(r => r.HasPermission(Permissions.KickMembers | Permissions.ManageMessages)))
+                User? user = await _mediator.Send(new UserRequest.Get {UserId = e.Member.Id, GuildId = e.Guild.Id});
+                var flag = isAdmin ? UserFlag.EscalatedStaff : UserFlag.Staff;
+                if (user is not null && !user.Flags.Has(flag))
                 {
-                    // I was really stupid to make the oversight of picking the first user in the Database instead of the first user in the guild. ~Velvet. //
-                    User? user = guild.Users.FirstOrDefault(u => u.Id == e.Member.Id);
-
-                    if (user is not null && !user.Flags.Has(UserFlag.Staff))
-                    {
-                        user.Flags.Add(UserFlag.Staff);
-                    }
-                    else
-                    {
-                        user = new() {Id = e.Member.Id, Flags = UserFlag.Staff, Guild = guild};
-                        guild.Users.Add(user);
-                    }
-                    _logger.LogDebug($"Role added event fired; marked {e.Member.Id} as Staff");
-                    await _dbService.UpdateGuildAsync(guild);
-                    await _dbService.UpdateGuildUserAsync(user);
+                    await _mediator.Send(new UserRequest.Update { UserId = e.Member.Id, GuildId = e.Guild.Id, Flags = user.Flags | flag });
                 }
-            });
+                else
+                {
+                    await _mediator.Send(new UserRequest.Add { UserId = e.Member.Id, GuildId = e.Guild.Id, Flags = UserFlag.Staff });
+                }
+            }
         }
     }
 }

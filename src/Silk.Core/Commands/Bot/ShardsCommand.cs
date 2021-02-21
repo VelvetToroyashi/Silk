@@ -11,7 +11,7 @@ namespace Silk.Core.Commands.Bot
 {
     public class ShardsCommand : BaseCommandModule
     {
-        private const string embedTitle = "`|\t[Shard]\t|\t[Ping]\t|\t[Guilds]\t|\t[Members]\t|`";
+        private const string EmbedTitle = "`|\t[Shard]\t|\t[Ping]\t|\t[Guilds]\t|\t[Members]\t|`";
 
         [Command]
         public async Task Shards(CommandContext ctx)
@@ -42,7 +42,7 @@ namespace Silk.Core.Commands.Bot
 
                 totalPing += shard.Ping;
             }
-            embed.WithDescription($"**{embedTitle}** \n{sb}");
+            embed.WithDescription($"**{EmbedTitle}** \n{sb}");
             //embed.AddField()
             sb.Clear();
 

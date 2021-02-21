@@ -8,7 +8,7 @@ using DSharpPlus;
 
 namespace Silk.Extensions
 {
-    public static class IServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static T Get<T>(this IServiceProvider provider)
         {

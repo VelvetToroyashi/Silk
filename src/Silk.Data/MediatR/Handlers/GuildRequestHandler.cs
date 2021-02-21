@@ -8,6 +8,25 @@ namespace Silk.Data.MediatR.Handlers
 {
     public class GuildRequestHandler
     {
+        public class GetHandler : IRequestHandler<GuildRequest.Get, Guild>
+        {
+            private readonly SilkDbContext _db;
+            public GetHandler(SilkDbContext db)
+            {
+                _db = db;
+            }
+
+            public async Task<Guild> Handle(GuildRequest.Get request, CancellationToken cancellationToken)
+            {
+                Guild? guild = await _db.Guilds
+                    .Include(g => g.Users)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
+                
+                return guild;
+            }
+        }
+        
         public class AddHandler : IRequestHandler<GuildRequest.Add, Guild>
         {
             private readonly SilkDbContext _db;

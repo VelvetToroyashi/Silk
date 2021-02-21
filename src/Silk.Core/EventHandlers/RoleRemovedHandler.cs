@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Services.Interfaces;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions;
 
@@ -12,12 +13,12 @@ namespace Silk.Core.EventHandlers
     public class RoleRemovedHandler
     {
         private readonly ILogger<RoleRemovedHandler> _logger;
-        private readonly IDatabaseService _dbService;
+        private readonly IMediator _mediator;
         private const Permissions RequisiteStaffPermissions = Permissions.KickMembers | Permissions.ManageMessages;
-        public RoleRemovedHandler(IDatabaseService dbService, ILogger<RoleRemovedHandler> logger)
+        public RoleRemovedHandler(ILogger<RoleRemovedHandler> logger, IMediator mediator)
         {
-            _dbService = dbService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task CheckStaffRoles(DiscordClient c, GuildMemberUpdateEventArgs e)
@@ -26,10 +27,10 @@ namespace Silk.Core.EventHandlers
             if (e.RolesAfter.Any(r => r.Permissions.HasPermission(RequisiteStaffPermissions))) return;
             _ = Task.Run(async () =>
             {
-                User? user = await _dbService.GetGuildUserAsync(e.Guild.Id, e.Member.Id);
+                User? user = await _mediator.Send(new UserRequest.Get { UserId = e.Member.Id, GuildId = e.Guild.Id });
                 if (user is null) return;
                 user.Flags.Remove(UserFlag.Staff);
-                await _dbService.UpdateGuildUserAsync(user);
+                await _mediator.Send(new UserRequest.Update {UserId = user.Id, GuildId = user.GuildId, Flags = user.Flags});
                 _logger.LogDebug($"Removed staff role from {e.Member.Id}");
             });
         }

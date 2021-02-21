@@ -48,7 +48,9 @@ namespace Silk.Core.Commands.General
             DiscordMember? userObj = ctx.Guild.Members.Values.FirstOrDefault(u => u.Username.Contains(user, StringComparison.OrdinalIgnoreCase));
 
             if (userObj is null)
+            {
                 await ctx.RespondAsync("Sorry, I couldn't find anyone with a name matching the text provided.");
+            }
             else
             {
                 await ctx.RespondAsync(

@@ -14,7 +14,7 @@ namespace Silk.Data
         /// </summary>
         public DbSet<User> Users { get; set; } = null!;
 
-        public DbSet<Infraction>? Infractions { get; set; } = null!;
+        public DbSet<Infraction> Infractions { get; set; } = null!;
 
         /// <summary>
         /// Users on a bot level; contains information that should have a globally persisted state.
@@ -22,9 +22,7 @@ namespace Silk.Data
         public DbSet<GlobalUser> GlobalUsers { get; set; } = null!;
 
         public DbSet<CommandInvocation> CommandInvocations { get; set; } = null!;
-
-        public DbSet<Command> Commands { get; set; } = null!;
-
+        
         public DbSet<GuildConfig> GuildConfigs { get; set; } = null!;
 
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
