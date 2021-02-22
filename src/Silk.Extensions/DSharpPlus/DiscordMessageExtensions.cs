@@ -16,7 +16,7 @@ namespace Silk.Extensions.DSharpPlus
         public static async Task DeleteAsync(this IEnumerable<DiscordMessage> messageCollection)
         {
             if (messageCollection is null)
-                throw new ArgumentNullException(nameof(messageCollection), "Cannot be null!");
+                throw new ArgumentNullException(nameof(messageCollection));
 
             DiscordChannel channel = messageCollection.First().Channel;
             await channel.DeleteMessagesAsync(messageCollection);

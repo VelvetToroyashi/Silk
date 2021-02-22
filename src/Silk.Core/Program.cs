@@ -13,6 +13,7 @@ using Serilog;
 using Serilog.Events;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Data;
 using Silk.Data.MediatR;
 
 namespace Silk.Core
@@ -56,7 +57,7 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
-                    const string logFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                    const string logFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception:j}";
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: logFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
@@ -100,7 +101,7 @@ namespace Silk.Core
                     services.AddHostedService<Bot>();
                     
                     services.AddMediatR(typeof(Program));
-                    services.AddMediatR(typeof(GuildRequest));
+                    services.AddMediatR(typeof(SilkDbContext));
                 })
                 .UseSerilog();
         }
