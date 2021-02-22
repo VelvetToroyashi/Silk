@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
@@ -11,7 +10,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Silk.Core.Utilities;
 using Silk.Data.Models;
-using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation.SClean
 {

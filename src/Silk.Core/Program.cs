@@ -14,7 +14,6 @@ using Serilog.Events;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Data;
-using Silk.Data.MediatR;
 
 namespace Silk.Core
 {
