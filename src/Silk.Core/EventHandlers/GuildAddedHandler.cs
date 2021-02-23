@@ -102,11 +102,7 @@ namespace Silk.Core.EventHandlers
         private async Task<int> CacheGuildMembers(IEnumerable<DiscordMember> members)
         {
             int staffCount = 0;
-            IEnumerable<DiscordMember> staff = members.Where(m =>
-                !m.IsBot &&
-                m.HasPermission(PermissionConstants.CacheFlag) ||
-                m.IsAdministrator() ||
-                m.IsOwner);
+            IEnumerable<DiscordMember> staff = members.Where(m => !m.IsBot);
 
             foreach (var member in staff)
             {
@@ -115,9 +111,22 @@ namespace Silk.Core.EventHandlers
                 User? user = await _mediator.Send(new UserRequest.Get { UserId = member.Id, GuildId = member.Guild.Id });
                 if (user is not null)
                 {
-                    user.Flags = user.Flags.Has(flag) ?
-                        user.Flags.Remove(flag) :
-                        user.Flags.Add(flag);
+                    if (member.HasPermission(Permissions.Administrator) || member.IsOwner && !user.Flags.Has(UserFlag.EscalatedStaff))
+                    {
+                        user.Flags.Add(UserFlag.EscalatedStaff);
+                    }
+                    else if (member.HasPermission(PermissionConstants.CacheFlag))
+                    {
+                        user.Flags.Add(UserFlag.Staff);
+                    }
+                    else
+                    {
+                        if (user.Flags.Has(UserFlag.Staff))
+                        {
+                            UserFlag f = user.Flags.Has(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;
+                            user.Flags.Remove(f);
+                        }
+                    }
                     await _mediator.Send(new UserRequest.Update { UserId = member.Id, GuildId = member.Guild.Id, Flags = user.Flags });
                 }
                 else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)

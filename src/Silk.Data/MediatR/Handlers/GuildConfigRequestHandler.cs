@@ -60,6 +60,7 @@ namespace Silk.Data.MediatR.Handlers
                 config.GreetingText = request.GreetingText ?? config.GreetingText;
                 
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
+                config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
                 config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
 
                 await _db.SaveChangesAsync(cancellationToken);

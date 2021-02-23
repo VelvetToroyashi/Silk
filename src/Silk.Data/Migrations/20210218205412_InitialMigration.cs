@@ -143,7 +143,7 @@ namespace Silk.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BlackListedWord",
+                name: "BlacklistedWord",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -229,7 +229,7 @@ namespace Silk.Data.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_BlackListedWord_GuildId",
-                table: "BlackListedWord",
+                table: "BlacklistedWord",
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
@@ -267,7 +267,7 @@ namespace Silk.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BlackListedWord");
+                name: "BlacklistedWord");
 
             migrationBuilder.DropTable(
                 name: "GlobalUsers");

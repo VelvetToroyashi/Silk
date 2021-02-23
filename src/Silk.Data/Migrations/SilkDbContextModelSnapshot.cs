@@ -2,7 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Silk.Data;
 
 namespace Silk.Data.Migrations
 {
@@ -17,7 +19,7 @@ namespace Silk.Data.Migrations
                 .HasAnnotation("ProductVersion", "6.0.0-preview.1.21102.2")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("Silk.Data.Models.BlackListedWord", b =>
+            modelBuilder.Entity("Silk.Data.Models.BlacklistedWord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,8 +37,9 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("BlackListedWord");
+                    b.ToTable("BlacklistedWord");
                 });
+
             modelBuilder.Entity("Silk.Data.Models.CommandInvocation", b =>
                 {
                     b.Property<long>("Id")
@@ -57,6 +60,32 @@ namespace Silk.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CommandInvocations");
+                });
+
+            modelBuilder.Entity("Silk.Data.Models.DisabledCommand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("CommandName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("GuildConfigId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildConfigId");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("DisabledCommand");
                 });
 
             modelBuilder.Entity("Silk.Data.Models.GlobalUser", b =>
@@ -336,10 +365,25 @@ namespace Silk.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Silk.Data.Models.BlackListedWord", b =>
+            modelBuilder.Entity("Silk.Data.Models.BlacklistedWord", b =>
                 {
                     b.HasOne("Silk.Data.Models.GuildConfig", "Guild")
                         .WithMany("BlackListedWords")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Silk.Data.Models.DisabledCommand", b =>
+                {
+                    b.HasOne("Silk.Data.Models.GuildConfig", null)
+                        .WithMany("DisabledCommands")
+                        .HasForeignKey("GuildConfigId");
+
+                    b.HasOne("Silk.Data.Models.Guild", "Guild")
+                        .WithMany()
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -418,6 +462,8 @@ namespace Silk.Data.Migrations
                     b.Navigation("AllowedInvites");
 
                     b.Navigation("BlackListedWords");
+
+                    b.Navigation("DisabledCommands");
 
                     b.Navigation("SelfAssignableRoles");
                 });

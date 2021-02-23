@@ -37,7 +37,8 @@ namespace Silk.Data.MediatR
             public string? GreetingText { get; init; }
 
             public List<Invite>? AllowedInvites { get; init; }
-            public List<BlackListedWord>? BlacklistedWords { get; init; }
+            public List<DisabledCommand>? DisabledCommands { get; init; }
+            public List<BlacklistedWord>? BlacklistedWords { get; init; }
         }
     }
 }

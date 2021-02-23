@@ -29,7 +29,7 @@ namespace Silk.Core.Commands.Server
             _mediator = mediator;
             _updater = updater;
         }
-        //TODO: Break this monstrosity up into DoXFlow()
+        
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [Description

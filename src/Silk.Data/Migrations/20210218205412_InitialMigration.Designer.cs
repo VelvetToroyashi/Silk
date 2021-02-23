@@ -21,7 +21,7 @@ namespace Silk.Data.Migrations
                 .HasAnnotation("ProductVersion", "6.0.0-preview.1.21102.2")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("Silk.Data.Models.BlackListedWord", b =>
+            modelBuilder.Entity("Silk.Data.Models.BlacklistedWord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,7 +39,7 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("BlackListedWord");
+                    b.ToTable("BlacklistedWord");
                 });
 
             modelBuilder.Entity("Silk.Data.Models.GlobalUser", b =>
@@ -319,7 +319,7 @@ namespace Silk.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Silk.Data.Models.BlackListedWord", b =>
+            modelBuilder.Entity("Silk.Data.Models.BlacklistedWord", b =>
                 {
                     b.HasOne("Silk.Data.Models.GuildConfig", "Guild")
                         .WithMany("BlackListedWords")

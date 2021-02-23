@@ -53,6 +53,7 @@ namespace Silk.Data.Models
         public string GreetingText { get; set; } = "";
 
         //This will be used eventually.
+        //TODO: Have infraction type be it's own format
         public string InfractionFormat { get; set; } = "";
 
         #region AutoMod/Moderation
@@ -124,7 +125,12 @@ namespace Silk.Data.Models
         /// A list of blacklisted words.
         /// </summary>
         // ReSharper disable once CollectionNeverUpdated.Global
-        public List<BlackListedWord> BlackListedWords { get; set; } = new();
+        public List<BlacklistedWord> BlackListedWords { get; set; } = new();
+
+        /// <summary>
+        /// A list of disabled commands on this server
+        /// </summary>
+        public List<DisabledCommand> DisabledCommands { get; set; } = new();
         /// <summary>
         /// A list of roles that can be obtained from Silk!.
         /// </summary>
