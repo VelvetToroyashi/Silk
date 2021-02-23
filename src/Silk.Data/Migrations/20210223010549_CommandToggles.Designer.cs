@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -9,9 +10,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210223010549_CommandToggles")]
+    partial class CommandToggles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,8 +85,7 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildConfigId");
 
-                    b.HasIndex("GuildId", "CommandName")
-                        .IsUnique();
+                    b.HasIndex("GuildId");
 
                     b.ToTable("DisabledCommand");
                 });
