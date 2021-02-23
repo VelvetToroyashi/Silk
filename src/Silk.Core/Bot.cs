@@ -129,7 +129,7 @@ namespace Silk.Core
         }
 
 
-        // Cluserfuck of a method. I know. //
+        // Clusterfuck of a method. I know. //
         //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
         {
