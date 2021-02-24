@@ -27,10 +27,10 @@ namespace Silk.Core.EventHandlers
             if (e.RolesAfter.Any(r => r.Permissions.HasPermission(RequisiteStaffPermissions))) return;
             _ = Task.Run(async () =>
             {
-                User? user = await _mediator.Send(new UserRequest.Get { UserId = e.Member.Id, GuildId = e.Guild.Id });
+                User? user = await _mediator.Send(new UserRequest.Get (e.Member.Id, e.Guild.Id));
                 if (user is null) return;
                 user.Flags.Remove(UserFlag.Staff);
-                await _mediator.Send(new UserRequest.Update {UserId = user.Id, GuildId = user.GuildId, Flags = user.Flags});
+                await _mediator.Send(new UserRequest.Update (user.Id, user.GuildId) {Flags = user.Flags});
                 _logger.LogDebug($"Removed staff role from {e.Member.Id}");
             });
         }

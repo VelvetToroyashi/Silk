@@ -24,7 +24,6 @@ namespace Silk.Core.Commands.General.DiceRoll
         {
             if (string.IsNullOrEmpty(roll))
             {
-                await ThrowHelper.EmptyArgument(ctx);
                 return;
             }
             var parser = new DiceParser(roll);

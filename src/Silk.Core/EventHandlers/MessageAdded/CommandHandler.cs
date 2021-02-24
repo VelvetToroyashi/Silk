@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -25,7 +26,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 _mediator = mediator;
                 _cache = cache;
             }
-
+            
             public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
             {
                 bool isBot = notification.EventArgs.Author.IsBot;

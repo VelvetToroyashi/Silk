@@ -26,7 +26,7 @@ namespace Silk.Core.Commands.Moderation
             var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);;
             var eBuilder = new DiscordEmbedBuilder();
 
-            User? userModel = await _mediator.Send(new UserRequest.Get { UserId = user.Id, GuildId = ctx.Guild.Id });
+            User? userModel = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, ctx.User.Id));
             
             if (userModel is null || !userModel.Infractions.Any())
             {

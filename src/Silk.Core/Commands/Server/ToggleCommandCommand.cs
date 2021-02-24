@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -21,7 +22,7 @@ namespace Silk.Core.Commands.Server
             _mediator = mediator;
         }
 
-        [Command]
+        //[Command]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
         [Description("Reenable commands :)")]
@@ -29,17 +30,17 @@ namespace Silk.Core.Commands.Server
         {
             await HandleCommandToggleAsync(ctx, commands, (list, name) =>
             {
-                //It's safe to use Single instead of SingleOrDefault here becase this delegate only gets called if it exists to begin with
-                var c = list.Single(co => co.CommandName == name);
-                list.Remove(c);
+                var c = list.SingleOrDefault(co => co.CommandName == name);
+                if (c is not null) list.Remove(c!);
             });
 
         }
         
-        [Command]
+        //[Command]
         [RequireGuild]
         [RequireFlag(UserFlag.EscalatedStaff)]
-        [Description("Don't want someone running pesky commands on your server? You can disable them globaly! Note that sub-commands should be wrapped in quotes.")]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [Description("Don't want someone running pesky commands on your server? You can disable them globaly!")]
         public async Task Disable(CommandContext ctx, [RemainingText] string? commands)
         {
             await HandleCommandToggleAsync(ctx, commands, (list, name) =>
@@ -69,10 +70,7 @@ namespace Silk.Core.Commands.Server
             {
                 if (!cnext.RegisteredCommands.ContainsKey(commandName))
                     continue;
-                
-                // ReSharper disable once SimplifyLinqExpressionUseAll : I know what I'm doing, I think
-                if (!config.DisabledCommands.Any(c => c.CommandName == commandName))
-                    action(config.DisabledCommands, commandName); 
+                action(config.DisabledCommands, commandName);
             }
 
             await _mediator.Send(new GuildConfigRequest.Update {GuildId = ctx.Guild.Id, DisabledCommands = config.DisabledCommands});

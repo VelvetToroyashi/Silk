@@ -18,17 +18,9 @@ using Silk.Extensions;
 
 namespace Silk.Core.Utilities.Bot
 {
+    //TODO: Fix this, I guess. Clean it up****
     public class BotExceptionHandler
     {
-        private record A : IRequestExceptionHandler<MessageCreated, Task>
-        {
-
-            public async Task Handle(MessageCreated request, Exception exception, RequestExceptionHandlerState<Task> state, CancellationToken cancellationToken)
-            {
-                _logger.LogWarning(":catAAAAAAAAAA:");
-            }
-        }
-        
         private static ILogger<BotExceptionHandler> _logger = null!;
         private readonly DiscordShardedClient _client;
 
@@ -66,7 +58,7 @@ namespace Silk.Core.Utilities.Bot
                         await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");
                         break;
                     case RequireFlagAttribute f:
-                        await e.Context.RespondAsync($"Heh. You need to be {f.RequisiteUserFlag} for that.");
+                        await e.Context.RespondAsync($"Heh. You need to be {f.RequisiteUserFlag.Humanize(LetterCasing.Title)} for that.");
                         break;
                     case CooldownAttribute cd:
                         await e.Context.RespondAsync($"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!");

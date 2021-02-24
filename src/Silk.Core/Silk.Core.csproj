@@ -112,8 +112,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions" />
     <Folder Include="Commands\Server\Roles" />
+    <Folder Include="Commands\Tests" />
   </ItemGroup>
   
 </Project>

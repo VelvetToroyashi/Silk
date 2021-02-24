@@ -55,5 +55,27 @@ namespace Silk.Data.MediatR.Handlers
                 return user;
             }
         }
+
+        public class GetOrCreateHandler : IRequestHandler<UserRequest.GetOrCreate, User>
+        {
+            private readonly SilkDbContext _db;
+            public GetOrCreateHandler(SilkDbContext db) => _db = db;
+
+            public async Task<User> Handle(UserRequest.GetOrCreate request, CancellationToken cancellationToken)
+            {
+                User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                if (user is null)
+                {
+                    user = new()
+                    {
+                        GuildId = request.GuildId,
+                        Id = request.UserId,
+                        Flags = request.Flags ?? UserFlag.None,
+                        Infractions = request.Infractions ?? new()
+                    };
+                }
+                return user;
+            }
+        }
     }
 }
