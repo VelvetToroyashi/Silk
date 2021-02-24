@@ -42,7 +42,7 @@ namespace Silk.Core.Commands.Server
             DiscordMessage msg = null!;
             
             DiscordMessageBuilder builder = new DiscordMessageBuilder().WithoutMentions().WithReply(ctx.Message.Id);
-            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get {GuildId = ctx.Guild.Id});
+            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             
             if (config.GreetingChannel is 0) 

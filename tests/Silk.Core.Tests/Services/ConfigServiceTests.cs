@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Silk.Core.Services;
 using Silk.Data.MediatR;
+using Silk.Data.Models;
 using Xunit;
 
 namespace Silk.Core.Tests.Services
@@ -25,7 +26,7 @@ namespace Silk.Core.Tests.Services
 
             _mediator
                 .Setup(m => m.Send(It.IsAny<IRequest<GuildConfigRequest.Get>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GuildConfigRequest.Get())
+                .ReturnsAsync(It.IsAny<GuildConfigRequest.Get>())
                 .Verifiable("uHHHH");
         
             _configService = new(_cache.Object, _mediator.Object);
@@ -37,10 +38,8 @@ namespace Silk.Core.Tests.Services
             //Act
             object discard;
             _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
-            
             await _configService.GetConfigAsync(0);
             //Assert
-            var request = new GuildConfigRequest.Get {GuildId = 0};
             _mediator.Verify(x => x.Send(It.IsAny<GuildConfigRequest.Get>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -49,7 +48,7 @@ namespace Silk.Core.Tests.Services
         {
             object discard;
             _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(true);
-            _mediator.Verify(m => m.Send(new(), CancellationToken.None), Times.Never);
+            _mediator.Verify(m => m.Send(new(), It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

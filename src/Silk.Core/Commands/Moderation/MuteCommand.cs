@@ -39,7 +39,7 @@ namespace Silk.Core.Commands.Moderation
             }
             if (user.IsAbove(ctx.Member))
             {
-                await ctx.RespondAsync($"They're {user.Roles.Last().Position - ctx.Member.Roles.Last().Position} role(s) above you!");
+                await ctx.RespondAsync($"They're {ctx.Member.Roles.Last().Position - user.Roles.Last().Position} role(s) above you!");
                 return;
             }
 

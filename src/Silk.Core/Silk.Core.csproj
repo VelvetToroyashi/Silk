@@ -112,7 +112,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Server\Roles" />
     <Folder Include="Commands\Tests" />
   </ItemGroup>
   
