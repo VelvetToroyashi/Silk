@@ -15,7 +15,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
 {
     public class AutoModInviteHandler
     {
-        private const RegexOptions flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
+        private const RegexOptions Flags = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /*
          * To those unacquainted to Regex, or simply too lazy to plug it into regex101.com,
@@ -26,8 +26,8 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
          * And again, for the curious ones, the former regex will match anything that resembles an invite.
          * For instance, discord.gg/HZfZb95, discord.com/invite/HZfZb95, discordapp.com/invite/HZfZb95
          */
-        private static readonly Regex AggressiveRegexPattern = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z]*-*[0-9]*){2,}", flags);
-        private static readonly Regex LenientRegexPattern = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", flags);
+        private static readonly Regex AggressiveRegexPattern = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z]*-*[0-9]*){2,}", Flags);
+        private static readonly Regex LenientRegexPattern = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", Flags);
 
         private readonly IInfractionService _infractionService;
         private readonly ConfigService _configService; // Pretty self-explanatory; used for caching the guild configs to make sure they've enabled AutoMod //
@@ -43,7 +43,6 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         }
 
         private record UnifiedEventArgs(DiscordChannel Channel, DiscordMessage Message, DiscordGuild Guild);
-
 
         // Can't be DRY compliant here because they take two different types of event args, hence why we make one unified object, and call that method instead.
         public Task MessageEditInvites(DiscordClient client, MessageUpdateEventArgs eventArgs)
@@ -114,7 +113,8 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
                 }
             }
 
-            if (handleInvite) await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
+            if (handleInvite) 
+                await AutoModMatchedInviteProcedureAsync(config, message, inviteCode);
         }
 
         /// <summary>
