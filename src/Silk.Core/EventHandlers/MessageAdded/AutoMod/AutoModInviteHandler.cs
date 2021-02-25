@@ -129,7 +129,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
             if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
             if (shouldPunish && config.WarnOnMatchedInvite)
             {
-                var infraction = await _infractionService.CreateInfractionAsync((DiscordMember) message.Author,
+                var infraction = await _infractionService. CreateInfractionAsync((DiscordMember) message.Author,
                     message.Channel.Guild.CurrentMember, InfractionType.Ignore, "Sent an invite");
                 await _infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, infraction);
             }

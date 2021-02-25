@@ -12,6 +12,7 @@ using Silk.Extensions;
 namespace Silk.Core.Commands.Moderation
 {
     [Experimental]
+    // Read the VC chat; give me terrible ideas to implement and @ me
     public class CasesCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
@@ -21,12 +22,13 @@ namespace Silk.Core.Commands.Moderation
         }
 
         [Command]
+        [RequireFlag(UserFlag.Staff)]
         public async Task Cases(CommandContext ctx, DiscordUser user)
         {
-            var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);;
+            var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
             var eBuilder = new DiscordEmbedBuilder();
 
-            User? userModel = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, ctx.User.Id));
+            User? userModel = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, user.Id));
             
             if (userModel is null || !userModel.Infractions.Any())
             {
@@ -36,13 +38,17 @@ namespace Silk.Core.Commands.Moderation
             else
             {
                 string cases = userModel.Infractions
-                    .Select((i, n) => 
-                        $"{n}: {i.InfractionType} by <@{i.Enforcer}>, " + 
-                        $"Reason:\n{i.Reason[..100]}")
+                    .OrderBy(i => i.InfractionTime)
+                    .Select((i, n) =>
+                    {
+                        var s = $"{n + 1}: {i.InfractionType} by <@{i.Enforcer}>, ";
+                        s += $"Reason:\n{i.Reason[..(i.Reason.Length > 100 ? 100 : ^0)]}";
+                        return s;
+                    })
                     .Join("\n");
                 eBuilder
                     .WithColor(DiscordColor.Gold)
-                    .WithTitle($"Infractions for {user.Id}")
+                    .WithTitle($"Cases for {user.Id}")
                     .WithDescription(cases);
                 mBuilder.WithEmbed(eBuilder);
                 

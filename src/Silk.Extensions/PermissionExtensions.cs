@@ -23,7 +23,7 @@ namespace Silk.Extensions
 
         public static bool IsAbove(this DiscordMember target, DiscordMember comparison) =>
             target.Roles.Any() &&
-            target.Roles.OrderBy(r => r.Position).Last().Position >=
-            comparison.Roles.OrderBy(r => r.Position).Last().Position;
+            target.Roles.Max(r => r.Position) >=
+            comparison.Roles.Max(r => r.Position);
     }
 }

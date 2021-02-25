@@ -29,22 +29,22 @@ namespace Silk.Core.Commands.Moderation
         [Command("mute")]
         [RequirePermissions(Permissions.ManageRoles)]
         [Description("Mute a guild member!")]
+        [Priority(0)]
         public async Task Mute(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
+            GuildConfig config = (await _configService.GetConfigAsync(ctx.Guild.Id))!;
             if (user.IsAbove(bot))
             {
                 await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} role(s) above me!");
                 return;
             }
-            if (user.IsAbove(ctx.Member))
+            if (user.IsAbove(ctx.Member) && user.Roles.All(r => r.Id != config.MuteRoleId))
             {
-                await ctx.RespondAsync($"They're {ctx.Member.Roles.Last().Position - user.Roles.Last().Position} role(s) above you!");
+                await ctx.RespondAsync($"They're {user.Roles.Last().Position - ctx.Member.Roles.Last().Position} role(s) above you!");
                 return;
             }
-
-            GuildConfig config = (await _configService.GetConfigAsync(ctx.Guild.Id))!;
-
+            
             if (config.MuteRoleId is 0)
             {
                 await ThrowHelper.MisconfiguredMuteRole(ctx.Channel);
@@ -59,6 +59,7 @@ namespace Silk.Core.Commands.Moderation
         }
         
         [Command("mute")]
+        [Priority(1)]
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;

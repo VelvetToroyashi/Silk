@@ -15,7 +15,10 @@ namespace Silk.Data.MediatR.Handlers
 
             public async Task<User?> Handle(UserRequest.Get request, CancellationToken cancellationToken)
             {
-                User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                User? user = await _db.Users
+                    .Include(u => u.Infractions)
+                    .FirstOrDefaultAsync(u => u.Id == request.UserId && 
+                                                u.GuildId == request.GuildId, cancellationToken);
                 return user;
             }
         }

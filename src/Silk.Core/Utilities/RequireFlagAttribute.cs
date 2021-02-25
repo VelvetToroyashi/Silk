@@ -14,30 +14,30 @@ namespace Silk.Core.Utilities
     {
         public bool RequireGuild { get; }
         public UserFlag RequisiteUserFlag { get; }
-        private static readonly HashSet<ulong> _cachedStaff = new();
+        private static readonly HashSet<ulong> _cachedMembers = new();
 
         /// <summary>
         /// Check for a requisite flag from the database, and execute if check passes.
         /// </summary>
-        /// <param name="RequisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
-        /// <param name="RequireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
-        public RequireFlagAttribute(UserFlag RequisiteUserFlag, bool RequireGuild = false)
+        /// <param name="requisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
+        /// <param name="requireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
+        public RequireFlagAttribute(UserFlag requisiteUserFlag, bool requireGuild = false)
         {
-            this.RequisiteUserFlag = RequisiteUserFlag;
-            this.RequireGuild = RequireGuild;
+            RequisiteUserFlag = requisiteUserFlag;
+            RequireGuild = requireGuild;
         }
 
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
             if (help) return help;
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
-            if (_cachedStaff.Contains(ctx.User.Id) && RequireGuild) return true;
+            if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
             IDatabaseService db = ctx.Services.Get<IDatabaseService>();
             User? member = await db.GetGuildUserAsync(ctx.Guild!.Id, ctx.User.Id);
 
             if (member is null) return false;
-            if (member.Flags.HasFlag(UserFlag.Staff)) _cachedStaff.Add(member.Id);
+            if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);
             return member.Flags.HasFlag(UserFlag.Staff);
         }
     }

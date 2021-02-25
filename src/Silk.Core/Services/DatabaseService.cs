@@ -171,7 +171,6 @@ namespace Silk.Core.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync(Expression<Func<User, bool>> predicate)
         {
-
             await using SilkDbContext db = GetDbContext();
             return db.Users.Where(predicate);
         }

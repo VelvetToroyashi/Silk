@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data;
 using Silk.Data.Models;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Server
 {
@@ -45,7 +47,7 @@ namespace Silk.Core.Commands.Server
                 embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");
 
             if (guild.Features.Count > 0)
-                embed.AddField("Enabled guild features: ", string.Join(", ", guild.Features));
+                embed.AddField("Enabled guild features: ", guild.Features.Select(f => f.Humanize(LetterCasing.Title)).Join(", "));
 
             embed.AddField("Verification Level:", guild.VerificationLevel.ToString().ToUpper());
             embed.AddField("Member Count:", guild.MemberCount.ToString());

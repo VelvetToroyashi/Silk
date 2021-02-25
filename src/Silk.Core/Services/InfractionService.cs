@@ -91,13 +91,13 @@ namespace Silk.Core.Services
             User user = await _mediator.Send(new UserRequest.GetOrCreate(member.Guild.Id, member.Id));
             if (user.Flags.HasFlag(UserFlag.ActivelyMuted))
             {
-                Infraction inf = user
+                Infraction? inf = user
                     .Infractions
-                    .Last(i => 
+                    .LastOrDefault(i => 
                         i.HeldAgainstUser &&
                         i.InfractionType is (InfractionType.AutoModMute or InfractionType.Mute) /* &&
                         i.Expiration > DateTime.Now*/ /* I don't think this is needed. */);
-                
+                if (inf is null) return;
                 inf.Expiration = infraction.Expiration;
                 await _mediator.Send(new UserRequest.Update(member.Guild.Id, member.Id) {Infractions = user.Infractions});
                 _logger.LogTrace($"Updated mute for {member.Id}!");
@@ -111,7 +111,7 @@ namespace Silk.Core.Services
 
             if (infraction.Expiration is not null)
             {
-                if (_tempInfractions.Contains(infraction))
+                if (!_tempInfractions.Contains(infraction))
                 {
                     _tempInfractions.Add(infraction);
                     _logger.LogTrace($"Added temporary infraction to {member.Id}!");
