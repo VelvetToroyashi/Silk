@@ -21,7 +21,7 @@ namespace Silk.Core.EventHandlers
         public async Task CheckStaffRole(DiscordClient c, GuildMemberUpdateEventArgs e)
         {
             if (e.RolesBefore.Count >= e.RolesAfter.Count || e.Member.IsBot) return;
-            var isStaff = e.RolesAfter.Except(e.RolesBefore).Any(r => r.HasPermission(PermissionConstants.CacheFlag));
+            var isStaff = e.RolesAfter.Except(e.RolesBefore).Any(r => r.HasPermission(FlagConstants.CacheFlag));
             var isAdmin = e.Member.HasPermission(Permissions.Administrator);
             if (isStaff)
             {

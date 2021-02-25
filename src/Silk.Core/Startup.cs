@@ -39,7 +39,10 @@ namespace Silk.Core
             services.AddTransient<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
-            services.AddTransient<AutoModInviteHandler>();
+            
+            
+            services.AddSingleton<AntiInviteCore>();
+            
 
             services.AddSingleton<BotExceptionHandler>();
 

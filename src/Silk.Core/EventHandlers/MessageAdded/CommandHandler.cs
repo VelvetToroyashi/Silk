@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -65,7 +63,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 
                 _ = Task.Run(async () =>
                     {
-                        await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.Name), CancellationToken.None);
+                        await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.QualifiedName), CancellationToken.None);
                         await commandsNext.ExecuteCommandAsync(context);
                     }, CancellationToken.None)
                     .ContinueWith(t =>

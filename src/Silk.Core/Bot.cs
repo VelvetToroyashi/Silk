@@ -11,6 +11,7 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers;
@@ -66,7 +67,11 @@ namespace Silk.Core
             Instance = this;
             Client = client;
         }
-        private void InitializeServices() { }
+        private void InitializeServices()
+        {
+            _ = _services.GetRequiredService<AntiInviteCore>();
+            // Logger has to be setup in that class before it can be used properly. //
+        }
 
         private void InitializeCommands()
         {
@@ -135,16 +140,22 @@ namespace Silk.Core
         {
             _logger.LogDebug("Subscribing to events");
 
-            Client.MessageCreated += async (c, e) => { _ =_mediator.Publish(new MessageCreated(c, e)); };
-            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/CommandInvocations".PadLeft(40));
+            Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e)); };
+            _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(40));
+
+            Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
+            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(40));
+            
+            //TODO: Change this to MediatR notification
             Client.MessageCreated += _services.Get<MessageCreatedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
+            
+            
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
             
             
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(40));
-            Client.MessageUpdated += _services.Get<AutoModInviteHandler>().MessageEditInvites;
-            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckEditInvites".PadLeft(40));
             Client.MessageDeleted += _services.Get<MessageRemovedHandler>().MessageRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
             Client.GuildMemberAdded += _services.Get<MemberAddedHandler>().OnMemberAdded;

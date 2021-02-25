@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -10,10 +9,8 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.EventArgs;
 using Humanizer;
 using Humanizer.Localisation;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Silk.Core.EventHandlers.Notifications;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities.Bot

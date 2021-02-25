@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using Silk.Core.Utilities.Bot;
 
 namespace Silk.Core.Utilities
 {

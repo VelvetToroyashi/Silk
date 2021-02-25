@@ -115,7 +115,7 @@ namespace Silk.Core.EventHandlers
                     {
                         user.Flags.Add(UserFlag.EscalatedStaff);
                     }
-                    else if (member.HasPermission(PermissionConstants.CacheFlag))
+                    else if (member.HasPermission(FlagConstants.CacheFlag))
                     {
                         user.Flags.Add(UserFlag.Staff);
                     }
@@ -129,7 +129,7 @@ namespace Silk.Core.EventHandlers
                     }
                     await _mediator.Send(new UserRequest.Update(member.Guild.Id, member.Id) {Flags = user.Flags});
                 }
-                else if (member.HasPermission(PermissionConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
+                else if (member.HasPermission(FlagConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
                     await _mediator.Send(new UserRequest.Add(member.Guild.Id, member.Id, flag));
                     staffCount++;
