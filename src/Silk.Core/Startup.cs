@@ -38,8 +38,6 @@ namespace Silk.Core
             services.AddTransient<TicketService>();
             services.AddTransient<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
-
-            
             
             services.AddSingleton<AntiInviteCore>();
             

@@ -34,7 +34,7 @@ namespace Silk.Core
                       DiscordIntents.GuildMessageReactions |
                       DiscordIntents.DirectMessageReactions, // Auto-mod,
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None
+            MinimumLogLevel = LogLevel.Warning
         };
 
         public static async Task Main(string[] args) =>
@@ -91,7 +91,7 @@ namespace Silk.Core
 
                     // Sub out the default implementation filter with custom filter
                     services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
-
+                
                     /* Can remove all filters with this line */
                     // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 

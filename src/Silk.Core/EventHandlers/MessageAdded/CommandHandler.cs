@@ -27,6 +27,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
             
             public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
             {
+                
                 bool isBot = notification.EventArgs.Author.IsBot;
                 bool isEmpty = string.IsNullOrEmpty(notification.EventArgs.Message.Content);
                 DiscordUser bot = notification.Client.CurrentUser;
@@ -60,11 +61,12 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 CommandContext context = command is null ?
                     throw new CommandNotFoundException($"Invalid command {commandString}") :
                     commandsNext.CreateContext(notification.EventArgs.Message, prefix, command, arguments);
+                await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.QualifiedName), CancellationToken.None);
+
                 
                 _ = Task.Run(async () =>
                     {
-                        await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.QualifiedName), CancellationToken.None);
-                        await commandsNext.ExecuteCommandAsync(context);
+                                                await commandsNext.ExecuteCommandAsync(context);
                     }, CancellationToken.None)
                     .ContinueWith(t =>
                     {

@@ -58,12 +58,10 @@ namespace Silk.Core
 
             SilkDbContext silkDbContext = dbFactory.CreateDbContext();
 
-            try { _ = silkDbContext.Guilds.FirstOrDefault(); }
-            catch
-            {
-                _logger.LogInformation("Database not set up! Migrating...");
-                silkDbContext.Database.Migrate();
-            }
+            #if DEBUG
+            silkDbContext.Database.Migrate();
+            #endif
+            
             Instance = this;
             Client = client;
         }
@@ -151,10 +149,7 @@ namespace Silk.Core
             Client.MessageCreated += _services.Get<MessageCreatedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
             
-            
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
-            
-            
             _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(40));
             Client.MessageDeleted += _services.Get<MessageRemovedHandler>().MessageRemoved;
             _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
