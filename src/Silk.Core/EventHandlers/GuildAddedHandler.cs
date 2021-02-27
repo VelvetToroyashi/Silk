@@ -49,8 +49,7 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            Guild guild = await _mediator.Send(new GuildRequest.GetOrCreate(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
-        int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
+            int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
             
             lock (_lock)
             {
@@ -94,6 +93,13 @@ namespace Silk.Core.EventHandlers
             var builder = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
+                .WithDescription("Thank you for adding me :) I'll keep it short, " +
+                                 "I'm a bot developed by several international programmers with the goal of making a better bot for the masses.\n\n" +
+                                 "I'm a Free & Open-Source Software (FOSS) bot, but programming takes time, and time is money. If you feel our efforts " +
+                                 "are worth being paid for, you can become a patron [here](https://patreon.com/VelvetThePanda), or if you just want to " +
+                                 "tip, you can donate to the [Ko-Fi](https://ko-fi.com/VelvetThePanda).\n\n" +
+                                 "If you're curious to see what makes me tick, the \nsource code is available on [GitHub](https://github.com/VelvetThePanda/Silk)~!\n" +
+                                 "Nonetheless, we hope you enjoy my features :)")
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
                 .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
             await availableChannel.SendMessageAsync(builder);

@@ -17,7 +17,8 @@ namespace Silk.Core
     public static class Startup
     {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static IServiceCollection AddDatabase(IServiceCollection services, string connectionString) =>
+        public static void AddDatabase(IServiceCollection services, string connectionString)
+        {
             services.AddDbContextFactory<SilkDbContext>(
                 option =>
                 {
@@ -27,6 +28,7 @@ namespace Silk.Core
                     option.EnableDetailedErrors();
                     #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
                 }, ServiceLifetime.Transient);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddServices(IServiceCollection services)

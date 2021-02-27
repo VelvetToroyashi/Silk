@@ -11,7 +11,7 @@ using DSharpPlus.Exceptions;
 using Silk.Core.Utilities;
 using Silk.Data.Models;
 
-namespace Silk.Core.Commands.Moderation.SClean
+namespace Silk.Core.Commands.Moderation
 {
     public class CleanCommand : BaseCommandModule
     {
@@ -45,7 +45,14 @@ namespace Silk.Core.Commands.Moderation.SClean
                 .Create<bool, bool, ulong, ulong, string>(async (i, b, u, c, r) => 
                     await GetResult(ctx, messages, i, b, u, c, r));
 
-            await _command.InvokeAsync(options?.Split(' ') ?? new string[]{});
+            try
+            {
+                await _command.InvokeAsync(options?.Split(' ') ?? new string[] { });
+            }
+            catch
+            {
+                // ignored
+            } //CBA to deal with System.CommandLine exceptions
         }
 
         private async Task GetResult(CommandContext ctx,int messageCount, bool images, bool bots, ulong user, ulong channel, string regex)
@@ -83,7 +90,8 @@ namespace Silk.Core.Commands.Moderation.SClean
                     {
                         if (images)
                         {
-                            tempMessages = apiMessages.Where(m =>
+                            tempMessages = apiMessages
+                                .Where(m =>
                                     m.Attachments.Any(a =>
                                         a.FileName.EndsWith(".png") ||
                                         a.FileName.EndsWith(".jpg") ||
@@ -95,7 +103,6 @@ namespace Silk.Core.Commands.Moderation.SClean
                         else
                         {
                             messageList = apiMessages.Take(messageCount);
-                            if (messageList.Count() is 0) return;
                         }
                     }
                     
@@ -106,7 +113,8 @@ namespace Silk.Core.Commands.Moderation.SClean
                     }
                     else break;
                 }
-                await chn.DeleteMessagesAsync(messageList);
+                if (messageList.Count() is not 0)
+                    await chn.DeleteMessagesAsync(messageList);
             }
             catch (KeyNotFoundException)
             {
