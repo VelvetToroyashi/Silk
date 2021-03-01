@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MediatR;
 using Silk.Core.Services.Interfaces;
 using Silk.Data.Models;
 
@@ -10,7 +11,6 @@ namespace Silk.Core.Commands.Economy
 {
     public class FlipCommand : BaseCommandModule
     {
-        private readonly IDatabaseService _dbService;
         private readonly string[] _winningMessages =
         {
             "Capitalism shines upon you.",
@@ -27,17 +27,19 @@ namespace Silk.Core.Commands.Economy
             "Hope that wasn't all your earnings"
         };
 
-
-        public FlipCommand(IDatabaseService dbService)
+        private readonly IMediator _mediator;
+        public FlipCommand(IMediator mediator)
         {
-            _dbService = dbService;
+            _mediator = mediator;
         }
 
-        [Command]
+        //TODO: CREATE GLOBAL USER MEDIATR REQUESTS
+        //[Command]
         [Cooldown(10, 86400, CooldownBucketType.User)]
         [Description("Flip a metaphorical coin, and double your profits, or lose everything~")]
         public async Task FlipAsync(CommandContext ctx, uint amount)
         {
+            /*
             DiscordMessageBuilder builder = new();
             DiscordEmbedBuilder embedBuilder = new();
             builder.WithReply(ctx.Message.Id);
@@ -78,6 +80,7 @@ namespace Silk.Core.Commands.Economy
 
             await ctx.RespondAsync(builder);
             await _dbService.UpdateGlobalUserAsync(user);
+        */
         }
     }
 }

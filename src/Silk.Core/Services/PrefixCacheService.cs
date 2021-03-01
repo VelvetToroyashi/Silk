@@ -74,6 +74,7 @@ namespace Silk.Core.Services
         public void PurgeCache(ulong id)
         {
             _cache.TryRemove(id, out _);
+            //GetPrefix caches, so no need for the result.//
             _ = GetPrefixFromDatabase(id);
             _logger.LogDebug("Purged prefix from recached from database");
         }

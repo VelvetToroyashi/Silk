@@ -22,26 +22,28 @@ namespace Silk.Core.Commands.Moderation
         }
 
         [Command]
+        [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
         public async Task Cases(CommandContext ctx, DiscordUser user)
         {
             var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
             var eBuilder = new DiscordEmbedBuilder();
 
-            User? userModel = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, user.Id));
+            Guild guild = await _mediator.Send(new GuildRequest.Get(ctx.Guild.Id));
+            bool userExists = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, user.Id)) is not null;
             
-            if (userModel is null || !userModel.Infractions.Any())
+            if (!userExists || guild.Infractions.Count(i => i.UserId == user.Id) is 0)
             {
                 mBuilder.WithContent("User has no cases!");
                 await ctx.RespondAsync(mBuilder);
             }
             else
             {
-                string cases = userModel.Infractions
+                string cases = guild.Infractions
                     .OrderBy(i => i.InfractionTime)
-                    .Select((i, n) =>
+                    .Select(i =>
                     {
-                        var s = $"{n + 1}: {i.InfractionType} by <@{i.Enforcer}>, ";
+                        var s = $"{i.Id + 1}: {i.InfractionType} by <@{i.Enforcer}>, ";
                         s += $"Reason:\n{i.Reason[..(i.Reason.Length > 100 ? 100 : ^0)]}";
                         return s;
                     })

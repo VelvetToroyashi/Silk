@@ -19,6 +19,8 @@ namespace Silk.Data.ModelConfigurations.cs
                 .HasOne(g => g.Configuration)
                 .WithOne(g => g.Guild)
                 .HasForeignKey<GuildConfig>(g => g.GuildId);
+            builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
+            
         }
     }
 }

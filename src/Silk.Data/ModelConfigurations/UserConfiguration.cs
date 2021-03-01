@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Silk.Data.Models;
 
-namespace Silk.Data.ModelConfigurations.cs
+namespace Silk.Data.ModelConfigurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
@@ -10,7 +10,6 @@ namespace Silk.Data.ModelConfigurations.cs
         {
             //builder.Property(u => u.DatabaseId).ValueGeneratedOnAdd();
             builder.HasKey(u => u.DatabaseId);
-            builder.HasMany(u => u.Infractions).WithOne(i => i.User);
         }
     }
 }

@@ -29,11 +29,12 @@ namespace Silk.Core.EventHandlers
                 var flag = isAdmin ? UserFlag.EscalatedStaff : UserFlag.Staff;
                 if (user is not null && !user.Flags.Has(flag))
                 {
-                    await _mediator.Send(new UserRequest.Update (e.Member.Id, e.Guild.Id) {Flags = user.Flags | flag });
+                    user.Flags |= flag;
+                    await _mediator.Send(new UserRequest.Update (e.Member.Id, e.Guild.Id, user.Flags));
                 }
                 else
                 {
-                    await _mediator.Send(new UserRequest.Add (e.Member.Id, e.Guild.Id,  UserFlag.Staff ));
+                    await _mediator.Send(new UserRequest.Add (e.Member.Id, e.Guild.Id, flag));
                 }
             }
         }

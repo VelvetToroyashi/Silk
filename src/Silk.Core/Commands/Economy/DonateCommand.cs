@@ -12,9 +12,11 @@ using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
 {
+    //TODO: CREATE MEDIATR GLOBAL USER REQUEST
     [Category(Categories.Economy)]
     public class DonateCommand : BaseCommandModule
     {
+        /*
         private readonly IDatabaseService _dbService;
         private readonly HashSet<ulong> _activeTransactions = new();
         public DonateCommand(IDatabaseService dbService)
@@ -116,6 +118,7 @@ namespace Silk.Core.Commands.Economy
         }
 
         public async override Task AfterExecutionAsync(CommandContext ctx) => _activeTransactions.Remove(ctx.User.Id);
+        */
 
     }
 }

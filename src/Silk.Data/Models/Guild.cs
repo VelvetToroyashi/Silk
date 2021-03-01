@@ -12,5 +12,6 @@ namespace Silk.Data.Models
         public string Prefix { get; set; } = "";
         public GuildConfig Configuration { get; set; } = new();
         public List<User> Users { get; set; } = new();
+        public List<Infraction> Infractions { get; set; } = new();
     }
 }

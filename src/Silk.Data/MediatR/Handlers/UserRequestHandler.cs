@@ -16,9 +16,8 @@ namespace Silk.Data.MediatR.Handlers
             public async Task<User?> Handle(UserRequest.Get request, CancellationToken cancellationToken)
             {
                 User? user = await _db.Users
-                    .Include(u => u.Infractions)
                     .FirstOrDefaultAsync(u => u.Id == request.UserId && 
-                                                u.GuildId == request.GuildId, cancellationToken);
+                                              u.GuildId == request.GuildId, cancellationToken);
                 return user;
             }
         }
@@ -52,7 +51,6 @@ namespace Silk.Data.MediatR.Handlers
                 User user = await _db.Users.FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
                 
                 user.Flags = request.Flags ?? user.Flags;
-                user.Infractions = request.Infractions ?? user.Infractions;
                 await _db.SaveChangesAsync(cancellationToken);
                 
                 return user;
@@ -67,16 +65,14 @@ namespace Silk.Data.MediatR.Handlers
             public async Task<User> Handle(UserRequest.GetOrCreate request, CancellationToken cancellationToken)
             {
                 User? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
-                if (user is null)
+                
+                user ??= new()
                 {
-                    user = new()
-                    {
-                        GuildId = request.GuildId,
-                        Id = request.UserId,
-                        Flags = request.Flags ?? UserFlag.None,
-                        Infractions = request.Infractions ?? new()
-                    };
-                }
+                    GuildId = request.GuildId,
+                    Id = request.UserId,
+                    Flags = request.Flags ?? UserFlag.None,
+                };
+                
                 return user;
             }
         }

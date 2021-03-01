@@ -12,10 +12,8 @@ namespace Silk.Data.Models
         KickedPrior = 16,
         BannedPrior = 32,
         Blacklisted = 64,
-        FreeShopOwner = 128,
-        PaidShopOwner = 256,
-        InfractionExemption = 512,
-        Staff = 1024 | InfractionExemption, //1536
-        EscalatedStaff = 2048 | Staff  // 3584
+        InfractionExemption = 128,
+        Staff = 256 | InfractionExemption, //1536
+        EscalatedStaff = 512 | Staff  // 3584
     }
 }

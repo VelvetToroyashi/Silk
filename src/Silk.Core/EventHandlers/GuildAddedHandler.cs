@@ -59,12 +59,22 @@ namespace Silk.Core.EventHandlers
                 _shardStates[client.ShardId] = state;
                 if (!StartupCompleted)
                 {
-                    string message = $"Cached Guild! Shard [{client.ShardId + 1}/{Bot.Instance!.Client.ShardClients.Count}] → Guild [{state.CachedGuilds}/{client.Guilds.Count}]";
-                    message += cachedMembers is 0 ?
-                        " → Staff [No new staff!]" :
-                        $" → Staff [{cachedMembers}/{eventArgs.Guild.Members.Count}]";
-
-                    _logger.LogDebug(message);
+                    string message;
+                    if (cachedMembers is 0)
+                    {
+                        message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [No new staff!]";
+                        _logger.LogDebug(message, client.ShardId + 1,
+                            Bot.Instance!.Client.ShardClients.Count,
+                            state.CachedGuilds, client.Guilds.Count);
+                    }
+                    else
+                    {
+                        message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
+                        _logger.LogDebug(message, client.ShardId + 1, 
+                            Bot.Instance!.Client.ShardClients.Count, 
+                            state.CachedGuilds,  client.Guilds.Count, 
+                            cachedMembers, eventArgs.Guild.Members.Count);
+                    }
                 }
             }
         }
@@ -133,7 +143,7 @@ namespace Silk.Core.EventHandlers
                             user.Flags.Remove(f);
                         }
                     }
-                    await _mediator.Send(new UserRequest.Update(member.Guild.Id, member.Id) {Flags = user.Flags});
+                    await _mediator.Send(new UserRequest.Update(member.Guild.Id, member.Id, user.Flags));
                 }
                 else if (member.HasPermission(FlagConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {

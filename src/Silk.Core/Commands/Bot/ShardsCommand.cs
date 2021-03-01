@@ -47,7 +47,7 @@ namespace Silk.Core.Commands.Bot
             sb.Clear();
 
             sb.Append("`|");
-            sb.Append($" {ctx.Client.ShardId + 1}".Center("\t[Shard]\t"));
+            sb.Append($" {shards.Count}".Center("\t[Shard]\t"));
             sb.Append('|');
             sb.Append($"{totalPing / shards.Count}".Center("\t[Ping]\t"));
             sb.Append('|');

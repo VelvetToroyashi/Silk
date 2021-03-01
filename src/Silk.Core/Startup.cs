@@ -34,15 +34,13 @@ namespace Silk.Core
         public static void AddServices(IServiceCollection services)
         {
             services.AddScoped<SilkDbContext>();
-            services.AddScoped<IDatabaseService, DatabaseService>();
-            services.AddTransient<IInfractionService, InfractionService>();
+            services.AddScoped<IInfractionService, InfractionService>();
             services.AddTransient<IPrefixCacheService, PrefixCacheService>();
             services.AddTransient<TicketService>();
             services.AddTransient<ConfigService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
             
             services.AddSingleton<AntiInviteCore>();
-            
 
             services.AddSingleton<BotExceptionHandler>();
 
@@ -51,7 +49,6 @@ namespace Silk.Core
             services.AddTransient<MessageRemovedHandler>();
 
             services.AddTransient<MemberAddedHandler>();
-            services.AddTransient<MemberRemovedHandler>();
 
             services.AddTransient<RoleAddedHandler>();
             services.AddTransient<RoleRemovedHandler>();

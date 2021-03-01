@@ -91,18 +91,17 @@ namespace Silk.Core
             _commands = new CommandsNextConfiguration
             {
                 UseDefaultCommandHandler = false,
-                Services = _services,
+                Services = _services.CreateScope().ServiceProvider,
                 IgnoreExtraArguments = true,
 
             };
-
             await Client.UseCommandsNextAsync(_commands);
-            await _exceptionHandler.SubscribeToEventsAsync();
-
             InitializeCommands();
             InitializeServices();
             SubscribeToEvents();
-
+            
+            await _exceptionHandler.SubscribeToEventsAsync();
+            
             await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -139,32 +138,29 @@ namespace Silk.Core
             _logger.LogDebug("Subscribing to events");
 
             Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e)); };
-            _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(40));
-            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(50));
+            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(50));
 
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
-            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(50));
             
             //TODO: Change this to MediatR notification
             Client.MessageCreated += _services.Get<MessageCreatedHandler>().Tickets;
-            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(40));
-            
+            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(50));
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
-            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(50));
             Client.MessageDeleted += _services.Get<MessageRemovedHandler>().MessageRemoved;
-            _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(50));
             Client.GuildMemberAdded += _services.Get<MemberAddedHandler>().OnMemberAdded;
-            _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(40));
-            Client.GuildMemberRemoved += _services.Get<MemberRemovedHandler>().OnMemberRemoved;
-            _logger.LogTrace("Subscribed to:" + " MemberRemovedHelper/MemberRemoved".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(50));
             Client.GuildCreated += _services.Get<GuildAddedHandler>().SendThankYouMessage;
-            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(50));
             Client.GuildAvailable += _services.Get<GuildAddedHandler>().OnGuildAvailable;
-            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(50));
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
-            _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete");
+            _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete".PadLeft(50));
             Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>().CheckStaffRole;
-            _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(40));
+            _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(50));
             _logger.LogInformation("Subscribed to all events!");
         }
 
