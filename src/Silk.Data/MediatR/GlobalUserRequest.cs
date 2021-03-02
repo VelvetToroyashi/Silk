@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Data.MediatR
@@ -11,7 +12,8 @@ namespace Silk.Data.MediatR
 
         public record Update(ulong UserId) : IRequest<GlobalUser>
         {
-           
+           public int Cash { get; init; }
+           public DateTime LastCashOut { get; init; }
         }
     }
 }

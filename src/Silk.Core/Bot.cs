@@ -9,6 +9,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using Humanizer;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -121,13 +122,13 @@ namespace Silk.Core
                 extension.RegisterConverter(new MemberConverter());
             }
 
-            _logger.LogInformation($"Services + CommandInvocations initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
+            _logger.LogInformation("Bot initialized in: {Time} ms", DateTime.Now.Subtract(Program.Startup).TotalMilliseconds.ToString("N0"));
             await Client.StartAsync();
 
             // Client.StartAsync() returns as soon as all shards are ready, which means we log before
             // The client is *actually* ready.
             while (!GuildAddedHandler.StartupCompleted) { }
-            _logger.LogInformation($"All shards initialized in: {DateTime.Now.Subtract(Program.Startup).TotalMilliseconds:N0} ms");
+            _logger.LogInformation("All shards initialized in: {Time} ms", DateTime.Now.Subtract(Program.Startup).TotalMilliseconds.ToString("N0"));
         }
 
 

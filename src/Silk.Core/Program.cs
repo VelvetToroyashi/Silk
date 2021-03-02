@@ -20,8 +20,6 @@ namespace Silk.Core
     public class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
-
-
         public static string HttpClientName { get; } = "Silk";
 
         private static readonly DiscordConfiguration _clientConfig = new()
@@ -30,7 +28,7 @@ namespace Silk.Core
                       DiscordIntents.GuildMembers | //Auto-mod/Auto-greet
                       DiscordIntents.DirectMessages | // CommandInvocations & Auto-Mod
                       DiscordIntents.GuildPresences | // Role-menu
-                      DiscordIntents.GuildMessages | // DM CommandInvocations
+                      DiscordIntents.GuildMessages | // DM Commands
                       DiscordIntents.GuildMessageReactions |
                       DiscordIntents.DirectMessageReactions, // Auto-mod,
             MessageCacheSize = 1024,
@@ -97,10 +95,7 @@ namespace Silk.Core
 
                     services.AddTransient(_ => new BotConfig(config));
 
-                    services.AddHostedService<Bot>();
                     
-                    services.AddMediatR(typeof(Program));
-                    services.AddMediatR(typeof(SilkDbContext));
                 })
                 .UseSerilog();
         }
