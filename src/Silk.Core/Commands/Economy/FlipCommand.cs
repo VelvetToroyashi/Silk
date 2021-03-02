@@ -4,7 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Services.Interfaces;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
@@ -32,19 +32,17 @@ namespace Silk.Core.Commands.Economy
         {
             _mediator = mediator;
         }
-
-        //TODO: CREATE GLOBAL USER MEDIATR REQUESTS
-        //[Command]
+        
+        [Command]
         [Cooldown(10, 86400, CooldownBucketType.User)]
         [Description("Flip a metaphorical coin, and double your profits, or lose everything~")]
         public async Task FlipAsync(CommandContext ctx, uint amount)
         {
-            /*
             DiscordMessageBuilder builder = new();
             DiscordEmbedBuilder embedBuilder = new();
             builder.WithReply(ctx.Message.Id);
 
-            GlobalUser user = await _dbService.GetOrCreateGlobalUserAsync(ctx.User.Id);
+            GlobalUser user = await _mediator.Send(new GlobalUserRequest.GetOrCreate(ctx.User.Id));
 
             if (amount > user.Cash)
             {
@@ -79,8 +77,7 @@ namespace Silk.Core.Commands.Economy
             }
 
             await ctx.RespondAsync(builder);
-            await _dbService.UpdateGlobalUserAsync(user);
-        */
+            await _mediator.Send(new GlobalUserRequest.Update(user.Id) {Cash = user.Cash});
         }
     }
 }

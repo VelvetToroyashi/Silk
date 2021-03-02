@@ -60,6 +60,25 @@ namespace Silk.Data.MediatR.Handlers
                 return user;
             }
         }
-        
+
+        public class GetOrCreateHandler : IRequestHandler<GlobalUserRequest.GetOrCreate, GlobalUser>
+        {
+            private readonly SilkDbContext _db;
+            public GetOrCreateHandler(SilkDbContext db)
+            {
+                _db = db;
+            }
+            public async Task<GlobalUser> Handle(GlobalUserRequest.GetOrCreate request, CancellationToken cancellationToken)
+            {
+                GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+                user ??= new()
+                {
+                    Id = request.UserId,
+                    LastCashOut = DateTime.MinValue
+                };
+                
+                return user;
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 
                 _ = Task.Run(async () =>
                     {
-                                                await commandsNext.ExecuteCommandAsync(context);
+                        await commandsNext.ExecuteCommandAsync(context);
                     }, CancellationToken.None)
                     .ContinueWith(t =>
                     {
