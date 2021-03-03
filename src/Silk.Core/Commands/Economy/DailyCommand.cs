@@ -57,14 +57,12 @@ namespace Silk.Core.Commands.Economy
                 }
                 else
                 {
-                    user.Cash += 200;
-                    
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                         .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
 
-                    await _mediator.Send(new GlobalUserRequest.Update(user.Id) {Cash = user.Cash, LastCashOut = DateTime.Now});
+                    await _mediator.Send(new GlobalUserRequest.Update(user.Id) {Cash = user.Cash + 200, LastCashOut = DateTime.Now});
                     await ctx.RespondAsync(embed);
                 }
             }
