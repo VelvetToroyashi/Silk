@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -35,11 +37,27 @@ namespace Silk.Core.Services
             }
         }
 
-        public async Task<bool> AliasTagAsync(string tagName, ulong guildId)
+        public async Task<(bool success, string? reason)> AliasTagAsync(string tagName, string aliasName, string content, ulong guildId, ulong ownerId)
         {
+            Tag? tag = await _mediator.Send(new TagRequest.Get(tagName, guildId));
             
+            if (tag is null)
+                return (false, "Tag not found");
+            if (tag.OriginalTag is null)
+            {
+                if (tag.Aliases!.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)))
+                    return (false, "Tag already exists!");
+            }
+            else
+            {
+                if (tag.OriginalTag.Aliases!.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)))
+                    return (false, "Tag already exists!");
+            }
             
-            return false;
+
+            await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, content, tag));
+            
+            return (false, null);
         }
         public async Task UpdateTagContentAsync(string tagName, ulong guildId)
         {

@@ -24,8 +24,9 @@ namespace Silk.Data.MediatR.Handlers
                     OwnerId = request.OwnerId,
                     GuildId = request.GuildId,
                     Name = request.Name,
+                    OriginalTag = request.OriginalTag,
                     Content = request.Content,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 _db.Tags.Add(tag);

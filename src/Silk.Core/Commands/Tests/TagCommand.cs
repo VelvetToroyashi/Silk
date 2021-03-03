@@ -49,7 +49,7 @@ namespace Silk.Core.Commands.Tests
                 var builder = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.Blurple)
                     .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl);
-                //TODO: if (dbTag is TagAlias) { ... } 
+                //TODO: Check if original tag is not null
                 builder.WithTitle(dbTag.Name);
                 builder.AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
 
