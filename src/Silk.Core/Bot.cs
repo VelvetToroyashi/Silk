@@ -92,7 +92,7 @@ namespace Silk.Core
             _commands = new CommandsNextConfiguration
             {
                 UseDefaultCommandHandler = false,
-                Services = _services.CreateScope().ServiceProvider,
+                Services = _services,
                 IgnoreExtraArguments = true,
 
             };
