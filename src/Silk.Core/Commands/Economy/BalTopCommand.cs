@@ -15,7 +15,6 @@ namespace Silk.Core.Commands.Economy
     public class BalTopCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-
         public BalTopCommand(IDbContextFactory<SilkDbContext> dbContextFactory) => _dbFactory = dbContextFactory;
 
         [RequireGuild]
@@ -24,7 +23,8 @@ namespace Silk.Core.Commands.Economy
         [Description("See which members have the most money!")]
         public async Task BalTop(CommandContext ctx)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            await using SilkDbContext db = _dbFactory.CreateDbContext();
+            // Need specific info here, so. //
             List<GlobalUser> economyUsers = db.GlobalUsers
                 .OrderByDescending(user => user.Cash)
                 .Take(10)

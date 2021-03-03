@@ -6,8 +6,10 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
@@ -15,20 +17,21 @@ namespace Silk.Core.Commands.Economy
     [Category(Categories.Economy)]
     public class DonateCommand : BaseCommandModule
     {
-        private readonly IDatabaseService _dbService;
+        private readonly IMediator _mediator;
         private readonly HashSet<ulong> _activeTransactions = new();
-        public DonateCommand(IDatabaseService dbService)
+        public DonateCommand(IMediator mediator)
         {
-            _dbService = dbService;
+            _mediator = mediator;
         }
+
 
         [Command("donate")]
         [Aliases("gift")]
         [Description("Send a Guild member some sweet cash!")]
         public async Task Donate(CommandContext ctx, uint amount, DiscordMember recipient)
         {
-            GlobalUser sender = await _dbService.GetOrCreateGlobalUserAsync(ctx.User.Id);
-            GlobalUser receiver = await _dbService.GetOrCreateGlobalUserAsync(recipient.Id);
+            GlobalUser sender = await _mediator.Send(new GlobalUserRequest.GetOrCreate(ctx.User.Id));
+            GlobalUser receiver = await _mediator.Send(new GlobalUserRequest.GetOrCreate(recipient.Id));
 
             if (receiver == sender)
             {
@@ -51,8 +54,8 @@ namespace Silk.Core.Commands.Economy
             }
 
 
-            await _dbService.UpdateGlobalUserAsync(receiver!);
-            await _dbService.UpdateGlobalUserAsync(sender!);
+            await _mediator.Send(new GlobalUserRequest.Update(sender.Id) {Cash = sender.Cash});
+            await _mediator.Send(new GlobalUserRequest.Update(receiver.Id) {Cash = receiver.Cash});
         }
 
         private static async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)

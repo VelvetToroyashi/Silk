@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
@@ -30,35 +32,43 @@ namespace Silk.Core
                 }, ServiceLifetime.Transient);
         }
 
+        public record Scoped
+        {
+            public int Id { get; } = new Random().Next(10);
+        }
+
+        public record Transient
+        {
+            public int Id { get; } = new Random().Next(10);
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddServices(IServiceCollection services)
         {
-            services.AddScoped<SilkDbContext>();
-            services.AddScoped<IDatabaseService, DatabaseService>();
-            services.AddTransient<IInfractionService, InfractionService>();
-            services.AddTransient<IPrefixCacheService, PrefixCacheService>();
-            services.AddTransient<TicketService>();
+
+            services.AddScoped<Scoped>();
+            services.AddTransient<Transient>();
+            
             services.AddTransient<ConfigService>();
-            services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
-            
+            services.AddTransient<SilkDbContext>();
+            services.AddTransient<TicketService>();
             services.AddSingleton<AntiInviteCore>();
-            
-
-            services.AddSingleton<BotExceptionHandler>();
-
+            services.AddTransient<RoleAddedHandler>();
             services.AddTransient<GuildAddedHandler>();
+            services.AddTransient<MemberAddedHandler>();
+            services.AddTransient<RoleRemovedHandler>();
+            services.AddSingleton<BotExceptionHandler>();
+            services.AddSingleton<SerilogLoggerFactory>();
             services.AddTransient<MessageCreatedHandler>();
             services.AddTransient<MessageRemovedHandler>();
+            services.AddScoped<IInfractionService, InfractionService>();
+            services.AddTransient<IPrefixCacheService, PrefixCacheService>();
+            services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
+            
+            services.AddHostedService<Bot>();
 
-            services.AddTransient<MemberAddedHandler>();
-            services.AddTransient<MemberRemovedHandler>();
-
-            services.AddTransient<RoleAddedHandler>();
-            services.AddTransient<RoleRemovedHandler>();
-
-            services.AddSingleton<SerilogLoggerFactory>();
-
+            services.AddMediatR(typeof(Program));
+            services.AddMediatR(typeof(SilkDbContext));
         }
-
     }
 }

@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Silk.Core.Services.Interfaces;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions;
 
@@ -33,8 +36,8 @@ namespace Silk.Core.Utilities
             if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
             if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
-            IDatabaseService db = ctx.Services.Get<IDatabaseService>();
-            User? member = await db.GetGuildUserAsync(ctx.Guild!.Id, ctx.User.Id);
+            IMediator mediator = ctx.Services.CreateScope().ServiceProvider.Get<IMediator>();
+            User? member = await mediator.Send(new UserRequest.Get(ctx.Guild!.Id, ctx.User.Id));
 
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);

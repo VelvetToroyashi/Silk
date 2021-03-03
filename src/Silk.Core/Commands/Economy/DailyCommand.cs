@@ -6,9 +6,11 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
@@ -17,19 +19,20 @@ namespace Silk.Core.Commands.Economy
     [Category(Categories.Economy)]
     public class DailyCommand : BaseCommandModule
     {
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
-
-        public DailyCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly IMediator _mediator;
+        public DailyCommand(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
         [Command("daily")]
         [Description("Collect daily economy account cash!")]
         public async Task DailyMoney(CommandContext ctx)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
-            GlobalUser? user = db.GlobalUsers.FirstOrDefault(u => u.Id == ctx.User.Id);
+            GlobalUser? user = await _mediator.Send(new GlobalUserRequest.Get(ctx.User.Id));
             if (user is null)
             {
-                user = new GlobalUser {Id = ctx.User.Id, Cash = 500, LastCashOut = DateTime.Now};
+                await _mediator.Send(new GlobalUserRequest.Add(ctx.User.Id) { Cash = 500 });
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.Green)
@@ -37,11 +40,8 @@ namespace Silk.Core.Commands.Economy
                                      "I'm feeling extra generous, and have given you an extra three hundred dollars" +
                                      " on top of normal daily rates *:)* Don't spend it all in one place~")
                     .WithTitle("Collected $500, come back in 24h for $200 more!");
-
-                db.GlobalUsers.Add(user);
-
+                
                 await ctx.RespondAsync(embed);
-                await db.SaveChangesAsync();
             }
             else
             {
@@ -57,15 +57,13 @@ namespace Silk.Core.Commands.Economy
                 }
                 else
                 {
-                    user.Cash += 200;
-                    user.LastCashOut = DateTime.Now;
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                         .WithAuthor(ctx.User.Username, ctx.User.GetUrl(), ctx.User.AvatarUrl)
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
 
+                    await _mediator.Send(new GlobalUserRequest.Update(user.Id) {Cash = user.Cash + 200, LastCashOut = DateTime.Now});
                     await ctx.RespondAsync(embed);
-                    await db.SaveChangesAsync();
                 }
             }
         }

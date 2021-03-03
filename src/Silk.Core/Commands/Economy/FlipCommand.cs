@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Services.Interfaces;
+using MediatR;
+using Silk.Data.MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
 {
     public class FlipCommand : BaseCommandModule
     {
-        private readonly IDatabaseService _dbService;
         private readonly string[] _winningMessages =
         {
             "Capitalism shines upon you.",
@@ -27,12 +27,12 @@ namespace Silk.Core.Commands.Economy
             "Hope that wasn't all your earnings"
         };
 
-
-        public FlipCommand(IDatabaseService dbService)
+        private readonly IMediator _mediator;
+        public FlipCommand(IMediator mediator)
         {
-            _dbService = dbService;
+            _mediator = mediator;
         }
-
+        
         [Command]
         [Cooldown(10, 86400, CooldownBucketType.User)]
         [Description("Flip a metaphorical coin, and double your profits, or lose everything~")]
@@ -42,7 +42,7 @@ namespace Silk.Core.Commands.Economy
             DiscordEmbedBuilder embedBuilder = new();
             builder.WithReply(ctx.Message.Id);
 
-            GlobalUser user = await _dbService.GetOrCreateGlobalUserAsync(ctx.User.Id);
+            GlobalUser user = await _mediator.Send(new GlobalUserRequest.GetOrCreate(ctx.User.Id));
 
             if (amount > user.Cash)
             {
@@ -77,7 +77,7 @@ namespace Silk.Core.Commands.Economy
             }
 
             await ctx.RespondAsync(builder);
-            await _dbService.UpdateGlobalUserAsync(user);
+            await _mediator.Send(new GlobalUserRequest.Update(user.Id) {Cash = user.Cash});
         }
     }
 }

@@ -23,7 +23,13 @@ namespace Silk.Core.Commands.Miscellaneous
         public async Task RoleInfo(CommandContext ctx, DiscordRole role)
         {
             IEnumerable<DiscordMember> members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
-
+            string memberString = members.Count() is 0 && role != ctx.Guild.EveryoneRole ? 
+                "This role isn't assigned to anyone!" : 
+                members.Take(members.Count() > 5 ? 5 : 
+                    members.Count())
+                    .Select(m => m.Mention)
+                    .Join(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "Everyone has the everyone role, silly!")}";
+            
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle($"Info for {role.Name} ( {role.Id} ):")
                 .AddField("Color:", role.Color.ToString())
@@ -31,9 +37,9 @@ namespace Silk.Core.Commands.Miscellaneous
                 .AddField("Hoisted:", role.IsHoisted.ToString())
                 .AddField("Hierarchy:", GetHierarchy(ctx, role))
                 .AddField("Bot role:", role.IsManaged.ToString())
-                .AddField("Members:", members.Count() is 0 ? "This role isn't assigned to anyone!" : members.Take(members.Count() > 5 ? 5 : members.Count()).Select(m => m.Mention).Join(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "")}")
+                .AddField("Members:", memberString)
                 .AddField("Mentionable:", role.IsMentionable.ToString())
-                .AddField("Permissions:", role.Permissions.ToString())
+                .AddField("Permissions:", role.Permissions.ToPermissionString())
                 .WithColor(role.Color)
                 .WithThumbnail(ctx.Guild.IconUrl);
 

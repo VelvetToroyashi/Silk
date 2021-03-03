@@ -29,8 +29,11 @@ namespace Silk.Core.EventHandlers
             {
                 User? user = await _mediator.Send(new UserRequest.Get (e.Member.Id, e.Guild.Id));
                 if (user is null) return;
-                user.Flags.Remove(UserFlag.Staff);
-                await _mediator.Send(new UserRequest.Update (user.Id, user.GuildId) {Flags = user.Flags});
+
+                var flag = user.Flags.HasFlag(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;
+                flag |= UserFlag.InfractionExemption;
+                user.Flags = user.Flags.Remove(flag);
+                await _mediator.Send(new UserRequest.Update (user.Id, user.GuildId, user.Flags));
                 _logger.LogDebug($"Removed staff role from {e.Member.Id}");
             });
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,23 @@ namespace Silk.Data.MediatR.Handlers
                     .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
                 
                 return guild;
+            }
+        }
+
+        public class UpdateHandler : IRequestHandler<GuildRequest.Update>
+        {
+            private readonly SilkDbContext _db;
+            public UpdateHandler(SilkDbContext db)
+            {
+                _db = db;
+            }
+
+            public async Task<Unit> Handle(GuildRequest.Update request, CancellationToken cancellationToken)
+            {
+                Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
+                guild.Infractions = request.Infractions;
+                
+                return new();
             }
         }
         
