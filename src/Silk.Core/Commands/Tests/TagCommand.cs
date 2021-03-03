@@ -160,6 +160,20 @@ namespace Silk.Core.Commands.Tests
         }
 
         [Command]
+        public async Task Edit(CommandContext ctx, string tagName, [RemainingText] string content)
+        {
+            var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.User.Id, ctx.User.Id);
+            if (!couldEditTag.success)
+            {
+                await ctx.RespondAsync(couldEditTag.reason);
+            }
+            else
+            {
+                await ctx.RespondAsync("Sucessfully edited tag!");
+            }
+        }
+        
+        [Command]
         public async Task Search(CommandContext ctx, string tagName)
         {
             var tags = await _mediator.Send(new TagRequest.GetByName(tagName, ctx.Guild.Id));
