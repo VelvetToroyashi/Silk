@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -9,9 +10,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210303061816_Tags_Initial")]
+    partial class Tags_Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -315,9 +317,6 @@ namespace Silk.Data.Migrations
                     b.Property<decimal>("OwnerId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<int>("Uses")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("GuildId");
@@ -508,11 +507,13 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Models.Tag", b =>
                 {
-                    b.HasOne("Silk.Data.Models.Guild", null)
+                    b.HasOne("Silk.Data.Models.Guild", "Guild")
                         .WithMany("Tags")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Silk.Data.Models.TagAlias", b =>
