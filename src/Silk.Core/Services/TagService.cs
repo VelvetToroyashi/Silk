@@ -55,9 +55,10 @@ namespace Silk.Core.Services
             }
             
 
-            await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, content, tag));
-            
-            return (false, null);
+            var alias = await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, content, tag));
+
+            _tags.TryAdd(new(aliasName, guildId), alias);
+            return (true, null);
         }
         public async Task UpdateTagContentAsync(string tagName, ulong guildId)
         {
