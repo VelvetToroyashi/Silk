@@ -12,6 +12,7 @@ namespace Silk.Data.Models
         public DateTime CreatedAt { get; set; }
         public ulong OwnerId { get; set; }
         public ulong GuildId { get; set; }
+        public Tag? OriginalTag { get; set; }
         public List<Tag>? Aliases { get; set; }
     }
 }
