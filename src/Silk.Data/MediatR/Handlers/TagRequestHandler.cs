@@ -26,7 +26,8 @@ namespace Silk.Data.MediatR.Handlers
                     Name = request.Name,
                     OriginalTag = request.OriginalTag,
                     Content = request.Content,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    Aliases = request.OriginalTag is null ? new() : null
                 };
 
                 _db.Tags.Add(tag);

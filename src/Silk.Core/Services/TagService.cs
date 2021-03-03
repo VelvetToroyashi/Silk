@@ -37,15 +37,16 @@ namespace Silk.Core.Services
             }
         }
 
-        public async Task<(bool success, string? reason)> AliasTagAsync(string tagName, string aliasName, string content, ulong guildId, ulong ownerId)
+        public async Task<(bool success, string? reason)> AliasTagAsync(string tagName, string aliasName, ulong guildId, ulong ownerId)
         {
             Tag? tag = await _mediator.Send(new TagRequest.Get(tagName, guildId));
             
             if (tag is null)
-                return (false, "Tag not found");
-            if (tag.OriginalTag is null)
+                return (false, "Tag not found!");
+            
+            if (tag.OriginalTag is null) // Not an alias
             {
-                if (tag.Aliases!.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)))
+                if (tag.Aliases?.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)) ?? false)
                     return (false, "Tag already exists!");
             }
             else
@@ -55,7 +56,7 @@ namespace Silk.Core.Services
             }
             
 
-            var alias = await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, content, tag));
+            var alias = await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, tag.Content, tag));
 
             _tags.TryAdd(new(aliasName, guildId), alias);
             return (true, null);
