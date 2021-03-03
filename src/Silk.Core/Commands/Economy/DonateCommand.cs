@@ -54,11 +54,9 @@ namespace Silk.Core.Commands.Economy
             }
 
 
-            await _mediator.Send(new GlobalUserRequest.Update(sender.Id) {Cash = sender.Cash});
-            await _mediator.Send(new GlobalUserRequest.Update(receiver.Id) {Cash = receiver.Cash});
         }
 
-        private static async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
+        private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
         {
             // We use uint as an easier way of anti fraud protection; people would put a negative number and essentially steal money from others. //
             DiscordMember member = await ctx.Guild.GetMemberAsync(receiver.Id);
@@ -72,6 +70,9 @@ namespace Silk.Core.Commands.Economy
             receiver.Cash += (int) amount;
 
             await ctx.RespondAsync(embed);
+            
+            await _mediator.Send(new GlobalUserRequest.Update(sender.Id) {Cash = sender.Cash});
+            await _mediator.Send(new GlobalUserRequest.Update(receiver.Id) {Cash = receiver.Cash});
         }
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)

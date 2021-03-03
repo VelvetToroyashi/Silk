@@ -57,6 +57,7 @@ namespace Silk.Data.MediatR.Handlers
                 GlobalUser user = await _db.GlobalUsers.FirstAsync(u => u.Id == request.UserId, cancellationToken);
                 user.Cash = request.Cash;
                 user.LastCashOut = request.LastCashOut;
+                await _db.SaveChangesAsync(cancellationToken);
                 return user;
             }
         }
