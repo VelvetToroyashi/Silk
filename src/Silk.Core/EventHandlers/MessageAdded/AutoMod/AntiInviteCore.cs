@@ -44,7 +44,8 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         {
             if (!config.BlacklistInvites) return false;
             if (message.Channel.IsPrivate) return false;
-
+            if (message.Author.IsBot) return false;
+            
             Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
             Match match = scanPattern.Match(message.Content);
             
