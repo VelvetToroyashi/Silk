@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -9,9 +10,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210303063923_Tags_Count")]
+    partial class Tags_Count
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,9 +314,6 @@ namespace Silk.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("OriginalTagId")
-                        .HasColumnType("integer");
-
                     b.Property<decimal>("OwnerId")
                         .HasColumnType("numeric(20,0)");
 
@@ -325,9 +324,35 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.HasIndex("OriginalTagId");
-
                     b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("Silk.Data.Models.TagAlias", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("OrigionalTagId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("OwnerDatabaseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("OwnerId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrigionalTagId");
+
+                    b.HasIndex("OwnerDatabaseId");
+
+                    b.ToTable("TagAlias");
                 });
 
             modelBuilder.Entity("Silk.Data.Models.Ticket", b =>
@@ -490,12 +515,25 @@ namespace Silk.Data.Migrations
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.HasOne("Silk.Data.Models.Tag", "OriginalTag")
+            modelBuilder.Entity("Silk.Data.Models.TagAlias", b =>
+                {
+                    b.HasOne("Silk.Data.Models.Tag", "OrigionalTag")
                         .WithMany("Aliases")
-                        .HasForeignKey("OriginalTagId");
+                        .HasForeignKey("OrigionalTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("OriginalTag");
+                    b.HasOne("Silk.Data.Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerDatabaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrigionalTag");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Silk.Data.Models.TicketMessage", b =>

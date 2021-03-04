@@ -64,6 +64,8 @@ namespace Silk.Core
             services.AddScoped<IInfractionService, InfractionService>();
             services.AddTransient<IPrefixCacheService, PrefixCacheService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
+
+            services.AddSingleton<TagService>();
             
             services.AddHostedService<Bot>();
 
