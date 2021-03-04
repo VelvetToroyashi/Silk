@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Tests
             
             if (dbTag is null)
             {
-                await ctx.RespondAsync("Tag not found! :(");
+                await ctx.RespondAsync("Tag not found!");
             }
             else
             {
@@ -162,7 +162,7 @@ namespace Silk.Core.Commands.Tests
         [Command]
         public async Task Edit(CommandContext ctx, string tagName, [RemainingText] string content)
         {
-            var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.User.Id, ctx.User.Id);
+            var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.success)
             {
                 await ctx.RespondAsync(couldEditTag.reason);

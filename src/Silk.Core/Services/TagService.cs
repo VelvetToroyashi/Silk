@@ -61,16 +61,12 @@ namespace Silk.Core.Services
         {
             Tag? tag = await GetTagAsync(tagName, guildId);
             
-            if (await GetTagAsync(tagName, guildId) is null)
-            {
+            if (tag is null)
                 return (false, "Tag not found!");
-            }
-
+            
             if (tag!.OwnerId != ownerId)
-            {
                 return (false, "You do not have permission to edit this tag! Do you own it?");
-            }
-
+            
             await _mediator.Send(new TagRequest.Update(tagName, guildId) {Content = content});
             return (true, null);
         }
