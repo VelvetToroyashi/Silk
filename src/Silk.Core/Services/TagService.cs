@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.Extensions.Hosting;
+using Silk.Core.Types;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
 
@@ -26,26 +25,25 @@ namespace Silk.Core.Services
             return dbTag;
         }
 
-        public async Task<(bool success, string? reason)> AliasTagAsync(string tagName, string aliasName, ulong guildId, ulong ownerId)
+        /// <summary>
+        /// Creates a tag that points to another tag.
+        /// </summary>
+        /// <param name="tagName">The name of the tag to alias to.</param>
+        /// <param name="aliasName">The name of the alias.</param>
+        /// <param name="guildId">The Id of the guild the tag and alias belong to.</param>
+        /// <param name="ownerId">The Id of the owner of the alias.</param>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        public async Task<TagCreationResult> AliasTagAsync(string tagName, string aliasName, ulong guildId, ulong ownerId)
         {
             Tag? tag = await _mediator.Send(new TagRequest.Get(tagName, guildId));
             Tag? alias = await _mediator.Send(new TagRequest.Get(aliasName, guildId));
             
-            if (tag is null)
-                return (false, "Tag not found!");
-            if (alias is not null)
-                return (false, "Alias or tag already exists!");
+            if (tag is null) 
+                return new(false, "Tag not found!");
             
-            if (tag.OriginalTag is null) // Not an alias
-            {
-                if (tag.Aliases?.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)) ?? false)
-                    return (false, "Tag already exists!");
-            }
-            else
-            {
-                if (tag.OriginalTag.Aliases!.Any(a => string.Equals(a.Name, aliasName, StringComparison.OrdinalIgnoreCase)))
-                    return (false, "Tag already exists!");
-            }
+            if (alias is not null) 
+                return new(false, "Alias already exists!");
+            
             
             alias = await _mediator.Send(new TagRequest.Create(aliasName, guildId, ownerId, tag.Content, tag));
             
@@ -54,35 +52,62 @@ namespace Silk.Core.Services
 
             await _mediator.Send(new TagRequest.Update(tagName, guildId) {Aliases = tag.Aliases});
             
-            return (true, null);
+            return new(true, null);
         }
-        
-        public async Task<(bool success, string? reason)> UpdateTagContentAsync(string tagName, string content, ulong guildId, ulong ownerId)
+        /// <summary>
+        /// Updates the content of a tag, and corresponding aliases.
+        /// </summary>
+        /// <param name="tagName">The name of the tag to update (case insensitive).</param>
+        /// <param name="content">The content of which to update the tag.</param>
+        /// <param name="guildId">The Id of the guild the tag belongs to.</param>
+        /// <param name="ownerId">The Id of the owner of the tag.</param>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        public async Task<TagCreationResult> UpdateTagContentAsync(string tagName, string content, ulong guildId, ulong ownerId)
         {
             Tag? tag = await GetTagAsync(tagName, guildId);
             
             if (tag is null)
-                return (false, "Tag not found!");
+                return new(false, "Tag not found!");
             
             if (tag!.OwnerId != ownerId)
-                return (false, "You do not have permission to edit this tag! Do you own it?");
+                return new(false, "You do not have permission to edit this tag! Do you own it?");
             
             await _mediator.Send(new TagRequest.Update(tagName, guildId) {Content = content});
-            return (true, null);
+            
+            return new(true, null);
         }
 
-        public async Task<(bool success, string? reason)> CreateTagAsync(string tagName, string content, ulong guildId, ulong ownerId)
+        /// <summary>
+        /// Creates a tag with a given name.
+        /// </summary>
+        /// <param name="tagName">The name of the tag to create (case-insenstive).</param>
+        /// <param name="content">The content of the tag to create.</param>
+        /// <param name="guildId">The Id of the guild this tag was created on.</param>
+        /// <param name="ownerId">The Id of the user that owns this tag or alias.</param>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        public async Task<TagCreationResult> CreateTagAsync(string tagName, string content, ulong guildId, ulong ownerId)
         {
             if (await GetTagAsync(tagName, guildId) is not null)
-                return (false, "Tag already exists!");
+                return new(false, "Tag already exists!");
             await _mediator.Send(new TagRequest.Create(tagName, guildId, ownerId, content, null));
-            return (true, null);
+            return new(true, null);
         }
 
+        /// <summary>
+        /// Removes a specific tag from the database. If the tag has aliases, they will be removed as well.
+        /// </summary>
+        /// <param name="tagName">The name of the tag to remove.</param>
+        /// <param name="guildId">The Id of the guild the tag belongs to.</param>
         public async Task RemoveTagAsync(string tagName, ulong guildId) => 
             await _mediator.Send(new TagRequest.Delete(tagName, guildId));
             
 
+        /// <summary>
+        /// Gets a collection of tags a given user owns.
+        /// </summary>
+        /// <param name="ownerId">The Id of the tag owner.</param>
+        /// <param name="guildId">The Id of the guild the tag owner is from.</param>
+        /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
         public async Task<IEnumerable<Tag>?> GetUserTagsAsync(ulong ownerId, ulong guildId) => 
             await _mediator.Send(new TagRequest.GetByUser(guildId, ownerId));
     }        

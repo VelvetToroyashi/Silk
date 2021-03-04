@@ -13,7 +13,7 @@ using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions;
 
-namespace Silk.Core.Commands.Tests
+namespace Silk.Core.Commands.Server
 {
     [RequireGuild]
     [Group("tag")]
@@ -83,9 +83,9 @@ namespace Silk.Core.Commands.Tests
         public async Task Alias(CommandContext ctx, string aliasName, [RemainingText] string orignalTag)
         {
             var couldCreateAlias = await _tagService.AliasTagAsync(orignalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
-            if (!couldCreateAlias.success)
+            if (!couldCreateAlias.Success)
             {
-                await ctx.RespondAsync(couldCreateAlias.reason);
+                await ctx.RespondAsync(couldCreateAlias.Reason);
             }
             else
             {
@@ -113,9 +113,9 @@ namespace Silk.Core.Commands.Tests
             }
 
             var couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
-            if (!couldCreateTag.success)
+            if (!couldCreateTag.Success)
             {
-                await ctx.RespondAsync(couldCreateTag.reason);
+                await ctx.RespondAsync(couldCreateTag.Reason);
             }
             else
             {
@@ -163,9 +163,9 @@ namespace Silk.Core.Commands.Tests
         public async Task Edit(CommandContext ctx, string tagName, [RemainingText] string content)
         {
             var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
-            if (!couldEditTag.success)
+            if (!couldEditTag.Success)
             {
-                await ctx.RespondAsync(couldEditTag.reason);
+                await ctx.RespondAsync(couldEditTag.Reason);
             }
             else
             {
