@@ -25,6 +25,8 @@ namespace Silk.Data
         
         public DbSet<GuildConfig> GuildConfigs { get; set; } = null!;
 
+        public DbSet<Tag> Tags { get; set; } = null!;
+
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)

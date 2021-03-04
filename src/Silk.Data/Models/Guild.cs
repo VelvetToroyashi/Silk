@@ -13,5 +13,6 @@ namespace Silk.Data.Models
         public GuildConfig Configuration { get; set; } = new();
         public List<User> Users { get; set; } = new();
         public List<Infraction> Infractions { get; set; } = new();
+        public List<Tag> Tags { get; set; } = new();
     }
 }
