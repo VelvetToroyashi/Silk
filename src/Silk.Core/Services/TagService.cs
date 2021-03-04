@@ -65,14 +65,25 @@ namespace Silk.Core.Services
         public async Task<TagCreationResult> UpdateTagContentAsync(string tagName, string content, ulong guildId, ulong ownerId)
         {
             Tag? tag = await GetTagAsync(tagName, guildId);
-            
+
             if (tag is null)
                 return new(false, "Tag not found!");
             
-            if (tag!.OwnerId != ownerId)
+            if (tag.OriginalTag is not null)
+                return new(false, "You cannot edit an alias!");
+            
+            if (tag.OwnerId != ownerId)
                 return new(false, "You do not have permission to edit this tag! Do you own it?");
             
             await _mediator.Send(new TagRequest.Update(tagName, guildId) {Content = content});
+
+            if (tag.Aliases?.Any() ?? false)
+            {
+                foreach (Tag alias in tag.Aliases)
+                {
+                    await _mediator.Send(new TagRequest.Update(alias.Name, guildId) {Content = content});
+                }
+            }
             
             return new(true, null);
         }
