@@ -171,7 +171,7 @@ namespace Silk.Core.Services
         {
             //Ensure the user will exist in the DB so we don't hit FK violations
             _ = await _mediator.Send(new UserRequest.GetOrCreate(member.Guild.Id, member.Id));
-            
+            Guild guild = await _mediator.Send(new GuildRequest.Get(member.Guild.Id));
             Infraction infraction = new()
             {
                 Enforcer = enforcer.Id,
@@ -181,6 +181,10 @@ namespace Silk.Core.Services
                 GuildId = member.Guild.Id,
                 InfractionType = type,
             };
+            
+            guild.Infractions.Add(infraction);
+
+            await _mediator.Send(new GuildRequest.Update(member.Guild.Id) {Infractions = guild.Infractions});
             
             return infraction;
         }

@@ -20,8 +20,10 @@ namespace Silk.Data.MediatR.Handlers
 
             public async Task<Guild> Handle(GuildRequest.Get request, CancellationToken cancellationToken)
             {
-                Guild? guild = await _db.Guilds
+                Guild? guild =
+                    await _db.Guilds
                     .Include(g => g.Users)
+                    .Include(g => g.Infractions)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
                 
