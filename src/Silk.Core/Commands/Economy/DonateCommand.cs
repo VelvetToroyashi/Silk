@@ -77,7 +77,6 @@ namespace Silk.Core.Commands.Economy
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)
         {
-
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             int authKey = new Random().Next(1000, 10000);

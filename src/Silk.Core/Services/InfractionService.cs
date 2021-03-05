@@ -127,7 +127,6 @@ namespace Silk.Core.Services
             {
                 _logger.LogTrace($"Applied indefinite mute to {member.Id}!");
             }
-            
         }
 
         /// <summary>

@@ -8,7 +8,7 @@
         ///
         /// When used by the warn command, after 5 strikes, Silk! will ask to elevate to the next appropriate action depending on the guild configuration.
         /// </summary>
-        Ignore,
+        Warn,
         /// <summary>
         /// Signifies the user was kicked when this infraction was added.
         /// </summary>
