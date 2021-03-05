@@ -30,6 +30,12 @@ namespace Silk.Core.Commands.Economy
         [Description("Send a Guild member some sweet cash!")]
         public async Task Donate(CommandContext ctx, uint amount, DiscordMember recipient)
         {
+            if (ctx.Member == recipient)
+            {
+                await ctx.RespondAsync("You can't send money to yourself, heh.");
+                return;
+            }
+            
             GlobalUser sender = await _mediator.Send(new GlobalUserRequest.GetOrCreate(ctx.User.Id));
             GlobalUser receiver = await _mediator.Send(new GlobalUserRequest.GetOrCreate(recipient.Id));
 
@@ -52,8 +58,6 @@ namespace Silk.Core.Commands.Economy
             {
                 await DoTransactionAsync(ctx, amount, sender, receiver!);
             }
-
-
         }
 
         private async Task DoTransactionAsync(CommandContext ctx, uint amount, GlobalUser sender, GlobalUser receiver)
@@ -76,7 +80,7 @@ namespace Silk.Core.Commands.Economy
         }
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)
-        {
+        { 
             // 'Complicated async logic here' //
             InteractivityExtension interactivity = ctx.Client.GetInteractivity();
             int authKey = new Random().Next(1000, 10000);
