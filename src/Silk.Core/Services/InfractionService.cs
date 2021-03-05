@@ -32,6 +32,9 @@ namespace Silk.Core.Services
             _client = client;
             _mediator = mediator;
             _db = db;
+            
+            LoadInfractionsAsync().GetAwaiter().GetResult();
+            
             Timer timer = new(TimeSpan.FromSeconds(30).TotalMilliseconds);
             timer.Elapsed += async (_, _) => await OnTick();
             timer.Start();
@@ -215,7 +218,7 @@ namespace Silk.Core.Services
                 return;
             }
 
-            DiscordEmbed embed = EmbedHelper.CreateEmbed("Ban expired!", $"<@{inf.UserId}>'s ban has expired.", DiscordColor.Goldenrod);
+            DiscordEmbed embed = EmbedHelper.CreateEmbed("Tempban lifted.", $"<@{inf.UserId}>'s ({inf.UserId}) tempban has expired.", DiscordColor.Goldenrod);
             await guild.Channels[config.LoggingChannel].SendMessageAsync(embed);
         }
 

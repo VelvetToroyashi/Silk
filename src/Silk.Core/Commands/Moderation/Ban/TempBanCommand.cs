@@ -48,7 +48,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .WithAuthor(ctx.User.Username, null, ctx.User.AvatarUrl)
                 .WithTitle($"{user.Username} was temporarily banned from {ctx.Guild.Name}!")
                 .AddField("Duration:", duration.Humanize(1, CultureInfo.CurrentCulture, TimeUnit.Year, TimeUnit.Second), true)
-                .AddField("Enforcer:", ctx.User.Username, true)
+                .AddField("Enforcer:", $"{ctx.User.Mention} ({ctx.User.Id})", true)
                 .AddField("Reason:", reason);
 
             DateTime dur = DateTime.Now + duration;
