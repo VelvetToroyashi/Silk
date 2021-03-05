@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services.Interfaces;
@@ -24,7 +25,7 @@ namespace Silk.Core.Services
         private readonly SilkDbContext _db;
         
         private readonly List<Infraction> _tempInfractions = new();
-
+        
         public InfractionService(ILogger<InfractionService> logger, DiscordShardedClient client, IMediator mediator, SilkDbContext db)
         {
             _logger = logger;
@@ -43,9 +44,13 @@ namespace Silk.Core.Services
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(member.Guild.Id));
 
             if (config.LoggingChannel is 0)
+            {
                 _logger.LogTrace($"No available log channel for guild! | {member.Guild.Id}");
+            }
             else
-                _ = channel.Guild.Channels[config.LoggingChannel].SendMessageAsync(embed);
+            {
+                _ = LogToModChannelAsync(config, channel.Guild, embed);
+            }
 
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
         }
@@ -74,16 +79,16 @@ namespace Silk.Core.Services
             await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
         }
 
-        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed)
         {
             if (infraction.Expiration is null) 
                 throw new ArgumentOutOfRangeException(nameof(infraction), "Infraction must have expiry date!");
-
-            _logger.LogTrace("Querying user and guild");
+            
             Guild guild = await _mediator.Send(new GuildRequest.Get(channel.GuildId));
-            _logger.LogTrace("Got guild {GuildId}", guild.Id);
+            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(channel.GuildId));
             User user = await _mediator.Send(new UserRequest.GetOrCreate(guild.Id, member.Id));
-            _logger.LogTrace("Got user {UserId}!", user.Id);
+            _logger.LogTrace("Retrieved Guild, Guild Config, and User from database");
+            
             await ApplyInfractionAsync(guild, user, infraction);
 
             int infractionIndex = _tempInfractions.FindIndex(i => i.UserId == member.Id);
@@ -91,7 +96,10 @@ namespace Silk.Core.Services
             if (infractionIndex > 0)
                 _tempInfractions.RemoveAt(infractionIndex);
             
+            _tempInfractions.Add(infraction);
+            _logger.LogTrace("Added temp ban for {User}; expires {ExpirationDate}!", member.Id, infraction.Expiration);
 
+            _ = LogToModChannelAsync(config, channel.Guild, embed);
         }
 
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
@@ -167,13 +175,14 @@ namespace Silk.Core.Services
                 Reason = reason,
                 InfractionTime = DateTime.Now,
                 UserId = member.Id,
+                GuildId = member.Guild.Id,
                 InfractionType = type,
             };
             
             return infraction;
         }
 
-        public async Task<Infraction> CreateTemporaryInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
+        public async Task<Infraction> CreateTempInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.", DateTime? expiration = null)
         {
             if (type is not (InfractionType.SoftBan or InfractionType.Mute))
                 throw new ArgumentException("Is not a temporary infraction type!", nameof(type));
@@ -194,7 +203,8 @@ namespace Silk.Core.Services
             User? user = await _mediator.Send(new UserRequest.Get(member.Guild.Id, member.Id));
             return user?.Flags.HasFlag(UserFlag.ActivelyMuted) ?? false;
         }
-
+        
+        
         private async Task ProcessSoftBanAsync(DiscordGuild guild, GuildConfig config, Infraction inf)
         {
             await guild.UnbanMemberAsync(inf.UserId);
@@ -243,7 +253,7 @@ namespace Silk.Core.Services
             if (_tempInfractions.Count is 0) return;
             var infractions = _tempInfractions
                 .Where(i => ((DateTime) i.Expiration!).Subtract(DateTime.Now).Seconds < 0)
-                .GroupBy(x => x.User.Guild.Id);
+                .GroupBy(x => x.GuildId);
             
             foreach (var inf in infractions)
             {
@@ -281,6 +291,7 @@ namespace Silk.Core.Services
         private async Task LoadInfractionsAsync()
         {
             IEnumerable<Infraction> infractions = new List<Infraction>();
+            //TODO: Subsitite this for DiscordShardedClient#Guilds and MediatR calls
             foreach (var guild in _db.Guilds)
             {
                 infractions = infractions
@@ -298,11 +309,17 @@ namespace Silk.Core.Services
             
         }
 
-        /// <summary>
-        /// Used to perform the correct step depending on guild settings.
-        /// </summary>
-        /// <param name="member">The member in question</param>
-        /// <param name="infraction">The infraction object to be attached to the member</param>
+        private async Task LogToModChannelAsync(GuildConfig config, DiscordGuild guild, DiscordEmbed embed)
+        {
+            if (!guild.Channels.TryGetValue(config.LoggingChannel, out DiscordChannel? logChannel))
+            {
+                _logger.LogTrace("Log channel ({LogChannel}) does not exist on guild!", config.LoggingChannel);
+                return;
+            }
+            _logger.LogTrace("Log channel ({LogChannel}) exists on guild! Sending embed", config.LoggingChannel);
+            await logChannel.SendMessageAsync(embed);
+        }
+        
         public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction) => throw new NotImplementedException();
 
     }

@@ -51,7 +51,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            Infraction infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member,
+            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member,
                 InfractionType.Mute, reason);
 
             await _infractionService.MuteAsync(user, ctx.Channel, infraction);
@@ -83,7 +83,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            Infraction infraction = await _infractionService.CreateTemporaryInfractionAsync(user, ctx.Member,
+            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member,
                 InfractionType.Mute, reason, DateTime.Now.Add(duration));
 
             await _infractionService.MuteAsync(user, ctx.Channel, infraction);

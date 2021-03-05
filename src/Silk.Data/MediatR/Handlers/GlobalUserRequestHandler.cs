@@ -69,6 +69,7 @@ namespace Silk.Data.MediatR.Handlers
             {
                 _db = db;
             }
+            // TODO: Make this proper
             public async Task<GlobalUser> Handle(GlobalUserRequest.GetOrCreate request, CancellationToken cancellationToken)
             {
                 GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
