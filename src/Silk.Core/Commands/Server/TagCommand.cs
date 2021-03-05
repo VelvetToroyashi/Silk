@@ -163,6 +163,12 @@ namespace Silk.Core.Commands.Server
         [Command]
         public async Task Edit(CommandContext ctx, string tagName, [RemainingText] string content)
         {
+            if (string.IsNullOrEmpty(content))
+            {
+                await ctx.RespondAsync("Missing tag content!");
+                return;
+            }
+            
             var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.Success)
             {

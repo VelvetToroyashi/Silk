@@ -58,7 +58,6 @@ namespace Silk.Core.Services
             if (config.LoggingChannel is 0)
             {
                 _logger.LogWarning($"No available logging channel for guild! | {member.Guild.Id}");
-                
             }
             else
             {
@@ -75,11 +74,29 @@ namespace Silk.Core.Services
             await channel.SendMessageAsync($":hammer: Banned **{member.Username}#{member.Discriminator}**!");
         }
 
-        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction) { }
+        public async Task TempBanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
+        {
+            if (infraction.Expiration is null) 
+                throw new ArgumentOutOfRangeException(nameof(infraction), "Infraction must have expiry date!");
+
+            _logger.LogTrace("Querying user and guild");
+            Guild guild = await _mediator.Send(new GuildRequest.Get(channel.GuildId));
+            _logger.LogTrace("Got guild {GuildId}", guild.Id);
+            User user = await _mediator.Send(new UserRequest.GetOrCreate(guild.Id, member.Id));
+            _logger.LogTrace("Got user {UserId}!", user.Id);
+            await ApplyInfractionAsync(guild, user, infraction);
+
+            int infractionIndex = _tempInfractions.FindIndex(i => i.UserId == member.Id);
+            
+            if (infractionIndex > 0)
+                _tempInfractions.RemoveAt(infractionIndex);
+            
+
+        }
 
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
-            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(member.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(channel.GuildId));
 
             if (!channel.Guild.Roles.TryGetValue(config.MuteRoleId, out DiscordRole? muteRole))
             {
@@ -217,6 +234,7 @@ namespace Silk.Core.Services
                 InfractionType.Kick => user.Flags | UserFlag.KickedPrior,
                 _ => user.Flags
             };
+            await _mediator.Send(new GuildRequest.Update(guild.Id));
             await _mediator.Send(new UserRequest.Update(guild.Id, user.Id, user.Flags));
         }
 
