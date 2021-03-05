@@ -86,6 +86,7 @@ namespace Silk.Core.Services
         {
             if (infraction.Expiration is null) 
                 throw new ArgumentOutOfRangeException(nameof(infraction), "Infraction must have expiry date!");
+            
             _logger.LogTrace("Querying for guild, config, and user");
             Guild guild = await _mediator.Send(new GuildRequest.Get(channel.GuildId));
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(channel.GuildId));
@@ -156,17 +157,7 @@ namespace Silk.Core.Services
                 _logger.LogTrace($"Applied indefinite mute to {member.Id}!");
             }
         }
-
-        /// <summary>
-        /// Creates an infraction that's marked as temporary. Only <see cref="InfractionType.SoftBan"/> and <see cref="InfractionType.Mute"/> can be passed.
-        /// </summary>
-        /// <returns>The infraction that was created.</returns>
-        /// <remarks>
-        ///     <para>
-        ///     Remarks: Temporary infractions are not passed into the infraction queue, and it is up to
-        ///     the delegated methods that handle infractions to add them to the queue.
-        ///     </para>
-        /// </remarks>
+        
         public async Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
             //Ensure the user will exist in the DB so we don't hit FK violations
@@ -181,10 +172,6 @@ namespace Silk.Core.Services
                 GuildId = member.Guild.Id,
                 InfractionType = type,
             };
-            
-            guild.Infractions.Add(infraction);
-
-            await _mediator.Send(new GuildRequest.Update(member.Guild.Id) {Infractions = guild.Infractions});
             
             return infraction;
         }
@@ -251,7 +238,7 @@ namespace Silk.Core.Services
                 InfractionType.Kick => user.Flags | UserFlag.KickedPrior,
                 _ => user.Flags
             };
-            await _mediator.Send(new GuildRequest.Update(guild.Id));
+            await _mediator.Send(new GuildRequest.Update(guild.Id) { Infractions = guild.Infractions });
             await _mediator.Send(new UserRequest.Update(guild.Id, user.Id, user.Flags));
         }
 
