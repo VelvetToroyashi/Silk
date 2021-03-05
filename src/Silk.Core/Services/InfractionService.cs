@@ -86,11 +86,11 @@ namespace Silk.Core.Services
         {
             if (infraction.Expiration is null) 
                 throw new ArgumentOutOfRangeException(nameof(infraction), "Infraction must have expiry date!");
-            
+            _logger.LogTrace("Querying for guild, config, and user");
             Guild guild = await _mediator.Send(new GuildRequest.Get(channel.GuildId));
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(channel.GuildId));
             User user = await _mediator.Send(new UserRequest.GetOrCreate(guild.Id, member.Id));
-            _logger.LogTrace("Retrieved Guild, Guild Config, and User from database");
+            _logger.LogTrace("Retrieved guild, config, and user from database!");
             
             await ApplyInfractionAsync(guild, user, infraction);
 
@@ -319,7 +319,7 @@ namespace Silk.Core.Services
                 _logger.LogTrace("Log channel ({LogChannel}) does not exist on guild!", config.LoggingChannel);
                 return;
             }
-            _logger.LogTrace("Log channel ({LogChannel}) exists on guild! Sending embed", config.LoggingChannel);
+            _logger.LogTrace("Log channel ({LogChannel}) exists on guild!", config.LoggingChannel);
             await logChannel.SendMessageAsync(embed);
         }
         
