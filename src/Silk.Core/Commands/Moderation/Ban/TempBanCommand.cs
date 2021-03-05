@@ -28,15 +28,28 @@ namespace Silk.Core.Commands.Moderation.Ban
         [RequireBotPermissions(Permissions.BanMembers)]
         [RequireUserPermissions(Permissions.BanMembers)]
         [Description("Temporarily ban a member from the Guild")]
-        public async Task TempBan(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not provided.")
+        public async Task TempBan(CommandContext ctx, DiscordUser user, TimeSpan duration, [RemainingText] string reason = "Not provided.")
         {
+            DiscordMember member;
+
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(user.Id);
+            }
+            catch (NotFoundException)
+            {
+                await ctx.RespondAsync("Member not found on server!");
+                return;
+            }
+            
             if (DateTime.Now + duration > DateTime.Now + TimeSpan.FromDays(365))
             {
                 await ctx.RespondAsync("Can't temp-ban member for more than 1 year!");
                 return;
             }
             
-            try { /*await user.BanAsync(0, reason);*/ }
+            
+            try { await member.BanAsync(0, reason); }
             catch (NotFoundException)
             {
                 await ctx.RespondAsync("User isn't on the server!");
@@ -52,9 +65,9 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .AddField("Reason:", reason);
 
             DateTime dur = DateTime.Now + duration;
-            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member, InfractionType.SoftBan, reason, dur);
+            Infraction infraction = await _infractionService.CreateTempInfractionAsync(member, ctx.Member, InfractionType.SoftBan, reason, dur);
             
-            await _infractionService.TempBanAsync(user, ctx.Channel, infraction, embed);
+            await _infractionService.TempBanAsync(member, ctx.Channel, infraction, embed);
         }
     }
 }
