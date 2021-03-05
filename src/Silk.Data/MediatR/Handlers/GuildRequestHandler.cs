@@ -41,9 +41,13 @@ namespace Silk.Data.MediatR.Handlers
 
             public async Task<Unit> Handle(GuildRequest.Update request, CancellationToken cancellationToken)
             {
-                Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
+                Guild guild = await 
+                    _db.Guilds
+                        .Include(g => g.Infractions)
+                        .AsSplitQuery()
+                        .FirstAsync(g => g.Id == request.GuildId, cancellationToken);
                 guild.Infractions = request.Infractions;
-                
+                await _db.SaveChangesAsync(cancellationToken);
                 return new();
             }
         }
