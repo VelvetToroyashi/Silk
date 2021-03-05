@@ -7,6 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
@@ -62,7 +63,8 @@ namespace Silk.Core.Services
         {
             await member.BanAsync(0, infraction.Reason);
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(member.Guild.Id));
-            await ApplyInfractionAsync(infraction.Guild, infraction.User, infraction);
+            User user = await _mediator.Send(new UserRequest.GetOrCreate(channel.GuildId, member.Id));
+            await ApplyInfractionAsync(infraction.Guild, user, infraction);
             if (config.LoggingChannel is 0)
             {
                 _logger.LogWarning($"No available logging channel for guild! | {member.Guild.Id}");
@@ -128,7 +130,7 @@ namespace Silk.Core.Services
                         i.Expiration > DateTime.Now*/ /* I don't think this is needed. */);
                 if (inf is null) return;
                 inf.Expiration = infraction.Expiration;
-                await _mediator.Send(new GuildRequest.Update(guild.Id) { Infractions = user.Guild.Infractions });
+                await _mediator.Send(new GuildRequest.Update(guild.Id) { Infraction = infraction });
                 _logger.LogTrace($"Updated mute for {member.Id}!");
                 return;
             }
@@ -162,7 +164,6 @@ namespace Silk.Core.Services
         {
             //Ensure the user will exist in the DB so we don't hit FK violations
             _ = await _mediator.Send(new UserRequest.GetOrCreate(member.Guild.Id, member.Id));
-            Guild guild = await _mediator.Send(new GuildRequest.Get(member.Guild.Id));
             Infraction infraction = new()
             {
                 Enforcer = enforcer.Id,
@@ -171,6 +172,7 @@ namespace Silk.Core.Services
                 UserId = member.Id,
                 GuildId = member.Guild.Id,
                 InfractionType = type,
+                HeldAgainstUser = true,
             };
             
             return infraction;
@@ -230,7 +232,6 @@ namespace Silk.Core.Services
 
         private async Task ApplyInfractionAsync(Guild guild, User user, Infraction infraction)
         {
-            guild.Infractions.Add(infraction);
             user.Flags = infraction.InfractionType switch
             {
                 InfractionType.AutoModMute or InfractionType.Mute => user.Flags | UserFlag.ActivelyMuted,
@@ -238,8 +239,9 @@ namespace Silk.Core.Services
                 InfractionType.Kick => user.Flags | UserFlag.KickedPrior,
                 _ => user.Flags
             };
-            await _mediator.Send(new GuildRequest.Update(guild.Id) { Infractions = guild.Infractions });
             await _mediator.Send(new UserRequest.Update(guild.Id, user.Id, user.Flags));
+            
+            await _mediator.Send(new GuildRequest.Update(guild.Id) { Infraction = infraction });
         }
 
         private async Task OnTick()
@@ -280,28 +282,31 @@ namespace Silk.Core.Services
         }
         private void DropInfractions(ulong guildId)
         {
-            _tempInfractions.RemoveAll(i => i.User.GuildId == guildId);
+            _tempInfractions.RemoveAll(i => i.GuildId == guildId);
         }
 
         private async Task LoadInfractionsAsync()
         {
             IEnumerable<Infraction> infractions = new List<Infraction>();
             //TODO: Subsitite this for DiscordShardedClient#Guilds and MediatR calls
-            foreach (var guild in _db.Guilds)
+            foreach (var guild in _db.Guilds.Include(g => g.Infractions))
             {
-                infractions = infractions
-                    .Union(guild
-                        .Infractions
-                        .Where(g => 
-                            g.InfractionType is 
-                                InfractionType.SoftBan or 
-                                InfractionType.Mute or 
-                                InfractionType.AutoModMute &&
-                            g.HeldAgainstUser && 
-                            (g.Expiration is null || g.Expiration > DateTime.Now)
-                            ));
+                if (!guild.Infractions.Any())
+                    continue;
+                
+                var guildInfractions = guild.Infractions
+                    .Where(g =>
+                        g.InfractionType is
+                            InfractionType.SoftBan or
+                            InfractionType.Mute or
+                            InfractionType.AutoModMute &&
+                        g.HeldAgainstUser &&
+                        (g.Expiration is null || g.Expiration > DateTime.Now));
+                infractions = infractions.Union(guildInfractions);
+                
+                _logger.LogTrace("Loaded {Infractions} infractions for Guild {GuildId}", guildInfractions.Count(), guild.Id);
             }
-            
+            _logger.LogTrace("Loaded {Infractions} infractions total", infractions.Count());
         }
 
         private async Task LogToModChannelAsync(GuildConfig config, DiscordGuild guild, DiscordEmbed embed)

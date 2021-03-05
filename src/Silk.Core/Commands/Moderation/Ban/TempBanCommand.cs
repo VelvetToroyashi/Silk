@@ -36,7 +36,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 return;
             }
             
-            try { await user.BanAsync(0, reason); }
+            try { /*await user.BanAsync(0, reason);*/ }
             catch (NotFoundException)
             {
                 await ctx.RespondAsync("User isn't on the server!");

@@ -10,7 +10,7 @@ namespace Silk.Data.MediatR
         
         public record Add(ulong GuildId, string Prefix) : IRequest<Guild>;
         
-        public record Update(ulong GuildId) : IRequest { public List<Infraction> Infractions { get; init; } }
+        public record Update(ulong GuildId) : IRequest { public Infraction? Infraction { get; init; } }
         
         public record GetOrCreate(ulong GuildId, string Prefix) : IRequest<Guild>;
 

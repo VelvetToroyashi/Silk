@@ -1,8 +1,10 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Humanizer;
 using MediatR;
 using Silk.Core.Utilities;
 using Silk.Data.MediatR;
@@ -39,19 +41,21 @@ namespace Silk.Core.Commands.Moderation
             }
             else
             {
-                string cases = guild.Infractions
-                    .OrderBy(i => i.InfractionTime)
-                    .Select(i =>
+                var sb = new StringBuilder();
+                for (int i = 0; i < guild.Infractions.Count; i++)
+                {
+                    var currentInfraction = guild.Infractions[i];
+                    if (currentInfraction.UserId == user.Id)
                     {
-                        var s = $"{i.Id + 1}: {i.InfractionType} by <@{i.Enforcer}>, ";
-                        s += $"Reason:\n{i.Reason[..(i.Reason.Length > 100 ? 100 : ^0)]}";
-                        return s;
-                    })
-                    .Join("\n");
+                        sb.AppendLine($"Case {i + 1}: {currentInfraction.InfractionType.Humanize(LetterCasing.Title)} by <@{currentInfraction.Enforcer}>, " +
+                                      $"Reason:\n{currentInfraction.Reason[..(currentInfraction.Reason.Length > 100 ? 100 : ^0)]}");
+                    }
+                }
+                
                 eBuilder
                     .WithColor(DiscordColor.Gold)
                     .WithTitle($"Cases for {user.Id}")
-                    .WithDescription(cases);
+                    .WithDescription(sb.ToString());
                 mBuilder.WithEmbed(eBuilder);
                 
                 await ctx.RespondAsync(mBuilder);

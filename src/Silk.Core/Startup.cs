@@ -32,23 +32,11 @@ namespace Silk.Core
                 }, ServiceLifetime.Transient);
         }
 
-        public record Scoped
-        {
-            public int Id { get; } = new Random().Next(10);
-        }
 
-        public record Transient
-        {
-            public int Id { get; } = new Random().Next(10);
-        }
         
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddServices(IServiceCollection services)
         {
-
-            services.AddScoped<Scoped>();
-            services.AddTransient<Transient>();
-            
             services.AddTransient<ConfigService>();
             services.AddTransient<SilkDbContext>();
             services.AddTransient<TicketService>();
