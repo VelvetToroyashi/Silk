@@ -247,7 +247,7 @@ namespace Silk.Core.Services
             user.Flags = infraction.InfractionType switch
             {
                 InfractionType.AutoModMute or InfractionType.Mute => user.Flags | UserFlag.ActivelyMuted,
-                InfractionType.Ban => user.Flags | UserFlag.BannedPrior,
+                InfractionType.Ban or InfractionType.SoftBan => user.Flags | UserFlag.BannedPrior,
                 InfractionType.Kick => user.Flags | UserFlag.KickedPrior,
                 _ => user.Flags
             };
