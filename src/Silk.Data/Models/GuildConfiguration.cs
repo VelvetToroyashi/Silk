@@ -128,6 +128,11 @@ namespace Silk.Data.Models
         public List<BlacklistedWord> BlackListedWords { get; set; } = new();
 
         /// <summary>
+        /// A list of steps depending on the number of infractions a <see cref="User"/> has.
+        /// </summary>
+        public List<InfractionStep> InfractionSteps { get; set; } = new();
+
+        /// <summary>
         /// A list of disabled commands on this server
         /// </summary>
         public List<DisabledCommand> DisabledCommands { get; set; } = new();

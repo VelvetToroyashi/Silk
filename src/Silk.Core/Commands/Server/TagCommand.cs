@@ -100,6 +100,7 @@ namespace Silk.Core.Commands.Server
             if (tag is not null)
             {
                 await ctx.RespondAsync("Tag with that name already exists!");
+                return;
             }
             if (_reservedWords.Any(tagName.StartsWith))
             {

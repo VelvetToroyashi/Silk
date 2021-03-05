@@ -3,8 +3,8 @@
     public enum InfractionType
     {
         /// <summary>
-        /// Used by Auto-Mod and the strike command. In the case of the former, the <see cref="Silk.Core.Services.Interfaces.IInfractionService"/>
-        /// will take appropriate action dependent on the number of strikes the user has.
+        /// Used by Auto-Mod and the strike command. In the case of the former, the Infraction Handler
+        /// swill take appropriate action dependent on the number of strikes the user has.
         ///
         /// When used by the warn command, after 5 strikes, Silk! will ask to elevate to the next appropriate action depending on the guild configuration.
         /// </summary>
@@ -28,6 +28,10 @@
         /// <summary>
         /// Signifies the user was banned indefinitely.
         /// </summary>
-        Ban
+        Ban,
+        /// <summary>
+        /// Used for <see cref="InfractionStep"/>. This value signifies that no action will be taken against the user for this infraction.
+        /// </summary>
+        Ignore
     }
 }
