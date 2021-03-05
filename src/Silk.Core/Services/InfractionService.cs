@@ -275,6 +275,7 @@ namespace Silk.Core.Services
                 }
                 
                 GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(inf.Key));
+                _logger.LogTrace("Retrieved config for guild {GuildId}!", guild.Id);
                 
                 foreach (Infraction infraction in inf)
                 {

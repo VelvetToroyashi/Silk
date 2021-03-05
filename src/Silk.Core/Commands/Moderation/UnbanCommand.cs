@@ -14,19 +14,11 @@ namespace Silk.Core.Commands.Moderation
     [Category(Categories.Mod)]
     public class UnbanCommand : BaseCommandModule
     {
-
-
         [Command("unban")]
-        [RequireFlag(UserFlag.Staff)]
+        [RequireUserPermissions(Permissions.BanMembers)]
         [Description("Unban a member from the Guild")]
         public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
-            if (!ctx.Member.HasPermission(Permissions.BanMembers))
-            {
-                await ctx.RespondAsync("[You] Can't ban, can't unban. Sorry.").ConfigureAwait(false);
-                return;
-            }
-
             if ((await ctx.Guild.GetBansAsync()).Select(b => b.User.Id).Contains(user.Id))
             {
                 await user.UnbanAsync(ctx.Guild, reason);
@@ -46,7 +38,7 @@ namespace Silk.Core.Commands.Moderation
             {
                 DiscordEmbedBuilder embed =
                     new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
-                        .WithColor(new DiscordColor("#d11515"));
+                        .WithColor(new("#d11515"));
 
                 await ctx.RespondAsync(embed);
             }
