@@ -9,7 +9,7 @@ namespace Silk.Data.MediatR.Handlers
 {
     public class GlobalUserRequestHandler
     {
-        public class GetHandler : IRequestHandler<GlobalUserRequest.Get, GlobalUser>
+        public class GetHandler : IRequestHandler<GlobalUserRequest.Get, GlobalUser?>
         {
             private readonly SilkDbContext _db;
             public GetHandler(SilkDbContext db)
@@ -17,7 +17,7 @@ namespace Silk.Data.MediatR.Handlers
                 _db = db;
             }
 
-            public async Task<GlobalUser> Handle(GlobalUserRequest.Get request, CancellationToken cancellationToken)
+            public async Task<GlobalUser?> Handle(GlobalUserRequest.Get request, CancellationToken cancellationToken)
             {
                 GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
                 return user;
@@ -36,7 +36,7 @@ namespace Silk.Data.MediatR.Handlers
                 GlobalUser user = new()
                 {
                     Id = request.UserId,
-                    Cash = 0,
+                    Cash = request.Cash ?? 0,
                     LastCashOut = DateTime.MinValue
                 };
                 _db.GlobalUsers.Add(user);
