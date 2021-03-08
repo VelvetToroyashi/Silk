@@ -70,7 +70,7 @@ namespace Silk.Core
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
                         _ => logger.MinimumLevel.Information().CreateLogger()
                     };
-                    Log.Logger.Information("Logging initialized!");
+                    Log.Logger.ForContext<Program>().Information("Logging initialized!");
                 })
                 .ConfigureServices((context, services) =>
                 {

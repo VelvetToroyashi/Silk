@@ -59,7 +59,7 @@ namespace Silk.Core
 
             SilkDbContext silkDbContext = dbFactory.CreateDbContext();
 
-            #if DEBUG
+            #if !DEBUG
             silkDbContext.Database.Migrate();
             #endif
             
