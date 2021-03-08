@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Server.Roles
 
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
             
-            var botPos = ctx.Guild.CurrentMember.Roles.Last().Position;
+            var botPos = ctx.Guild.CurrentMember.Roles.Max()!.Position;
             var unavailableRoles = roles.Where(r => r.Position > botPos);
             
             if (unavailableRoles.Any())
@@ -43,11 +43,12 @@ namespace Silk.Core.Commands.Server.Roles
 
             foreach (var r in roles)
             {
-                var ro = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
+                var assignableRole
+                    = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
                 
-                if (ro is not null)
+                if (assignableRole is not null)
                 {
-                    config.SelfAssignableRoles.Remove(ro);
+                    config.SelfAssignableRoles.Remove(assignableRole);
                 }
                 else
                 {

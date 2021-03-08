@@ -289,9 +289,10 @@ namespace Silk.Core.Services
         {
             IEnumerable<Infraction> infractions = new List<Infraction>();
             //TODO: Subsitite this for DiscordShardedClient#Guilds and MediatR calls
+            //Update, we can't, since the client needs to start first.
             foreach (var guild in _db.Guilds.Include(g => g.Infractions))
             {
-                if (!guild.Infractions.Any())
+                if (!guild.Infractions.Any(inf => inf.Expiration > DateTime.Now))
                     continue;
                 
                 var guildInfractions = guild.Infractions

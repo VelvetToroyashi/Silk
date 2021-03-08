@@ -18,7 +18,7 @@ namespace Silk.Core.Utilities.Bot
         public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
         {
 
-            var user = ctx.Guild.Members.Values.FirstOrDefault(m =>
+            var user = ctx.Guild?.Members.Values.FirstOrDefault(m =>
                 m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
             if (user is not null) return Optional.FromValue(user);
             return await ConvertMemberAsync(value, ctx);
@@ -54,15 +54,15 @@ namespace Silk.Core.Utilities.Bot
 
             int di = value.IndexOf('#');
             string un = di != -1 ? value.Substring(0, di) : value;
-            string dv = di != -1 ? value.Substring(di + 1) : null;
+            string? dv = di != -1 ? value.Substring(di + 1) : null;
 
-            IEnumerable<DiscordMember> us = ctx.Guild.Members.Values
+            IEnumerable<DiscordMember>? us = ctx.Guild?.Members.Values
                 .Where(xm =>
                     xm.Username.ToLowerInvariant() == un &&
                     (dv != null && xm.Discriminator == dv || dv == null)
                     || xm.Nickname?.ToLowerInvariant() == value);
 
-            DiscordMember? mbr = us.FirstOrDefault();
+            DiscordMember? mbr = us?.FirstOrDefault();
             return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();
         }
     }
