@@ -91,6 +91,7 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 ## Docker: 
 To run Silk! as a docker container, you can simply create an `appSettings.json` file in the root directory, and run `docker pull velvetthepanda/silk`, assuming you have a postgres database running already. If not, you can download a pre-configured `docker-compose` file [here](https://files.velvetthepanda.dev/docker-compose.yml). 
 
-Both Postgres and Silk! will have to initialize on the first run, and if run without the `-d` flag, you will see an exception thrown as Silk! tries to access tables that don't exist (signifying it needs to migrate). Fear not, running `docker-compose up -d` again will have Postgres configured, and Silk! will create requisite tables if they do not already exist upon startup.
+Both Postgres and Silk! will have to initialize on the first run, which may cause slightly degraded startup times as Silk! creates requisite tables on the database. 
 
+Further startup times should be no more than ~3 seconds to fully initialize and do cache runs.
 ![](https://files.velvetthepanda.dev/silk.png)
