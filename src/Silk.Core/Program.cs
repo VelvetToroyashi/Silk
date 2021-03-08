@@ -93,7 +93,7 @@ namespace Silk.Core
                     /* Can remove all filters with this line */
                     // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
-                    services.AddTransient(_ => new BotConfig(config));
+                    services.AddSingleton(_ => new BotConfig(config));
 
                     
                 })
