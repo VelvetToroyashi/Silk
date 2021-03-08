@@ -43,8 +43,7 @@ namespace Silk.Core.Commands.Server.Roles
 
             foreach (var r in roles)
             {
-                var assignableRole
-                    = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
+                var assignableRole = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
                 
                 if (assignableRole is not null)
                 {
