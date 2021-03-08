@@ -70,11 +70,12 @@ namespace Silk.Core
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
                         _ => logger.MinimumLevel.Information().CreateLogger()
                     };
+                    Log.Logger.Information("Logging initialized!");
                 })
                 .ConfigureServices((context, services) =>
                 {
                     IConfiguration config = context.Configuration;
-                    _clientConfig.Token = config.GetConnectionString("BotToken");
+                    _clientConfig.Token = config.GetConnectionString("botToken");
                     services.AddSingleton(new DiscordShardedClient(_clientConfig));
                     Core.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
                     Core.Startup.AddServices(services);

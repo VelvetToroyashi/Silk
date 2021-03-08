@@ -34,14 +34,14 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
       {
          "ConnectionStrings": {
             "dbConnection": "",
-            "BotToken": ""
+            "botToken": ""
          }
       }
       ```
    - For the ```dbConnection``` property, in the double quotes, add your connection string.
       - Note: The PostgreSQL connection string will look something like this: ```Server=;Database=;Username=;Password=```
    
-   - For the ```BotToken``` property, in the double quotes, add your ```Discord Bot Token```. 
+   - For the ```botToken``` property, in the double quotes, add your ```Discord Bot Token```. 
      - If you don't have your token off-hand, you can get it from the [Discord Developer Portal](https://discord.com/developers); Select your application once logged in, then select ```Bot``` in the menu, and you should be able to Reveal your token from there.
 
 #### **App Secrets**
