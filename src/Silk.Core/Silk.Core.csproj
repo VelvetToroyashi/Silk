@@ -110,9 +110,5 @@
     <Compile Remove="Commands\Bot\Restart.cs" />
     <Compile Remove="logs\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\Tests" />
-  </ItemGroup>
   
 </Project>

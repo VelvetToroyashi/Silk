@@ -11,6 +11,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Silk.Core.EventHandlers.MessageAdded;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities.Bot
@@ -18,6 +19,7 @@ namespace Silk.Core.Utilities.Bot
 
     public class BotExceptionHandler
     {
+        
         private readonly ILogger<BotExceptionHandler> _logger;
         private readonly DiscordShardedClient _client;
         public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client)
@@ -26,14 +28,17 @@ namespace Silk.Core.Utilities.Bot
             _client = client;
             _client.ClientErrored += OnClientErrored;
             _client.SocketClosed += OnSocketErrored;
-            //I know this is terrible, but, piss off :p //
-            
+            CommandHandler.ParserErrored += OnParserErrored;
+        }
+        private void OnParserErrored(string command, Exception e)
+        {
+            _logger.LogWarning("Couldn't find that command!: {CommandName}, Exception: {Exception}", command, e.InnerException ?? e);
         }
 
 
         private async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {
-            
+            _logger.LogWarning("A command errored! Command: {CommandName}", e.Command.Name);
         }
 
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
@@ -44,7 +49,7 @@ namespace Silk.Core.Utilities.Bot
             }
             else
             {
-                _logger.LogWarning("Something went wrong! {Exception}", e.Exception);
+                _logger.LogWarning(e.Exception, "Client threw an excpetion!");
             }
         }
         private async Task OnSocketErrored(DiscordClient c, SocketCloseEventArgs e)

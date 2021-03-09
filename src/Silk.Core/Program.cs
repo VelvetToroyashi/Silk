@@ -21,6 +21,7 @@ namespace Silk.Core
     {
         public static DateTime Startup { get; } = DateTime.Now;
         public static string HttpClientName { get; } = "Silk";
+        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception:j}";
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
@@ -35,11 +36,15 @@ namespace Silk.Core
             MinimumLogLevel = LogLevel.None
         };
 
-        public static async Task Main(string[] args) =>
+        public static async Task Main(string[] args)
+        {
+            Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
             await CreateHostBuilder(args)
                 .UseConsoleLifetime()
                 .StartAsync()
-                .ConfigureAwait(false);
+                .ConfigureAwait(false); 
+        }
+            
 
 
         private static IHostBuilder CreateHostBuilder(string[] args)
@@ -54,10 +59,10 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
-                    const string logFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception:j}";
+                    
                     var logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: logFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, logFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                        .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch

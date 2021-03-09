@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -15,6 +16,8 @@ namespace Silk.Core.EventHandlers.MessageAdded
 {
         public class CommandHandler : INotificationHandler<MessageCreated>
         {
+            public static Action<string, Exception> ParserErrored;
+            
             private readonly IPrefixCacheService _prefixService;
             private readonly ConfigService _cache;
             private readonly IMediator _mediator;
@@ -58,20 +61,23 @@ namespace Silk.Core.EventHandlers.MessageAdded
                 
                 Command? command = commandsNext.FindCommand(commandString, out string arguments);
                 
-                CommandContext context = command is null ?
-                    throw new CommandNotFoundException($"Invalid command {commandString}") :
+                object context = command is null ?
+                    new CommandNotFoundException($"Invalid command {commandString}") :
                     commandsNext.CreateContext(notification.EventArgs.Message, prefix, command, arguments);
-                await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command.QualifiedName), CancellationToken.None);
 
+                if (context is CommandNotFoundException cnf)
+                {
+                    ParserErrored(notification.EventArgs.Message.Content, cnf);
+                    return;
+                }
                 
+                await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command!.QualifiedName), CancellationToken.None);
+
+
                 _ = Task.Run(async () =>
-                    {
-                        await commandsNext.ExecuteCommandAsync(context);
-                    }, CancellationToken.None)
-                    .ContinueWith(t =>
-                    {
-                        if (t.IsFaulted && t.Exception?.InnerException is not null) throw t.Exception.InnerException;
-                    }, cancellationToken);
+                {
+                    await commandsNext.ExecuteCommandAsync(context as CommandContext);
+                }, CancellationToken.None);
             }
         }
 }
