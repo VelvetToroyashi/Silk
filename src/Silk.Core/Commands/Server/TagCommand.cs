@@ -34,6 +34,7 @@ namespace Silk.Core.Commands.Server
         }
 
         [GroupCommand]
+        [Description("Shows the Content of a Tag")]
         public async Task Tag(CommandContext ctx, [RemainingText] string tag)
         {
             Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
@@ -50,6 +51,7 @@ namespace Silk.Core.Commands.Server
         }
 
         [Command]
+        [Description("Get some Info about a Tag")]
         public async Task Info(CommandContext ctx, [RemainingText] string tag)
         {
             Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
@@ -80,20 +82,22 @@ namespace Silk.Core.Commands.Server
         }
 
         [Command]
-        public async Task Alias(CommandContext ctx, string aliasName, [RemainingText] string orignalTag)
+        [Description("Create an Alias for a Tag")]
+        public async Task Alias(CommandContext ctx, string aliasName, [RemainingText] string originalTag)
         {
-            var couldCreateAlias = await _tagService.AliasTagAsync(orignalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
+            var couldCreateAlias = await _tagService.AliasTagAsync(originalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateAlias.Success)
             {
                 await ctx.RespondAsync(couldCreateAlias.Reason);
             }
             else
             {
-                await ctx.RespondAsync($"Alias `{aliasName}` that points to tag `{orignalTag}` successfuly created.");
+                await ctx.RespondAsync($"Alias `{aliasName}` that points to tag `{originalTag}` successfully created.");
             }
         }
         
         [Command]
+        [Description("Create a Tag")]
         public async Task Create(CommandContext ctx, string tagName, [RemainingText] string? content)
         {
             Tag? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
@@ -125,6 +129,7 @@ namespace Silk.Core.Commands.Server
         }
 
         [Command]
+        [Description("Delete a Tag")]
         public async Task Delete(CommandContext ctx, [RemainingText] string tagName)
         {
             if (string.IsNullOrEmpty(tagName))
@@ -161,6 +166,7 @@ namespace Silk.Core.Commands.Server
         }
 
         [Command]
+        [Description("Edit a Tag's Content")]
         public async Task Edit(CommandContext ctx, string tagName, [RemainingText] string content)
         {
             if (string.IsNullOrEmpty(content))
@@ -176,11 +182,12 @@ namespace Silk.Core.Commands.Server
             }
             else
             {
-                await ctx.RespondAsync("Sucessfully edited tag!");
+                await ctx.RespondAsync("Successfully edited tag!");
             }
         }
         
         [Command]
+        [Description("Search for a Tag by name")]
         public async Task Search(CommandContext ctx, string tagName)
         {
             var tags = await _mediator.Send(new TagRequest.GetByName(tagName, ctx.Guild.Id));
@@ -234,6 +241,7 @@ namespace Silk.Core.Commands.Server
         }
         
         [Command]
+        [Description("Get Tags created by a User")]
         public async Task Tags(CommandContext ctx, DiscordMember user)
         {
             IEnumerable<Tag>? tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
@@ -271,7 +279,9 @@ namespace Silk.Core.Commands.Server
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
         }
+        
         [Command]
+        [Description("Get Tags created by the Current User")]
         public async Task Tags(CommandContext ctx) => await Tags(ctx, ctx.Member);
     }
 }
