@@ -94,7 +94,7 @@ namespace Silk.Core.Commands.Server
         }
         
         [Command]
-        public async Task Create(CommandContext ctx, string tagName, [RemainingText] string content)
+        public async Task Create(CommandContext ctx, string tagName, [RemainingText] string? content)
         {
             Tag? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
             if (tag is not null)

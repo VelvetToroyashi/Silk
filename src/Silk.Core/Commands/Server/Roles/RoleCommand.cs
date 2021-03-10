@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Server.Roles
 
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
             
-            var botPos = ctx.Guild.CurrentMember.Roles.Max()!.Position;
+            var botPos = ctx.Guild.CurrentMember.Roles.Last()!.Position;
             var unavailableRoles = roles.Where(r => r.Position > botPos);
             
             if (unavailableRoles.Any())

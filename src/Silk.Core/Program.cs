@@ -17,11 +17,11 @@ using Silk.Data;
 
 namespace Silk.Core
 {
-    public class Program
+    public static class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
         public static string HttpClientName { get; } = "Silk";
-        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception:j}";
+        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
@@ -32,12 +32,17 @@ namespace Silk.Core
                       DiscordIntents.GuildMessages          | // Commands & Auto-Mod
                       DiscordIntents.GuildMessageReactions  | // Role-menu
                       DiscordIntents.DirectMessageReactions,  // Interactivity in DMs
+            LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None
+            MinimumLogLevel = LogLevel.None 
         };
 
+        // Setting this in the prop doesn't work; it'll have a 2s discrepancy
+        //static Program() => Startup = DateTime.Now;
+        
         public static async Task Main(string[] args)
         {
+            _ = Startup;
             Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
             await CreateHostBuilder(args)
                 .UseConsoleLifetime()
@@ -55,11 +60,10 @@ namespace Silk.Core
                 {
                     configuration.SetBasePath(Directory.GetCurrentDirectory());
                     configuration.AddJsonFile("appSettings.json", true, false);
-                    configuration.AddUserSecrets<Program>(true, false);
+                    configuration.AddUserSecrets<Bot>(true, false);
                 })
                 .ConfigureLogging((builder, _) =>
                 {
-                    
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
@@ -75,7 +79,7 @@ namespace Silk.Core
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
                         _ => logger.MinimumLevel.Information().CreateLogger()
                     };
-                    Log.Logger.ForContext<Program>().Information("Logging initialized!");
+                    Log.Logger.ForContext(typeof(Program)).Information("Logging initialized!");
                 })
                 .ConfigureServices((context, services) =>
                 {
