@@ -57,10 +57,9 @@ namespace Silk.Core
             _exceptionHandler = exceptionHandler;
             _mediator = mediator;
 
-            SilkDbContext silkDbContext = dbFactory.CreateDbContext();
-
-            #if !DEBUG
-            silkDbContext.Database.Migrate();
+            
+            #if RELEASE
+                dbFactory.CreateDbContext().Database.Migrate();
             #endif
             
             Instance = this;

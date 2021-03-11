@@ -121,11 +121,11 @@ namespace Silk.Data.Models
         /// A list of whitlisted invites.
         /// </summary>
         public List<Invite> AllowedInvites { get; set; } = new();
-        /// <summary>
-        /// A list of blacklisted words.
-        /// </summary>
-        // ReSharper disable once CollectionNeverUpdated.Global
-        public List<BlacklistedWord> BlackListedWords { get; set; } = new();
+        ///// <summary>
+        ///// A list of blacklisted words.
+        ///// </summary>
+        //// ReSharper disable once CollectionNeverUpdated.Global
+        //public List<BlacklistedWord> BlackListedWords { get; set; } = new();
 
         /// <summary>
         /// A list of steps depending on the number of infractions a <see cref="User"/> has.

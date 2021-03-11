@@ -23,7 +23,7 @@ namespace Silk.Data.MediatR.Handlers
                 GuildConfig config = 
                     await _db.GuildConfigs
                         .Include(c => c.DisabledCommands)
-                        .Include(c => c.BlackListedWords)
+                        //.Include(c => c.BlackListedWords)
                         .Include(c => c.SelfAssignableRoles)
                         .AsSplitQuery()
                         .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
@@ -67,7 +67,7 @@ namespace Silk.Data.MediatR.Handlers
                 
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
-                config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
+                //config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
 
                 await _db.SaveChangesAsync(cancellationToken);
                 return config;

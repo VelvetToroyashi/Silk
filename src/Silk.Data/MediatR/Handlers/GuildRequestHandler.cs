@@ -86,8 +86,9 @@ namespace Silk.Data.MediatR.Handlers
                     .Include(g => g.Users)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
-
-                if (guild is not null) return guild;
+    
+                if ((Guild?)guild is not null) 
+                    return guild;
 
                 guild = new()
                 {
