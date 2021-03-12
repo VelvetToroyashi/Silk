@@ -9,5 +9,6 @@ namespace Silk.Data.Models
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; } = null!;
         public UserFlag Flags { get; set; }
+        public List<Reminder> Reminders { get; set; } = new();
     }
 }

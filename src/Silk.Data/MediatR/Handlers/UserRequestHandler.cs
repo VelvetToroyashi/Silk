@@ -70,7 +70,7 @@ namespace Silk.Data.MediatR.Handlers
                     .Include(u => u.Guild)
                     .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
-                if (user is null)
+                if ((User?)user is null)
                 {
                     Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
                     user = new()

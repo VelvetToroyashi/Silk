@@ -19,6 +19,7 @@ namespace Silk.Core.EventHandlers
     {
         public static bool StartupCompleted { get; private set; }
 
+        private bool _logged = false;
         private readonly IMediator _mediator;
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly Dictionary<int, ShardState> _shardStates = new();
@@ -86,7 +87,11 @@ namespace Silk.Core.EventHandlers
             state.Completed = true;
             _shardStates[c.ShardId] = state;
             StartupCompleted = _shardStates.Values.All(s => s.Completed);
-            if (StartupCompleted) _logger.LogDebug("All shard(s) cache runs complete!");
+            if (StartupCompleted && !_logged)
+            {
+                _logger.LogDebug("All shard(s) cache runs complete!");
+                _logged = true;
+            }
         }
 
 

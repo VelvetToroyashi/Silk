@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -9,9 +10,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210312134603_Reminders")]
+    partial class Reminders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -313,7 +315,7 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId", "GuildId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Reminders");
                 });
@@ -434,19 +436,21 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Models.User", b =>
                 {
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<long>("DatabaseId")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("Flags")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id", "GuildId");
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("Id")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("DatabaseId");
 
                     b.HasIndex("GuildId");
 
@@ -512,7 +516,8 @@ namespace Silk.Data.Migrations
                 {
                     b.HasOne("Silk.Data.Models.User", "Owner")
                         .WithMany("Reminders")
-                        .HasForeignKey("OwnerId", "GuildId")
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

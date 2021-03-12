@@ -27,6 +27,8 @@ namespace Silk.Data
 
         public DbSet<Tag> Tags { get; set; } = null!;
 
+        public DbSet<Reminder> Reminders { get; set; } = null!;
+
         public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)

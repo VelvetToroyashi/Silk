@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using MediatR;
+﻿using MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Data.MediatR

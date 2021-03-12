@@ -8,8 +8,7 @@ namespace Silk.Data.ModelConfigurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            //builder.Property(u => u.DatabaseId).ValueGeneratedOnAdd();
-            builder.HasKey(u => u.DatabaseId);
+            builder.HasKey(u => new {u.Id, u.GuildId});
         }
     }
 }
