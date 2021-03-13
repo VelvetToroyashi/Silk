@@ -31,7 +31,6 @@ namespace Silk.Core.Services
 
         private readonly DiscordShardedClient _client;
 
-        private Timer _timer;
         public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client)
         {
             _logger = logger;
@@ -51,6 +50,25 @@ namespace Silk.Core.Services
             _reminders.Add(reminder);
         }
 
+        public async Task<IEnumerable<Reminder>?> GetRemindersAsync(ulong userId)
+        {
+            IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
+            if (reminders.Count() is 0) return null;
+            else return reminders;
+        }
+
+        public async Task RemoveReminderAsync(int id)
+        {
+            Reminder? reminder = _reminders.SingleOrDefault(r => r.Id == id);
+            if (reminder is not null)
+            {
+                using IServiceScope scope = _services.CreateScope();
+                var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
+                _reminders.Remove(reminder);
+                await mediator.Send(new ReminderRequest.Remove(id));
+            }
+        }
+        
         private async void Tick(object? state)
         {
             // ReSharper disable once ForCanBeConvertedToForeach
@@ -58,10 +76,9 @@ namespace Silk.Core.Services
             for (int i = 0; i < _reminders.Count; i++)
             {
                 Reminder r = _reminders[i];
-                if (r.Expiration < DateTime.Now)
+                if (r.Expiration < (DateTime)state!)
                     _ = SendReminderMessageAsync(r);
             }
-               
         }
 
         private async Task SendReminderMessageAsync(Reminder reminder)
@@ -83,7 +100,7 @@ namespace Silk.Core.Services
                     {
                         await (await guild.GetMemberAsync(reminder.OwnerId))
                             .SendMessageAsync(MissingChannel +
-                                              $"{(DateTime.Now - reminder.Expiration).Humanize(2, minUnit: TimeUnit.Second)} ago: \n{reminder.MessageContent}");
+                                              $"{(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago: \n{reminder.MessageContent}");
                     }
                     catch (UnauthorizedException)
                     {
@@ -100,7 +117,7 @@ namespace Silk.Core.Services
                     _logger.LogTrace("Preparing to send reminder...");
                     var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
                     var mention = reminder.WasReply ? $"<@{reminder.OwnerId}>" : null;
-                    var message = $"Hey, {mention}! {(DateTime.Now - reminder.Expiration).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
+                    var message = $"Hey, {mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
 
                     if (reminder.WasReply)
                     {
@@ -156,11 +173,20 @@ namespace Silk.Core.Services
             using IServiceScope scope = _services.CreateScope();
             var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
-            _logger.LogTrace("Acquired reminders.");
-            _logger.LogDebug("Starting reminder callback timer");
-            _timer = new(Tick, DateTime.Now, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+            _logger.LogTrace("Acquired reminders. ");
+            _logger.LogDebug("Starting reminder callback timer. ");
+            var timer = new Timer(Tick, DateTime.UtcNow, TimeSpan.Zero, TimeSpan.FromSeconds(10));
             
-            await Task.Delay(-1, stoppingToken);
+            try { await Task.Delay(-1, stoppingToken); }
+            catch(TaskCanceledException) { }
+            finally
+            {
+                _logger.LogDebug("Cancelation requested. Stopping service. ");
+
+                await timer.DisposeAsync();
+                // It's safe to clear the list as it's all saved to the database prior when they're added. //
+                _reminders.Clear();
+            }
         }
     }
 }

@@ -43,10 +43,16 @@ namespace Silk.Core
         public static async Task Main(string[] args)
         {
             _ = Startup;
+            if (Environment.OSVersion.Platform is PlatformID.Win32NT)
+            {
+                Console.WindowWidth = 150;
+                Console.BufferWidth = 150;
+            }
+            
             Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
             await CreateHostBuilder(args)
                 .UseConsoleLifetime()
-                .StartAsync()
+                .RunConsoleAsync()
                 .ConfigureAwait(false); 
         }
             

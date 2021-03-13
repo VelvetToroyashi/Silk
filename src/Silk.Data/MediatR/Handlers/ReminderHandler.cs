@@ -51,6 +51,7 @@ namespace Silk.Data.MediatR.Handlers
                 Reminder r = new()
                 {
                     Expiration = request.Expiration,
+                    CreationTime = DateTime.Now.ToUniversalTime(),
                     OwnerId = request.OwnerId,
                     ChannelId = request.ChannelId,
                     MessageId = request.MessageId,

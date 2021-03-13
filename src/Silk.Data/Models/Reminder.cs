@@ -12,6 +12,11 @@ namespace Silk.Data.Models
         public DateTime Expiration { get; set; }
         
         /// <summary>
+        /// When this reminder was created.
+        /// </summary>
+        public DateTime CreationTime { get; set; }
+        
+        /// <summary>
         /// The Id of the owner.
         /// </summary>
         public ulong OwnerId { get; init; }

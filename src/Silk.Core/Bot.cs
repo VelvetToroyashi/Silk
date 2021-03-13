@@ -109,8 +109,7 @@ namespace Silk.Core
                 PollBehaviour = PollBehaviour.DeleteEmojis,
                 Timeout = TimeSpan.FromMinutes(1)
             });
-
-
+            
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
             CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();
 
@@ -123,7 +122,7 @@ namespace Silk.Core
 
             _logger.LogInformation("Bot initialized in: {Time} ms", DateTime.Now.Subtract(Program.Startup).TotalMilliseconds.ToString("N0"));
             await Client.StartAsync();
-
+            
             // Client.StartAsync() returns as soon as all shards are ready, which means we log before
             // The client is *actually* ready.
             while (!GuildAddedHandler.StartupCompleted) { }
@@ -167,7 +166,11 @@ namespace Silk.Core
 
         public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
 
-        public async Task StopAsync(CancellationToken cancellationToken) => await Client.StopAsync();
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Recieved BREAK or SIGTERM! Shutting down gracefully...");
+            await Client.StopAsync();
+        } 
 
     }
 }
