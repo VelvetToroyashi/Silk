@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Silk.Extensions
 {
@@ -24,7 +25,16 @@ namespace Silk.Extensions
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-        public static string Pull(this string text, Range range) => 
+        public static string Pull(this string text, Range range) =>
             text[range.Start..Math.Min(text.Length, range.End.Value)];
+        public static Stream AsStream(this string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
     }
 }
