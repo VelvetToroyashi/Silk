@@ -11,6 +11,7 @@ using MediatR;
 using Silk.Core.Constants;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions;
@@ -18,7 +19,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Server
 {
-    
+    [Category(Categories.Server)]
     public class WelcomeCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
