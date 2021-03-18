@@ -56,12 +56,10 @@ namespace Silk.Core
             _logger = logger;
             _exceptionHandler = exceptionHandler;
             _mediator = mediator;
+            
+            _logger.LogInformation("Migrating database!");
+            dbFactory.CreateDbContext().Database.Migrate();
 
-            
-            #if RELEASE
-                dbFactory.CreateDbContext().Database.Migrate();
-            #endif
-            
             Instance = this;
             Client = client;
         }

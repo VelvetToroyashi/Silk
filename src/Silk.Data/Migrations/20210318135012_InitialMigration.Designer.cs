@@ -10,8 +10,8 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
-    [Migration("20210312134603_Reminders")]
-    partial class Reminders
+    [Migration("20210318135012_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -285,6 +285,9 @@ namespace Silk.Data.Migrations
                     b.Property<decimal>("ChannelId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
@@ -315,7 +318,7 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("OwnerId", "GuildId");
 
                     b.ToTable("Reminders");
                 });
@@ -436,21 +439,19 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Models.User", b =>
                 {
-                    b.Property<long>("DatabaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("Flags")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<long>("DatabaseId")
+                        .HasColumnType("bigint");
 
-                    b.HasKey("DatabaseId");
+                    b.Property<int>("Flags")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id", "GuildId");
 
                     b.HasIndex("GuildId");
 
@@ -516,8 +517,7 @@ namespace Silk.Data.Migrations
                 {
                     b.HasOne("Silk.Data.Models.User", "Owner")
                         .WithMany("Reminders")
-                        .HasForeignKey("OwnerId")
-                        .HasPrincipalKey("Id")
+                        .HasForeignKey("OwnerId", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -5,10 +5,12 @@ using DSharpPlus.CommandsNext.Attributes;
 using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Services;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
-namespace Silk.Core.Commands.Tests
+namespace Silk.Core.Commands.General
 {
+    [Category(Categories.General)]
     public class RemindCommand : BaseCommandModule
     {
         private readonly ReminderService _reminders;
