@@ -15,7 +15,8 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Experimental.RoleMenu
 {
-    [Group("rolemenu")] [Aliases("role_menu")]
+    [Group("rolemenu")]
+    [Aliases("role_menu")]
     public class RoleMenuCommand : BaseCommandModule
     {
 
