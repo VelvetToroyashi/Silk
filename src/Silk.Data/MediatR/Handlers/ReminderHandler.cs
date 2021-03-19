@@ -84,7 +84,13 @@ namespace Silk.Data.MediatR.Handlers
                 if (reminder is not null)
                 {
                     _db.Reminders.Remove(reminder);
-                    await _db.SaveChangesAsync(cancellationToken);
+                    try
+                    {
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                    // Timer timed out and it got dequeued slower than it should've. //
+                    catch(DbUpdateConcurrencyException) { }
+
                 }
                 return new();
             }

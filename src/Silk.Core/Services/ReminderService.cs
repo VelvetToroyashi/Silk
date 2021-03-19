@@ -69,15 +69,15 @@ namespace Silk.Core.Services
             }
         }
         
-        private async void Tick(object? state)
+        private async Task Tick()
         {
             // ReSharper disable once ForCanBeConvertedToForeach
             // Collection gets modified. //
             for (int i = 0; i < _reminders.Count; i++)
             {
                 Reminder r = _reminders[i];
-                if (r.Expiration < (DateTime)state!)
-                    _ = SendReminderMessageAsync(r);
+                if (r.Expiration < DateTime.UtcNow)
+                    await SendReminderMessageAsync(r);
             }
         }
 
@@ -175,14 +175,13 @@ namespace Silk.Core.Services
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
             _logger.LogTrace("Acquired reminders. ");
             _logger.LogDebug("Starting reminder callback timer. ");
-            var timer = new Timer(Tick, DateTime.UtcNow, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+            var timer = new Timer(async (_) => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             
             try { await Task.Delay(-1, stoppingToken); }
             catch(TaskCanceledException) { }
             finally
             {
-                _logger.LogDebug("Cancelation requested. Stopping service. ");
-
+                _logger.LogDebug("Cancelation requested. Stopping service... ");
                 await timer.DisposeAsync();
                 // It's safe to clear the list as it's all saved to the database prior when they're added. //
                 _reminders.Clear();

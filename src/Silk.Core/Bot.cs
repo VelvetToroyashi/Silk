@@ -91,8 +91,8 @@ namespace Silk.Core
                 UseDefaultCommandHandler = false,
                 Services = _services,
                 IgnoreExtraArguments = true,
-
             };
+            
             await Client.UseCommandsNextAsync(_commands);
             InitializeCommands();
             InitializeServices();
