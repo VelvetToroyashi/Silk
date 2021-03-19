@@ -36,6 +36,7 @@ namespace Silk.Core.Services
             _logger = logger;
             _services = services;
             _client = client;
+            
         }
 
         public async Task CreateReminder
@@ -77,7 +78,7 @@ namespace Silk.Core.Services
             {
                 Reminder r = _reminders[i];
                 if (r.Expiration < DateTime.UtcNow)
-                    await SendReminderMessageAsync(r);
+                    _ = SendReminderMessageAsync(r);
             }
         }
 
@@ -86,7 +87,7 @@ namespace Silk.Core.Services
             var guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
             if (!(guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is { } guild))
             {
-                _logger.LogWarning("Couldn't find guild {GuildId}! Removing reminders from queue", (reminder.GuildId));
+                _logger.LogWarning("Couldn't find guild {GuildId}! Removing reminders from queue", reminder.GuildId);
                 _reminders.RemoveAll(r => r.GuildId == reminder.GuildId);
             }
             else
@@ -109,7 +110,6 @@ namespace Silk.Core.Services
                     catch (NotFoundException)
                     {
                         _logger.LogTrace("Member left guild. Skipping");
-                        return;
                     }
                 }
                 else
@@ -175,7 +175,7 @@ namespace Silk.Core.Services
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
             _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
             _logger.LogDebug("Starting reminder callback timer");
-            var timer = new Timer(async (_) => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            var timer = new Timer(async (_) => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             
             try { await Task.Delay(-1, stoppingToken); }
             catch(TaskCanceledException) { }
