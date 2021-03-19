@@ -91,7 +91,7 @@ namespace Silk.Core.Services
             }
             else
             {
-                _logger.LogTrace("Dequeing reminder...");
+                _logger.LogTrace("Dequeing reminder");
                 _reminders.Remove(reminder);
                 if (!guild.Channels.TryGetValue(reminder.ChannelId, out var channel))
                 {
@@ -114,7 +114,7 @@ namespace Silk.Core.Services
                 }
                 else
                 {
-                    _logger.LogTrace("Preparing to send reminder...");
+                    _logger.LogTrace("Preparing to send reminder");
                     var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
                     var mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
                     var message = $"Hey{mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
@@ -173,8 +173,8 @@ namespace Silk.Core.Services
             using IServiceScope scope = _services.CreateScope();
             var mediator = scope.ServiceProvider.Get<IMediator>();
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
-            _logger.LogTrace("Acquired reminders. ");
-            _logger.LogDebug("Starting reminder callback timer. ");
+            _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
+            _logger.LogDebug("Starting reminder callback timer");
             var timer = new Timer(async (_) => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             
             try { await Task.Delay(-1, stoppingToken); }
