@@ -32,7 +32,7 @@ namespace Silk.Core.Services
         /// <param name="aliasName">The name of the alias.</param>
         /// <param name="guildId">The Id of the guild the tag and alias belong to.</param>
         /// <param name="ownerId">The Id of the owner of the alias.</param>
-        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsuccessful.</returns>
         public async Task<TagCreationResult> AliasTagAsync(string tagName, string aliasName, ulong guildId, ulong ownerId)
         {
             Tag? tag = await _mediator.Send(new TagRequest.Get(tagName, guildId));
@@ -61,7 +61,7 @@ namespace Silk.Core.Services
         /// <param name="content">The content of which to update the tag.</param>
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
         /// <param name="ownerId">The Id of the owner of the tag.</param>
-        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsuccessful.</returns>
         public async Task<TagCreationResult> UpdateTagContentAsync(string tagName, string content, ulong guildId, ulong ownerId)
         {
             Tag? tag = await GetTagAsync(tagName, guildId);
@@ -91,11 +91,11 @@ namespace Silk.Core.Services
         /// <summary>
         /// Creates a tag with a given name.
         /// </summary>
-        /// <param name="tagName">The name of the tag to create (case-insenstive).</param>
+        /// <param name="tagName">The name of the tag to create (case-insensitive).</param>
         /// <param name="content">The content of the tag to create.</param>
         /// <param name="guildId">The Id of the guild this tag was created on.</param>
         /// <param name="ownerId">The Id of the user that owns this tag or alias.</param>
-        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsucessful.</returns>
+        /// <returns>A <see cref="TagCreationResult"/> with a provided reason, if the operation was unsuccessful.</returns>
         public async Task<TagCreationResult> CreateTagAsync(string tagName, string content, ulong guildId, ulong ownerId)
         {
             if (await GetTagAsync(tagName, guildId) is not null)
