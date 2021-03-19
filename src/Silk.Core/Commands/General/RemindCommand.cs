@@ -10,6 +10,7 @@ using Silk.Extensions;
 
 namespace Silk.Core.Commands.General
 {
+    [Category(Categories.General)]
     public class RemindCommand : BaseCommandModule
     {
         private readonly ReminderService _reminders;

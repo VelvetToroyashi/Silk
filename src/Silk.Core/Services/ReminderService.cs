@@ -175,7 +175,7 @@ namespace Silk.Core.Services
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
             _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
             _logger.LogDebug("Starting reminder callback timer");
-            var timer = new Timer(async (_) => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            var timer = new Timer ((__) => _ = Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             
             try { await Task.Delay(-1, stoppingToken); }
             catch(TaskCanceledException) { }
