@@ -7,12 +7,14 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR;
-using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
+using Silk.Data.MediatR;
+using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Server
 {
+    [Category(Categories.Server)]
     public class ToggleCommandCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
