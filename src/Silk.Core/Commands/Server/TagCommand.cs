@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -219,6 +220,22 @@ namespace Silk.Core.Commands.Server
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
             
+        }
+
+        [Command]
+        public async Task Raw(CommandContext ctx, string tag)
+        {
+            Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
+
+            if (dbTag is null)
+            {
+                await ctx.RespondAsync("Tag not found!");
+            }
+            else
+            {
+                await ctx.RespondAsync(Formatter.Sanitize(dbTag.Content));
+                await _mediator.Send(new TagRequest.Update(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
+            }
         }
         
     }
