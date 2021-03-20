@@ -65,6 +65,7 @@ namespace Silk.Core
         }
         private void InitializeServices()
         {
+        
             _ = _services.GetRequiredService<AntiInviteCore>();
             // Logger has to be setup in that class before it can be used properly. //
         }

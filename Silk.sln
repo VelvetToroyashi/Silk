@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Benchmarks", "tests\Si
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Extensions.Tests", "tests\Silk.Extensions.Tests\Silk.Extensions.Tests.csproj", "{832DCD90-034E-4282-B6A7-627D7FC51EB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Data", "src\Silk.Data\Silk.Data.csproj", "{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Data", "src\Silk.Core.Data\Silk.Core.Data.csproj", "{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

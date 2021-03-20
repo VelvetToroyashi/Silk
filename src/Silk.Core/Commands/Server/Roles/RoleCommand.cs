@@ -82,13 +82,9 @@ namespace Silk.Core.Commands.Server.Roles
             }
             
             if (ctx.Member.Roles.Contains(role))
-            {
-                await ctx.Member.RevokeRoleAsync(role);
-            }
-            else
-            {
-                await ctx.Member.GrantRoleAsync(role);
-            }
+                 await ctx.Member.RevokeRoleAsync(role);
+            else await ctx.Member.GrantRoleAsync(role);
+            
             
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
         }

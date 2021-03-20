@@ -96,7 +96,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\Silk.Data\Silk.Data.csproj" />
+    <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
     <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
     <ProjectReference Include="..\Silk.Items\Silk.Items.csproj" />
   </ItemGroup>

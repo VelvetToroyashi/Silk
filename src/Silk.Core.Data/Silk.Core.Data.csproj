@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <RootNamespace>Silk.Data</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
