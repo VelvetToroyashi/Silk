@@ -16,8 +16,11 @@ namespace Silk.Core.EventHandlers.MessageAdded
 {
         public class CommandHandler : INotificationHandler<MessageCreated>
         {
-            public static Action<string, Exception> ParserErrored;
-            
+            //Message Content, Exception
+
+            //Also in retrospect, this could've been a static method on BotExceptionHandler, but I digress.
+            public static Action<string, Exception> ParserErrored = (_, _) => {};
+        
             private readonly IPrefixCacheService _prefixService;
             private readonly ConfigService _cache;
             private readonly IMediator _mediator;

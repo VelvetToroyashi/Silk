@@ -8,9 +8,9 @@ using Silk.Core.Services;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
-namespace Silk.Core.Commands.Tests
+namespace Silk.Core.Commands.General
 {
-    [Category(Categories.Misc)]
+    [Category(Categories.General)]
     public class RemindCommand : BaseCommandModule
     {
         private readonly ReminderService _reminders;

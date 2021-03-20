@@ -45,7 +45,7 @@ namespace Silk.Core.Services
             ulong? replyAuthorId = null, string? replyMessageContent = null)
         {
             using IServiceScope scope = _services.CreateScope();
-            var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
+            var mediator = scope.ServiceProvider.Get<IMediator>();
             Reminder reminder = await mediator.Send(new ReminderRequest.Create(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, replyId, replyAuthorId, replyMessageContent));
             _reminders.Add(reminder);
         }
@@ -116,8 +116,8 @@ namespace Silk.Core.Services
                 {
                     _logger.LogTrace("Preparing to send reminder...");
                     var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
-                    var mention = reminder.WasReply ? $"<@{reminder.OwnerId}>" : null;
-                    var message = $"Hey, {mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
+                    var mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
+                    var message = $"Hey{mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
 
                     if (reminder.WasReply)
                     {
@@ -148,7 +148,7 @@ namespace Silk.Core.Services
                         if (validMessage)
                         {
                             builder.WithReply(reminder.MessageId, true);
-                            builder.WithContent("You wanted me to remind you of this!");
+                            builder.WithContent($"You wanted me to remind you of this {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago!");
                         }
                         else
                         {
@@ -161,7 +161,7 @@ namespace Silk.Core.Services
                 _logger.LogTrace("Succesfully sent reminder. Removing from database");
                 
                 using IServiceScope scope = _services.CreateScope();
-                var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
+                var mediator = scope.ServiceProvider.Get<IMediator>();
                 await mediator.Send(new ReminderRequest.Remove(reminder.Id));
             }
         }
@@ -171,7 +171,7 @@ namespace Silk.Core.Services
             _logger.LogInformation("Started!");
             
             using IServiceScope scope = _services.CreateScope();
-            var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
+            var mediator = scope.ServiceProvider.Get<IMediator>();
             _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
             _logger.LogTrace("Acquired reminders. ");
             _logger.LogDebug("Starting reminder callback timer. ");

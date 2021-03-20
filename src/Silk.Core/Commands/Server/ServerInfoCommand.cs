@@ -43,8 +43,8 @@ namespace Silk.Core.Commands.Server
 
             embed.WithThumbnail(guild.IconUrl);
 
-            if (guild.PremiumSubscriptionCount.Value > 0)
-                embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount.Value} boosts (level {guild.PremiumTier})");
+            if (guild.PremiumSubscriptionCount.HasValue && guild.PremiumSubscriptionCount.Value > 0)
+                embed.AddField("Boosts:", $"{guild.PremiumSubscriptionCount!.Value} boosts (level {guild.PremiumTier})");
 
             if (guild.Features.Count > 0)
                 embed.AddField("Enabled guild features: ", guild.Features.Select(f => f.Humanize(LetterCasing.Title)).Join(", "));

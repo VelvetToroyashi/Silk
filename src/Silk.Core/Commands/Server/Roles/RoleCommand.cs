@@ -31,32 +31,35 @@ namespace Silk.Core.Commands.Server.Roles
 
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
             
-            var botPos = ctx.Guild.CurrentMember.Roles.Last()!.Position;
-            var unavailableRoles = roles.Where(r => r.Position > botPos);
-            
-            if (unavailableRoles.Any())
+            if (roles.Any())
             {
-                builder.WithContent($"I can't give out these roles: {string.Join(", ", unavailableRoles.Select(r => r.Mention))}");
-                await ctx.RespondAsync(builder);
-                roles = roles.Except(unavailableRoles).ToArray();
-            }
-
-            foreach (var r in roles)
-            {
-                var assignableRole = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
                 
-                if (assignableRole is not null)
-                {
-                    config.SelfAssignableRoles.Remove(assignableRole);
-                }
-                else
-                {
-                    config.SelfAssignableRoles.Add(new() {Id = r.Id});
-                }
-            }
-            await _mediator.Send(new GuildConfigRequest.Update {GuildId = config.GuildId, SelfAssignableRoles = config.SelfAssignableRoles});
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
+                var botPos = ctx.Guild.CurrentMember.Roles.Last()!.Position;
+                var unavailableRoles = roles.Where(r => r.Position > botPos);
 
+                if (unavailableRoles.Any())
+                {
+                    builder.WithContent($"I can't give out these roles: {string.Join(", ", unavailableRoles.Select(r => r.Mention))}");
+                    await ctx.RespondAsync(builder);
+                    roles = roles.Except(unavailableRoles).ToArray();
+                }
+
+                foreach (var r in roles)
+                {
+                    var assignableRole = config.SelfAssignableRoles.SingleOrDefault(s => s.Id == r.Id);
+
+                    if (assignableRole is not null)
+                    {
+                        config.SelfAssignableRoles.Remove(assignableRole);
+                    }
+                    else
+                    {
+                        config.SelfAssignableRoles.Add(new() {Id = r.Id});
+                    }
+                }
+                await _mediator.Send(new GuildConfigRequest.Update {GuildId = config.GuildId, SelfAssignableRoles = config.SelfAssignableRoles});
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
+            }
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Gold)
                 .WithTitle("Currently assignable roles")
@@ -65,7 +68,7 @@ namespace Silk.Core.Commands.Server.Roles
 
         }
         
-        [Command]
+        [Command("role")]
         [RequireGuild]
         [Description("Get a role!")]
         public async Task Role(CommandContext ctx, DiscordRole role)
