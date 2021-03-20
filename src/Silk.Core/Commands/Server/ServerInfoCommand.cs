@@ -5,9 +5,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data;
-using Silk.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Server

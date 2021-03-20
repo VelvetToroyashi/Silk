@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.ModelConfigurations
+namespace Silk.Core.Data.ModelConfigurations
 {
     public class DisabledCommandConfiguration : IEntityTypeConfiguration<DisabledCommand>
     {

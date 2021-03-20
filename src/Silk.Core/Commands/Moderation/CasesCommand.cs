@@ -6,9 +6,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using MediatR;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation

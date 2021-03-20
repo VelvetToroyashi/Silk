@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using MediatR;
-using Silk.Data.Models;
+﻿using MediatR;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR
+namespace Silk.Core.Data.MediatR
 {
     public class UserRequest
     {
-        public record Get(ulong GuildId, ulong UserId) : IRequest<User?>;
+        public record Get(ulong GuildId, ulong UserId) : IRequest<User>;
 
         public record Update(ulong GuildId, ulong UserId, UserFlag? Flags) : IRequest<User>;
 

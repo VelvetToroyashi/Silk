@@ -14,19 +14,14 @@ namespace Silk.Core.Utilities.HelpFormatter
             Misc = "`💡 Misc`",
             Server = "`🖥️ Server`",
             Bot = "`🤖 Bot`",
-            Economy = "`💰 Economy`";
-
-        public static readonly IReadOnlyList<string> Order = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Economy};
+            Economy = "`💰 Economy`",
+            Uncategorized = "`❓ Uncategorized`";
+            
+        public static readonly IReadOnlyList<string> Order = new[] {Dev, General, Games, Misc, Mod, Server, Bot, Economy, Uncategorized};
     }
 
     public static class CustomEmoji
     {
-        public static readonly DiscordEmoji
-            ECheck = Check.ToEmoji(),
-            ECross = Cross.ToEmoji(),
-            ELoading = Loading.ToEmoji(),
-            EHelp = Help.ToEmoji(),
-            EGitHub = GitHub.ToEmoji();
 
 
         public static DiscordEmoji ToEmoji(this string text)

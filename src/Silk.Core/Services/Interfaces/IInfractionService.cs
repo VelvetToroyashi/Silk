@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Services.Interfaces
 {

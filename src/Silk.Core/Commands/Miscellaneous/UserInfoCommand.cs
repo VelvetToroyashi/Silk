@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Miscellaneous
                 members.Take(members.Count() > 5 ? 5 : 
                     members.Count())
                     .Select(m => m.Mention)
-                    .Join(", ") + $"{(members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : "Everyone has the everyone role, silly!")}";
+                    .Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : null)}";
             
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle($"Info for {role.Name} ( {role.Id} ):")

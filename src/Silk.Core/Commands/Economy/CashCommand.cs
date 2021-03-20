@@ -4,10 +4,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data;
-using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
 {

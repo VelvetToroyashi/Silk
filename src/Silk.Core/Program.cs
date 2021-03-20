@@ -13,7 +13,6 @@ using Serilog;
 using Serilog.Events;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
-using Silk.Data;
 
 namespace Silk.Core
 {

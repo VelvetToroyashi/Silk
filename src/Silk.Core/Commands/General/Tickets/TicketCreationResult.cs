@@ -1,4 +1,4 @@
-﻿using Silk.Data.Models;
+﻿using Silk.Core.Data.Models;
 
 namespace Silk.Core.Commands.General.Tickets
 {

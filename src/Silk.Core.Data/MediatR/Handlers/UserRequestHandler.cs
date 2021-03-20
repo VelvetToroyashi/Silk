@@ -1,15 +1,14 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR.Handlers
+namespace Silk.Core.Data.MediatR.Handlers
 {
     public class UserHandler
     {
-        public class GetHandler : IRequestHandler<UserRequest.Get, User?>
+        public class GetHandler : IRequestHandler<UserRequest.Get, User>
         {
             private readonly SilkDbContext _db;
             public GetHandler(SilkDbContext db) => _db = db;

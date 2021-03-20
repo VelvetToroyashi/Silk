@@ -7,8 +7,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Silk.Data;
-using Silk.Data.Models;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Commands.General.Tickets
 {

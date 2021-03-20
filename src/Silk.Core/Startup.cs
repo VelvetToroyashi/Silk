@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
 using Silk.Core.Commands.General.Tickets;
+using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
@@ -12,7 +13,6 @@ using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.Bot;
-using Silk.Data;
 
 namespace Silk.Core
 {

@@ -1,14 +1,15 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR.Handlers
+namespace Silk.Core.Data.MediatR.Handlers
 {
     public class GuildConfigRequestHandler
     {
-        public class GetHandler : IRequestHandler<GuildConfigRequest.Get, GuildConfig?>
+        public class GetHandler : IRequestHandler<GuildConfigRequest.Get, GuildConfig>
         {
             private readonly SilkDbContext _db;
 
@@ -18,7 +19,7 @@ namespace Silk.Data.MediatR.Handlers
                 _db = db;
             }
             
-            public async Task<GuildConfig?> Handle(GuildConfigRequest.Get request, CancellationToken cancellationToken)
+            public async Task<GuildConfig> Handle(GuildConfigRequest.Get request, CancellationToken cancellationToken)
             {
                 GuildConfig config = 
                     await _db.GuildConfigs
@@ -43,10 +44,8 @@ namespace Silk.Data.MediatR.Handlers
             public async Task<GuildConfig?> Handle(GuildConfigRequest.Update request, CancellationToken cancellationToken)
             {
                 GuildConfig config = await _db.GuildConfigs
-                    .Include(c => c.DisabledCommands)
-                    //.Include(c => c.BlackListedWords)
-                    .Include(c => c.SelfAssignableRoles)
                     .AsSplitQuery()
+                    .Include(c => c.SelfAssignableRoles)
                     .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
                 
                 config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
@@ -72,7 +71,7 @@ namespace Silk.Data.MediatR.Handlers
                 
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
-                config.SelfAssignableRoles = request.SelfAssignableRoles ?? config.SelfAssignableRoles;
+                config.SelfAssignableRoles = request.SelfAssignableRoles?.Except(config.SelfAssignableRoles, new EqualityComparers.SelfAssignableRoleComparer()).ToList() ?? config.SelfAssignableRoles;
                 //config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
 
                 await _db.SaveChangesAsync(cancellationToken);

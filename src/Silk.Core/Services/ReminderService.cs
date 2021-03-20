@@ -14,8 +14,8 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Extensions;
 using Timer = System.Threading.Timer;
 

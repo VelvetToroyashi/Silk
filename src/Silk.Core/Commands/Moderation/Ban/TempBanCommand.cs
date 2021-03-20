@@ -8,9 +8,9 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Humanizer;
 using Humanizer.Localisation;
+using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Moderation.Ban
 {

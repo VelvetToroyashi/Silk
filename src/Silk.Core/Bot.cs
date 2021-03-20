@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MessageAdded;
@@ -22,7 +23,6 @@ using Silk.Core.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data;
 using Silk.Extensions;
 
 namespace Silk.Core

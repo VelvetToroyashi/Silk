@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR
+namespace Silk.Core.Data.MediatR
 {
     public class TagRequest
     {
-        public record  Get(string Name, ulong GuildId) : IRequest<Tag?>;
+        public record  Get(string Name, ulong GuildId) : IRequest<Tag>;
         public record GetByUser(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
         public record GetByName(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
         

@@ -2,11 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Silk.Data;
 
-namespace Silk.Data.Migrations
+namespace Silk.Core.Data.Migrations
 {
     [DbContext(typeof(SilkDbContext))]
     partial class SilkDbContextModelSnapshot : ModelSnapshot

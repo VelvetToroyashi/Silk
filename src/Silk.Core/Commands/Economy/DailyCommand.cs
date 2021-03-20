@@ -8,10 +8,9 @@ using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Economy

@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR
+namespace Silk.Core.Data.MediatR
 {
     public class GuildRequest
     {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Types;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

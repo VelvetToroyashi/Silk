@@ -6,11 +6,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using MediatR;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 
 namespace Silk.Core.EventHandlers.MessageAdded
 {

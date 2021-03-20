@@ -7,10 +7,10 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data.Models;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 

@@ -6,8 +6,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Constants;
+using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
-using Silk.Data.Models;
 
 namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
 {

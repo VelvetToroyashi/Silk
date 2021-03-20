@@ -1,5 +1,5 @@
 ﻿using DSharpPlus.Entities;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.General.Tickets

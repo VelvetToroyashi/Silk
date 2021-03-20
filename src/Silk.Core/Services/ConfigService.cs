@@ -3,8 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Services
 {

@@ -46,11 +46,11 @@ namespace Silk.Core.Utilities.HelpFormatter
                     .WithFooter("* = Group | ** = Executable group");
                 IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
                     .GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-                    .Where(x => x.Key is not null)
-                    .OrderBy(x => Categories.Order.IndexOf(x.Key));
+                    //.Where(x => x.Key is not null)
+                    .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
 
                 foreach (IGrouping<string?, Command> commands in modules)
-                    embed.AddField(commands.Key ?? "Uncategorized",
+                    embed.AddField(commands.Key ?? Categories.Uncategorized,
                         commands
                             .Select(x => $"`{x.Name}" +
                                          $"{(x is CommandGroup g ? g.IsExecutableWithoutSubcommands ? "**" : "*" : "")}`")

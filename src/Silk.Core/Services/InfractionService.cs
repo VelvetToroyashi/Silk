@@ -9,11 +9,11 @@ using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
-using Silk.Data;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 
 namespace Silk.Core.Services
 {

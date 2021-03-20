@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR.Handlers
+namespace Silk.Core.Data.MediatR.Handlers
 {
     public class ReminderHandler
     {

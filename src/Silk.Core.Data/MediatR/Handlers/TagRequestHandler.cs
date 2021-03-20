@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Data.Models;
+using Silk.Core.Data.Models;
 
-namespace Silk.Data.MediatR.Handlers
+namespace Silk.Core.Data.MediatR.Handlers
 {
     public class TagRequestHandler
     {

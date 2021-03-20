@@ -5,8 +5,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data;
 
 namespace Silk.Core.Commands.General
 {

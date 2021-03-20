@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Silk.Data.Models
+namespace Silk.Core.Data.Models
 {
     public class Ticket
     {

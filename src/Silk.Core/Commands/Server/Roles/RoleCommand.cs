@@ -4,10 +4,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Server.Roles
 {
@@ -84,7 +84,6 @@ namespace Silk.Core.Commands.Server.Roles
             if (ctx.Member.Roles.Contains(role))
                  await ctx.Member.RevokeRoleAsync(role);
             else await ctx.Member.GrantRoleAsync(role);
-            
             
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
         }

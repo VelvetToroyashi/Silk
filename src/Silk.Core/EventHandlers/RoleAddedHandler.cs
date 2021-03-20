@@ -4,8 +4,8 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Silk.Core.Constants;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers
