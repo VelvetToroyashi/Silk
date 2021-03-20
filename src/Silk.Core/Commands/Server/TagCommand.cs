@@ -10,8 +10,8 @@ using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Silk.Core.Services;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Data.MediatR;
-using Silk.Data.Models;
+using Silk.Core.Data.MediatR;
+using Silk.Core.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Server

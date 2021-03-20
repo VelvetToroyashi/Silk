@@ -10,6 +10,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Silk.Core</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyVersion>1.5.1</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup>

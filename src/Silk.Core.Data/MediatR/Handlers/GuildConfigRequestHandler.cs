@@ -44,8 +44,8 @@ namespace Silk.Core.Data.MediatR.Handlers
             public async Task<GuildConfig?> Handle(GuildConfigRequest.Update request, CancellationToken cancellationToken)
             {
                 GuildConfig config = await _db.GuildConfigs
-                    .AsSplitQuery()
                     .Include(c => c.SelfAssignableRoles)
+                    .AsSplitQuery()
                     .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
                 
                 config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
@@ -71,8 +71,15 @@ namespace Silk.Core.Data.MediatR.Handlers
                 
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
-                config.SelfAssignableRoles = request.SelfAssignableRoles?.Except(config.SelfAssignableRoles, new EqualityComparers.SelfAssignableRoleComparer()).ToList() ?? config.SelfAssignableRoles;
-                //config.BlackListedWords = request.BlacklistedWords ?? config.BlackListedWords;
+                if (request.SelfAssignableRoles is not null)
+                {
+                    foreach (var r in request.SelfAssignableRoles)
+                    {
+                        if ( config.SelfAssignableRoles.Any(ro => ro.Id == r.Id))
+                             config.SelfAssignableRoles.Remove(r);
+                        else config.SelfAssignableRoles.Add(r);
+                    }   
+                }
 
                 await _db.SaveChangesAsync(cancellationToken);
                 return config;
