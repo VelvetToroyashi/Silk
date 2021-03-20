@@ -5,12 +5,14 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Server
 {
+    [Category(Categories.Server)]
     public class SetMuteCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;

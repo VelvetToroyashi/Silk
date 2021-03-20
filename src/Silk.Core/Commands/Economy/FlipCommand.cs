@@ -4,11 +4,13 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Data.MediatR;
 using Silk.Data.Models;
 
 namespace Silk.Core.Commands.Economy
 {
+    [Category(Categories.Economy)]
     public class FlipCommand : BaseCommandModule
     {
         private readonly string[] _winningMessages =
