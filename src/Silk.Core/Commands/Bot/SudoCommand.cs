@@ -2,9 +2,11 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Bot
 {
+    [Category(Categories.Bot)]
     public class SudoCommand : BaseCommandModule
     {
         [Command]
