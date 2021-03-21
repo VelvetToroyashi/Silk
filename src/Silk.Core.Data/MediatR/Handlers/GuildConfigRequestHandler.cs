@@ -71,6 +71,7 @@ namespace Silk.Core.Data.MediatR.Handlers
                 
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
+                
                 if (request.SelfAssignableRoles is not null)
                 {
                     foreach (var r in request.SelfAssignableRoles)
