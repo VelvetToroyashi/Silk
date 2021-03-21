@@ -73,22 +73,23 @@ namespace Silk.Core.Commands.Server.Roles
                     .WithDescription(string.Join('\n', config.SelfAssignableRoles.Select(r => $"<@&{r.Id}>")));
                 await ctx.RespondAsync(embedBuilder);
             }
-
-            foreach (DiscordRole role in roles)
+            else
             {
-                if (!config.SelfAssignableRoles.Select(r => r.Id).Contains(role.Id))
+                foreach (DiscordRole role in roles)
                 {
-                    await ctx.RespondAsync("Sorry, but that's not an assignable role! Contact your server's staff for assistance!");
+                    if (!config.SelfAssignableRoles.Select(r => r.Id).Contains(role.Id))
+                    {
+                        await ctx.RespondAsync("Sorry, but that's not an assignable role! Contact your server's staff for assistance!");
+                    }
+                    else
+                    {
+                        if (ctx.Member.Roles.Contains(role))
+                            await ctx.Member.RevokeRoleAsync(role);
+                        else await ctx.Member.GrantRoleAsync(role);
+                    }
                 }
-                else
-                {
-                    if (ctx.Member.Roles.Contains(role))
-                        await ctx.Member.RevokeRoleAsync(role);
-                    else await ctx.Member.GrantRoleAsync(role);
-                }
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
             }
-            
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
         }
     }
 }
