@@ -105,11 +105,11 @@ namespace Silk.Core.Services
                     }
                     catch (UnauthorizedException)
                     {
-                        _logger.LogTrace("Failed to message user. Skipping reminder");
+                        _logger.LogTrace("Failed to message user, skipping ");
                     }
                     catch (NotFoundException)
                     {
-                        _logger.LogTrace("Member left guild. Skipping");
+                        _logger.LogTrace("Member left guild, skipping");
                     }
                 }
                 else
@@ -158,7 +158,7 @@ namespace Silk.Core.Services
                     }
                     await builder.SendAsync(channel);
                 }
-                _logger.LogTrace("Succesfully sent reminder. Removing from database");
+                _logger.LogTrace("Sent reminder succesfully");
                 
                 using IServiceScope scope = _services.CreateScope();
                 var mediator = scope.ServiceProvider.Get<IMediator>();

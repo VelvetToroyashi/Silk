@@ -9,12 +9,13 @@ using MediatR;
 using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation
 {
     [Experimental]
-    // Read the VC chat; give me terrible ideas to implement and @ me
+    [Category(Categories.Mod)]
     public class CasesCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
