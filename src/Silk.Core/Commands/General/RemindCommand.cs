@@ -64,7 +64,7 @@ namespace Silk.Core.Commands.General
                     return s;
                 }).ToArray();
 
-                if (string.Join('\n', allReminders).Length < 2048)
+                if (string.Join('\n', allReminders).Length <= 2048)
                 {
                     var builder = new DiscordEmbedBuilder()
                         .WithColor(DiscordColor.Blurple)
@@ -92,6 +92,7 @@ namespace Silk.Core.Commands.General
         }
 
         [Command]
+        [Aliases("cancel")]
         [Description("Removes one of your reminders based on the id given")]
         public async Task Remove(CommandContext ctx, int id)
         {
