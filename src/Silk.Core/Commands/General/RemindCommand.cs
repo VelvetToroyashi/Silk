@@ -48,7 +48,7 @@ namespace Silk.Core.Commands.General
 
             if(reminders is null)
             {
-                await ctx.RespondAsync("You have no reminders!");
+                await ctx.RespondAsync("You don't have any active reminders!");
             }
             else
             {
@@ -103,7 +103,7 @@ namespace Silk.Core.Commands.General
             }
             else
             {
-                await ctx.RespondAsync("You don't have any reminder with this id!");
+                await ctx.RespondAsync("I couldn’t find that reminder!");
             }
         }
     }
