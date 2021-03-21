@@ -121,5 +121,13 @@ namespace Silk.Core.Services
         /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
         public async Task<IEnumerable<Tag>?> GetUserTagsAsync(ulong ownerId, ulong guildId) => 
             await _mediator.Send(new TagRequest.GetByUser(guildId, ownerId));
+
+        /// <summary>
+        /// Gets a collection of tags in a guild.
+        /// </summary>
+        /// <param name="guildId">The Id of the guild.</param>
+        /// <returns>A collection of tags in the guild, or null if there are none.</returns>
+        public async Task<IEnumerable<Tag>?> GetGuildTagsAsync(ulong guildId) =>
+            await _mediator.Send(new TagRequest.GetByGuild(guildId));
     }        
 }

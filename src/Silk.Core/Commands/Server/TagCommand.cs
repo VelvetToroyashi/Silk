@@ -26,7 +26,8 @@ namespace Silk.Core.Commands.Server
         private readonly string[] _reservedWords = new[]
         {
             "create", "update", "delete",
-            "alias", "info", "claim"
+            "alias", "info", "claim",
+            "raw", "list"
         };
         public TagCommand(IMediator mediator, TagService tagService)
         {
@@ -230,6 +231,7 @@ namespace Silk.Core.Commands.Server
         }
 
         [Command]
+        [Description("Shows the Raw Content of a Tag")]
         public async Task Raw(CommandContext ctx, string tag)
         {
             Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
@@ -245,6 +247,45 @@ namespace Silk.Core.Commands.Server
             }
         }
         
+        [Command]
+        [Description("Shows a List of All Tags in this Server")]
+        public async Task List(CommandContext ctx)
+        {
+            IEnumerable<Tag>? tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
+            if (tags is null)
+            {
+                await ctx.RespondAsync("No tags in this server! :c");
+                return;
+            }
+
+            string allTags = string.Join('\n', tags
+                .Select(t =>
+                {
+                    var s = $"`{t.Name}`";
+                    if (t.OriginalTagId is not null)
+                    {
+                        s += $" → `{t.OriginalTag!.Name}`";
+                    }
+                    return s;
+                }));
+            var builder = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Blurple)
+                .WithTitle($"Tags in {ctx.Guild.Name}:")
+                .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+
+            if (tags.Count() < 10)
+            {
+                builder.WithDescription(allTags);
+                await ctx.RespondAsync(builder);
+            }
+            else
+            {
+                var interactivity = ctx.Client.GetInteractivity();
+
+                var pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
+                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
+            }
+        }
     }
     
     [RequireGuild]

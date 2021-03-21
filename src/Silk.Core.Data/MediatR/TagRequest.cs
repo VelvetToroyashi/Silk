@@ -9,6 +9,7 @@ namespace Silk.Core.Data.MediatR
         public record  Get(string Name, ulong GuildId) : IRequest<Tag>;
         public record GetByUser(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
         public record GetByName(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
+        public record GetByGuild(ulong GuildId) : IRequest<IEnumerable<Tag>?>;
         
         public record Update(string Name, ulong GuildId) : IRequest<Tag>
         {
