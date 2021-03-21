@@ -132,7 +132,7 @@ namespace Silk.Core.Data.MediatR.Handlers
                 Tag[] tags = await _db
                     .Tags
                     .Include(t => t.OriginalTag)
-                    .Include(t => t.OriginalTag)
+                    .Include(t => t.Aliases)
                     .Where(t => t.GuildId == request.GuildId && t.OwnerId == request.OwnerId)
                     .ToArrayAsync(cancellationToken);
                 
@@ -158,6 +158,28 @@ namespace Silk.Core.Data.MediatR.Handlers
                         .AsSplitQuery()
                         .Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
                         .ToArrayAsync(cancellationToken);
+
+                return tags.Any() ? tags : null;
+            }
+        }
+
+        public class GetByGuildHandler : IRequestHandler<TagRequest.GetByGuild, IEnumerable<Tag>?>
+        {
+            private readonly SilkDbContext _db;
+            public GetByGuildHandler(SilkDbContext db)
+            {
+                _db = db;
+            }
+
+            public async Task<IEnumerable<Tag>?> Handle(TagRequest.GetByGuild request, CancellationToken cancellationToken)
+            {
+                Tag[] tags = await
+                    _db
+                    .Tags
+                    .Include(t => t.OriginalTag)
+                    .Include(t => t.Aliases)
+                    .Where(t => t.GuildId == request.GuildId)
+                    .ToArrayAsync(cancellationToken);
 
                 return tags.Any() ? tags : null;
             }
