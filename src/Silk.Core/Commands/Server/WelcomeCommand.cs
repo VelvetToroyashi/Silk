@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -23,13 +24,13 @@ namespace Silk.Core.Commands.Server
 
         // What do you think this is for. //
         private const string BaseFile = 
-                @"config:
-                welcome:
-                    enabled: false
-                    greet_on: member_join
-                    greeting_channel: 0
-                    message: """"
-                    role_id: 0";
+@"config:
+    welcome:
+        enabled: false
+        greet_on: member_join
+        greeting_channel: 0
+        message: """"
+        role_id: 0";
         
         public WelcomeCommand(IMediator mediator, IServiceCacheUpdaterService updater)
         {
@@ -44,6 +45,7 @@ namespace Silk.Core.Commands.Server
          "\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
         public async Task SetWelcome(CommandContext ctx)
         {
+            
             if (!ctx.Message.Attachments.Any())
             {
                 await SetWelcomeWhenNoFile(ctx);
