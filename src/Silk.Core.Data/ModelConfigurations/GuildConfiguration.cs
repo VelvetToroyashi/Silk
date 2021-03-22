@@ -6,7 +6,6 @@ namespace Silk.Core.Data.ModelConfigurations
 {
     public class GuildConfiguration : IEntityTypeConfiguration<Guild>
     {
-
         public void Configure(EntityTypeBuilder<Guild> builder)
         {
             builder.Property(g => g.Id).ValueGeneratedNever();
@@ -19,8 +18,8 @@ namespace Silk.Core.Data.ModelConfigurations
                 .HasOne(g => g.Configuration)
                 .WithOne(g => g.Guild)
                 .HasForeignKey<GuildConfig>(g => g.GuildId);
-            builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
             
+            builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
         }
     }
 }

@@ -92,7 +92,7 @@ namespace Silk.Core.Commands.Server
             var enabled = (bool)dict["enabled"];
             var greetOn = dict["greet_on"] as string;
             var greetingChannel = ulong.Parse(dict["greeting_channel"]?.ToString() ?? "0");
-            var message = dict["message"] as string;
+            var message = dict["message"].ToString();
             var roleId = ulong.Parse(dict["role_id"].ToString() ?? "0");
 
             switch (greetOn!.ToLower())
