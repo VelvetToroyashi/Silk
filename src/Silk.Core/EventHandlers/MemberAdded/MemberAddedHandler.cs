@@ -41,6 +41,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
             if (screenMembers || verifyMembers)
                 MemberQueue.Add(e.Member);
+            else await GreetMemberAsync(e.Member, config);
         }
 
         private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)

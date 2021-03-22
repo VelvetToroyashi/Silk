@@ -88,12 +88,12 @@ namespace Silk.Core.Commands.Server
         {
             GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(guildId));
             Dictionary<string, object> dict = result["config"]["welcome"];
-            
-            bool.TryParse(dict["enabled"] as string, out bool enabled);
+
+            var enabled = (bool)dict["enabled"];
             var greetOn = dict["greet_on"] as string;
-            var greetingChannel = (ulong?) dict["greeting_channel"];
+            var greetingChannel = ulong.Parse(dict["greeting_channel"]?.ToString() ?? "0");
             var message = dict["message"] as string;
-            var roleId = (ulong) dict["role_id"];
+            var roleId = ulong.Parse(dict["role_id"].ToString() ?? "0");
 
             switch (greetOn!.ToLower())
             {
@@ -114,7 +114,7 @@ namespace Silk.Core.Commands.Server
                     config.VerificationRole = roleId;
                     break;
             }
-            greetingChannel = greetingChannel is (0 or null) ? config.GreetingChannel : greetingChannel;
+            config.GreetingChannel = greetingChannel is 0 ? config.GreetingChannel : greetingChannel;
 
             await _mediator.Send(new GuildConfigRequest.Update
             {
@@ -126,6 +126,7 @@ namespace Silk.Core.Commands.Server
                 GreetingChannelId = config.GreetingChannel,
                 GreetingText = message
             });
+            _updater.UpdateGuild(guildId);
         }
         
         private async Task SetWelcomeNoFileAsync(CommandContext ctx)
