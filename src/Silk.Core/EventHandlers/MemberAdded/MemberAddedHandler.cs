@@ -52,7 +52,8 @@ namespace Silk.Core.EventHandlers.MemberAdded
                 string formattedMessage = config.GreetingText
                     .Replace("{u}", member.Username)
                     .Replace("{s}", member.Guild.Name)
-                    .Replace("{@u}", member.Mention);
+                    .Replace("{@u}", member.Mention)
+                    .Replace("\\n", "\n");
 
                 await channel.SendMessageAsync(formattedMessage);
             }
