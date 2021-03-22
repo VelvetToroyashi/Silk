@@ -55,7 +55,7 @@ namespace Silk.Core.Commands.General
                 string[] allReminders = reminders
                 .Select(r =>
                 {
-                    var s = $"`{r.Id}` → Expiring {r.Expiration.Humanize()}\n";
+                    var s = $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n";
                     if(r.ReplyId is not null)
                     {
                         s += $"[Referenced message](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";

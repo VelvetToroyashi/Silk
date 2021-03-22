@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using SharpYaml.Serialization;
+using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
@@ -20,40 +21,114 @@ namespace Silk.Core.Commands.Server
     public class WelcomeCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
+        private readonly HttpClient _client;
         private readonly IServiceCacheUpdaterService _updater;
 
         // What do you think this is for. //
         private const string BaseFile = 
 @"config:
     welcome:
-        enabled: false
-        greet_on: member_join
-        greeting_channel: 0
-        message: """"
-        role_id: 0";
+        enabled: false # true or false
+        greet_on: member_join # member_join, role_grant, or screen_complete (when they agree to server rules)
+        greeting_channel: 0 # Id of the channel to greet them in
+        message: """" # Valid substitutions {u} -> Username, {@u} -> User mention, {s} -> Server name
+        role_id: 0 # Id of the role to check, if configured.";
         
-        public WelcomeCommand(IMediator mediator, IServiceCacheUpdaterService updater)
+        public WelcomeCommand(IMediator mediator, IServiceCacheUpdaterService updater, HttpClient client)
         {
             _mediator = mediator;
             _updater = updater;
+            _client = client;
         }
 
         [Command]
         [RequireFlag(UserFlag.Staff)]
         [Description
-        ("Welcome message settings! Currently supported substitutio5they ns:" +
+        ("Welcome message settings! Currently supported substitutions:" +
          "\n`{u}` -> Username, `{@u}` -> Mention, `{s}` -> Server Name")]
         public async Task SetWelcome(CommandContext ctx)
         {
-            
             if (!ctx.Message.Attachments.Any())
             {
-                await SetWelcomeWhenNoFile(ctx);
-                return;
+                await SetWelcomeNoFileAsync(ctx);
             }
-            VerifyStructure(new Serializer().Deserialize(new Serializer().Serialize(BaseFile)));
+            else
+            {
+                DiscordAttachment? attachment = ctx.Message.Attachments.FirstOrDefault(a => a.FileName is "config.yaml");
+                if (attachment is null)
+                {
+                    await ctx.RespondAsync("Hmm. I don't see `config.yaml` in those attatchments!");
+                }
+                else
+                {
+                    var dict = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
+                    string content = await _client.GetStringAsync(attachment.Url);
+                    string? result = VerifyStructure(new Serializer().Deserialize(content, dict));
+                    
+                    if (result is not null)
+                    {
+                        await ctx.RespondAsync(result);
+                    }
+                    else
+                    {
+                        try { await ConfigureWelcomeAsync(dict, ctx.Guild.Id, ctx); }
+                        catch
+                        {
+                            await ctx.RespondAsync("Something went wrong while parsing your config! Check the file and try again.");
+                            return;
+                        }
+                        await ctx.TriggerTypingAsync();
+                        await ctx.RespondAsync("Alright! Changes should apply immediately! Thank you for choosing Silk! <3");
+                    }   
+                }
+            }
         }
-        private async Task SetWelcomeWhenNoFile(CommandContext ctx)
+
+        private async Task ConfigureWelcomeAsync(Dictionary<string, Dictionary<string, Dictionary<string, object>>> result, ulong guildId, CommandContext ctx)
+        {
+            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(guildId));
+            Dictionary<string, object> dict = result["config"]["welcome"];
+            
+            bool.TryParse(dict["enabled"] as string, out bool enabled);
+            var greetOn = dict["greet_on"] as string;
+            var greetingChannel = (ulong?) dict["greeting_channel"];
+            var message = dict["message"] as string;
+            var roleId = (ulong) dict["role_id"];
+
+            switch (greetOn!.ToLower())
+            {
+                case "member_join":
+                    config.GreetMembers = enabled;
+                    config.GreetOnScreeningComplete = false;
+                    config.GreetOnVerificationRole = false;
+                    break;
+                case "screen_complete":
+                    config.GreetMembers = enabled;
+                    config.GreetOnScreeningComplete = true;
+                    config.GreetOnVerificationRole = false;
+                    break;
+                case "role_grant":
+                    config.GreetMembers = enabled;
+                    config.GreetOnScreeningComplete = false;
+                    config.GreetOnVerificationRole = true;
+                    config.VerificationRole = roleId;
+                    break;
+            }
+            greetingChannel = greetingChannel is (0 or null) ? config.GreetingChannel : greetingChannel;
+
+            await _mediator.Send(new GuildConfigRequest.Update
+            {
+                GuildId = guildId,
+                GreetMembers = config.GreetMembers,
+                GreetOnScreeningComplete = config.GreetOnScreeningComplete,
+                GreetOnVerificationRole = config.GreetOnVerificationRole,
+                VerificationRoleId = config.VerificationRole,
+                GreetingChannelId = config.GreetingChannel,
+                GreetingText = message
+            });
+        }
+        
+        private async Task SetWelcomeNoFileAsync(CommandContext ctx)
         {
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id)
@@ -61,32 +136,25 @@ namespace Silk.Core.Commands.Server
                              + "Just change this config file, and I'll do the rest :)\n"
                              + "(Just rerun this command with the attatched file <3)");
             
-            builder.WithFile("config.yml", BaseFile.AsStream());
-
-            
-
-            var dict = new Dictionary<string, Dictionary<string, Dictionary<string, object>>>();
-
-                        
-            new Serializer().Deserialize(BaseFile, dict);
+            builder.WithFile("config.yaml", BaseFile.AsStream());
             
             await ctx.RespondAsync(builder);
         }
 
         private string? VerifyStructure(object obj)
         {
-            if (obj is not Dictionary<string, object> config)
+            if (obj is not Dictionary<string, Dictionary<string, Dictionary<string, object>>> configDict)
                 return "Missing entirety of file!";
             
-            if (!config.TryGetValue("config", out object? welcome))
+            if (!configDict.TryGetValue("config", out Dictionary<string, Dictionary<string, object>>? config))
                 return "Mising \"config\" section!";
             
-            if (welcome is not Dictionary<string, object> welcomeOptions)
+            if (!config.TryGetValue("welcome", out Dictionary<string, object>? welcome))
                 return "Missing \"welcome\" section!";
             
             var options = new[] { "enabled", "greet_on", "greeting_channel", "message", "role_id" };
             
-            string? missingOption = options.FirstOrDefault(o => !welcomeOptions.ContainsKey(o));
+            string? missingOption = options.FirstOrDefault(o => !welcome.ContainsKey(o));
             
             if (missingOption is not null)
                 return $"Missing \"{missingOption}\" section!";
