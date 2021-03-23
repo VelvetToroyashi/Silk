@@ -22,7 +22,7 @@ namespace Silk.Core
         public static string HttpClientName { get; } = "Silk";
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
 
-        private static readonly DiscordConfiguration _clientConfig = new()
+        private static DiscordConfiguration _clientConfig = new()
         {
             Intents = DiscordIntents.Guilds                 | // Caching
                       DiscordIntents.GuildMembers           | // Auto-mod/Auto-greet
@@ -49,14 +49,12 @@ namespace Silk.Core
                 .RunConsoleAsync()
                 .ConfigureAwait(false); 
         }
-            
-
-
+        
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime()
-                .ConfigureAppConfiguration((_, configuration) =>
+                .ConfigureAppConfiguration((context, configuration) =>
                 {
                     configuration.SetBasePath(Directory.GetCurrentDirectory());
                     configuration.AddJsonFile("appSettings.json", true, false);
@@ -64,6 +62,9 @@ namespace Silk.Core
                 })
                 .ConfigureLogging((builder, _) =>
                 {
+                    if (int.TryParse(builder.Configuration["Shards"] ?? "1", out int shards))
+                        _clientConfig.ShardCount = shards;
+                    
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)

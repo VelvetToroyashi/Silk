@@ -78,7 +78,7 @@ namespace Silk.Core.Services
             {
                 Reminder r = _reminders[i];
                 if (r.Expiration < DateTime.UtcNow)
-                    _ = SendReminderMessageAsync(r);
+                    await SendReminderMessageAsync(r);
             }
         }
 
