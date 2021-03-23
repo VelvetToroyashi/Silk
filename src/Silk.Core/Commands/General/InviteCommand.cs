@@ -13,7 +13,7 @@ namespace Silk.Core.Commands.General
         [Description("Gives you the Oauth2 code to invite me to your server!")]
         public async Task Invite(CommandContext ctx)
         {
-            var Oauth2 = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentUser.Id}&permissions=502656214&scope=bot";
+            var Oauth2 = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentUser.Id}&permissions=502656214&scope=bot%20applications.commands";
             await ctx.RespondAsync(new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Gold)
                 .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!"));
