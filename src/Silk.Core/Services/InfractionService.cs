@@ -320,8 +320,11 @@ namespace Silk.Core.Services
             _logger.LogTrace("Log channel ({LogChannel}) exists on guild!", config.LoggingChannel);
             await logChannel.SendMessageAsync(embed);
         }
-        
-        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction) => throw new NotImplementedException();
+
+        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
+        {
+            
+        }
 
     }
 }
