@@ -12,8 +12,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class AddRequestHandler : IRequestHandler<CommandInvokeRequest.Add>
         {
-            private readonly SilkDbContext _db;
-            public AddRequestHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public AddRequestHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -30,8 +30,8 @@ namespace Silk.Core.Data.MediatR.Handlers
         public class GetByUserHandler : IRequestHandler<CommandInvokeRequest.GetByUserId, IEnumerable<CommandInvocation>>
         {
 
-            private readonly SilkDbContext _db;
-            public GetByUserHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetByUserHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -45,8 +45,8 @@ namespace Silk.Core.Data.MediatR.Handlers
         public class GetByGuildHandler : IRequestHandler<CommandInvokeRequest.GetByGuildId, IEnumerable<CommandInvocation>>
         {
 
-            private readonly SilkDbContext _db;
-            public GetByGuildHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetByGuildHandler(GuildContext db)
             {
                 _db = db;
             }

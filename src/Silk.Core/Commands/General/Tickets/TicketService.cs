@@ -16,14 +16,14 @@ namespace Silk.Core.Commands.General.Tickets
     {
         private readonly DiscordShardedClient _client;
         private readonly ILogger<TicketService> _logger;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
         private const ulong SILK_GUILD_ID = 721518523704410202;
         private const ulong SILK_CONTRIBUTOR_ID = 745751916608356467;
 
 
         // private readonly DatabaseService _dbService;
-        public TicketService(DiscordShardedClient client, ILogger<TicketService> logger, IDbContextFactory<SilkDbContext> dbFactory)
+        public TicketService(DiscordShardedClient client, ILogger<TicketService> logger, IDbContextFactory<GuildContext> dbFactory)
         {
             _client = client;
             _logger = logger;
@@ -45,7 +45,7 @@ namespace Silk.Core.Commands.General.Tickets
         public async Task<TicketCreationResult> CreateAsync(DiscordUser user, string message)
         {
             DiscordChannel ticketCategory = await GetOrCreateTicketCategoryAsync();
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
 
             // Make sure they don't have an open ticket already. //
             if (await db.Tickets.AnyAsync(t => t.Opener == user.Id && t.IsOpen))
@@ -103,7 +103,7 @@ namespace Silk.Core.Commands.General.Tickets
             try
             {
                 ulong userId = GetTicketUser(message.Channel);
-                await using SilkDbContext db = _dbFactory.CreateDbContext();
+                await using GuildContext db = _dbFactory.CreateDbContext();
                 Ticket ticket = await GetTicketAsync(userId, db);
                 ticket.Closed = DateTime.Now;
                 ticket.IsOpen = false;
@@ -136,18 +136,18 @@ namespace Silk.Core.Commands.General.Tickets
 
         public async Task CloseTicketById(int ticketId)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
 
         }
 
 
         public async Task<Ticket> GetTicketAsync(ulong id)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
             return await db.Tickets.FirstOrDefaultAsync(t => t.IsOpen && t.Opener == id);
         }
 
-        public async Task<Ticket> GetTicketAsync(ulong id, SilkDbContext dbContext) => await dbContext.Tickets.FirstOrDefaultAsync(t => t.IsOpen && t.Opener == id);
+        public async Task<Ticket> GetTicketAsync(ulong id, GuildContext dbContext) => await dbContext.Tickets.FirstOrDefaultAsync(t => t.IsOpen && t.Opener == id);
 
         /// <summary>
         /// Get a <see cref="DiscordUser"/>'s Id from the corresponding ticket channel.
@@ -176,7 +176,7 @@ namespace Silk.Core.Commands.General.Tickets
             if (!c.IsPrivate)
                 return _ticketChannels.ContainsKey(id);
 
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
 
             Ticket? ticket = await db.Tickets
                 .Where(t => t.IsOpen)

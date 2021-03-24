@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Silk.Core.Data.Migrations
 {
-    [DbContext(typeof(SilkDbContext))]
+    [DbContext(typeof(GuildContext))]
     [Migration("20210318135012_InitialMigration")]
     partial class InitialMigration
     {

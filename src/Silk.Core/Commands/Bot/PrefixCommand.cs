@@ -18,11 +18,11 @@ namespace Silk.Core.Commands.Bot
     {
         private const int PrefixMaxLength = 5;
         private readonly IPrefixCacheService _prefixCache;
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
         private record PrefixValidationResult(bool Valid, string Reason);
 
-        public PrefixCommand(IPrefixCacheService prefixCache, IDbContextFactory<SilkDbContext> dbFactory)
+        public PrefixCommand(IPrefixCacheService prefixCache, IDbContextFactory<GuildContext> dbFactory)
         {
             _prefixCache = prefixCache;
             _dbFactory = dbFactory;
@@ -33,7 +33,7 @@ namespace Silk.Core.Commands.Bot
         [Description("Sets the command prefix for Silk to use on the current Guild")]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {

@@ -13,8 +13,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class GetAllHandler : IRequestHandler<ReminderRequest.GetAll, IEnumerable<Reminder>>
         {
-            private readonly SilkDbContext _db;
-            public GetAllHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetAllHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -29,10 +29,10 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class CreateHandler : IRequestHandler<ReminderRequest.Create, Reminder>
         {
-            private readonly SilkDbContext _db;
+            private readonly GuildContext _db;
             private readonly IServiceProvider _provider;
             private readonly IMediator _mediator;
-            public CreateHandler(IMediator mediator, SilkDbContext db, IServiceProvider provider)
+            public CreateHandler(IMediator mediator, GuildContext db, IServiceProvider provider)
             {
                 _mediator = mediator;
                 _db = db;
@@ -72,8 +72,8 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class RemoveHandler : IRequestHandler<ReminderRequest.Remove>
         {
-            private readonly SilkDbContext _db;
-            public RemoveHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public RemoveHandler(GuildContext db)
             {
                 _db = db;
             }

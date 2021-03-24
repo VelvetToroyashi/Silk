@@ -23,11 +23,11 @@ namespace Silk.Core.Services
         private readonly ILogger<InfractionService> _logger;
         private readonly DiscordShardedClient _client;
         private readonly IMediator _mediator;
-        private readonly SilkDbContext _db;
+        private readonly GuildContext _db;
         
         private readonly List<Infraction> _tempInfractions = new();
         
-        public InfractionService(ILogger<InfractionService> logger, DiscordShardedClient client, IMediator mediator, SilkDbContext db)
+        public InfractionService(ILogger<InfractionService> logger, DiscordShardedClient client, IMediator mediator, GuildContext db)
         {
             _logger = logger;
             _client = client;

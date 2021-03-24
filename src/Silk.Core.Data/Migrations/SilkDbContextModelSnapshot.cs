@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Silk.Core.Data.Migrations
 {
-    [DbContext(typeof(SilkDbContext))]
+    [DbContext(typeof(GuildContext))]
     partial class SilkDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

@@ -17,9 +17,9 @@ namespace Silk.Core.Commands.Moderation.Ban
     [Category(Categories.Mod)]
     public class BanCommand : BaseCommandModule
     {
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public BanCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        public BanCommand(IDbContextFactory<GuildContext> dbFactory)
         {
             _dbFactory = dbFactory;
         }

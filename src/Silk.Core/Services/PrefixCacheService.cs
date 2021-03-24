@@ -17,10 +17,10 @@ namespace Silk.Core.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly ConcurrentDictionary<ulong, string> _cache = new();
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
         private readonly Stopwatch _sw = new();
         private readonly IServiceCacheUpdaterService _cacheUpdater;
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<SilkDbContext> dbFactory, IMemoryCache memoryCache, IServiceCacheUpdaterService cacheUpdater)
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<GuildContext> dbFactory, IMemoryCache memoryCache, IServiceCacheUpdaterService cacheUpdater)
         {
             _logger = logger;
             _dbFactory = dbFactory;
@@ -43,7 +43,7 @@ namespace Silk.Core.Services
         {
             _sw.Restart();
 
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
 
             Guild? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
             if (guild is null)

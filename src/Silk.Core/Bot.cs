@@ -49,7 +49,7 @@ namespace Silk.Core
             IServiceProvider services, 
             DiscordShardedClient client, 
             BotExceptionHandler exceptionHandler, 
-            IDbContextFactory<SilkDbContext> dbFactory)
+            IDbContextFactory<GuildContext> dbFactory)
         {
             _sw.Start();
             _services = services;

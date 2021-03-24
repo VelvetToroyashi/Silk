@@ -13,9 +13,9 @@ namespace Silk.Core.Commands.General
     [Category(Categories.General)]
     public class PingCommand : BaseCommandModule
     {
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public PingCommand(IDbContextFactory<SilkDbContext> dbFactory) => _dbFactory = dbFactory;
+        public PingCommand(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         [Command("ping")]
         [Aliases("pong")]
@@ -45,7 +45,7 @@ namespace Silk.Core.Commands.General
 
         private int GetDbLatency()
         {
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
             //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
             db.Database.BeginTransaction();
             var sw = Stopwatch.StartNew();

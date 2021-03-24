@@ -10,12 +10,29 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
+using Silk.Core.Data.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
 namespace Silk.Core.Commands.General
 {
+    public class RemindersCommand : BaseCommandModule
+    {
+        [Command]
+        public async Task Reminders(CommandContext ctx)
+        {
+            DiscordUser? user = ctx.User;
+            DiscordChannel? channel = ctx.Channel;
+            string? content = ctx.Message.Content;
+            string? prefix = ctx.Prefix;
+            Command? command = ctx.CommandsNext.FindCommand("remind list", out _);
+            CommandContext? fctx = ctx.CommandsNext.CreateFakeContext(user, channel, content, prefix, command);
+
+            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
+        }
+    }
+
     [Group("remind")]
     [Aliases("reminder")]
     [Category(Categories.General)]
@@ -44,7 +61,7 @@ namespace Silk.Core.Commands.General
         [Description("Gives you a list of your reminders")]
         public async Task List(CommandContext ctx)
         {
-            var reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
+            IEnumerable<Reminder>? reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
 
             if(reminders is null)
             {

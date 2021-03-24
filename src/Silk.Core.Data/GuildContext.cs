@@ -3,7 +3,7 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data
 {
-    public class SilkDbContext : DbContext
+    public class GuildContext : DbContext
     {
         public DbSet<Guild> Guilds { get; set; } = null!;
 
@@ -29,11 +29,11 @@ namespace Silk.Core.Data
 
         public DbSet<Reminder> Reminders { get; set; } = null!;
 
-        public SilkDbContext(DbContextOptions<SilkDbContext> options) : base(options) { }
+        public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfigurationsFromAssembly(typeof(SilkDbContext).Assembly);
+            builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
             builder.Entity<TicketMessage>().HasOne(ticket => ticket.Ticket).WithMany(ticket => ticket.History);
             builder.Entity<SelfAssignableRole>().Property(r => r.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);

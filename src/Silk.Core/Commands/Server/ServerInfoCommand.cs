@@ -15,9 +15,9 @@ namespace Silk.Core.Commands.Server
     [Category(Categories.Server)]
     public class ServerInfoCommand : BaseCommandModule
     {
-        private readonly IDbContextFactory<SilkDbContext> _dbFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public ServerInfoCommand(IDbContextFactory<SilkDbContext> dbFactory)
+        public ServerInfoCommand(IDbContextFactory<GuildContext> dbFactory)
         {
             _dbFactory = dbFactory;
         }
@@ -27,7 +27,7 @@ namespace Silk.Core.Commands.Server
         public async Task ServerInfo(CommandContext ctx)
         {
             DiscordGuild guild = ctx.Guild;
-            SilkDbContext db = _dbFactory.CreateDbContext();
+            GuildContext db = _dbFactory.CreateDbContext();
 
             var staffMembers = db.Guilds.Include(g => g.Users)
                 .First(g => g.Id == guild.Id)

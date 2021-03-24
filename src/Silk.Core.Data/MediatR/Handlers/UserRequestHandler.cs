@@ -10,8 +10,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class GetHandler : IRequestHandler<UserRequest.Get, User>
         {
-            private readonly SilkDbContext _db;
-            public GetHandler(SilkDbContext db) => _db = db;
+            private readonly GuildContext _db;
+            public GetHandler(GuildContext db) => _db = db;
 
             public async Task<User?> Handle(UserRequest.Get request, CancellationToken cancellationToken)
             {
@@ -24,9 +24,9 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class AddHandler : IRequestHandler<UserRequest.Add, User>
         {
-            private readonly SilkDbContext _db;
+            private readonly GuildContext _db;
 
-            public AddHandler(SilkDbContext db) => _db = db;
+            public AddHandler(GuildContext db) => _db = db;
 
             public async Task<User> Handle(UserRequest.Add request, CancellationToken cancellationToken)
             {
@@ -39,9 +39,9 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class UpdateHandler : IRequestHandler<UserRequest.Update, User>
         {
-            private readonly SilkDbContext _db;
+            private readonly GuildContext _db;
 
-            public UpdateHandler(SilkDbContext db)
+            public UpdateHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -59,8 +59,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class GetOrCreateHandler : IRequestHandler<UserRequest.GetOrCreate, User>
         {
-            private readonly SilkDbContext _db;
-            public GetOrCreateHandler(SilkDbContext db) => _db = db;
+            private readonly GuildContext _db;
+            public GetOrCreateHandler(GuildContext db) => _db = db;
 
             public async Task<User> Handle(UserRequest.GetOrCreate request, CancellationToken cancellationToken)
             {

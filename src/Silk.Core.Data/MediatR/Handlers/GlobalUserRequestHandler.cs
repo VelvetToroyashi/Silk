@@ -11,8 +11,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class GetHandler : IRequestHandler<GlobalUserRequest.Get, GlobalUser>
         {
-            private readonly SilkDbContext _db;
-            public GetHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -26,8 +26,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class AddHandler : IRequestHandler<GlobalUserRequest.Add, GlobalUser>
         {
-            private readonly SilkDbContext _db;
-            public AddHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public AddHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -47,8 +47,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class UpdateHandler : IRequestHandler<GlobalUserRequest.Update, GlobalUser>
         {
-            private readonly SilkDbContext _db;
-            public UpdateHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public UpdateHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -64,8 +64,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class GetOrCreateHandler : IRequestHandler<GlobalUserRequest.GetOrCreate, GlobalUser>
         {
-            private readonly SilkDbContext _db;
-            public GetOrCreateHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetOrCreateHandler(GuildContext db)
             {
                 _db = db;
             }

@@ -21,7 +21,7 @@ namespace Silk.Core
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddDatabase(IServiceCollection services, string connectionString)
         {
-            services.AddDbContextFactory<SilkDbContext>(
+            services.AddDbContextFactory<GuildContext>(
                 option =>
                 {
                     option.UseNpgsql(connectionString);
@@ -38,7 +38,7 @@ namespace Silk.Core
         public static void AddServices(IServiceCollection services)
         {
             services.AddTransient<ConfigService>();
-            services.AddTransient<SilkDbContext>();
+            services.AddTransient<GuildContext>();
             services.AddTransient<TicketService>();
             services.AddSingleton<AntiInviteCore>();
             services.AddTransient<RoleAddedHandler>();
@@ -62,7 +62,7 @@ namespace Silk.Core
             services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 
             services.AddMediatR(typeof(Program));
-            services.AddMediatR(typeof(SilkDbContext));
+            services.AddMediatR(typeof(GuildContext));
         }
     }
 }

@@ -10,8 +10,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class GetHandler : IRequestHandler<GuildRequest.Get, Guild>
         {
-            private readonly SilkDbContext _db;
-            public GetHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -32,8 +32,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class UpdateHandler : IRequestHandler<GuildRequest.Update>
         {
-            private readonly SilkDbContext _db;
-            public UpdateHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public UpdateHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -53,9 +53,9 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class AddHandler : IRequestHandler<GuildRequest.Add, Guild>
         {
-            private readonly SilkDbContext _db;
+            private readonly GuildContext _db;
 
-            public AddHandler(SilkDbContext db)
+            public AddHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -71,9 +71,9 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class GetOrCreateHandler : IRequestHandler<GuildRequest.GetOrCreate, Guild>
         {
-            private readonly SilkDbContext _db;
+            private readonly GuildContext _db;
 
-            public GetOrCreateHandler(SilkDbContext db)
+            public GetOrCreateHandler(GuildContext db)
             {
                 _db = db;
             }

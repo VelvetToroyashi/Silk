@@ -13,8 +13,8 @@ namespace Silk.Core.Data.MediatR.Handlers
     {
         public class CreateHandler : IRequestHandler<TagRequest.Create, Tag>
         {
-            private readonly SilkDbContext _db;
-            public CreateHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public CreateHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -41,8 +41,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class GetHandler : IRequestHandler<TagRequest.Get, Tag?>
         {
-            private readonly SilkDbContext _db;
-            public GetHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -62,8 +62,8 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class UpdateHandler : IRequestHandler<TagRequest.Update, Tag>
         {
-            private readonly SilkDbContext _db;
-            public UpdateHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public UpdateHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -84,8 +84,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class DeleteHandler : IRequestHandler<TagRequest.Delete>
         {
-            private readonly SilkDbContext _db;
-            public DeleteHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public DeleteHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -121,8 +121,8 @@ namespace Silk.Core.Data.MediatR.Handlers
         
         public class GetByUserHandler : IRequestHandler<TagRequest.GetByUser, IEnumerable<Tag>?>
         {
-            private readonly SilkDbContext _db;
-            public GetByUserHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetByUserHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -142,8 +142,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class GetByNameHandler : IRequestHandler<TagRequest.GetByName, IEnumerable<Tag>?>
         {
-            private readonly SilkDbContext _db;
-            public GetByNameHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetByNameHandler(GuildContext db)
             {
                 _db = db;
             }
@@ -165,8 +165,8 @@ namespace Silk.Core.Data.MediatR.Handlers
 
         public class GetByGuildHandler : IRequestHandler<TagRequest.GetByGuild, IEnumerable<Tag>?>
         {
-            private readonly SilkDbContext _db;
-            public GetByGuildHandler(SilkDbContext db)
+            private readonly GuildContext _db;
+            public GetByGuildHandler(GuildContext db)
             {
                 _db = db;
             }
