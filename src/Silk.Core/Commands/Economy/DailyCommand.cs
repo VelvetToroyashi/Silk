@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -7,7 +6,6 @@ using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities.HelpFormatter;

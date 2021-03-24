@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -321,9 +320,15 @@ namespace Silk.Core.Services
             await logChannel.SendMessageAsync(embed);
         }
 
-        public async Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction)
+        public async Task ProgressInfractionStepAsync(DiscordMember member, string reason, DateTime? a = null)
         {
+            User user = await _mediator.Send(new UserRequest.GetOrCreate(member.Guild.Id, member.Id));
+            Guild guild = await _mediator.Send(new GuildRequest.Get(member.Guild.Id));
+            GuildConfig config = guild.Configuration;
+            List<InfractionStep> steps = config.InfractionSteps;
+            List<Infraction> infractions = guild.Infractions.Where(i => i.UserId == member.Id).ToList();
             
+
         }
 
     }

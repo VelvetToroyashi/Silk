@@ -22,6 +22,7 @@ namespace Silk.Core.Data.MediatR.Handlers
                     await _db.Guilds
                     .Include(g => g.Users)
                     .Include(g => g.Infractions)
+                    .Include(g => g.Configuration)
                     .AsSplitQuery()
                     .AsNoTracking()
                     .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);

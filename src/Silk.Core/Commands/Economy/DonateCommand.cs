@@ -9,7 +9,6 @@ using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
-using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Economy

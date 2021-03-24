@@ -23,6 +23,7 @@ namespace Silk.Core.Data.MediatR.Handlers
             {
                 GuildConfig config = 
                     await _db.GuildConfigs
+                        .Include(c => c.InfractionSteps)
                         .Include(c => c.DisabledCommands)
                         //.Include(c => c.BlackListedWords)
                         .Include(c => c.SelfAssignableRoles)
@@ -68,7 +69,8 @@ namespace Silk.Core.Data.MediatR.Handlers
                 config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
 
                 config.GreetingText = request.GreetingText ?? config.GreetingText;
-                
+
+                config.InfractionSteps = request.InfractionSteps ?? config.InfractionSteps;
                 config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
                 config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
                 

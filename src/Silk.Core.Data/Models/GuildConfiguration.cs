@@ -99,12 +99,7 @@ namespace Silk.Core.Data.Models
         /// Represents whether to match only discord.gg/ or all possible invite codes.
         /// </summary>
         public bool UseAggressiveRegex { get; set; }
-
-        /// <summary>
-        /// A list that contians the type of infraction that should be applied, and an expiration if applicable.
-        /// </summary>
-        public List<InfractionType> InfractionDictionary { get; set; } = new();
-
+        
         /// <summary>
         /// Whether to automatically dehoist members. Guild must be premium.
         /// </summary>
@@ -113,6 +108,11 @@ namespace Silk.Core.Data.Models
         /// Whether to scan matched invites. Server must be premium and blacklist invites.
         /// </summary>
         public bool ScanInvites { get; set; }
+
+        /// <summary>
+        /// A list of steps depending on the number of infractions a <see cref="User"/> has.
+        /// </summary>
+        public List<InfractionStep> InfractionSteps { get; set; } = new();
 
         #endregion
 
@@ -127,10 +127,6 @@ namespace Silk.Core.Data.Models
         //// ReSharper disable once CollectionNeverUpdated.Global
         //public List<BlacklistedWord> BlackListedWords { get; set; } = new();
 
-        /// <summary>
-        /// A list of steps depending on the number of infractions a <see cref="User"/> has.
-        /// </summary>
-        public List<InfractionStep> InfractionSteps { get; set; } = new();
 
         /// <summary>
         /// A list of disabled commands on this server

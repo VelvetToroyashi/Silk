@@ -36,6 +36,7 @@ namespace Silk.Core.Data.MediatR
             public List<Invite>? AllowedInvites { get; init; }
             public List<DisabledCommand>? DisabledCommands { get; init; }
             public List<SelfAssignableRole>? SelfAssignableRoles { get; init; }
+            public List<InfractionStep>? InfractionSteps { get; init; }
             //public List<BlacklistedWord>? BlacklistedWords { get; init; }
         }
     }

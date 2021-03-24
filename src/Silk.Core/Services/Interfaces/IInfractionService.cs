@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Data.Models;
 
@@ -43,13 +42,14 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="channel">The channel the command was executed in.</param>
         /// <param name="infraction">The infraction generated for the user.</param>
         public Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
-        
+
         /// <summary>
         /// Automatically determines the next course of action given the user's infraction count.
         /// </summary>
         /// <param name="member">The member the infraction belongs to, if escalation is required.</param>
-        /// <param name="infraction">The infraction to pass, if escelation is required.</param>
-        public Task ProgressInfractionStepAsync(DiscordMember member, Infraction infraction);
+        /// <param name="reason">The reason the infraction was given.</param>
+        /// <param name="expiration">The time the expiration expires, if ever.</param>
+        public Task ProgressInfractionStepAsync(DiscordMember member, string reason, DateTime? expiration = null);
         
         /// <summary>
         /// Creates an <see cref="Infraction"/> object to pass to moderation methods.

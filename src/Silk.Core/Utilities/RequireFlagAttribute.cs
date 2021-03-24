@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
-using Silk.Core.Services.Interfaces;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities

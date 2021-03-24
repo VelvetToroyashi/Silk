@@ -6,7 +6,6 @@ using DSharpPlus.EventArgs;
 using MediatR;
 using Silk.Core.Data.MediatR;
 using Silk.Core.Data.Models;
-using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers
 {
