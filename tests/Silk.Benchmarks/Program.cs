@@ -6,7 +6,10 @@ namespace Silk.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<ReplaceTest>();
+
+            BenchmarkRunner.Run<CollectionTests>();
         }
+
+
     }
 }
