@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
+using Silk.Core.Types;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities.HelpFormatter

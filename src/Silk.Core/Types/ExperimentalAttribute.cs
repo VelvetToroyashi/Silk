@@ -2,7 +2,7 @@
 using System.Linq;
 using DSharpPlus.CommandsNext;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Types
 {
     ///<summary>
     /// Denotes this command is experimental, and may not work properly.
