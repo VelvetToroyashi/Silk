@@ -8,7 +8,6 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     public record GuildUpdateRequest(ulong GuildId, Infraction? Infraction) : IRequest;
 
-
     public class GuildUpdateHandler : IRequestHandler<GuildUpdateRequest>
     {
         private readonly GuildContext _db;
