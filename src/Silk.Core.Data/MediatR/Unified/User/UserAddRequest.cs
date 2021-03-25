@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.Models;
 
-namespace Silk.Core.Data.MediatR.Unified
+namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
     /// Adds a user to the database.

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.Models;
 
-namespace Silk.Core.Data.MediatR.Unified
+namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
     /// Updates users in the database en masse.

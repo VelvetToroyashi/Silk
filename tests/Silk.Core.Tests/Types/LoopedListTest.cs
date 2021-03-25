@@ -8,8 +8,8 @@ namespace Silk.Core.Tests.Types
     {
         private readonly LoopedList<int> _loopedIntList = new() {1, 2, 3, 4};
         private readonly LoopedList<int> _emptyIntList = new();
-        
-        
+
+
         [Fact]
         public void LoopedIntList_Allows_Last_Index()
         {
@@ -41,10 +41,10 @@ namespace Silk.Core.Tests.Types
             //Arrange
             int result;
             int expected = 3;
-            
+
             //Act
             result = _loopedIntList[6];
-            
+
             //Assert
             Assert.Equal(expected, result);
         }
@@ -54,7 +54,18 @@ namespace Silk.Core.Tests.Types
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => _emptyIntList.Next());
         }
-        
-        
+
+        [Fact]
+        public void LoopedIntList_SetsIndex_OnBaseList()
+        {
+            //Arrange
+            int result;
+            int expected = 8;
+            //Act
+            result = _loopedIntList[2] = expected;
+            //Assert
+            Assert.Equal(expected, result);
+        }
+
     }
 }

@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Models;
 
-namespace Silk.Core.Data.MediatR.Unified
+namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
     /// Gets a user from the database, and creates one if it does not exist.
