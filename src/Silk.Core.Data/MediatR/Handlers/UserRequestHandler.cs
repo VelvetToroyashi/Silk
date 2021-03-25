@@ -8,7 +8,7 @@ namespace Silk.Core.Data.MediatR.Handlers
 {
     public class UserHandler
     {
-        public class GetHandler : IRequestHandler<UserRequest.Get, User>
+        public class GetHandler : IRequestHandler<UserRequest.Get, User?>
         {
             private readonly GuildContext _db;
             public GetHandler(GuildContext db) => _db = db;
