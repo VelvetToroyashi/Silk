@@ -166,7 +166,7 @@ namespace Silk.Core
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Recieved BREAK or SIGTERM! Shutting down gracefully...");
+            _logger.LogInformation("Shutting down. ");
             await Client.StopAsync();
         } 
 

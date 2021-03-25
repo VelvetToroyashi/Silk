@@ -55,11 +55,12 @@ namespace Silk.Core
             services.AddSingleton<TagService>();
             
             services.AddHostedService<Bot>();
-
+            services.AddHostedService<StatusService>();
+            
             //Copped this hack from: https://stackoverflow.com/a/65552373 //
             services.AddSingleton<ReminderService>();
             services.AddHostedService(b => b.GetRequiredService<ReminderService>());
-
+            
             services.AddMediatR(typeof(Program));
             services.AddMediatR(typeof(GuildContext));
         }
