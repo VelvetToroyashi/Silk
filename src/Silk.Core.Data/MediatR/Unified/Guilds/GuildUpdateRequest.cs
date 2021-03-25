@@ -6,8 +6,14 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
+    /// <summary>
+    /// Updates a <see cref="Guild"/>.
+    /// </summary>
     public record GuildUpdateRequest(ulong GuildId, Infraction? Infraction) : IRequest;
 
+    /// <summary>
+    /// The default handler for <see cref="GuildUpdateRequest"/>
+    /// </summary>
     public class GuildUpdateHandler : IRequestHandler<GuildUpdateRequest>
     {
         private readonly GuildContext _db;
