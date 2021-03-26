@@ -1,4 +1,8 @@
-﻿using MediatR;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
@@ -11,5 +15,23 @@ namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
     /// <summary>
     /// The default handler for <see cref="GetOrCreateGlobalUserRequest"/>.
     /// </summary>
-    public class GetOrCreateGlobalUserHandler { }
+    public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUser>
+    {
+        private readonly GuildContext _db;
+        public GetOrCreateGlobalUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
+        public async Task<GlobalUser> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
+        {
+            GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            user ??= new()
+            {
+                Id = request.UserId,
+                LastCashOut = DateTime.MinValue
+            };
+            await _db.SaveChangesAsync(cancellationToken);
+            return user;
+        }
+    }
 }
