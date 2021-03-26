@@ -34,7 +34,6 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
                 }
                 // Timer timed out and it got dequeued slower than it should've. //
                 catch (DbUpdateConcurrencyException) { }
-
             }
             return new();
         }
