@@ -28,12 +28,9 @@ namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
         }
         public async Task<GlobalUser> Handle(UpdateGlobalUserRequest request, CancellationToken cancellationToken)
         {
-            GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-            user ??= new()
-            {
-                Id = request.UserId,
-                LastCashOut = DateTime.MinValue
-            };
+            GlobalUser user = await _db.GlobalUsers.FirstAsync(u => u.Id == request.UserId, cancellationToken);
+            user.Cash = request.Cash;
+            user.LastCashOut = request.LastCashOut;
             await _db.SaveChangesAsync(cancellationToken);
             return user;
         }
