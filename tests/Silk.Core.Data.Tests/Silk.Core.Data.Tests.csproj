@@ -19,5 +19,4 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Silk.Core.Data\Silk.Core.Data.csproj"/>
     </ItemGroup>
-
 </Project>

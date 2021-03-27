@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,10 +48,8 @@ namespace Silk.Core.Data.Tests.MediatR
             await _checkpoint.Reset(connection);
         }
 
-
-
         [Test]
-        public async Task MediatR_Add_Inserts_Properly()
+        public async Task MediatR_Add_Inserts_When_User_Does_Not_Exist()
         {
             // Arrange
             User? result;
@@ -101,5 +100,23 @@ namespace Silk.Core.Data.Tests.MediatR
             Assert.IsNotNull(user);
         }
 
+        [Test]
+        public async Task MediatR_Update_Returns_Updated_User()
+        {
+            //Arrange
+            User before;
+            User after;
+            before = await _mediator.Send(new AddUserRequest(GuildId, UserId));
+            //Act
+            after = await _mediator.Send(new UpdateUserRequest(GuildId, UserId, UserFlag.Staff));
+            //Assert
+            Assert.AreNotEqual(before, after);
+        }
+
+        [Test]
+        public async Task MediatR_Update_Throws_When_User_Does_Not_Exist()
+        {
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _mediator.Send(new UpdateUserRequest(GuildId, UserId)));
+        }
     }
 }
