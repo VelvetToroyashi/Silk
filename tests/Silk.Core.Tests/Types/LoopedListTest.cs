@@ -54,6 +54,43 @@ namespace Silk.Core.Tests.Types
             Assert.Throws<ArgumentOutOfRangeException>(() => _emptyIntList.Next());
         }
 
+        [Test]
+        public void LoopedIntList_Setter_Sets_Index_Within_Bounds()
+        {
+            //Arrange
+            int expected = 2;
+            int result;
+            LoopedList<int> list = new() {1, 2, 3, 4};
+            //Act
+            result = list[2] = expected;
+
+            //Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void LoopedIntList_Setter_Sets_Overflowed_Indexer()
+        {
+            //Arrange
+            LoopedList<int> expected = new() {1, 3, 3, 4};
+            //Act
+            _loopedIntList[5] = 3;
+            //Assert
+            Assert.AreEqual(expected, _loopedIntList);
+        }
+
+        [Test]
+        public void LoopedIntList_Setter_Throws_When_Empty()
+        {
+            //Arrange
+            int expected = 2;
+            TestDelegate tDelegate;
+            //Act
+            tDelegate = () => _emptyIntList[0] = expected;
+            //Assert
+            Assert.Throws<ArgumentOutOfRangeException>(tDelegate);
+        }
+
 
     }
 }

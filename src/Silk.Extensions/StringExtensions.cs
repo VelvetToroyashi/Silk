@@ -27,6 +27,7 @@ namespace Silk.Extensions
         }
         public static string Pull(this string text, Range range) =>
             text[range.Start..Math.Min(text.Length, range.End.Value)];
+
         public static Stream AsStream(this string s)
         {
             var stream = new MemoryStream();
