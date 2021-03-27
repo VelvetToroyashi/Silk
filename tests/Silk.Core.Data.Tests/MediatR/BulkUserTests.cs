@@ -51,7 +51,7 @@ namespace Silk.Core.Data.Tests.MediatR
         }
 
         [Test]
-        public async Task MediatR_BulkAdd_Inserts_AllUsers_When_None_Exist()
+        public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
         {
             //Arrange
             List<User> users = new[]
@@ -92,7 +92,27 @@ namespace Silk.Core.Data.Tests.MediatR
         [Test]
         public async Task MediatR_Bulk_Update_Updates_All_Users()
         {
-            //Arrange 
+            //Arrange
+            User[] updatedUsers = new User[2];
+            List<User> users = new[]
+            {
+                new User() {Id = 1, GuildId = GuildId},
+                new User() {Id = 2, GuildId = GuildId},
+            }.ToList();
+            users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
+            //Act
+            users.CopyTo(updatedUsers);
+
+            foreach (User u in updatedUsers)
+                u.Flags = UserFlag.Staff;
+
+            await _mediator.Send(new BulkUpdateUserRequest(users));
+            updatedUsers = _context.Users.ToArray();
+            //Assert
+            Assert.AreNotEqual(users, updatedUsers);
+
+            foreach (var user in updatedUsers)
+                Assert.AreEqual(UserFlag.Staff, user.Flags);
         }
     }
 }
