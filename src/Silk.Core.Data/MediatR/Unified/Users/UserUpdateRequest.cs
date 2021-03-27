@@ -9,22 +9,24 @@ namespace Silk.Core.Data.MediatR.Unified.Users
     /// <summary>
     /// Updates a user in the database.
     /// </summary>
-    public record UpdateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
+    public record UserUpdateRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
     /// <summary>
-    /// The default handler for <see cref="UpdateUserRequest"/>.
+    /// The default handler for <see cref="UserUpdateRequest"/>.
     /// </summary>
-    public class UpdateUserHandler : IRequestHandler<UpdateUserRequest, User>
+    public class UserUpdateHandler : IRequestHandler<UserUpdateRequest, User>
     {
         private readonly GuildContext _db;
-        public UpdateUserHandler(GuildContext db)
+
+        public UserUpdateHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<User> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
+        public async Task<User> Handle(UserUpdateRequest request, CancellationToken cancellationToken)
         {
-            User user = await _db.Users.FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+            User user = await _db.Users
+                .FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
             user.Flags = request.Flags ?? user.Flags;
             await _db.SaveChangesAsync(cancellationToken);

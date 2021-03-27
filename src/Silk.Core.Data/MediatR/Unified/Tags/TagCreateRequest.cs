@@ -9,20 +9,21 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
     /// <summary>
     /// Creates a <see cref="Tag"/>.
     /// </summary>
-    public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
+    public record TagCreateRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
 
     /// <summary>
-    /// The default handler for <see cref="CreateTagRequest"/>
+    /// The default handler for <see cref="TagCreateRequest"/>
     /// </summary>
-    public class CreateTagHandler : IRequestHandler<CreateTagRequest, Tag>
+    public class TagCreateHandler : IRequestHandler<TagCreateRequest, Tag>
     {
         private readonly GuildContext _db;
-        public CreateTagHandler(GuildContext db)
+
+        public TagCreateHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Tag> Handle(CreateTagRequest request, CancellationToken cancellationToken)
+        public async Task<Tag> Handle(TagCreateRequest request, CancellationToken cancellationToken)
         {
             Tag tag = new()
             {

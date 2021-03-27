@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Silk.Core.Constants;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 
@@ -25,16 +25,16 @@ namespace Silk.Core.EventHandlers
             var isAdmin = e.Member.HasPermission(Permissions.Administrator);
             if (isStaff)
             {
-                User? user = await _mediator.Send(new UserRequest.Get (e.Member.Id,  e.Guild.Id));
+                User? user = await _mediator.Send(new UserGetRequest(e.Member.Id,  e.Guild.Id));
                 var flag = isAdmin ? UserFlag.EscalatedStaff : UserFlag.Staff;
                 if (user is not null && !user.Flags.Has(flag))
                 {
                     user.Flags |= flag;
-                    await _mediator.Send(new UserRequest.Update (e.Member.Id, e.Guild.Id, user.Flags));
+                    await _mediator.Send(new UserUpdateRequest(e.Member.Id, e.Guild.Id, user.Flags));
                 }
                 else
                 {
-                    await _mediator.Send(new UserRequest.Add (e.Member.Id, e.Guild.Id, flag));
+                    await _mediator.Send(new UserAddRequest(e.Member.Id, e.Guild.Id, flag));
                 }
             }
         }

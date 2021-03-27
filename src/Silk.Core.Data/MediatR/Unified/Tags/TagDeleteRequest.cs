@@ -10,17 +10,18 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
     /// <summary>
     /// Deletes a <see cref="Tag"/>.
     /// </summary>
-    public record DeleteTagRequest(string Name, ulong GuildId) : IRequest;
+    public record TagDeleteRequest(string Name, ulong GuildId) : IRequest;
 
-    public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
+    public class TagDeleteHandler : IRequestHandler<TagDeleteRequest>
     {
         private readonly GuildContext _db;
-        public DeleteTagHandler(GuildContext db)
+
+        public TagDeleteHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(DeleteTagRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(TagDeleteRequest request, CancellationToken cancellationToken)
         {
             Tag tag = await _db
                 .Tags

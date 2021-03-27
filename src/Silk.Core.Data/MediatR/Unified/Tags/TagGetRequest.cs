@@ -9,20 +9,21 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
     /// <summary>
     /// Gets a <see cref="Tag"/>, or null if it doesn't exist.
     /// </summary>
-    public record GetTagRequest(string Name, ulong GuildId) : IRequest<Tag?>;
+    public record TagGetRequest(string Name, ulong GuildId) : IRequest<Tag?>;
 
     /// <summary>
-    /// The default handler for <see cref="GetTagRequest"/>.
+    /// The default handler for <see cref="TagGetRequest"/>.
     /// </summary>
-    public class GetTagHandler : IRequestHandler<GetTagRequest, Tag?>
+    public class TagGetHandler : IRequestHandler<TagGetRequest, Tag?>
     {
-
         private readonly GuildContext _db;
-        public GetTagHandler(GuildContext db)
+
+        public TagGetHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<Tag?> Handle(GetTagRequest request, CancellationToken cancellationToken)
+
+        public async Task<Tag?> Handle(TagGetRequest request, CancellationToken cancellationToken)
         {
             Tag? tag = await _db.Tags
                 .Include(t => t.OriginalTag)

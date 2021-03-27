@@ -7,21 +7,21 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
 {
     /// <summary>
-    /// Adds a user whom's information is tracked globally rather than per-guild.
+    /// Adds a user who's information is tracked globally rather than per-guild.
     /// </summary>
-    public record AddGlobalUserRequest(ulong UserId, int? Cash) : IRequest<GlobalUser>;
+    public record GlobalUserAddRequest(ulong UserId, int? Cash) : IRequest<GlobalUser>;
 
     /// <summary>
-    /// The default handler for <see cref="AddGlobalUserRequest"/>.
+    /// The default handler for <see cref="GlobalUserAddRequest"/>.
     /// </summary>
-    public class AddGlobalUserHandler : IRequestHandler<AddGlobalUserRequest, GlobalUser>
+    public class GlobalUserAddHandler : IRequestHandler<GlobalUserAddRequest, GlobalUser>
     {
         private readonly GuildContext _db;
-        public AddGlobalUserHandler(GuildContext db)
+        public GlobalUserAddHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<GlobalUser> Handle(AddGlobalUserRequest request, CancellationToken cancellationToken)
+        public async Task<GlobalUser> Handle(GlobalUserAddRequest request, CancellationToken cancellationToken)
         {
             GlobalUser user = new()
             {

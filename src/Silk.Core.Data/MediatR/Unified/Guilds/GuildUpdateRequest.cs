@@ -17,6 +17,7 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
     public class GuildUpdateHandler : IRequestHandler<GuildUpdateRequest>
     {
         private readonly GuildContext _db;
+
         public GuildUpdateHandler(GuildContext db)
         {
             _db = db;
@@ -31,6 +32,7 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
                 guild.Infractions.Add(request.Infraction);
                 await _db.SaveChangesAsync(cancellationToken);
             }
+
             return new();
         }
     }

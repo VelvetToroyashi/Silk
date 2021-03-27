@@ -8,24 +8,26 @@ namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
     /// <summary>
     /// Adds a <see cref="CommandInvocation"/>.
     /// </summary>
-    public record AddCommandInvocationRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
+    public record CommandInvocationAddRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="AddCommandInvocationRequest"/>.
+    /// The default handler for <see cref="CommandInvocationAddRequest"/>.
     /// </summary>
-    public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationRequest>
+    public class CommandInvocationAddHandler : IRequestHandler<CommandInvocationAddRequest>
     {
         private readonly GuildContext _db;
-        public AddCommandInvocationHandler(GuildContext db)
+
+        public CommandInvocationAddHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<Unit> Handle(AddCommandInvocationRequest request, CancellationToken cancellationToken)
+
+        public async Task<Unit> Handle(CommandInvocationAddRequest request, CancellationToken cancellationToken)
         {
             CommandInvocation command = new() {UserId = request.UserId, GuildId = request.GuildId, CommandName = request.CommandName};
             _db.CommandInvocations.Add(command);
-            await _db.SaveChangesAsync(cancellationToken);
 
+            await _db.SaveChangesAsync(cancellationToken);
             return new();
         }
     }

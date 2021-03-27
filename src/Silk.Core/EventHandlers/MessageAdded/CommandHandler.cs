@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.CommandInvocations;
 using Silk.Core.Data.Models;
 using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Services;
@@ -74,7 +74,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
                     return;
                 }
                 
-                await _mediator.Send(new CommandInvokeRequest.Add(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command!.QualifiedName), CancellationToken.None);
+                await _mediator.Send(new CommandInvocationAddRequest(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command!.QualifiedName), CancellationToken.None);
 
 
                 _ = Task.Run(async () =>

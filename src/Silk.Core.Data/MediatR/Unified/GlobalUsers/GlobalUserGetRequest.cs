@@ -9,20 +9,21 @@ namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
     /// <summary>
     /// Gets a <see cref="GlobalUser"/>.
     /// </summary>
-    public record GetGlobalUserRequest(ulong UserId) : IRequest<GlobalUser>;
+    public record GlobalUserGetRequest(ulong UserId) : IRequest<GlobalUser>;
 
     /// <summary>
-    /// The default handler for <see cref="GetGlobalUserRequest"/>.
+    /// The default handler for <see cref="GlobalUserGetRequest"/>.
     /// </summary>
-    public class GetGlobalUserHandler : IRequestHandler<GetGlobalUserRequest, GlobalUser>
+    public class GlobalUserGetHandler : IRequestHandler<GlobalUserGetRequest, GlobalUser>
     {
         private readonly GuildContext _db;
-        public GetGlobalUserHandler(GuildContext db)
+
+        public GlobalUserGetHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<GlobalUser> Handle(GetGlobalUserRequest request, CancellationToken cancellationToken)
+        public async Task<GlobalUser> Handle(GlobalUserGetRequest request, CancellationToken cancellationToken)
         {
             GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
             return user;

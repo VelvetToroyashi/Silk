@@ -6,7 +6,7 @@ using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
@@ -38,7 +38,7 @@ namespace Silk.Core.Commands.Server
 
             builder.WithContent($"Alright! I'll use {role.Mention} for muting!");
             await ctx.RespondAsync(builder);
-            await _mediator.Send(new GuildConfigRequest.Update {GuildId = ctx.Guild.Id, MuteRoleId = role.Id});
+            await _mediator.Send(new GuildConfigUpdateRequest(ctx.Guild.Id) { MuteRoleId = role.Id});
             
         }
         

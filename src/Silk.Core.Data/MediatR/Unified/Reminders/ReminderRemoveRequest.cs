@@ -9,20 +9,21 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
     /// <summary>
     /// Removes a reminder.
     /// </summary>
-    public record RemoveReminderRequest(int ReminderId) : IRequest;
+    public record ReminderRemoveRequest(int ReminderId) : IRequest;
 
     /// <summary>
-    /// The defualt handler for <see cref="RemoveReminderRequest"/>.
+    /// The default handler for <see cref="ReminderRemoveRequest"/>.
     /// </summary>
-    public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
+    public class ReminderRemoveHandler : IRequestHandler<ReminderRemoveRequest>
     {
         private readonly GuildContext _db;
-        public RemoveReminderHandler(GuildContext db)
+
+        public ReminderRemoveHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(ReminderRemoveRequest request, CancellationToken cancellationToken)
         {
             Reminder? reminder = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
             if (reminder is not null)
@@ -33,8 +34,11 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
                     await _db.SaveChangesAsync(cancellationToken);
                 }
                 // Timer timed out and it got dequeued slower than it should've. //
-                catch (DbUpdateConcurrencyException) { }
+                catch (DbUpdateConcurrencyException)
+                {
+                }
             }
+
             return new();
         }
     }

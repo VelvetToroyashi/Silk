@@ -10,20 +10,22 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
     /// <summary>
     /// Gets all reminders.
     /// </summary>
-    public record GetAllRemindersRequest : IRequest<IEnumerable<Reminder>>;
+    public record ReminderGetAllRequest : IRequest<IEnumerable<Reminder>>;
 
     /// <summary>
-    /// The default handler for <see cref="GetAllRemindersRequest"/>.
+    /// The default handler for <see cref="ReminderGetAllRequest"/>.
     /// </summary>
-    public class GetAllRemindersHandler : IRequestHandler<ReminderRequest.GetAll, IEnumerable<Reminder>>
+    public class ReminderGetAllHandler : IRequestHandler<ReminderGetAllRequest, IEnumerable<Reminder>>
     {
         private readonly GuildContext _db;
-        public GetAllRemindersHandler(GuildContext db)
+
+        public ReminderGetAllHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<IEnumerable<Reminder>> Handle(ReminderRequest.GetAll request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Reminder>> Handle(ReminderGetAllRequest request,
+            CancellationToken cancellationToken)
         {
             return await _db.Reminders
                 .Include(r => r.Owner)

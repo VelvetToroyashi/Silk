@@ -11,22 +11,23 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
     /// <summary>
     /// Gets tag by their name, or null, if none are found.
     /// </summary>
-    public record GetTagByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
+    public record TagGetByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
 
     /// <summary>
-    /// The default handler for <see cref="GetTagByNameRequest"/>.
+    /// The default handler for <see cref="TagGetByNameRequest"/>.
     /// </summary>
-    public class TagGetByNameHandler : IRequestHandler<GetTagByNameRequest, IEnumerable<Tag>?>
+    public class TagGetByNameHandler : IRequestHandler<TagGetByNameRequest, IEnumerable<Tag>?>
     {
         private readonly GuildContext _db;
+
         public TagGetByNameHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<IEnumerable<Tag>?> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
+
+        public async Task<IEnumerable<Tag>?> Handle(TagGetByNameRequest request, CancellationToken cancellationToken)
         {
-            Tag[] tags = await
-                _db
+            Tag[] tags = await _db
                     .Tags
                     .Include(t => t.Aliases)
                     .Include(t => t.OriginalTag)

@@ -10,7 +10,8 @@ using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Silk.Core.Services;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Tags;
+using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 
@@ -48,7 +49,7 @@ namespace Silk.Core.Commands.Server
             else
             {
                 await ctx.RespondAsync(dbTag.Content);
-                await _mediator.Send(new TagRequest.Update(tag, ctx.Guild.Id) {Uses = dbTag.Uses + 1});
+                await _mediator.Send(new TagUpdateRequest(tag, ctx.Guild.Id) {Uses = dbTag.Uses + 1});
             }
         }
 
@@ -146,7 +147,7 @@ namespace Silk.Core.Commands.Server
                 await ctx.RespondAsync("Tag not found!");
                 return;
             }
-            User? user = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, ctx.User.Id));
+            User? user = await _mediator.Send(new UserGetRequest(ctx.Guild.Id, ctx.User.Id));
 
             if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? true))
             {
@@ -192,7 +193,7 @@ namespace Silk.Core.Commands.Server
         [Description("Search for a Tag by name")]
         public async Task Search(CommandContext ctx, string tagName)
         {
-            var tags = await _mediator.Send(new TagRequest.GetByName(tagName, ctx.Guild.Id));
+            var tags = await _mediator.Send(new TagGetByNameRequest(tagName, ctx.Guild.Id));
             if (tags is null)
             {
                 await ctx.RespondAsync("No tags found :c");
@@ -243,7 +244,7 @@ namespace Silk.Core.Commands.Server
             else
             {
                 await ctx.RespondAsync(Formatter.Sanitize(dbTag.Content));
-                await _mediator.Send(new TagRequest.Update(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
+                await _mediator.Send(new TagUpdateRequest(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
             }
         }
         

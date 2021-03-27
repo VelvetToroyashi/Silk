@@ -8,16 +8,16 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
-    public record GetTagByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
+    public record TagGetByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
 
-    public class GetTagByUserHandler : IRequestHandler<GetTagByUserRequest, IEnumerable<Tag>?>
+    public class TagGetByUserHandler : IRequestHandler<TagGetByUserRequest, IEnumerable<Tag>?>
     {
         private readonly GuildContext _db;
-        public GetTagByUserHandler(GuildContext db)
+        public TagGetByUserHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<IEnumerable<Tag>?> Handle(GetTagByUserRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Tag>?> Handle(TagGetByUserRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
                 .Tags

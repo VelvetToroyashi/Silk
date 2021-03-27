@@ -6,19 +6,18 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
-    public record GetGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig>;
+    public record GuildConfigGetRequest(ulong GuildId) : IRequest<GuildConfig>;
 
-    public class GetGuildConfigHandler
+    public class GuildConfigGetHandler
     {
         private readonly GuildContext _db;
 
-
-        public GetGuildConfigHandler(GuildContext db)
+        public GuildConfigGetHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<GuildConfig> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
+        public async Task<GuildConfig> Handle(GuildConfigGetRequest request, CancellationToken cancellationToken)
         {
             GuildConfig config =
                 await _db.GuildConfigs
