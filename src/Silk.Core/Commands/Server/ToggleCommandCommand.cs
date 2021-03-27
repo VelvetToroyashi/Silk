@@ -61,7 +61,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(ctx.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
             var commandNames = commands.Split(' ');
             
@@ -74,7 +74,7 @@ namespace Silk.Core.Commands.Server
                 action(config.DisabledCommands, commandName);
             }
 
-            await _mediator.Send(new GuildConfigUpdateRequest(ctx.Guild.Id) {DisabledCommands = config.DisabledCommands});
+            await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) {DisabledCommands = config.DisabledCommands});
 
             var thumbsUp = DiscordEmoji.FromUnicode("👍");
             await ctx.Message.CreateReactionAsync(thumbsUp);

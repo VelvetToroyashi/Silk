@@ -7,16 +7,19 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Gets a user from the database, and creates one if it does not exist.
+    /// Request to get a user from the database, or creates one if it does not exist.
     /// </summary>
-    public record UserGetOrCreateRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
+    public record GetOrCreateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
-    public class UserGetOrCreateHandler : IRequestHandler<UserGetOrCreateRequest, User>
+    /// <summary>
+    /// The default handler for <see cref="GetOrCreateUserRequest"/>.
+    /// </summary>
+    public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, User>
     {
         private readonly GuildContext _db;
-        public UserGetOrCreateHandler(GuildContext db) => _db = db;
+        public GetOrCreateUserHandler(GuildContext db) => _db = db;
 
-        public async Task<User> Handle(UserGetOrCreateRequest request, CancellationToken cancellationToken)
+        public async Task<User> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
         {
             User? user = await _db.Users
                 .Include(u => u.Guild)

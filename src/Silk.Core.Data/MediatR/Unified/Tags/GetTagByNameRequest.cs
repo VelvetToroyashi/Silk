@@ -9,23 +9,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Gets tag by their name, or null, if none are found.
+    /// Request for getting tags by name, or null, if none are found.
     /// </summary>
-    public record TagGetByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
+    public record GetTagByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
 
     /// <summary>
-    /// The default handler for <see cref="TagGetByNameRequest"/>.
+    /// The default handler for <see cref="GetTagByNameRequest"/>.
     /// </summary>
-    public class TagGetByNameHandler : IRequestHandler<TagGetByNameRequest, IEnumerable<Tag>?>
+    public class GetTagByNameHandler : IRequestHandler<GetTagByNameRequest, IEnumerable<Tag>?>
     {
         private readonly GuildContext _db;
 
-        public TagGetByNameHandler(GuildContext db)
+        public GetTagByNameHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<IEnumerable<Tag>?> Handle(TagGetByNameRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Tag>?> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
                     .Tags

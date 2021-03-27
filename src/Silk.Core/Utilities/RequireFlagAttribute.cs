@@ -36,7 +36,7 @@ namespace Silk.Core.Utilities
             if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
             IMediator mediator = ctx.Services.CreateScope().ServiceProvider.Get<IMediator>();
-            User? member = await mediator.Send(new UserGetRequest(ctx.Guild!.Id, ctx.User.Id));
+            User? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 
             if (member is null) return false;
             if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);

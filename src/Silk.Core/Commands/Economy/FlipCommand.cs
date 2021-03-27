@@ -44,7 +44,7 @@ namespace Silk.Core.Commands.Economy
             DiscordEmbedBuilder embedBuilder = new();
             builder.WithReply(ctx.Message.Id);
 
-            GlobalUser user = await _mediator.Send(new GlobalUserGetOrCreateRequest(ctx.User.Id));
+            GlobalUser user = await _mediator.Send(new GetOrCreateGlobalUserRequest(ctx.User.Id));
 
             if (amount > user.Cash)
             {
@@ -79,7 +79,7 @@ namespace Silk.Core.Commands.Economy
             }
 
             await ctx.RespondAsync(builder);
-            await _mediator.Send(new GlobalUserUpdateRequest(user.Id) {Cash = user.Cash});
+            await _mediator.Send(new UpdateGlobalUserRequest(user.Id) {Cash = user.Cash});
         }
     }
 }

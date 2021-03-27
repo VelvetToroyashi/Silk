@@ -7,23 +7,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Reminders
 {
     /// <summary>
-    /// Removes a reminder.
+    /// Request to remove a reminder.
     /// </summary>
-    public record ReminderRemoveRequest(int ReminderId) : IRequest;
+    public record RemoveReminderRequest(int ReminderId) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="ReminderRemoveRequest"/>.
+    /// The default handler for <see cref="RemoveReminderRequest"/>.
     /// </summary>
-    public class ReminderRemoveHandler : IRequestHandler<ReminderRemoveRequest>
+    public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
     {
         private readonly GuildContext _db;
 
-        public ReminderRemoveHandler(GuildContext db)
+        public RemoveReminderHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(ReminderRemoveRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
         {
             Reminder? reminder = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
             if (reminder is not null)

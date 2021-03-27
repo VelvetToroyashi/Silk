@@ -38,7 +38,7 @@ namespace Silk.Core.Commands.Server
 
             builder.WithContent($"Alright! I'll use {role.Mention} for muting!");
             await ctx.RespondAsync(builder);
-            await _mediator.Send(new GuildConfigUpdateRequest(ctx.Guild.Id) { MuteRoleId = role.Id});
+            await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { MuteRoleId = role.Id});
             
         }
         

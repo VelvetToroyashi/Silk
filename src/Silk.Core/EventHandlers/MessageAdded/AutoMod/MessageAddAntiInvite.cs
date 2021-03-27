@@ -23,7 +23,7 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
         {
             if (notification.EventArgs.Channel.IsPrivate) return;
-            GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(notification.EventArgs.Guild.Id), cancellationToken);
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(notification.EventArgs.Guild.Id), cancellationToken);
             bool hasInvite = await AntiInviteCore.CheckForInviteAsync(notification.Client, notification.EventArgs.Message, config);
             
             if (hasInvite)

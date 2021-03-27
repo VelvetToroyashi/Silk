@@ -33,8 +33,8 @@ namespace Silk.Core.Commands.Moderation
             var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
             var eBuilder = new DiscordEmbedBuilder();
 
-            Guild guild = await _mediator.Send(new GuildGetRequest(ctx.Guild.Id));
-            bool userExists = await _mediator.Send(new UserGetRequest(ctx.Guild.Id, user.Id)) is not null;
+            Guild guild = await _mediator.Send(new GetGuildRequest(ctx.Guild.Id));
+            bool userExists = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, user.Id)) is not null;
             
             if (!userExists || guild.Infractions.Count(i => i.UserId == user.Id) is 0)
             {

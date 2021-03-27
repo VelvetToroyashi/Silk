@@ -85,7 +85,7 @@ namespace Silk.Core.Commands.Server
 
         private async Task ConfigureWelcomeAsync(Dictionary<string, Dictionary<string, Dictionary<string, object>>> result, ulong guildId, CommandContext ctx)
         {
-            GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(guildId));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(guildId));
             Dictionary<string, object> dict = result["config"]["welcome"];
 
             var enabled = (bool)dict["enabled"];
@@ -115,7 +115,7 @@ namespace Silk.Core.Commands.Server
             }
             config.GreetingChannel = greetingChannel is 0 ? config.GreetingChannel : greetingChannel;
 
-            await _mediator.Send(new GuildConfigUpdateRequest(guildId)
+            await _mediator.Send(new UpdateGuildConfigRequest(guildId)
             {
                 GreetMembers = config.GreetMembers,
                 GreetOnScreeningComplete = config.GreetOnScreeningComplete,

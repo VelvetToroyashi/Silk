@@ -9,23 +9,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
 {
     /// <summary>
-    /// Gets commands invoked on a specific guild.
+    /// Request for getting commands invoked on a specific guild.
     /// </summary>
-    public record CommandInvocationGetByGuildRequest(ulong GuildId) : IRequest<IEnumerable<CommandInvocation>>;
+    public record GetCommandInvocationByGuildRequest(ulong GuildId) : IRequest<IEnumerable<CommandInvocation>>;
 
     /// <summary>
-    /// The default handler for <see cref="CommandInvocationGetByGuildRequest"/>.
+    /// The default handler for <see cref="GetCommandInvocationByGuildRequest"/>.
     /// </summary>
-    public class CommandInvocationGetByGuildHandler : IRequestHandler<CommandInvocationGetByGuildRequest, IEnumerable<CommandInvocation>>
+    public class GetCommandInvocationByGuildHandler : IRequestHandler<GetCommandInvocationByGuildRequest, IEnumerable<CommandInvocation>>
     {
         private readonly GuildContext _db;
 
-        public CommandInvocationGetByGuildHandler(GuildContext db)
+        public GetCommandInvocationByGuildHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<IEnumerable<CommandInvocation>> Handle(CommandInvocationGetByGuildRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CommandInvocation>> Handle(GetCommandInvocationByGuildRequest request, CancellationToken cancellationToken)
         {
             IEnumerable<CommandInvocation> commands = await _db.CommandInvocations
                     .Where(c => c.UserId == request.GuildId)

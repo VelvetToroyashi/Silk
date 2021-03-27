@@ -8,20 +8,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Deletes a <see cref="Tag"/>.
+    /// Request to delete a <see cref="Tag"/>.
     /// </summary>
-    public record TagDeleteRequest(string Name, ulong GuildId) : IRequest;
+    public record DeleteTagRequest(string Name, ulong GuildId) : IRequest;
 
-    public class TagDeleteHandler : IRequestHandler<TagDeleteRequest>
+    /// <summary>
+    /// The default handler for <see cref="DeleteTagRequest"/>.
+    /// </summary>
+    public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
     {
         private readonly GuildContext _db;
 
-        public TagDeleteHandler(GuildContext db)
+        public DeleteTagHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(TagDeleteRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeleteTagRequest request, CancellationToken cancellationToken)
         {
             Tag tag = await _db
                 .Tags

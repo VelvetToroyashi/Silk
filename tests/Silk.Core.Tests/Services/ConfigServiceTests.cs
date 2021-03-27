@@ -24,8 +24,8 @@ namespace Silk.Core.Tests.Services
 
 
             _mediator
-                .Setup(m => m.Send(It.IsAny<IRequest<GuildConfigGetRequest>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(It.IsAny<GuildConfigGetRequest>())
+                .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                 .Verifiable("uHHHH");
         
             _configService = new(_cache.Object, _mediator.Object);
@@ -39,7 +39,7 @@ namespace Silk.Core.Tests.Services
             _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
             await _configService.GetConfigAsync(0);
             //Assert
-            _mediator.Verify(x => x.Send(It.IsAny<GuildConfigGetRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]

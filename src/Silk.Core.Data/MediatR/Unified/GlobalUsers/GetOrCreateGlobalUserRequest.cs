@@ -8,23 +8,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
 {
     /// <summary>
-    /// Gets a user who's data is stored globally, or creates it if it does not exist.
+    /// Request for getting a user who's data is stored globally, or creates it if it does not exist.
     /// </summary>
-    public record GlobalUserGetOrCreateRequest(ulong UserId) : IRequest<GlobalUser>;
+    public record GetOrCreateGlobalUserRequest(ulong UserId) : IRequest<GlobalUser>;
 
     /// <summary>
-    /// The default handler for <see cref="GlobalUserGetOrCreateRequest"/>.
+    /// The default handler for <see cref="GetOrCreateGlobalUserRequest"/>.
     /// </summary>
-    public class GlobalUserGetOrCreateHandler : IRequestHandler<GlobalUserGetOrCreateRequest, GlobalUser>
+    public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUser>
     {
         private readonly GuildContext _db;
 
-        public GlobalUserGetOrCreateHandler(GuildContext db)
+        public GetOrCreateGlobalUserHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<GlobalUser> Handle(GlobalUserGetOrCreateRequest request, CancellationToken cancellationToken)
+        public async Task<GlobalUser> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
         {
             GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
             user ??= new()

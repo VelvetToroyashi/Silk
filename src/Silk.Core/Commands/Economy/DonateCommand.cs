@@ -35,8 +35,8 @@ namespace Silk.Core.Commands.Economy
                 return;
             }
             
-            GlobalUser sender = await _mediator.Send(new GlobalUserGetOrCreateRequest(ctx.User.Id));
-            GlobalUser receiver = await _mediator.Send(new GlobalUserGetOrCreateRequest(recipient.Id));
+            GlobalUser sender = await _mediator.Send(new GetOrCreateGlobalUserRequest(ctx.User.Id));
+            GlobalUser receiver = await _mediator.Send(new GetOrCreateGlobalUserRequest(recipient.Id));
 
             if (receiver == sender)
             {
@@ -74,8 +74,8 @@ namespace Silk.Core.Commands.Economy
 
             await ctx.RespondAsync(embed);
             
-            await _mediator.Send(new GlobalUserUpdateRequest(sender.Id) {Cash = sender.Cash});
-            await _mediator.Send(new GlobalUserUpdateRequest(receiver.Id) {Cash = receiver.Cash});
+            await _mediator.Send(new UpdateGlobalUserRequest(sender.Id) {Cash = sender.Cash});
+            await _mediator.Send(new UpdateGlobalUserRequest(receiver.Id) {Cash = receiver.Cash});
         }
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)

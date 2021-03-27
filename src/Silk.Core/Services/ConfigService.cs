@@ -26,7 +26,7 @@ namespace Silk.Core.Services
 
         private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
         {
-            GuildConfig configuration = await _mediator.Send(new GuildConfigGetRequest(guildId), CancellationToken.None);
+            GuildConfig configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
             _cache.Set(guildId, configuration, TimeSpan.FromHours(1));
             return configuration;
         }

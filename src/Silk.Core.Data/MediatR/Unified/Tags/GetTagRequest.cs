@@ -7,23 +7,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Gets a <see cref="Tag"/>, or null if it doesn't exist.
+    /// Request to get a <see cref="Tag"/>, or null if it doesn't exist.
     /// </summary>
-    public record TagGetRequest(string Name, ulong GuildId) : IRequest<Tag?>;
+    public record GetTagRequest(string Name, ulong GuildId) : IRequest<Tag?>;
 
     /// <summary>
-    /// The default handler for <see cref="TagGetRequest"/>.
+    /// The default handler for <see cref="GetTagRequest"/>.
     /// </summary>
-    public class TagGetHandler : IRequestHandler<TagGetRequest, Tag?>
+    public class GetTagHandler : IRequestHandler<GetTagRequest, Tag?>
     {
         private readonly GuildContext _db;
 
-        public TagGetHandler(GuildContext db)
+        public GetTagHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Tag?> Handle(TagGetRequest request, CancellationToken cancellationToken)
+        public async Task<Tag?> Handle(GetTagRequest request, CancellationToken cancellationToken)
         {
             Tag? tag = await _db.Tags
                 .Include(t => t.OriginalTag)

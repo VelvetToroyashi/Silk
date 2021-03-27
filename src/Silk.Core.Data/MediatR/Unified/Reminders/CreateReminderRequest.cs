@@ -8,31 +8,31 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Reminders
 {
     /// <summary>
-    /// Create a <see cref="Reminder"/>.
+    /// Request for creating a <see cref="Reminder"/>.
     /// </summary>
-    public record ReminderCreateRequest(
+    public record CreateReminderRequest(
         DateTime Expiration, ulong OwnerId,
         ulong ChannelId, ulong MessageId, ulong GuildId,
         string MessageContent, bool WasReply, ulong? ReplyId = null,
         ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
 
     /// <summary>
-    /// The default handler for <see cref="ReminderCreateRequest"/>.
+    /// The default handler for <see cref="CreateReminderRequest"/>.
     /// </summary>
-    public class ReminderCreateHandler : IRequestHandler<ReminderCreateRequest, Reminder>
+    public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, Reminder>
     {
         private readonly GuildContext _db;
         private readonly IMediator _mediator;
 
-        public ReminderCreateHandler(IMediator mediator, GuildContext db)
+        public CreateReminderHandler(IMediator mediator, GuildContext db)
         {
             _mediator = mediator;
             _db = db;
         }
 
-        public async Task<Reminder> Handle(ReminderCreateRequest request, CancellationToken cancellationToken)
+        public async Task<Reminder> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new UserGetOrCreateRequest(request.GuildId, request.OwnerId), cancellationToken);
+            await _mediator.Send(new GetOrCreateUserRequest(request.GuildId, request.OwnerId), cancellationToken);
 
             Reminder r = new()
             {

@@ -8,7 +8,11 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
-    public record GuildConfigUpdateRequest(ulong GuildId) : IRequest<GuildConfig?>
+    /// <summary>
+    /// Request for updating a <see cref="GuildConfig"/> for a Guild.
+    /// </summary>
+    /// <param name="GuildId">The Id of the Guild</param>
+    public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig?>
     {
         public ulong? MuteRoleId { get; init; }
         public ulong? LoggingChannel { get; init; }
@@ -38,16 +42,19 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
         //public List<BlacklistedWord>? BlacklistedWords { get; init; }
     }
 
-    public class GuildConfigUpdateHandler : IRequestHandler<GuildConfigUpdateRequest, GuildConfig?>
+    /// <summary>
+    /// The default handler for <see cref="UpdateGuildConfigRequest"/>.
+    /// </summary>
+    public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfig?>
     {
         private readonly GuildContext _db;
 
-        public GuildConfigUpdateHandler(GuildContext db)
+        public UpdateGuildConfigHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<GuildConfig?> Handle(GuildConfigUpdateRequest request, CancellationToken cancellationToken)
+        public async Task<GuildConfig?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
         {
             GuildConfig config = await _db.GuildConfigs
                 .Include(c => c.SelfAssignableRoles)

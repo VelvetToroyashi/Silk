@@ -7,7 +7,12 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
-    public record TagUpdateRequest(string Name, ulong GuildId) : IRequest<Tag>
+    /// <summary>
+    /// Request to update a <see cref="Tag"/>.
+    /// </summary>
+    /// <param name="Name">The Name of the Tag</param>
+    /// <param name="GuildId">The Id of the Guild</param>
+    public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<Tag>
     {
         public string? NewName { get; init; }
         public int? Uses { get; init; }
@@ -15,16 +20,19 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
         public List<Tag>? Aliases { get; init; }
     }
 
-    public class TagUpdateHandler : IRequestHandler<TagUpdateRequest, Tag>
+    /// <summary>
+    /// The default handler for <see cref="UpdateTagRequest"/>.
+    /// </summary>
+    public class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
     {
         private readonly GuildContext _db;
 
-        public TagUpdateHandler(GuildContext db)
+        public UpdateTagHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Tag> Handle(TagUpdateRequest request, CancellationToken cancellationToken)
+        public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
             Tag tag = await _db.Tags.FirstAsync(t => t.Name.ToLower() == request.Name.ToLower() &&
                                                      t.GuildId == request.GuildId, cancellationToken);

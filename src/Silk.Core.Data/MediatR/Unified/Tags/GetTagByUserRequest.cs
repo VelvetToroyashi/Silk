@@ -8,16 +8,24 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
-    public record TagGetByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
+    /// <summary>
+    /// Request to get all <see cref="Tag"/>'s created by a User in a Guild
+    /// </summary>
+    /// <param name="GuildId">The Id of the Guild</param>
+    /// <param name="OwnerId">The Id of the User</param>
+    public record GetTagByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
 
-    public class TagGetByUserHandler : IRequestHandler<TagGetByUserRequest, IEnumerable<Tag>?>
+    /// <summary>
+    /// The default handler for <see cref="GetTagByUserRequest"/>.
+    /// </summary>
+    public class GetTagByUserHandler : IRequestHandler<GetTagByUserRequest, IEnumerable<Tag>?>
     {
         private readonly GuildContext _db;
-        public TagGetByUserHandler(GuildContext db)
+        public GetTagByUserHandler(GuildContext db)
         {
             _db = db;
         }
-        public async Task<IEnumerable<Tag>?> Handle(TagGetByUserRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Tag>?> Handle(GetTagByUserRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
                 .Tags

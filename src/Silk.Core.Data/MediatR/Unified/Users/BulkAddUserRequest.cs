@@ -7,26 +7,27 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Updates users in the database en masse.
+    /// Request for adding users to the database en masse.
     /// </summary>
-    public record UserBulkUpdateRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
+    public record BulkAddUserRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
 
     /// <summary>
-    /// The default handler for <see cref="UserBulkUpdateRequest"/>.
+    /// The default handler for <see cref="BulkAddUserRequest"/>.
     /// </summary>
-    public class UserBulkUpdateHandler : IRequestHandler<UserBulkUpdateRequest, IEnumerable<User>>
+    public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<User>>
     {
         private readonly GuildContext _db;
 
-        public UserBulkUpdateHandler(GuildContext db)
+        public BulkAddUserHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<IEnumerable<User>> Handle(UserBulkUpdateRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<User>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
         {
             _db.AttachRange(request.Users);
             await _db.SaveChangesAsync(cancellationToken);
+
             return request.Users;
         }
     }

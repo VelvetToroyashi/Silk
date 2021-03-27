@@ -9,7 +9,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
 {
     /// <summary>
-    /// Gets commands invoked by a specific user.
+    /// Request for getting commands invoked by a specific user.
     /// </summary>
     public record GetCommandInvocationByUserRequest(ulong UserId) : IRequest<IEnumerable<CommandInvocation>>;
 

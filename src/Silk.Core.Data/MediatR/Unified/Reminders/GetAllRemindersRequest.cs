@@ -8,23 +8,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Reminders
 {
     /// <summary>
-    /// Gets all reminders.
+    /// Request for getting all reminders.
     /// </summary>
-    public record ReminderGetAllRequest : IRequest<IEnumerable<Reminder>>;
+    public record GetAllRemindersRequest : IRequest<IEnumerable<Reminder>>;
 
     /// <summary>
-    /// The default handler for <see cref="ReminderGetAllRequest"/>.
+    /// The default handler for <see cref="GetAllRemindersRequest"/>.
     /// </summary>
-    public class ReminderGetAllHandler : IRequestHandler<ReminderGetAllRequest, IEnumerable<Reminder>>
+    public class GetAllRemindersHandler : IRequestHandler<GetAllRemindersRequest, IEnumerable<Reminder>>
     {
         private readonly GuildContext _db;
 
-        public ReminderGetAllHandler(GuildContext db)
+        public GetAllRemindersHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<IEnumerable<Reminder>> Handle(ReminderGetAllRequest request,
+        public async Task<IEnumerable<Reminder>> Handle(GetAllRemindersRequest request,
             CancellationToken cancellationToken)
         {
             return await _db.Reminders

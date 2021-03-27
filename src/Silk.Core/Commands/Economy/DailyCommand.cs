@@ -26,10 +26,10 @@ namespace Silk.Core.Commands.Economy
         [Description("Collect daily economy account cash!")]
         public async Task DailyMoney(CommandContext ctx)
         {
-            GlobalUser? user = await _mediator.Send(new GlobalUserGetRequest(ctx.User.Id));
+            GlobalUser? user = await _mediator.Send(new GetGlobalUserRequest(ctx.User.Id));
             if (user is null)
             {
-                await _mediator.Send(new GlobalUserAddRequest(ctx.User.Id, 500));
+                await _mediator.Send(new AddGlobalUserRequest(ctx.User.Id, 500));
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.Nickname, ctx.User.GetUrl(), ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.Green)
@@ -59,7 +59,7 @@ namespace Silk.Core.Commands.Economy
                         .WithColor(DiscordColor.Green)
                         .WithDescription("Done! I've deposited $200 in your account. Come back tomorrow for more~");
 
-                    await _mediator.Send(new GlobalUserUpdateRequest(user.Id) {Cash = user.Cash + 200, LastCashOut = DateTime.Now});
+                    await _mediator.Send(new UpdateGlobalUserRequest(user.Id) {Cash = user.Cash + 200, LastCashOut = DateTime.Now});
                     await ctx.RespondAsync(embed);
                 }
             }

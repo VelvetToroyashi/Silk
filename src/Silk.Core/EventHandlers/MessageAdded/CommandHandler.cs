@@ -74,7 +74,7 @@ namespace Silk.Core.EventHandlers.MessageAdded
                     return;
                 }
                 
-                await _mediator.Send(new CommandInvocationAddRequest(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command!.QualifiedName), CancellationToken.None);
+                await _mediator.Send(new AddCommandInvocationRequest(notification.EventArgs.Author.Id, notification.EventArgs.Guild?.Id, command!.QualifiedName), CancellationToken.None);
 
 
                 _ = Task.Run(async () =>

@@ -24,7 +24,7 @@ namespace Silk.Core.EventHandlers
             if (e.Channel.IsPrivate) return; // Goes without saying.                           //
             _ = Task.Run(async () =>
             {
-                GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(e.Guild.Id));
+                GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(e.Guild.Id));
 
                 if (!config.LogMessageChanges) return;
                 if (config.LoggingChannel is 0) return;

@@ -7,23 +7,25 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     /// <summary>
-    /// Updates a <see cref="Guild"/>.
+    /// Request for updating a <see cref="Guild"/>.
     /// </summary>
-    public record GuildUpdateRequest(ulong GuildId, Infraction? Infraction) : IRequest;
+    /// <param name="GuildId">The Id of the Guild</param>
+    /// <param name="Infraction">The infraction for this update (can pass null as argument if not needed)</param>
+    public record UpdateGuildRequest(ulong GuildId, Infraction? Infraction) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="GuildUpdateRequest"/>
+    /// The default handler for <see cref="UpdateGuildRequest"/>
     /// </summary>
-    public class GuildUpdateHandler : IRequestHandler<GuildUpdateRequest>
+    public class UpdateGuildHandler : IRequestHandler<UpdateGuildRequest>
     {
         private readonly GuildContext _db;
 
-        public GuildUpdateHandler(GuildContext db)
+        public UpdateGuildHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(GuildUpdateRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(UpdateGuildRequest request, CancellationToken cancellationToken)
         {
             Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
 

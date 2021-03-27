@@ -25,16 +25,16 @@ namespace Silk.Core.EventHandlers
             var isAdmin = e.Member.HasPermission(Permissions.Administrator);
             if (isStaff)
             {
-                User? user = await _mediator.Send(new UserGetRequest(e.Member.Id,  e.Guild.Id));
+                User? user = await _mediator.Send(new GetUserRequest(e.Member.Id,  e.Guild.Id));
                 var flag = isAdmin ? UserFlag.EscalatedStaff : UserFlag.Staff;
                 if (user is not null && !user.Flags.Has(flag))
                 {
                     user.Flags |= flag;
-                    await _mediator.Send(new UserUpdateRequest(e.Member.Id, e.Guild.Id, user.Flags));
+                    await _mediator.Send(new UpdateUserRequest(e.Member.Id, e.Guild.Id, user.Flags));
                 }
                 else
                 {
-                    await _mediator.Send(new UserAddRequest(e.Member.Id, e.Guild.Id, flag));
+                    await _mediator.Send(new AddUserRequest(e.Member.Id, e.Guild.Id, flag));
                 }
             }
         }

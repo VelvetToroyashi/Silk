@@ -6,23 +6,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
 {
     /// <summary>
-    /// Adds a <see cref="CommandInvocation"/>.
+    /// Request for adding a <see cref="CommandInvocation"/>.
     /// </summary>
-    public record CommandInvocationAddRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
+    public record AddCommandInvocationRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="CommandInvocationAddRequest"/>.
+    /// The default handler for <see cref="AddCommandInvocationRequest"/>.
     /// </summary>
-    public class CommandInvocationAddHandler : IRequestHandler<CommandInvocationAddRequest>
+    public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationRequest>
     {
         private readonly GuildContext _db;
 
-        public CommandInvocationAddHandler(GuildContext db)
+        public AddCommandInvocationHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Unit> Handle(CommandInvocationAddRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(AddCommandInvocationRequest request, CancellationToken cancellationToken)
         {
             CommandInvocation command = new() {UserId = request.UserId, GuildId = request.GuildId, CommandName = request.CommandName};
             _db.CommandInvocations.Add(command);

@@ -7,23 +7,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Updates a user in the database.
+    /// Request for updating a user in the database.
     /// </summary>
-    public record UserUpdateRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
+    public record UpdateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
     /// <summary>
-    /// The default handler for <see cref="UserUpdateRequest"/>.
+    /// The default handler for <see cref="UpdateUserRequest"/>.
     /// </summary>
-    public class UserUpdateHandler : IRequestHandler<UserUpdateRequest, User>
+    public class UpdateUserHandler : IRequestHandler<UpdateUserRequest, User>
     {
         private readonly GuildContext _db;
 
-        public UserUpdateHandler(GuildContext db)
+        public UpdateUserHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<User> Handle(UserUpdateRequest request, CancellationToken cancellationToken)
+        public async Task<User> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
         {
             User user = await _db.Users
                 .FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);

@@ -7,23 +7,23 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Creates a <see cref="Tag"/>.
+    /// Request for creating a <see cref="Tag"/>.
     /// </summary>
-    public record TagCreateRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
+    public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
 
     /// <summary>
-    /// The default handler for <see cref="TagCreateRequest"/>
+    /// The default handler for <see cref="CreateTagRequest"/>
     /// </summary>
-    public class TagCreateHandler : IRequestHandler<TagCreateRequest, Tag>
+    public class CreateTagHandler : IRequestHandler<CreateTagRequest, Tag>
     {
         private readonly GuildContext _db;
 
-        public TagCreateHandler(GuildContext db)
+        public CreateTagHandler(GuildContext db)
         {
             _db = db;
         }
 
-        public async Task<Tag> Handle(TagCreateRequest request, CancellationToken cancellationToken)
+        public async Task<Tag> Handle(CreateTagRequest request, CancellationToken cancellationToken)
         {
             Tag tag = new()
             {

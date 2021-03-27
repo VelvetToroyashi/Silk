@@ -32,7 +32,7 @@ namespace Silk.Core.Commands.Server.Roles
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
 
-            GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(ctx.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             
             if (roles.Any())
             {
@@ -47,7 +47,7 @@ namespace Silk.Core.Commands.Server.Roles
                 }
                 
                 
-                await _mediator.Send(new GuildConfigUpdateRequest(config.GuildId)
+                await _mediator.Send(new UpdateGuildConfigRequest(config.GuildId)
                 {
                     SelfAssignableRoles = roles.Select(r => new SelfAssignableRole {Id = r.Id}).ToList()
                 });
@@ -66,7 +66,7 @@ namespace Silk.Core.Commands.Server.Roles
         [Description("Get a role!")]
         public async Task Role(CommandContext ctx, [RemainingText] params DiscordRole[] roles)
         {
-            GuildConfig config = await _mediator.Send(new GuildConfigGetRequest(ctx.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             if (!roles.Any())
             {
                 var embedBuilder = new DiscordEmbedBuilder()
