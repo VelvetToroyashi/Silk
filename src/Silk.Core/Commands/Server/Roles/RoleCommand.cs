@@ -4,7 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
@@ -32,7 +32,7 @@ namespace Silk.Core.Commands.Server.Roles
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
 
-            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             
             if (roles.Any())
             {
@@ -47,7 +47,10 @@ namespace Silk.Core.Commands.Server.Roles
                 }
                 
                 
-                await _mediator.Send(new GuildConfigRequest.Update {GuildId = config.GuildId, SelfAssignableRoles = roles.Select(r => new SelfAssignableRole() {Id = r.Id}).ToList()});
+                await _mediator.Send(new UpdateGuildConfigRequest(config.GuildId)
+                {
+                    SelfAssignableRoles = roles.Select(r => new SelfAssignableRole {Id = r.Id}).ToList()
+                });
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
             }
             
@@ -63,7 +66,7 @@ namespace Silk.Core.Commands.Server.Roles
         [Description("Get a role!")]
         public async Task Role(CommandContext ctx, [RemainingText] params DiscordRole[] roles)
         {
-            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(ctx.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             if (!roles.Any())
             {
                 var embedBuilder = new DiscordEmbedBuilder()

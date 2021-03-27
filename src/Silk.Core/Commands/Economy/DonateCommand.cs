@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.GlobalUsers;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities.HelpFormatter;
 
@@ -35,8 +35,8 @@ namespace Silk.Core.Commands.Economy
                 return;
             }
             
-            GlobalUser sender = await _mediator.Send(new GlobalUserRequest.GetOrCreate(ctx.User.Id));
-            GlobalUser receiver = await _mediator.Send(new GlobalUserRequest.GetOrCreate(recipient.Id));
+            GlobalUser sender = await _mediator.Send(new GetOrCreateGlobalUserRequest(ctx.User.Id));
+            GlobalUser receiver = await _mediator.Send(new GetOrCreateGlobalUserRequest(recipient.Id));
 
             if (receiver == sender)
             {
@@ -74,8 +74,8 @@ namespace Silk.Core.Commands.Economy
 
             await ctx.RespondAsync(embed);
             
-            await _mediator.Send(new GlobalUserRequest.Update(sender.Id) {Cash = sender.Cash});
-            await _mediator.Send(new GlobalUserRequest.Update(receiver.Id) {Cash = receiver.Cash});
+            await _mediator.Send(new UpdateGlobalUserRequest(sender.Id) {Cash = sender.Cash});
+            await _mediator.Send(new UpdateGlobalUserRequest(receiver.Id) {Cash = receiver.Cash});
         }
 
         private static async Task VerifyTransactionAsync(CommandContext ctx, GlobalUser sender, GlobalUser receiver, uint amount)

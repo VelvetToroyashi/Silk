@@ -12,7 +12,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Reminders;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 using Timer = System.Threading.Timer;
@@ -45,7 +45,7 @@ namespace Silk.Core.Services
         {
             using IServiceScope scope = _services.CreateScope();
             var mediator = scope.ServiceProvider.Get<IMediator>();
-            Reminder reminder = await mediator.Send(new ReminderRequest.Create(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, replyId, replyAuthorId, replyMessageContent));
+            Reminder reminder = await mediator.Send(new CreateReminderRequest(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, replyId, replyAuthorId, replyMessageContent));
             _reminders.Add(reminder);
         }
 
@@ -64,7 +64,7 @@ namespace Silk.Core.Services
                 using IServiceScope scope = _services.CreateScope();
                 var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
                 _reminders.Remove(reminder);
-                await mediator.Send(new ReminderRequest.Remove(id));
+                await mediator.Send(new RemoveReminderRequest(id));
             }
         }
         
@@ -160,7 +160,7 @@ namespace Silk.Core.Services
                 
                 using IServiceScope scope = _services.CreateScope();
                 var mediator = scope.ServiceProvider.Get<IMediator>();
-                await mediator.Send(new ReminderRequest.Remove(reminder.Id));
+                await mediator.Send(new RemoveReminderRequest(reminder.Id));
             }
         }
         
@@ -170,7 +170,7 @@ namespace Silk.Core.Services
             
             using IServiceScope scope = _services.CreateScope();
             var mediator = scope.ServiceProvider.Get<IMediator>();
-            _reminders = (await mediator.Send(new ReminderRequest.GetAll(), stoppingToken)).ToList();
+            _reminders = (await mediator.Send(new GetAllRemindersRequest(), stoppingToken)).ToList();
             _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
             _logger.LogDebug("Starting reminder callback timer");
             var timer = new Timer ((__) => _ = Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));

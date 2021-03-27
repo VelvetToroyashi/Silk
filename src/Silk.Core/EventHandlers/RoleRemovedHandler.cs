@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 
@@ -27,13 +27,13 @@ namespace Silk.Core.EventHandlers
             if (e.RolesAfter.Any(r => r.Permissions.HasPermission(RequisiteStaffPermissions))) return;
             _ = Task.Run(async () =>
             {
-                User? user = await _mediator.Send(new UserRequest.Get (e.Member.Id, e.Guild.Id));
+                User? user = await _mediator.Send(new GetUserRequest (e.Member.Id, e.Guild.Id));
                 if (user is null) return;
 
                 var flag = user.Flags.HasFlag(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;
                 flag |= UserFlag.InfractionExemption;
                 user.Flags = user.Flags.Remove(flag);
-                await _mediator.Send(new UserRequest.Update (user.Id, user.GuildId, user.Flags));
+                await _mediator.Send(new UpdateUserRequest (user.Id, user.GuildId, user.Flags));
                 _logger.LogDebug($"Removed staff role from {e.Member.Id}");
             });
         }

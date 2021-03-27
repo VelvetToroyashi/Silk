@@ -8,7 +8,8 @@ using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Constants;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 
@@ -50,7 +51,7 @@ namespace Silk.Core.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            _ = await _mediator.Send(new GuildRequest.GetOrCreate(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
+            _ = await _mediator.Send(new GetOrCreateGuildRequest(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
             int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
             
             lock (_lock)
@@ -130,7 +131,7 @@ namespace Silk.Core.EventHandlers
             {
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-                User? user = await _mediator.Send(new UserRequest.Get(member.Guild.Id, member.Id));
+                User? user = await _mediator.Send(new GetUserRequest(member.Guild.Id, member.Id));
                 if (user is not null)
                 {
                     if (member.HasPermission(Permissions.Administrator) || member.IsOwner && !user.Flags.Has(UserFlag.EscalatedStaff))
@@ -149,11 +150,11 @@ namespace Silk.Core.EventHandlers
                             user.Flags.Remove(f);
                         }
                     }
-                    await _mediator.Send(new UserRequest.Update(member.Guild.Id, member.Id, user.Flags));
+                    await _mediator.Send(new UpdateUserRequest(member.Guild.Id, member.Id, user.Flags));
                 }
                 else if (member.HasPermission(FlagConstants.CacheFlag) || member.IsAdministrator() || member.IsOwner)
                 {
-                    await _mediator.Send(new UserRequest.Add(member.Guild.Id, member.Id, flag));
+                    await _mediator.Send(new AddUserRequest(member.Guild.Id, member.Id, flag));
                     staffCount++;
                 }
             }

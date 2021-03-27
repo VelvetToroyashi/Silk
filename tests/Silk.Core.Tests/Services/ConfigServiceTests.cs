@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Services;
 using Xunit;
 
@@ -24,8 +24,8 @@ namespace Silk.Core.Tests.Services
 
 
             _mediator
-                .Setup(m => m.Send(It.IsAny<IRequest<GuildConfigRequest.Get>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(It.IsAny<GuildConfigRequest.Get>())
+                .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                 .Verifiable("uHHHH");
         
             _configService = new(_cache.Object, _mediator.Object);
@@ -39,7 +39,7 @@ namespace Silk.Core.Tests.Services
             _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
             await _configService.GetConfigAsync(0);
             //Assert
-            _mediator.Verify(x => x.Send(It.IsAny<GuildConfigRequest.Get>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]

@@ -6,7 +6,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using MediatR;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
@@ -32,8 +33,8 @@ namespace Silk.Core.Commands.Moderation
             var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
             var eBuilder = new DiscordEmbedBuilder();
 
-            Guild guild = await _mediator.Send(new GuildRequest.Get(ctx.Guild.Id));
-            bool userExists = await _mediator.Send(new UserRequest.Get(ctx.Guild.Id, user.Id)) is not null;
+            Guild guild = await _mediator.Send(new GetGuildRequest(ctx.Guild.Id));
+            bool userExists = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, user.Id)) is not null;
             
             if (!userExists || guild.Infractions.Count(i => i.UserId == user.Id) is 0)
             {

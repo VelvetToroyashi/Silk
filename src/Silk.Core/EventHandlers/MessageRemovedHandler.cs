@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.EventHandlers
@@ -24,7 +24,7 @@ namespace Silk.Core.EventHandlers
             if (e.Channel.IsPrivate) return; // Goes without saying.                           //
             _ = Task.Run(async () =>
             {
-                GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(e.Guild.Id));
+                GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(e.Guild.Id));
 
                 if (!config.LogMessageChanges) return;
                 if (config.LoggingChannel is 0) return;

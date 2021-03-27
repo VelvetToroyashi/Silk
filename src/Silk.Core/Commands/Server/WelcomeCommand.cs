@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using SharpYaml.Serialization;
-using Silk.Core.Data.MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
@@ -85,7 +85,7 @@ namespace Silk.Core.Commands.Server
 
         private async Task ConfigureWelcomeAsync(Dictionary<string, Dictionary<string, Dictionary<string, object>>> result, ulong guildId, CommandContext ctx)
         {
-            GuildConfig config = await _mediator.Send(new GuildConfigRequest.Get(guildId));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(guildId));
             Dictionary<string, object> dict = result["config"]["welcome"];
 
             var enabled = (bool)dict["enabled"];
@@ -115,9 +115,8 @@ namespace Silk.Core.Commands.Server
             }
             config.GreetingChannel = greetingChannel is 0 ? config.GreetingChannel : greetingChannel;
 
-            await _mediator.Send(new GuildConfigRequest.Update
+            await _mediator.Send(new UpdateGuildConfigRequest(guildId)
             {
-                GuildId = guildId,
                 GreetMembers = config.GreetMembers,
                 GreetOnScreeningComplete = config.GreetOnScreeningComplete,
                 GreetOnVerificationRole = config.GreetOnVerificationRole,
