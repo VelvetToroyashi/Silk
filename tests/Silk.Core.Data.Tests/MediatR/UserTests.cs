@@ -1,9 +1,10 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using NUnit.Framework;
+using Respawn;
 using Silk.Core.Data.MediatR.Unified.Users;
 using Silk.Core.Data.Models;
 
@@ -17,48 +18,88 @@ namespace Silk.Core.Data.Tests.MediatR
 
         private IMediator _mediator;
         private readonly IServiceCollection _provider = new ServiceCollection();
+        private readonly Checkpoint _checkpoint = new() {TablesToIgnore = new[] {"Guilds"}, DbAdapter = DbAdapter.Postgres};
+
         private GuildContext _context;
 
         [OneTimeSetUp]
-        public void SetUp()
+        public void GlobalSetUp()
         {
+            _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
             _provider.AddMediatR(typeof(GuildContext));
             _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
-            _context = new(new DbContextOptionsBuilder<GuildContext>().UseNpgsql(ConnectionString).Options);
-            _context.Database.EnsureCreated();
-
+            _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
             _context.Guilds.Add(new() {Id = GuildId});
-            _context.SaveChanges();
         }
 
         [OneTimeTearDown]
         public void Cleanup()
         {
-            _context.Database.EnsureDeleted();
             _context.Dispose();
         }
 
+        [SetUp]
+        public async Task SetUp()
+        {
+            await using var connection = new NpgsqlConnection(ConnectionString);
+            await connection.OpenAsync();
+            await _checkpoint.Reset(connection);
+        }
+
+
+
         [Test]
-        public async Task MediatR_User_Add_Adds_Properly()
+        public async Task MediatR_Add_Inserts_Properly()
         {
             // Arrange
-            User expected = new()
-            {
-                Id = UserId,
-                GuildId = GuildId,
-                DatabaseId = 0,
-            };
-
             User? result;
 
             //Act
             await _mediator.Send(new AddUserRequest(GuildId, UserId));
-            result = _context.Users.FirstOrDefault(u => u.Id == UserId && u.GuildId == GuildId);
+            result = await _context.Users.FirstOrDefaultAsync(u => u.Id == UserId && u.GuildId == GuildId);
 
             //Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(expected, result);
         }
+
+        [Test]
+        public async Task MediatR_Add_Throws_When_User_Exists()
+        {
+            //Arrange
+            var request = new AddUserRequest(GuildId, UserId);
+            //Act
+            await _mediator.Send(request);
+            //Assert
+            Assert.ThrowsAsync<DbUpdateException>(async () => await _mediator.Send(request));
+        }
+
+        [Test]
+        public async Task MediatR_Get_Returns_Null_When_User_Does_Not_Exist()
+        {
+            //Arrange
+            User? user;
+
+            //Act
+            user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+
+            //Assert
+            Assert.IsNull(user);
+        }
+
+        [Test]
+        public async Task MediatR_Get_Returns_NonNull_When_User_Exists()
+        {
+            //Arrange
+            User? user;
+            await _mediator.Send(new AddUserRequest(GuildId, UserId));
+
+            //Act
+            user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+
+            //Assert
+            Assert.IsNotNull(user);
+        }
+
     }
 }
