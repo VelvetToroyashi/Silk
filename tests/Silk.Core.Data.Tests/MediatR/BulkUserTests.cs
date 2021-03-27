@@ -88,5 +88,11 @@ namespace Silk.Core.Data.Tests.MediatR
             //Assert
             Assert.AreEqual(users.Count, result);
         }
+
+        [Test]
+        public async Task MediatR_Bulk_Update_Updates_All_Users()
+        {
+            //Arrange 
+        }
     }
 }

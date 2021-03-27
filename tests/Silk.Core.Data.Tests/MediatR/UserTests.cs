@@ -69,10 +69,12 @@ namespace Silk.Core.Data.Tests.MediatR
         {
             //Arrange
             var request = new AddUserRequest(GuildId, UserId);
+            AsyncTestDelegate send;
             //Act
             await _mediator.Send(request);
+            send = async () => await _mediator.Send(request);
             //Assert
-            Assert.ThrowsAsync<DbUpdateException>(async () => await _mediator.Send(request));
+            Assert.ThrowsAsync<DbUpdateException>(send);
         }
 
         [Test]
@@ -80,10 +82,8 @@ namespace Silk.Core.Data.Tests.MediatR
         {
             //Arrange
             User? user;
-
             //Act
             user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
-
             //Assert
             Assert.IsNull(user);
         }
@@ -94,10 +94,8 @@ namespace Silk.Core.Data.Tests.MediatR
             //Arrange
             User? user;
             await _mediator.Send(new AddUserRequest(GuildId, UserId));
-
             //Act
             user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
-
             //Assert
             Assert.IsNotNull(user);
         }
@@ -118,7 +116,12 @@ namespace Silk.Core.Data.Tests.MediatR
         [Test]
         public async Task MediatR_Update_Throws_When_User_Does_Not_Exist()
         {
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _mediator.Send(new UpdateUserRequest(GuildId, UserId)));
+            //Arrange
+            AsyncTestDelegate send;
+            //Act
+            send = async () => await _mediator.Send(new UpdateUserRequest(GuildId, UserId));
+            //Assert
+            Assert.ThrowsAsync<InvalidOperationException>(send);
         }
     }
 }
