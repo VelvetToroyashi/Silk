@@ -8,7 +8,7 @@ namespace Silk.Core.Data.MediatR.Handlers
 {
     public class UserHandler
     {
-        public class GetHandler : IRequestHandler<UserRequest.Get, User>
+        public class GetHandler : IRequestHandler<UserRequest.Get, User?>
         {
             private readonly GuildContext _db;
             public GetHandler(GuildContext db) => _db = db;
@@ -16,12 +16,12 @@ namespace Silk.Core.Data.MediatR.Handlers
             public async Task<User?> Handle(UserRequest.Get request, CancellationToken cancellationToken)
             {
                 User? user = await _db.Users
-                    .FirstOrDefaultAsync(u => u.Id == request.UserId && 
+                    .FirstOrDefaultAsync(u => u.Id == request.UserId &&
                                               u.GuildId == request.GuildId, cancellationToken);
                 return user;
             }
         }
-        
+
         public class AddHandler : IRequestHandler<UserRequest.Add, User>
         {
             private readonly GuildContext _db;
@@ -45,14 +45,14 @@ namespace Silk.Core.Data.MediatR.Handlers
             {
                 _db = db;
             }
-            
+
             public async Task<User> Handle(UserRequest.Update request, CancellationToken cancellationToken)
             {
                 User user = await _db.Users.FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
-                
+
                 user.Flags = request.Flags ?? user.Flags;
                 await _db.SaveChangesAsync(cancellationToken);
-                
+
                 return user;
             }
         }
@@ -64,12 +64,12 @@ namespace Silk.Core.Data.MediatR.Handlers
 
             public async Task<User> Handle(UserRequest.GetOrCreate request, CancellationToken cancellationToken)
             {
-                User? user = 
+                User? user =
                     await _db.Users
-                    .Include(u => u.Guild)
-                    .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                        .Include(u => u.Guild)
+                        .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
-                if ((User?)user is null)
+                if ((User?) user is null)
                 {
                     Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
                     user = new()

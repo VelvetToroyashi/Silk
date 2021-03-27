@@ -17,16 +17,23 @@ namespace Silk.Benchmarks
         private readonly LinkedList<int> linkedList = new(_baseList);
 
         [Benchmark]
-        public void ListLookup() => list.Contains(5000);
+        public void ListForLoop()
+        {
+            for (int i = 0; i < list.Count; i++)
+                _ = list[i];
+        }
+        [Benchmark]
+        public void ListForeachLoop()
+        {
+            foreach (int i in list)
+                _ = i;
+        }
 
         [Benchmark]
-        public void HashLookup() => hashSet.Contains(5000);
-
-        [Benchmark]
-        public void SortedLookup() => sortedSet.Contains(5000);
-
-        [Benchmark]
-        public void LinkedLookup() => linkedList.Contains(5000);
-
+        public void HashSetForLoop()
+        {
+            foreach (int i in hashSet)
+                _ = i;
+        }
     }
 }

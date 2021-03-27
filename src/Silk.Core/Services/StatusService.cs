@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +22,8 @@ namespace Silk.Core.Services
             "cute red pandas",
             "for commands!"
         };
-        
-        
+
+
         public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
         {
             _client = client;
@@ -40,11 +39,11 @@ namespace Silk.Core.Services
                 {
                     var activity = new DiscordActivity(_statuses.Next(), ActivityType.Watching);
                     try { await _client.UpdateStatusAsync(activity); }
-                    catch (SocketException) {} 
+                    catch (SocketException) { }
                     await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
             }
-            catch(TaskCanceledException) { }
+            catch (TaskCanceledException) { }
             finally
             {
                 _logger.LogDebug("Cancelation requested. Stopping service");

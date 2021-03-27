@@ -5,7 +5,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Data.Models;
 using Silk.Core.Types;
-using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General.Tickets
@@ -27,7 +26,7 @@ namespace Silk.Core.Commands.General.Tickets
         [Description("Open a ticket for an issue, bug or other reason.")]
         public async Task Create(CommandContext ctx, string message = "No message provided")
         {
-            
+
             TicketCreationResult? result = await _ticketService.CreateAsync(ctx.User, message).ConfigureAwait(false);
             if (!result.Succeeded)
             {
