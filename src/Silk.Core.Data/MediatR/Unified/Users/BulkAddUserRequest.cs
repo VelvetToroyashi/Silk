@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Unified.Users
@@ -25,9 +26,16 @@ namespace Silk.Core.Data.MediatR.Unified.Users
 
         public async Task<IEnumerable<User>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
         {
-            _db.AttachRange(request.Users);
-            await _db.SaveChangesAsync(cancellationToken);
-
+            foreach (var user in request.Users)
+            {
+                try
+                {
+                    _db.Add(user);
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+                catch (DbUpdateException) { }
+                finally { _db.ChangeTracker.Clear(); }
+            }
             return request.Users;
         }
     }

@@ -14,7 +14,7 @@ namespace Silk.Core.Data.Tests.MediatR
     public class UserTests
     {
         private const ulong UserId = 1234567890;
-        private const ulong GuildId = 0;
+        private const ulong GuildId = 10;
         private const string ConnectionString = "Server=localhost; Port=5432; Database=silk; Username=silk; Password=silk;";
 
         private IMediator _mediator;
@@ -35,9 +35,11 @@ namespace Silk.Core.Data.Tests.MediatR
         }
 
         [OneTimeTearDown]
-        public void Cleanup()
+        public async Task Cleanup()
         {
-            _context.Dispose();
+            _context.Guilds.RemoveRange(_context.Guilds);
+            await _context.SaveChangesAsync();
+            await _context.DisposeAsync();
         }
 
         [SetUp]
