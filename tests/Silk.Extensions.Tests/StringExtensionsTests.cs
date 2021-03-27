@@ -1,24 +1,23 @@
-﻿using Xunit;
+﻿using NUnit.Framework;
 
 namespace Silk.Extensions.Tests
 {
-
-    public class StringExtensionMethods
+    public class StringExtensionsTests
     {
         private const string CenterInputString = "This string should center!";
 
         [Theory]
-        [InlineData("This is a\ttest string that\tshould be centered!", "             This string should center!             ")]
-        [InlineData("This is a test string that should be centered against!", "              This string should center!              ")]
+        [TestCase("This is a\ttest string that\tshould be centered!", "             This string should center!             ")]
+        [TestCase("This is a test string that should be centered against!", "              This string should center!              ")]
         public void Center_ReturnsCenteredString(string input, string expected)
         {
             //Act
             string actualCenterWithTabs = CenterInputString.Center(input);
             //Assert
-            Assert.Equal(expected, actualCenterWithTabs);
+            Assert.AreEqual(expected, actualCenterWithTabs);
         }
 
-        [Fact]
+        [Test]
         public void Center_WhenOversizedInput_ReturnsOriginalString()
         {
             //Arrange
@@ -26,9 +25,8 @@ namespace Silk.Extensions.Tests
             const string anchor = "This string is too short!";
             //Act
             string actual = input.Center(anchor);
-            Assert.Equal(input, actual);
+            //Assert
+            Assert.AreEqual(input, actual);
         }
-
-
     }
 }

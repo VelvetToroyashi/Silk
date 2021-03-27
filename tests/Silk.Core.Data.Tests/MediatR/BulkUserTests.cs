@@ -78,7 +78,6 @@ namespace Silk.Core.Data.Tests.MediatR
             {
                 new User() {Id = 1, GuildId = GuildId},
                 new User() {Id = 2, GuildId = GuildId},
-                new User() {Id = 3, GuildId = GuildId},
             }.ToList();
             int result;
 
