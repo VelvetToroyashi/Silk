@@ -1,6 +1,6 @@
 ﻿using System;
+using NUnit.Framework;
 using Silk.Core.Types;
-using Xunit;
 
 namespace Silk.Core.Tests.Types
 {
@@ -9,9 +9,8 @@ namespace Silk.Core.Tests.Types
         private readonly LoopedList<int> _loopedIntList = new() {1, 2, 3, 4};
         private readonly LoopedList<int> _emptyIntList = new();
 
-
-        [Fact]
-        public void LoopedIntList_Allows_Last_Index()
+        [Test]
+        public void LoopedIntList_Indexer_Accesses_LastElement()
         {
             //Arrange
             int index = _loopedIntList.Count - 1;
@@ -20,11 +19,11 @@ namespace Silk.Core.Tests.Types
             //Act
             result = _loopedIntList[index];
             //Assert
-            Assert.Equal(expected, result);
+            Assert.AreEqual(expected, result);
         }
 
-        [Fact]
-        public void LoopedIntList_CyclesNext()
+        [Test]
+        public void LoopedIntList_Next_Returns_FirstElement()
         {
             //Arrange
             int result;
@@ -32,11 +31,11 @@ namespace Silk.Core.Tests.Types
             //Act
             result = _loopedIntList.Next();
             //Assert
-            Assert.Equal(expected, result);
+            Assert.AreEqual(expected, result);
         }
 
-        [Fact]
-        public void LoopedIntList_Returns_Proper_Overflow_Index()
+        [Test]
+        public void LoopedIntList_Indexer_Overflows()
         {
             //Arrange
             int result;
@@ -46,26 +45,15 @@ namespace Silk.Core.Tests.Types
             result = _loopedIntList[6];
 
             //Assert
-            Assert.Equal(expected, result);
+            Assert.AreEqual(expected, result);
         }
 
-        [Fact]
-        public void LoopedIntList_DoesNot_DivideByZero_When_Empty()
+        [Test]
+        public void LoopedIntList_ThrowsWhen_Empty()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => _emptyIntList.Next());
         }
 
-        [Fact]
-        public void LoopedIntList_SetsIndex_OnBaseList()
-        {
-            //Arrange
-            int result;
-            int expected = 8;
-            //Act
-            result = _loopedIntList[2] = expected;
-            //Assert
-            Assert.Equal(expected, result);
-        }
 
     }
 }
