@@ -3,12 +3,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands.Bot
 {
@@ -18,22 +17,21 @@ namespace Silk.Core.Commands.Bot
     {
         private const int PrefixMaxLength = 5;
         private readonly IPrefixCacheService _prefixCache;
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
 
         private record PrefixValidationResult(bool Valid, string Reason);
 
-        public PrefixCommand(IPrefixCacheService prefixCache, IDbContextFactory<GuildContext> dbFactory)
+        public PrefixCommand(IPrefixCacheService prefixCache, GuildContext db)
         {
             _prefixCache = prefixCache;
-            _dbFactory = dbFactory;
+            _db = db;
         }
 
-        [Command("setprefix")]
-        [RequireFlag(UserFlag.Staff)]
+        [Command("prefix")]
         [Description("Sets the command prefix for Silk to use on the current Guild")]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            GuildContext db = _dbFactory.CreateDbContext();
+            if (!ctx.Member.HasPermission(Constants.FlagConstants.CacheFlag)) return;
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {
@@ -41,11 +39,11 @@ namespace Silk.Core.Commands.Bot
                 return;
             }
 
-            Guild guild = db.Guilds.First(g => g.Id == ctx.Guild.Id);
+            Guild guild = _db.Guilds.First(g => g.Id == ctx.Guild.Id);
             guild.Prefix = prefix;
             _prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
 
-            await db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
             await ctx.RespondAsync($"Done! I'll respond to `{prefix}` from now on.");
         }
 

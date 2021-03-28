@@ -18,37 +18,38 @@ namespace Silk.Core
     public static class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
+        public static string Version => "1.5.1-alpha";
         public static string HttpClientName { get; } = "Silk";
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
 
         private static DiscordConfiguration _clientConfig = new()
         {
-            Intents = DiscordIntents.Guilds                 | // Caching
-                      DiscordIntents.GuildMembers           | // Auto-mod/Auto-greet
-                      DiscordIntents.DirectMessages         | // DM Commands
-                      DiscordIntents.GuildPresences         | // Auto-Mod Anti-Status-Invite
-                      DiscordIntents.GuildMessages          | // Commands & Auto-Mod
-                      DiscordIntents.GuildMessageReactions  | // Role-menu
-                      DiscordIntents.DirectMessageReactions,  // Interactivity in DMs
+            Intents = DiscordIntents.Guilds | // Caching
+                      DiscordIntents.GuildMembers | // Auto-mod/Auto-greet
+                      DiscordIntents.DirectMessages | // DM Commands
+                      DiscordIntents.GuildPresences | // Auto-Mod Anti-Status-Invite
+                      DiscordIntents.GuildMessages | // Commands & Auto-Mod
+                      DiscordIntents.GuildMessageReactions | // Role-menu
+                      DiscordIntents.DirectMessageReactions, // Interactivity in DMs
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None 
+            MinimumLogLevel = LogLevel.None,
         };
 
         // Setting this in the prop doesn't work; it'll have a 2s discrepancy
         //static Program() => Startup = DateTime.Now;
-        
+
         public static async Task Main(string[] args)
         {
             _ = Startup;
-            
+
             Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
             await CreateHostBuilder(args)
                 .UseConsoleLifetime()
                 .RunConsoleAsync()
-                .ConfigureAwait(false); 
+                .ConfigureAwait(false);
         }
-        
+
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
@@ -63,7 +64,7 @@ namespace Silk.Core
                 {
                     if (int.TryParse(builder.Configuration["Shards"] ?? "1", out int shards))
                         _clientConfig.ShardCount = shards;
-                    
+
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
@@ -99,13 +100,13 @@ namespace Silk.Core
 
                     // Sub out the default implementation filter with custom filter
                     services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
-                
+
                     /* Can remove all filters with this line */
                     // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
                     services.AddSingleton(_ => new BotConfig(config));
 
-                    
+
                 })
                 .UseSerilog();
         }

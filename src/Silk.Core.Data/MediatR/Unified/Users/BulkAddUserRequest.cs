@@ -26,16 +26,27 @@ namespace Silk.Core.Data.MediatR.Unified.Users
 
         public async Task<IEnumerable<User>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
         {
-            foreach (var user in request.Users)
+            try
             {
-                try
-                {
-                    _db.Add(user);
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                catch (DbUpdateException) { }
-                finally { _db.ChangeTracker.Clear(); }
+                _db.AddRange(request.Users);
+                await _db.SaveChangesAsync(cancellationToken);
             }
+            catch (DbUpdateException)
+            {
+                foreach (var user in request.Users)
+                {
+                    try
+                    {
+                        _db.ChangeTracker.Clear();
+                        _db.Users.Add(user);
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                    catch (DbUpdateException) { }
+
+                }
+            }
+
+            finally { _db.ChangeTracker.Clear(); }
             return request.Users;
         }
     }

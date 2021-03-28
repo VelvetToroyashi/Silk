@@ -15,11 +15,11 @@ namespace Silk.Core.Data.Tests.MediatR
     {
         private const ulong UserId = 1234567890;
         private const ulong GuildId = 10;
-        private const string ConnectionString = "Server=localhost; Port=5432; Database=silk; Username=silk; Password=silk;";
+        private const string ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
 
         private IMediator _mediator;
         private readonly IServiceCollection _provider = new ServiceCollection();
-        private readonly Checkpoint _checkpoint = new() {TablesToIgnore = new[] {"Guilds"}, DbAdapter = DbAdapter.Postgres};
+        private readonly Checkpoint _checkpoint = new() {TablesToIgnore = new[] {"Guilds", "__EFMigrationsHistory"}, DbAdapter = DbAdapter.Postgres};
 
         private GuildContext _context;
 
@@ -31,6 +31,7 @@ namespace Silk.Core.Data.Tests.MediatR
             _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
             _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
+            _context.Database.Migrate();
             _context.Guilds.Add(new() {Id = GuildId});
         }
 

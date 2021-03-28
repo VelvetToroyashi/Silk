@@ -15,14 +15,10 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
     /// <summary>
     /// The default handler for <see cref="GetGuildConfigRequest"/>.
     /// </summary>
-    public class GetGuildConfigHandler
+    public class GetGuildConfigHandler : IRequestHandler<GetGuildConfigRequest, GuildConfig>
     {
         private readonly GuildContext _db;
-
-        public GetGuildConfigHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetGuildConfigHandler(GuildContext db) => _db = db;
 
         public async Task<GuildConfig> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
         {

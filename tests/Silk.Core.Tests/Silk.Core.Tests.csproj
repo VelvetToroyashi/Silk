@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00822"/>
         <PackageReference Include="FluentAssertions" Version="5.10.3"/>
         <PackageReference Include="MediatR" Version="9.0.0"/>
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>

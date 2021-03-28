@@ -25,9 +25,19 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="timeOut">Optional override for the wait period before timing out.</param>
         /// <returns>A true or false value, or null, if it timed out.</returns>
         public Task<bool?> GetBoolInputFromMessageAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
-        public Task<DiscordEmoji> GetReactionInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
 
+        /// <summary>
+        /// Gets a reaction from a specific message.
+        /// </summary>
+        /// <param name="userId">The Id of the user to get a reaction from.</param>
+        /// <param name="channelId">The Id of the channel to wait for a reaction in.</param>
+        /// <param name="messageId">The Id of the message to wait for a message for.</param>
+        /// <param name="guildId">The Id of the guild the channel belongs to, or null if it is a DM.</param>
+        /// <param name="timeOut">Optional override for the wait period before timing out.</param>
+        /// <returns>The emoji the user reacted with, or null if it timed out.</returns>
+        public Task<DiscordEmoji?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
 
+        //public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
 
     }
 }
