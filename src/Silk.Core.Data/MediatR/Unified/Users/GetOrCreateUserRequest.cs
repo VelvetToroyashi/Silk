@@ -26,7 +26,7 @@ namespace Silk.Core.Data.MediatR.Unified.Users
                 .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId,
                     cancellationToken);
 
-            if ((User?) user is null)
+            if (user is null)
             {
                 //Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
                 user = new()
@@ -35,7 +35,7 @@ namespace Silk.Core.Data.MediatR.Unified.Users
                     Id = request.UserId,
                     Flags = request.Flags ?? UserFlag.None,
                 };
-                //guild.Users.Add(user);
+                _db.Users.Add(user);
                 await _db.SaveChangesAsync(cancellationToken);
             }
 

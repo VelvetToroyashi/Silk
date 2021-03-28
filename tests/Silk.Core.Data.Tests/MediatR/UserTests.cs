@@ -124,5 +124,30 @@ namespace Silk.Core.Data.Tests.MediatR
             //Assert
             Assert.ThrowsAsync<InvalidOperationException>(send);
         }
+
+        [Test]
+        public async Task MediatR_GetOrCreate_Creates_When_User_Does_Not_Exist()
+        {
+            //Arrange
+            User? user;
+            //Act
+            await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));
+            user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+            //Assert
+            Assert.IsNotNull(user);
+        }
+
+        [Test]
+        public async Task MediatR_GetOrCreate_Returns_User_When_User_Exists()
+        {
+            //Arrange
+            User? user;
+            await _mediator.Send(new AddUserRequest(GuildId, UserId));
+            //Act
+            user = await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));
+            //Assert
+            Assert.IsNotNull(user);
+        }
+
     }
 }
