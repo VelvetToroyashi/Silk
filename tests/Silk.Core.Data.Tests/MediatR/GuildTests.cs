@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.Tests.MediatR
 {
-    public class GuildConfigTests
+    public class GuildTests
     {
         private const ulong GuildId = 10;
         private const string ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
@@ -49,26 +50,65 @@ namespace Silk.Core.Data.Tests.MediatR
         }
 
         [Test]
-        public async Task MediatR_Get_When_Guild_Is_Null_Returns_Null()
+        public async Task MediatR_Get_Or_Create_Creates_When_Guild_Does_Not_Exist()
         {
             //Arrange
-            GuildConfig? result;
+            Guild result;
+            int before,
+                after;
             //Act
-            result = await _mediator.Send(new GetGuildConfigRequest(GuildId));
+            before = _context.Guilds.Count();
+            result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+            after = _context.Guilds.Count();
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreNotEqual(before, after);
+        }
+
+        [Test]
+        public async Task MediatR_Get_Or_Create_Does_Not_Create_When_Guild_Exists()
+        {
+            //Arrange
+            Guild? result;
+            int before,
+                after;
+
+            await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+
+            //Act
+            before = _context.Guilds.Count();
+            result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+            after = _context.Guilds.Count();
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(before, after);
+        }
+
+        [Test]
+        public async Task MediatR_Get_Returns_Null_When_Guild_Does_Not_Exist()
+        {
+            //Arrange
+            Guild? result;
+            //Act
+            result = await _mediator.Send(new GetGuildRequest(GuildId));
             //Assert
             Assert.IsNull(result);
         }
 
         [Test]
-        public async Task MediatR_Get_When_Guild_Is_Not_Null_Does_Not_Return_Null()
+        public async Task MediatR_Get_Returns_NonNull_When_Guild_Exists()
         {
             //Arrange
-            GuildConfig? result;
+            Guild? result;
             await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+
             //Act
-            result = await _mediator.Send(new GetGuildConfigRequest(GuildId));
+            result = await _mediator.Send(new GetGuildRequest(GuildId));
+
             //Assert
-            Assert.IsNotNull(result, "Config is null!");
+            Assert.IsNotNull(result);
+
         }
     }
 }

@@ -29,10 +29,11 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
         {
             Guild? guild = await _db.Guilds
                 .Include(g => g.Users)
+                .Include(g => g.Infractions)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
-            if ((Guild?) guild is not null)
+            if (guild is not null)
                 return guild;
 
             guild = new()

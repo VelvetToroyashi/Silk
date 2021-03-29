@@ -27,13 +27,32 @@ namespace Silk.Core.Data.MediatR.Unified.Users
 
         public async Task<IEnumerable<User>> Handle(BulkUpdateUserRequest request, CancellationToken cancellationToken)
         {
-            foreach (var user in request.Users)
+            try
             {
-                EntityEntry<User> state = _db.Attach(user);
-                state.State = EntityState.Modified;
-            }
+                foreach (var user in request.Users)
+                {
+                    EntityEntry<User> state = _db.Attach(user);
+                    state.State = EntityState.Modified;
+                }
 
-            await _db.SaveChangesAsync(cancellationToken);
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException) // Data wasn't actually modified. Save individually. //
+            {
+                try
+                {
+                    foreach (var user in request.Users)
+                    {
+                        EntityEntry<User> state = _db.Attach(user);
+                        state.State = EntityState.Modified;
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                }
+                catch
+                {
+                    /* Continue. */
+                }
+            }
             return request.Users;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,15 +32,20 @@ namespace Silk.Core.Data.Tests.MediatR
             _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
             _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
-            _context.Database.Migrate();
+            await _context.Database.MigrateAsync();
             _context.Guilds.Add(new() {Id = GuildId});
+            await _context.SaveChangesAsync();
         }
 
         [OneTimeTearDown]
         public async Task Cleanup()
         {
-            _context.Guilds.RemoveRange(_context.Guilds);
-            await _context.SaveChangesAsync();
+            if (_context.Guilds.Any())
+            {
+                _context.ChangeTracker.Clear();
+                _context.Guilds.RemoveRange(_context.Guilds);
+                await _context.SaveChangesAsync();
+            }
             await _context.DisposeAsync();
         }
 

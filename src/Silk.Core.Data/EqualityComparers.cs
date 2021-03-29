@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Silk.Core.Data.Models;
 
-namespace Silk.Core.Data.MediatR
+namespace Silk.Core.Data
 {
     internal sealed class EqualityComparers
     {

@@ -31,15 +31,20 @@ namespace Silk.Core.Data.Tests.MediatR
             _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
             _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
-            _context.Database.Migrate();
+            await _context.Database.MigrateAsync();
             _context.Guilds.Add(new() {Id = GuildId});
+            await _context.SaveChangesAsync();
         }
 
         [OneTimeTearDown]
         public async Task Cleanup()
         {
-            _context.Guilds.RemoveRange(_context.Guilds);
-            await _context.SaveChangesAsync();
+            if (_context.Guilds.Any())
+            {
+                _context.ChangeTracker.Clear();
+                _context.Guilds.RemoveRange(_context.Guilds);
+                await _context.SaveChangesAsync();
+            }
             await _context.DisposeAsync();
         }
 
@@ -55,19 +60,18 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
         {
             //Arrange
-            List<User> users = new[]
+            List<User> users = new()
             {
-                new User() {Id = 1, GuildId = GuildId},
-                new User() {Id = 2, GuildId = GuildId},
-                new User() {Id = 3, GuildId = GuildId},
-            }.ToList();
+                new() {Id = 1, GuildId = GuildId},
+                new() {Id = 2, GuildId = GuildId},
+            };
 
-            List<User> result;
+            int result;
             //Act
             await _mediator.Send(new BulkAddUserRequest(users));
-            result = await _context.Users.Where(u => u.GuildId == GuildId).ToListAsync();
+            result = _context.Users.Count();
             //Assert
-            Assert.AreEqual(users.Count, result.Count);
+            Assert.AreEqual(users.Count, result);
         }
 
         [Test]
@@ -75,11 +79,11 @@ namespace Silk.Core.Data.Tests.MediatR
         {
             //Arrange
             await _mediator.Send(new AddUserRequest(GuildId, 1));
-            List<User> users = new[]
+            List<User> users = new()
             {
-                new User() {Id = 1, GuildId = GuildId},
-                new User() {Id = 2, GuildId = GuildId},
-            }.ToList();
+                new() {Id = 1, GuildId = GuildId},
+                new() {Id = 2, GuildId = GuildId},
+            };
             int result;
 
             //Act
@@ -91,15 +95,35 @@ namespace Silk.Core.Data.Tests.MediatR
         }
 
         [Test]
+        public async Task MediatR_BulkAdd_Takes_Slow_Route_When_Passed_Malformed_Collection()
+        {
+            //Arrange
+            List<User> users = new()
+            {
+                new() {Id = 1, GuildId = GuildId},
+                new() {Id = 2},
+            };
+            int result;
+
+            //Act
+            await _mediator.Send(new BulkAddUserRequest(users));
+            result = _context.Users.Count();
+
+            //Assert
+            Assert.AreNotEqual(users.Count, result);
+            Assert.AreEqual(1, result);
+        }
+
+        [Test]
         public async Task MediatR_Bulk_Update_Updates_All_Users()
         {
             //Arrange
             User[] updatedUsers = new User[2];
-            List<User> users = new[]
+            List<User> users = new()
             {
-                new User() {Id = 1, GuildId = GuildId},
-                new User() {Id = 2, GuildId = GuildId},
-            }.ToList();
+                new() {Id = 1, GuildId = GuildId},
+                new() {Id = 2, GuildId = GuildId},
+            };
             users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
             //Act
             users.CopyTo(updatedUsers);
@@ -107,7 +131,7 @@ namespace Silk.Core.Data.Tests.MediatR
             foreach (User u in updatedUsers)
                 u.Flags = UserFlag.Staff;
 
-            await _mediator.Send(new BulkUpdateUserRequest(users));
+            await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
             updatedUsers = _context.Users.ToArray();
             //Assert
             Assert.AreNotEqual(users, updatedUsers);
