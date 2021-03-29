@@ -98,17 +98,5 @@ namespace Silk.Extensions.Tests
             //Assert
             Assert.IsNotNull(stream);
         }
-
-        [Test]
-        public void AsStream_Returns_Null_When_String_Is_Null()
-        {
-            //Arrange
-            string? input = null;
-            Stream? stream;
-            //Act
-            stream = input.AsStream();
-            //Assert
-            Assert.IsNull(stream);
-        }
     }
 }

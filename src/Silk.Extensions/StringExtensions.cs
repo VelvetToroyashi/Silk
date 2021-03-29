@@ -42,9 +42,8 @@ namespace Silk.Extensions
             }
         }
 
-        public static Stream? AsStream(this string s)
+        public static Stream AsStream(this string s)
         {
-            if (s is null) return null;
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
 

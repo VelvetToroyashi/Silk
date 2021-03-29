@@ -24,7 +24,7 @@ namespace Silk.Core.Data.Tests.MediatR
         private GuildContext _context;
 
         [OneTimeSetUp]
-        public void GlobalSetUp()
+        public async Task GlobalSetUp()
         {
             _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
             _provider.AddMediatR(typeof(GuildContext));

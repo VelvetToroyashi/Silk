@@ -8,7 +8,7 @@ using Silk.Core.Types;
 
 namespace Silk.Core.Services
 {
-    public class TagService 
+    public class TagService
     {
 
         private readonly IMediator _mediator;
@@ -35,24 +35,26 @@ namespace Silk.Core.Services
         public async Task<TagCreationResult> AliasTagAsync(string tagName, string aliasName, ulong guildId, ulong ownerId)
         {
             Tag? tag = await _mediator.Send(new GetTagRequest(tagName, guildId));
-            Tag? alias = await _mediator.Send(new GetTagRequest(aliasName, guildId));
-            
-            if (tag is null) 
+
+            if (tag is null)
                 return new(false, "Tag not found!");
-            
-            if (alias is not null) 
+
+            Tag? alias = await _mediator.Send(new GetTagRequest(aliasName, guildId));
+
+            if (alias is not null)
                 return new(false, "Alias already exists!");
-            
-            
+
+
             alias = await _mediator.Send(new CreateTagRequest(aliasName, guildId, ownerId, tag.Content, tag));
-            
+
             tag.Aliases ??= new();
             tag.Aliases.Add(alias);
 
             await _mediator.Send(new UpdateTagRequest(tagName, guildId) {Aliases = tag.Aliases});
-            
+
             return new(true, null);
         }
+
         /// <summary>
         /// Updates the content of a tag, and corresponding aliases.
         /// </summary>
@@ -67,13 +69,13 @@ namespace Silk.Core.Services
 
             if (tag is null)
                 return new(false, "Tag not found!");
-            
+
             if (tag.OriginalTag is not null)
                 return new(false, "You cannot edit an alias!");
-            
+
             if (tag.OwnerId != ownerId)
                 return new(false, "You do not have permission to edit this tag! Do you own it?");
-            
+
             await _mediator.Send(new UpdateTagRequest(tagName, guildId) {Content = content});
 
             if (tag.Aliases?.Any() ?? false)
@@ -83,7 +85,7 @@ namespace Silk.Core.Services
                     await _mediator.Send(new UpdateTagRequest(alias.Name, guildId) {Content = content});
                 }
             }
-            
+
             return new(true, null);
         }
 
@@ -108,9 +110,9 @@ namespace Silk.Core.Services
         /// </summary>
         /// <param name="tagName">The name of the tag to remove.</param>
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
-        public async Task RemoveTagAsync(string tagName, ulong guildId) => 
+        public async Task RemoveTagAsync(string tagName, ulong guildId) =>
             await _mediator.Send(new DeleteTagRequest(tagName, guildId));
-            
+
 
         /// <summary>
         /// Gets a collection of tags a given user owns.
@@ -118,7 +120,7 @@ namespace Silk.Core.Services
         /// <param name="ownerId">The Id of the tag owner.</param>
         /// <param name="guildId">The Id of the guild the tag owner is from.</param>
         /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
-        public async Task<IEnumerable<Tag>?> GetUserTagsAsync(ulong ownerId, ulong guildId) => 
+        public async Task<IEnumerable<Tag>?> GetUserTagsAsync(ulong ownerId, ulong guildId) =>
             await _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
 
         /// <summary>
@@ -128,5 +130,5 @@ namespace Silk.Core.Services
         /// <returns>A collection of tags in the guild, or null if there are none.</returns>
         public async Task<IEnumerable<Tag>?> GetGuildTagsAsync(ulong guildId) =>
             await _mediator.Send(new GetTagByGuildRequest(guildId));
-    }        
+    }
 }
