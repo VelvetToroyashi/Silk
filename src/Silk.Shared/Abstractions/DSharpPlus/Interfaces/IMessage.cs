@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Silk.Shared.Abstractions.DSharpPlus
+namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
 {
     public interface IMessage
     {

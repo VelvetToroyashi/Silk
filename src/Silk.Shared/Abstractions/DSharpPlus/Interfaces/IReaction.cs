@@ -1,4 +1,4 @@
-﻿namespace Silk.Shared.Abstractions.DSharpPlus
+﻿namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
 {
     public interface IReaction
     {
