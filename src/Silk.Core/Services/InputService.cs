@@ -49,11 +49,11 @@ namespace Silk.Core.Services
             return message.TimedOut ? null : message.Result.Content;
         }
 
-        public async Task<bool?> GetBoolInputFromMessageAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null)
+        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
         {
             throw new NotImplementedException();
         }
-        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
+        public async Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)
         {
             throw new NotImplementedException();
         }
