@@ -30,7 +30,8 @@ namespace Silk.Core
                       DiscordIntents.GuildPresences | // Auto-Mod Anti-Status-Invite
                       DiscordIntents.GuildMessages | // Commands & Auto-Mod
                       DiscordIntents.GuildMessageReactions | // Role-menu
-                      DiscordIntents.DirectMessageReactions, // Interactivity in DMs
+                      DiscordIntents.DirectMessageReactions | // Interactivity in DMs
+                      DiscordIntents.GuildVoiceStates,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None,

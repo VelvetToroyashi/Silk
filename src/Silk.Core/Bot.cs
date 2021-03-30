@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
@@ -42,12 +43,12 @@ namespace Silk.Core
         private readonly Stopwatch _sw = new();
 
 
-        public Bot(            
+        public Bot(
             IMediator mediator,
-            ILogger<Bot> logger, 
-            IServiceProvider services, 
-            DiscordShardedClient client, 
-            BotExceptionHandler exceptionHandler, 
+            ILogger<Bot> logger,
+            IServiceProvider services,
+            DiscordShardedClient client,
+            BotExceptionHandler exceptionHandler,
             IDbContextFactory<GuildContext> dbFactory)
         {
             _sw.Start();
@@ -55,16 +56,23 @@ namespace Silk.Core
             _logger = logger;
             _exceptionHandler = exceptionHandler;
             _mediator = mediator;
-            
-            _logger.LogInformation("Migrating database!");
-            dbFactory.CreateDbContext().Database.Migrate();
+
+            try
+            {
+                _logger.LogInformation("Migrating core database!");
+                dbFactory.CreateDbContext().Database.Migrate();
+            }
+            catch (PostgresException)
+            {
+                /* Ignored. */
+            }
 
             Instance = this;
             Client = client;
         }
         private void InitializeServices()
         {
-        
+
             _ = _services.GetRequiredService<AntiInviteCore>();
             // Logger has to be setup in that class before it can be used properly. //
         }
@@ -92,14 +100,14 @@ namespace Silk.Core
                 Services = _services,
                 IgnoreExtraArguments = true,
             };
-            
+
             await Client.UseCommandsNextAsync(_commands);
             InitializeCommands();
             InitializeServices();
             SubscribeToEvents();
-            
+
             await _exceptionHandler.SubscribeToEventsAsync();
-            
+
             await Client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = PaginationBehaviour.WrapAround,
@@ -107,7 +115,7 @@ namespace Silk.Core
                 PollBehaviour = PollBehaviour.DeleteEmojis,
                 Timeout = TimeSpan.FromMinutes(1)
             });
-            
+
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
             CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();
 
@@ -120,7 +128,7 @@ namespace Silk.Core
 
             _logger.LogInformation("Bot initialized in: {Time} ms", DateTime.Now.Subtract(Program.Startup).TotalMilliseconds.ToString("N0"));
             await Client.StartAsync();
-            
+
             // Client.StartAsync() returns as soon as all shards are ready, which means we log before
             // The client is *actually* ready.
             while (!GuildAddedHandler.StartupCompleted) { }
@@ -140,7 +148,7 @@ namespace Silk.Core
 
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
             _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(50));
-            
+
             //TODO: Change this to MediatR notification
             Client.MessageCreated += _services.Get<MessageCreatedHandler>().Tickets;
             _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(50));
@@ -168,7 +176,7 @@ namespace Silk.Core
         {
             _logger.LogInformation("Shutting down. ");
             await Client.StopAsync();
-        } 
+        }
 
     }
 }
