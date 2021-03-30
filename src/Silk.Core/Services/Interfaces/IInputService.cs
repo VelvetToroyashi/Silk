@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Services.Interfaces
 {
@@ -35,7 +35,7 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="guildId">The Id of the guild the channel belongs to, or null if it is a DM.</param>
         /// <param name="timeOut">Optional override for the wait period before timing out.</param>
         /// <returns>The emoji the user reacted with, or null if it timed out.</returns>
-        public Task<DiscordEmoji?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
+        public Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
 
         //public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
 

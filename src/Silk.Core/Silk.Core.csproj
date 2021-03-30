@@ -100,6 +100,7 @@
     <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
     <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
     <ProjectReference Include="..\Silk.Items\Silk.Items.csproj" />
+      <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj"/>
   </ItemGroup>
 
     <ItemGroup>
@@ -112,10 +113,6 @@
         <Compile Remove="Commands\Bot\GuildJoinHandler.cs"/>
         <Compile Remove="Commands\Bot\Restart.cs"/>
         <Compile Remove="logs\**"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Commands\Experimental"/>
     </ItemGroup>
 
 </Project>

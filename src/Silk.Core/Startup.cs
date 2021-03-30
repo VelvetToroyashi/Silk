@@ -32,7 +32,7 @@ namespace Silk.Core
         }
 
 
-        
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddServices(IServiceCollection services)
         {
@@ -48,19 +48,22 @@ namespace Silk.Core
             services.AddSingleton<SerilogLoggerFactory>();
             services.AddTransient<MessageCreatedHandler>();
             services.AddTransient<MessageRemovedHandler>();
+
+            services.AddScoped<IInputService, InputService>();
+
             services.AddScoped<IInfractionService, InfractionService>();
             services.AddTransient<IPrefixCacheService, PrefixCacheService>();
             services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
             services.AddSingleton<TagService>();
-            
+
             services.AddHostedService<Bot>();
             services.AddHostedService<StatusService>();
-            
+
             //Copped this hack from: https://stackoverflow.com/a/65552373 //
             services.AddSingleton<ReminderService>();
             services.AddHostedService(b => b.GetRequiredService<ReminderService>());
-            
+
             services.AddMediatR(typeof(Program));
             services.AddMediatR(typeof(GuildContext));
         }
