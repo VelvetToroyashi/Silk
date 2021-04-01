@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using Silk.Core.Types;
 
 namespace Silk.Core.Tests.Types
 {

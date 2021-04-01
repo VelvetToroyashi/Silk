@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Silk.Core.Data.MediatR.Unified.Guilds;
-using Silk.Core.Services;
+using Silk.Core.Discord.Services;
 using Xunit;
 
 namespace Silk.Core.Tests.Services
@@ -27,7 +26,7 @@ namespace Silk.Core.Tests.Services
                 .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                 .Verifiable("uHHHH");
-        
+
             _configService = new(_cache.Object, _mediator.Object);
         }
 

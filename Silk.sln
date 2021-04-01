@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core", "src\Silk.Core\Silk.Core.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Discord", "src\Silk.Core.Discord\Silk.Core.Discord.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Tests", "tests\Silk.Core.Tests\Silk.Core.Tests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
 EndProject
