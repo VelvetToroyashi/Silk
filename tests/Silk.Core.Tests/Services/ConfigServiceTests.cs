@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using Silk.Core.Data.MediatR.Unified.Guilds;
 using Silk.Core.Discord.Services;
 using Xunit;
 
