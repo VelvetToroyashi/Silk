@@ -5,7 +5,7 @@ WORKDIR /Silk
 COPY . ./
 RUN dotnet restore --disable-parallel
 
-RUN dotnet publish ./src/Silk.Core/Silk.Core.csproj -c Release -o out 
+RUN dotnet publish ./src/Silk.Core/Silk.Core.Discord.csproj -c Release -o out 
 
 # Run it
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
