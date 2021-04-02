@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
 
 WORKDIR /Silk
 COPY . ./
-RUN dotnet restore
+RUN dotnet restore --disable-parallel
 
 RUN dotnet publish ./src/Silk.Core/Silk.Core.csproj -c Release -o out 
 
