@@ -7,7 +7,6 @@ using Silk.Core.Data;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.HelpFormatter;
-using Silk.Extensions;
 
 namespace Silk.Core.Discord.Commands.Bot
 {
@@ -27,11 +26,11 @@ namespace Silk.Core.Discord.Commands.Bot
             _db = db;
         }
 
-        [Command("prefix")]
+        [Command("setprefix")]
         [Description("Sets the command prefix for Silk to use on the current Guild")]
+        [RequireUserPermissions(Constants.FlagConstants.CacheFlag)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
-            if (!ctx.Member.HasPermission(Constants.FlagConstants.CacheFlag)) return;
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {
@@ -49,7 +48,7 @@ namespace Silk.Core.Discord.Commands.Bot
 
         [Command("prefix")]
         [Description("Gets Silk's command prefix for the current Guild")]
-        public async Task SetPrefix(CommandContext ctx)
+        public async Task GetPrefix(CommandContext ctx)
         {
             string prefix = _prefixCache.RetrievePrefix(ctx.Guild?.Id);
             await ctx.RespondAsync($"My prefix is `{prefix}`, but you can always use commands by mentioning me! ({ctx.Client.CurrentUser.Mention})");
