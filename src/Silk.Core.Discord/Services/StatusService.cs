@@ -6,6 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Shared.Types.Collections;
 
 namespace Silk.Core.Discord.Services
 {

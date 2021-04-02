@@ -5,6 +5,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 
 namespace Silk.Core.Discord.Commands.Economy

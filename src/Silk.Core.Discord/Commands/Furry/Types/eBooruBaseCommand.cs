@@ -9,7 +9,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
 using Silk.Core.Discord.Utilities;
 
-namespace Silk.Core.Discord.Commands.Furry.Utilities
+namespace Silk.Core.Discord.Commands.Furry.Types
 {
     public abstract class eBooruBaseCommand : BaseCommandModule
     {

@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
+using Silk.Core.Data;
 using Silk.Core.Discord.Commands.General.Tickets;
 using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.MemberAdded;

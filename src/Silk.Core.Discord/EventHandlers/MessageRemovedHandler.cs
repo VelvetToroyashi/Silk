@@ -4,6 +4,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
+using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Discord.EventHandlers
 {

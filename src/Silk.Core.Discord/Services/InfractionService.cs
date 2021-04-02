@@ -6,7 +6,12 @@ using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data;
+using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Unified.Users;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
 

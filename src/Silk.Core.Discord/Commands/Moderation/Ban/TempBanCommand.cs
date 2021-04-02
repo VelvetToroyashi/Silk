@@ -8,6 +8,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Humanizer;
 using Humanizer.Localisation;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 

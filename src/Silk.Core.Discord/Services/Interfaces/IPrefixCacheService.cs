@@ -1,4 +1,6 @@
-﻿namespace Silk.Core.Discord.Services.Interfaces
+﻿using Silk.Core.Data.Models;
+
+namespace Silk.Core.Discord.Services.Interfaces
 {
     /// <summary>
     /// Provides methods for updating and retrieving a

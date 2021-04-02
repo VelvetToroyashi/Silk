@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;

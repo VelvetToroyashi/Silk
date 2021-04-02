@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;

@@ -7,6 +7,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Discord.Commands.General.Tickets
 {

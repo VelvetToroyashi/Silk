@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Silk.Core.Types
+namespace Silk.Shared.Types
 {
     public abstract class TextParser
     {

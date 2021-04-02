@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Silk.Core.Types
+namespace Silk.Shared.Types.Collections
 {
     public sealed class LoopedList<T> : List<T>
     {

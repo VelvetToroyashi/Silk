@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Silk.Core.Data;
 using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded;
@@ -161,6 +162,8 @@ namespace Silk.Core.Discord
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(50));
             Client.GuildAvailable += _services.Get<GuildAddedHandler>().OnGuildAvailable;
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(50));
+            Client.GuildCreated += _services.Get<GuildAddedHandler>().OnGuildAvailable;
+            _logger.LogTrace("Subscribed to: " + " GuildAddedHandler/GuildCreated".PadLeft(50));
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>().OnGuildDownloadComplete;
             _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete".PadLeft(50));
             Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>().CheckStaffRole;

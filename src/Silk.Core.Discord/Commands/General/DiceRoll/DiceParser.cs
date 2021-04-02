@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Silk.Shared.Types;
 
 namespace Silk.Core.Discord.Commands.General.DiceRoll
 {

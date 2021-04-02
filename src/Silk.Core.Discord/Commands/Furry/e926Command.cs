@@ -5,10 +5,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
-using Silk.Core.Discord.Commands.Furry.Utilities;
+using Silk.Core.Discord.Commands.Furry.Types;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 
-namespace Silk.Core.Discord.Commands.Furry.SFW
+namespace Silk.Core.Discord.Commands.Furry
 {
     [Category(Categories.Misc)]
     [ModuleLifespan(ModuleLifespan.Transient)]

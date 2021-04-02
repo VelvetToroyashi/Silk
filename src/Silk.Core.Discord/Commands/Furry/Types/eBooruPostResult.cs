@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Silk.Core.Discord.Commands.Furry.Utilities
+namespace Silk.Core.Discord.Commands.Furry.Types
 {
     public class eBooruPostResult
     {

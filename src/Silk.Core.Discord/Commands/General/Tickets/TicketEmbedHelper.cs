@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using Silk.Core.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Discord.Commands.General.Tickets

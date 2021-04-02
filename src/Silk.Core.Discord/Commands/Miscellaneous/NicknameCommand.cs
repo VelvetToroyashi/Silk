@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 

@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
+using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
