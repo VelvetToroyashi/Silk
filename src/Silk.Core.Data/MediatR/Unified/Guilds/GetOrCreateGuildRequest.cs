@@ -30,6 +30,7 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
             Guild? guild = await _db.Guilds
                 .Include(g => g.Users)
                 .Include(g => g.Infractions)
+                .Include(g => g.Configuration)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
