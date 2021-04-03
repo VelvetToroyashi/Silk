@@ -95,7 +95,7 @@ namespace Silk.Core.Discord.Utilities.Bot
             }
             else
             {
-                _logger.LogWarning(e.Exception, "Client threw an excpetion!");
+                _logger.LogWarning(e.Exception, "Client threw an exception!");
             }
         }
         private async Task OnSocketErrored(DiscordClient c, SocketCloseEventArgs e)
