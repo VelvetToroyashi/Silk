@@ -38,24 +38,27 @@ namespace Silk.Core.Discord.Commands.General
             var commandIssuingUser = $"{ctx.User.Username}{ctx.User.Discriminator}";
 
             var clearedMessagesEmbed = new DiscordEmbedBuilder()
-                .WithTitle("Deleted Messages:")
+                .WithTitle("Cleared Messages:")
                 .WithDescription(
                     $"User: {ctx.User.Mention}\n" +
                     $"Channel: {ctx.Channel.Mention}\n" +
                     $"Amount: **{messages}**")
                 .AddField("User ID:", ctx.User.Id.ToString(), true)
                 .WithThumbnail(ctx.Message.Author.AvatarUrl)
-                .WithFooter("Messages Deleted at (UTC)")
+                .WithFooter("Cleared Messages at (UTC)")
                 .WithTimestamp(DateTime.Now.ToUniversalTime())
                 .WithColor(DiscordColor.Red);
 
             await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
             await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
             
-            var sentMessage = await ctx.Channel.SendMessageAsync($"{commandIssuingUser} cleared {messages} message(s)");
-
+            DiscordMessage responseMsg = await ctx.RespondAsync(new DiscordEmbedBuilder()
+                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                .WithColor(DiscordColor.SpringGreen)
+                .WithDescription($"Cleared {messages} messages!"));
+            
             await Task.Delay(5000);
-            try { await ctx.Channel.DeleteMessageAsync(sentMessage); }
+            try { await ctx.Channel.DeleteMessageAsync(responseMsg); }
             catch (NotFoundException) {}
         }
 
