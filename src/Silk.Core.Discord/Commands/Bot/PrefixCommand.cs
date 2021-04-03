@@ -26,7 +26,7 @@ namespace Silk.Core.Discord.Commands.Bot
             _db = db;
         }
 
-        [Command("setprefix")]
+        [Command("prefix")]
         [Description("Sets the command prefix for Silk to use on the current Guild")]
         [RequireUserPermissions(Constants.FlagConstants.CacheFlag)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
