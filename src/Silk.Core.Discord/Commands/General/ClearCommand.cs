@@ -26,18 +26,38 @@ namespace Silk.Core.Discord.Commands.General
         [Command]
         [Description("Cleans all messages from all users.")]
         [RequireUserPermissions(Permissions.ManageMessages)]
-        public async Task Clear(CommandContext ctx, int messages = 5)
+        public async Task Clear(CommandContext ctx, int numOfMessages = 5)
         {
-            GuildConfig guildConfig = await GetOrCreateGuildConfig(ctx);
+            IReadOnlyList<DiscordMessage> queriedMessages = await ctx.Channel.GetMessagesAsync(numOfMessages + 1);
             
-            ulong loggingChannelId = guildConfig.LoggingChannel;
-            DiscordChannel? loggingChannel = ctx.Guild.GetChannel(loggingChannelId) ?? ctx.Channel;
-
-            IReadOnlyList<DiscordMessage> queriedMessages = await ctx.Channel.GetMessagesAsync(messages + 1);
-
             var commandIssuingUser = $"{ctx.User.Username}{ctx.User.Discriminator}";
+            await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
+            
+            var responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
+            DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
+            
+            GuildConfig guildConfig = await GetOrCreateGuildConfig(ctx);
+            DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
+            
+            var clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
+            if (loggingChannel is not null) await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
 
-            var clearedMessagesEmbed = new DiscordEmbedBuilder()
+            await Task.Delay(5000);
+            try { await ctx.Channel.DeleteMessageAsync(responseMsg); }
+            catch (NotFoundException) { }
+        }
+
+        private static DiscordEmbedBuilder MakeResponseEmbed(CommandContext ctx, int messages)
+        {
+            return new DiscordEmbedBuilder()
+                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+                .WithColor(DiscordColor.SpringGreen)
+                .WithDescription($"Cleared {messages} messages!");
+        }
+
+        private static DiscordEmbedBuilder MakeLoggingChannelEmbed(CommandContext ctx, int messages)
+        {
+            return new DiscordEmbedBuilder()
                 .WithTitle("Cleared Messages:")
                 .WithDescription(
                     $"User: {ctx.User.Mention}\n" +
@@ -48,29 +68,12 @@ namespace Silk.Core.Discord.Commands.General
                 .WithFooter("Cleared Messages at (UTC)")
                 .WithTimestamp(DateTime.Now.ToUniversalTime())
                 .WithColor(DiscordColor.Red);
-
-            await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
-            await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
-            
-            DiscordMessage responseMsg = await ctx.RespondAsync(new DiscordEmbedBuilder()
-                .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-                .WithColor(DiscordColor.SpringGreen)
-                .WithDescription($"Cleared {messages} messages!"));
-            
-            await Task.Delay(5000);
-            try { await ctx.Channel.DeleteMessageAsync(responseMsg); }
-            catch (NotFoundException) {}
         }
 
         private async Task<GuildConfig> GetOrCreateGuildConfig(CommandContext ctx)
         {
-            GuildConfig? guildConfig = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
-            if ((GuildConfig?) guildConfig is not null) return guildConfig;
-            
             var guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, Discord.Bot.DefaultCommandPrefix));
-            guildConfig = guild.Configuration;
-
-            return guildConfig;
+            return guild.Configuration;
         }
     }
 }
