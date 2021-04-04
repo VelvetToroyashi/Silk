@@ -82,8 +82,6 @@ namespace Silk.Core.Discord.EventHandlers
             }
         }
 
-
-
         public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
         {
             ShardState state = _shardStates[c.ShardId];

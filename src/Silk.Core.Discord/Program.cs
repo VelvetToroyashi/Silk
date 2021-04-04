@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -18,9 +19,22 @@ namespace Silk.Core.Discord
     public static class Program
     {
         public static DateTime Startup { get; } = DateTime.Now;
-        public static string Version => "1.5.1-alpha";
         public static string HttpClientName { get; } = "Silk";
+
+        public const string Version = "1.5.1-alpha";
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
+
+        private static IServiceCollection? _backingServices;
+
+        public static IServiceCollection Services
+        {
+            get => _backingServices;
+            set
+            {
+                if (_backingServices is not null) throw new FieldAccessException($"Do not set {nameof(Services)} after it has been set.");
+                else _backingServices = value;
+            }
+        }
 
         private static DiscordConfiguration _clientConfig = new()
         {
@@ -40,22 +54,23 @@ namespace Silk.Core.Discord
         // Setting this in the prop doesn't work; it'll have a 2s discrepancy
         //static Program() => Startup = DateTime.Now;
 
-        public static async Task Main(string[] args)
+        public static async Task Start()
         {
             _ = Startup;
-
             Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
-            await CreateHostBuilder(args)
+
+            await CreateHostBuilder()
                 .UseConsoleLifetime()
                 .RunConsoleAsync()
                 .ConfigureAwait(false);
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args)
+        [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "I know what I'm doing.")]
+        private static IHostBuilder CreateHostBuilder()
         {
-            return Host.CreateDefaultBuilder(args)
+            return Host.CreateDefaultBuilder()
                 .UseConsoleLifetime()
-                .ConfigureAppConfiguration((context, configuration) =>
+                .ConfigureAppConfiguration((_, configuration) =>
                 {
                     configuration.SetBasePath(Directory.GetCurrentDirectory());
                     configuration.AddJsonFile("appSettings.json", true, false);
@@ -87,10 +102,10 @@ namespace Silk.Core.Discord
                 {
                     IConfiguration config = context.Configuration;
                     _clientConfig.Token = config.GetConnectionString("botToken");
-                    services.AddSingleton(new DiscordShardedClient(_clientConfig));
+                    _backingServices = services;
+                    services!.AddSingleton(new DiscordShardedClient(_clientConfig));
                     Discord.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
                     Discord.Startup.AddServices(services);
-
 
                     services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 

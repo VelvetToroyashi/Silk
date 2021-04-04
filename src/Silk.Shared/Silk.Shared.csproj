@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Abstractions\DSharpPlus\Concrete"/>
         <Folder Include="Types\DTO"/>
     </ItemGroup>
 

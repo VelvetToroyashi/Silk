@@ -1,6 +1,6 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Silk.Core.Data.Migrations
 {
@@ -55,9 +55,7 @@ namespace Silk.Core.Data.Migrations
                     ResponderId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                });
+                constraints: table => { });
 
             migrationBuilder.CreateTable(
                 name: "Tickets",
@@ -184,7 +182,7 @@ namespace Silk.Core.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => new { x.Id, x.GuildId });
+                    table.PrimaryKey("PK_Users", x => new {x.Id, x.GuildId});
                     table.ForeignKey(
                         name: "FK_Users_Guilds_GuildId",
                         column: x => x.GuildId,
@@ -324,9 +322,9 @@ namespace Silk.Core.Data.Migrations
                     table.PrimaryKey("PK_Reminders", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Reminders_Users_OwnerId_GuildId",
-                        columns: x => new { x.OwnerId, x.GuildId },
+                        columns: x => new {x.OwnerId, x.GuildId},
                         principalTable: "Users",
-                        principalColumns: new[] { "Id", "GuildId" },
+                        principalColumns: new[] {"Id", "GuildId"},
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -338,7 +336,7 @@ namespace Silk.Core.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_DisabledCommand_GuildId_CommandName",
                 table: "DisabledCommand",
-                columns: new[] { "GuildId", "CommandName" },
+                columns: new[] {"GuildId", "CommandName"},
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -365,7 +363,7 @@ namespace Silk.Core.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reminders_OwnerId_GuildId",
                 table: "Reminders",
-                columns: new[] { "OwnerId", "GuildId" });
+                columns: new[] {"OwnerId", "GuildId"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_SelfAssignableRole_GuildConfigId",

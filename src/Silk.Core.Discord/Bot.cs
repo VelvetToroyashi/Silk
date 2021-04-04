@@ -172,7 +172,16 @@ namespace Silk.Core.Discord
         }
 
 
-        public async Task StartAsync(CancellationToken cancellationToken) => await InitializeClientAsync();
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await InitializeClientAsync();
+            try { await Task.Delay(-1, cancellationToken); }
+            catch (TaskCanceledException)
+            {
+                /* Ignored. */
+            }
+
+        }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {

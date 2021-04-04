@@ -12,6 +12,7 @@ using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.Bot;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord
 {
@@ -59,6 +60,8 @@ namespace Silk.Core.Discord
 
             services.AddHostedService<Bot>();
             services.AddHostedService<StatusService>();
+
+            services.AddSingleton<IMessageSender, MessageSenderService>();
 
             //Copped this hack from: https://stackoverflow.com/a/65552373 //
             services.AddSingleton<ReminderService>();

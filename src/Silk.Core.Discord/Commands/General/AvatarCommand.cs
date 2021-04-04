@@ -11,8 +11,6 @@ namespace Silk.Core.Discord.Commands.General
     [Category(Categories.General)]
     public class AvatarCommand : BaseCommandModule
     {
-
-
         [Command("avatar")]
         public async Task GetAvatar(CommandContext ctx, DiscordMember member) => await GetAvatarAsync(ctx, member);
 
