@@ -17,31 +17,28 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
         private readonly TicketService _ticketService;
         public TicketHandler(TicketService ticketService) => _ticketService = ticketService;
 
-        public Task Tickets(DiscordClient c, MessageCreateEventArgs e)
+        // Send help. //
+        public async Task Tickets(DiscordClient c, MessageCreateEventArgs e)
         {
-            _ = Task.Run(async () =>
+            if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
+
+            ulong ticketUserId = TicketService.GetTicketUser(e.Channel);
+
+            IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
+            DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUserId).Value;
+
+            if (member is null) return; // Member doesn't exist anymore, or wasn't in cache, which they should be :sus: // 
+
+            DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author); // Should've renamed this tbqh                  //
+            try { await member.SendMessageAsync(embed); } // Outbound is for what the ticket opener sees. //
+            catch (UnauthorizedException)
             {
-                if (!await _ticketService.HasTicket(e.Channel, e.Author.Id)) return;
+                var builder = new DiscordMessageBuilder();
+                builder.WithReply(e.Message.Id, true);
+                builder.WithContent("I couldn't message that user! They've either closed their DMs.");
 
-                ulong ticketUserId = TicketService.GetTicketUser(e.Channel);
-
-                IEnumerable<KeyValuePair<ulong, DiscordMember?>> members = c.Guilds.Values.SelectMany(g => g.Members);
-                DiscordMember? member = members.SingleOrDefault(m => m.Key == ticketUserId).Value;
-
-                if (member is null) return; // Member doesn't exist anymore, or wasn't in cache, which they should be :sus: // 
-
-                DiscordEmbed embed = TicketEmbedHelper.GenerateOutboundEmbed(e.Message.Content, e.Author); // Should've renamed this tbqh                  //
-                try { await member.SendMessageAsync(embed); } // Outbound is for what the ticket opener sees. //
-                catch (UnauthorizedException)
-                {
-                    var builder = new DiscordMessageBuilder();
-                    builder.WithReply(e.Message.Id, true);
-                    builder.WithContent("I couldn't message that user! They've either closed their DMs.");
-
-                    await e.Channel.SendMessageAsync(builder);
-                }
-            });
-            return Task.CompletedTask;
+                await e.Channel.SendMessageAsync(builder);
+            }
         }
 
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
