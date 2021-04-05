@@ -71,7 +71,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.2.21154.6"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.1.21102.12"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-preview2"/>

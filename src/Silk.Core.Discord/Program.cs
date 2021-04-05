@@ -1,7 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Threading.Tasks;
 using DSharpPlus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 
@@ -24,17 +20,6 @@ namespace Silk.Core.Discord
         public const string Version = "1.5.1-alpha";
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
 
-        private static IServiceCollection? _backingServices;
-
-        public static IServiceCollection Services
-        {
-            get => _backingServices;
-            set
-            {
-                if (_backingServices is not null) throw new FieldAccessException($"Do not set {nameof(Services)} after it has been set.");
-                else _backingServices = value;
-            }
-        }
 
         private static DiscordConfiguration _clientConfig = new()
         {
@@ -54,57 +39,28 @@ namespace Silk.Core.Discord
         // Setting this in the prop doesn't work; it'll have a 2s discrepancy
         //static Program() => Startup = DateTime.Now;
 
-        public static async Task Start()
+        public static void Start(IHostBuilder host)
         {
             _ = Startup;
             Console.WriteLine($"Started! The current time is {DateTime.Now:h:mm:ss ff tt}");
 
-            await CreateHostBuilder()
-                .UseConsoleLifetime()
-                .RunConsoleAsync()
-                .ConfigureAwait(false);
+            ConfigureHost(host);
         }
 
-        [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "I know what I'm doing.")]
-        private static IHostBuilder CreateHostBuilder()
+        private static void ConfigureHost(IHostBuilder host)
         {
-            return Host.CreateDefaultBuilder()
-                .UseConsoleLifetime()
-                .ConfigureAppConfiguration((_, configuration) =>
-                {
-                    configuration.SetBasePath(Directory.GetCurrentDirectory());
-                    configuration.AddJsonFile("appSettings.json", true, false);
-                    configuration.AddUserSecrets<Bot>(true, false);
-                })
-                .ConfigureLogging((builder, _) =>
+            host.ConfigureLogging((builder, _) =>
                 {
                     if (int.TryParse(builder.Configuration["Shards"] ?? "1", out int shards))
                         _clientConfig.ShardCount = shards;
-
-                    var logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
-
-                    Log.Logger = builder.Configuration["LogLevel"] switch
-                    {
-                        "All" => logger.MinimumLevel.Verbose().CreateLogger(),
-                        "Info" => logger.MinimumLevel.Information().CreateLogger(),
-                        "Debug" => logger.MinimumLevel.Debug().CreateLogger(),
-                        "Warning" => logger.MinimumLevel.Warning().CreateLogger(),
-                        "Error" => logger.MinimumLevel.Error().CreateLogger(),
-                        "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
-                        _ => logger.MinimumLevel.Information().CreateLogger()
-                    };
-                    Log.Logger.ForContext(typeof(Program)).Information("Logging initialized!");
                 })
                 .ConfigureServices((context, services) =>
                 {
                     IConfiguration config = context.Configuration;
-                    _clientConfig.Token = config.GetConnectionString("botToken");
-                    _backingServices = services;
+                    _clientConfig.Token = config.GetConnectionString("discord");
+
                     services!.AddSingleton(new DiscordShardedClient(_clientConfig));
-                    Discord.Startup.AddDatabase(services, config.GetConnectionString("dbConnection"));
+
                     Discord.Startup.AddServices(services);
 
                     services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));

@@ -24,7 +24,7 @@ namespace Silk.Core.Discord
             services.AddDbContextFactory<GuildContext>(
                 option =>
                 {
-                    NpgsqlDbContextOptionsBuilderExtensions.UseNpgsql(option, connectionString);
+                    option.UseNpgsql(connectionString);
                     #if DEBUG
                     option.EnableSensitiveDataLogging();
                     option.EnableDetailedErrors();
@@ -47,7 +47,7 @@ namespace Silk.Core.Discord
             services.AddTransient<RoleRemovedHandler>();
             services.AddSingleton<BotExceptionHandler>();
             services.AddSingleton<SerilogLoggerFactory>();
-            services.AddTransient<MessageCreatedHandler>();
+            services.AddTransient<TicketHandler>();
             services.AddTransient<MessageRemovedHandler>();
 
             services.AddScoped<IInputService, InputService>();

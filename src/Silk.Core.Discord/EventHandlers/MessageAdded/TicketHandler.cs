@@ -6,6 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Discord.Commands.General.Tickets;
 using Silk.Core.Discord.EventHandlers.Notifications;
@@ -13,12 +14,12 @@ using Silk.Core.Discord.Services.Interfaces;
 
 namespace Silk.Core.Discord.EventHandlers.MessageAdded
 {
-    public class MessageCreatedHandler
+    public class TicketHandler : INotificationHandler<MessageCreated>
     {
         private readonly TicketService _ticketService;
         private readonly IPrefixCacheService _prefixCache;
-        private readonly ILogger<MessageCreatedHandler> _logger;
-        public MessageCreatedHandler(TicketService ticketService, IPrefixCacheService prefixCache, ILogger<MessageCreatedHandler> logger)
+        private readonly ILogger<TicketHandler> _logger;
+        public TicketHandler(TicketService ticketService, IPrefixCacheService prefixCache, ILogger<TicketHandler> logger)
         {
             _ticketService = ticketService;
             _prefixCache = prefixCache;

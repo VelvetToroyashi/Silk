@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Silk.Core.Discord\Silk.Core.Discord.csproj"/>
+        <ProjectReference Include="..\..\src\Silk.Core.Logic\Silk.Core.Logic.csproj"/>
     </ItemGroup>
 
 </Project>
