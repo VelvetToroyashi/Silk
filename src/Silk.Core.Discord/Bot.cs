@@ -72,7 +72,6 @@ namespace Silk.Core.Discord
         }
         private void InitializeServices()
         {
-
             _ = _services.GetRequiredService<AntiInviteCore>();
             // Logger has to be setup in that class before it can be used properly. //
         }
@@ -119,7 +118,6 @@ namespace Silk.Core.Discord
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
             CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();
 
-
             foreach (CommandsNextExtension extension in cnextExtensions)
             {
                 extension.SetHelpFormatter<HelpFormatter>();
@@ -135,7 +133,6 @@ namespace Silk.Core.Discord
             _logger.LogInformation("All shards initialized in: {Time} ms", DateTime.Now.Subtract(Program.Startup).TotalMilliseconds.ToString("N0"));
         }
 
-
         // Clusterfuck of a method. I know. //
         //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
@@ -149,12 +146,8 @@ namespace Silk.Core.Discord
             _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(50));
             _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(50));
 
-
-
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
             _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(50));
-
-
 
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
             //_logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(50));
@@ -182,7 +175,6 @@ namespace Silk.Core.Discord
             _logger.LogInformation("Subscribed to all events!");
         }
 
-
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await InitializeClientAsync();
@@ -191,7 +183,6 @@ namespace Silk.Core.Discord
             {
                 /* Ignored. */
             }
-
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -199,6 +190,5 @@ namespace Silk.Core.Discord
             _logger.LogInformation("Shutting down. ");
             await Client.StopAsync();
         }
-
     }
 }

@@ -14,7 +14,7 @@ namespace Silk.Core.Logic
 {
     public class Startup
     {
-        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
+        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext:l}] {Message:lj} {Exception:j}{NewLine}";
 
         public static async Task Main()
         {
