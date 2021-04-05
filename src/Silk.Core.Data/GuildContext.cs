@@ -7,8 +7,6 @@ namespace Silk.Core.Data
     {
         public DbSet<Guild> Guilds { get; set; } = null!;
 
-        public DbSet<Ticket> Tickets { get; set; } = null!;
-
         /// <summary>
         /// Users on a guild level; holds information and states that reflect such.
         /// </summary>
@@ -34,7 +32,6 @@ namespace Silk.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
-            builder.Entity<TicketMessage>().HasOne(ticket => ticket.Ticket).WithMany(ticket => ticket.History);
             builder.Entity<SelfAssignableRole>().Property(r => r.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }

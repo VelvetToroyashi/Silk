@@ -18,7 +18,6 @@ using Npgsql;
 using Silk.Core.Data;
 using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
-using Silk.Core.Discord.EventHandlers.MessageAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Utilities.Bot;
@@ -141,8 +140,6 @@ namespace Silk.Core.Discord
 
             Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e)); };
             //TODO: Change this to MediatR notification
-            Client.MessageCreated += _services.Get<TicketHandler>()!.Tickets;
-            _logger.LogTrace("Subscribed to:" + " MessageAddedHelper/Tickets".PadLeft(50));
             _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(50));
             _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(50));
 
@@ -164,7 +161,7 @@ namespace Silk.Core.Discord
             _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(50));
 
             Client.GuildCreated += _services.Get<GuildAddedHandler>()!.OnGuildAvailable;
-            _logger.LogTrace("Subscribed to: " + " GuildAddedHandler/GuildCreated".PadLeft(50));
+            _logger.LogTrace("Subscribed to:" + " GuildAddedHandler/GuildCreated".PadLeft(50));
 
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>()!.OnGuildDownloadComplete;
             _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete".PadLeft(50));
