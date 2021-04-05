@@ -36,10 +36,7 @@ namespace Silk.Extensions
             {
                 return text[range.Start..Math.Min(text.Length, range.End.Value)];
             }
-            else
-            {
-                return text[range];
-            }
+            return text[range];
         }
 
         public static Stream AsStream(this string s)

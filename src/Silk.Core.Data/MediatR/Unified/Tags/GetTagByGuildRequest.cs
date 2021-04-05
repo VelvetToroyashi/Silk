@@ -28,11 +28,11 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
         public async Task<IEnumerable<Tag>?> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
-                    .Tags
-                    .Include(t => t.OriginalTag)
-                    .Include(t => t.Aliases)
-                    .Where(t => t.GuildId == request.GuildId)
-                    .ToArrayAsync(cancellationToken);
+                .Tags
+                .Include(t => t.OriginalTag)
+                .Include(t => t.Aliases)
+                .Where(t => t.GuildId == request.GuildId)
+                .ToArrayAsync(cancellationToken);
 
             return tags.Any() ? tags : null;
         }

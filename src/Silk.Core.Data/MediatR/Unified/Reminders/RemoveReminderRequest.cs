@@ -34,9 +34,7 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
                     await _db.SaveChangesAsync(cancellationToken);
                 }
                 // Timer timed out and it got dequeued slower than it should've. //
-                catch (DbUpdateConcurrencyException)
-                {
-                }
+                catch (DbUpdateConcurrencyException) { }
             }
 
             return new();

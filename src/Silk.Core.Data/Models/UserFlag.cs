@@ -13,6 +13,6 @@ namespace Silk.Core.Data.Models
         BannedPrior = 32,
         InfractionExemption = 64,
         Staff = 128 | InfractionExemption, //1536
-        EscalatedStaff = 256 | Staff  // 3584
+        EscalatedStaff = 256 | Staff // 3584
     }
 }

@@ -6,7 +6,7 @@ namespace Silk.Core.Discord.Utilities
     {
         public static string DumpAsJson(object o, bool indented = true) => JsonConvert.SerializeObject(o,
             indented ? Formatting.Indented : Formatting.None,
-            new JsonSerializerSettings()
+            new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Include,

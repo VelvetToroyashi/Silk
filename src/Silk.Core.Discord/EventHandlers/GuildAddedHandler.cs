@@ -20,7 +20,7 @@ namespace Silk.Core.Discord.EventHandlers
     {
         public static bool StartupCompleted { get; private set; }
 
-        private bool _logged = false;
+        private bool _logged;
         private readonly IMediator _mediator;
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly Dictionary<int, ShardState> _shardStates = new();

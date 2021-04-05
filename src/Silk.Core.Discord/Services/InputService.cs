@@ -27,11 +27,8 @@ namespace Silk.Core.Discord.Services
         private InteractivityExtension GetInteractivityInternal(ulong? guildId)
         {
             if (guildId is null) { return _client.ShardClients[0].GetInteractivity(); } // DMs are handled on Shard 0 anyway. //
-            else
-            {
-                DiscordClient guildShard = _client.ShardClients.Values.First(s => s.Guilds.Keys.Contains(guildId.Value));
-                return guildShard.GetInteractivity();
-            }
+            DiscordClient guildShard = _client.ShardClients.Values.First(s => s.Guilds.Keys.Contains(guildId.Value));
+            return guildShard.GetInteractivity();
         }
         private async Task<string?> WaitForInputAsync(InteractivityExtension interactivity, ulong userId, ulong channelId, ulong? guildId, TimeSpan? timeOut)
         {
@@ -43,7 +40,7 @@ namespace Silk.Core.Discord.Services
 
                 if (guildId is null)
                     return isUser && isChannel;
-                else return isUser && isChannel && isGuild;
+                return isUser && isChannel && isGuild;
             }, timeOut);
 
             return message.TimedOut ? null : message.Result.Content;

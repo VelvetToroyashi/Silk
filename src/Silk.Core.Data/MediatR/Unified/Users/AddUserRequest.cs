@@ -23,7 +23,7 @@ namespace Silk.Core.Data.MediatR.Unified.Users
         {
             var user = new User {Id = request.UserId, GuildId = request.GuildId, Flags = request.Flags ?? UserFlag.None};
             _db.Users.Add(user);
-            
+
             await _db.SaveChangesAsync(cancellationToken);
             return user;
         }

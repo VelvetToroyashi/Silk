@@ -18,10 +18,7 @@ namespace Silk.Shared.Types.Collections
                 {
                     throw new ArgumentOutOfRangeException(nameof(index), "Colletion must be non-empty.");
                 }
-                else
-                {
-                    base[index % Count] = value;
-                }
+                base[index % Count] = value;
             }
         }
     }

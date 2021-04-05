@@ -8,7 +8,7 @@ namespace Silk.Core.Discord.EventHandlers
 {
     public class MessageCountHandler : INotificationHandler<MessageCreated>
     {
-        private int _messages = 0;
+        private int _messages;
 
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
         {

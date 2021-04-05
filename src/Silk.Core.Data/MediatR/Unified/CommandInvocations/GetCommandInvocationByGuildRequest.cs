@@ -28,8 +28,8 @@ namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
         public async Task<IEnumerable<CommandInvocation>> Handle(GetCommandInvocationByGuildRequest request, CancellationToken cancellationToken)
         {
             IEnumerable<CommandInvocation> commands = await _db.CommandInvocations
-                    .Where(c => c.UserId == request.GuildId)
-                    .ToListAsync(cancellationToken);
+                .Where(c => c.UserId == request.GuildId)
+                .ToListAsync(cancellationToken);
             return commands;
         }
     }

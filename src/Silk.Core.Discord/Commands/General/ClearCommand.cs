@@ -29,16 +29,16 @@ namespace Silk.Core.Discord.Commands.General
         public async Task Clear(CommandContext ctx, int numOfMessages = 5)
         {
             IReadOnlyList<DiscordMessage> queriedMessages = await ctx.Channel.GetMessagesAsync(numOfMessages + 1);
-            
+
             var commandIssuingUser = $"{ctx.User.Username}{ctx.User.Discriminator}";
             await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
-            
+
             var responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
             DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
-            
+
             GuildConfig guildConfig = await GetOrCreateGuildConfig(ctx);
             DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
-            
+
             var clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
             if (loggingChannel is not null) await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
 

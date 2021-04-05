@@ -9,7 +9,7 @@ namespace Silk.Core.Data.ModelConfigurations
 
         public void Configure(EntityTypeBuilder<DisabledCommand> builder)
         {
-            builder.HasIndex(c => new { c.GuildId, c.CommandName }).IsUnique();
+            builder.HasIndex(c => new {c.GuildId, c.CommandName}).IsUnique();
         }
     }
 }

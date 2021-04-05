@@ -22,7 +22,7 @@ namespace Silk.Core.Data
         public DbSet<GlobalUser> GlobalUsers { get; set; } = null!;
 
         public DbSet<CommandInvocation> CommandInvocations { get; set; } = null!;
-        
+
         public DbSet<GuildConfig> GuildConfigs { get; set; } = null!;
 
         public DbSet<Tag> Tags { get; set; } = null!;

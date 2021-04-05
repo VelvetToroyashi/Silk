@@ -28,7 +28,7 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
         {
             var guild = new Guild {Id = request.GuildId, Configuration = new(), Prefix = request.Prefix};
             _db.Guilds.Add(guild);
-            
+
             await _db.SaveChangesAsync(cancellationToken);
             return guild;
         }

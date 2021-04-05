@@ -21,7 +21,7 @@ namespace Silk.Core.Discord
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
 
 
-        private static DiscordConfiguration _clientConfig = new()
+        private static readonly DiscordConfiguration _clientConfig = new()
         {
             Intents = DiscordIntents.Guilds | // Caching
                       DiscordIntents.GuildMembers | // Auto-mod/Auto-greet

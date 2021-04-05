@@ -53,7 +53,7 @@ namespace Silk.Core.Discord.Services
         {
             IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
             if (reminders.Count() is 0) return null;
-            else return reminders;
+            return reminders;
         }
 
         public async Task RemoveReminderAsync(int id)
@@ -173,7 +173,7 @@ namespace Silk.Core.Discord.Services
             _reminders = (await mediator.Send(new GetAllRemindersRequest(), stoppingToken)).ToList();
             _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
             _logger.LogDebug("Starting reminder callback timer");
-            var timer = new Timer((__) => _ = Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            var timer = new Timer(__ => _ = Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
             try { await Task.Delay(-1, stoppingToken); }
             catch (TaskCanceledException) { }

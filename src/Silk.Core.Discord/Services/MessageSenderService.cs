@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -28,7 +29,7 @@ namespace Silk.Core.Discord.Services
         }
         public async Task<IMessage> Reply(ulong channelId, ulong messageId, bool mention = false, string? content = null, IEmbed? embed = null)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
 

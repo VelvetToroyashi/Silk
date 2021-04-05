@@ -24,7 +24,7 @@ namespace Silk.Core.Discord.Commands.Server
     {
         private readonly IMediator _mediator;
         private readonly TagService _tagService;
-        private readonly string[] _reservedWords = new[]
+        private readonly string[] _reservedWords =
         {
             "create", "update", "delete",
             "alias", "info", "claim",

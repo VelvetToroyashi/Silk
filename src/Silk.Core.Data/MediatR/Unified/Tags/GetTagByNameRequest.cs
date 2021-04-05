@@ -28,12 +28,12 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
         public async Task<IEnumerable<Tag>?> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
-                    .Tags
-                    .Include(t => t.Aliases)
-                    .Include(t => t.OriginalTag)
-                    .AsSplitQuery()
-                    .Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
-                    .ToArrayAsync(cancellationToken);
+                .Tags
+                .Include(t => t.Aliases)
+                .Include(t => t.OriginalTag)
+                .AsSplitQuery()
+                .Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
+                .ToArrayAsync(cancellationToken);
 
             return tags.Any() ? tags : null;
         }

@@ -24,7 +24,8 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
             _db = db;
         }
 
-        public async Task<IEnumerable<Reminder>> Handle(GetAllRemindersRequest request,
+        public async Task<IEnumerable<Reminder>> Handle(
+            GetAllRemindersRequest request,
             CancellationToken cancellationToken)
         {
             return await _db.Reminders
