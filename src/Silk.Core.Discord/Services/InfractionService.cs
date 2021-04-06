@@ -259,7 +259,7 @@ namespace Silk.Core.Discord.Services
                 if (guild is null)
                 {
                     _logger.LogWarning($"Guild was removed from cache! Dropping infractions from guild {inf.Key}");
-                    DropInfractions(inf.Key);
+                    _tempInfractions.RemoveAll(i => i.GuildId == inf.Key);
                     return;
                 }
 
@@ -279,10 +279,6 @@ namespace Silk.Core.Discord.Services
                     _tempInfractions.Remove(infraction);
                 }
             }
-        }
-        private void DropInfractions(ulong guildId)
-        {
-            _tempInfractions.RemoveAll(i => i.GuildId == guildId);
         }
 
         private async Task LoadInfractionsAsync()
@@ -321,15 +317,15 @@ namespace Silk.Core.Discord.Services
             await logChannel.SendMessageAsync(embed);
         }
 
+        //TODO: Implement this.
         public async Task ProgressInfractionStepAsync(DiscordMember member, string reason, DateTime? a = null)
         {
+
             User user = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
             Guild guild = await _mediator.Send(new GetGuildRequest(member.Guild.Id));
             GuildConfig config = guild.Configuration;
             List<InfractionStep> steps = config.InfractionSteps;
             List<Infraction> infractions = guild.Infractions.Where(i => i.UserId == member.Id).ToList();
-
-
         }
 
     }
