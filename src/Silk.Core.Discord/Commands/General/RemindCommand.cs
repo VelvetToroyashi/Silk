@@ -56,6 +56,10 @@ namespace Silk.Core.Discord.Commands.General
             await ctx.RespondAsync($"Alrighty, I'll remind you in {time.Humanize(2, minUnit: TimeUnit.Second)}: {reminder.Pull(..200)}");
         }
 
+        // RECURRING REMINDERS //
+
+
+        // NON-RECURRING //
         [Command]
         [Description("Gives you a list of your reminders")]
         public async Task List(CommandContext ctx)
