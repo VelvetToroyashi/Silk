@@ -11,6 +11,7 @@ using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Commands.Moderation
 {
@@ -18,12 +19,14 @@ namespace Silk.Core.Discord.Commands.Moderation
     public class MuteCommand : BaseCommandModule
     {
         private readonly ConfigService _configService;
+        private readonly IMessageSender _sender;
         private readonly IInfractionService _infractionService;
 
-        public MuteCommand(ConfigService configService, IInfractionService infractionService)
+        public MuteCommand(ConfigService configService, IInfractionService infractionService, IMessageSender sender)
         {
             _configService = configService;
             _infractionService = infractionService;
+            _sender = sender;
         }
 
         [Command("mute")]
@@ -34,44 +37,74 @@ namespace Silk.Core.Discord.Commands.Moderation
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
             GuildConfig config = (await _configService.GetConfigAsync(ctx.Guild.Id))!;
+
             if (user.IsAbove(bot))
             {
-                await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} role(s) above me!");
+                var roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+                string message;
+
+                message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above me!" :
+                    "We have the same top role! I can't add roles to this person.";
+
+                await _sender.SendAsync(ctx.Channel.Id, message);
                 return;
             }
-            if (user.IsAbove(ctx.Member) && user.Roles.All(r => r.Id != config.MuteRoleId))
+
+            if (user.IsAbove(ctx.Member))
             {
-                await ctx.RespondAsync($"They're {user.Roles.Last().Position - ctx.Member.Roles.Last().Position} role(s) above you!");
+                var roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                string message;
+
+                message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above you!" :
+                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
+
+                await _sender.SendAsync(ctx.Channel.Id, message);
                 return;
             }
 
             if (config.MuteRoleId is 0)
             {
-                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel);
+                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel.Id, _sender);
                 return;
             }
 
-            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member,
-                InfractionType.Mute, reason);
+            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member, InfractionType.Mute, reason);
 
             await _infractionService.MuteAsync(user, ctx.Channel, infraction);
             await ctx.RespondAsync($":white_check_mark: Muted {user.Username} indefinitely.");
         }
 
-        [Command("mute")]
         [Priority(1)]
+        [Command("mute")]
+        [RequireFlag(UserFlag.Staff)]
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
             if (user.IsAbove(bot))
             {
-                await ctx.RespondAsync($"{user.Username} is {user.Roles.Last().Position - bot.Roles.Last().Position} role(s) above me!")
-                    .ConfigureAwait(false);
+                var roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+                string message;
+
+                message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above me!" :
+                    "We have the same top role! I can't add roles to this person.";
+
+                await _sender.SendAsync(ctx.Channel.Id, message);
                 return;
             }
+
             if (user.IsAbove(ctx.Member))
             {
-                await ctx.RespondAsync($"They're {user.Roles.Last().Position - ctx.Member.Roles.Last().Position} role(s) above you!");
+                var roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                string message;
+
+                message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above you!" :
+                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
+
+                await _sender.SendAsync(ctx.Channel.Id, message);
                 return;
             }
 
@@ -79,7 +112,7 @@ namespace Silk.Core.Discord.Commands.Moderation
 
             if (config.MuteRoleId is 0)
             {
-                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel);
+                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel.Id, _sender);
                 return;
             }
 

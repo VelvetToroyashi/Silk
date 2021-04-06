@@ -53,36 +53,32 @@ namespace Silk.Core.Discord.Utilities.Bot
             };
             await task;
 
-            Log.Logger.ForContext(e.Command.Module.ModuleType).Warning(e.Exception, "Exception thrown!");
+            Log.Logger.ForContext(e.Command.Module.ModuleType).Warning(e.Exception, "Something went wrong!");
             //_logger.LogWarning(e.Exception.InnerException ?? e.Exception , "A command threw an exception! Command: {CommandName}", e.Command.Name);
         }
 
         private async Task ShowChecksFailedMessage(CommandErrorEventArgs e, DiscordClient c, ChecksFailedException cf)
         {
-            switch (cf.FailedChecks[0])
+            string owner = c.CurrentApplication.Owners.Select(o => $"{o.Username}#{o.Discriminator}").Join(", ");
+            foreach (CheckBaseAttribute check in cf.FailedChecks)
             {
-                case RequireOwnerAttribute:
-                    string owner = c.CurrentApplication.Owners.Select(o => $"{o.Username}#{o.Discriminator}").Join(", ");
-                    await e.Context.RespondAsync($"My owners consist of: {owner}. {cf.Context.User.Username}#{cf.Context.User.Discriminator} doesn't look like any of those names!");
-                    break;
-                case RequireNsfwAttribute:
-                    await e.Context.RespondAsync("Hot, but this channel isn't that spicy! (Mark it as NSFW and I'll budge ;3)");
-                    break;
-                case RequireFlagAttribute f:
-                    await e.Context.RespondAsync($"Heh. You need to be {f.RequisiteUserFlag.Humanize(LetterCasing.Title)} for that.");
-                    break;
-                case CooldownAttribute cd:
-                    await e.Context.RespondAsync($"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!");
-                    break;
-                case RequireUserPermissionsAttribute p:
-                    await e.Context.RespondAsync($"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!");
-                    break;
-                case RequireDirectMessageAttribute:
-                    await e.Context.RespondAsync("Psst. You need to be in DMs to run this!");
-                    break;
-                case RequireGuildAttribute:
-                    await e.Context.RespondAsync("Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.");
-                    break;
+                string? message = check switch
+                {
+                    RequireOwnerAttribute => $"My owners consist of: {owner}. {cf.Context.User.Username}#{cf.Context.User.Discriminator} doesn't look like any of those names!",
+                    RequireNsfwAttribute => "As much as I'd love to, I've gotta keep the hot stuff to the right channels.",
+                    RequireFlagAttribute f => $"Heh. You need to be {f.RequisiteUserFlag.Humanize(LetterCasing.Title)} for that.",
+                    CooldownAttribute cd => $"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!",
+                    RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
+                    RequireDirectMessageAttribute => "Psst. You need to be in DMs to run this!",
+                    RequireGuildAttribute => "Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.",
+                    _ => null
+                };
+
+                if (message is not null)
+                {
+                    await e.Context.RespondAsync(message);
+                    return;
+                }
             }
         }
 

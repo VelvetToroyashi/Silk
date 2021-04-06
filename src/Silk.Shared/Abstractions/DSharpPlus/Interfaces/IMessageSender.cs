@@ -4,6 +4,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
 {
     public interface IMessageSender
     {
-        public Task<IMessage> Send(ulong channelId, string content);
+        public Task<IMessage> SendAsync(ulong channelId, string content);
     }
 }

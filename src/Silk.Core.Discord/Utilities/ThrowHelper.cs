@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Utilities
 {
     public static class ThrowHelper
     {
         //TODO: Use this more often.
-        public static async Task MisconfiguredMuteRole(DiscordChannel channel)
+        public static async Task MisconfiguredMuteRole(ulong channelId, IMessageSender sender)
         {
-            await channel.SendMessageAsync("Mute role isn't set up!");
+            await sender.SendAsync(channelId, "Mute role isn't set up!");
             throw new KeyNotFoundException("Mute role not set.");
         }
     }

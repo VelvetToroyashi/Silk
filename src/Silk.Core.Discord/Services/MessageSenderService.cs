@@ -17,7 +17,7 @@ namespace Silk.Core.Discord.Services
             _client = client;
         }
 
-        public async Task<IMessage> Send(ulong channelId, string? content)
+        public async Task<IMessage> SendAsync(ulong channelId, string? content)
         {
             DiscordChannel? channel = GetChannel(channelId);
             DiscordMessage message;

@@ -32,6 +32,13 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public Task<IMessage> SendAsync(IMessage message);
 
         /// <summary>
+        /// Sends an <see cref="IMessage"/> to the channel.
+        /// </summary>
+        /// <param name="message">The message to send to the channel.</param>
+        /// <returns>The sent <see cref="IMessage"/>.</returns>
+        public Task<IMessage> SendAsync(string message);
+
+        /// <summary>
         /// Gets a specific message from the channel.
         /// </summary>
         /// <param name="id">The Id of the message to retrieve.</param>
