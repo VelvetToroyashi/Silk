@@ -16,7 +16,7 @@ namespace Silk.Core.Discord.Commands.General
             var Oauth2 = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentUser.Id}&permissions=502656214&scope=bot%20applications.commands";
             await ctx.RespondAsync(new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Gold)
-                .WithDescription($"You can invite me with [this Oauth2]({Oauth2}) Link!"));
+                .WithDescription($"You can invite me with [this Oauth2 Link]({Oauth2}) !"));
         }
     }
 }
