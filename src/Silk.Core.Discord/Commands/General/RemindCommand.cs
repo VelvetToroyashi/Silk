@@ -83,7 +83,7 @@ namespace Silk.Core.Discord.Commands.General
             };
 
             await _reminders.CreateReminder(time, ctx.User.Id, ctx.Channel.Id, ctx.Message.Id, ctx.Guild.Id, reminder, false, type);
-            await ctx.RespondAsync($"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)} of/to: {reminder}");
+            await ctx.RespondAsync($"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)}: {reminder}");
         }
 
 

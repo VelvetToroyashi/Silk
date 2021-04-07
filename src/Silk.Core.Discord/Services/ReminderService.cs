@@ -54,7 +54,7 @@ namespace Silk.Core.Discord.Services
         {
             IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
             if (reminders.Count() is 0) return null;
-            return reminders;
+            else return reminders;
         }
 
         public async Task RemoveReminderAsync(int id)

@@ -16,7 +16,6 @@ using Silk.Extensions;
 
 namespace Silk.Core.Discord.Utilities.Bot
 {
-
     public class BotExceptionHandler
     {
 
@@ -81,7 +80,6 @@ namespace Silk.Core.Discord.Utilities.Bot
                 }
             }
         }
-
 
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
