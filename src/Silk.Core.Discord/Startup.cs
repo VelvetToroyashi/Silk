@@ -43,8 +43,9 @@ namespace Silk.Core.Discord
             services.AddSingleton<ReminderService>();
 
             services.AddHostedService(b => b.GetRequiredService<ReminderService>());
-            services.AddHostedService<Bot>();
             services.AddHostedService<StatusService>();
+            services.AddHostedService<Bot>();
+
 
 
             services.AddMediatR(typeof(Program));

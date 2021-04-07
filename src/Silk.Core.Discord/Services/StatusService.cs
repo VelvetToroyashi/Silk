@@ -12,6 +12,8 @@ namespace Silk.Core.Discord.Services
 {
     public class StatusService : BackgroundService
     {
+        private bool _ready = false;
+
         private readonly DiscordShardedClient _client;
         private readonly ILogger<StatusService> _logger;
         private readonly LoopedList<string> _statuses = new()
@@ -28,11 +30,21 @@ namespace Silk.Core.Discord.Services
         {
             _client = client;
             _logger = logger;
+
+            client.Ready += (_, _) =>
+            {
+                _ready = true;
+                return Task.CompletedTask;
+            };
         }
 
+        // This service starts before the client actually connects to Discord, so we need to wait. //
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogWarning("Waiting for client to connect to gateway");
+            while (!_ready) { await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken); }
             _logger.LogInformation("Started!");
+
             try
             {
                 while (true)
