@@ -27,7 +27,7 @@ using Silk.Extensions;
 namespace Silk.Core.Discord
 {
     //Lorum Ipsum, or something.
-    public class Bot : IHostedService
+    public class Bot : BackgroundService
     {
         public DiscordShardedClient Client { get; set; }
         public static Bot? Instance { get; private set; }
@@ -172,20 +172,19 @@ namespace Silk.Core.Discord
             _logger.LogInformation("Subscribed to all events!");
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await InitializeClientAsync();
-            try { await Task.Delay(-1, cancellationToken); }
+            try { await Task.Delay(-1, stoppingToken); }
             catch (TaskCanceledException)
             {
                 /* Ignored. */
             }
-        }
-
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Shutting down. ");
-            await Client.StopAsync();
+            finally
+            {
+                _logger.LogInformation("Shutting down. ");
+                await Client.StopAsync();
+            }
         }
     }
 }

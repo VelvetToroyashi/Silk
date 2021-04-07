@@ -187,6 +187,7 @@ namespace Silk.Core.Discord.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine("Thonk.");
             _logger.LogInformation("Started!");
 
             using IServiceScope scope = _services.CreateScope();
