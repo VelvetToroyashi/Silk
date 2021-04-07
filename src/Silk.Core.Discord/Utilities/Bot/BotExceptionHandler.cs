@@ -70,7 +70,7 @@ namespace Silk.Core.Discord.Utilities.Bot
                     CooldownAttribute cd => $"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!",
                     RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
                     RequireDirectMessageAttribute => "Psst. You need to be in DMs to run this!",
-                    RequireGuildAttribute => "Not exactly sure what's that's supposed to accomplish in DMs; try it in a server.",
+                    RequireGuildAttribute => "As it would turn out, you can't run this in DMs!",
                     _ => null
                 };
 

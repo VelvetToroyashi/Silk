@@ -38,7 +38,7 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
             Reminder r = new()
             {
                 Expiration = request.Expiration,
-                CreationTime = DateTime.Now.ToUniversalTime(),
+                CreationTime = DateTime.UtcNow,
                 OwnerId = request.OwnerId,
                 ChannelId = request.ChannelId,
                 MessageId = request.MessageId,

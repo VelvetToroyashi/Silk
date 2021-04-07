@@ -32,6 +32,7 @@ namespace Silk.Core.Discord.Commands.General
         }
     }
 
+    [RequireGuild]
     [Group("remind")]
     [Aliases("reminder")]
     [Category(Categories.General)]
@@ -52,7 +53,7 @@ namespace Silk.Core.Discord.Commands.General
             string? replyContent = ctx.Message.ReferencedMessage?.Content;
 
             await _reminders.CreateReminder(DateTime.UtcNow + time, ctx.User.Id, ctx.Channel.Id,
-                ctx.Message.Id, ctx.Guild.Id, reminder, ctx.Message.ReferencedMessage is not null, ReminderType.Once, replyId, authorId, replyContent);
+                ctx.Message.Id, ctx.Guild?.Id ?? 0, reminder, ctx.Message.ReferencedMessage is not null, ReminderType.Once, replyId, authorId, replyContent);
             await ctx.RespondAsync($"Alrighty, I'll remind you in {time.Humanize(2, minUnit: TimeUnit.Second)}: {reminder.Pull(..200)}");
         }
 
@@ -78,7 +79,7 @@ namespace Silk.Core.Discord.Commands.General
                 ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
                 ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
                 ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30),
-                _ => throw new InvalidOperationException("Yeah no.")
+                _ => throw new ArgumentException("Yeah no.")
             };
 
             await _reminders.CreateReminder(time, ctx.User.Id, ctx.Channel.Id, ctx.Message.Id, ctx.Guild.Id, reminder, false, type);

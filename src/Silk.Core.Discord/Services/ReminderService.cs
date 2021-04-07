@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Unified.Reminders;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Discord.Services
 {
@@ -90,41 +91,72 @@ namespace Silk.Core.Discord.Services
             }
             else
             {
-                if (reminder.Type is ReminderType.Once)
+                if (reminder.GuildId is not 0)
                 {
-                    _logger.LogTrace("Dequeing reminder");
-                    _reminders.Remove(reminder);
+                    await SendGuildReminderAsync(reminder, guild);
                 }
-
-                if (!guild.Channels.TryGetValue(reminder.ChannelId, out var channel)) { await SendDmReminderAsync(reminder, guild); }
-                else { await SendGuildReminderAsync(reminder, channel); }
-
-                using IServiceScope scope = _services.CreateScope();
-                var mediator = scope.ServiceProvider.Get<IMediator>();
-
-                if (reminder.Type is ReminderType.Once)
+                else
                 {
-                    await RemoveReminderAsync(reminder.Id);
-                    return;
+                    DiscordMember? member = _client.GetMember((m) => m.Id == reminder.OwnerId);
+
+                    if (member is not null)
+                    {
+                        DiscordChannel channel = await member.CreateDmChannelAsync();
+                        await SendRecurringReminderMessageAsync(reminder, channel);
+                    }
+                    else
+                    {
+                        // Skip, but don't remove it. //
+                        _logger.LogWarning("Couldn't find member to DM. Skipping");
+                        await UpdateRecurringReminderAsync(reminder); // Ensure the expiration is reset so we don't spam the logs. //
+                    }
                 }
-                DateTime time = reminder.Type switch
-                {
-                    ReminderType.Hourly => DateTime.UtcNow + TimeSpan.FromHours(1),
-                    ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
-                    ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
-                    ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30)
-                };
-                int index = _reminders.IndexOf(reminder);
-                _reminders[index] = await mediator!.Send(new UpdateReminderRequest(reminder, time));
             }
         }
 
-        private async Task SendGuildReminderAsync(Reminder reminder, DiscordChannel channel)
+        private async Task UpdateRecurringReminderAsync(Reminder reminder)
+        {
+            using IServiceScope scope = _services.CreateScope();
+            var mediator = scope.ServiceProvider.Get<IMediator>();
+            DateTime time = reminder.Type switch
+            {
+                ReminderType.Hourly => DateTime.UtcNow + TimeSpan.FromHours(1),
+                ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
+                ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
+                ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30),
+                _ => throw new ArgumentException()
+            };
+            int index = _reminders.IndexOf(reminder);
+            _reminders[index] = await mediator!.Send(new UpdateReminderRequest(reminder, time));
+        }
+
+        private async Task SendGuildReminderAsync(Reminder reminder, DiscordGuild guild)
+        {
+            if (reminder.Type is ReminderType.Once)
+            {
+                _logger.LogTrace("Dequeing reminder");
+                _reminders.Remove(reminder);
+                await RemoveReminderAsync(reminder.Id);
+            }
+            if (!guild.Channels.TryGetValue(reminder.ChannelId, out var channel)) { await SendDmReminderMessageAsync(reminder, guild); }
+            else { await SendGuildReminderMessageAsync(reminder, channel); }
+        }
+        private async Task SendRecurringReminderMessageAsync(Reminder reminder, DiscordChannel channel)
+        {
+            var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
+            var message = $"Hey, <@{reminder.OwnerId}! You wanted to reminded {reminder.Type.Humanize(LetterCasing.LowerCase)}: \n{reminder.MessageContent}";
+            builder.WithContent(message);
+
+            await channel.SendMessageAsync(builder);
+            await UpdateRecurringReminderAsync(reminder);
+        }
+
+        private async Task SendGuildReminderMessageAsync(Reminder reminder, DiscordChannel channel)
         {
             _logger.LogTrace("Preparing to send reminder");
             var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
             var mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
-            var message = $"Hey{mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
+            var message = $"Hey, {mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
 
             // These are misleading names (They don't actually dispatch a message) I know but w/e. //
             if (reminder.WasReply) { await SendReplyReminderAsync(reminder, channel, builder, message); }
@@ -172,17 +204,17 @@ namespace Silk.Core.Discord.Services
             }
         }
 
-        private async Task SendDmReminderAsync(Reminder reminder, DiscordGuild guild)
+        private async Task SendDmReminderMessageAsync(Reminder reminder, DiscordGuild guild)
         {
-            _logger.LogTrace("Channel doesn't exist on guild! Attempting to DM user");
+            _logger.LogWarning("Channel doesn't exist on guild! Attempting to DM user");
 
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(reminder.OwnerId);
                 await member.SendMessageAsync(MissingChannel + $"{(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago: \n{reminder.MessageContent}");
             }
-            catch (UnauthorizedException) { _logger.LogTrace("Failed to message user, skipping "); }
-            catch (NotFoundException) { _logger.LogTrace("Member left guild, skipping"); }
+            catch (UnauthorizedException) { _logger.LogWarning("Failed to message user, skipping "); }
+            catch (NotFoundException) { _logger.LogWarning("Member left guild, skipping"); }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
