@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Silk.Core.Data;
-using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities;
 
 namespace Silk.Core.Logic
@@ -22,14 +21,14 @@ namespace Silk.Core.Logic
             var builder = CreateHostBuilder();
             AddLogging(builder);
             ConfigureServices(builder);
-            Program.Start(builder);
+            Discord.Program.Start(builder);
 
             builder.UseConsoleLifetime();
 
             await builder.RunConsoleAsync().ConfigureAwait(false);
         }
 
-        private static IHostBuilder CreateHostBuilder()
+        public static IHostBuilder CreateHostBuilder()
         {
             var builder = Host.CreateDefaultBuilder();
 
@@ -65,13 +64,14 @@ namespace Silk.Core.Logic
             });
         }
 
-        private static void ConfigureServices(IHostBuilder builder)
+        public static IHostBuilder ConfigureServices(IHostBuilder builder)
         {
             builder.ConfigureServices((context, services) =>
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
             });
+            return builder;
         }
 
         private static void AddDatabases(IServiceCollection services, string connectionString)

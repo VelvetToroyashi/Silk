@@ -42,6 +42,11 @@ namespace Silk.Core.Data.Models
         public ulong MessageId { get; set; }
 
         /// <summary>
+        /// The type of reminder, be it recurring or non-reccuring.
+        /// </summary>
+        public ReminderType Type { get; set; }
+
+        /// <summary>
         /// The content of the original reminder, in case a message can't be sent to the original channel.
         /// </summary>
         public string MessageContent { get; set; }
