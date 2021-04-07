@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data
@@ -29,15 +27,7 @@ namespace Silk.Core.Data
 
         public DbSet<Reminder> Reminders { get; set; } = null!;
 
-        public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
-        public GuildContext()
-        {
-            var options = new DbContextOptionsBuilder();
-            var str = JsonSerializer.Deserialize<dynamic>(File.ReadAllText("./appSettings.json"));
-            var connString = str!.ConnectionStrings.core;
-
-            options.UseNpgsql(connString as string);
-        }
+        public GuildContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
