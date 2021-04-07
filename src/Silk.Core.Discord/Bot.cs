@@ -87,7 +87,7 @@ namespace Silk.Core.Discord
 
             sw.Stop();
 
-            _logger.LogDebug($"Registered commands for {Client.ShardClients.Count} shard(s) in {sw.ElapsedMilliseconds} ms.");
+            _logger.LogDebug("Registered commands for {Shards} shard(s) in {Time} ms", Client.ShardClients.Count, sw.ElapsedMilliseconds);
         }
 
         private async Task InitializeClientAsync()

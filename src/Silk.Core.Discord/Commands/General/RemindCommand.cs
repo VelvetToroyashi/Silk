@@ -82,7 +82,7 @@ namespace Silk.Core.Discord.Commands.General
             };
 
             await _reminders.CreateReminder(time, ctx.User.Id, ctx.Channel.Id, ctx.Message.Id, ctx.Guild.Id, reminder, false, type);
-            await ctx.RespondAsync($"Alrighty! I'll remind you {type} of/to: {reminder}");
+            await ctx.RespondAsync($"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)} of/to: {reminder}");
         }
 
 
@@ -102,10 +102,14 @@ namespace Silk.Core.Discord.Commands.General
                 string[] allReminders = reminders
                     .Select(r =>
                     {
-                        var s = $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n";
+                        var s =
+                            r.Type is ReminderType.Once ?
+                                $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
+                                $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
+
                         if (r.ReplyId is not null)
                         {
-                            s += $"[Referenced message](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
+                            s += $"[replying to this](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
                         }
                         s += $"`{r.MessageContent}`";
                         return s;

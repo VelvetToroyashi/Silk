@@ -187,14 +187,13 @@ namespace Silk.Core.Discord.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("Thonk.");
             _logger.LogInformation("Started!");
 
             using IServiceScope scope = _services.CreateScope();
             var mediator = scope.ServiceProvider.Get<IMediator>();
 
             _reminders = (await mediator!.Send(new GetAllRemindersRequest(), stoppingToken)).ToList();
-            _logger.LogTrace("Slurped {ReminderCount} reminders into memory", _reminders.Count);
+            _logger.LogTrace("Loaded {ReminderCount} reminders", _reminders.Count);
             _logger.LogDebug("Starting reminder callback timer");
 
             var timer = new Timer(__ => _ = Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
