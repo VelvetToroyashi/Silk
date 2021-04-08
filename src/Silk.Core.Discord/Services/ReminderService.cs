@@ -91,25 +91,16 @@ namespace Silk.Core.Discord.Services
             }
             else
             {
-                if (reminder.GuildId is not 0)
+                if (reminder.Type is ReminderType.Once)
                 {
                     await SendGuildReminderAsync(reminder, guild);
                 }
                 else
                 {
-                    DiscordMember? member = _client.GetMember((m) => m.Id == reminder.OwnerId);
-
-                    if (member is not null)
-                    {
-                        DiscordChannel channel = await member.CreateDmChannelAsync();
-                        await SendRecurringReminderMessageAsync(reminder, channel);
-                    }
-                    else
-                    {
-                        // Skip, but don't remove it. //
-                        _logger.LogWarning("Couldn't find member to DM. Skipping");
-                        await UpdateRecurringReminderAsync(reminder); // Ensure the expiration is reset so we don't spam the logs. //
-                    }
+                    guild.Channels.TryGetValue(reminder.ChannelId, out var channel);
+                    channel ??= await _client.GetMember(m => m.Id == reminder.OwnerId)?.CreateDmChannelAsync()!;
+                    if (channel is null) return; // Member doesn't exist //
+                    await SendRecurringReminderMessageAsync(reminder, channel);
                 }
             }
         }
@@ -141,10 +132,11 @@ namespace Silk.Core.Discord.Services
             if (!guild.Channels.TryGetValue(reminder.ChannelId, out var channel)) { await SendDmReminderMessageAsync(reminder, guild); }
             else { await SendGuildReminderMessageAsync(reminder, channel); }
         }
+
         private async Task SendRecurringReminderMessageAsync(Reminder reminder, DiscordChannel channel)
         {
             var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
-            var message = $"Hey, <@{reminder.OwnerId}! You wanted to reminded {reminder.Type.Humanize(LetterCasing.LowerCase)}: \n{reminder.MessageContent}";
+            var message = $"Hey, <@{reminder.OwnerId}>! You wanted to reminded {reminder.Type.Humanize(LetterCasing.LowerCase)}: \n{reminder.MessageContent}";
             builder.WithContent(message);
 
             await channel.SendMessageAsync(builder);
