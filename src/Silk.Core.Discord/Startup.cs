@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Extensions.Logging;
 using Silk.Core.Data;
@@ -16,23 +14,6 @@ namespace Silk.Core.Discord
 {
     public static class Startup
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static void AddDatabase(IServiceCollection services, string connectionString)
-        {
-            services.AddDbContextFactory<GuildContext>(
-                option =>
-                {
-                    option.UseNpgsql(connectionString);
-                    #if DEBUG
-                    option.EnableSensitiveDataLogging();
-                    option.EnableDetailedErrors();
-                    #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-                }, ServiceLifetime.Transient);
-        }
-
-
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void AddServices(IServiceCollection services)
         {
             services.AddTransient<ConfigService>();
@@ -54,14 +35,18 @@ namespace Silk.Core.Discord
 
             services.AddSingleton<TagService>();
 
-            services.AddHostedService<Bot>();
-            services.AddHostedService<StatusService>();
+
 
             services.AddSingleton<IMessageSender, MessageSenderService>();
 
             //Copped this hack from: https://stackoverflow.com/a/65552373 //
             services.AddSingleton<ReminderService>();
+
             services.AddHostedService(b => b.GetRequiredService<ReminderService>());
+            services.AddHostedService<StatusService>();
+            services.AddHostedService<Bot>();
+
+
 
             services.AddMediatR(typeof(Program));
             services.AddMediatR(typeof(GuildContext));

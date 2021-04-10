@@ -49,13 +49,10 @@ namespace Silk.Core.Discord
 
         private static void ConfigureHost(IHostBuilder host)
         {
-            host.ConfigureLogging((builder, _) =>
+            host.ConfigureServices((context, services) =>
                 {
-                    if (int.TryParse(builder.Configuration["Shards"] ?? "1", out int shards))
+                    if (int.TryParse(context.Configuration["Shards"] ?? "1", out int shards))
                         _clientConfig.ShardCount = shards;
-                })
-                .ConfigureServices((context, services) =>
-                {
                     IConfiguration config = context.Configuration;
                     _clientConfig.Token = config.GetConnectionString("discord");
 

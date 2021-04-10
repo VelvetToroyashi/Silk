@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Silk.Core.Data;
-using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities;
 
 namespace Silk.Core.Logic
@@ -19,17 +18,19 @@ namespace Silk.Core.Logic
         public static async Task Main()
         {
             // Make Generic Host here. //
-            var builder = CreateHostBuilder();
+            var builder = CreateBuilder();
             AddLogging(builder);
             ConfigureServices(builder);
-            Program.Start(builder);
+            Discord.Program.Start(builder);
 
             builder.UseConsoleLifetime();
 
             await builder.RunConsoleAsync().ConfigureAwait(false);
         }
+        // EFCore calls this. //
+        public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder());
 
-        private static IHostBuilder CreateHostBuilder()
+        private static IHostBuilder CreateBuilder()
         {
             var builder = Host.CreateDefaultBuilder();
 
@@ -65,26 +66,28 @@ namespace Silk.Core.Logic
             });
         }
 
-        private static void ConfigureServices(IHostBuilder builder)
-        {
+        private static IHostBuilder ConfigureServices(IHostBuilder builder) =>
             builder.ConfigureServices((context, services) =>
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
             });
-        }
 
         private static void AddDatabases(IServiceCollection services, string connectionString)
         {
-            services.AddDbContextFactory<GuildContext>(
-                option =>
-                {
-                    option.UseNpgsql(connectionString);
-                    #if DEBUG
-                    option.EnableSensitiveDataLogging();
-                    option.EnableDetailedErrors();
-                    #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-                }, ServiceLifetime.Transient);
+            void Builder(DbContextOptionsBuilder b)
+            {
+                b.UseNpgsql(connectionString);
+                #if DEBUG
+                b.EnableSensitiveDataLogging();
+                b.EnableDetailedErrors();
+                #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
+            }
+
+            services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
+            services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
+
+            services.AddTransient<DbContextOptions<GuildContext>>(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
         }
     }
 }

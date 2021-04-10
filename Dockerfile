@@ -3,9 +3,9 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 
 WORKDIR /Silk
 COPY . ./
-RUN dotnet restore --disable-parallel
+RUN dotnet restore 
 
-RUN dotnet publish ./src/Silk.Core/Silk.Core.Discord.csproj -c Release -o out 
+RUN dotnet publish ./src/Silk.Core.Discord/Silk.Core.Discord.csproj -c Release -o out 
 
 # Run it
 FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine

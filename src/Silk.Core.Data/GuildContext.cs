@@ -27,7 +27,7 @@ namespace Silk.Core.Data
 
         public DbSet<Reminder> Reminders { get; set; } = null!;
 
-        public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
+        public GuildContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -32,6 +32,7 @@ namespace Silk.Core.Discord.Commands.General
         }
     }
 
+    [RequireGuild]
     [Group("remind")]
     [Aliases("reminder")]
     [Category(Categories.General)]
@@ -52,10 +53,41 @@ namespace Silk.Core.Discord.Commands.General
             string? replyContent = ctx.Message.ReferencedMessage?.Content;
 
             await _reminders.CreateReminder(DateTime.UtcNow + time, ctx.User.Id, ctx.Channel.Id,
-                ctx.Message.Id, ctx.Guild.Id, reminder, ctx.Message.ReferencedMessage is not null, replyId, authorId, replyContent);
+                ctx.Message.Id, ctx.Guild?.Id ?? 0, reminder, ctx.Message.ReferencedMessage is not null, ReminderType.Once, replyId, authorId, replyContent);
             await ctx.RespondAsync($"Alrighty, I'll remind you in {time.Humanize(2, minUnit: TimeUnit.Second)}: {reminder.Pull(..200)}");
         }
 
+        // RECURRING REMINDERS //
+
+        [Command]
+        public async Task Hourly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly);
+
+        [Command]
+        public async Task Daily(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Daily);
+
+        [Command]
+        public async Task Weekly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly);
+
+        [Command]
+        public async Task Monthly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly);
+
+        private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type)
+        {
+            DateTime time = type switch
+            {
+                ReminderType.Hourly => DateTime.UtcNow + TimeSpan.FromHours(1),
+                ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
+                ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
+                ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30),
+                _ => throw new ArgumentException("Yeah no.")
+            };
+
+            await _reminders.CreateReminder(time, ctx.User.Id, ctx.Channel.Id, ctx.Message.Id, ctx.Guild.Id, reminder, false, type);
+            await ctx.RespondAsync($"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)}: {reminder}");
+        }
+
+
+        // NON-RECURRING REMINDERS //
         [Command]
         [Description("Gives you a list of your reminders")]
         public async Task List(CommandContext ctx)
@@ -71,10 +103,14 @@ namespace Silk.Core.Discord.Commands.General
                 string[] allReminders = reminders
                     .Select(r =>
                     {
-                        var s = $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n";
+                        var s =
+                            r.Type is ReminderType.Once ?
+                                $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
+                                $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
+
                         if (r.ReplyId is not null)
                         {
-                            s += $"[Referenced message](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
+                            s += $"[replying to this](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
                         }
                         s += $"`{r.MessageContent}`";
                         return s;

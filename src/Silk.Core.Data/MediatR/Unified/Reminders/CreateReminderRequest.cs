@@ -13,7 +13,8 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
     public record CreateReminderRequest(
         DateTime Expiration, ulong OwnerId,
         ulong ChannelId, ulong MessageId, ulong GuildId,
-        string MessageContent, bool WasReply, ulong? ReplyId = null,
+        string MessageContent, bool WasReply,
+        ReminderType Type, ulong? ReplyId = null,
         ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
 
     /// <summary>
@@ -37,11 +38,12 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
             Reminder r = new()
             {
                 Expiration = request.Expiration,
-                CreationTime = DateTime.Now.ToUniversalTime(),
+                CreationTime = DateTime.UtcNow,
                 OwnerId = request.OwnerId,
                 ChannelId = request.ChannelId,
                 MessageId = request.MessageId,
                 GuildId = request.GuildId,
+                Type = request.Type,
                 ReplyId = request.ReplyId,
                 MessageContent = request.MessageContent,
                 WasReply = request.WasReply,
