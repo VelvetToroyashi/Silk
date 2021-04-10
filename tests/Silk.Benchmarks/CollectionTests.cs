@@ -11,10 +11,10 @@ namespace Silk.Benchmarks
     public class CollectionTests
     {
         private static readonly IEnumerable<int> _baseList = Enumerable.Range(0, 10000);
-        private readonly List<int> list = new(_baseList);
         private readonly HashSet<int> hashSet = new(_baseList);
-        private readonly SortedSet<int> sortedSet = new(_baseList);
         private readonly LinkedList<int> linkedList = new(_baseList);
+        private readonly List<int> list = new(_baseList);
+        private readonly SortedSet<int> sortedSet = new(_baseList);
 
         [Benchmark]
         public void ListForLoop()

@@ -23,13 +23,13 @@ namespace Silk.Core.Discord.Commands.Server
     public class TagCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
-        private readonly TagService _tagService;
         private readonly string[] _reservedWords =
         {
             "create", "update", "delete",
             "alias", "info", "claim",
             "raw", "list"
         };
+        private readonly TagService _tagService;
         public TagCommand(IMediator mediator, TagService tagService)
         {
             _mediator = mediator;
@@ -341,6 +341,9 @@ namespace Silk.Core.Discord.Commands.Server
 
         [Command]
         [Description("Get Tags created by the Current User")]
-        public async Task Tags(CommandContext ctx) => await Tags(ctx, ctx.Member);
+        public async Task Tags(CommandContext ctx)
+        {
+            await Tags(ctx, ctx.Member);
+        }
     }
 }

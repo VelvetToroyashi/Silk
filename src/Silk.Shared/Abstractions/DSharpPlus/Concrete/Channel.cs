@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -26,21 +27,18 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             {
                 return ((Message) await channel.SendMessageAsync(message.Content))!;
             }
-            else
-            {
-                var builder = new DiscordMessageBuilder();
-                builder.WithReply(message.Reply.Id);
-                builder.WithContent(message.Content);
-                return ((Message) await channel.SendMessageAsync(builder))!;
-            }
+            var builder = new DiscordMessageBuilder();
+            builder.WithReply(message.Reply.Id);
+            builder.WithContent(message.Content);
+            return ((Message) await channel.SendMessageAsync(builder))!;
         }
         public async Task<IMessage> SendAsync(string message)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
         public async Task<IMessage?> GetMessageAsync(ulong id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,18 +6,21 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request to add a user to the database.
+    ///     Request to add a user to the database.
     /// </summary>
     public record AddUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
     /// <summary>
-    /// The default handler for <see cref="AddUserRequest"/>.
+    ///     The default handler for <see cref="AddUserRequest" />.
     /// </summary>
     public class AddUserHandler : IRequestHandler<AddUserRequest, User>
     {
         private readonly GuildContext _db;
 
-        public AddUserHandler(GuildContext db) => _db = db;
+        public AddUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<User> Handle(AddUserRequest request, CancellationToken cancellationToken)
         {

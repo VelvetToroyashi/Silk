@@ -7,17 +7,20 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request to get a user from the database, or creates one if it does not exist.
+    ///     Request to get a user from the database, or creates one if it does not exist.
     /// </summary>
     public record GetOrCreateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
     /// <summary>
-    /// The default handler for <see cref="GetOrCreateUserRequest"/>.
+    ///     The default handler for <see cref="GetOrCreateUserRequest" />.
     /// </summary>
     public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, User>
     {
         private readonly GuildContext _db;
-        public GetOrCreateUserHandler(GuildContext db) => _db = db;
+        public GetOrCreateUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<User> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
         {
@@ -33,7 +36,7 @@ namespace Silk.Core.Data.MediatR.Unified.Users
                 {
                     GuildId = request.GuildId,
                     Id = request.UserId,
-                    Flags = request.Flags ?? UserFlag.None,
+                    Flags = request.Flags ?? UserFlag.None
                 };
                 _db.Users.Add(user);
                 await _db.SaveChangesAsync(cancellationToken);

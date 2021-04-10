@@ -33,7 +33,7 @@ namespace Silk.Core.Discord.Commands.Bot
             var shards = Discord.Bot.Instance!.Client.ShardClients;
             var averagePing = shards.Sum(c => c.Value.Ping) / shards.Count;
 
-            embed.WithDescription($"**{EmbedTitle}** \n{sb}");
+            embed.AddField("​", $"**{EmbedTitle}**");
             embed.WithFooter($"You are shard {ctx.Client.ShardId + 1}!");
 
             sb.Append("`|");
@@ -68,6 +68,5 @@ namespace Silk.Core.Discord.Commands.Bot
 
             await ctx.Channel.SendPaginatedMessageAsync(ctx.User, paginated);
         }
-
     }
 }

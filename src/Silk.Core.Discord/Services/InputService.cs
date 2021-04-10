@@ -9,7 +9,7 @@ using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Services
 {
-    /// <inheritdoc cref="IInputService"/>
+    /// <inheritdoc cref="IInputService" />
     public class InputService : IInputService
     {
         private readonly DiscordShardedClient _client;
@@ -23,6 +23,15 @@ namespace Silk.Core.Discord.Services
         {
             var interactivity = GetInteractivityInternal(guildId);
             return await WaitForInputAsync(interactivity, userId, channelId, guildId, timeOut);
+        }
+
+        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)
+        {
+            throw new NotImplementedException();
         }
         private InteractivityExtension GetInteractivityInternal(ulong? guildId)
         {
@@ -44,15 +53,6 @@ namespace Silk.Core.Discord.Services
             }, timeOut);
 
             return message.TimedOut ? null : message.Result.Content;
-        }
-
-        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 namespace Silk.Core.Discord.Utilities
 {
     /// <summary>
-    /// Overriding Logging Filter for HttpClientFactory
-    /// Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
+    ///     Overriding Logging Filter for HttpClientFactory
+    ///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
     /// </summary>
     public class CustomLoggingFilter : IHttpMessageHandlerBuilderFilter
     {

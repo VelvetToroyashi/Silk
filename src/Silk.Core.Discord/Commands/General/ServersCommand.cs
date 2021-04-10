@@ -12,8 +12,13 @@ namespace Silk.Core.Discord.Commands.General
         [Command("servers")]
         [Aliases("serverlist")]
         [Description("How many servers am I present on?")]
-        public async Task Servers(CommandContext ctx) => await ctx.RespondAsync($"I am currently on {GetGuildCount()} servers!");
-        private static int GetGuildCount() => Discord.Bot.Instance!.Client.ShardClients.Values.SelectMany(s => s.Guilds.Keys).Count();
-
+        public async Task Servers(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"I am currently on {GetGuildCount()} servers!");
+        }
+        private static int GetGuildCount()
+        {
+            return Discord.Bot.Instance!.Client.ShardClients.Values.SelectMany(s => s.Guilds.Keys).Count();
+        }
     }
 }

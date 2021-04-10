@@ -7,13 +7,13 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     /// <summary>
-    /// Request for retrieving a <see cref="Guild"/>.
+    ///     Request for retrieving a <see cref="Guild" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     public record GetGuildRequest(ulong GuildId) : IRequest<Guild>;
 
     /// <summary>
-    /// The default handler for <see cref="GetGuildRequest"/>.
+    ///     The default handler for <see cref="GetGuildRequest" />.
     /// </summary>
     public class GetGuildHandler : IRequestHandler<GetGuildRequest, Guild>
     {

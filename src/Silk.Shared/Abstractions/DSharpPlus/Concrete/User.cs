@@ -7,6 +7,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     {
         public ulong Id { get; init; }
 
-        public static explicit operator User(DiscordUser u) => new() {Id = u.Id};
+        public static explicit operator User(DiscordUser u)
+        {
+            return new() {Id = u.Id};
+        }
     }
 }

@@ -15,14 +15,14 @@ namespace Silk.Core.Discord.Utilities.HelpFormatter
 {
     public class HelpFormatter : BaseHelpFormatter
     {
-        public Command? Command { get; private set; }
-        public Command[]? Subcommands { get; private set; }
 
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Command = null;
             Subcommands = null;
         }
+        public Command? Command { get; private set; }
+        public Command[]? Subcommands { get; private set; }
 
         public override BaseHelpFormatter WithCommand(Command command)
         {
@@ -112,6 +112,5 @@ namespace Silk.Core.Discord.Utilities.HelpFormatter
             }
             return argString;
         }
-
     }
 }

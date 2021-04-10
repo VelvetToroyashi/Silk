@@ -24,13 +24,6 @@ namespace Silk.Core.Discord.Utilities.HelpFormatter
     {
 
 
-        public static DiscordEmoji ToEmoji(this string text)
-        {
-            Match match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
-            return DiscordEmoji.FromUnicode(match.Success ? match.Groups[0].Value : text.Trim());
-        }
-
-
         public const string
             Check = "<:check:410612082929565696>",
             Cross = "<:cross:410612082988285952>",
@@ -43,5 +36,12 @@ namespace Silk.Core.Discord.Utilities.HelpFormatter
             Staff = "<:DiscordStaff:777722613966438442>",
             Server = "<:Server:787537636007870485>",
             Empty = "<:Empty:445680384592576514>";
+
+
+        public static DiscordEmoji ToEmoji(this string text)
+        {
+            Match match = Regex.Match(text.Trim(), @"^<?a?:?([a-zA-Z0-9_]+:[0-9]+)>?$");
+            return DiscordEmoji.FromUnicode(match.Success ? match.Groups[0].Value : text.Trim());
+        }
     }
 }

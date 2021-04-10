@@ -7,14 +7,14 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     /// <summary>
-    /// Request for updating a <see cref="Guild"/>.
+    ///     Request for updating a <see cref="Guild" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Infraction">The infraction for this update (can pass null as argument if not needed)</param>
     public record UpdateGuildRequest(ulong GuildId, Infraction? Infraction) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="UpdateGuildRequest"/>
+    ///     The default handler for <see cref="UpdateGuildRequest" />
     /// </summary>
     public class UpdateGuildHandler : IRequestHandler<UpdateGuildRequest>
     {

@@ -12,7 +12,6 @@ namespace Silk.Core.Discord.Services
 {
     public class StatusService : BackgroundService
     {
-        private bool _ready = false;
 
         private readonly DiscordShardedClient _client;
         private readonly ILogger<StatusService> _logger;
@@ -24,6 +23,7 @@ namespace Silk.Core.Discord.Services
             "cute red pandas",
             "for commands!"
         };
+        private bool _ready;
 
 
         public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)

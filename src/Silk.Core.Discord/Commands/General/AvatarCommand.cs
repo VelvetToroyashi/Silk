@@ -12,7 +12,10 @@ namespace Silk.Core.Discord.Commands.General
     public class AvatarCommand : BaseCommandModule
     {
         [Command("avatar")]
-        public async Task GetAvatar(CommandContext ctx, DiscordMember member) => await GetAvatarAsync(ctx, member);
+        public async Task GetAvatar(CommandContext ctx, DiscordMember member)
+        {
+            await GetAvatarAsync(ctx, member);
+        }
 
         [Command("avatar")]
         [Description("Show your, or someone else's avatar!")]
@@ -58,12 +61,16 @@ namespace Silk.Core.Discord.Commands.General
             }
         }
 
-        private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096&v=1");
+        private static string AvatarImageResizedUrl(string avatarUrl)
+        {
+            return avatarUrl.Replace("128", "4096&v=1");
+        }
 
-        private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx) =>
-            new DiscordEmbedBuilder()
+        private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx)
+        {
+            return new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.CornflowerBlue)
                 .WithFooter($"Silk! | Requested by {ctx.User.Username}/{ctx.User.Id}", ctx.User.AvatarUrl);
-
+        }
     }
 }

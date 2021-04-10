@@ -7,11 +7,14 @@ namespace Silk.Shared.Types
         public const char EOT = '\0';
 
         protected int _currentPosition;
-        protected string _source;
 
         int _nextWhitespaceEnd;
+        protected string _source;
 
-        public TextParser(string currentString) => _source = currentString;
+        public TextParser(string currentString)
+        {
+            _source = currentString;
+        }
 
         protected char ReadChar()
         {

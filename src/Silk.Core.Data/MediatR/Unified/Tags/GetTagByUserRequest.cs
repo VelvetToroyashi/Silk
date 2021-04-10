@@ -9,14 +9,14 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request to get all <see cref="Tag"/>'s created by a User in a Guild
+    ///     Request to get all <see cref="Tag" />'s created by a User in a Guild
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="OwnerId">The Id of the User</param>
     public record GetTagByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<Tag>?>;
 
     /// <summary>
-    /// The default handler for <see cref="GetTagByUserRequest"/>.
+    ///     The default handler for <see cref="GetTagByUserRequest" />.
     /// </summary>
     public class GetTagByUserHandler : IRequestHandler<GetTagByUserRequest, IEnumerable<Tag>?>
     {

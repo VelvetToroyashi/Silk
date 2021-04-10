@@ -11,15 +11,15 @@ using Silk.Core.Discord.Services.Interfaces;
 
 namespace Silk.Core.Discord.Services
 {
-    /// <inheritdoc cref="IPrefixCacheService"/>
+    /// <inheritdoc cref="IPrefixCacheService" />
     public class PrefixCacheService : IPrefixCacheService
     {
+        private readonly ConcurrentDictionary<ulong, string> _cache = new();
+        private readonly IServiceCacheUpdaterService _cacheUpdater;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
-        private readonly ConcurrentDictionary<ulong, string> _cache = new();
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
         private readonly Stopwatch _sw = new();
-        private readonly IServiceCacheUpdaterService _cacheUpdater;
         public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<GuildContext> dbFactory, IMemoryCache memoryCache, IServiceCacheUpdaterService cacheUpdater)
         {
             _logger = logger;
@@ -37,6 +37,25 @@ namespace Silk.Core.Discord.Services
             if (guildId == default || guildId == 0) return string.Empty;
             if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string) prefix;
             return GetPrefixFromDatabase(guildId.Value);
+        }
+
+
+        // I don't know if updating a reference will update 
+        public void UpdatePrefix(ulong id, string prefix)
+        {
+            string key = GetGuildString(id);
+
+            _memoryCache.TryGetValue(key, out string oldPrefix);
+            _memoryCache.Set(key, prefix);
+            _logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
+        }
+
+        public void PurgeCache(ulong id)
+        {
+            _cache.TryRemove(id, out _);
+            //GetPrefix caches, so no need for the result.//
+            _ = GetPrefixFromDatabase(id);
+            _logger.LogDebug("Purged prefix from recached from database");
         }
 
         private string GetPrefixFromDatabase(ulong guildId)
@@ -58,25 +77,9 @@ namespace Silk.Core.Discord.Services
             return guild.Prefix;
         }
 
-
-        // I don't know if updating a reference will update 
-        public void UpdatePrefix(ulong id, string prefix)
+        private static string GetGuildString(ulong id)
         {
-            string key = GetGuildString(id);
-
-            _memoryCache.TryGetValue(key, out string oldPrefix);
-            _memoryCache.Set(key, prefix);
-            _logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
-        }
-
-        private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
-
-        public void PurgeCache(ulong id)
-        {
-            _cache.TryRemove(id, out _);
-            //GetPrefix caches, so no need for the result.//
-            _ = GetPrefixFromDatabase(id);
-            _logger.LogDebug("Purged prefix from recached from database");
+            return $"GUILD_PREFIX_KEY_{id}";
         }
     }
 }

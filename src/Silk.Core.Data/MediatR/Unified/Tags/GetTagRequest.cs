@@ -7,12 +7,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request to get a <see cref="Tag"/>, or null if it doesn't exist.
+    ///     Request to get a <see cref="Tag" />, or null if it doesn't exist.
     /// </summary>
     public record GetTagRequest(string Name, ulong GuildId) : IRequest<Tag?>;
 
     /// <summary>
-    /// The default handler for <see cref="GetTagRequest"/>.
+    ///     The default handler for <see cref="GetTagRequest" />.
     /// </summary>
     public class GetTagHandler : IRequestHandler<GetTagRequest, Tag?>
     {

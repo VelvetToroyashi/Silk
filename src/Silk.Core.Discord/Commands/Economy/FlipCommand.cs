@@ -13,13 +13,6 @@ namespace Silk.Core.Discord.Commands.Economy
     [Category(Categories.Economy)]
     public class FlipCommand : BaseCommandModule
     {
-        private readonly string[] _winningMessages =
-        {
-            "Capitalism shines upon you.",
-            "RNG is having a good day, or would it be a bad day?",
-            "You defeated all odds, but how far does that luck stretch?",
-            "Double the money, but half the luck~ Just kidding ;p"
-        };
         private readonly string[] _losingMessages =
         {
             "Yikes!",
@@ -30,6 +23,13 @@ namespace Silk.Core.Discord.Commands.Economy
         };
 
         private readonly IMediator _mediator;
+        private readonly string[] _winningMessages =
+        {
+            "Capitalism shines upon you.",
+            "RNG is having a good day, or would it be a bad day?",
+            "You defeated all odds, but how far does that luck stretch?",
+            "Double the money, but half the luck~ Just kidding ;p"
+        };
         public FlipCommand(IMediator mediator)
         {
             _mediator = mediator;

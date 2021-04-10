@@ -18,20 +18,12 @@ namespace Silk.Core.Discord.EventHandlers
     //This relies on multiple events to update its state, so we can't implement INotificationHandler.
     public class GuildAddedHandler
     {
-        public static bool StartupCompleted { get; private set; }
+        private readonly object _lock = new();
+        private readonly ILogger<GuildAddedHandler> _logger;
+        private readonly IMediator _mediator;
+        private readonly Dictionary<int, ShardState> _shardStates = new();
 
         private bool _logged;
-        private readonly IMediator _mediator;
-        private readonly ILogger<GuildAddedHandler> _logger;
-        private readonly Dictionary<int, ShardState> _shardStates = new();
-        private readonly object _lock = new();
-
-        private struct ShardState
-        {
-            public bool Completed { get; set; }
-            public int CachedGuilds { get; set; }
-            public int CachedMembers { get; set; }
-        }
 
         public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IMediator mediator)
         {
@@ -44,10 +36,11 @@ namespace Silk.Core.Discord.EventHandlers
             foreach ((int key, _) in shards)
                 _shardStates.Add(key, new());
         }
+        public static bool StartupCompleted { get; private set; }
 
 
         /// <summary>
-        /// Caches and logs members when GUILD_AVAILABLE is fired via the gateway.
+        ///     Caches and logs members when GUILD_AVAILABLE is fired via the gateway.
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
@@ -159,6 +152,13 @@ namespace Silk.Core.Discord.EventHandlers
                 }
             }
             return Math.Max(staffCount, 0);
+        }
+
+        private struct ShardState
+        {
+            public bool Completed { get; set; }
+            public int CachedGuilds { get; set; }
+            public int CachedMembers { get; set; }
         }
     }
 }

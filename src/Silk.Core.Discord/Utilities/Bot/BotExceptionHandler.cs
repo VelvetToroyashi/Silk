@@ -18,9 +18,9 @@ namespace Silk.Core.Discord.Utilities.Bot
 {
     public class BotExceptionHandler
     {
+        private readonly DiscordShardedClient _client;
 
         private readonly ILogger<BotExceptionHandler> _logger;
-        private readonly DiscordShardedClient _client;
         public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client)
         {
             _logger = logger;

@@ -60,16 +60,28 @@ namespace Silk.Core.Discord.Commands.General
         // RECURRING REMINDERS //
 
         [Command]
-        public async Task Hourly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly);
+        public async Task Hourly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly);
+        }
 
         [Command]
-        public async Task Daily(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Daily);
+        public async Task Daily(CommandContext ctx, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Daily);
+        }
 
         [Command]
-        public async Task Weekly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly);
+        public async Task Weekly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly);
+        }
 
         [Command]
-        public async Task Monthly(CommandContext ctx, [RemainingText] string reminder) => await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly);
+        public async Task Monthly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly);
+        }
 
         private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type)
         {

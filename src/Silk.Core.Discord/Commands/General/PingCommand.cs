@@ -15,7 +15,10 @@ namespace Silk.Core.Discord.Commands.General
     {
         private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public PingCommand(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public PingCommand(IDbContextFactory<GuildContext> dbFactory)
+        {
+            _dbFactory = dbFactory;
+        }
 
         [Command("ping")]
         [Aliases("pong")]

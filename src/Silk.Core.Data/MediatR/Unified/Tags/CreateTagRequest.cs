@@ -7,12 +7,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request for creating a <see cref="Tag"/>.
+    ///     Request for creating a <see cref="Tag" />.
     /// </summary>
     public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
 
     /// <summary>
-    /// The default handler for <see cref="CreateTagRequest"/>
+    ///     The default handler for <see cref="CreateTagRequest" />
     /// </summary>
     public class CreateTagHandler : IRequestHandler<CreateTagRequest, Tag>
     {

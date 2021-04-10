@@ -6,7 +6,10 @@ namespace Silk.Extensions
 {
     public static class PermissionExtensions
     {
-        public static bool HasPermission(this DiscordRole role, Permissions permission) => role.Permissions.HasPermission(permission);
+        public static bool HasPermission(this DiscordRole role, Permissions permission)
+        {
+            return role.Permissions.HasPermission(permission);
+        }
 
         public static bool HasPermission(this DiscordMember member, Permissions perm)
         {
@@ -15,15 +18,22 @@ namespace Silk.Extensions
                 : member.Roles.Any(role => role.HasPermission(perm));
         }
 
-        public static bool IsAdministrator(this DiscordMember member) =>
-            member.Roles.Any(role => role.Permissions.HasPermission(Permissions.Administrator));
+        public static bool IsAdministrator(this DiscordMember member)
+        {
+            return member.Roles.Any(role => role.Permissions.HasPermission(Permissions.Administrator));
+        }
 
 
-        public static string GetRoleMention(this DiscordMember member) => member.Roles.Last().Mention;
+        public static string GetRoleMention(this DiscordMember member)
+        {
+            return member.Roles.Last().Mention;
+        }
 
-        public static bool IsAbove(this DiscordMember target, DiscordMember comparison) =>
-            target.Roles.Any() &&
-            target.Roles.Max(r => r.Position) >=
-            comparison.Roles.Max(r => r.Position);
+        public static bool IsAbove(this DiscordMember target, DiscordMember comparison)
+        {
+            return target.Roles.Any() &&
+                   target.Roles.Max(r => r.Position) >=
+                   comparison.Roles.Max(r => r.Position);
+        }
     }
 }

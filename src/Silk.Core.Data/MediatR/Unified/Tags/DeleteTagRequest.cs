@@ -8,12 +8,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request to delete a <see cref="Tag"/>.
+    ///     Request to delete a <see cref="Tag" />.
     /// </summary>
     public record DeleteTagRequest(string Name, ulong GuildId) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="DeleteTagRequest"/>.
+    ///     The default handler for <see cref="DeleteTagRequest" />.
     /// </summary>
     public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
     {

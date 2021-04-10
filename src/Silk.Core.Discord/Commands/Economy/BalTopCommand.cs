@@ -15,7 +15,10 @@ namespace Silk.Core.Discord.Commands.Economy
     public class BalTopCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public BalTopCommand(IDbContextFactory<GuildContext> dbContextFactory) => _dbFactory = dbContextFactory;
+        public BalTopCommand(IDbContextFactory<GuildContext> dbContextFactory)
+        {
+            _dbFactory = dbContextFactory;
+        }
 
         [RequireGuild]
         [Command("top")]

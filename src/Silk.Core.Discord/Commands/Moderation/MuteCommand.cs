@@ -19,8 +19,8 @@ namespace Silk.Core.Discord.Commands.Moderation
     public class MuteCommand : BaseCommandModule
     {
         private readonly ConfigService _configService;
-        private readonly IMessageSender _sender;
         private readonly IInfractionService _infractionService;
+        private readonly IMessageSender _sender;
 
         public MuteCommand(ConfigService configService, IInfractionService infractionService, IMessageSender sender)
         {

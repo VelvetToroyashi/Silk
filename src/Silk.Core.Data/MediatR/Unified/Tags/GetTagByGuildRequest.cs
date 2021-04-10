@@ -9,12 +9,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request for getting tags for a specific guild, if any.
+    ///     Request for getting tags for a specific guild, if any.
     /// </summary>
     public record GetTagByGuildRequest(ulong GuildId) : IRequest<IEnumerable<Tag>?>;
 
     /// <summary>
-    /// The default handler for <see cref="GetTagByGuildRequest"/>.
+    ///     The default handler for <see cref="GetTagByGuildRequest" />.
     /// </summary>
     public class GetTagByGuildHandler : IRequestHandler<GetTagByGuildRequest, IEnumerable<Tag>?>
     {

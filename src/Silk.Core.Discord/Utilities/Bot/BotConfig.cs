@@ -5,9 +5,6 @@ namespace Silk.Core.Discord.Utilities.Bot
 {
     public record BotConfig
     {
-        // Took them out; they make no sense. //
-        public KeyValuePair<string, string> e6API { get; }
-        public bool SelfHosted { get; }
 
         internal BotConfig(IConfiguration c)
         {
@@ -16,5 +13,8 @@ namespace Silk.Core.Discord.Utilities.Bot
             e6API = new(e6k, e6u);
             SelfHosted = bool.Parse(c["SelfHosted"] ?? bool.TrueString);
         }
+        // Took them out; they make no sense. //
+        public KeyValuePair<string, string> e6API { get; }
+        public bool SelfHosted { get; }
     }
 }

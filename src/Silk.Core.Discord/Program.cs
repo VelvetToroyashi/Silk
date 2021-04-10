@@ -14,8 +14,6 @@ namespace Silk.Core.Discord
 {
     public static class Program
     {
-        public static DateTime Startup { get; } = DateTime.Now;
-        public static string HttpClientName { get; } = "Silk";
 
         public const string Version = "1.5.1-alpha";
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
@@ -33,8 +31,10 @@ namespace Silk.Core.Discord
                       DiscordIntents.GuildVoiceStates,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None,
+            MinimumLogLevel = LogLevel.None
         };
+        public static DateTime Startup { get; } = DateTime.Now;
+        public static string HttpClientName { get; } = "Silk";
 
         // Setting this in the prop doesn't work; it'll have a 2s discrepancy
         //static Program() => Startup = DateTime.Now;

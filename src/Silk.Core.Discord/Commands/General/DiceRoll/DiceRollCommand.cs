@@ -14,8 +14,10 @@ namespace Silk.Core.Discord.Commands.General.DiceRoll
     {
         [Command]
         [Description("Generate a random number in a given range; defaults to 100. (Hard limit of ~2.1 billion)")]
-        public async Task Random(CommandContext ctx, int max = 100) =>
+        public async Task Random(CommandContext ctx, int max = 100)
+        {
             await ctx.RespondAsync(new Random().Next(max).ToString()).ConfigureAwait(false);
+        }
 
         [Command]
         [Description("Roll die like it's DnD! Example: 2d4 + 10 + d7")]
@@ -60,10 +62,12 @@ namespace Silk.Core.Discord.Commands.General.DiceRoll
             await ctx.RespondAsync(embed).ConfigureAwait(false);
         }
 
-        private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>
-            embed
+        private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed)
+        {
+            return embed
                 .WithColor(DiscordColor.PhthaloGreen)
                 .WithTitle("You rolled:")
                 .WithFooter("Made by alex#6555 with <3");
+        }
     }
 }

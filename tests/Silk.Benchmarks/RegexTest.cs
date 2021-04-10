@@ -13,15 +13,18 @@ namespace Silk.Benchmarks
             server = "Silk!",
             user = "Silk Canary",
             mention = "@Silk Canary";
-
-        private readonly Regex userRegex = new Regex(@"({u[ser]?)}", RegexOptions.Compiled);
         private readonly Regex mentionRegex = new(@"({@u[ser]?})", RegexOptions.Compiled);
         private readonly Regex serverRegex = new(@"({s[erver]?})", RegexOptions.Compiled);
+
+        private readonly Regex userRegex = new Regex(@"({u[ser]?)}", RegexOptions.Compiled);
 
 
 
         [Benchmark]
-        public void StringReplace() => _ = input.Replace("{u}", user).Replace("{@u}", mention).Replace("{s}", server);
+        public void StringReplace()
+        {
+            _ = input.Replace("{u}", user).Replace("{@u}", mention).Replace("{s}", server);
+        }
 
         [Benchmark]
         public void RegexReplaceUncompiled()
@@ -38,6 +41,5 @@ namespace Silk.Benchmarks
             placeholder = mentionRegex.Replace(placeholder, mention);
             _ = serverRegex.Replace(placeholder, server);
         }
-
     }
 }

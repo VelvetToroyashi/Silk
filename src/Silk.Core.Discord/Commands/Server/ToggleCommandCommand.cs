@@ -79,6 +79,5 @@ namespace Silk.Core.Discord.Commands.Server
             var thumbsUp = DiscordEmoji.FromUnicode("👍");
             await ctx.Message.CreateReactionAsync(thumbsUp);
         }
-
     }
 }

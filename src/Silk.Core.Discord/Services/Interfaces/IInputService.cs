@@ -7,7 +7,7 @@ namespace Silk.Core.Discord.Services.Interfaces
     public interface IInputService
     {
         /// <summary>
-        /// Gets input from a specific user.
+        ///     Gets input from a specific user.
         /// </summary>
         /// <param name="userId">The Id of the user to listen for input from.</param>
         /// <param name="channelId">The Id of the channel to listen for input from.</param>
@@ -17,7 +17,7 @@ namespace Silk.Core.Discord.Services.Interfaces
         public Task<string?> GetStringInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
 
         /// <summary>
-        /// Gets a reaction from a specific message.
+        ///     Gets a reaction from a specific message.
         /// </summary>
         /// <param name="userId">The Id of the user to get a reaction from.</param>
         /// <param name="channelId">The Id of the channel to wait for a reaction in.</param>
@@ -30,6 +30,5 @@ namespace Silk.Core.Discord.Services.Interfaces
         public Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null);
 
         //public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
-
     }
 }

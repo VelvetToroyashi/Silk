@@ -14,12 +14,10 @@ namespace Silk.Core.Discord.Utilities
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public sealed class RequireFlagAttribute : CheckBaseAttribute
     {
-        public bool RequireGuild { get; }
-        public UserFlag RequisiteUserFlag { get; }
         private static readonly HashSet<ulong> _cachedMembers = new();
 
         /// <summary>
-        /// Check for a requisite flag from the database, and execute if check passes.
+        ///     Check for a requisite flag from the database, and execute if check passes.
         /// </summary>
         /// <param name="requisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
         /// <param name="requireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
@@ -28,6 +26,8 @@ namespace Silk.Core.Discord.Utilities
             RequisiteUserFlag = requisiteUserFlag;
             RequireGuild = requireGuild;
         }
+        public bool RequireGuild { get; }
+        public UserFlag RequisiteUserFlag { get; }
 
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {

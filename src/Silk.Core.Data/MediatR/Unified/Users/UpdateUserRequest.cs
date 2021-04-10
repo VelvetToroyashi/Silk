@@ -7,12 +7,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request for updating a user in the database.
+    ///     Request for updating a user in the database.
     /// </summary>
     public record UpdateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
 
     /// <summary>
-    /// The default handler for <see cref="UpdateUserRequest"/>.
+    ///     The default handler for <see cref="UpdateUserRequest" />.
     /// </summary>
     public class UpdateUserHandler : IRequestHandler<UpdateUserRequest, User>
     {

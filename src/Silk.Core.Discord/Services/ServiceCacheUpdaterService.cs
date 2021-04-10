@@ -6,6 +6,9 @@ namespace Silk.Core.Discord.Services
     {
         public event GuildConfigUpdated? ConfigUpdated;
 
-        public void UpdateGuild(ulong id) => ConfigUpdated?.Invoke(id);
+        public void UpdateGuild(ulong id)
+        {
+            ConfigUpdated?.Invoke(id);
+        }
     }
 }

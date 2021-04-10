@@ -7,8 +7,6 @@ namespace Silk.Shared.Types.Collections
     {
         private int _pos = -1;
 
-        public T Next() => unchecked(this[++_pos]);
-
         public new T this[int index]
         {
             get => Count is 0 ? throw new ArgumentOutOfRangeException(nameof(index), "Colletion must be non-empty.") : base[index % Count];
@@ -20,6 +18,11 @@ namespace Silk.Shared.Types.Collections
                 }
                 base[index % Count] = value;
             }
+        }
+
+        public T Next()
+        {
+            return unchecked(this[++_pos]);
         }
     }
 }

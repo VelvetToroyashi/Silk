@@ -12,7 +12,7 @@ using Silk.Core.Discord.Services.Interfaces;
 namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
 {
     /// <summary>
-    /// Utility class for all core Auto-Mod features.
+    ///     Utility class for all core Auto-Mod features.
     /// </summary>
     public class AntiInviteCore
     {
@@ -23,18 +23,18 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
         }
 
         /// <summary>
-        /// Regex to match discord invites using discord's main invite URL (discord.gg)
+        ///     Regex to match discord invites using discord's main invite URL (discord.gg)
         /// </summary>
         public static Regex LenientRegexPattern { get; } = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", FlagConstants.RegexFlags);
 
         /// <summary>
-        /// A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern"/>.
-        /// Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
+        ///     A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern" />.
+        ///     Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
         /// </summary>
         public static Regex AggressiveRegexPattern { get; } = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-]{2,})", FlagConstants.RegexFlags);
 
         /// <summary>
-        /// Checks if a <see cref="DiscordMessage"/> has a valid <see cref="DiscordInvite"/>.
+        ///     Checks if a <see cref="DiscordMessage" /> has a valid <see cref="DiscordInvite" />.
         /// </summary>
         /// <param name="client">Client instance used to make API calls as necessary.</param>
         /// <param name="message">The message to check.</param>
@@ -58,7 +58,7 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
         }
 
         /// <summary>
-        ///  Checks if a suspected <see cref="DiscordInvite"/> is blacklisted.
+        ///     Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
         /// </summary>
         /// <param name="client">A client object to make API calls with.</param>
         /// <param name="message">The message to check.</param>
@@ -95,7 +95,8 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
         }
 
         /// <summary>
-        /// Checks if a memeber should be punished for sending a Discord invite, and calls <see cref="IInfractionService.ProgressInfractionStepAsync"/> if it succeeds.
+        ///     Checks if a memeber should be punished for sending a Discord invite, and calls <see cref="IInfractionService.ProgressInfractionStepAsync" /> if
+        ///     it succeeds.
         /// </summary>
         /// <param name="config">The configuration for the guild.</param>
         /// <param name="message">The offending message, to be deleted, if configured.</param>

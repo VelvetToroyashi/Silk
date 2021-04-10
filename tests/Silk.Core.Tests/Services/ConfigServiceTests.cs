@@ -12,8 +12,8 @@ namespace Silk.Core.Tests.Services
     public class ConfigServiceTests
     {
         private readonly Mock<IMemoryCache> _cache;
-        private readonly Mock<IMediator> _mediator;
         private readonly ConfigService _configService;
+        private readonly Mock<IMediator> _mediator;
 
         public ConfigServiceTests()
         {

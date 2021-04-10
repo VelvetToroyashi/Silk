@@ -10,9 +10,9 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
 {
     public class MessageEditAntiInvite : INotificationHandler<MessageEdited>
     {
+        private readonly ConfigService _configService;
 
         private readonly IInfractionService _infractionService;
-        private readonly ConfigService _configService;
         private readonly IMediator _mediator;
 
         public MessageEditAntiInvite(IInfractionService infractionService, IMediator mediator, ConfigService configService)

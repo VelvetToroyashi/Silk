@@ -8,7 +8,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
 {
     /// <summary>
-    /// Request for updating a user who's data is tracked globally.
+    ///     Request for updating a user who's data is tracked globally.
     /// </summary>
     public record UpdateGlobalUserRequest(ulong UserId) : IRequest<GlobalUser>
     {
@@ -17,7 +17,7 @@ namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
     }
 
     /// <summary>
-    /// The default handler for <see cref="UpdateGlobalUserRequest"/>.
+    ///     The default handler for <see cref="UpdateGlobalUserRequest" />.
     /// </summary>
     public class UpdateGlobalUserHandler : IRequestHandler<UpdateGlobalUserRequest, GlobalUser>
     {

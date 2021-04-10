@@ -7,14 +7,14 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     /// <summary>
-    /// Request for retrieving or creating a <see cref="Guild"/>.
+    ///     Request for retrieving or creating a <see cref="Guild" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Prefix">The prefix of the Guild</param>
     public record GetOrCreateGuildRequest(ulong GuildId, string Prefix) : IRequest<Guild>;
 
     /// <summary>
-    /// The default handler for <see cref="GetOrCreateGuildRequest"/>.
+    ///     The default handler for <see cref="GetOrCreateGuildRequest" />.
     /// </summary>
     public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, Guild>
     {

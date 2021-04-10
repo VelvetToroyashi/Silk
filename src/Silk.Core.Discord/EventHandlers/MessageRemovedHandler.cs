@@ -36,17 +36,20 @@ namespace Silk.Core.Discord.EventHandlers
 
         }
 
-        private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e, DateTime now) => new DiscordEmbedBuilder()
-            .WithTitle("Message Deleted:")
-            .WithDescription(
-                $"User: {e.Message.Author.Mention}\n" +
-                $"Channel: {e.Channel.Mention}\n" +
-                $"Message Contents: ```\n{e.Message.Content}```")
-            .AddField("Message ID:", e.Message.Id.ToString(), true)
-            .AddField("User ID:", e.Message.Author.Id.ToString(), true)
-            .WithThumbnail(e.Message.Author.AvatarUrl)
-            .WithFooter("Message deleted at (UTC)")
-            .WithTimestamp(now.ToUniversalTime())
-            .WithColor(DiscordColor.Red);
+        private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e, DateTime now)
+        {
+            return new DiscordEmbedBuilder()
+                .WithTitle("Message Deleted:")
+                .WithDescription(
+                    $"User: {e.Message.Author.Mention}\n" +
+                    $"Channel: {e.Channel.Mention}\n" +
+                    $"Message Contents: ```\n{e.Message.Content}```")
+                .AddField("Message ID:", e.Message.Id.ToString(), true)
+                .AddField("User ID:", e.Message.Author.Id.ToString(), true)
+                .WithThumbnail(e.Message.Author.AvatarUrl)
+                .WithFooter("Message deleted at (UTC)")
+                .WithTimestamp(now.ToUniversalTime())
+                .WithColor(DiscordColor.Red);
+        }
     }
 }

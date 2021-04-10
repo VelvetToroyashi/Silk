@@ -9,12 +9,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request for updating users in the database en masse.
+    ///     Request for updating users in the database en masse.
     /// </summary>
     public record BulkUpdateUserRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
 
     /// <summary>
-    /// The default handler for <see cref="BulkUpdateUserRequest"/>.
+    ///     The default handler for <see cref="BulkUpdateUserRequest" />.
     /// </summary>
     public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnumerable<User>>
     {

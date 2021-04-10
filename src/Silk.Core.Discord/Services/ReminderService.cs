@@ -22,12 +22,12 @@ namespace Silk.Core.Discord.Services
     public class ReminderService : BackgroundService
     {
         private const string MissingChannel = "Hey!, you wanted me to remind you of something, but the channel was deleted, or is otherwise inaccessible to me now.\n";
-
-        private List<Reminder> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
+        private readonly DiscordShardedClient _client;
+        private readonly ILogger<ReminderService> _logger;
 
         private readonly IServiceProvider _services;
-        private readonly ILogger<ReminderService> _logger;
-        private readonly DiscordShardedClient _client;
+
+        private List<Reminder> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
 
         public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client)
         {
@@ -54,7 +54,7 @@ namespace Silk.Core.Discord.Services
         {
             IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
             if (reminders.Count() is 0) return null;
-            else return reminders;
+            return reminders;
         }
 
         public async Task RemoveReminderAsync(int id)

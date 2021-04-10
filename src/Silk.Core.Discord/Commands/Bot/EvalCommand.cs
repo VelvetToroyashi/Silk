@@ -109,14 +109,6 @@ namespace Silk.Core.Discord.Commands.Bot
 
         public record TestVariables
         {
-            public DiscordMessage Message { get; }
-            public DiscordChannel Channel { get; }
-            public DiscordGuild Guild { get; }
-            public DiscordUser User { get; }
-            public DiscordMember Member { get; }
-            public CommandContext Context { get; }
-
-            public DiscordClient Client { get; }
 
             public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
             {
@@ -129,6 +121,14 @@ namespace Silk.Core.Discord.Commands.Bot
 
                 if (Guild != null) Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
             }
+            public DiscordMessage Message { get; }
+            public DiscordChannel Channel { get; }
+            public DiscordGuild Guild { get; }
+            public DiscordUser User { get; }
+            public DiscordMember Member { get; }
+            public CommandContext Context { get; }
+
+            public DiscordClient Client { get; }
         }
     }
 

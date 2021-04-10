@@ -19,9 +19,6 @@ namespace Silk.Core.Discord.Commands.Server
     [Category(Categories.Server)]
     public class WelcomeCommand : BaseCommandModule
     {
-        private readonly IMediator _mediator;
-        private readonly HttpClient _client;
-        private readonly IServiceCacheUpdaterService _updater;
 
         // What do you think this is for. //
         private const string BaseFile =
@@ -32,6 +29,9 @@ namespace Silk.Core.Discord.Commands.Server
         greeting_channel: 0 # Id of the channel to greet them in
         message: """" # Valid substitutions {u} -> Username, {@u} -> User mention, {s} -> Server name
         role_id: 0 # Id of the role to check, if configured.";
+        private readonly HttpClient _client;
+        private readonly IMediator _mediator;
+        private readonly IServiceCacheUpdaterService _updater;
 
         public WelcomeCommand(IMediator mediator, IServiceCacheUpdaterService updater, HttpClient client)
         {

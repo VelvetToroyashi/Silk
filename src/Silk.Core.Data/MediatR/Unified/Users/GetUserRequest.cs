@@ -7,17 +7,20 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request to get a user from the database, or null, if it does not exist.
+    ///     Request to get a user from the database, or null, if it does not exist.
     /// </summary>
     public record GetUserRequest(ulong GuildId, ulong UserId) : IRequest<User?>;
 
     /// <summary>
-    /// The default handler associated with <see cref="GetUserRequest"/>.
+    ///     The default handler associated with <see cref="GetUserRequest" />.
     /// </summary>
     public class GetUserHandler : IRequestHandler<GetUserRequest, User?>
     {
         private readonly GuildContext _db;
-        public GetUserHandler(GuildContext db) => _db = db;
+        public GetUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<User?> Handle(GetUserRequest request, CancellationToken cancellationToken)
         {

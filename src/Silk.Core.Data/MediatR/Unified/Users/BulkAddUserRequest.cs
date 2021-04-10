@@ -9,7 +9,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Users
 {
     /// <summary>
-    /// Request for adding users to the database en masse.
+    ///     Request for adding users to the database en masse.
     /// </summary>
     /// <remarks>
     ///     <para>
@@ -23,7 +23,7 @@ namespace Silk.Core.Data.MediatR.Unified.Users
     public record BulkAddUserRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
 
     /// <summary>
-    /// The default handler for <see cref="BulkAddUserRequest"/>.
+    ///     The default handler for <see cref="BulkAddUserRequest" />.
     /// </summary>
     public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<User>>
     {
@@ -50,7 +50,11 @@ namespace Silk.Core.Data.MediatR.Unified.Users
 
                 _db.Users.AddRange(nonAddedUsers);
 
-                try { await _db.SaveChangesAsync(cancellationToken); }
+
+                try
+                {
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
                 catch (DbUpdateException) { await AttemptAddUsersSlowAsync(request.Users); }
                 // Y'know. I hope whoever forces the catch branch to run has a warm pillow. //
             }
@@ -58,8 +62,8 @@ namespace Silk.Core.Data.MediatR.Unified.Users
         }
 
         /// <summary>
-        /// Adds users individually to mitigate an entire query failing when adding in bulk.
-        /// <para>This is considerably slower than <see cref="Handle"/>.</para>
+        ///     Adds users individually to mitigate an entire query failing when adding in bulk.
+        ///     <para>This is considerably slower than <see cref="Handle" />.</para>
         /// </summary>
         /// <param name="users">The collection of users to add.</param>
         private async Task AttemptAddUsersSlowAsync(IEnumerable<User> users)

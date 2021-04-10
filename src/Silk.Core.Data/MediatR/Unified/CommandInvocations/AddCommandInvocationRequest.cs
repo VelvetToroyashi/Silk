@@ -6,12 +6,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.CommandInvocations
 {
     /// <summary>
-    /// Request for adding a <see cref="CommandInvocation"/>.
+    ///     Request for adding a <see cref="CommandInvocation" />.
     /// </summary>
     public record AddCommandInvocationRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
 
     /// <summary>
-    /// The default handler for <see cref="AddCommandInvocationRequest"/>.
+    ///     The default handler for <see cref="AddCommandInvocationRequest" />.
     /// </summary>
     public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationRequest>
     {

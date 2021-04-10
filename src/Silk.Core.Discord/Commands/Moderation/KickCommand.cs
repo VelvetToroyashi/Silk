@@ -19,8 +19,8 @@ namespace Silk.Core.Discord.Commands.Moderation
     [Category(Categories.Mod)]
     public class KickCommand : BaseCommandModule
     {
-        private readonly ILogger<KickCommand> _logger;
         private readonly IInfractionService _infractionService;
+        private readonly ILogger<KickCommand> _logger;
 
         public KickCommand(ILogger<KickCommand> logger, IInfractionService infractionService)
         {

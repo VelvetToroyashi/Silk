@@ -16,10 +16,8 @@ namespace Silk.Core.Discord.Commands.Bot
     public class PrefixCommand : BaseCommandModule
     {
         private const int PrefixMaxLength = 5;
-        private readonly IPrefixCacheService _prefixCache;
         private readonly GuildContext _db;
-
-        private record PrefixValidationResult(bool Valid, string Reason);
+        private readonly IPrefixCacheService _prefixCache;
 
         public PrefixCommand(IPrefixCacheService prefixCache, GuildContext db)
         {
@@ -65,5 +63,7 @@ namespace Silk.Core.Discord.Commands.Bot
 
             return new(true, "");
         }
+
+        private record PrefixValidationResult(bool Valid, string Reason);
     }
 }

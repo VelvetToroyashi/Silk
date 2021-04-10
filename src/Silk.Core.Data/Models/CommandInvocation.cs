@@ -11,6 +11,5 @@ namespace Silk.Core.Data.Models
 
         [Required]
         public string CommandName { get; set; } = "";
-
     }
 }

@@ -12,9 +12,9 @@ namespace Silk.Core.Discord.EventHandlers
 {
     public class RoleRemovedHandler
     {
+        private const Permissions RequisiteStaffPermissions = Permissions.KickMembers | Permissions.ManageMessages;
         private readonly ILogger<RoleRemovedHandler> _logger;
         private readonly IMediator _mediator;
-        private const Permissions RequisiteStaffPermissions = Permissions.KickMembers | Permissions.ManageMessages;
         public RoleRemovedHandler(ILogger<RoleRemovedHandler> logger, IMediator mediator)
         {
             _logger = logger;

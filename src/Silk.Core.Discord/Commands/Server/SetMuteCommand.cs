@@ -41,6 +41,5 @@ namespace Silk.Core.Discord.Commands.Server
             await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) {MuteRoleId = role.Id});
 
         }
-
     }
 }

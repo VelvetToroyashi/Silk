@@ -6,8 +6,8 @@ namespace Silk.Core.Tests.Types
 {
     public class LoopedListTest
     {
-        private readonly LoopedList<int> _loopedIntList = new() {1, 2, 3, 4};
         private readonly LoopedList<int> _emptyIntList = new();
+        private readonly LoopedList<int> _loopedIntList = new() {1, 2, 3, 4};
 
         [Test]
         public void LoopedIntList_Indexer_Accesses_LastElement()
@@ -90,7 +90,5 @@ namespace Silk.Core.Tests.Types
             //Assert
             Assert.Throws<ArgumentOutOfRangeException>(tDelegate);
         }
-
-
     }
 }

@@ -6,6 +6,5 @@
         public const string
             Confirm = "<:check:777724297627172884>",
             Decline = "<:cross:777724316115796011>";
-
     }
 }

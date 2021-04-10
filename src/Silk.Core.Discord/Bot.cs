@@ -29,17 +29,14 @@ namespace Silk.Core.Discord
     //Lorum Ipsum, or something.
     public class Bot : BackgroundService
     {
-        public DiscordShardedClient Client { get; set; }
-        public static Bot? Instance { get; private set; }
-        public static string DefaultCommandPrefix { get; } = "s!";
-
-        private CommandsNextConfiguration? _commands;
+        private readonly BotExceptionHandler _exceptionHandler;
+        private readonly ILogger<Bot> _logger;
 
         private readonly IMediator _mediator;
         private readonly IServiceProvider _services;
-        private readonly ILogger<Bot> _logger;
-        private readonly BotExceptionHandler _exceptionHandler;
         private readonly Stopwatch _sw = new();
+
+        private CommandsNextConfiguration? _commands;
 
 
         public Bot(
@@ -69,6 +66,9 @@ namespace Silk.Core.Discord
             Instance = this;
             Client = client;
         }
+        public DiscordShardedClient Client { get; set; }
+        public static Bot? Instance { get; private set; }
+        public static string DefaultCommandPrefix { get; } = "s!";
         private void InitializeServices()
         {
             _ = _services.GetRequiredService<AntiInviteCore>();
@@ -96,7 +96,7 @@ namespace Silk.Core.Discord
             {
                 UseDefaultCommandHandler = false,
                 Services = _services,
-                IgnoreExtraArguments = true,
+                IgnoreExtraArguments = true
             };
 
             await Client.UseCommandsNextAsync(_commands);

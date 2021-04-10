@@ -8,7 +8,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Tags
 {
     /// <summary>
-    /// Request to update a <see cref="Tag"/>.
+    ///     Request to update a <see cref="Tag" />.
     /// </summary>
     /// <param name="Name">The Name of the Tag</param>
     /// <param name="GuildId">The Id of the Guild</param>
@@ -21,7 +21,7 @@ namespace Silk.Core.Data.MediatR.Unified.Tags
     }
 
     /// <summary>
-    /// The default handler for <see cref="UpdateTagRequest"/>.
+    ///     The default handler for <see cref="UpdateTagRequest" />.
     /// </summary>
     public class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
     {

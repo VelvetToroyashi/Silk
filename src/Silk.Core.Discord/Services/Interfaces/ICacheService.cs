@@ -4,7 +4,7 @@
     public interface ICacheService
     {
         /// <summary>
-        /// Requisite event handler method for <see cref="GuildConfigUpdated"/> event.
+        ///     Requisite event handler method for <see cref="GuildConfigUpdated" /> event.
         /// </summary>
         /// <param name="id">The id of the guild that was updated.</param>
         public void PurgeCache(ulong id);

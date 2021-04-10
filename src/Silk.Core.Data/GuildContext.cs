@@ -5,17 +5,19 @@ namespace Silk.Core.Data
 {
     public class GuildContext : DbContext
     {
+
+        public GuildContext(DbContextOptions options) : base(options) { }
         public DbSet<Guild> Guilds { get; set; } = null!;
 
         /// <summary>
-        /// Users on a guild level; holds information and states that reflect such.
+        ///     Users on a guild level; holds information and states that reflect such.
         /// </summary>
         public DbSet<User> Users { get; set; } = null!;
 
         public DbSet<Infraction> Infractions { get; set; } = null!;
 
         /// <summary>
-        /// Users on a bot level; contains information that should have a globally persisted state.
+        ///     Users on a bot level; contains information that should have a globally persisted state.
         /// </summary>
         public DbSet<GlobalUser> GlobalUsers { get; set; } = null!;
 
@@ -26,8 +28,6 @@ namespace Silk.Core.Data
         public DbSet<Tag> Tags { get; set; } = null!;
 
         public DbSet<Reminder> Reminders { get; set; } = null!;
-
-        public GuildContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

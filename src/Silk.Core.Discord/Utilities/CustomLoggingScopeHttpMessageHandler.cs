@@ -8,8 +8,8 @@ using Microsoft.Extensions.Logging;
 namespace Silk.Core.Discord.Utilities
 {
     /// <summary>
-    /// Overriding Logging Scope Handler for HttpClientFactory
-    /// Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
+    ///     Overriding Logging Scope Handler for HttpClientFactory
+    ///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
     /// </summary>
     public class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
     {
@@ -41,11 +41,6 @@ namespace Silk.Core.Discord.Utilities
 
         private static class Log
         {
-            private static class EventIds
-            {
-                public static readonly EventId PipelineStart = new(100, "RequestPipelineStart");
-                public static readonly EventId PipelineEnd = new(101, "RequestPipelineEnd");
-            }
 
             private static readonly Func<ILogger, HttpMethod, Uri, IDisposable> _beginRequestPipelineScope =
                 LoggerMessage.DefineScope<HttpMethod, Uri>(
@@ -76,6 +71,12 @@ namespace Silk.Core.Discord.Utilities
             public static void RequestPipelineEnd(ILogger logger, HttpResponseMessage response)
             {
                 _requestPipelineEnd(logger, response.StatusCode, null!);
+            }
+
+            private static class EventIds
+            {
+                public static readonly EventId PipelineStart = new(100, "RequestPipelineStart");
+                public static readonly EventId PipelineEnd = new(101, "RequestPipelineEnd");
             }
         }
     }

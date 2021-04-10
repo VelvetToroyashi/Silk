@@ -8,12 +8,12 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.GlobalUsers
 {
     /// <summary>
-    /// Request for getting a user who's data is stored globally, or creates it if it does not exist.
+    ///     Request for getting a user who's data is stored globally, or creates it if it does not exist.
     /// </summary>
     public record GetOrCreateGlobalUserRequest(ulong UserId) : IRequest<GlobalUser>;
 
     /// <summary>
-    /// The default handler for <see cref="GetOrCreateGlobalUserRequest"/>.
+    ///     The default handler for <see cref="GetOrCreateGlobalUserRequest" />.
     /// </summary>
     public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUser>
     {

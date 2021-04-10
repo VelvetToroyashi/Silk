@@ -10,18 +10,21 @@ namespace Silk.Benchmarks
     [TailCallDiagnoser]
     public class SilkStringCenterTest
     {
-        private readonly string input = "Center";
         private readonly string anchor = "Longer\tCenter";
+        private readonly string input = "Center";
 
 
         public string CenterWithPad()
         {
             var interpretedAnchor = anchor.Replace("\t", "    ");
-            return (input.PadLeft((interpretedAnchor.Length - input.Length) / 2)).PadRight(interpretedAnchor.Length);
+            return input.PadLeft((interpretedAnchor.Length - input.Length) / 2).PadRight(interpretedAnchor.Length);
         }
 
         [Benchmark]
-        public string CenterWithExtensionMethod() => input.Center(anchor);
+        public string CenterWithExtensionMethod()
+        {
+            return input.Center(anchor);
+        }
 
         public string CenterWithCountInsteadOfSum()
         {
@@ -106,6 +109,5 @@ namespace Silk.Benchmarks
                 state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
             });
         }
-
     }
 }

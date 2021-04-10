@@ -13,10 +13,16 @@ namespace Silk.Benchmarks
         private readonly string LoremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
         [Benchmark]
-        public string Replace() => LoremIpsum.Replace(" ", null);
+        public string Replace()
+        {
+            return LoremIpsum.Replace(" ", null);
+        }
 
         [Benchmark]
-        public string Except() => string.Join(null, LoremIpsum.Except(LoremIpsum.Where(s => s is ' ')).ToArray());
+        public string Except()
+        {
+            return string.Join(null, LoremIpsum.Except(LoremIpsum.Where(s => s is ' ')).ToArray());
+        }
 
         [Benchmark]
         public string For()
@@ -69,8 +75,10 @@ namespace Silk.Benchmarks
         }
 
         [Benchmark]
-        public string John() => LoremIpsum.ReplaceSingleChar(' ', default);
-
+        public string John()
+        {
+            return LoremIpsum.ReplaceSingleChar(' ', default);
+        }
     }
 
     public static class A
@@ -86,7 +94,10 @@ namespace Silk.Benchmarks
                 }
             });
         }
-        public static Span<T> AsSpan<T>(this ReadOnlySpan<T> t) => MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(t), t.Length);
+        public static Span<T> AsSpan<T>(this ReadOnlySpan<T> t)
+        {
+            return MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(t), t.Length);
+        }
         public static string Replace2n(this string haystack, char needle)
         {
             var ol = haystack.Length;

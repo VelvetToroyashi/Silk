@@ -12,7 +12,7 @@ namespace Silk.Core.Discord.Commands.Bot
     public class AboutCommand : BaseCommandModule
     {
         [Command("about")]
-        [Description("Shows relevant information, data and links about Pac-Man Bot.")]
+        [Description("Shows relevant information, data and links about Silk!")]
         public async Task SendBotInfo(CommandContext ctx)
         {
             var app = await ctx.Client.GetCurrentApplicationAsync();

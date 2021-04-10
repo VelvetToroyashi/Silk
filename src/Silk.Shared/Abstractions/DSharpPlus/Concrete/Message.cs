@@ -7,12 +7,12 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
-        private ulong _id;
         private IUser _author;
         private string _content;
-        private DateTimeOffset _timestamp;
-        private IMessage? _reply;
+        private ulong _id;
         private IReadOnlyCollection<IEmoji> _reactions;
+        private IMessage? _reply;
+        private DateTimeOffset _timestamp;
 
         public Message(ulong id, IUser author, string? content, DateTimeOffset timestamp, IMessage? reply, IReadOnlyCollection<IEmoji> reactions)
         {
@@ -61,8 +61,10 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         }
 
         public static explicit operator Message?(DiscordMessage? message)
-            => message is null ?
+        {
+            return message is null ?
                 null :
                 new(message.Id, (User) message.Author, message.Content, message.CreationTimestamp, message.ReferencedMessage is null ? null : (Message) message.ReferencedMessage, default!);
+        }
     }
 }

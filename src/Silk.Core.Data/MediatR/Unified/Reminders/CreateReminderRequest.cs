@@ -8,7 +8,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Reminders
 {
     /// <summary>
-    /// Request for creating a <see cref="Reminder"/>.
+    ///     Request for creating a <see cref="Reminder" />.
     /// </summary>
     public record CreateReminderRequest(
         DateTime Expiration, ulong OwnerId,
@@ -18,7 +18,7 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
         ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
 
     /// <summary>
-    /// The default handler for <see cref="CreateReminderRequest"/>.
+    ///     The default handler for <see cref="CreateReminderRequest" />.
     /// </summary>
     public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, Reminder>
     {
@@ -48,7 +48,7 @@ namespace Silk.Core.Data.MediatR.Unified.Reminders
                 MessageContent = request.MessageContent,
                 WasReply = request.WasReply,
                 ReplyAuthorId = request.ReplyAuthorId,
-                ReplyMessageContent = request.ReplyMessageContent,
+                ReplyMessageContent = request.ReplyMessageContent
             };
 
             _db.Add(r);

@@ -9,7 +9,7 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Data.MediatR.Unified.Guilds
 {
     /// <summary>
-    /// Request for updating a <see cref="GuildConfig"/> for a Guild.
+    ///     Request for updating a <see cref="GuildConfig" /> for a Guild.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig?>
@@ -43,7 +43,7 @@ namespace Silk.Core.Data.MediatR.Unified.Guilds
     }
 
     /// <summary>
-    /// The default handler for <see cref="UpdateGuildConfigRequest"/>.
+    ///     The default handler for <see cref="UpdateGuildConfigRequest" />.
     /// </summary>
     public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfig?>
     {

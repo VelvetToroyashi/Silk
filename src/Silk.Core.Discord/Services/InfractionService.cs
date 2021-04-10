@@ -17,13 +17,13 @@ using Silk.Core.Discord.Utilities;
 
 namespace Silk.Core.Discord.Services
 {
-    /// <inheritdoc cref="IInfractionService"/>
+    /// <inheritdoc cref="IInfractionService" />
     public sealed class InfractionService : IInfractionService
     {
-        private readonly ILogger<InfractionService> _logger;
         private readonly DiscordShardedClient _client;
-        private readonly IMediator _mediator;
         private readonly GuildContext _db;
+        private readonly ILogger<InfractionService> _logger;
+        private readonly IMediator _mediator;
 
         private readonly List<Infraction> _tempInfractions = new();
 
@@ -172,7 +172,7 @@ namespace Silk.Core.Discord.Services
                 UserId = member.Id,
                 GuildId = member.Guild.Id,
                 InfractionType = type,
-                HeldAgainstUser = true,
+                HeldAgainstUser = true
             };
 
             return infraction;
@@ -198,6 +198,17 @@ namespace Silk.Core.Discord.Services
         {
             User? user = await _mediator.Send(new GetUserRequest(member.Guild.Id, member.Id));
             return user?.Flags.HasFlag(UserFlag.ActivelyMuted) ?? false;
+        }
+
+        //TODO: Implement this.
+        public async Task ProgressInfractionStepAsync(DiscordMember member, string reason, DateTime? a = null)
+        {
+
+            User user = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
+            Guild guild = await _mediator.Send(new GetGuildRequest(member.Guild.Id));
+            GuildConfig config = guild.Configuration;
+            List<InfractionStep> steps = config.InfractionSteps;
+            List<Infraction> infractions = guild.Infractions.Where(i => i.UserId == member.Id).ToList();
         }
 
 
@@ -316,17 +327,5 @@ namespace Silk.Core.Discord.Services
             _logger.LogTrace("Log channel ({LogChannel}) exists on guild!", config.LoggingChannel);
             await logChannel.SendMessageAsync(embed);
         }
-
-        //TODO: Implement this.
-        public async Task ProgressInfractionStepAsync(DiscordMember member, string reason, DateTime? a = null)
-        {
-
-            User user = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
-            Guild guild = await _mediator.Send(new GetGuildRequest(member.Guild.Id));
-            GuildConfig config = guild.Configuration;
-            List<InfractionStep> steps = config.InfractionSteps;
-            List<Infraction> infractions = guild.Infractions.Where(i => i.UserId == member.Id).ToList();
-        }
-
     }
 }

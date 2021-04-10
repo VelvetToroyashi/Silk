@@ -14,9 +14,15 @@ namespace Silk.Benchmarks
         private readonly Consumer consumer = new();
 
         [Benchmark]
-        public void BlockSplitLINQSkipTake() => _ = BlockSplitLINQSkipAndTake();
+        public void BlockSplitLINQSkipTake()
+        {
+            _ = BlockSplitLINQSkipAndTake();
+        }
         [Benchmark]
-        public void BlockSplitWithRange() => _ = BlockSplitRangeOperator();
+        public void BlockSplitWithRange()
+        {
+            _ = BlockSplitRangeOperator();
+        }
 
         public IEnumerable<string> BlockSplitLINQSkipAndTake()
         {
@@ -30,9 +36,7 @@ namespace Silk.Benchmarks
         {
             string[] split = LoremIpsum.Split(',');
             for (int i = 0; i < split.Length / 4; i++)
-                yield return string.Join(string.Empty, split[(i * 4)..(i * 4 + (4 + 1))]);
+                yield return string.Join(string.Empty, split[(i * 4)..(i * 4 + 4 + 1)]);
         }
-
-
     }
 }

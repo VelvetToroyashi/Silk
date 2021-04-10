@@ -16,8 +16,8 @@ namespace Silk.Core.Discord.Commands.Economy
     [Category(Categories.Economy)]
     public class DonateCommand : BaseCommandModule
     {
-        private readonly IMediator _mediator;
         private readonly HashSet<ulong> _activeTransactions = new();
+        private readonly IMediator _mediator;
         public DonateCommand(IMediator mediator)
         {
             _mediator = mediator;
@@ -121,7 +121,9 @@ namespace Silk.Core.Discord.Commands.Economy
             _activeTransactions.Add(ctx.User.Id);
         }
 
-        public async override Task AfterExecutionAsync(CommandContext ctx) => _activeTransactions.Remove(ctx.User.Id);
-
+        public async override Task AfterExecutionAsync(CommandContext ctx)
+        {
+            _activeTransactions.Remove(ctx.User.Id);
+        }
     }
 }

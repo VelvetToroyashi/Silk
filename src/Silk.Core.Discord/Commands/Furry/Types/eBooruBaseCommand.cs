@@ -13,11 +13,11 @@ namespace Silk.Core.Discord.Commands.Furry.Types
 {
     public abstract class eBooruBaseCommand : BaseCommandModule
     {
+
+        private readonly HttpClient _client;
         private protected string? baseUrl;
         // Needed for e621.net //
         private protected string? username;
-
-        private readonly HttpClient _client;
 
         public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
         {
@@ -25,7 +25,7 @@ namespace Silk.Core.Discord.Commands.Furry.Types
         }
 
         /// <summary>
-        /// Execute the query from the specified booru site.
+        ///     Execute the query from the specified booru site.
         /// </summary>
         /// <param name="ctx">The command context to execute this command in.</param>
         /// <param name="amount">Amount of images to return.</param>
@@ -33,7 +33,7 @@ namespace Silk.Core.Discord.Commands.Furry.Types
         public abstract Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null);
 
         /// <summary>
-        /// Make a GET request to the booru site (e6/e9), and return the result.
+        ///     Make a GET request to the booru site (e6/e9), and return the result.
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
@@ -53,11 +53,11 @@ namespace Silk.Core.Discord.Commands.Furry.Types
         }
 
         /// <summary>
-        /// Similar to <see cref="DoQueryAsync"/> but adds a specified API key when making a GET request.
+        ///     Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
         /// </summary>
         /// <param name="query">search query to put in the GET request.</param>
         /// <param name="apiKey">The API key.</param>
-        /// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
+        /// <param name="requireUsername">Add <see cref="username" /> to the HTTP header or not.</param>
         /// <returns></returns>
         private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
         {
@@ -83,11 +83,11 @@ namespace Silk.Core.Discord.Commands.Furry.Types
         }
 
         /// <summary>
-        /// Get a set number of posts randomly from the list of available posts.
+        ///     Get a set number of posts randomly from the list of available posts.
         /// </summary>
         /// <param name="post">e6/e9 post result.</param>
         /// <param name="amount">The amount of posts to return.</param>
-        /// <param name="seed">The seed for the <see cref="Random"/> used to pick posts, preferably being a casted message Id.</param>
+        /// <param name="seed">The seed for the <see cref="Random" /> used to pick posts, preferably being a casted message Id.</param>
         /// <returns>A list of mostly random posts from a given post result.</returns>
         private protected async Task<List<Post?>> GetPostsAsync(eBooruPostResult? post, int amount, int seed = default)
         {

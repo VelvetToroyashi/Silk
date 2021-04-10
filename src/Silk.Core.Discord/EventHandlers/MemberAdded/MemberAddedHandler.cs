@@ -14,11 +14,10 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
 {
     public class MemberAddedHandler
     {
-        public List<DiscordMember> MemberQueue { get; private set; } = new();
-
-        private readonly Timer _timer = new(500);
         private readonly ConfigService _configService;
         private readonly ILogger<MemberAddedHandler> _logger;
+
+        private readonly Timer _timer = new(500);
         public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
         {
             _configService = configService;
@@ -27,6 +26,7 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
             _timer.Elapsed += async (_, _) => _ = OnTick();
             _timer.Start();
         }
+        public List<DiscordMember> MemberQueue { get; private set; } = new();
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
@@ -79,11 +79,14 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
             }
         }
 
-        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now) => new DiscordEmbedBuilder()
-            .WithTitle("User joined:")
-            .WithDescription($"User: {e.Member.Mention}")
-            .AddField("User ID:", e.Member.Id.ToString(), true)
-            .WithThumbnail(e.Member.AvatarUrl)
-            .WithColor(DiscordColor.Green);
+        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now)
+        {
+            return new DiscordEmbedBuilder()
+                .WithTitle("User joined:")
+                .WithDescription($"User: {e.Member.Mention}")
+                .AddField("User ID:", e.Member.Id.ToString(), true)
+                .WithThumbnail(e.Member.AvatarUrl)
+                .WithColor(DiscordColor.Green);
+        }
     }
 }

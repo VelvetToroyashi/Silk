@@ -33,11 +33,13 @@ namespace Silk.Core.Discord.Services
         }
 
 
-        private DiscordChannel? GetChannel(ulong channelId) =>
-            _client.ShardClients
+        private DiscordChannel? GetChannel(ulong channelId)
+        {
+            return _client.ShardClients
                 .Values
                 .SelectMany(g => g.Guilds.Values)
                 .SelectMany(g => g.Channels)
                 .FirstOrDefault(g => g.Key == channelId)!.Value;
+        }
     }
 }
