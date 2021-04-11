@@ -23,7 +23,7 @@ namespace Silk.Core.Discord.Services
             "cute red pandas",
             "for commands!"
         };
-        private bool _ready;
+        private bool _ready = false;
 
 
         public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
@@ -31,7 +31,7 @@ namespace Silk.Core.Discord.Services
             _client = client;
             _logger = logger;
 
-            client.Ready += (_, _) =>
+            client.GuildDownloadCompleted += (_, _) =>
             {
                 _ready = true;
                 return Task.CompletedTask;
