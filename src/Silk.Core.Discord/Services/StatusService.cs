@@ -42,7 +42,7 @@ namespace Silk.Core.Discord.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogWarning("Waiting for client to connect to gateway");
-            while (!_ready) { await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken); }
+            while (!_ready) { await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); }
             _logger.LogInformation("Started!");
 
             try
@@ -52,6 +52,7 @@ namespace Silk.Core.Discord.Services
                     var activity = new DiscordActivity(_statuses.Next(), ActivityType.Watching);
                     try { await _client.UpdateStatusAsync(activity); }
                     catch (SocketException) { }
+                    catch (NullReferenceException) { } // Websocket isn't initialized. Why this fires before all shards are ready is beyond me ~Velvet //
                     await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
             }
