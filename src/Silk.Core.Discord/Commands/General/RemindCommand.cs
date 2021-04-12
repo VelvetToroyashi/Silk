@@ -60,37 +60,57 @@ namespace Silk.Core.Discord.Commands.General
         // RECURRING REMINDERS //
 
         [Command]
+        public async Task Hourly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, offset);
+        }
+        [Command]
         public async Task Hourly(CommandContext ctx, [RemainingText] string reminder)
         {
-            await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly);
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, TimeSpan.Zero);
         }
 
+        [Command]
+        public async Task Daily(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Daily, offset);
+        }
         [Command]
         public async Task Daily(CommandContext ctx, [RemainingText] string reminder)
         {
-            await CreateRecurringReminder(ctx, reminder, ReminderType.Daily);
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Daily, TimeSpan.Zero);
         }
 
+        [Command]
+        public async Task Weekly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, offset);
+        }
         [Command]
         public async Task Weekly(CommandContext ctx, [RemainingText] string reminder)
         {
-            await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly);
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, TimeSpan.Zero);
         }
 
         [Command]
+        public async Task Monthly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, offset);
+        }
+        [Command]
         public async Task Monthly(CommandContext ctx, [RemainingText] string reminder)
         {
-            await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly);
+            await CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, TimeSpan.Zero);
         }
 
-        private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type)
+        private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type, TimeSpan offset)
         {
             DateTime time = type switch
             {
-                ReminderType.Hourly => DateTime.UtcNow + TimeSpan.FromHours(1),
-                ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
-                ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
-                ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30),
+                ReminderType.Hourly => DateTime.UtcNow + offset + TimeSpan.FromHours(1),
+                ReminderType.Daily => DateTime.UtcNow + offset + TimeSpan.FromDays(1),
+                ReminderType.Weekly => DateTime.UtcNow + offset + TimeSpan.FromDays(7),
+                ReminderType.Monthly => DateTime.UtcNow + offset + TimeSpan.FromDays(30),
                 _ => throw new ArgumentException("Yeah no.")
             };
 
