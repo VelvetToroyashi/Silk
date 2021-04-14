@@ -6,7 +6,7 @@ using Silk.Core.Discord.Utilities.HelpFormatter;
 
 namespace Silk.Core.Discord.Commands.General
 {
-    [Category(Categories.General)]
+    [Category(Categories.Bot)]
     public class ServerList : BaseCommandModule
     {
         [Command("servers")]

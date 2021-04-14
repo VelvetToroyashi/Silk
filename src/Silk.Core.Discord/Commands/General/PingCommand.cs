@@ -10,7 +10,7 @@ using Silk.Core.Discord.Utilities.HelpFormatter;
 
 namespace Silk.Core.Discord.Commands.General
 {
-    [Category(Categories.General)]
+    [Category(Categories.Misc)]
     public class PingCommand : BaseCommandModule
     {
         private readonly IDbContextFactory<GuildContext> _dbFactory;

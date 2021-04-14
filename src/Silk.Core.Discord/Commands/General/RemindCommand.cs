@@ -16,6 +16,7 @@ using Silk.Extensions;
 
 namespace Silk.Core.Discord.Commands.General
 {
+    [Category(Categories.General)]
     public class RemindersCommand : BaseCommandModule
     {
         [Command]
