@@ -54,7 +54,8 @@ namespace Silk.Core.Logic
                 var logger = new LoggerConfiguration()
                     .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
-                    .MinimumLevel.Override("Microsoft", LogEventLevel.Error);
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+                    .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
 
                 Log.Logger = builder.Configuration["LogLevel"] switch
                 {
