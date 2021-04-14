@@ -29,6 +29,7 @@ namespace Silk.Core.Discord.Services.Interfaces
 
         public Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null);
 
+        public Task<bool?> GetConfirmationAsync(IMessage message, ulong userId, TimeSpan? timeOut = null);
         //public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
     }
 }

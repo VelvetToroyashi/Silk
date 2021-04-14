@@ -15,7 +15,6 @@ namespace Silk.Core.Discord.Services
     public class PrefixCacheService : IPrefixCacheService
     {
         private readonly ConcurrentDictionary<ulong, string> _cache = new();
-        private readonly IServiceCacheUpdaterService _cacheUpdater;
         private readonly IDbContextFactory<GuildContext> _dbFactory;
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
@@ -25,15 +24,13 @@ namespace Silk.Core.Discord.Services
             _logger = logger;
             _dbFactory = dbFactory;
             _memoryCache = memoryCache;
-            _cacheUpdater = cacheUpdater;
 
-            _cacheUpdater.ConfigUpdated += PurgeCache;
+            cacheUpdater.ConfigUpdated += PurgeCache;
         }
 
         [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         public string RetrievePrefix(ulong? guildId)
         {
-
             if (guildId == default || guildId == 0) return string.Empty;
             if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string) prefix;
             return GetPrefixFromDatabase(guildId.Value);
@@ -55,7 +52,6 @@ namespace Silk.Core.Discord.Services
             _cache.TryRemove(id, out _);
             //GetPrefix caches, so no need for the result.//
             _ = GetPrefixFromDatabase(id);
-            _logger.LogDebug("Purged prefix from recached from database");
         }
 
         private string GetPrefixFromDatabase(ulong guildId)
@@ -70,16 +66,10 @@ namespace Silk.Core.Discord.Services
                 _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database");
                 return Bot.DefaultCommandPrefix;
             }
-
-            _sw.Stop();
             _memoryCache.Set(GetGuildString(guildId), guild.Prefix);
-            _logger.LogDebug($"Cached {guild.Prefix} - {guildId} in {_sw.ElapsedMilliseconds} ms");
             return guild.Prefix;
         }
 
-        private static string GetGuildString(ulong id)
-        {
-            return $"GUILD_PREFIX_KEY_{id}";
-        }
+        private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
     }
 }

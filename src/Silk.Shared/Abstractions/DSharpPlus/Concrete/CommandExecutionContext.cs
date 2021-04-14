@@ -10,6 +10,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private readonly IMessageSender _messageSender;
         public CommandExecutionContext(DiscordMessage message, DiscordChannel channel, DiscordGuild? guild, IMessageSender messageSender)
         {
+            User = (User) message.Author;
             Message = (Message) message!;
             Channel = new Channel() {Id = channel.Id};
             Guild = (Guild) guild!;
@@ -17,23 +18,20 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         }
 
         /// <inheritdoc />
-        public IMessage Message { get; internal set; }
+        public IUser User { get; }
+        /// <inheritdoc />
+        public IMessage Message { get; }
 
         /// <inheritdoc />
-        public IChannel Channel { get; internal set; }
+        public IChannel Channel { get; }
 
         /// <inheritdoc />
-        public IGuild? Guild { get; internal set; }
+        public IGuild? Guild { get; }
 
         /// <inheritdoc />
         public async Task<IMessage> RespondAsync(string message)
         {
             return await _messageSender.SendAsync(Channel.Id, message);
-        }
-        /// <inheritdoc />
-        public async Task<IMessage> ReplyAsync(IMessage message)
-        {
-            return null;
         }
     }
 }
