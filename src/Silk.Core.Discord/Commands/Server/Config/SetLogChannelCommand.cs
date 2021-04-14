@@ -29,7 +29,7 @@ namespace Silk.Core.Discord.Commands.Server.Config
 
             [Command("Log")]
             public async Task LogWrapper(CommandContext ctx, DiscordChannel channel) =>
-                await SetLoggingChannel(new CommandExecutionContext(ctx.Message, ctx.Channel, ctx.Guild, _sender), new Channel() {Id = channel.Id});
+                await SetLoggingChannel(new CommandExecutionContext(ctx.Message, ctx.Channel, ctx.Guild, ctx.Prefix, _sender), new Channel() {Id = channel.Id});
 
             public async Task SetLoggingChannel(ICommandExecutionContext ctx, IChannel channel)
             {

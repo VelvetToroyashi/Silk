@@ -4,16 +4,17 @@ using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICommandExecutionContext"/> />
     public class CommandExecutionContext : ICommandExecutionContext
     {
         private readonly IMessageSender _messageSender;
-        public CommandExecutionContext(DiscordMessage message, DiscordChannel channel, DiscordGuild? guild, IMessageSender messageSender)
+        public CommandExecutionContext(DiscordMessage message, DiscordChannel channel, DiscordGuild? guild, string prefix, IMessageSender messageSender)
         {
             User = (User) message.Author;
             Message = (Message) message!;
             Channel = new Channel() {Id = channel.Id};
             Guild = (Guild) guild!;
+            Prefix = prefix;
             _messageSender = messageSender;
         }
 
@@ -27,6 +28,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         /// <inheritdoc />
         public IGuild? Guild { get; }
+
+        public string Prefix { get; }
 
         /// <inheritdoc />
         public async Task<IMessage> RespondAsync(string message)

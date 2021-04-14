@@ -8,6 +8,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public IMessage Message { get; }
         public IChannel Channel { get; }
         public IGuild? Guild { get; }
+        public string Prefix { get; }
 
         public Task<IMessage> RespondAsync(string message);
     }
