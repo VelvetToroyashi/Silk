@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Extensions.Logging;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 
@@ -31,7 +32,8 @@ namespace Silk.Core.Discord
                       DiscordIntents.GuildVoiceStates,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None
+            MinimumLogLevel = LogLevel.None,
+            LoggerFactory = new SerilogLoggerFactory()
         };
         public static DateTime Startup { get; } = DateTime.Now;
         public static string HttpClientName { get; } = "Silk";

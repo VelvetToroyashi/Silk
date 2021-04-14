@@ -63,7 +63,7 @@ namespace Silk.Core.Discord.Services
         {
             await member.BanAsync(0, infraction.Reason);
             GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(member.Guild.Id));
-            User user = await _mediator.Send(new GetOrCreateUserRequest(channel.GuildId, member.Id));
+            User user = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
             await ApplyInfractionAsync(infraction.Guild, user, infraction);
             if (config.LoggingChannel is 0)
             {
@@ -90,8 +90,8 @@ namespace Silk.Core.Discord.Services
                 throw new ArgumentOutOfRangeException(nameof(infraction), "Infraction must have expiry date!");
 
             _logger.LogTrace("Querying for guild, config, and user");
-            Guild guild = await _mediator.Send(new GetGuildRequest(channel.GuildId));
-            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(channel.GuildId));
+            Guild guild = await _mediator.Send(new GetGuildRequest(member.Guild.Id));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(member.Guild.Id));
             User user = await _mediator.Send(new GetOrCreateUserRequest(guild.Id, member.Id));
             _logger.LogTrace("Retrieved guild, config, and user from database!");
 
@@ -110,7 +110,7 @@ namespace Silk.Core.Discord.Services
 
         public async Task MuteAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
         {
-            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(channel.GuildId));
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(member.Guild.Id));
 
             if (!channel.Guild.Roles.TryGetValue(config.MuteRoleId, out DiscordRole? muteRole))
             {

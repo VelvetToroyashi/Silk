@@ -7,64 +7,33 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
-        private IUser _author;
-        private string _content;
-        private ulong _id;
-        private IReadOnlyCollection<IEmoji> _reactions;
-        private IMessage? _reply;
-        private DateTimeOffset _timestamp;
-
         public Message(ulong id, IUser author, string? content, DateTimeOffset timestamp, IMessage? reply, IReadOnlyCollection<IEmoji> reactions)
         {
-            _id = id;
-            _author = author;
-            _content = content;
-            _timestamp = timestamp;
-            _reply = reply;
-            _reactions = reactions;
+            ((IMessage) this).Id = id;
+            ((IMessage) this).Author = author;
+            ((IMessage) this).Content = content;
+            ((IMessage) this).Timestamp = timestamp;
+            ((IMessage) this).Reply = reply;
+            ((IMessage) this).Reactions = reactions;
         }
 
-        ulong IMessage.Id
-        {
-            get => _id;
-            set => _id = value;
-        }
+        ulong IMessage.Id { get; set; }
 
-        IUser IMessage.Author
-        {
-            get => _author;
-            set => _author = value;
-        }
+        IUser IMessage.Author { get; set; }
 
-        string IMessage.Content
-        {
-            get => _content;
-            set => _content = value;
-        }
+        string IMessage.Content { get; set; }
 
-        DateTimeOffset IMessage.Timestamp
-        {
-            get => _timestamp;
-            set => _timestamp = value;
-        }
+        DateTimeOffset IMessage.Timestamp { get; set; }
 
-        IMessage? IMessage.Reply
-        {
-            get => _reply;
-            set => _reply = value;
-        }
+        IMessage? IMessage.Reply { get; set; }
 
-        IReadOnlyCollection<IEmoji> IMessage.Reactions
-        {
-            get => _reactions;
-            set => _reactions = value;
-        }
+        IReadOnlyCollection<IEmoji> IMessage.Reactions { get; set; }
 
         public static explicit operator Message?(DiscordMessage? message)
         {
             return message is null ?
                 null :
-                new(message.Id, (User) message.Author, message.Content, message.CreationTimestamp, message.ReferencedMessage is null ? null : (Message) message.ReferencedMessage, default!);
+                new(message.Id, (User) message.Author, message.Content, message.CreationTimestamp, message.ReferencedMessage is null ? null : (Message?) message.ReferencedMessage, default!);
         }
     }
 }

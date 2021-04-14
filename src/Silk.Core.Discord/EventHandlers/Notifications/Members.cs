@@ -2,12 +2,12 @@
 
 namespace Silk.Core.Discord.EventHandlers.Notifications
 {
-    public class MemberJoined : INotification { }
+    public record MemberJoined : INotification { }
 
-    public class MemberRemoved : INotification { }
+    public record MemberRemoved : INotification { }
 
-    public class MemberUpdated : INotification { }
+    public record MemberUpdated : INotification { }
 
-    public class MemberStatusUpdated : INotification { }
+    public record MemberStatusUpdated : INotification { }
 
 }

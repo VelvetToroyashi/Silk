@@ -135,10 +135,9 @@ namespace Silk.Core.Discord.Commands.General
                 string[] allReminders = reminders
                     .Select(r =>
                     {
-                        var s =
-                            r.Type is ReminderType.Once ?
-                                $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
-                                $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
+                        var s = r.Type is ReminderType.Once ?
+                            $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
+                            $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
 
                         if (r.ReplyId is not null)
                         {
