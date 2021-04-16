@@ -5,10 +5,12 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
 
 namespace Silk.Core.Discord.Commands.Bot
 {
+    [Category(Categories.Bot)]
     public class AboutCommand : BaseCommandModule
     {
         [Command("about")]

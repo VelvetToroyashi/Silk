@@ -6,6 +6,7 @@ using Silk.Core.Discord.Utilities;
 
 namespace Silk.Core.Discord.Commands.Server.Config
 {
+    [Hidden]
     [RequireGuild]
     [Group("config")]
     [RequireFlag(UserFlag.Staff)]
