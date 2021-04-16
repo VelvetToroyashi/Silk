@@ -5,7 +5,7 @@ namespace Silk.Shared.Types.Collections
 {
     public sealed class LoopedList<T> : List<T>
     {
-        private int _pos = -1;
+        private uint _pos;
 
         public new T this[int index]
         {
@@ -22,7 +22,7 @@ namespace Silk.Shared.Types.Collections
 
         public T Next()
         {
-            return unchecked(this[++_pos]);
+            return unchecked(this[(int) ++_pos]);
         }
     }
 }
