@@ -13,16 +13,11 @@ namespace Silk.Shared.Types.Collections
             set
             {
                 if (Count is 0)
-                {
                     throw new ArgumentOutOfRangeException(nameof(index), "Colletion must be non-empty.");
-                }
                 base[index % Count] = value;
             }
         }
 
-        public T Next()
-        {
-            return unchecked(this[(int) ++_pos]);
-        }
+        public T Next() => unchecked(this[(int) _pos++]);
     }
 }

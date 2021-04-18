@@ -96,7 +96,10 @@ namespace Silk.Core.Discord.Utilities.Bot
         {
             if (e.CloseCode is 4014)
                 _logger.LogCritical("Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
+
+
         }
+
         private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
         {
             CommandsNextExtension? cnext = c.GetCommandsNext();
