@@ -18,6 +18,6 @@ RUN apk upgrade --update-cache --available && \
 WORKDIR /Silk
 COPY --from=build /Silk/out .
 
-RUN chmod +x ./Silk.Core
+RUN chmod +x ./Silk.Core.Logic
 
-CMD ["./Silk.Core"]
+CMD ["./Silk.Core.Logic"]
