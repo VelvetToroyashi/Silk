@@ -13,6 +13,9 @@ namespace Silk.Extensions
 
         public static bool HasPermission(this DiscordMember member, Permissions perm)
         {
+            if (member.IsAdministrator() || member.IsOwner)
+                return true;
+
             return !member.Roles.Any()
                 ? member.Guild.EveryoneRole.HasPermission(perm)
                 : member.Roles.Any(role => role.HasPermission(perm));
