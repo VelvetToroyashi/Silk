@@ -1,35 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Authors>VelvetThePanda, CalebABG97, NatsumiHB</Authors>
-        <Company>The Silk Devs Team</Company>
-        <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
-        <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
-        <RepositoryUrl>https://GitHub.com/VelvetThePanda/Silk</RepositoryUrl>
+        <TargetFramework>net5.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.2.21154.6"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.2.21154.6"/>
-        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.3.21201.2"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.2.21154.6"/>
+        <PackageReference Include="Serilog" Version="2.10.1-dev-01285"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Services"/>
-    </ItemGroup>
-
-    <ItemGroup>
+        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj"/>
         <ProjectReference Include="..\Silk.Core.Discord\Silk.Core.Discord.csproj"/>
     </ItemGroup>
 
