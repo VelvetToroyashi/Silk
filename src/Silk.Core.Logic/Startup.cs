@@ -42,7 +42,7 @@ namespace Silk.Core.Logic
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory());
                 configuration.AddJsonFile("appSettings.json", true, false);
-                configuration.AddUserSecrets<Startup>(true, false);
+                configuration.AddUserSecrets<Discord.Startup>(true, false);
             });
             return builder;
         }

@@ -4,10 +4,11 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.3.21201.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5"/>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Serilog" Version="2.10.1-dev-01285"/>
     </ItemGroup>

@@ -12,7 +12,7 @@ using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord
 {
-    public static class Startup
+    public class Startup
     {
         public static void AddServices(IServiceCollection services)
         {
