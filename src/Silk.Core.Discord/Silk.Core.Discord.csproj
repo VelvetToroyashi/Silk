@@ -49,7 +49,7 @@
         <PackageReference Include="DSharpPlus" Version="4.0.1-nightly-00839"/>
         <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00837"/>
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.1-nightly-00839"/>
-        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.0.1-nightly-00837"/>
+        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.0.1-nightly-00841"/>
         <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002"/>
         <PackageReference Include="Humanizer" Version="2.8.26"/>
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2"/>
