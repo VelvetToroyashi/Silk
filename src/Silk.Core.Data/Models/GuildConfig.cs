@@ -77,6 +77,8 @@ namespace Silk.Core.Data.Models
         /// </summary>
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
 
+        public List<ReactionRole> ReactionRoles { get; set; } = new();
+
         #region AutoMod/Moderation
 
         /// <summary>
