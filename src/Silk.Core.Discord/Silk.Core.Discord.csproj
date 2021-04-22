@@ -46,7 +46,7 @@
     <ItemGroup>
         <PackageReference Include="Colorful.Console" Version="1.2.15"/>
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1"/>
-        <PackageReference Include="DSharpPlus" Version="4.0.1-nightly-00839"/>
+        <PackageReference Include="DSharpPlus" Version="4.0.1-nightly-00841"/>
         <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00837"/>
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.1-nightly-00839"/>
         <PackageReference Include="DSharpPlus.VoiceNext" Version="4.0.1-nightly-00837"/>
