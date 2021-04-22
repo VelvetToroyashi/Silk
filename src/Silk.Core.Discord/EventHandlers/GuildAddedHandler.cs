@@ -18,6 +18,8 @@ namespace Silk.Core.Discord.EventHandlers
     //This relies on multiple events to update its state, so we can't implement INotificationHandler.
     public class GuildAddedHandler
     {
+        public static bool StartupCompleted { get; private set; }
+
         private readonly object _lock = new();
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IMediator _mediator;
@@ -36,7 +38,7 @@ namespace Silk.Core.Discord.EventHandlers
             foreach ((int key, _) in shards)
                 _shardStates.Add(key, new());
         }
-        public static bool StartupCompleted { get; private set; }
+
 
 
         /// <summary>

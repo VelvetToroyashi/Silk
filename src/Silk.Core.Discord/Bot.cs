@@ -20,6 +20,7 @@ using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Discord.EventHandlers.Notifications;
+using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -27,8 +28,10 @@ using Silk.Extensions;
 namespace Silk.Core.Discord
 {
     //Lorum Ipsum, or something.
-    public class Bot : BackgroundService
+    public class Bot : IHostedService
     {
+        public static BotState State { get; set; } = BotState.Starting;
+
         private readonly BotExceptionHandler _exceptionHandler;
         private readonly ILogger<Bot> _logger;
 
@@ -136,55 +139,30 @@ namespace Silk.Core.Discord
         //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
         {
-            _logger.LogDebug("Subscribing to events");
-
             Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e)); };
-            //TODO: Change this to MediatR notification
-            _logger.LogTrace("Subscribed to:" + " Notifications/CommandInvocations".PadLeft(50));
-            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageAdd/AntiInvite".PadLeft(50));
-
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
-            _logger.LogTrace("Subscribed to:" + " Notifications/AutoMod/MessageEdit/AntiInvite".PadLeft(50));
-
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
-            //_logger.LogTrace("Subscribed to:" + " AutoMod/CheckAddInvites".PadLeft(50));
+
             Client.MessageDeleted += _services.Get<MessageRemovedHandler>()!.MessageRemoved;
-            _logger.LogTrace("Subscribed to:" + " MessageRemovedHelper/MessageRemoved".PadLeft(50));
 
             Client.GuildMemberAdded += _services.Get<MemberAddedHandler>()!.OnMemberAdded;
-            _logger.LogTrace("Subscribed to:" + " MemberAddedHandler/MemberAdded".PadLeft(50));
-
             Client.GuildCreated += _services.Get<GuildAddedHandler>()!.SendThankYouMessage;
-            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/SendWelcomeMessage".PadLeft(50));
-
             Client.GuildAvailable += _services.Get<GuildAddedHandler>()!.OnGuildAvailable;
-            _logger.LogTrace("Subscribed to:" + " GuildAddedHelper/GuildAvailable".PadLeft(50));
-
             Client.GuildCreated += _services.Get<GuildAddedHandler>()!.OnGuildAvailable;
-            _logger.LogTrace("Subscribed to:" + " GuildAddedHandler/GuildCreated".PadLeft(50));
-
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>()!.OnGuildDownloadComplete;
-            _logger.LogTrace("Subscribed to:" + "  GuildAddedHelper/GuildDownloadComplete".PadLeft(50));
-
             Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>()!.CheckStaffRole;
-            _logger.LogTrace("Subscribed to:" + " RoleAddedHelper/CheckForStaffRole".PadLeft(50));
-
-            _logger.LogInformation("Subscribed to all events!");
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             await InitializeClientAsync();
-            try { await Task.Delay(-1, stoppingToken); }
-            catch (TaskCanceledException)
-            {
-                /* Ignored. */
-            }
-            finally
-            {
-                _logger.LogInformation("Shutting down. ");
-                await Client.StopAsync();
-            }
+
+        }
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await Client.StopAsync();
+            _logger.LogInformation("Disconnected from Discord Gateway");
         }
     }
 }
