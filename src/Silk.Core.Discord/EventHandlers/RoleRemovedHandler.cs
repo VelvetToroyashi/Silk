@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR.Unified.Users;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 

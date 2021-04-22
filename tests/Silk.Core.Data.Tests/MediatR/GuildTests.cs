@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using NUnit.Framework;
 using Respawn;
-using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.Tests.MediatR

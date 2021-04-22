@@ -4,7 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.GlobalUsers;
+using Silk.Core.Data.MediatR.GlobalUsers;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 

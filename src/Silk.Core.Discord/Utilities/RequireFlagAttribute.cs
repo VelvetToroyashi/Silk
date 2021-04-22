@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Silk.Core.Data.MediatR.Unified.Users;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
 

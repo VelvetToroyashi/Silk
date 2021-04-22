@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.CommandInvocations;
+using Silk.Core.Data.MediatR.CommandInvocations;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Services;

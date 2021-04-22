@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 

@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.Guilds;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;

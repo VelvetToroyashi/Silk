@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.GlobalUsers;
+using Silk.Core.Data.MediatR.GlobalUsers;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 

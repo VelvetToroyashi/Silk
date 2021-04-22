@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
-using Silk.Core.Data.MediatR.Unified.Users;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Constants;
 using Silk.Extensions;
