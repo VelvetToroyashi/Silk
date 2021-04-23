@@ -42,7 +42,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
             while (roleIdInputResult.ToLower() is not "cancel" or null)
             {
-                await setupInitializerMessage.EditAsync("a");
+                await setupInitializerMessage.CreateReactionAsync(785932615739637800);
                 break;
             }
 

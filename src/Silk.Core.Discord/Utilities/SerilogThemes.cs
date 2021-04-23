@@ -24,14 +24,14 @@ namespace Silk.Core.Discord.Utilities
         {
             (ConsoleColor foreground, ConsoleColor background) = style switch
             {
-                ConsoleThemeStyle.Number => (ConsoleColor.Magenta, ConsoleColor.Black),
+                ConsoleThemeStyle.Number => (ConsoleColor.DarkBlue, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelDebug => (ConsoleColor.Green, ConsoleColor.Black),
-                ConsoleThemeStyle.LevelError => (ConsoleColor.White, ConsoleColor.Black),
-                ConsoleThemeStyle.LevelFatal => (ConsoleColor.Yellow, ConsoleColor.Black),
-                ConsoleThemeStyle.LevelVerbose => (ConsoleColor.Red, ConsoleColor.Yellow),
-                ConsoleThemeStyle.LevelWarning => (ConsoleColor.DarkRed, ConsoleColor.Black),
-                ConsoleThemeStyle.SecondaryText => (ConsoleColor.Blue, ConsoleColor.Black),
-                ConsoleThemeStyle.LevelInformation => (ConsoleColor.DarkBlue, ConsoleColor.Black),
+                ConsoleThemeStyle.LevelError => (ConsoleColor.Red, ConsoleColor.Black),
+                ConsoleThemeStyle.LevelFatal => (ConsoleColor.Yellow, ConsoleColor.DarkRed),
+                ConsoleThemeStyle.LevelVerbose => (ConsoleColor.Magenta, ConsoleColor.Black),
+                ConsoleThemeStyle.LevelWarning => (ConsoleColor.Yellow, ConsoleColor.Black),
+                ConsoleThemeStyle.SecondaryText => (ConsoleColor.DarkBlue, ConsoleColor.Black),
+                ConsoleThemeStyle.LevelInformation => (ConsoleColor.White, ConsoleColor.Black),
                 _ => (ConsoleColor.Yellow, ConsoleColor.Black)
             };
             Console.ForegroundColor = foreground;

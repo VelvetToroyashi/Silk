@@ -38,7 +38,11 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public IReadOnlyCollection<IEmoji> Reactions { get; }
 
-        public async Task CreateReactionAsync(ulong emojiId) { }
+        public async Task CreateReactionAsync(ulong emojiId)
+        {
+            var emoji = DiscordEmoji.FromUnicode($"<:_:{emojiId}>");
+            await _message.CreateReactionAsync(emoji);
+        }
 
         public async Task DeleteAsync()
         {
