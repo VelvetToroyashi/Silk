@@ -27,7 +27,7 @@ namespace Silk.Core.Discord.Utilities
                 ConsoleThemeStyle.Number => (ConsoleColor.DarkBlue, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelDebug => (ConsoleColor.Green, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelError => (ConsoleColor.Red, ConsoleColor.Black),
-                ConsoleThemeStyle.LevelFatal => (ConsoleColor.Yellow, ConsoleColor.DarkRed),
+                ConsoleThemeStyle.LevelFatal => (ConsoleColor.Red, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelVerbose => (ConsoleColor.Magenta, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelWarning => (ConsoleColor.Yellow, ConsoleColor.Black),
                 ConsoleThemeStyle.SecondaryText => (ConsoleColor.DarkBlue, ConsoleColor.Black),
