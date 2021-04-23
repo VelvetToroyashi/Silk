@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
@@ -22,6 +24,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             Reply = (Message) message.ReferencedMessage!;
             Reactions = default!;
         }
+
         public ulong Id { get; }
 
         public ulong? GuildId { get; }
@@ -40,7 +43,13 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task CreateReactionAsync(ulong emojiId)
         {
-            var emoji = DiscordEmoji.FromUnicode($"<:_:{emojiId}>");
+            var client = _message
+                .GetType()
+                .BaseType!
+                .GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(_message) as DiscordClient;
+
+            var emoji = DiscordEmoji.FromGuildEmote(client, emojiId);
             await _message.CreateReactionAsync(emoji);
         }
 

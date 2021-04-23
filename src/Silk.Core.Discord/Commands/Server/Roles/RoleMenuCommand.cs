@@ -42,7 +42,6 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
             while (roleIdInputResult.ToLower() is not "cancel" or null)
             {
-                await setupInitializerMessage.CreateReactionAsync(785932615739637800);
                 break;
             }
 
@@ -59,6 +58,12 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             {
                 if (result.Content.Length < 50)
                 {
+                    var confirmationMessage = await ctx.RespondAsync("Are you sure?");
+                    var confirmationResult = await _input.GetConfirmationAsync(confirmationMessage, ctx.User.Id);
+
+                    if (!confirmationResult ?? true) return null;
+
+                    await confirmationMessage.DeleteAsync();
                     await result.DeleteAsync();
                     return result.Content;
                 }
