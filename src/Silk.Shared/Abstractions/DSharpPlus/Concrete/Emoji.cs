@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
@@ -15,7 +14,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         public bool IsSharedEmoji()
         {
             var client = _emoji.GetClient();
-            return client.Guilds.Values.Any(g => g.Emojis.Values.Contains(_emoji));
+            return DiscordEmoji.TryFromGuildEmote(client, Id, out _);
         }
 
         private Emoji(DiscordEmoji emoji)
