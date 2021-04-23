@@ -32,7 +32,7 @@ namespace Silk.Core.Discord.Utilities
                 ConsoleThemeStyle.LevelFatal => (ConsoleColor.DarkRed, ConsoleColor.Black),
                 ConsoleThemeStyle.SecondaryText => (ConsoleColor.Blue, ConsoleColor.Black),
                 ConsoleThemeStyle.Number => (ConsoleColor.DarkBlue, ConsoleColor.Black),
-                _ => (ConsoleColor.Gray, ConsoleColor.Black)
+                _ => (ConsoleColor.Yellow, ConsoleColor.Black)
             };
             Console.ForegroundColor = foreground;
             Console.BackgroundColor = background;
