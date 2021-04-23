@@ -68,7 +68,7 @@ namespace Silk.Core.Logic
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
                         _ => logger.MinimumLevel.Information().CreateLogger()
                     };
-                    Log.Logger.ForContext(typeof(Startup)).Information("[BACKEND] Logging initialized!");
+                    Log.Logger.ForContext(typeof(Startup)).Information("Logging initialized!");
                 })
                 .UseSerilog();
         }

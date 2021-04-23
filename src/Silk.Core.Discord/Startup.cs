@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Silk.Core.Data;
 using Silk.Core.Discord.EventHandlers;
@@ -16,6 +17,8 @@ namespace Silk.Core.Discord
     {
         public static void AddServices(IServiceCollection services)
         {
+            services.AddSingleton(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
+
             services.AddTransient<ConfigService>();
             services.AddTransient<GuildContext>();
             services.AddSingleton<AntiInviteCore>();
