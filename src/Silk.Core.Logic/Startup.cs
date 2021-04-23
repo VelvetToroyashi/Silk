@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +15,6 @@ namespace Silk.Core.Logic
     public class Startup
     {
         private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext:l}] {Message:lj} {Exception:j}{NewLine}";
-        private readonly CancellationToken _stoppingToken = new();
-
 
         public static async Task Main()
         {
