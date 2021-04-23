@@ -14,4 +14,8 @@
         <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00841"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
+    </ItemGroup>
+
 </Project>

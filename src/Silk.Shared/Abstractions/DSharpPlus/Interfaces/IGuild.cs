@@ -4,8 +4,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
 {
     public interface IGuild
     {
-        public ulong Id { get; init; }
-        public IReadOnlyList<IUser> Users { get; init; }
-        public IReadOnlyList<IChannel> Channels { get; init; }
+        public ulong Id { get; }
+        public IReadOnlyList<IUser> Users { get; }
+        public IReadOnlyList<IChannel> Channels { get; }
+        public IReadOnlyList<IEmoji> Emojis { get; }
     }
 }

@@ -54,7 +54,8 @@ namespace Silk.Core.Discord.Services
             var yes = DiscordEmoji.FromGuildEmote(client, Emojis.ConfirmId);
             var no = DiscordEmoji.FromGuildEmote(client, Emojis.DeclineId);
 
-
+            await message.CreateReactionAsync(Emojis.ConfirmId);
+            await message.CreateReactionAsync(Emojis.DeclineId);
 
             var result = await interactivity.WaitForReactionAsync(r => r.Emoji == yes || r.Emoji == no && r.User.Id == userId);
 

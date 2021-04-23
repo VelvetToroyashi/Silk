@@ -46,7 +46,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             }
 
         }
-
+        private async Task GetRolesAsync(IMessage message) { }
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
         {
             var result = await _input.GetInputAsync(ctx.User.Id, ctx.Channel.Id, ctx.Guild!.Id);
