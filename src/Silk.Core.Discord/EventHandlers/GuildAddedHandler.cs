@@ -11,6 +11,7 @@ using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Constants;
+using Silk.Core.Discord.Types;
 using Silk.Extensions;
 
 namespace Silk.Core.Discord.EventHandlers
@@ -46,6 +47,9 @@ namespace Silk.Core.Discord.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
+            if (Bot.State is not BotState.Caching)
+                Bot.State = BotState.Caching;
+
             _ = await _mediator.Send(new GetOrCreateGuildRequest(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
             int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
 
@@ -87,6 +91,7 @@ namespace Silk.Core.Discord.EventHandlers
             {
                 _logger.LogDebug("All shard(s) cache runs complete!");
                 _logged = true;
+                Bot.State = BotState.Ready;
             }
         }
 
