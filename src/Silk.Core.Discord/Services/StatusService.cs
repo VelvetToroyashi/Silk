@@ -58,7 +58,7 @@ namespace Silk.Core.Discord.Services
             catch (TaskCanceledException) { }
             finally
             {
-                _logger.LogDebug("Cancelation requested. Stopping service");
+                _logger.LogDebug("Cancelation requested. Stopping service. ");
             }
         }
     }

@@ -224,7 +224,7 @@ namespace Silk.Core.Discord.Services
             catch (TaskCanceledException) { }
             finally
             {
-                _logger.LogDebug("Cancelation requested. Stopping service");
+                _logger.LogDebug("Cancelation requested. Stopping service. ");
                 await timer.DisposeAsync();
                 // It's safe to clear the list as it's all saved to the database prior when they're added. //
                 _reminders.Clear();
