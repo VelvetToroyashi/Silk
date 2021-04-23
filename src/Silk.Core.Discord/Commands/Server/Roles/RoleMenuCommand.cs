@@ -27,14 +27,25 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         [Command]
         public async Task Create(CommandContext ctx)
         {
-            var roleMenuMessage = await ctx.Channel.SendMessageAsync("**Awaiting setup.**");
-            var setupInitializerMessage = await ctx.RespondAsync("Hello! What would you like to name this role menu? " +
-                                                                 "\n(Menu will be prefixed with **Role Menu:**, title limited to 50 characters)");
+            var roleMenuMessage = await _sender.SendAsync(ctx.Channel.Id, "**Awaiting setup.**");
+            var setupInitializerMessage = await _sender.SendAsync(ctx.Channel.Id, "Hello! What would you like to name this role menu? " +
+                                                                                  "\n(Menu will be prefixed with **Role Menu:**, title limited to 50 characters)");
             var titleMessage = string.Empty;
             while (string.IsNullOrEmpty(titleMessage))
             {
                 titleMessage = await GetTitleAsync(new CommandExecutionContext(ctx, _sender));
             }
+
+            await roleMenuMessage.EditAsync($"**RoleMenu: {titleMessage}**");
+
+            var roleIdInputResult = string.Empty;
+
+            while (roleIdInputResult.ToLower() is not "cancel" or null)
+            {
+                await setupInitializerMessage.EditAsync("a");
+                break;
+            }
+
         }
 
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
