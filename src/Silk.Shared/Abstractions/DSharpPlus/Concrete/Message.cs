@@ -2,21 +2,25 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
-        public Message(ulong id, ulong? guildId, IUser author, string? content, DateTimeOffset timestamp, IMessage? reply, IReadOnlyCollection<IEmoji> reactions)
+        private readonly DiscordMessage _message;
+        public Message(DiscordMessage message)
         {
-            Id = id;
-            GuildId = guildId;
-            Author = author;
-            Content = content;
-            Timestamp = timestamp;
-            Reply = reply;
-            Reactions = reactions;
+            _message = message;
+
+            Id = message.Id;
+            GuildId = message.Channel.GuildId;
+            Author = (User) message.Author;
+            Content = message.Content;
+            Timestamp = message.CreationTimestamp;
+            Reply = (Message) message.ReferencedMessage!;
+            Reactions = default!;
         }
         public ulong Id { get; }
 
@@ -24,9 +28,11 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public IUser Author { get; }
 
-        public string? Content { get; }
+        public string? Content { get; private set; }
 
         public DateTimeOffset Timestamp { get; }
+
+        //public IEmbed Embed { get; }
 
         public IMessage? Reply { get; }
 
@@ -34,21 +40,29 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task CreateReactionAsync(ulong emojiId) { }
 
+        public async Task DeleteAsync()
+        {
+            try
+            {
+                await _message.DeleteAsync();
+            }
+            catch (NotFoundException)
+            {
+                /* Ignored. */
+            }
+        }
+
+        public async Task EditAsync(string content)
+        {
+            Content = content;
+            await _message.ModifyAsync(m => m.Content = content);
+        }
+
         public static explicit operator Message?(DiscordMessage? message)
         {
-            Message? reply = null;
-
             if (message is null) return null;
-            if (message.ReferencedMessage is not null)
-                reply = (Message) message.ReferencedMessage!;
 
-            return new(
-                message.Id,
-                message.Channel.GuildId,
-                (User) message.Author,
-                message.Content,
-                message.CreationTimestamp,
-                reply, default!);
+            return new(message);
         }
     }
 }

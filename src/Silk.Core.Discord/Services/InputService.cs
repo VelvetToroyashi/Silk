@@ -8,6 +8,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.Bot;
+using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Services
@@ -27,6 +28,12 @@ namespace Silk.Core.Discord.Services
         {
             var interactivity = GetInteractivityInternal(guildId);
             return await WaitForInputAsync(interactivity, userId, channelId, guildId, timeOut);
+        }
+
+        public async Task<IMessage?> GetInputAsync(ulong userId, ulong channelId, ulong? guildId, TimeSpan? timeOut = null)
+        {
+            var interactivity = GetInteractivityInternal(guildId);
+            return (Message) (await interactivity.WaitForMessageAsync(m => m.Author.Id == userId && m.Channel.Id == channelId)).Result!;
         }
 
         public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)

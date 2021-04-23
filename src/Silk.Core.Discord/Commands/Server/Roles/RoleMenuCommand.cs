@@ -1,20 +1,65 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity.Extensions;
+using Silk.Core.Discord.Services.Interfaces;
+using Silk.Shared.Abstractions.DSharpPlus.Concrete;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Commands.Server.Roles
 {
-    [Group]
     [RequireGuild]
+    [Aliases("rm")]
+    [Group("rolemenu")]
+    [ModuleLifespan(ModuleLifespan.Transient)] // We're gonna hold some states. //
     public class RoleMenuCommand : BaseCommandModule
     {
+        private readonly IInputService _input;
+        private readonly IMessageSender _sender;
+
+        private readonly List<IMessage> _residualMessages = new();
+        public RoleMenuCommand(IInputService input, IMessageSender sender)
+        {
+            _input = input;
+            _sender = sender;
+        }
+
         [Command]
         public async Task Create(CommandContext ctx)
         {
-            var interactivity = ctx.Client.GetInteractivity();
-            var nameInputMessage = await ctx.RespondAsync("Alrighty, what would you like to name this rolemenu?");
-            await interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.Channel == ctx.Message.Channel && !string.IsNullOrEmpty(m.Content));
+            var roleMenuMessage = await ctx.Channel.SendMessageAsync("**Awaiting setup.**");
+            var setupInitializerMessage = await ctx.RespondAsync("Hello! What would you like to name this role menu? " +
+                                                                 "\n(Menu will be prefixed with **Role Menu:**, title limited to 50 characters)");
+            var titleMessage = string.Empty;
+            while (string.IsNullOrEmpty(titleMessage))
+            {
+                titleMessage = await GetTitleAsync(new CommandExecutionContext(ctx, _sender));
+            }
+        }
+
+        private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
+        {
+            var result = await _input.GetInputAsync(ctx.User.Id, ctx.Channel.Id, ctx.Guild!.Id);
+            if (string.IsNullOrEmpty(result?.Content))
+            {
+                return null;
+            }
+            else
+            {
+                if (result.Content.Length < 50)
+                {
+                    await result.DeleteAsync();
+                    return result.Content;
+                }
+                else
+                {
+                    var lengthExceededMessage = await ctx.RespondAsync("Sorry! But the title must not exceed 50 characters!");
+                    await Task.Delay(4000);
+                    await result.DeleteAsync();
+                    await lengthExceededMessage.DeleteAsync();
+                    return null;
+                }
+            }
         }
     }
 }

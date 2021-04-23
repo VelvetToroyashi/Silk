@@ -19,5 +19,15 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         /// </summary>
         /// <param name="emojiId">The Id of th emoji to add.</param>
         public Task CreateReactionAsync(ulong emojiId);
+
+        /// <summary>
+        /// Deletes a message.
+        /// </summary>
+        public Task DeleteAsync();
+
+        /// <summary>
+        /// Edits a message's content.
+        /// </summary>
+        public Task EditAsync(string content);
     }
 }
