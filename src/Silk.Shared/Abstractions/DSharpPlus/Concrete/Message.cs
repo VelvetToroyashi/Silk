@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
@@ -43,12 +42,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task CreateReactionAsync(ulong emojiId)
         {
-            var client = _message
-                .GetType()
-                .BaseType!
-                .GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .GetValue(_message) as DiscordClient;
-
+            var client = _message.GetClient();
             var emoji = DiscordEmoji.FromGuildEmote(client, emojiId);
             await _message.CreateReactionAsync(emoji);
         }
