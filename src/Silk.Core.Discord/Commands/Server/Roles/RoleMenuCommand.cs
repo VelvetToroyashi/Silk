@@ -27,26 +27,30 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         [Command]
         public async Task Create(CommandContext ctx)
         {
+            var context = new CommandExecutionContext(ctx, _sender);
             var roleMenuMessage = await _sender.SendAsync(ctx.Channel.Id, "**Awaiting setup.**");
             var setupInitializerMessage = await _sender.SendAsync(ctx.Channel.Id, "Hello! What would you like to name this role menu? " +
                                                                                   "\n(Menu will be prefixed with **Role Menu:**, title limited to 50 characters)");
             var titleMessage = string.Empty;
             while (string.IsNullOrEmpty(titleMessage))
             {
-                titleMessage = await GetTitleAsync(new CommandExecutionContext(ctx, _sender));
+                titleMessage = await GetTitleAsync(context);
             }
 
             await roleMenuMessage.EditAsync($"**RoleMenu: {titleMessage}**");
-            await ConfigureRoleEmojiDictionaryAsync(roleMenuMessage);
+            await ConfigureRoleEmojiDictionaryAsync(roleMenuMessage, context);
 
 
         }
-        private async Task ConfigureRoleEmojiDictionaryAsync(IMessage message)
+        private async Task ConfigureRoleEmojiDictionaryAsync(IMessage roleMenuMessage, ICommandExecutionContext context)
         {
             var inputResult = string.Empty;
-            while (inputResult is not null or "cancel")
+            IMessage roleInputMessage = default!;
+            while (inputResult is not null or "done")
             {
-                inputResult = await _input.GetStringInputAsync(message.Author.Id, message.ChannelId, message.GuildId);
+                roleInputMessage = await context.RespondAsync("Please provide the Id of a role you'd like to add. Alternatively, mention the role.");
+
+                inputResult = await _input.GetStringInputAsync(context.User.Id, context.Channel.Id, context.Guild!.Id);
             }
         }
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)

@@ -8,5 +8,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public IReadOnlyList<IUser> Users { get; }
         public IReadOnlyList<IChannel> Channels { get; }
         public IReadOnlyList<IEmoji> Emojis { get; }
+        public IReadOnlyList<ulong> Roles { get; }
     }
 }
