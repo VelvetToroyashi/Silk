@@ -10,7 +10,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
+        private bool _deleted;
         private readonly DiscordMessage _message;
+
         public Message(DiscordMessage message)
         {
             _message = message;
@@ -42,9 +44,12 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task CreateReactionAsync(ulong emojiId)
         {
-            var client = _message.GetClient();
-            var emoji = DiscordEmoji.FromGuildEmote(client, emojiId);
-            await _message.CreateReactionAsync(emoji);
+            if (!_deleted)
+            {
+                var client = _message.GetClient();
+                var emoji = DiscordEmoji.FromGuildEmote(client, emojiId);
+                await _message.CreateReactionAsync(emoji);
+            }
         }
 
         public async Task DeleteAsync()
@@ -52,6 +57,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             try
             {
                 await _message.DeleteAsync();
+                _deleted = true;
             }
             catch (NotFoundException)
             {
@@ -61,6 +67,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task EditAsync(string content)
         {
+            if (_deleted)
+                throw new InvalidOperationException("Cannot modify content of deleted message.");
+
             Content = content;
             await _message.ModifyAsync(m => m.Content = content);
         }
