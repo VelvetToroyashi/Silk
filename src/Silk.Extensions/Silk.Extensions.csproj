@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="DSharpPlus" Version="4.0.1-nightly-00841"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00841"/>
+        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00842"/>
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.1-nightly-00841"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.2.21154.6"/>
