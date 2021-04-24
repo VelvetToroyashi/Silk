@@ -8,6 +8,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
     {
         public ulong Id { get; }
         public ulong? GuildId { get; }
+        public ulong ChannelId { get; }
         public IUser Author { get; }
         public string Content { get; }
         public DateTimeOffset Timestamp { get; }

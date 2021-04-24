@@ -37,16 +37,18 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             }
 
             await roleMenuMessage.EditAsync($"**RoleMenu: {titleMessage}**");
+            await ConfigureRoleEmojiDictionaryAsync(roleMenuMessage);
 
-            var roleIdInputResult = string.Empty;
-
-            while (roleIdInputResult.ToLower() is not "cancel" or null)
-            {
-                break;
-            }
 
         }
-        private async Task GetRolesAsync(IMessage message) { }
+        private async Task ConfigureRoleEmojiDictionaryAsync(IMessage message)
+        {
+            var inputResult = string.Empty;
+            while (inputResult is not null or "cancel")
+            {
+                inputResult = await _input.GetStringInputAsync(message.Author.Id, message.ChannelId, message.GuildId);
+            }
+        }
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
         {
             var result = await _input.GetInputAsync(ctx.User.Id, ctx.Channel.Id, ctx.Guild!.Id);

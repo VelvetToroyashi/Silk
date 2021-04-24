@@ -19,6 +19,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
             Id = message.Id;
             GuildId = message.Channel.GuildId;
+            ChannelId = message.ChannelId;
             Author = (User) message.Author;
             Content = message.Content;
             Timestamp = message.CreationTimestamp;
@@ -29,6 +30,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         public ulong Id { get; }
 
         public ulong? GuildId { get; }
+        /// <inheritdoc />
+        public ulong ChannelId { get; }
 
         public IUser Author { get; }
 
