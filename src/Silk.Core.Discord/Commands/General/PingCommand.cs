@@ -25,7 +25,9 @@ namespace Silk.Core.Discord.Commands.General
         [Description("Check the responsiveness of Silk")]
         public async Task Ping(CommandContext ctx)
         {
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Blue);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Blue)
+                .WithDescription("Calulating ping. This should only take a moment.");
 
             var sw = Stopwatch.StartNew();
             DiscordMessage message = await ctx.RespondAsync(embed);
@@ -34,6 +36,7 @@ namespace Silk.Core.Discord.Commands.General
             await Task.Delay(100);
             var silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
             embed
+                .WithTitle("")
                 .AddField("→ Message Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("→ Discord API latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("→ Silk! API Latency ←", "```cs\n" + $"{silkApiResponse.RoundtripTime} ms".PadLeft(10, '⠀') + "```", true)
