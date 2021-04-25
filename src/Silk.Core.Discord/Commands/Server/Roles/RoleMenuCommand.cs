@@ -30,6 +30,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         [Command]
         public async Task Create(CommandContext ctx)
         {
+            await ctx.Message.DeleteAsync();
             var context = new CommandExecutionContext(ctx, _sender);
             var roleMenuMessage = await _sender.SendAsync(ctx.Channel.Id, "**Awaiting setup.**");
             var setupInitializerMessage = await _sender.SendAsync(ctx.Channel.Id, "Hello! What would you like to name this role menu? " +
@@ -99,6 +100,9 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                         if (emojiResult.emoji is null) continue;
 
                         var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
+
+
+
                         yield return n;
                     }
                 }

@@ -55,6 +55,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             }
         }
 
+        public Task RemoveReactionsAsync() => _message.DeleteAllReactionsAsync();
+
         public async Task DeleteAsync()
         {
             try
