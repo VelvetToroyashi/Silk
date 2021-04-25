@@ -8,6 +8,7 @@ using Silk.Core.Data.Models;
 using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.HelpFormatter;
+using Silk.Extensions;
 
 namespace Silk.Core.Discord.Commands.Bot
 {
@@ -27,9 +28,10 @@ namespace Silk.Core.Discord.Commands.Bot
 
         [Command("prefix")]
         [Description("Sets the command prefix for Silk to use on the current Guild")]
-        [RequireUserPermissions(FlagConstants.CacheFlag)]
         public async Task SetPrefix(CommandContext ctx, string prefix)
         {
+            if (!ctx.Member.HasPermission(FlagConstants.CacheFlag)) return;
+
             (bool valid, string reason) = IsValidPrefix(prefix);
             if (!valid)
             {

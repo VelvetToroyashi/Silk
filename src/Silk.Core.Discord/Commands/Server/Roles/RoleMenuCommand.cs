@@ -101,7 +101,9 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                         var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
 
-
+                        await roleMenuMessage.CreateReactionAsync(emojiResult.emoji!.Id);
+                        await roleInputMessage.RemoveReactionsAsync();
+                        await roleIdInputMessage.DeleteAsync();
 
                         yield return n;
                     }
