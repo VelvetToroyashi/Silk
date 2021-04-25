@@ -32,12 +32,11 @@ namespace Silk.Core.Discord.Services.Interfaces
         ///     Gets a reaction from a specific message.
         /// </summary>
         /// <param name="userId">The Id of the user to get a reaction from.</param>
-        /// <param name="channelId">The Id of the channel to wait for a reaction in.</param>
         /// <param name="messageId">The Id of the message to wait for a message for.</param>
         /// <param name="guildId">The Id of the guild the channel belongs to, or null if it is a DM.</param>
         /// <param name="timeOut">Optional override for the wait period before timing out.</param>
         /// <returns>The emoji the user reacted with, or null if it timed out.</returns>
-        public Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
+        public Task<IReaction?> GetReactionInputAsync(ulong userId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
 
         public Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null);
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -15,10 +16,11 @@ namespace Silk.Core.Discord.Commands.Server.Roles
     [ModuleLifespan(ModuleLifespan.Transient)] // We're gonna hold some states. //
     public class RoleMenuCommand : BaseCommandModule
     {
+        private record RoleMenuOption(ulong EmojiId, ulong RoleId);
+
         private readonly IInputService _input;
         private readonly IMessageSender _sender;
 
-        private readonly List<IMessage> _residualMessages = new();
         public RoleMenuCommand(IInputService input, IMessageSender sender)
         {
             _input = input;
@@ -44,35 +46,59 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
             await ConfigureRoleEmojiDictionaryAsync(roleMenuMessage, context);
 
-
         }
+
         private async Task ConfigureRoleEmojiDictionaryAsync(IMessage roleMenuMessage, ICommandExecutionContext context)
         {
-            var inputResult = string.Empty;
-            IMessage roleInputMessage = default!;
-            while (inputResult is not null or "done")
+            IMessage roleInputMessage = await context.RespondAsync(
+                "Please provide the Id of a role you'd like to add. Type `done` to finish setup!\n\n" +
+                "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
+                "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)");
+
+            var optionsEnumerable = CreateOptionsListAsync(roleMenuMessage, context, roleInputMessage);
+            if (optionsEnumerable is null)
             {
-                roleInputMessage = await context.RespondAsync("Please provide the Id of a role you'd like to add.\n\n" +
-                                                              "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
-                                                              "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)");
+                await SendTimedOutMessageAsync(roleInputMessage, context, roleInputMessage);
+                return;
+            }
+
+            var options = new List<RoleMenuOption>();
+
+            await foreach (var rm in optionsEnumerable)
+                options.Add(rm);
+
+            // Start doing db stuff here //
+        }
+
+        private async IAsyncEnumerable<RoleMenuOption>? CreateOptionsListAsync(IMessage roleMenuMessage, ICommandExecutionContext context, IMessage roleInputMessage)
+        {
+            while (true)
+            {
                 var result = await _input.GetInputAsync(context.User.Id, context.Channel.Id, context.Guild!.Id);
 
                 if (result is null)
                 {
-                    await roleMenuMessage.DeleteAsync();
-                    await roleInputMessage.DeleteAsync();
-                    var msg = await context.RespondAsync("Timed out!");
-                    await Task.Delay(3000);
-                    await msg.DeleteAsync();
-                    return;
+                    await SendTimedOutMessageAsync(roleMenuMessage, context, roleInputMessage);
+                    break;
                 }
 
-
+                if (string.Equals(result.Content, "done", StringComparison.OrdinalIgnoreCase)) break;
                 if (!ulong.TryParse(result.Content, out var id)) continue;
 
                 if (context.Guild.Roles.Contains(id))
                 {
-                    inputResult = result.Content;
+                    var emojiId = await GetReactionAsync(context, result, roleInputMessage, id);
+
+                    if (emojiId is not null)
+                    {
+                        var n = new RoleMenuOption(emojiId.Value, id);
+                        yield return n;
+                    }
+                    else
+                    {
+                        await SendTimedOutMessageAsync(roleMenuMessage, context, roleInputMessage);
+                        break;
+                    }
                 }
                 else
                 {
@@ -81,9 +107,44 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                     await Task.Delay(3000);
                     await notFoundMessage.DeleteAsync();
                 }
-
             }
         }
+
+        private static async Task SendTimedOutMessageAsync(IMessage roleMenuMessage, ICommandExecutionContext context, IMessage roleInputMessage)
+        {
+            await roleMenuMessage.DeleteAsync();
+            await roleInputMessage.DeleteAsync();
+            var msg = await context.RespondAsync("Timed out!");
+            await Task.Delay(3000);
+            await msg.DeleteAsync();
+        }
+
+        private async Task<ulong?> GetReactionAsync(ICommandExecutionContext context, IMessage result, IMessage roleInputMessage, ulong inputResult)
+        {
+            await result.DeleteAsync();
+            await roleInputMessage.EditAsync($"Alright! React with what emoji you want to use for people to get <@&{inputResult}>?");
+
+            var reaction = await _input.GetReactionInputAsync(context.User.Id, roleInputMessage.Id, context.Guild!.Id, TimeSpan.FromMinutes(2));
+
+            if (reaction is null)
+            {
+                return null;
+            }
+            else
+            {
+                if (!reaction.Emoji.IsSharedEmoji())
+                {
+                    var invalidEmojiMessage = await context.RespondAsync("I can't use that emoji! I don't share any servers with that emoji!");
+                    await reaction.DeleteAsync();
+                    await Task.Delay(3000);
+                    await invalidEmojiMessage.DeleteAsync();
+                    return null;
+                }
+
+                return reaction.Emoji.Id;
+            }
+        }
+
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
         {
             var result = await _input.GetInputAsync(ctx.User.Id, ctx.Channel.Id, ctx.Guild!.Id);

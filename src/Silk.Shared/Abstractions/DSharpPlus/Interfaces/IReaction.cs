@@ -1,8 +1,22 @@
-﻿namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
 {
     public interface IReaction
     {
-        public IEmoji Emoji { get; internal set; }
-        public ulong UserId { get; set; }
+        /// <summary>
+        /// The emoji added to the message.
+        /// </summary>
+        public IEmoji Emoji { get; }
+
+        /// <summary>
+        /// The user that added this reaction.
+        /// </summary>
+        public ulong UserId { get; }
+
+        /// <summary>
+        /// Deletes this reaction. 
+        /// </summary>
+        public Task DeleteAsync();
     }
 }

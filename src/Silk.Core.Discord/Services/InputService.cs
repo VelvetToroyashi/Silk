@@ -36,9 +36,10 @@ namespace Silk.Core.Discord.Services
             return (Message) (await interactivity.WaitForMessageAsync(m => m.Author.Id == userId && m.Channel.Id == channelId)).Result!;
         }
 
-        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong channelId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
+        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
         {
-            throw new NotImplementedException();
+            var interactivity = GetInteractivityInternal(guildId);
+            return (Reaction) (await interactivity.WaitForReactionAsync(r => r.Message.Id == messageId && r.User.Id == userId)).Result;
         }
 
         public async Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)

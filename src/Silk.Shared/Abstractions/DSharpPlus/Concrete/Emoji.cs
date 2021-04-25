@@ -13,6 +13,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private readonly DiscordEmoji _emoji;
         public bool IsSharedEmoji()
         {
+            if (Id is 0) return true; // Default Emoji //
             var client = _emoji.GetClient();
             return DiscordEmoji.TryFromGuildEmote(client, Id, out _);
         }
