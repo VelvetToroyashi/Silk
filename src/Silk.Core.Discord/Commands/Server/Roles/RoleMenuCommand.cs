@@ -16,7 +16,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
     [ModuleLifespan(ModuleLifespan.Transient)] // We're gonna hold some states. //
     public class RoleMenuCommand : BaseCommandModule
     {
-        private record RoleMenuOption(ulong EmojiId, ulong RoleId);
+        private record RoleMenuOption(string Name, ulong EmojiId, ulong RoleId);
 
         private readonly IInputService _input;
         private readonly IMessageSender _sender;
@@ -74,36 +74,38 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         {
             while (true)
             {
-                var result = await _input.GetInputAsync(context.User.Id, context.Channel.Id, context.Guild!.Id);
+                var roleIdInputMessage = await _input.GetInputAsync(context.User.Id, context.Channel.Id, context.Guild!.Id);
 
-                if (result is null)
+                if (roleIdInputMessage is null)
                 {
                     await SendTimedOutMessageAsync(roleMenuMessage, context, roleInputMessage);
                     break;
                 }
 
-                if (string.Equals(result.Content, "done", StringComparison.OrdinalIgnoreCase)) break;
-                if (!ulong.TryParse(result.Content, out var id)) continue;
+                if (string.Equals(roleIdInputMessage.Content, "done", StringComparison.OrdinalIgnoreCase)) break;
+                if (!ulong.TryParse(roleIdInputMessage.Content, out var id)) continue;
 
                 if (context.Guild.Roles.Contains(id))
                 {
-                    var emojiId = await GetReactionAsync(context, result, roleInputMessage, id);
+                    var emojiResult = await GetReactionAsync(context, roleIdInputMessage, roleInputMessage, id);
 
-                    if (emojiId is not null)
-                    {
-                        var n = new RoleMenuOption(emojiId.Value, id);
-                        yield return n;
-                    }
-                    else
+                    if (emojiResult.timedOut)
                     {
                         await SendTimedOutMessageAsync(roleMenuMessage, context, roleInputMessage);
                         break;
+                    }
+                    else
+                    {
+                        if (emojiResult.emoji is null) continue;
+
+                        var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
+                        yield return n;
                     }
                 }
                 else
                 {
                     var notFoundMessage = await context.RespondAsync("That's not a role!");
-                    await result.DeleteAsync();
+                    await roleIdInputMessage.DeleteAsync();
                     await Task.Delay(3000);
                     await notFoundMessage.DeleteAsync();
                 }
@@ -119,7 +121,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             await msg.DeleteAsync();
         }
 
-        private async Task<ulong?> GetReactionAsync(ICommandExecutionContext context, IMessage result, IMessage roleInputMessage, ulong inputResult)
+        private async Task<(IEmoji? emoji, bool timedOut)> GetReactionAsync(ICommandExecutionContext context, IMessage result, IMessage roleInputMessage, ulong inputResult)
         {
             await result.DeleteAsync();
             await roleInputMessage.EditAsync($"Alright! React with what emoji you want to use for people to get <@&{inputResult}>?");
@@ -128,7 +130,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
             if (reaction is null)
             {
-                return null;
+                return (null, true);
             }
             else
             {
@@ -138,10 +140,10 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                     await reaction.DeleteAsync();
                     await Task.Delay(3000);
                     await invalidEmojiMessage.DeleteAsync();
-                    return null;
+                    return (null, false);
                 }
 
-                return reaction.Emoji.Id;
+                return (reaction.Emoji, true);
             }
         }
 
