@@ -150,7 +150,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                     return (null, false);
                 }
 
-                return (reaction.Emoji, true);
+                return (reaction.Emoji, false);
             }
         }
 
