@@ -22,7 +22,10 @@ namespace Silk.Core.Discord.Services
             "for @Silk help",
             "you!",
             "cute red pandas",
-            "for commands!"
+            "for commands!",
+            "patreon/VelvetThePanda",
+            "ko-fi.com/VelvetThePanda",
+            "for donations! (ko-fi/patreon: VelvetThePanda)"
         };
         private bool _ready => Bot.State is BotState.Ready;
 
@@ -33,7 +36,6 @@ namespace Silk.Core.Discord.Services
             _logger = logger;
         }
 
-        // This service starts before the client actually connects to Discord, so we need to wait. //
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             if (!_ready) // This should be started after the state is ready, but you never know. //
