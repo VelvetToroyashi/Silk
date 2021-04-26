@@ -88,7 +88,8 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                 if (context.Guild.Roles.Contains(id))
                 {
-                    var emojiResult = await GetReactionAsync(context, roleIdInputMessage, roleInputMessage, id);
+                    await roleIdInputMessage.DeleteAsync();
+                    var emojiResult = await GetReactionAsync(context, roleInputMessage, id);
 
                     if (emojiResult.timedOut)
                     {
@@ -101,10 +102,15 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                         var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
 
-                        await roleMenuMessage.CreateReactionAsync(emojiResult.emoji!.Id);
+                        await roleMenuMessage.CreateReactionAsync(emojiResult.emoji);
+                        await roleMenuMessage.EditAsync(roleMenuMessage.Content + $"\n{emojiResult.emoji}: <@&{id}>");
+
                         await roleInputMessage.RemoveReactionsAsync();
+
                         await Task.Delay(250);
-                        await roleIdInputMessage.DeleteAsync();
+                        await roleInputMessage.DeleteAsync();
+
+                        await roleInputMessage.EditAsync("Please provide the Id of a role you'd like to add. Type `done` to finish setup!");
 
                         yield return n;
                     }
@@ -128,9 +134,8 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             await msg.DeleteAsync();
         }
 
-        private async Task<(IEmoji? emoji, bool timedOut)> GetReactionAsync(ICommandExecutionContext context, IMessage result, IMessage roleInputMessage, ulong inputResult)
+        private async Task<(IEmoji? emoji, bool timedOut)> GetReactionAsync(ICommandExecutionContext context, IMessage roleInputMessage, ulong inputResult)
         {
-            await result.DeleteAsync();
             await roleInputMessage.EditAsync($"Alright! React with what emoji you want to use for people to get <@&{inputResult}>?");
 
             var reaction = await _input.GetReactionInputAsync(context.User.Id, roleInputMessage.Id, context.Guild!.Id, TimeSpan.FromMinutes(2));

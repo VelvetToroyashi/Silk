@@ -55,6 +55,17 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             }
         }
 
+        public async Task CreateReactionAsync(IEmoji emoji)
+        {
+            if (!_deleted)
+            {
+                if (emoji is not Emoji e)
+                    throw new InvalidCastException($"Canont convert from {emoji.GetType().Name} to {nameof(Emoji)}");
+
+                await _message.CreateReactionAsync(e);
+            }
+        }
+
         public Task RemoveReactionsAsync() => _message.DeleteAllReactionsAsync();
 
         public async Task DeleteAsync()

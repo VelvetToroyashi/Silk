@@ -22,6 +22,12 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public Task CreateReactionAsync(ulong emojiId);
 
         /// <summary>
+        /// Creates a reaction on this message.
+        /// </summary>
+        /// <param name="emoji">The emoji to add.</param>
+        public Task CreateReactionAsync(IEmoji emoji);
+
+        /// <summary>
         /// Removes all the reactions from the message.
         /// </summary>
         public Task RemoveReactionsAsync();

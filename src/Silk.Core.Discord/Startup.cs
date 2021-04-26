@@ -16,8 +16,6 @@ namespace Silk.Core.Discord
     {
         public static void AddServices(IServiceCollection services)
         {
-
-
             services.AddTransient<ConfigService>();
             services.AddTransient<GuildContext>();
             services.AddSingleton<AntiInviteCore>();

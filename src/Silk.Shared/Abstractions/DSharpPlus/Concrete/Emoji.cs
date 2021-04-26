@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+﻿using System.Reflection;
+using DSharpPlus.Entities;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
@@ -25,7 +26,10 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             Name = emoji.Name;
         }
 
-        public static explicit operator Emoji(DiscordEmoji emoji) => new(emoji);
+        public override string ToString() => _emoji.ToString();
 
+        public static explicit operator Emoji(DiscordEmoji emoji) => new(emoji);
+        public static implicit operator DiscordEmoji(Emoji emoji) =>
+            (typeof(Emoji).GetField(nameof(_emoji), BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(emoji) as DiscordEmoji)!;
     }
 }

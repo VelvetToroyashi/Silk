@@ -80,7 +80,7 @@ namespace Silk.Core.Logic
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
-                services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
+                services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
             });
         }
 
