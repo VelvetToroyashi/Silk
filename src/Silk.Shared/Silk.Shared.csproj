@@ -10,8 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.0.1-nightly-00841"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1-nightly-00841"/>
+        <PackageReference Include="DSharpPlus" Version="4.0.0"/>
+        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
