@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Silk.Core.Data;
@@ -56,7 +57,7 @@ namespace Silk.Core.Logic
                         .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
+                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Verbose);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch
                     {
@@ -79,6 +80,7 @@ namespace Silk.Core.Logic
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
+                services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
             });
         }
 
