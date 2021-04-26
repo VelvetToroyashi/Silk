@@ -108,7 +108,6 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                         await roleInputMessage.RemoveReactionsAsync();
 
                         await Task.Delay(250);
-                        await roleInputMessage.DeleteAsync();
 
                         await roleInputMessage.EditAsync("Please provide the Id of a role you'd like to add. Type `done` to finish setup!");
 
