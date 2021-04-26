@@ -103,6 +103,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                         await roleMenuMessage.CreateReactionAsync(emojiResult.emoji!.Id);
                         await roleInputMessage.RemoveReactionsAsync();
+                        await Task.Delay(250);
                         await roleIdInputMessage.DeleteAsync();
 
                         yield return n;
