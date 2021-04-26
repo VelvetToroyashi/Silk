@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Discord.Services.Interfaces;
@@ -20,6 +21,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
         private readonly IInputService _input;
         private readonly IMessageSender _sender;
+        private readonly List<IReaction> _reactions = new();
 
         public RoleMenuCommand(IInputService input, IMessageSender sender)
         {
@@ -28,6 +30,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         }
 
         [Command]
+        [RequireBotPermissions(Permissions.ManageRoles)]
         public async Task Create(CommandContext ctx)
         {
             await ctx.Message.DeleteAsync();
@@ -89,7 +92,11 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                 if (context.Guild.Roles.Contains(id))
                 {
                     await roleIdInputMessage.DeleteAsync();
-                    var emojiResult = await GetReactionAsync(context, roleInputMessage, id);
+
+                    (IEmoji? emoji, bool timedOut) emojiResult = default;
+
+                    while (emojiResult.emoji is null)
+                        emojiResult = await GetReactionAsync(context, roleInputMessage, id);
 
                     if (emojiResult.timedOut)
                     {
@@ -98,8 +105,6 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                     }
                     else
                     {
-                        if (emojiResult.emoji is null) continue;
-
                         var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
 
                         await roleMenuMessage.CreateReactionAsync(emojiResult.emoji);
