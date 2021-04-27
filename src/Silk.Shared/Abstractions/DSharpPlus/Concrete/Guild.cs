@@ -13,15 +13,18 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         public IReadOnlyList<IEmoji> Emojis { get; private init; }
         public IReadOnlyList<ulong> Roles { get; private init; }
 
-        public static explicit operator Guild?(DiscordGuild? guild) =>
-            guild is null ? null
-                : new()
+        public static implicit operator Guild?(DiscordGuild? guild)
+        {
+            if (guild is null) return null;
+            else
+                return new()
                 {
                     Id = guild.Id,
                     Users = guild.Members.Select(u => (User) (DiscordUser) u.Value).ToList().AsReadOnly(),
-                    Channels = guild.Channels.Values.Select(c => new Channel() {Id = c.Id}).ToList().AsReadOnly(),
+                    Channels = guild.Channels.Values.Select(c => (Channel) c).ToList().AsReadOnly(),
                     Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList().AsReadOnly(),
-                    Roles = guild.Roles.Keys.ToList().AsReadOnly()
+                    Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList().AsReadOnly()
                 };
+        }
     }
 }

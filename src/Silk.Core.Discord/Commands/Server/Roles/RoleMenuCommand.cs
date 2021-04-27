@@ -59,7 +59,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                 "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
                 "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)");
 
-            var optionsEnumerable = CreateOptionsListAsync(roleMenuMessage, context, roleInputMessage);
+            var optionsEnumerable = CreateOptionsListAsync(roleInputMessage, roleMenuMessage, context);
             if (optionsEnumerable is null)
             {
                 await SendTimedOutMessageAsync(roleInputMessage, context, roleInputMessage);
@@ -74,7 +74,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             // Start doing db stuff here //
         }
 
-        private async IAsyncEnumerable<RoleMenuOption>? CreateOptionsListAsync(IMessage roleMenuMessage, ICommandExecutionContext context, IMessage roleInputMessage)
+        private async IAsyncEnumerable<RoleMenuOption>? CreateOptionsListAsync(IMessage roleInputMessage, IMessage roleMenuMessage, ICommandExecutionContext context)
         {
             while (true)
             {
@@ -109,11 +109,9 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                         await roleMenuMessage.CreateReactionAsync(emojiResult.emoji);
                         await roleMenuMessage.EditAsync(roleMenuMessage.Content + $"\n{emojiResult.emoji}: <@&{id}>");
-
-                        await roleInputMessage.RemoveReactionsAsync();
-
                         await Task.Delay(250);
-
+                        await roleInputMessage.RemoveReactionsAsync();
+                        await Task.Delay(250);
                         await roleInputMessage.EditAsync("Please provide the Id of a role you'd like to add. Type `done` to finish setup!");
 
                         yield return n;

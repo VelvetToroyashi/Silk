@@ -28,7 +28,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public override string ToString() => _emoji.ToString();
 
-        public static explicit operator Emoji(DiscordEmoji emoji) => new(emoji);
+        public static implicit operator Emoji(DiscordEmoji emoji) => new(emoji);
         public static implicit operator DiscordEmoji(Emoji emoji) =>
             (typeof(Emoji).GetField(nameof(_emoji), BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(emoji) as DiscordEmoji)!;
     }

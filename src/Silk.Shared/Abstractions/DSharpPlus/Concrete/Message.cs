@@ -90,7 +90,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             await _message.ModifyAsync(m => m.Content = content);
         }
 
-        public static explicit operator Message?(DiscordMessage? message)
+        public static implicit operator Message?(DiscordMessage? message)
         {
             if (message is null) return null;
 

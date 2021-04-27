@@ -11,7 +11,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         /// <summary>
         ///     The id of the current channel.
         /// </summary>
-        public ulong Id { get; init; }
+        public ulong Id { get; }
 
         /// <summary>
         ///     Gets a specific message from the channel.

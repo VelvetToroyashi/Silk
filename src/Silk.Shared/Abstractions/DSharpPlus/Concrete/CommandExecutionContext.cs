@@ -16,7 +16,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             User = (User) message.Author;
             Message = (Message) message!;
-            Channel = new Channel() {Id = channel.Id};
+            Channel = (Channel) channel;
             Guild = (Guild) guild!;
             Prefix = prefix;
             _messageSender = messageSender;

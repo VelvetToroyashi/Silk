@@ -25,6 +25,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public Task DeleteAsync() => _message.DeleteReactionsEmojiAsync(_emoji);
 
-        public static explicit operator Reaction(MessageReactionAddEventArgs reaction) => new(reaction);
+        public static implicit operator Reaction(MessageReactionAddEventArgs reaction) => new(reaction);
     }
 }
