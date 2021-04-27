@@ -89,19 +89,26 @@ namespace Silk.Core.Discord.Commands.Furry.Types
         /// <param name="amount">The amount of posts to return.</param>
         /// <param name="seed">The seed for the <see cref="Random" /> used to pick posts, preferably being a casted message Id.</param>
         /// <returns>A list of mostly random posts from a given post result.</returns>
-        private protected async Task<List<Post?>> GetPostsAsync(eBooruPostResult? post, int amount, int seed = default)
+        private protected async Task<List<Post>> GetPostsAsync(eBooruPostResult? post, int amount, int seed = default)
         {
             var rand = new Random(seed);
             var posts = new List<Post?>();
             for (var i = 0; i < amount; i++)
             {
-                if (post?.Posts?.Count is 0) break;
-                int r = rand.Next(post?.Posts?.Count ?? 0);
-                if (post?.Posts?[i] is null) continue;
-                posts.Add(post.Posts?[r]);
-                post.Posts?.RemoveAt(r);
+                if (post?.Posts?.Count is 0) break; // No results were returned. //
+                int r = rand.Next(post!.Posts?.Count ?? 0);
+                if (post.Posts?[r] is null) // That post doesn't exist. //
+                {
+                    i--;
+                    post.Posts?.RemoveAt(r);
+                    continue;
+                }
+
+                posts.Add(post.Posts[r]);
+                post.Posts.RemoveAt(r);
             }
-            return posts;
+
+            return posts!;
         }
 
         private protected string? GetSource(string? source)

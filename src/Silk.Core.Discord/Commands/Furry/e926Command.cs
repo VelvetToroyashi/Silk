@@ -24,7 +24,7 @@ namespace Silk.Core.Discord.Commands.Furry
         [Aliases("e9")]
         [Description("SFW! Get cute stuff off none other than e926.net." +
                      "(See the [tags](https://e926.net/tags) section on e926.")]
-        public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string query = null)
+        public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null)
         {
             if (query?.Split().Length > 5)
             {
@@ -44,12 +44,12 @@ namespace Silk.Core.Discord.Commands.Furry
                 return;
             }
 
-            List<Post?> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
+            List<Post> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
             foreach (Post post in posts)
             {
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithTitle(query)
-                    .WithDescription($"[Direct Link](https://e926.net/posts/{post.Id})\n" +
+                    .WithDescription($"[Direct Link](https://e926.net/posts/{post!.Id})\n" +
                                      $"Description: {post.Description.Truncate(200)}")
                     .AddField("Score:", post.Score.Total.ToString())
                     .WithColor(DiscordColor.PhthaloBlue)
@@ -60,5 +60,8 @@ namespace Silk.Core.Discord.Commands.Furry
                 await Task.Delay(300);
             }
         }
+
+        [Command("e926")]
+        public async Task Search(CommandContext ctx, [RemainingText] string? search) => await Search(ctx, 3, search);
     }
 }

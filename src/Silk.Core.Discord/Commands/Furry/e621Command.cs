@@ -55,11 +55,9 @@ namespace Silk.Core.Discord.Commands.Furry
                 return;
             }
 
-            List<Post?> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
-            foreach (Post? post in posts)
+            List<Post> posts = await GetPostsAsync(result, amount, (int) ctx.Message.Id);
+            foreach (Post post in posts)
             {
-                //if (post is null) continue;
-                // TODO: Handle Null Exception for parts of the post which may be null (i.e image source)
                 DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                     .WithTitle(query)
                     .WithDescription(
@@ -75,10 +73,6 @@ namespace Silk.Core.Discord.Commands.Furry
         }
 
         [Command("e621")]
-        [RequireNsfw]
-        public async Task Search(CommandContext ctx, [RemainingText] string? search)
-        {
-            await Search(ctx, 3, search);
-        }
+        public async Task Search(CommandContext ctx, [RemainingText] string? search) => await Search(ctx, 3, search);
     }
 }
