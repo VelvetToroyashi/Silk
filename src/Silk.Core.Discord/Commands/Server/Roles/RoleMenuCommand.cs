@@ -231,7 +231,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         private static async Task SendErrorAsync(ICommandExecutionContext context, string errorMessage)
         {
             var msg = await context.RespondAsync(errorMessage);
-            await Task.Delay(3000);
+            await Task.Delay(6000);
             await msg.DeleteAsync();
         }
 
