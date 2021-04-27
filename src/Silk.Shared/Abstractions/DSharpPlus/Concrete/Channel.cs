@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
@@ -12,10 +13,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         private Channel(DiscordChannel channel) => _channel = channel;
 
-        public async Task<IMessage?> GetMessageAsync(ulong id)
-        {
-            return null;
-        }
+        public async Task<IMessage?> GetMessageAsync(ulong id) => throw new NotImplementedException("Soon™");
 
         public static implicit operator Channel(DiscordChannel c) => new(c);
 
