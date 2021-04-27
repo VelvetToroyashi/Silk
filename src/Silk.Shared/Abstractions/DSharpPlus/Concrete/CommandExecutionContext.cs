@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
@@ -10,19 +9,20 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     {
         private readonly IMessageSender _messageSender;
 
-        public CommandExecutionContext(CommandContext context, IMessageSender messageSender) :
-            this(context.Message, context.Channel, context.Guild, context.Prefix, messageSender) { }
-        public CommandExecutionContext(DiscordMessage message, DiscordChannel channel, DiscordGuild? guild, string prefix, IMessageSender messageSender)
+        public CommandExecutionContext(CommandContext ctx, IMessageSender messageSender)
         {
-            User = (User) message.Author;
-            Message = (Message) message!;
-            Channel = (Channel) channel;
-            Guild = (Guild) guild!;
-            Prefix = prefix;
+            User = (User) ctx.Message.Author;
+            CurrentUser = (User) ctx.Guild.CurrentMember;
+            Message = (Message) ctx.Message!;
+            Channel = (Channel) ctx.Channel;
+            Guild = (Guild) ctx.Guild!;
+            Prefix = ctx.Prefix;
             _messageSender = messageSender;
         }
 
         public IUser User { get; }
+
+        public IUser CurrentUser { get; }
 
         public IMessage Message { get; }
 
