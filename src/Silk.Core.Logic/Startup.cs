@@ -97,8 +97,8 @@ namespace Silk.Core.Logic
 
             services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-
-            services.AddTransient<DbContextOptions<GuildContext>>(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
+            using var scope = services.BuildServiceProvider().CreateScope();
+            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
         }
     }
 }

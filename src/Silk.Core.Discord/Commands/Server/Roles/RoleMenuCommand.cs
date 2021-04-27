@@ -17,11 +17,25 @@ namespace Silk.Core.Discord.Commands.Server.Roles
     [ModuleLifespan(ModuleLifespan.Transient)] // We're gonna hold some states. //
     public class RoleMenuCommand : BaseCommandModule
     {
+
+
         private record RoleMenuOption(string Name, ulong EmojiId, ulong RoleId);
 
         private readonly IInputService _input;
         private readonly IMessageSender _sender;
-        private readonly List<IReaction> _reactions = new();
+        private readonly List<IEmoji> _reactions = new();
+        private readonly List<ulong> _roles = new();
+
+        private const string InitialRoleInputMessage = "Please provide the Id of a role you'd like to add. Type `done` to finish setup!\n\n" +
+                                                       "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
+                                                       "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)";
+
+        private const string DuplicatedRoleId = "Sorry! But you've already assigned that role. Pick a different one and try again.";
+        private const string AlreadyReactedErrorMessage = "Sorry, but you've already used that emoji! Please pick a different one and try again.";
+        private const string NonSharedEmojiErrorMessage = "Hey! I can't use that emoji, as I'm not in the server it came from. Pick a different emoji and try again!";
+
+        private const string TitleInputLengthExceedsLimit = "Sorry, but the title can only be 50 letters long!";
+        private const string GiveIdMessage = "Please provide the Id of a role you'd like to add. Type `done` to finish setup!";
 
         public RoleMenuCommand(IInputService input, IMessageSender sender)
         {
@@ -54,10 +68,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
         private async Task ConfigureRoleEmojiDictionaryAsync(IMessage roleMenuMessage, ICommandExecutionContext context)
         {
-            IMessage roleInputMessage = await context.RespondAsync(
-                "Please provide the Id of a role you'd like to add. Type `done` to finish setup!\n\n" +
-                "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
-                "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)");
+            IMessage roleInputMessage = await context.RespondAsync(InitialRoleInputMessage);
 
             var optionsEnumerable = CreateOptionsListAsync(roleInputMessage, roleMenuMessage, context);
             if (optionsEnumerable is null)
@@ -89,6 +100,17 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                 if (string.Equals(roleIdInputMessage.Content, "done", StringComparison.OrdinalIgnoreCase)) break;
                 if (!ulong.TryParse(roleIdInputMessage.Content, out var id)) continue;
 
+                if (!_roles.Contains(id))
+                {
+                    _roles.Add(id);
+                }
+                else
+                {
+                    await roleIdInputMessage.DeleteAsync();
+                    await SendDuplicatedRoleMessageAsync(context);
+                    continue;
+                }
+
                 if (context.Guild.Roles.Contains(id))
                 {
                     await roleIdInputMessage.DeleteAsync();
@@ -112,8 +134,9 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                         await Task.Delay(250);
                         await roleInputMessage.RemoveReactionsAsync();
                         await Task.Delay(250);
-                        await roleInputMessage.EditAsync("Please provide the Id of a role you'd like to add. Type `done` to finish setup!");
+                        await roleInputMessage.EditAsync(GiveIdMessage);
 
+                        _reactions.Add(emojiResult.emoji);
                         yield return n;
                     }
                 }
@@ -127,14 +150,14 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             }
         }
 
-        private static async Task SendTimedOutMessageAsync(IMessage roleMenuMessage, ICommandExecutionContext context, IMessage roleInputMessage)
+        private static async Task SendDuplicatedRoleMessageAsync(ICommandExecutionContext context)
         {
-            await roleMenuMessage.DeleteAsync();
-            await roleInputMessage.DeleteAsync();
-            var msg = await context.RespondAsync("Timed out!");
+            var dupeRoleMessage = await context.RespondAsync(DuplicatedRoleId);
             await Task.Delay(3000);
-            await msg.DeleteAsync();
+            await dupeRoleMessage.DeleteAsync();
         }
+
+
 
         private async Task<(IEmoji? emoji, bool timedOut)> GetReactionAsync(ICommandExecutionContext context, IMessage roleInputMessage, ulong inputResult)
         {
@@ -150,13 +173,16 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             {
                 if (!reaction.Emoji.IsSharedEmoji())
                 {
-                    var invalidEmojiMessage = await context.RespondAsync("I can't use that emoji! I don't share any servers with that emoji!");
                     await reaction.DeleteAsync();
-                    await Task.Delay(3000);
-                    await invalidEmojiMessage.DeleteAsync();
+                    await SendErrorAsync(context, NonSharedEmojiErrorMessage);
+
                     return (null, false);
                 }
-
+                if (_reactions.Contains(reaction.Emoji))
+                {
+                    await SendErrorAsync(context, AlreadyReactedErrorMessage);
+                }
+                _reactions.Add(reaction.Emoji);
                 return (reaction.Emoji, false);
             }
         }
@@ -188,13 +214,34 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                 }
                 else
                 {
-                    var lengthExceededMessage = await ctx.RespondAsync("Sorry! But the title must not exceed 50 characters!");
-                    await Task.Delay(4000);
                     await result.DeleteAsync();
-                    await lengthExceededMessage.DeleteAsync();
+                    await SendErrorAsync(ctx, TitleInputLengthExceedsLimit);
                     return null;
                 }
             }
         }
+
+        /// <summary>
+        /// Sends an error to the user.
+        /// </summary>
+        /// <param name="context">The context the error happened in.</param>
+        /// <param name="errorMessage">The message to prompt the user with.</param>
+        private static async Task SendErrorAsync(ICommandExecutionContext context, string errorMessage)
+        {
+            var msg = await context.RespondAsync(errorMessage);
+            await Task.Delay(3000);
+            await msg.DeleteAsync();
+        }
+
+        private static async Task SendTimedOutMessageAsync(IMessage roleMenuMessage, ICommandExecutionContext context, IMessage roleInputMessage)
+        {
+            await roleMenuMessage.DeleteAsync();
+            await roleInputMessage.DeleteAsync();
+            var msg = await context.RespondAsync("Timed out!");
+            await Task.Delay(3000);
+            await msg.DeleteAsync();
+        }
+
+
     }
 }
