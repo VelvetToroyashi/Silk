@@ -11,6 +11,7 @@ using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Discord.Commands.Server.Roles
 {
+    [Hidden]
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
@@ -40,6 +41,12 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
         private const string NonRoleIdErrorMessage = "Hmm.. That doesn't appear to be a role on this server! Copy a different Id and try again.";
 
+        private const string HierarchyDisalowsAssigningRoleErrorMessage = "I can't give that role out to people! I can only give out roles below my own. Try a different one and try again.";
+        /// <summary>
+        /// <b>poggers</b> a
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="sender"></param>
         public RoleMenuCommand(IInputService input, IMessageSender sender)
         {
             _input = input;
