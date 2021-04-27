@@ -7,9 +7,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Reaction : IReaction
     {
-        public IEmoji Emoji { get; private init; }
+        public IEmoji Emoji { get; }
 
-        public ulong UserId { get; private init; }
+        public ulong UserId { get; }
 
         private readonly DiscordEmoji _emoji;
         private readonly DiscordMessage _message;
