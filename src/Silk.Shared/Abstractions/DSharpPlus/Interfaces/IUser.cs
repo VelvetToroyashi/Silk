@@ -11,6 +11,11 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public ulong Id { get; }
 
         /// <summary>
+        /// Indicates if this user is a bot.
+        /// </summary>
+        public bool IsBot { get; }
+
+        /// <summary>
         /// When the user's account was created.
         /// </summary>
         public DateTimeOffset CreationTimestamp { get; }

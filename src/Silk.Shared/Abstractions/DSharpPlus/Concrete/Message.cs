@@ -72,8 +72,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             try
             {
-                await _message.DeleteAsync();
                 _deleted = true;
+                await _message.DeleteAsync();
             }
             catch (NotFoundException)
             {
