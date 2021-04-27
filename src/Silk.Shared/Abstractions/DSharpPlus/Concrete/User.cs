@@ -28,7 +28,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             {
                 JoinedTimestamp = member.JoinedAt;
                 IsFromGuild = true;
-                Roles = _member!.Roles.Select(r => r.Id).ToList().AsReadOnly();
+                Roles = member.Roles.Select(r => r.Id).ToList().AsReadOnly();
                 _member = member;
             }
         }

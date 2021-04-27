@@ -26,6 +26,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
         private readonly List<IEmoji> _reactions = new();
         private readonly List<ulong> _roles = new();
 
+
         private const string InitialRoleInputMessage = "Please provide the Id of a role you'd like to add. Type `done` to finish setup!\n\n" +
                                                        "(Tip: Right-click or tap a user with the role you want to copy the Id of. Alternatively, you can find the Id in the server settings!\n" +
                                                        "Putting a backslash (\\\\) in front of the ping will give show the Id, but mention the role! Use with caution if you're running this in a public channel.)";
@@ -36,6 +37,8 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
         private const string TitleInputLengthExceedsLimit = "Sorry, but the title can only be 50 letters long!";
         private const string GiveIdMessage = "Please provide the Id of a role you'd like to add. Type `done` to finish setup!";
+
+        private const string NonRoleIdErrorMessage = "Hmm.. That doesn't appear to be a role on this server! Copy a different Id and try again.";
 
         public RoleMenuCommand(IInputService input, IMessageSender sender)
         {
@@ -82,6 +85,7 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             await foreach (var rm in optionsEnumerable)
                 options.Add(rm);
 
+            await Task.Delay(0);
             // Start doing db stuff here //
         }
 
@@ -127,27 +131,27 @@ namespace Silk.Core.Discord.Commands.Server.Roles
                     }
                     else
                     {
-                        var n = new RoleMenuOption(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
-
-                        await roleMenuMessage.CreateReactionAsync(emojiResult.emoji);
-                        await roleMenuMessage.EditAsync(roleMenuMessage.Content + $"\n{emojiResult.emoji}: <@&{id}>");
-                        await Task.Delay(250);
-                        await roleInputMessage.RemoveReactionsAsync();
-                        await Task.Delay(250);
-                        await roleInputMessage.EditAsync(GiveIdMessage);
-
+                        await PromptForNextIdAsync(roleInputMessage, roleMenuMessage, emojiResult, id);
                         _reactions.Add(emojiResult.emoji);
-                        yield return n;
+
+                        yield return new(emojiResult.emoji!.Name, emojiResult.emoji!.Id, id);
                     }
                 }
                 else
                 {
-                    var notFoundMessage = await context.RespondAsync("That's not a role!");
                     await roleIdInputMessage.DeleteAsync();
-                    await Task.Delay(3000);
-                    await notFoundMessage.DeleteAsync();
+                    await SendErrorAsync(context, NonRoleIdErrorMessage);
                 }
             }
+        }
+        private static async Task PromptForNextIdAsync(IMessage roleInputMessage, IMessage roleMenuMessage, (IEmoji? emoji, bool timedOut) emojiResult, ulong id)
+        {
+            await roleMenuMessage.CreateReactionAsync(emojiResult.emoji!);
+            await roleMenuMessage.EditAsync(roleMenuMessage.Content + $"\n{emojiResult.emoji}: <@&{id}>");
+            await Task.Delay(250);
+            await roleInputMessage.RemoveReactionsAsync();
+            await Task.Delay(250);
+            await roleInputMessage.EditAsync(GiveIdMessage);
         }
 
         private static async Task SendDuplicatedRoleMessageAsync(ICommandExecutionContext context)
@@ -156,8 +160,6 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             await Task.Delay(3000);
             await dupeRoleMessage.DeleteAsync();
         }
-
-
 
         private async Task<(IEmoji? emoji, bool timedOut)> GetReactionAsync(ICommandExecutionContext context, IMessage roleInputMessage, ulong inputResult)
         {
