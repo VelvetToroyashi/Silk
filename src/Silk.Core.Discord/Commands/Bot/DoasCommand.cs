@@ -7,12 +7,12 @@ using Silk.Core.Discord.Utilities.HelpFormatter;
 namespace Silk.Core.Discord.Commands.Bot
 {
     [Category(Categories.Bot)]
-    public class SudoCommand : BaseCommandModule
+    public class DoasCommand : BaseCommandModule
     {
         [Command]
         [RequireOwner]
         [Description("Run a command as a different user! \"I'm trusting you. ~Velvet\"")]
-        public async Task Sudo(CommandContext ctx, DiscordUser user, string command, [RemainingText] string? parameters)
+        public async Task Doas(CommandContext ctx, DiscordUser user, string command, [RemainingText] string? parameters)
         {
             bool exists = ctx.CommandsNext.RegisteredCommands.TryGetValue(command, out Command? cmd);
             if (!exists)
