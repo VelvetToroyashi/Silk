@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using Serilog.Extensions.Logging;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
@@ -52,34 +51,33 @@ namespace Silk.Core.Discord
         private static void ConfigureHost(IHostBuilder host)
         {
             host.ConfigureServices((context, services) =>
+            {
+                if (int.TryParse(context.Configuration["Shards"] ?? "1", out int shards))
+                    _clientConfig.ShardCount = shards;
+                IConfiguration config = context.Configuration;
+                _clientConfig.Token = config.GetConnectionString("discord");
+
+                services!.AddSingleton(new DiscordShardedClient(_clientConfig));
+
+                Discord.Startup.AddServices(services);
+
+                services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
+
+                services.AddHttpClient(HttpClientName, client =>
                 {
-                    if (int.TryParse(context.Configuration["Shards"] ?? "1", out int shards))
-                        _clientConfig.ShardCount = shards;
-                    IConfiguration config = context.Configuration;
-                    _clientConfig.Token = config.GetConnectionString("discord");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.5");
+                });
 
-                    services!.AddSingleton(new DiscordShardedClient(_clientConfig));
+                // Sub out the default implementation filter with custom filter
+                services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
 
-                    Discord.Startup.AddServices(services);
+                /* Can remove all filters with this line */
+                // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
-                    services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
-
-                    services.AddHttpClient(HttpClientName, client =>
-                    {
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.5");
-                    });
-
-                    // Sub out the default implementation filter with custom filter
-                    services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
-
-                    /* Can remove all filters with this line */
-                    // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-
-                    services.AddSingleton(_ => new BotConfig(config));
+                services.AddSingleton(_ => new BotConfig(config));
 
 
-                })
-                .UseSerilog();
+            });
         }
     }
 }

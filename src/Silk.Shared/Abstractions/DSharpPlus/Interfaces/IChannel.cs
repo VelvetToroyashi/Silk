@@ -13,6 +13,18 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         /// </summary>
         public ulong Id { get; }
 
+        public string Mention => $"<#{Id}>";
+
+        /// <summary>
+        /// Whether the channel is a DM or server channel.
+        /// </summary>
+        public bool IsPrivate { get; }
+
+        /// <summary>
+        /// The Guild this channel belongs to, if any. 
+        /// </summary>
+        public IGuild? Guild { get; }
+
         /// <summary>
         ///     Gets a specific message from the channel.
         /// </summary>
@@ -20,6 +32,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         /// <returns>An <see cref="IMessage" /> if the message exists, otherwise null.</returns>
         public Task<IMessage?> GetMessageAsync(ulong id);
 
-        public string Mention => $"<#{Id}>";
+
     }
 }

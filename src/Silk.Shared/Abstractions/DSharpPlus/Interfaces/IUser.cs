@@ -16,6 +16,23 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Interfaces
         public bool IsBot { get; }
 
         /// <summary>
+        /// The user's username.
+        /// </summary>
+        public string Username { get; }
+
+        /// <summary>
+        /// The user's nickname, if any.
+        /// </summary>
+        public string? Nickname { get; }
+
+        /// <summary>
+        /// Gets the user's nickname, or their username if it is not set.
+        /// </summary>
+        public string DisplayName => Nickname ?? Username;
+
+        public string Mention => Nickname is null ? $"<@{Id}>" : $"<@!{Id}>";
+
+        /// <summary>
         /// When the user's account was created.
         /// </summary>
         public DateTimeOffset CreationTimestamp { get; }

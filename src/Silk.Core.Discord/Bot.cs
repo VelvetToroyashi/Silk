@@ -139,7 +139,7 @@ namespace Silk.Core.Discord
         //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
         {
-            Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e)); };
+            Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e.Message!)); };
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
 

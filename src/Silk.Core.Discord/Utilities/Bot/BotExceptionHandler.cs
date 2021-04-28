@@ -11,7 +11,6 @@ using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Silk.Core.Discord.EventHandlers.MessageAdded;
 using Silk.Extensions;
 
 namespace Silk.Core.Discord.Utilities.Bot
@@ -27,14 +26,7 @@ namespace Silk.Core.Discord.Utilities.Bot
             _client = client;
             _client.ClientErrored += OnClientErrored;
             _client.SocketClosed += OnSocketErrored;
-            CommandHandler.ParserErrored += OnParserErrored;
         }
-        private void OnParserErrored(string command, Exception e)
-        {
-            // ReSharper disable once ExceptionPassedAsTemplateArgumentProblem
-            _logger.LogWarning("Couldn't find that command!: {CommandName}, Exception: {Exception}", command, e.InnerException ?? e);
-        }
-
 
         private async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
         {

@@ -21,8 +21,8 @@ namespace Silk.Core.Logic
         {
             // Make Generic Host here. //
             var builder = CreateBuilder();
-            AddLogging(builder);
             ConfigureServices(builder);
+            AddLogging(builder);
             Program.Start(builder);
 
             builder.UseConsoleLifetime();

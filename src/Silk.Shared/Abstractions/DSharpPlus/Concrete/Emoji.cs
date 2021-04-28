@@ -5,6 +5,7 @@ using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
+    /// <inheritdoc cref="IEmoji"/>
     public class Emoji : IEmoji
     {
         public ulong Id { get; init; }

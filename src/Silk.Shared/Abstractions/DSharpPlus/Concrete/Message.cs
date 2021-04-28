@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
@@ -10,40 +12,52 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
-        private bool _deleted;
-        private readonly DiscordMessage _message;
-
-        public Message(DiscordMessage message)
-        {
-            _message = message;
-
-            Id = message.Id;
-            GuildId = message.Channel.GuildId;
-            ChannelId = message.ChannelId;
-            Author = (User) message.Author;
-            Content = message.Content;
-            Timestamp = message.CreationTimestamp;
-            Reply = (Message) message.ReferencedMessage!;
-            Reactions = default!;
-        }
-
         public ulong Id { get; }
 
         public ulong? GuildId { get; }
-        /// <inheritdoc />
+
         public ulong ChannelId { get; }
+
+        public IChannel Channel { get; }
+        public IGuild? Guild { get; }
 
         public IUser Author { get; }
 
-        public string? Content { get; private set; }
+        public string Content => _message.Content;
 
-        public DateTimeOffset Timestamp { get; }
+        public DateTimeOffset CreationTimestamp { get; }
 
         //public IEmbed Embed { get; }
 
         public IMessage? Reply { get; }
 
-        public IReadOnlyCollection<IEmoji> Reactions { get; }
+        public IReadOnlyCollection<IEmoji> Reactions => ReactionUpdated() ? GetReactions() : _reactions;
+
+        public IReadOnlyCollection<IUser> MentionedUsers => UsersUpdated() ? GetUsers() : _mentionedUsers;
+
+        private bool _deleted;
+        private readonly DiscordMessage _message;
+        private IReadOnlyList<IEmoji> _reactions = new List<IEmoji>().AsReadOnly();
+        private IReadOnlyList<IUser> _mentionedUsers = new List<IUser>().AsReadOnly();
+
+        internal static Dictionary<ulong, Message> Messages { get; } = new();
+
+        private Message(DiscordMessage message)
+        {
+            _message = message;
+            Messages.Add(message.Id, this);
+
+            Id = message.Id;
+            GuildId = message.Channel.GuildId;
+            ChannelId = message.ChannelId;
+
+            Channel = (Channel) _message.Channel;
+            Guild = (Guild?) _message.Channel.Guild;
+
+            Author = (User) message.Author;
+            CreationTimestamp = message.CreationTimestamp;
+            Reply = (Message) message.ReferencedMessage!;
+        }
 
         public async Task CreateReactionAsync(ulong emojiId)
         {
@@ -86,7 +100,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             if (_deleted)
                 throw new InvalidOperationException("Cannot modify content of deleted message.");
 
-            Content = content;
             await _message.ModifyAsync(m => m.Content = content);
         }
 
@@ -94,7 +107,17 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             if (message is null) return null;
 
-            return new(message);
+            return Messages.TryGetValue(message.Id, out var msg) ? msg : new(message);
         }
+
+        public static implicit operator DiscordMessage(Message message) =>
+            (typeof(Message).GetField(nameof(_message), BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(message) as DiscordMessage)!;
+
+
+        private bool ReactionUpdated() => _message.Reactions.Count != _reactions.Count;
+        private IReadOnlyList<IEmoji> GetReactions() => _reactions = _message.Reactions.Select(r => (Emoji) r.Emoji).ToList().AsReadOnly();
+
+        private bool UsersUpdated() => _message.MentionedUsers.Count != _mentionedUsers.Count;
+        private IReadOnlyList<IUser> GetUsers() => _mentionedUsers = _message.MentionedUsers.Select(u => (User) u).ToList().AsReadOnly();
     }
 }

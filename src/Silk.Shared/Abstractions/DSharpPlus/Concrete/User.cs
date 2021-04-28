@@ -11,6 +11,9 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     {
         public ulong Id { get; }
         public bool IsBot { get; }
+        public string Mention => ((IUser) this).Mention;
+        public string Username { get; }
+        public string? Nickname => _member?.Nickname;
         public DateTimeOffset CreationTimestamp { get; }
         public DateTimeOffset? JoinedTimestamp { get; }
         public bool IsFromGuild { get; }
@@ -23,6 +26,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private User(DiscordUser user)
         {
             Id = user.Id;
+            Username = user.Username;
             IsBot = user.IsBot;
             CreationTimestamp = user.CreationTimestamp;
 
