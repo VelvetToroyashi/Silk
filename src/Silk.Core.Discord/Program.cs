@@ -75,8 +75,6 @@ namespace Silk.Core.Discord
                 // services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
                 services.AddSingleton(_ => new BotConfig(config));
-
-
             });
         }
     }
