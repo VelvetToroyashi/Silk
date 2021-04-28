@@ -6,6 +6,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Discord.Services.Interfaces;
+using Silk.Extensions;
 using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
@@ -92,7 +93,6 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             await foreach (var rm in optionsEnumerable)
                 options.Add(rm);
 
-            await Task.Delay(0);
             // Start doing db stuff here //
         }
 
@@ -113,6 +113,14 @@ namespace Silk.Core.Discord.Commands.Server.Roles
 
                 if (!_roles.Contains(id))
                 {
+                    var indexOfLastBotRole = context.Guild.Roles.IndexOf(context.CurrentUser.Roles!.Last());
+
+                    if (context.Guild.Roles.IndexOf(id) >= indexOfLastBotRole)
+                    {
+                        await SendErrorAsync(context, HierarchyDisalowsAssigningRoleErrorMessage);
+                        await roleIdInputMessage.DeleteAsync();
+                        continue;
+                    }
                     _roles.Add(id);
                 }
                 else
