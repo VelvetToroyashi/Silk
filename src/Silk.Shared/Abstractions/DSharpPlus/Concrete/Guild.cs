@@ -13,12 +13,15 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         public IReadOnlyList<IEmoji> Emojis { get; }
         public IReadOnlyList<ulong> Roles { get; }
 
+        internal static Dictionary<ulong, Guild> GuildsCache { get; } = new();
 
         private Guild(DiscordGuild guild)
         {
             Id = guild.Id;
-            Users = guild.Members.Values.Select(m => new User(m, true)).ToList();
+
+            Users = guild.Members.Values.Select(m => (User) m).ToList();
             Channels = guild.Channels.Values.Select(c => (Channel) c).ToList();
+
             Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
             Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();
         }
@@ -27,7 +30,13 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             if (guild is null) return null;
 
-            return new(guild);
+            if (GuildsCache.TryGetValue(guild.Id, out var g))
+                return g;
+
+            g = new(guild);
+            GuildsCache.Add(g.Id, g);
+
+            return g;
         }
     }
 }

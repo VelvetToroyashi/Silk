@@ -23,7 +23,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         private readonly DiscordMember? _member;
 
-        internal User(DiscordUser user, bool caching)
+        internal User(DiscordUser user)
         {
             Id = user.Id;
             Username = user.Username;
@@ -40,6 +40,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             }
         }
 
-        public static implicit operator User(DiscordUser u) => new(u, false);
+        public static implicit operator User(DiscordUser u) => new(u);
     }
 }
