@@ -40,7 +40,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
                 if (!caching)
                     (Guild.Guilds[member.Guild.Id].Users as List<IUser>)!.Add(this);
-
             }
         }
 
