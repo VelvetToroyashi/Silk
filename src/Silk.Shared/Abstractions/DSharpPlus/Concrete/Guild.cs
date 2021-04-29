@@ -18,21 +18,10 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private Guild(DiscordGuild guild)
         {
             Id = guild.Id;
-            Users = guild.Members.Select(u => (User) (DiscordUser) u.Value).ToList().AsReadOnly();
-            Channels = guild.Channels.Values.Select(c => (Channel) c).ToList().AsReadOnly();
             Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList().AsReadOnly();
             Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList().AsReadOnly();
         }
 
-        public static implicit operator Guild?(DiscordGuild? guild)
-        {
-            if (guild is null) return null;
-            var isCached = Guilds.TryGetValue(guild.Id, out var g);
-            g ??= new(guild);
-
-            if (!isCached) Guilds.Add(guild.Id, g);
-
-            return g;
-        }
+        public static implicit operator Guild?(DiscordGuild? guild) => guild is null ? null : new(guild);
     }
 }

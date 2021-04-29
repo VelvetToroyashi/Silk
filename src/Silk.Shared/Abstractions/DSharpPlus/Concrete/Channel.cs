@@ -22,7 +22,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         public async Task<IMessage?> GetMessageAsync(ulong id) => (Message?) await _channel.GetMessageAsync(id);
 
-        public static implicit operator Channel(DiscordChannel channel) => GetOrCacheChannel(channel);
+        public static implicit operator Channel(DiscordChannel channel) => new(channel);
 
 
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Screw you, I'll write DM if I want to.")]
