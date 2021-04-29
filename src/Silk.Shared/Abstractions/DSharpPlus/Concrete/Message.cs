@@ -40,12 +40,10 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private IReadOnlyList<IEmoji> _reactions = new List<IEmoji>().AsReadOnly();
         private IReadOnlyList<IUser> _mentionedUsers = new List<IUser>().AsReadOnly();
 
-        internal static Dictionary<ulong, Message> Messages { get; } = new();
 
         private Message(DiscordMessage message)
         {
             _message = message;
-            Messages.Add(message.Id, this);
 
             Id = message.Id;
             GuildId = message.Channel.GuildId;
@@ -107,12 +105,11 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             if (message is null) return null;
 
-            return Messages.TryGetValue(message.Id, out var msg) ? msg : new(message);
+            return new(message);
         }
 
         public static implicit operator DiscordMessage(Message message) =>
             (typeof(Message).GetField(nameof(_message), BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(message) as DiscordMessage)!;
-
 
         private bool ReactionUpdated() => _message.Reactions.Count != _reactions.Count;
         private IReadOnlyList<IEmoji> GetReactions() => _reactions = _message.Reactions.Select(r => (Emoji) r.Emoji).ToList().AsReadOnly();

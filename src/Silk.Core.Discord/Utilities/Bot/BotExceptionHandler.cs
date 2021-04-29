@@ -76,20 +76,14 @@ namespace Silk.Core.Discord.Utilities.Bot
         private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
         {
             if (e.Exception.Message.Contains("event"))
-            {
                 _logger.LogWarning("[{Event}] Timed out!", e.EventName);
-            }
             else
-            {
                 _logger.LogWarning(e.Exception, "Client threw an exception!");
-            }
         }
         private async Task OnSocketErrored(DiscordClient c, SocketCloseEventArgs e)
         {
             if (e.CloseCode is 4014)
                 _logger.LogCritical("Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
-
-
         }
 
         private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)

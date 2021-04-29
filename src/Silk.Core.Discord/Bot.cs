@@ -24,6 +24,7 @@ using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 
 namespace Silk.Core.Discord
 {
@@ -151,6 +152,12 @@ namespace Silk.Core.Discord
             Client.GuildCreated += _services.Get<GuildAddedHandler>()!.OnGuildAvailable;
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>()!.OnGuildDownloadComplete;
             Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>()!.CheckStaffRole;
+
+            Client.GuildDownloadCompleted += async (_, _) =>
+            {
+                foreach (var g in Client.ShardClients.Values.SelectMany(c => c.Guilds.Values))
+                    _ = (Guild) g!;
+            };
         }
 
 

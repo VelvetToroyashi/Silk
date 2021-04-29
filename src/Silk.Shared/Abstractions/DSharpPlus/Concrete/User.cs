@@ -37,13 +37,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
                 Roles = member.Roles.Select(r => r.Id).ToList();
                 _member = member;
-
-                // This goes based on the assumption that everything gets properly cached. //
-                // As of the time of writing, I have a small headache, so. I'm gonna hope it works. //
-                // I don't really wanna re-impl. caching of member objects, since //
-                // They're held in Guild#Members anyway, so. //
-                if (!caching && !Guild.Guilds[member.Guild.Id].Users.Contains(this))
-                    (Guild.Guilds[member.Guild.Id].Users as List<User>)!.Add(this);
             }
         }
 
