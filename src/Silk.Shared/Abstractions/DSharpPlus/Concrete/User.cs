@@ -11,7 +11,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     {
         public ulong Id { get; }
         public bool IsBot { get; }
-        public string Mention => ((IUser) this).Mention;
+        public string Mention => Nickname is null ? $"<@{Id}>" : $"<@!{Id}>";
         public string Username { get; }
         public string? Nickname => _member?.Nickname;
         public DateTimeOffset CreationTimestamp { get; }
@@ -39,7 +39,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
                 _member = member;
 
                 if (!caching)
-                    (Guild.Guilds[member.Guild.Id].Users as List<IUser>)!.Add(this);
+                    (Guild.Guilds[member.Guild.Id].Users as List<User>)!.Add(this);
+
             }
         }
 
