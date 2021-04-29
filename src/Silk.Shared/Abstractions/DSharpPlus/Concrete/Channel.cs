@@ -16,24 +16,20 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private readonly DiscordChannel _channel;
         private static readonly Dictionary<ulong, Channel> _channels = new();
 
-        private Channel(DiscordChannel channel) => _channel = channel;
+        internal Channel(DiscordChannel channel, bool caching)
+        {
+            _channel = channel;
+
+            if (!caching && !IsPrivate)
+                (Guild!.Channels as List<Channel>)!.Add(this);
+        }
 
         public async Task<IMessage?> GetMessageAsync(ulong id) => (Message?) await _channel.GetMessageAsync(id);
 
-        public static implicit operator Channel(DiscordChannel channel) => GetOrCacheChannel(channel);
-
-        private static Channel GetOrCacheChannel(DiscordChannel channel)
+        public static implicit operator Channel(DiscordChannel channel)
         {
-            if (_channels.TryGetValue(channel.Id, out var chn))
-            {
-                return chn;
-            }
-            else
-            {
-                chn = new(channel);
-                _channels.Add(channel.Id, chn);
-                return chn;
-            }
+            _ = _channels.TryGetValue(channel.Id, out var chn);
+            return chn ?? new(channel, false);
         }
     }
 }
