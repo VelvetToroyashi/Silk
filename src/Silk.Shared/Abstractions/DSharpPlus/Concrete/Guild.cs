@@ -9,7 +9,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     {
         public ulong Id { get; }
         public IReadOnlyList<IUser> Users { get; }
-        public IReadOnlyList<IChannel> Channels { get; internal set; }
+        public IReadOnlyList<IChannel> Channels { get; }
         public IReadOnlyList<IEmoji> Emojis { get; }
         public IReadOnlyList<ulong> Roles { get; }
 
@@ -18,10 +18,20 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private Guild(DiscordGuild guild)
         {
             Id = guild.Id;
-            Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList().AsReadOnly();
-            Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList().AsReadOnly();
+            Users = guild.Members.Values.Select(m => new User(m, true)).ToList();
+            Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
+            Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();
+
+            Guilds.Add(guild.Id, this);
         }
 
-        public static implicit operator Guild?(DiscordGuild? guild) => guild is null ? null : new(guild);
+
+        public static implicit operator Guild?(DiscordGuild? guild)
+        {
+            if (guild is null) return null;
+            if (Guilds.TryGetValue(guild.Id, out var g)) return g;
+
+            return new(guild);
+        }
     }
 }

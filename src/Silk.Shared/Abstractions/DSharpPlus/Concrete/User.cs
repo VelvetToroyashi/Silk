@@ -23,7 +23,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         private readonly DiscordMember? _member;
 
-        private User(DiscordUser user)
+        internal User(DiscordUser user, bool caching)
         {
             Id = user.Id;
             Username = user.Username;
@@ -34,11 +34,16 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             {
                 JoinedTimestamp = member.JoinedAt;
                 IsFromGuild = true;
-                Roles = member.Roles.Select(r => r.Id).ToList().AsReadOnly();
+
+                Roles = member.Roles.Select(r => r.Id).ToList();
                 _member = member;
+
+                if (!caching)
+                    (Guild.Guilds[member.Guild.Id].Users as List<IUser>)!.Add(this);
+
             }
         }
 
-        public static implicit operator User(DiscordUser u) => new(u);
+        public static implicit operator User(DiscordUser u) => new(u, false);
     }
 }
