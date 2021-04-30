@@ -27,7 +27,7 @@ namespace Silk.Shared.Types.Collections
 
         public IEnumerator<KeyValuePair<TKey, TValueTo>> GetEnumerator()
         {
-            foreach (var (key, value) in _underlyingDict)
+            foreach ((TKey key, TValueFrom value) in _underlyingDict)
                 yield return new(key, (TValueTo) (object) value!);
         }
 
