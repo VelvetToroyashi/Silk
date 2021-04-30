@@ -19,9 +19,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             Id = guild.Id;
 
-            Users = guild.Members.Values.Select(m => (User) m).ToList();
-            Channels = guild.Channels.Values.Select(c => (Channel) c).ToList();
-
             Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
             Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();
         }

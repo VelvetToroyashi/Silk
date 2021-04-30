@@ -23,7 +23,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 
         private readonly DiscordMember? _member;
 
-        internal User(DiscordUser user)
+        private User(DiscordUser user)
         {
             Id = user.Id;
             Username = user.Username;
@@ -34,8 +34,6 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             {
                 JoinedTimestamp = member.JoinedAt;
                 IsFromGuild = true;
-
-                Roles = member.Roles.Select(r => r.Id).ToList();
                 _member = member;
             }
         }
