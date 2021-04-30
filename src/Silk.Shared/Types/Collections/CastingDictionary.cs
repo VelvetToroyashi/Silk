@@ -14,9 +14,8 @@ namespace Silk.Shared.Types.Collections
     /// <typeparam name="TValueTo">The type to cast elements to.</typeparam>
     public sealed class CastingDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
     {
-        private readonly Dictionary<TKey, TValueFrom> _underlyingDict = new();
-        private Dictionary<TKey, TValueTo>? _enumeratedDict;
         private readonly bool _isCastable;
+        private readonly Dictionary<TKey, TValueFrom> _underlyingDict = new();
 
         public CastingDictionary() : this(false) { }
 
@@ -28,13 +27,8 @@ namespace Silk.Shared.Types.Collections
 
         public IEnumerator<KeyValuePair<TKey, TValueTo>> GetEnumerator()
         {
-            if (_enumeratedDict is not null)
-                return _enumeratedDict.GetEnumerator();
-
-            var castedValues = GetCastedDictionary();
-
-            _enumeratedDict = new(castedValues);
-            return _enumeratedDict.GetEnumerator();
+            foreach (var (key, value) in _underlyingDict)
+                yield return new(key, (TValueTo) (object) value!);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -69,16 +63,6 @@ namespace Silk.Shared.Types.Collections
 
         public ICollection<TKey> Keys => _underlyingDict.Keys;
 
-        public ICollection<TValueTo> Values => GetCastedDictionary().Values;
-
-        private IDictionary<TKey, TValueTo> GetCastedDictionary()
-        {
-            var castedLazy = _underlyingDict.Select(d =>
-            {
-                var dCasted = (TValueTo) (object) d.Value!;
-                return new KeyValuePair<TKey, TValueTo>(d.Key, dCasted);
-            });
-            return _enumeratedDict ??= new(castedLazy);
-        }
+        public ICollection<TValueTo> Values => _underlyingDict.Values.Select(v => (TValueTo) (object) v!).ToArray();
     }
 }
