@@ -24,7 +24,6 @@ using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
-using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 
 namespace Silk.Core.Discord
 {
@@ -155,12 +154,8 @@ namespace Silk.Core.Discord
             Client.GuildDownloadCompleted += async (cl, __) =>
             {
                 cl.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e.Message!)); };
-
-                foreach (var g in Client.ShardClients.Values.SelectMany(c => c.Guilds.Values))
-                    _ = (Guild) g!;
             };
         }
-
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
