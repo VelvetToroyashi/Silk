@@ -23,8 +23,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
             Users = new LazyCastDictionary<ulong, DiscordMember, IUser>(guild.Members, m => (User) m);
             Channels = new LazyCastDictionary<ulong, DiscordChannel, IChannel>(guild.Channels, c => (Channel) c);
 
-            Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
-            Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();
+            Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToArray();
+            Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToArray();
 
             _guild = guild;
         }
