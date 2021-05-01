@@ -24,7 +24,7 @@ namespace Silk.Shared.Types.Collections
 
         public TValueTo this[TKey key]
         {
-            get => (TValueTo) (object) _underlyingDict[key]!;
+            get => _castFunc(_underlyingDict[key]!);
             set => _underlyingDict[key] = (TValueFrom) (object) value!;
         }
 
