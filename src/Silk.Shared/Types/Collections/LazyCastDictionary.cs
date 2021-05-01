@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Silk.Shared.Types.Collections
@@ -32,9 +31,9 @@ namespace Silk.Shared.Types.Collections
         private readonly bool _isCastable;
         private readonly Func<TValueFrom, TValueTo> _castFunc = (t) => (TValueTo) (object) t!;
 
-        private readonly IReadOnlyDictionary<TKey, TValueFrom> _underlyingDict = new Dictionary<TKey, TValueFrom>();
+        private readonly IReadOnlyDictionary<TKey, TValueFrom> _underlyingDict;
 
-        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = new ReadOnlyDictionary<TKey, TValueFrom>(dictionary);
+        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = (IReadOnlyDictionary<TKey, TValueFrom>) dictionary;
 
         public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;
