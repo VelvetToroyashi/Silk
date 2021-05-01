@@ -9,7 +9,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     public class Guild : IGuild
     {
         public ulong Id => _guild.Id;
-        public IDictionary<ulong, IUser> Users { get; } = new CastingDictionary<ulong, DiscordUser, IUser>();
+        public IDictionary<ulong, IUser> Users { get; }
         public IDictionary<ulong, IChannel> Channels { get; } = new CastingDictionary<ulong, DiscordChannel, IChannel>();
         public IReadOnlyList<IEmoji> Emojis { get; }
         public IReadOnlyList<ulong> Roles { get; }
@@ -19,6 +19,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private Guild(DiscordGuild guild)
         {
             if (guild is null!) return;
+
+            Users = new CastingDictionary<ulong, DiscordMember, IUser>(_guild!.Members);
 
             Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
             Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();

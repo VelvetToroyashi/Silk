@@ -14,16 +14,27 @@ namespace Silk.Shared.Types.Collections
     /// <typeparam name="TValueTo">The type to cast elements to.</typeparam>
     public sealed class CastingDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
     {
+        public bool IsReadOnly => false;
+        public int Count => _underlyingDict.Count;
+
+        public TValueTo this[TKey key]
+        {
+            get => (TValueTo) (object) _underlyingDict[key]!;
+            set => _underlyingDict[key] = (TValueFrom) (object) value!;
+        }
+
         private readonly bool _isCastable;
-        private readonly Dictionary<TKey, TValueFrom> _underlyingDict = new();
+        private readonly IDictionary<TKey, TValueFrom> _underlyingDict = new Dictionary<TKey, TValueFrom>();
 
         public CastingDictionary() : this(false) { }
 
+        public CastingDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = dictionary;
+
+        public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false) =>
+            _underlyingDict = new Dictionary<TKey, TValueFrom>((IDictionary<TKey, TValueFrom>) dictionary);
+
         /// <param name="isCastableToBaseType">Dictates whether <see cref="TValueTo"/> can be casted back to <see cref="TValueFrom"/>.</param>
-        public CastingDictionary(bool isCastableToBaseType)
-        {
-            _isCastable = isCastableToBaseType;
-        }
+        public CastingDictionary(bool isCastableToBaseType) => _isCastable = isCastableToBaseType;
 
         public IEnumerator<KeyValuePair<TKey, TValueTo>> GetEnumerator()
         {
@@ -41,9 +52,6 @@ namespace Silk.Shared.Types.Collections
         public void CopyTo(KeyValuePair<TKey, TValueTo>[] array, int arrayIndex) { }
         public bool Remove(KeyValuePair<TKey, TValueTo> item) => _underlyingDict.Remove(item.Key);
 
-        public int Count => _underlyingDict.Count;
-        public bool IsReadOnly => false;
-
         public void Add(TKey key, TValueTo value) => _underlyingDict.Add(key, (TValueFrom) (object) value!);
 
         public bool ContainsKey(TKey key) => _underlyingDict.ContainsKey(key);
@@ -53,12 +61,6 @@ namespace Silk.Shared.Types.Collections
             var contains = _underlyingDict.TryGetValue(key, out TValueFrom? v);
             value = (TValueTo) (object) v!;
             return contains;
-        }
-
-        public TValueTo this[TKey key]
-        {
-            get => (TValueTo) (object) _underlyingDict[key]!;
-            set => _underlyingDict[key] = (TValueFrom) (object) value!;
         }
 
         public ICollection<TKey> Keys => _underlyingDict.Keys;
