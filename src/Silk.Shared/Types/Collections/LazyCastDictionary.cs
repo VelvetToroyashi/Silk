@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Silk.Shared.Types.Collections
@@ -19,23 +20,21 @@ namespace Silk.Shared.Types.Collections
     /// <typeparam name="TValueTo">The type to cast elements to.</typeparam>
     public sealed class LazyCastDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
     {
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => true;
         public int Count => _underlyingDict.Count;
 
         public TValueTo this[TKey key]
         {
             get => _castFunc(_underlyingDict[key]!);
-            set => _underlyingDict[key] = (TValueFrom) (object) value!;
+            set => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
         }
 
         private readonly bool _isCastable;
         private readonly Func<TValueFrom, TValueTo> _castFunc = (t) => (TValueTo) (object) t!;
 
-        private readonly IDictionary<TKey, TValueFrom> _underlyingDict = new Dictionary<TKey, TValueFrom>();
+        private readonly IReadOnlyDictionary<TKey, TValueFrom> _underlyingDict = new Dictionary<TKey, TValueFrom>();
 
-        public LazyCastDictionary() : this(false) { }
-
-        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = dictionary;
+        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = new ReadOnlyDictionary<TKey, TValueFrom>(dictionary);
 
         public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;
@@ -50,7 +49,7 @@ namespace Silk.Shared.Types.Collections
             this(dictionary) => _castFunc = castDelegate;
 
         /// <param name="isCastableToBaseType">Dictates whether <see cref="TValueTo"/> can be casted back to <see cref="TValueFrom"/>.</param>
-        public LazyCastDictionary(bool isCastableToBaseType)
+        private LazyCastDictionary(bool isCastableToBaseType)
         {
             _isCastable = isCastableToBaseType;
         }
@@ -60,18 +59,18 @@ namespace Silk.Shared.Types.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Add(KeyValuePair<TKey, TValueTo> item) => _underlyingDict.Add(item.Key, (TValueFrom) (object) item.Value!);
+        public void Add(KeyValuePair<TKey, TValueTo> item) => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
 
-        public void Clear() => _underlyingDict.Clear();
+        public void Clear() => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
 
         public bool Contains(KeyValuePair<TKey, TValueTo> item) => _isCastable && _underlyingDict.Contains(new(item.Key, (TValueFrom) (object) item.Value!));
         public void CopyTo(KeyValuePair<TKey, TValueTo>[] array, int arrayIndex) => throw new NotSupportedException("This dictionary does not support copying.");
-        public bool Remove(KeyValuePair<TKey, TValueTo> item) => _underlyingDict.Remove(item.Key);
+        public bool Remove(KeyValuePair<TKey, TValueTo> item) => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
 
-        public void Add(TKey key, TValueTo value) => _underlyingDict.Add(key, (TValueFrom) (object) value!);
+        public void Add(TKey key, TValueTo value) => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
 
         public bool ContainsKey(TKey key) => _underlyingDict.ContainsKey(key);
-        public bool Remove(TKey key) => _underlyingDict.Remove(key);
+        public bool Remove(TKey key) => throw new NotSupportedException($"{nameof(LazyCastDictionary<TKey, TValueFrom, TValueTo>)} is read-only.");
         public bool TryGetValue(TKey key, out TValueTo value)
         {
             var contains = _underlyingDict.TryGetValue(key, out TValueFrom? v);
@@ -79,7 +78,7 @@ namespace Silk.Shared.Types.Collections
             return contains;
         }
 
-        public ICollection<TKey> Keys => _underlyingDict.Keys;
+        public ICollection<TKey> Keys => _underlyingDict.Keys.ToArray();
 
         public ICollection<TValueTo> Values => _underlyingDict.Values.Select(v => _castFunc(v!)).ToArray();
     }

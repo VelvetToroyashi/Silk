@@ -15,6 +15,15 @@ namespace Silk.Core.Discord.Commands.Experimental
         public Task Dict(CommandContext ctx) => Dict(new CommandExecutionContext(ctx, _sender));
         private async Task Dict(ICommandExecutionContext ctx)
         {
+            var foo = ctx.Channel.Guild!;
+
+            var guilds = new IGuild[1_000_000];
+            for (int i = 0; i < 1_000_000; i++)
+            {
+                foo = foo.Channels[744881658809024532].Guild!;
+                guilds[i] = foo;
+            }
+
             await Task.Delay(0);
         }
     }
