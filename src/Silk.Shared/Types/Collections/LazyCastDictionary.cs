@@ -17,7 +17,7 @@ namespace Silk.Shared.Types.Collections
     /// <typeparam name="TKey">The type to store as the key.</typeparam>
     /// <typeparam name="TValueFrom">The underlying type to store.</typeparam>
     /// <typeparam name="TValueTo">The type to cast elements to.</typeparam>
-    public sealed class CastingDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
+    public sealed class LazyCastDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
     {
         public bool IsReadOnly => false;
         public int Count => _underlyingDict.Count;
@@ -33,24 +33,24 @@ namespace Silk.Shared.Types.Collections
 
         private readonly IDictionary<TKey, TValueFrom> _underlyingDict = new Dictionary<TKey, TValueFrom>();
 
-        public CastingDictionary() : this(false) { }
+        public LazyCastDictionary() : this(false) { }
 
-        public CastingDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = dictionary;
+        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = dictionary;
 
-        public CastingDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
+        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;
 
-        public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false)
+        public LazyCastDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false)
         {
             var d = dictionary.Select(kvp => kvp);
             _underlyingDict = new Dictionary<TKey, TValueFrom>(d);
         }
 
-        public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
+        public LazyCastDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;
 
         /// <param name="isCastableToBaseType">Dictates whether <see cref="TValueTo"/> can be casted back to <see cref="TValueFrom"/>.</param>
-        public CastingDictionary(bool isCastableToBaseType)
+        public LazyCastDictionary(bool isCastableToBaseType)
         {
             _isCastable = isCastableToBaseType;
         }
