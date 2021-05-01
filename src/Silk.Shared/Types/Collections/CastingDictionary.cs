@@ -36,11 +36,8 @@ namespace Silk.Shared.Types.Collections
         /// <param name="isCastableToBaseType">Dictates whether <see cref="TValueTo"/> can be casted back to <see cref="TValueFrom"/>.</param>
         public CastingDictionary(bool isCastableToBaseType) => _isCastable = isCastableToBaseType;
 
-        public IEnumerator<KeyValuePair<TKey, TValueTo>> GetEnumerator()
-        {
-            foreach ((TKey key, TValueFrom value) in _underlyingDict)
-                yield return new(key, (TValueTo) (object) value!);
-        }
+        public IEnumerator<KeyValuePair<TKey, TValueTo>> GetEnumerator() =>
+            _underlyingDict.Select(d => new KeyValuePair<TKey, TValueTo>(d.Key, (TValueTo) (object) d.Value!)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
