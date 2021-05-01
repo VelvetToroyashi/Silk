@@ -40,8 +40,11 @@ namespace Silk.Shared.Types.Collections
         public CastingDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;
 
-        public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false) =>
-            _underlyingDict = new Dictionary<TKey, TValueFrom>((IDictionary<TKey, TValueFrom>) dictionary);
+        public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false)
+        {
+            var d = dictionary.Select(kvp => kvp);
+            _underlyingDict = new Dictionary<TKey, TValueFrom>(d);
+        }
 
         public CastingDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
             this(dictionary) => _castFunc = castDelegate;

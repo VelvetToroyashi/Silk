@@ -2,6 +2,7 @@
 using System.Linq;
 using DSharpPlus.Entities;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
+using Silk.Shared.Types.Collections;
 
 namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
@@ -19,6 +20,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         {
             if (guild is null!) return;
 
+            Users = new CastingDictionary<ulong, DiscordMember, IUser>(guild.Members, m => (User) m);
+            Channels = new CastingDictionary<ulong, DiscordChannel, IChannel>(guild.Channels, c => (Channel) c);
 
             Emojis = guild.Emojis.Select(e => (Emoji) e.Value).ToList();
             Roles = guild.Roles.OrderBy(r => r.Value.Position).Select(r => r.Key).ToList();
