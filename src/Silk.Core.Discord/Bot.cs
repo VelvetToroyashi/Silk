@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +20,7 @@ using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Types;
+using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -109,13 +109,7 @@ namespace Silk.Core.Discord
 
             await _exceptionHandler.SubscribeToEventsAsync();
 
-            await Client.UseInteractivityAsync(new()
-            {
-                PaginationBehaviour = PaginationBehaviour.WrapAround,
-                PaginationDeletion = PaginationDeletion.DeleteMessage,
-                PollBehaviour = PollBehaviour.DeleteEmojis,
-                Timeout = TimeSpan.FromMinutes(1)
-            });
+            await Client.UseInteractivityAsync(DiscordConfigurations.Interactivity);
 
             IReadOnlyDictionary<int, CommandsNextExtension>? cmdNext = await Client.GetCommandsNextAsync();
             CommandsNextExtension[] cnextExtensions = cmdNext.Select(c => c.Value).ToArray();

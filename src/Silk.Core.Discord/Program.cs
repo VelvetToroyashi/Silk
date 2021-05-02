@@ -5,8 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using Serilog.Extensions.Logging;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Constants;
@@ -15,14 +13,7 @@ namespace Silk.Core.Discord
 {
     public static class Program
     {
-        private static readonly DiscordConfiguration _clientConfig = new()
-        {
-            Intents = FlagConstants.Intents,
-            LogTimestampFormat = "h:mm:ss ff tt",
-            MessageCacheSize = 1024,
-            MinimumLogLevel = LogLevel.None,
-            LoggerFactory = new SerilogLoggerFactory()
-        };
+        private static readonly DiscordConfiguration _clientConfig = DiscordConfigurations.Discord;
         public static DateTime Startup { get; } = DateTime.Now;
         public static string HttpClientName { get; } = "Silk";
 
