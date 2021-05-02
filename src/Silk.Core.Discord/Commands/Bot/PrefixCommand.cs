@@ -5,10 +5,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Data;
 using Silk.Core.Data.Models;
-using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Commands.Bot
 {

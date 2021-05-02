@@ -6,8 +6,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
-using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
 {

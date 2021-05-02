@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using DSharpPlus;
 
-namespace Silk.Core.Discord.Constants
+namespace Silk.Shared.Constants
 {
     public static class FlagConstants
     {

@@ -28,7 +28,7 @@ namespace Silk.Core.Discord.Commands.Bot
                 .AddField("Total guilds", $"{guilds}", true)
                 .AddField("Host", Environment.MachineName, true)
                 .AddField("Owner(s)", app.Owners.Select(x => x.Username).Join(", "), true)
-                .AddField("Bot version", Program.Version, true)
+                .AddField("Bot version", Shared.Constants.StringConstants.Version, true)
                 .AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
 
             await ctx.RespondAsync(embed);

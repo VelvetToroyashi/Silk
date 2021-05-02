@@ -1,4 +1,4 @@
-﻿namespace Silk.Core.Discord.Constants
+﻿namespace Silk.Shared.Constants
 {
     public static class Emojis
     {

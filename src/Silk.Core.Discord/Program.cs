@@ -9,19 +9,15 @@ using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord
 {
     public static class Program
     {
-
-        public const string Version = "1.5.1-alpha";
-        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
-
-
         private static readonly DiscordConfiguration _clientConfig = new()
         {
-            Intents = Constants.FlagConstants.Intents,
+            Intents = FlagConstants.Intents,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None,

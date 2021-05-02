@@ -10,9 +10,9 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Types;
 using Silk.Extensions;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.EventHandlers
 {

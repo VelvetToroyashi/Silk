@@ -5,11 +5,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Services
 {
