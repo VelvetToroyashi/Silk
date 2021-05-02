@@ -34,8 +34,12 @@ namespace Silk.Core.Logic
             _ = StartupTime; // Properties 
             // Make Generic Host here. //
             var builder = CreateBuilder();
+
             ConfigureServices(builder);
             ConfigureRemainingServices(builder);
+
+            ConfigureDiscordClient(builder);
+
             AddLogging(builder);
             builder.UseConsoleLifetime();
 
