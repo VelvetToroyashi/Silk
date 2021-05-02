@@ -10,13 +10,12 @@ using Serilog.Events;
 using Silk.Core.Data;
 using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic
 {
     public class Startup
     {
-        private const string LogFormat = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext:l}] {Message:lj} {Exception:j}{NewLine}";
-
         public static async Task Main()
         {
             // Make Generic Host here. //
@@ -54,8 +53,8 @@ namespace Silk.Core.Logic
             host.ConfigureLogging((builder, _) =>
                 {
                     var logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: LogFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                        .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                         .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
 
