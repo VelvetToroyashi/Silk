@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,9 +11,17 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Silk.Core.Data;
+using Silk.Core.Discord;
+using Silk.Core.Discord.EventHandlers;
+using Silk.Core.Discord.EventHandlers.MemberAdded;
+using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
+using Silk.Core.Discord.Services;
+using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
+using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic
@@ -26,8 +35,8 @@ namespace Silk.Core.Logic
             // Make Generic Host here. //
             var builder = CreateBuilder();
             ConfigureServices(builder);
+            ConfigureRemainingServices(builder);
             AddLogging(builder);
-
             builder.UseConsoleLifetime();
 
             await builder.RunConsoleAsync().ConfigureAwait(false);
@@ -45,7 +54,7 @@ namespace Silk.Core.Logic
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory());
                 configuration.AddJsonFile("appSettings.json", true, false);
-                configuration.AddUserSecrets<Discord.Startup>(true, false);
+                configuration.AddUserSecrets<Discord.Main>(true, false);
             });
             return builder;
         }
@@ -91,6 +100,44 @@ namespace Silk.Core.Logic
                 services.AddSingleton(_ => new BotConfig(context.Configuration));
             });
         }
+
+        private static void ConfigureRemainingServices(IHostBuilder builder)
+        {
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddTransient<ConfigService>();
+                services.AddTransient<GuildContext>();
+                services.AddSingleton<AntiInviteCore>();
+                services.AddTransient<RoleAddedHandler>();
+                services.AddTransient<GuildAddedHandler>();
+                services.AddTransient<MemberAddedHandler>();
+                services.AddTransient<RoleRemovedHandler>();
+                services.AddSingleton<BotExceptionHandler>();
+                services.AddSingleton<SerilogLoggerFactory>();
+                services.AddTransient<MessageRemovedHandler>();
+
+                services.AddScoped<IInputService, InputService>();
+
+                services.AddScoped<IInfractionService, InfractionService>();
+                services.AddTransient<IPrefixCacheService, PrefixCacheService>();
+                services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
+
+                services.AddSingleton<TagService>();
+
+                services.AddSingleton<IMessageSender, MessageSenderService>();
+                services.AddHostedService<Bot>();
+
+                //Copped this hack from: https://stackoverflow.com/a/65552373 //
+                services.AddSingleton<ReminderService>();
+                services.AddHostedService(b => b.GetRequiredService<ReminderService>());
+
+                services.AddHostedService<StatusService>();
+
+                services.AddMediatR(typeof(Main));
+                services.AddMediatR(typeof(GuildContext));
+            });
+        }
+
 
         private static IHostBuilder ConfigureDiscordClient(IHostBuilder builder)
         {

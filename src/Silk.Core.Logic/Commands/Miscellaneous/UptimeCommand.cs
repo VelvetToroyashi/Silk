@@ -4,7 +4,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Humanizer;
 using Humanizer.Localisation;
-using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 
 namespace Silk.Core.Logic.Commands.Miscellaneous
@@ -18,7 +17,7 @@ namespace Silk.Core.Logic.Commands.Miscellaneous
         public async Task UpTime(CommandContext ctx)
         {
             DateTime now = DateTime.Now;
-            TimeSpan uptime = now.Subtract(Program.Startup);
+            TimeSpan uptime = now.Subtract(Startup.StartupTime);
             await ctx.RespondAsync($"Running for `{uptime.Humanize(4, null, TimeUnit.Month, TimeUnit.Second)}.`");
         }
     }
