@@ -44,7 +44,7 @@ namespace Silk.Core.Discord
 
             services.AddHostedService<StatusService>();
 
-            services.AddMediatR(typeof(Program));
+            services.AddMediatR(typeof(Main));
             services.AddMediatR(typeof(GuildContext));
         }
     }

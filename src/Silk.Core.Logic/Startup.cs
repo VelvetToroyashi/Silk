@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading.Tasks;
+using DSharpPlus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,21 +11,22 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Silk.Core.Data;
-using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities;
+using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic
 {
     public class Startup
     {
+        public static DateTime StartupTime { get; } = DateTime.Now;
         public static async Task Main()
         {
+            _ = StartupTime; // Properties 
             // Make Generic Host here. //
             var builder = CreateBuilder();
             ConfigureServices(builder);
             AddLogging(builder);
-            Program.Start(builder);
 
             builder.UseConsoleLifetime();
 
@@ -30,6 +34,7 @@ namespace Silk.Core.Logic
 
         }
         // EFCore calls this. //
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore bs")]
         public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder());
 
         private static IHostBuilder CreateBuilder()
@@ -77,6 +82,26 @@ namespace Silk.Core.Logic
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
+                services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
+
+                services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
+
+                services.AddHttpClient(StringConstants.HttpClientName,
+                    client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
+                services.AddSingleton(_ => new BotConfig(context.Configuration));
+            });
+        }
+
+        private static IHostBuilder ConfigureDiscordClient(IHostBuilder builder)
+        {
+            return builder.ConfigureServices((context, _) =>
+            {
+                var client = DiscordConfigurations.Discord;
+                var config = context.Configuration;
+                int.TryParse(context.Configuration["Shards"] ?? "1", out int shards);
+
+                client.ShardCount = shards;
+                client.Token = config.GetConnectionString("discord");
             });
         }
 
