@@ -30,10 +30,7 @@ namespace Silk.Core.Logic
 
         }
         // EFCore calls this. //
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return ConfigureServices(CreateBuilder());
-        }
+        public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder());
 
         private static IHostBuilder CreateBuilder()
         {
@@ -96,7 +93,6 @@ namespace Silk.Core.Logic
 
             services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-            using var scope = services.BuildServiceProvider().CreateScope();
             services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
         }
     }
