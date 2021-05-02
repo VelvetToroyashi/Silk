@@ -54,7 +54,7 @@ namespace Silk.Core.Discord
 
                 services.AddHttpClient(HttpClientName, client =>
                 {
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Silk Project by VelvetThePanda / v1.5");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}");
                 });
 
                 // Sub out the default implementation filter with custom filter
