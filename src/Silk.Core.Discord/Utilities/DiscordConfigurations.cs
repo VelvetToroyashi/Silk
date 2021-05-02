@@ -8,8 +8,14 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Utilities
 {
+    /// <summary>
+    /// A class that holds the base configurations for various Discord-related entities.
+    /// </summary>
     public static class DiscordConfigurations
     {
+        /// <summary>
+        /// The base configuration used for <see cref="DiscordShardedClient"/>.
+        /// </summary>
         public static DiscordConfiguration Discord { get; } = new()
         {
             Intents = FlagConstants.Intents,
@@ -19,6 +25,9 @@ namespace Silk.Core.Discord.Utilities
             LoggerFactory = new SerilogLoggerFactory()
         };
 
+        /// <summary>
+        /// The base configuration used for <see cref="InteractivityExtension"/>.
+        /// </summary>
         public static InteractivityConfiguration Interactivity { get; } = new()
         {
             PaginationBehaviour = PaginationBehaviour.WrapAround,
