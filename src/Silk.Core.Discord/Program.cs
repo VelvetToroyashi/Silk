@@ -21,14 +21,7 @@ namespace Silk.Core.Discord
 
         private static readonly DiscordConfiguration _clientConfig = new()
         {
-            Intents = DiscordIntents.Guilds | // Caching
-                      DiscordIntents.GuildMembers | // Auto-mod/Auto-greet
-                      DiscordIntents.DirectMessages | // DM Commands
-                      DiscordIntents.GuildPresences | // Auto-Mod Anti-Status-Invite
-                      DiscordIntents.GuildMessages | // Commands & Auto-Mod
-                      DiscordIntents.GuildMessageReactions | // Role-menu
-                      DiscordIntents.DirectMessageReactions | // Interactivity in DMs
-                      DiscordIntents.GuildVoiceStates,
+            Intents = Constants.FlagConstants.Intents,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
             MinimumLogLevel = LogLevel.None,
