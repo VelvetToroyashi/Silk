@@ -29,7 +29,7 @@ namespace Silk.Shared.Types.Collections
         }
 
         private readonly bool _isCastable;
-        private readonly Func<TValueFrom, TValueTo> _castFunc = (t) => (TValueTo) (object) t!;
+        private readonly Func<TValueFrom, TValueTo> _castFunc = t => (TValueTo) (object) t!;
 
         private readonly IReadOnlyDictionary<TKey, TValueFrom> _underlyingDict;
 

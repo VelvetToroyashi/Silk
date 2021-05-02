@@ -61,7 +61,7 @@ namespace Silk.Core.Discord.Services
             var result = await interactivity.WaitForReactionAsync(r => r.Emoji == yes || r.Emoji == no && r.User.Id == userId);
 
             if (result.TimedOut) return null;
-            else return result.Result.Emoji == yes;
+            return result.Result.Emoji == yes;
         }
 
         private InteractivityExtension GetInteractivityInternal(ulong? guildId)

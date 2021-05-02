@@ -186,22 +186,19 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             {
                 return (null, true);
             }
-            else
+            if (!reaction.Emoji.IsSharedEmoji())
             {
-                if (!reaction.Emoji.IsSharedEmoji())
-                {
-                    await reaction.DeleteAsync();
-                    await SendErrorAsync(context, NonSharedEmojiErrorMessage);
+                await reaction.DeleteAsync();
+                await SendErrorAsync(context, NonSharedEmojiErrorMessage);
 
-                    return (null, false);
-                }
-                if (_reactions.Contains(reaction.Emoji))
-                {
-                    await SendErrorAsync(context, AlreadyReactedErrorMessage);
-                }
-                _reactions.Add(reaction.Emoji);
-                return (reaction.Emoji, false);
+                return (null, false);
             }
+            if (_reactions.Contains(reaction.Emoji))
+            {
+                await SendErrorAsync(context, AlreadyReactedErrorMessage);
+            }
+            _reactions.Add(reaction.Emoji);
+            return (reaction.Emoji, false);
         }
 
         private async Task<string?> GetTitleAsync(ICommandExecutionContext ctx)
@@ -211,31 +208,25 @@ namespace Silk.Core.Discord.Commands.Server.Roles
             {
                 return null;
             }
-            else
+            if (result.Content.Length < 50)
             {
-                if (result.Content.Length < 50)
+                var confirmationMessage = await ctx.RespondAsync("Are you sure?");
+                var confirmationResult = await _input.GetConfirmationAsync(confirmationMessage, ctx.User.Id);
+
+                if (!confirmationResult ?? true)
                 {
-                    var confirmationMessage = await ctx.RespondAsync("Are you sure?");
-                    var confirmationResult = await _input.GetConfirmationAsync(confirmationMessage, ctx.User.Id);
-
-                    if (!confirmationResult ?? true)
-                    {
-                        await result.DeleteAsync();
-                        await confirmationMessage.DeleteAsync();
-                        return null;
-                    }
-
+                    await result.DeleteAsync();
                     await confirmationMessage.DeleteAsync();
-                    await result.DeleteAsync();
-                    return result.Content;
-                }
-                else
-                {
-                    await result.DeleteAsync();
-                    await SendErrorAsync(ctx, TitleInputLengthExceedsLimit);
                     return null;
                 }
+
+                await confirmationMessage.DeleteAsync();
+                await result.DeleteAsync();
+                return result.Content;
             }
+            await result.DeleteAsync();
+            await SendErrorAsync(ctx, TitleInputLengthExceedsLimit);
+            return null;
         }
 
         /// <summary>
