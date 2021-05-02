@@ -43,7 +43,7 @@ namespace Silk.Core.Discord
 
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
-                services.AddHttpClient(HttpClientName, client =>
+                services.AddHttpClient(StringConstants.HttpClientName, client =>
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}");
                 });
