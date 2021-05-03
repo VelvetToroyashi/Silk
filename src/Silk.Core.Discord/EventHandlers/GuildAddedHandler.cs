@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dasync.Collections;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -111,10 +112,26 @@ namespace Silk.Core.Discord.EventHandlers
         private async Task<int> CacheGuildMembers(IEnumerable<DiscordMember> members)
         {
             int staffCount = 0;
-            IEnumerable<DiscordMember> staff = members.Where(m => !m.IsBot);
+            List<DiscordMember> staff = members.Where(m => !m.IsBot).ToList();
 
-            foreach (var member in staff)
+            if (staff.Count > 100)
             {
+                var asyncStaff = staff.ToAsyncEnumerable();
+                await asyncStaff.ParallelForEachAsync(CacheMemberasync);
+            }
+            else
+            {
+                foreach (var member in staff)
+                    await CacheMemberasync(member);
+            }
+
+
+            return Math.Max(staffCount, 0);
+
+
+            async Task CacheMemberasync(DiscordMember member)
+            {
+
                 UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
                 User? user = await _mediator.Send(new GetUserRequest(member.Guild.Id, member.Id));
@@ -138,7 +155,6 @@ namespace Silk.Core.Discord.EventHandlers
                     staffCount++;
                 }
             }
-            return Math.Max(staffCount, 0);
         }
 
         private void LogCachedMemberCount(DiscordClient client, GuildCreateEventArgs eventArgs, int cachedMembers, ShardState state)
