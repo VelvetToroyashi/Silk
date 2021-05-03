@@ -23,7 +23,6 @@ using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 using Silk.Shared.Constants;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Silk.Core.Logic
 {
@@ -97,7 +96,7 @@ namespace Silk.Core.Logic
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
-                services.AddScoped(typeof(ILogger), typeof(Shared.Types.Logger<>));
+
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
                 services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
