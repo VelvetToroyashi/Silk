@@ -122,7 +122,7 @@ namespace Silk.Core.Logic
                 services.AddSingleton<TagService>();
 
                 services.AddSingleton<IMessageSender, MessageSenderService>();
-                services.AddHostedService<Bot>();
+                services.AddHostedService<Main>();
 
                 //Copped this hack from: https://stackoverflow.com/a/65552373 //
                 services.AddSingleton<ReminderService>();
