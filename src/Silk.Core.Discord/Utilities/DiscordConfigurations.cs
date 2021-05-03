@@ -22,6 +22,7 @@ namespace Silk.Core.Discord.Utilities
             Intents = FlagConstants.Intents,
             LogTimestampFormat = "h:mm:ss ff tt",
             MessageCacheSize = 1024,
+            LargeThreshold = 1000,
             MinimumLogLevel = LogLevel.None,
             LoggerFactory = new SerilogLoggerFactory()
         };

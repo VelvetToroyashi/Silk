@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Silk.Core.Discord.EventHandlers.Notifications
 {
-    public record GuildCreated(DiscordClient Client, GuildCreateEventArgs Args) : INotification;
+    public record GuildDownloadCompleted(DiscordClient Client, GuildDownloadCompletedEventArgs Args) : INotification;
 }

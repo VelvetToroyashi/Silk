@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Discord.EventHandlers;
+using Silk.Core.Discord.EventHandlers.MemberAdded;
+using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
+using Silk.Extensions;
 
 namespace Silk.Core.Discord
 {
@@ -32,12 +39,14 @@ namespace Silk.Core.Discord
             ShardClient = shardClient;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void ChangeState(BotState state)
         {
-            if (State == state) return;
-
-            _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
-            State = state;
+            if (State != state)
+            {
+                _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
+                State = state;
+            }
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -64,8 +73,32 @@ namespace Silk.Core.Discord
             await ShardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
 
-            EventHelper.SubscribeToEvents(ShardClient, _provider);
+            SubscribeToEvents();
         }
+        private void SubscribeToEvents()
+        {
+            //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites; // I'll fix AutoMod eventually™ ~Velvet, May 3rd, 2021. //
+            var services = _provider;
+            var mediator = services.Get<IMediator>()!;
+
+            // Direct Dispatch //
+            ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
+            ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
+            ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
+
+            // MediatR Dispatch //
+
+            ShardClient.GuildDownloadCompleted += async (cl, __) =>
+                cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e.Message!)); };
+
+            ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
+            //ShardClient.GuildAvailable += async (c, e) => { _ = mediator.Publish(new GuildAvailable(c, e)); };
+            ShardClient.GuildAvailable += services.Get<GuildAddedHandler>()!.OnGuildAvailable;
+            ShardClient.GuildDownloadCompleted += async (c, e) => { _ = mediator.Publish(new GuildDownloadCompleted(c, e)); };
+
+            ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
+        }
+
         private async Task InitializeCommandsNextAsync()
         {
             _logger.LogDebug("Registering commands");
@@ -82,7 +115,7 @@ namespace Silk.Core.Discord
             }
 
             t.Stop();
-            var registeredCommands = cnext[0].RegisteredCommands.Count;
+            var registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
             _logger.LogDebug("Registered {Commands} commands for {Shards} shards in {Time} ms", registeredCommands, ShardClient.ShardClients.Count, t.ElapsedMilliseconds);
         }
