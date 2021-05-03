@@ -30,7 +30,6 @@ namespace Silk.Core.Discord.EventHandlers
         private readonly Dictionary<int, ShardState> _shardStates = new();
 
 
-
         private const string BotJoinGreetingMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                       "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
 
