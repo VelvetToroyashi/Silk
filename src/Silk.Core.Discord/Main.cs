@@ -31,6 +31,8 @@ namespace Silk.Core.Discord
 
         public static void ChangeState(BotState state)
         {
+            if (State == state) return;
+
             _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
             State = state;
         }
