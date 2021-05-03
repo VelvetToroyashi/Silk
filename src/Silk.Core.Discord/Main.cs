@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +23,13 @@ namespace Silk.Core.Discord
         public static string DefaultCommandPrefix { get; } = "s!";
 
         private static ILogger<Main> _logger;
+        private readonly IServiceProvider _provider;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger)
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, IServiceProvider provider)
         {
-            ShardClient = shardClient;
             _logger = logger;
+            _provider = provider;
+            ShardClient = shardClient;
         }
 
         public static void ChangeState(BotState state)
@@ -61,6 +64,7 @@ namespace Silk.Core.Discord
             await ShardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
 
+            EventHelper.SubscribeToEvents(ShardClient, _provider);
         }
         private async Task InitializeCommandsNextAsync()
         {
