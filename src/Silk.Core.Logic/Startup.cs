@@ -23,12 +23,16 @@ using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 using Silk.Shared.Constants;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Silk.Core.Logic
 {
     public class Startup
     {
         public static DateTime StartupTime { get; } = DateTime.Now;
+
+        private static ILogger<Startup> _logger;
+
         public static async Task Main()
         {
             _ = StartupTime; // Properties 
@@ -93,7 +97,9 @@ namespace Silk.Core.Logic
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
+                services.AddScoped(typeof(ILogger), typeof(Shared.Types.Logger<>));
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
+
                 services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
 
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
@@ -151,6 +157,11 @@ namespace Silk.Core.Logic
             });
         }
 
+        private static void MigrateDatabases(DbContext[] contexts)
+        {
+            foreach (var c in contexts)
+                c.Database.Migrate();
+        }
         private static void AddDatabases(IServiceCollection services, string connectionString)
         {
             void Builder(DbContextOptionsBuilder b)

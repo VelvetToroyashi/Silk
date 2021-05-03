@@ -27,7 +27,7 @@ namespace Silk.Core.Discord.Services
             "ko-fi.com/VelvetThePanda",
             "for donations! (ko-fi/patreon: VelvetThePanda)"
         };
-        private bool _ready => Bot.State is BotState.Ready;
+        private bool _ready => Main.State is BotState.Ready;
 
 
         public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
