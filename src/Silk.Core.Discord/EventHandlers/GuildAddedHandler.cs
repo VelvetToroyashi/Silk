@@ -18,21 +18,23 @@ using Silk.Shared.Constants;
 namespace Silk.Core.Discord.EventHandlers
 {
     //This relies on multiple events to update its state, so we can't implement INotificationHandler.
+    // Correction. I'm stupid. You can implement multiple interfaces. Don't listen to the above comment. ~Velvet.//
     public class GuildAddedHandler
     {
-        public static bool StartupCompleted { get; private set; }
+        private bool _logged;
+        private bool _startupCompleted;
 
+        private readonly IMediator _mediator;
         private readonly object _lock = new();
         private readonly ILogger<GuildAddedHandler> _logger;
-        private readonly IMediator _mediator;
         private readonly Dictionary<int, ShardState> _shardStates = new();
 
-        private bool _logged;
+
 
         private const string BotJoinGreetingMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                       "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
 
-        private struct ShardState
+        private class ShardState
         {
             public bool Completed { get; set; }
             public int CachedGuilds { get; set; }
@@ -54,7 +56,7 @@ namespace Silk.Core.Discord.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            if (StartupCompleted) return;
+            if (_startupCompleted) return;
 
             Main.ChangeState(BotState.Caching);
 
@@ -68,7 +70,7 @@ namespace Silk.Core.Discord.EventHandlers
                 ++state.CachedGuilds;
                 _shardStates[client.ShardId] = state;
 
-                if (!StartupCompleted)
+                if (!_startupCompleted)
                     LogCachedMemberCount(client, eventArgs, cachedMembers, state);
             }
         }
@@ -76,15 +78,14 @@ namespace Silk.Core.Discord.EventHandlers
 
         public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
         {
-            ShardState state = _shardStates[c.ShardId];
-            state.Completed = true;
-            _shardStates[c.ShardId] = state;
-            StartupCompleted = _shardStates.Values.All(s => s.Completed);
-            if (StartupCompleted && !_logged)
+            _shardStates[c.ShardId].Completed = true;
+            _startupCompleted = _shardStates.Values.All(s => s.Completed);
+
+            if (_startupCompleted && !_logged)
             {
-                _logger.LogDebug("All shard(s) cache runs complete!");
+                _logger.LogDebug("Cache runs complete! Runtime: {Runtime}", 0);
                 _logged = true;
-                Bot.State = BotState.Ready;
+                Main.ChangeState(BotState.Ready);
             }
         }
 
@@ -97,15 +98,15 @@ namespace Silk.Core.Discord.EventHandlers
             DiscordChannel? availableChannel =
                 allChannels.Where(c => c.Type is ChannelType.Text)
                     .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
-            if (availableChannel is null) return;
 
+            if (availableChannel is null) return; // Server prohibits talking in all channels. No point in waiting. //
 
             var builder = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
                 .WithDescription(BotJoinGreetingMessage)
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
-                .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
+                .WithFooter("Silk! | Made with <3 by the Velvet & Contributors");
             await availableChannel.SendMessageAsync(builder);
         }
 

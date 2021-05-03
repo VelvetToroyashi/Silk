@@ -125,8 +125,6 @@ namespace Silk.Core.Discord
 
             // Client.StartAsync() returns as soon as all shards are ready, which means we log before
             // The client is *actually* ready.
-            while (!GuildAddedHandler.StartupCompleted) { }
-            _logger.LogInformation("All shards initialized in: {Time} ms", _sw.ElapsedMilliseconds.ToString("N0"));
         }
 
         // Clusterfuck of a method. I know. //
