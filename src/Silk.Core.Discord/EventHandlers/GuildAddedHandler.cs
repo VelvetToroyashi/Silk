@@ -114,10 +114,10 @@ namespace Silk.Core.Discord.EventHandlers
             int staffCount = 0;
             List<DiscordMember> staff = members.Where(m => !m.IsBot).ToList();
 
-            if (staff.Count > 100)
+            if (staff.Count > 500)
             {
                 var asyncStaff = staff.ToAsyncEnumerable();
-                await asyncStaff.ParallelForEachAsync(CacheMemberasync);
+                await asyncStaff.ParallelForEachAsync(CacheMemberasync, 4);
             }
             else
             {
@@ -125,9 +125,7 @@ namespace Silk.Core.Discord.EventHandlers
                     await CacheMemberasync(member);
             }
 
-
             return Math.Max(staffCount, 0);
-
 
             async Task CacheMemberasync(DiscordMember member)
             {
