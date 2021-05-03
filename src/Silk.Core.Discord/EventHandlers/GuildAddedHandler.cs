@@ -162,14 +162,14 @@ namespace Silk.Core.Discord.EventHandlers
             {
                 message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [No new staff!]";
                 _logger.LogDebug(message, client.ShardId + 1,
-                    Bot.Instance!.Client.ShardClients.Count,
+                    Main.ShardClient.ShardClients.Count,
                     state.CachedGuilds, client.Guilds.Count);
             }
             else
             {
                 message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
                 _logger.LogDebug(message, client.ShardId + 1,
-                    Bot.Instance!.Client.ShardClients.Count,
+                    Main.ShardClient.ShardClients.Count,
                     state.CachedGuilds, client.Guilds.Count,
                     cachedMembers, eventArgs.Guild.Members.Count);
             }
