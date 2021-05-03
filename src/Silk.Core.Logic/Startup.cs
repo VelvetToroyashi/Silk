@@ -35,19 +35,18 @@ namespace Silk.Core.Logic
             // Make Generic Host here. //
             var builder = CreateBuilder();
 
-            ConfigureServices(builder);
-            ConfigureRemainingServices(builder);
+            AddLogging(builder);
 
+            ConfigureServices(builder);
             ConfigureDiscordClient(builder);
 
-            AddLogging(builder);
-            builder.UseConsoleLifetime();
-
-            await builder.RunConsoleAsync().ConfigureAwait(false);
-
+            await builder
+                .UseConsoleLifetime()
+                .RunConsoleAsync()
+                .ConfigureAwait(false);
         }
-        // EFCore calls this. //
-        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore bs")]
+
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
         public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder());
 
         private static IHostBuilder CreateBuilder()
@@ -58,7 +57,7 @@ namespace Silk.Core.Logic
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory());
                 configuration.AddJsonFile("appSettings.json", true, false);
-                configuration.AddUserSecrets<Discord.Main>(true, false);
+                configuration.AddUserSecrets<Main>(true, false);
             });
             return builder;
         }
@@ -99,16 +98,10 @@ namespace Silk.Core.Logic
 
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
-                services.AddHttpClient(StringConstants.HttpClientName,
-                    client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
+                services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
                 services.AddSingleton(_ => new BotConfig(context.Configuration));
-            });
-        }
 
-        private static void ConfigureRemainingServices(IHostBuilder builder)
-        {
-            builder.ConfigureServices((_, services) =>
-            {
+
                 services.AddTransient<ConfigService>();
                 services.AddTransient<GuildContext>();
                 services.AddSingleton<AntiInviteCore>();
@@ -143,9 +136,9 @@ namespace Silk.Core.Logic
         }
 
 
-        private static IHostBuilder ConfigureDiscordClient(IHostBuilder builder)
+        private static void ConfigureDiscordClient(IHostBuilder builder)
         {
-            return builder.ConfigureServices((context, _) =>
+            builder.ConfigureServices((context, services) =>
             {
                 var client = DiscordConfigurations.Discord;
                 var config = context.Configuration;
@@ -153,6 +146,8 @@ namespace Silk.Core.Logic
 
                 client.ShardCount = shards;
                 client.Token = config.GetConnectionString("discord");
+
+                DiscordConfigurations.CommandsNext.Services = services.BuildServiceProvider();
             });
         }
 

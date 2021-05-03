@@ -1,5 +1,6 @@
 ﻿using System;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using Microsoft.Extensions.Logging;
@@ -34,6 +35,12 @@ namespace Silk.Core.Discord.Utilities
             PaginationDeletion = PaginationDeletion.DeleteMessage,
             PollBehaviour = PollBehaviour.DeleteEmojis,
             Timeout = TimeSpan.FromMinutes(1)
+        };
+
+        public static CommandsNextConfiguration CommandsNext { get; } = new()
+        {
+            IgnoreExtraArguments = true,
+            UseDefaultCommandHandler = false,
         };
     }
 }
