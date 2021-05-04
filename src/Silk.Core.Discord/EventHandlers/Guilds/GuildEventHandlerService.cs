@@ -32,8 +32,6 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
 
-        private readonly SemaphoreSlim _semaphore = new(1);
-
         private Dictionary<int, int> _guilds;
 
         private int _shardCount; // How many shards to wait for. //
@@ -66,8 +64,6 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
             LogMembers(members, guild.Members.Count, shardId);
             CheckForCompletion();
-
-            _semaphore.Release();
         }
 
         internal async Task JoinedGuild(GuildCreated guildNotification)
