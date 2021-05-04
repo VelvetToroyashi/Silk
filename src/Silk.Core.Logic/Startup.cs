@@ -15,6 +15,7 @@ using Serilog.Extensions.Logging;
 using Silk.Core.Data;
 using Silk.Core.Discord;
 using Silk.Core.Discord.EventHandlers;
+using Silk.Core.Discord.EventHandlers.Guilds;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
 using Silk.Core.Discord.Services;
@@ -73,7 +74,7 @@ namespace Silk.Core.Logic
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
+                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Fatal);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch
                     {
@@ -127,9 +128,9 @@ namespace Silk.Core.Logic
                 services.AddSingleton<TagService>();
 
                 services.AddSingleton<IMessageSender, MessageSenderService>();
-                services.AddHostedService<Main>();
 
-
+                services.AddSingleton<Main>();
+                services.AddHostedService(s => s.GetRequiredService<Main>());
 
                 //Copped this hack from: https://stackoverflow.com/a/65552373 //
                 services.AddSingleton<ReminderService>();
@@ -137,7 +138,7 @@ namespace Silk.Core.Logic
 
                 services.AddHostedService<StatusService>();
 
-                services.AddMediatR(typeof(Main));
+                services.AddMediatR(typeof(Startup));
                 services.AddMediatR(typeof(GuildContext));
 
                 services.AddSingleton<GuildEventHandlerService>();

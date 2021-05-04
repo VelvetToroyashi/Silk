@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,20 +14,26 @@ using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.EventHandlers.Notifications;
+using Silk.Core.Discord.Types;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
-namespace Silk.Core.Discord.EventHandlers
+namespace Silk.Core.Discord.EventHandlers.Guilds
 {
-    public class GuildEventHandlerService : IHostedService, INotificationHandler<GuildCreated>, INotificationHandler<GuildAvailable>, INotificationHandler<GuildDownloadCompleted>
+    public class GuildEventHandlerService : IHostedService
     {
+        public ConcurrentQueue<Task> CacheQueue { get; } = new();
+
+        private DateTime? _startTime;
+
         private bool _cachedAllInitialGuilds;
+        private bool _logged;
 
         private readonly IMediator _mediator;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
 
-        private readonly ConcurrentQueue<Task> _cacheQueue = new();
+
         private readonly Dictionary<int, int> _guilds = new();
 
         private readonly int _shardCount; // How many shards to wait for. //
@@ -40,41 +47,50 @@ namespace Silk.Core.Discord.EventHandlers
             _shardCount = _client.ShardClients.Count;
             _currentShardsCompleted = 0;
 
-            Console.WriteLine("Poggers.");
+            _logger.LogTrace("Caller: {Caller}", new StackTrace()!.GetFrame(4)!.GetMethod()!.Name);
         }
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                           "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
 
 
-        private async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task StartAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken); // This will stop itself. IHostedService blocks other services while its starting. //
+        public async Task StopAsync(CancellationToken cancellationToken) { }
+
+        internal void MarkCompleted(int shardId) => _currentShardsCompleted++;
+
+        internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
-            var shardCount = _client.ShardClients.Count;
+            _startTime ??= DateTime.Now;
+            Main.ChangeState(BotState.Caching);
 
-            while (stoppingToken.IsCancellationRequested)
-            {
-                if (_cachedAllInitialGuilds)
-                {
-                    await Task.Delay(10000, stoppingToken);
-                    continue;
-                }
-
-                while (_currentShardsCompleted != shardCount)
-                    await Task.Delay(200, stoppingToken);
-
-                foreach (var t in _cacheQueue)
-                    await t;
-
-                await Task.Delay(-1, stoppingToken);
-            }
-        }
-
-        private async Task CacheGuildAsync(DiscordGuild guild, int shardId)
-        {
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
             int members = await CacheMembersAsync(guild.Members.Values);
             _guilds[shardId]++;
             LogMembers(members, guild.Members.Count, shardId);
+            CheckForCompletion();
+        }
+
+        internal async Task JoinedGuild(GuildCreated guildNotification)
+        {
+            var guildEvent = guildNotification.Args;
+
+            var allChannels = (await guildEvent.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            DiscordMember bot = guildEvent.Guild.CurrentMember;
+            DiscordChannel? availableChannel = allChannels
+                .Where(c => c.Type is ChannelType.Text)
+                .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+
+            if (availableChannel is null)
+                return;
+
+            var builder = new DiscordEmbedBuilder()
+                .WithTitle("Thank you for adding me!")
+                .WithColor(new("94f8ff"))
+                .WithDescription(OnGuildJoinThankYouMessage)
+                .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
+                .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
+            await availableChannel.SendMessageAsync(builder);
         }
 
         private void LogMembers(int members, int totalMembers, int shardId)
@@ -94,6 +110,24 @@ namespace Silk.Core.Discord.EventHandlers
                     Main.ShardClient.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
                     members, totalMembers);
+            }
+        }
+
+        private void CheckForCompletion()
+        {
+            var totalShards = _client.ShardClients.Count;
+            var completedShards = new bool[totalShards];
+
+            for (var i = 0; i > totalShards; i++)
+                completedShards[i] = _guilds[i] == _client.ShardClients[i].Guilds.Count;
+
+            _cachedAllInitialGuilds = completedShards.All(b => b);
+
+            if (_cachedAllInitialGuilds && !_logged)
+            {
+                _logger.LogInformation("Finished caching {Guilds} guilds for {Shards} shards in {Time} ms!",
+                    _client.ShardClients.Values.SelectMany(s => s.Guilds).Count(), _client.ShardClients.Count, (DateTime.Now - _startTime).Value.TotalMilliseconds);
+                _logged = true;
             }
         }
 
@@ -124,33 +158,21 @@ namespace Silk.Core.Discord.EventHandlers
             return Math.Max(staffCount, 0);
         }
 
-        private async Task JoinedGuild(GuildCreated guildNotification)
+        private async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var guildEvent = guildNotification.Args;
+            var shardCount = _client.ShardClients.Count;
 
-            var allChannels = (await guildEvent.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
-            DiscordMember bot = guildEvent.Guild.CurrentMember;
-            DiscordChannel? availableChannel = allChannels
-                .Where(c => c.Type is ChannelType.Text)
-                .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+            while (stoppingToken.IsCancellationRequested)
+            {
+                while (!_cachedAllInitialGuilds || _currentShardsCompleted != shardCount)
+                    await Task.Delay(200, stoppingToken);
 
-            if (availableChannel is null)
-                return;
+                if (!CacheQueue.IsEmpty)
+                    foreach (var t in CacheQueue)
+                        await t;
 
-            var builder = new DiscordEmbedBuilder()
-                .WithTitle("Thank you for adding me!")
-                .WithColor(new("94f8ff"))
-                .WithDescription(OnGuildJoinThankYouMessage)
-                .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
-                .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
-            await availableChannel.SendMessageAsync(builder);
+                await Task.Delay(5000, stoppingToken);
+            }
         }
-
-        public async Task Handle(GuildCreated notification, CancellationToken cancellationToken) => _cacheQueue.Enqueue(JoinedGuild(notification));
-        public async Task Handle(GuildAvailable notification, CancellationToken cancellationToken) => _cacheQueue.Enqueue(CacheGuildAsync(notification.Args.Guild, notification.Client.ShardId));
-        public async Task Handle(GuildDownloadCompleted notification, CancellationToken cancellationToken) => _currentShardsCompleted++;
-
-        public async Task StartAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
-        public async Task StopAsync(CancellationToken cancellationToken) { }
     }
 }

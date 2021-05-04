@@ -87,19 +87,14 @@ namespace Silk.Core.Discord
             ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
 
             // MediatR Dispatch //
+            // These could have multiple things working subbed to them. //
+            // Also, future groundwork for plugin-system. //
 
             ShardClient.GuildDownloadCompleted += async (cl, __) =>
                 cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e.Message!)); };
 
             ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
-            ShardClient.GuildAvailable += async (c, e) =>
-            {
-                var sw = Stopwatch.StartNew();
-                await Task.WhenAll(mediator.Publish(new GuildAvailable(c, e)), Task.Run(() =>
-                {
-                    while (true) _logger.LogTrace("Execution time: {ExTime}", sw.ElapsedMilliseconds);
-                }));
-            };
+            ShardClient.GuildAvailable += async (c, e) => { await mediator.Publish(new GuildAvailable(c, e)); };
             //ShardClient.GuildAvailable += services.Get<GuildAddedHandler>()!.OnGuildAvailable;
             //ShardClient.GuildAvailable += async (_, _) => await Task.Delay(980);
 
