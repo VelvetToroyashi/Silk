@@ -129,6 +129,8 @@ namespace Silk.Core.Logic
                 services.AddSingleton<IMessageSender, MessageSenderService>();
                 services.AddHostedService<Main>();
 
+
+
                 //Copped this hack from: https://stackoverflow.com/a/65552373 //
                 services.AddSingleton<ReminderService>();
                 services.AddHostedService(b => b.GetRequiredService<ReminderService>());
@@ -137,6 +139,9 @@ namespace Silk.Core.Logic
 
                 services.AddMediatR(typeof(Main));
                 services.AddMediatR(typeof(GuildContext));
+
+                services.AddSingleton<GuildEventHandlerService>();
+                services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
             });
         }
 

@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
 
@@ -30,7 +31,7 @@ namespace Silk.Core.Logic.Commands.Bot
                 .WithTitle("Shard info:");
             var sb = new StringBuilder();
 
-            var shards = Discord.Bot.Instance!.Client.ShardClients;
+            var shards = Main.ShardClient.ShardClients;
             var averagePing = shards.Sum(c => c.Value.Ping) / shards.Count;
 
             embed.AddField("​", $"**{EmbedTitle}**");
@@ -41,9 +42,9 @@ namespace Silk.Core.Logic.Commands.Bot
             sb.Append('|');
             sb.Append($"{averagePing / shards.Count}".Center("\t[Ping]\t"));
             sb.Append('|');
-            sb.Append($"{Discord.Bot.Instance!.Client.ShardClients.SelectMany(c => c.Value.Guilds.Keys).Count()}".Center("\t[Guilds]\t"));
+            sb.Append($"{shards.SelectMany(c => c.Value.Guilds).Count()}".Center("\t[Guilds]\t"));
             sb.Append('|');
-            sb.Append($" {Discord.Bot.Instance!.Client.ShardClients.Values.SelectMany(g => g.Guilds.Values).SelectMany(g => g.Members.Keys).Count()}".Center("\t[Members]\t"));
+            sb.Append($" {shards.Values.SelectMany(g => g.Guilds.Values).SelectMany(g => g.Members).Count()}".Center("\t[Members]\t"));
             sb.Append("|`");
 
             embed.AddField($"{Formatter.Bold("T o t a l:")}", sb.ToString());

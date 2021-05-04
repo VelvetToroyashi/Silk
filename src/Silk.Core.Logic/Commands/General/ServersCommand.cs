@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 
 namespace Silk.Core.Logic.Commands.General
@@ -18,7 +19,7 @@ namespace Silk.Core.Logic.Commands.General
         }
         private static int GetGuildCount()
         {
-            return Discord.Bot.Instance!.Client.ShardClients.Values.SelectMany(s => s.Guilds.Keys).Count();
+            return Main.ShardClient.ShardClients.Values.SelectMany(s => s.Guilds.Keys).Count();
         }
     }
 }

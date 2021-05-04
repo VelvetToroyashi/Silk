@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
 
@@ -20,7 +21,7 @@ namespace Silk.Core.Logic.Commands.Bot
             var app = await ctx.Client.GetCurrentApplicationAsync();
             var dsp = typeof(DiscordClient).Assembly.GetName().Version;
 
-            int guilds = Discord.Bot.Instance!.Client.ShardClients.Values.SelectMany(x => x.Guilds).Count();
+            int guilds = Main.ShardClient.ShardClients.Values.SelectMany(x => x.Guilds).Count();
 
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("About Silk!")

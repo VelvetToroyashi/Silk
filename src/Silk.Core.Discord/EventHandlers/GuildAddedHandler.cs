@@ -19,7 +19,7 @@ namespace Silk.Core.Discord.EventHandlers
 {
     //This relies on multiple events to update its state, so we can't implement INotificationHandler.
     // Correction. I'm stupid. You can implement multiple interfaces. Don't listen to the above comment. ~Velvet.//
-    public class GuildAddedHandler : INotificationHandler<GuildCreated>, INotificationHandler<GuildAvailable>, INotificationHandler<GuildDownloadCompleted>
+    public class GuildAddedHandler //: INotificationHandler<GuildCreated>, INotificationHandler<GuildAvailable>, INotificationHandler<GuildDownloadCompleted>
     {
         private class ShardState
         {
@@ -34,7 +34,9 @@ namespace Silk.Core.Discord.EventHandlers
         private readonly ILogger<GuildAddedHandler> _logger;
         private readonly IMediator _mediator;
         private readonly Dictionary<int, ShardState> _shardStates = new();
-
+        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
+                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
+        private int a = 0;
         private bool _logged;
 
         public GuildAddedHandler(ILogger<GuildAddedHandler> logger, IMediator mediator)
@@ -54,10 +56,12 @@ namespace Silk.Core.Discord.EventHandlers
         /// </summary>
         public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs eventArgs)
         {
-            //await _mediator.Send(new GetOrCreateGuildRequest(eventArgs.Guild.Id, Bot.DefaultCommandPrefix));
+            //await Task.Yield();
+            await Task.Delay(950);
+            //await _mediator.Send(new GetOrCreateGuildRequest(eventArgs.Guild.Id, Main.DefaultCommandPrefix));
             int cachedMembers = await CacheGuildMembers(eventArgs.Guild.Members.Values);
 
-            /*lock (_lock)
+            lock (_lock)
             {
                 Main.ChangeState(BotState.Caching);
                 ShardState state = _shardStates[client.ShardId];
@@ -83,7 +87,7 @@ namespace Silk.Core.Discord.EventHandlers
                             cachedMembers, eventArgs.Guild.Members.Count);
                     }
                 }
-            }*/
+            }
         }
 
         public async Task OnGuildDownloadComplete(DiscordClient c, GuildDownloadCompletedEventArgs e)
@@ -96,7 +100,7 @@ namespace Silk.Core.Discord.EventHandlers
             {
                 _logger.LogDebug("All shard(s) cache runs complete!");
                 _logged = true;
-                Bot.State = BotState.Ready;
+                Main.ChangeState(BotState.Ready);
             }
         }
 
@@ -115,15 +119,9 @@ namespace Silk.Core.Discord.EventHandlers
             var builder = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
-                .WithDescription("Thank you for adding me :) I'll keep it short, " +
-                                 "I'm a bot developed by several international programmers with the goal of making a better bot for the masses.\n\n" +
-                                 "I'm a Free & Open-Source Software (FOSS) bot, but programming takes time, and time is money. If you feel our efforts " +
-                                 "are worth being paid for, you can become a patron [here](https://patreon.com/VelvetThePanda), or if you just want to " +
-                                 "tip, you can donate to the [Ko-Fi](https://ko-fi.com/VelvetThePanda).\n\n" +
-                                 "If you're curious to see what makes me tick, the \nsource code is available on [GitHub](https://github.com/VelvetThePanda/Silk)~!\n" +
-                                 "Nonetheless, we hope you enjoy my features :)")
+                .WithDescription(OnGuildJoinThankYouMessage)
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
-                .WithFooter("Did I break? DM me ticket create [message] and I'll forward it to the owners <3");
+                .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
             await availableChannel.SendMessageAsync(builder);
         }
 
@@ -165,7 +163,7 @@ namespace Silk.Core.Discord.EventHandlers
             }
             return Math.Max(staffCount, 0);
         }
-        public Task Handle(GuildAvailable notification, CancellationToken cancellationToken) => OnGuildAvailable(notification.Client, notification.Args);
+        public async Task Handle(GuildAvailable notification, CancellationToken cancellationToken) => await OnGuildAvailable(notification.Client, notification.Args);
         public Task Handle(GuildDownloadCompleted notification, CancellationToken cancellationToken) => OnGuildDownloadComplete(notification.Client, notification.Args);
         public Task Handle(GuildCreated notification, CancellationToken cancellationToken) => Task.WhenAll(SendThankYouMessage(notification.Client, notification.Args), OnGuildAvailable(notification.Client, notification.Args));
     }

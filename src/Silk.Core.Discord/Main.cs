@@ -92,8 +92,17 @@ namespace Silk.Core.Discord
                 cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e.Message!)); };
 
             ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
-            //ShardClient.GuildAvailable += async (c, e) => { _ = mediator.Publish(new GuildAvailable(c, e)); };
-            ShardClient.GuildAvailable += services.Get<GuildAddedHandler>()!.OnGuildAvailable;
+            ShardClient.GuildAvailable += async (c, e) =>
+            {
+                var sw = Stopwatch.StartNew();
+                await Task.WhenAll(mediator.Publish(new GuildAvailable(c, e)), Task.Run(() =>
+                {
+                    while (true) _logger.LogTrace("Execution time: {ExTime}", sw.ElapsedMilliseconds);
+                }));
+            };
+            //ShardClient.GuildAvailable += services.Get<GuildAddedHandler>()!.OnGuildAvailable;
+            //ShardClient.GuildAvailable += async (_, _) => await Task.Delay(980);
+
             ShardClient.GuildDownloadCompleted += async (c, e) => { _ = mediator.Publish(new GuildDownloadCompleted(c, e)); };
 
             ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
@@ -119,7 +128,5 @@ namespace Silk.Core.Discord
 
             _logger.LogDebug("Registered {Commands} commands for {Shards} shards in {Time} ms", registeredCommands, ShardClient.ShardClients.Count, t.ElapsedMilliseconds);
         }
-
-
     }
 }
