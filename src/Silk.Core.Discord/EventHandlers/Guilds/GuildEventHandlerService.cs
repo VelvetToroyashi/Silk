@@ -21,7 +21,7 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 {
     public class GuildEventHandlerService : IHostedService
     {
-        public ConcurrentQueue<Task> CacheQueue { get; } = new();
+        public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
         private DateTime? _startTime;
 
@@ -32,20 +32,17 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
 
+        private readonly SemaphoreSlim _semaphore = new(1);
 
-        private readonly Dictionary<int, int> _guilds = new();
+        private Dictionary<int, int> _guilds;
 
-        private readonly int _shardCount; // How many shards to wait for. //
+        private int _shardCount; // How many shards to wait for. //
         private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
         public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger)
         {
             _mediator = mediator;
             _client = client;
             _logger = logger;
-
-            _shardCount = _client.ShardClients.Count;
-            _currentShardsCompleted = 0;
-
         }
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
@@ -57,16 +54,20 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
         internal void MarkCompleted(int shardId) => _currentShardsCompleted++;
 
+
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
             _startTime ??= DateTime.Now;
             Main.ChangeState(BotState.Caching);
-
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
+
             int members = await CacheMembersAsync(guild.Members.Values);
-            _guilds[shardId]++;
+            ++_guilds[shardId];
+
             LogMembers(members, guild.Members.Count, shardId);
             CheckForCompletion();
+
+            _semaphore.Release();
         }
 
         internal async Task JoinedGuild(GuildCreated guildNotification)
@@ -158,16 +159,24 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
         private async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var shardCount = _client.ShardClients.Count;
+            _shardCount = Main.ShardClient.ShardClients.Count;
+            _guilds = new(_shardCount);
 
-            while (stoppingToken.IsCancellationRequested)
+            for (var i = 0; i < _shardCount; i++)
+                _guilds.Add(i, 0);
+
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                while (!_cachedAllInitialGuilds || _currentShardsCompleted != shardCount)
+                while (!_cachedAllInitialGuilds && _currentShardsCompleted != _shardCount)
                     await Task.Delay(200, stoppingToken);
 
                 if (!CacheQueue.IsEmpty)
                     foreach (var t in CacheQueue)
-                        await t;
+                    {
+                        //await _semaphore.WaitAsync(stoppingToken);
+                        await t.Value;
+                    }
 
                 await Task.Delay(5000, stoppingToken);
             }
