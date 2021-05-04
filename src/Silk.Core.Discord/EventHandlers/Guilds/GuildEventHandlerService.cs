@@ -143,10 +143,13 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
                 if (user is not null)
                 {
                     if (!user.Flags.Has(flag))
+                    {
+                        staffCount++;
                         user.Flags.Add(flag);
+                    }
 
                     await _mediator.Send(new UpdateUserRequest(member.Guild.Id, member.Id, user.Flags));
-                    staffCount++;
+
                 }
                 else
                 {
