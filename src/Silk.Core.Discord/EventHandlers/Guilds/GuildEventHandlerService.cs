@@ -147,9 +147,7 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
                         staffCount++;
                         user.Flags.Add(flag);
                     }
-
                     await _mediator.Send(new UpdateUserRequest(member.Guild.Id, member.Id, user.Flags));
-
                 }
                 else
                 {
@@ -168,7 +166,6 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             for (var i = 0; i < _shardCount; i++)
                 _guilds.Add(i, 0);
 
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 while (!_cachedAllInitialGuilds && _currentShardsCompleted != _shardCount)
@@ -176,10 +173,7 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
                 if (!CacheQueue.IsEmpty)
                     foreach (var t in CacheQueue)
-                    {
-                        //await _semaphore.WaitAsync(stoppingToken);
                         await t.Value;
-                    }
 
                 await Task.Delay(5000, stoppingToken);
             }
