@@ -95,9 +95,6 @@ namespace Silk.Core.Discord
 
             ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
             ShardClient.GuildAvailable += async (c, e) => { await mediator.Publish(new GuildAvailable(c, e)); };
-            //ShardClient.GuildAvailable += services.Get<GuildAddedHandler>()!.OnGuildAvailable;
-            //ShardClient.GuildAvailable += async (_, _) => await Task.Delay(980);
-
             ShardClient.GuildDownloadCompleted += async (c, e) => { _ = mediator.Publish(new GuildDownloadCompleted(c, e)); };
 
             ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
@@ -108,7 +105,7 @@ namespace Silk.Core.Discord
             _logger.LogDebug("Registering commands");
 
             var t = Stopwatch.StartNew();
-            var asm = Assembly.GetExecutingAssembly();
+            var asm = Assembly.GetEntryAssembly();
             var cnext = await ShardClient.GetCommandsNextAsync();
 
             foreach (var cnextExt in cnext.Values)

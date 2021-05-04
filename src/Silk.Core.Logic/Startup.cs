@@ -112,7 +112,6 @@ namespace Silk.Core.Logic
                 services.AddTransient<GuildContext>();
                 services.AddSingleton<AntiInviteCore>();
                 services.AddTransient<RoleAddedHandler>();
-                services.AddTransient<GuildAddedHandler>();
                 services.AddTransient<MemberAddedHandler>();
                 services.AddTransient<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
