@@ -138,7 +138,7 @@ namespace Silk.Core.Logic
 
                 services.AddHostedService<StatusService>();
 
-                services.AddMediatR(typeof(Startup));
+                services.AddMediatR(typeof(Main));
                 services.AddMediatR(typeof(GuildContext));
 
                 services.AddSingleton<GuildEventHandlerService>();

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +46,6 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             _shardCount = _client.ShardClients.Count;
             _currentShardsCompleted = 0;
 
-            _logger.LogTrace("Caller: {Caller}", new StackTrace()!.GetFrame(4)!.GetMethod()!.Name);
         }
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
