@@ -17,7 +17,7 @@ namespace Silk.Shared.Types.Collections
     /// <typeparam name="TKey">The type to store as the key.</typeparam>
     /// <typeparam name="TValueFrom">The underlying type to store.</typeparam>
     /// <typeparam name="TValueTo">The type to cast elements to.</typeparam>
-    public sealed class LazyCastDictionary<TKey, TValueFrom, TValueTo> : IDictionary<TKey, TValueTo> where TKey : notnull
+    public sealed class LazyCastDictionary<TKey, TValueFrom, TValueTo> : IReadOnlyDictionary<TKey, TValueTo> where TKey : notnull
     {
         public bool IsReadOnly => true;
         public int Count => _underlyingDict.Count;
@@ -77,8 +77,8 @@ namespace Silk.Shared.Types.Collections
             return contains;
         }
 
-        public ICollection<TKey> Keys => _underlyingDict.Keys.ToArray();
+        public IEnumerable<TKey> Keys => _underlyingDict.Keys;
 
-        public ICollection<TValueTo> Values => _underlyingDict.Values.Select(v => _castFunc(v!)).ToArray();
+        public IEnumerable<TValueTo> Values => _underlyingDict.Values.Select(v => _castFunc(v!));
     }
 }
