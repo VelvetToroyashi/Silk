@@ -47,9 +47,9 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             _main = main;
         }
 
-        private const string OnGuildJoinThankYouMessage =
-            @"Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n 
-        Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
+        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n " +
+                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
+
 
 
         public async Task StartAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken); // This will stop itself. IHostedService blocks other services while its starting. //
