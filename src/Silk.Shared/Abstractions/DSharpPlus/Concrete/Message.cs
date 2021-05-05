@@ -12,28 +12,28 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
 {
     public class Message : IMessage
     {
-        public ulong Id { get; }
+        public ulong Id => _message.Id;
 
-        public ulong? GuildId { get; }
+        public ulong? GuildId => _message.Channel.GuildId;
 
-        public ulong ChannelId { get; }
+        public ulong ChannelId => _message.Id;
 
-        public IChannel Channel { get; }
-        public IGuild? Guild { get; }
+        public IChannel Channel => (Channel) _message.Channel;
+        public IGuild? Guild => (Guild) _message.Channel.Guild!;
 
-        public IUser Author { get; }
+        public IUser Author => (User) _message.Author;
 
         public string Content => _message.Content;
 
-        public DateTimeOffset CreationTimestamp { get; }
+        public DateTimeOffset CreationTimestamp => _message.Timestamp;
 
         //public IEmbed Embed { get; }
 
-        public IMessage? Reply { get; }
+        public IMessage? Reply => (Message?) _message.ReferencedMessage;
 
-        public IReadOnlyCollection<IEmoji> Reactions => ReactionUpdated() ? GetReactions() : _reactions;
+        public IReadOnlyCollection<IEmoji> Reactions => _message.Reactions.Select(r => (Emoji) r.Emoji).ToList();
 
-        public IReadOnlyCollection<IUser> MentionedUsers => UsersUpdated() ? GetUsers() : _mentionedUsers;
+        public IReadOnlyCollection<IUser> MentionedUsers => _message.MentionedUsers.Select(u => (User) u).ToList();
 
         private bool _deleted;
         private readonly DiscordMessage _message;
@@ -41,21 +41,7 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
         private IReadOnlyList<IUser> _mentionedUsers = new List<IUser>().AsReadOnly();
 
 
-        private Message(DiscordMessage message)
-        {
-            _message = message;
-
-            Id = message.Id;
-            GuildId = message.Channel.GuildId;
-            ChannelId = message.ChannelId;
-
-            Channel = (Channel) _message.Channel;
-            Guild = (Guild?) _message.Channel.Guild;
-
-            Author = (User) message.Author;
-            CreationTimestamp = message.CreationTimestamp;
-            Reply = (Message) message.ReferencedMessage!;
-        }
+        private Message(DiscordMessage message) => _message = message;
 
         public async Task CreateReactionAsync(ulong emojiId)
         {

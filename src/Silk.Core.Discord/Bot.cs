@@ -24,7 +24,6 @@ using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
-using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 
 namespace Silk.Core.Discord
 {
@@ -140,7 +139,6 @@ namespace Silk.Core.Discord
         //TODO: Change this to use MediatR & INotification<T>/INotificationHandler<T>
         private void SubscribeToEvents()
         {
-            Client.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e.Message!)); };
             Client.MessageUpdated += async (c, e) => { _ = _mediator.Publish(new MessageEdited(c, e)); };
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites;
 
@@ -153,13 +151,11 @@ namespace Silk.Core.Discord
             Client.GuildDownloadCompleted += _services.Get<GuildAddedHandler>()!.OnGuildDownloadComplete;
             Client.GuildMemberUpdated += _services.Get<RoleAddedHandler>()!.CheckStaffRole;
 
-            Client.GuildDownloadCompleted += async (_, _) =>
+            Client.GuildDownloadCompleted += async (cl, __) =>
             {
-                foreach (var g in Client.ShardClients.Values.SelectMany(c => c.Guilds.Values))
-                    _ = (Guild) g!;
+                cl.MessageCreated += async (c, e) => { _ = _mediator.Publish(new MessageCreated(c, e.Message!)); };
             };
         }
-
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {

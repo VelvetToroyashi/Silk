@@ -8,16 +8,17 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     public class Channel : IChannel
     {
         public ulong Id => _channel.Id;
+
         public bool IsPrivate => _channel is DiscordDmChannel;
 
-        public IGuild? Guild => (Guild?) _channel.Guild; // This gets cached, don't worry. //
+        public IGuild? Guild => (Guild?) _channel.Guild;
 
         private readonly DiscordChannel _channel;
 
         private Channel(DiscordChannel channel) => _channel = channel;
 
-        public async Task<IMessage?> GetMessageAsync(ulong id) => (Message?) await _channel.GetMessageAsync(id);
-
         public static implicit operator Channel(DiscordChannel channel) => new(channel);
+
+        public async Task<IMessage?> GetMessageAsync(ulong id) => (Message?) await _channel.GetMessageAsync(id);
     }
 }
