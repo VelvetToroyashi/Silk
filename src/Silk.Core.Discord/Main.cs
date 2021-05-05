@@ -52,7 +52,7 @@ namespace Silk.Core.Discord
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting service");
-            await InitializeClientAsync();
+            await InitializeClientExtensions();
             await InitializeCommandsNextAsync();
             _logger.LogDebug("Connecting to Discord gateway");
             await ShardClient.StartAsync();
@@ -66,7 +66,7 @@ namespace Silk.Core.Discord
             _logger.LogInformation("Disconnected from Discord gateway");
         }
 
-        private async Task InitializeClientAsync()
+        private async Task InitializeClientExtensions()
         {
             _logger.LogDebug("Initializing client");
 
