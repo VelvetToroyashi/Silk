@@ -24,9 +24,9 @@ namespace Silk.Core.Discord
 {
     public class Main : IHostedService
     {
-        public static BotState State { get; private set; } = BotState.Starting;
+        public BotState State { get; private set; } = BotState.Starting;
         //public static DiscordSlashClient SlashClient { get; } // Soon™ //
-        public static DiscordShardedClient ShardClient { get; private set; }
+        public DiscordShardedClient ShardClient { get; private set; }
         public static string DefaultCommandPrefix { get; } = "s!";
 
         private static ILogger<Main> _logger;
@@ -40,7 +40,7 @@ namespace Silk.Core.Discord
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void ChangeState(BotState state)
+        public void ChangeState(BotState state)
         {
             if (State != state)
             {

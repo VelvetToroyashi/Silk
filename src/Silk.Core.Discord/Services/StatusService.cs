@@ -13,7 +13,7 @@ namespace Silk.Core.Discord.Services
 {
     public class StatusService : BackgroundService
     {
-
+        private readonly Main _main;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<StatusService> _logger;
         private readonly LoopedList<string> _statuses = new()
@@ -27,13 +27,13 @@ namespace Silk.Core.Discord.Services
             "ko-fi.com/VelvetThePanda",
             "for donations! (ko-fi/patreon: VelvetThePanda)"
         };
-        private bool _ready => Main.State is BotState.Ready or BotState.Caching;
+        private bool _ready => _main.State is BotState.Ready or BotState.Caching;
 
-
-        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
+        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger, Main main)
         {
             _client = client;
             _logger = logger;
+            _main = main;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

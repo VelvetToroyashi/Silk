@@ -18,6 +18,9 @@ namespace Silk.Core.Logic.Commands.Bot
     {
         private const string EmbedTitle = "`|\t[Shard]\t|\t[Ping]\t|\t[Guilds]\t|\t[Members]\t|`";
 
+        private readonly Main _main;
+        public ShardsCommand(Main main) => _main = main;
+
         [Command]
         public async Task Shards(CommandContext ctx)
         {
@@ -31,7 +34,7 @@ namespace Silk.Core.Logic.Commands.Bot
                 .WithTitle("Shard info:");
             var sb = new StringBuilder();
 
-            var shards = Main.ShardClient.ShardClients;
+            var shards = _main.ShardClient.ShardClients;
             var averagePing = shards.Sum(c => c.Value.Ping) / shards.Count;
 
             embed.AddField("​", $"**{EmbedTitle}**");
