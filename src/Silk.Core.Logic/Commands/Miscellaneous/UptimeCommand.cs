@@ -16,8 +16,7 @@ namespace Silk.Core.Logic.Commands.Miscellaneous
         [Description("See how long Silk has been running!")]
         public async Task UpTime(CommandContext ctx)
         {
-            DateTime now = DateTime.Now;
-            TimeSpan uptime = now.Subtract(Startup.StartupTime);
+            TimeSpan uptime = DateTime.Now.Subtract(Startup.StartupTime);
             await ctx.RespondAsync($"Running for `{uptime.Humanize(4, null, TimeUnit.Month, TimeUnit.Second)}.`");
         }
     }
