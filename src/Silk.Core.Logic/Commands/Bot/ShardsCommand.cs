@@ -45,9 +45,9 @@ namespace Silk.Core.Logic.Commands.Bot
             sb.Append('|');
             sb.Append($"{averagePing / shards.Count}".Center("\t[Ping]\t"));
             sb.Append('|');
-            sb.Append($"{shards.SelectMany(c => c.Value.Guilds).Count()}".Center("\t[Guilds]\t"));
+            sb.Append($"{shards.Sum(c => c.Value.Guilds.Count)}".Center("\t[Guilds]\t"));
             sb.Append('|');
-            sb.Append($" {shards.Values.SelectMany(g => g.Guilds.Values).SelectMany(g => g.Members).Count()}".Center("\t[Members]\t"));
+            sb.Append($" {shards.Values.SelectMany(g => g.Guilds.Values).Sum(g => g.Members.Count)}".Center("\t[Members]\t"));
             sb.Append("|`");
 
             embed.AddField($"{Formatter.Bold("T o t a l:")}", sb.ToString());
