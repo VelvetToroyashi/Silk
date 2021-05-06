@@ -23,14 +23,12 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
     {
         public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
-        private DateTime? _startTime;
-
         private bool _logged;
+        private DateTime? _startTime;
         private bool _cachedAllInitialGuilds;
 
 
-
-        private readonly Main _main;
+        private readonly Main _bot;
         private readonly IMediator _mediator;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
@@ -39,17 +37,16 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
         private int _shardCount; // How many shards to wait for. //
         private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
-        public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger, Main main)
+        public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger, Main bot)
         {
             _mediator = mediator;
             _client = client;
             _logger = logger;
-            _main = main;
+            _bot = bot;
         }
 
-        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n " +
+        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                           "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
-
 
 
         public async Task StartAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken); // This will stop itself. IHostedService blocks other services while its starting. //
@@ -61,7 +58,7 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
             _startTime ??= DateTime.Now;
-            _main.ChangeState(BotState.Caching);
+            _bot.ChangeState(BotState.Caching);
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
 
             int members = await CacheMembersAsync(guild.Members.Values);
@@ -98,16 +95,16 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             string message;
             if (members is 0)
             {
-                message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [No new staff!]";
+                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
                 _logger.LogDebug(message, shardId + 1,
-                    _main.ShardClient.ShardClients.Count,
+                    _bot.ShardClient.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count);
             }
             else
             {
-                message = "Cached Guild! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
+                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
                 _logger.LogDebug(message, shardId + 1,
-                    _main.ShardClient.ShardClients.Count,
+                    _bot.ShardClient.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
                     members, totalMembers);
             }
@@ -118,16 +115,18 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             var totalShards = _client.ShardClients.Count;
             var completedShards = new bool[totalShards];
 
-            for (var i = 0; i > totalShards; i++)
+            for (var i = 0; i < totalShards; i++)
                 completedShards[i] = _guilds[i] == _client.ShardClients[i].Guilds.Count;
 
             _cachedAllInitialGuilds = completedShards.All(b => b);
 
             if (_cachedAllInitialGuilds && !_logged)
             {
-                _logger.LogInformation("Finished caching {Guilds} guilds for {Shards} shards in {Time} ms!",
-                    _client.ShardClients.Values.SelectMany(s => s.Guilds).Count(), _client.ShardClients.Count, (DateTime.Now - _startTime).Value.TotalMilliseconds);
+                _logger.LogInformation("Finished caching {Guilds} guilds for {Shards} shards in {Time:N1} ms!",
+                    _client.ShardClients.Values.SelectMany(s => s.Guilds).Count(),
+                    _client.ShardClients.Count, (DateTime.Now - _startTime).Value.TotalMilliseconds);
                 _logged = true;
+                _bot.ChangeState(BotState.Ready);
             }
         }
 
@@ -161,7 +160,7 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
         private async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _shardCount = _main.ShardClient.ShardClients.Count;
+            _shardCount = _bot.ShardClient.ShardClients.Count;
             _guilds = new(_shardCount);
 
             for (var i = 0; i < _shardCount; i++)
