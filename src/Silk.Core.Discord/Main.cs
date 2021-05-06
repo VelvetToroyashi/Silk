@@ -26,7 +26,7 @@ namespace Silk.Core.Discord
     {
         public BotState State { get; private set; } = BotState.Starting;
         //public static DiscordSlashClient SlashClient { get; } // Soon™ //
-        public DiscordShardedClient ShardClient { get; private set; }
+        public DiscordShardedClient ShardClient { get; }
         public static string DefaultCommandPrefix { get; } = "s!";
 
         private static ILogger<Main> _logger;
