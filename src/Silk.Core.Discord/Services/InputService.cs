@@ -5,11 +5,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Silk.Core.Discord.Constants;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.Bot;
 using Silk.Shared.Abstractions.DSharpPlus.Concrete;
 using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Services
 {
@@ -61,7 +61,7 @@ namespace Silk.Core.Discord.Services
             var result = await interactivity.WaitForReactionAsync(r => r.Emoji == yes || r.Emoji == no && r.User.Id == userId);
 
             if (result.TimedOut) return null;
-            else return result.Result.Emoji == yes;
+            return result.Result.Emoji == yes;
         }
 
         private InteractivityExtension GetInteractivityInternal(ulong? guildId)

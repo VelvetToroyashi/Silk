@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Silk.Core.Discord.EventHandlers.Notifications
 {
-    public record GuildCreated(GuildCreateEventArgs Args, DiscordClient Client) : INotification;
+    public record GuildCreated(DiscordClient Client, GuildCreateEventArgs Args) : INotification;
 }

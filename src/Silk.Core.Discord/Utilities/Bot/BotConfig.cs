@@ -6,7 +6,7 @@ namespace Silk.Core.Discord.Utilities.Bot
     public record BotConfig
     {
 
-        internal BotConfig(IConfiguration c)
+        public BotConfig(IConfiguration c)
         {
             string? e6k = c.GetSection("API_Keys")["e621:key"];
             string? e6u = c.GetSection("API_Keys")["e621:user"];

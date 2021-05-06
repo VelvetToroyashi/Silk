@@ -1,0 +1,85 @@
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using MediatR;
+using Silk.Core.Data.MediatR.GlobalUsers;
+using Silk.Core.Data.Models;
+using Silk.Core.Discord.Utilities.HelpFormatter;
+
+namespace Silk.Core.Logic.Commands.Economy
+{
+    [Category(Categories.Economy)]
+    public class FlipCommand : BaseCommandModule
+    {
+        private readonly string[] _losingMessages =
+        {
+            "Yikes!",
+            "Better luck next time!",
+            "RNG is not your friend, now is it?",
+            "Alas, the cost of gambling.",
+            "Hope that wasn't all your earnings"
+        };
+
+        private readonly IMediator _mediator;
+        private readonly string[] _winningMessages =
+        {
+            "Capitalism shines upon you.",
+            "RNG is having a good day, or would it be a bad day?",
+            "You defeated all odds, but how far does that luck stretch?",
+            "Double the money, but half the luck~ Just kidding ;p"
+        };
+        public FlipCommand(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [Command]
+        [Cooldown(10, 86400, CooldownBucketType.User)]
+        [Description("Flip a metaphorical coin, and double your profits, or lose everything~")]
+        public async Task FlipAsync(CommandContext ctx, uint amount)
+        {
+            DiscordMessageBuilder builder = new();
+            DiscordEmbedBuilder embedBuilder = new();
+            builder.WithReply(ctx.Message.Id);
+
+            GlobalUser user = await _mediator.Send(new GetOrCreateGlobalUserRequest(ctx.User.Id));
+
+            if (amount > user.Cash)
+            {
+                builder.WithContent("Ah ah ah... You can't gamble more than what you've got in your pockets!");
+                await ctx.RespondAsync(builder);
+                return;
+            }
+
+            Random ran = new((int) ctx.Message.Id);
+            bool won;
+
+            int nextRan = ran.Next(1000);
+
+            won = nextRan % 20 > 9;
+
+            if (won)
+            {
+                embedBuilder.WithColor(DiscordColor.SapGreen)
+                    .WithTitle(_winningMessages[ran.Next(_winningMessages.Length)])
+                    .WithDescription($"Congragulations! Bet: ${amount}, winnings ${amount * 2}");
+                builder.WithEmbed(embedBuilder);
+                user.Cash += (int) amount;
+
+            }
+            else
+            {
+                embedBuilder.WithColor(DiscordColor.DarkRed)
+                    .WithTitle(_losingMessages[ran.Next(_losingMessages.Length)])
+                    .WithDescription("Darn. Seems like you've lost your bet!");
+                builder.WithEmbed(embedBuilder);
+                user.Cash -= (int) amount;
+            }
+
+            await ctx.RespondAsync(builder);
+            await _mediator.Send(new UpdateGlobalUserRequest(user.Id) {Cash = user.Cash});
+        }
+    }
+}

@@ -13,7 +13,7 @@ namespace Silk.Core.Discord.Services
 {
     public class StatusService : BackgroundService
     {
-
+        private readonly Main _main;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<StatusService> _logger;
         private readonly LoopedList<string> _statuses = new()
@@ -27,23 +27,17 @@ namespace Silk.Core.Discord.Services
             "ko-fi.com/VelvetThePanda",
             "for donations! (ko-fi/patreon: VelvetThePanda)"
         };
-        private bool _ready => Bot.State is BotState.Ready;
+        private bool _ready => _main.State is BotState.Ready or BotState.Caching;
 
-
-        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
+        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger, Main main)
         {
             _client = client;
             _logger = logger;
+            _main = main;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (!_ready) // This should be started after the state is ready, but you never know. //
-            {
-                _logger.LogWarning("Waiting for client to connect to gateway");
-                while (!_ready) { await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); }
-            }
-
             _logger.LogInformation("Started!");
 
             try

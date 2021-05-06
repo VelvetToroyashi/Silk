@@ -14,7 +14,7 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
 
         public async Task<Unit> Handle(AddReactionRoleRequest request, CancellationToken cancellationToken)
         {
-            var role = new ReactionRole() {Id = request.RoleId, EmojiId = request.ReactionId, MessageId = request.MessageId, GuildConfigId = request.GuildConfigId};
+            var role = new ReactionRole {Id = request.RoleId, EmojiId = request.ReactionId, MessageId = request.MessageId, GuildConfigId = request.GuildConfigId};
             _db.Add(role);
             await _db.SaveChangesAsync(cancellationToken);
             return new();

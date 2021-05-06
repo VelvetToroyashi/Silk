@@ -20,9 +20,11 @@ namespace Silk.Core.Data.MediatR.Guilds
     {
         private readonly GuildContext _db;
 
+
         public GetOrCreateGuildHandler(GuildContext db)
         {
             _db = db;
+
         }
 
         public async Task<Guild> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)

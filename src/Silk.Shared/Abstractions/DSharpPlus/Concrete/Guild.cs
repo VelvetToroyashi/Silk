@@ -9,8 +9,8 @@ namespace Silk.Shared.Abstractions.DSharpPlus.Concrete
     public class Guild : IGuild
     {
         public ulong Id => _guild.Id;
-        public IDictionary<ulong, IUser> Users { get; }
-        public IDictionary<ulong, IChannel> Channels { get; }
+        public IReadOnlyDictionary<ulong, IUser> Users { get; }
+        public IReadOnlyDictionary<ulong, IChannel> Channels { get; }
         public IReadOnlyList<IEmoji> Emojis { get; }
         public IReadOnlyList<ulong> Roles { get; }
 

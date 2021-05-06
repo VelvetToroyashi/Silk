@@ -6,12 +6,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Folder Include="Types\Attributes"/>
         <Folder Include="Types\DTO"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.0.0"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0"/>
+        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00857"/>
+        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00857"/>
     </ItemGroup>
 
     <ItemGroup>
