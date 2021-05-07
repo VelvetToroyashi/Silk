@@ -91,7 +91,7 @@ namespace Silk.Core.Discord
             // Also, future groundwork for plugin-system. //
 
             ShardClient.GuildDownloadCompleted += async (cl, __) =>
-                cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e.Message!)); };
+                cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e)); };
 
             ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
             ShardClient.GuildAvailable += async (c, e) => { await mediator.Publish(new GuildAvailable(c, e)); };

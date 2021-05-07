@@ -7,8 +7,6 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities.Bot;
-using Silk.Shared.Abstractions.DSharpPlus.Concrete;
-using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Services
@@ -30,33 +28,33 @@ namespace Silk.Core.Discord.Services
             return await WaitForInputAsync(interactivity, userId, channelId, guildId, timeOut);
         }
 
-        public async Task<IMessage?> GetInputAsync(ulong userId, ulong channelId, ulong? guildId, TimeSpan? timeOut = null)
+        public async Task<DiscordMessage?> GetInputAsync(ulong userId, ulong channelId, ulong? guildId, TimeSpan? timeOut = null)
         {
             var interactivity = GetInteractivityInternal(guildId);
-            return (Message) (await interactivity.WaitForMessageAsync(m => m.Author.Id == userId && m.Channel.Id == channelId)).Result!;
+            return (await interactivity.WaitForMessageAsync(m => m.Author.Id == userId && m.Channel.Id == channelId)).Result!;
         }
 
-        public async Task<IReaction?> GetReactionInputAsync(ulong userId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
+        public async Task<DiscordReaction?> GetReactionInputAsync(ulong userId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null)
         {
             var interactivity = GetInteractivityInternal(guildId);
-            return (Reaction) (await interactivity.WaitForReactionAsync(r => r.Message.Id == messageId && r.User.Id == userId)).Result;
+            return (await interactivity.WaitForReactionAsync(r => r.Message.Id == messageId && r.User.Id == userId)).Result.Message.Reactions.Last();
         }
 
-        public async Task<IChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)
+        public async Task<DiscordChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public async Task<bool?> GetConfirmationAsync(IMessage message, ulong userId, TimeSpan? timeOut = null)
+        public async Task<bool?> GetConfirmationAsync(DiscordMessage message, ulong userId, TimeSpan? timeOut = null)
         {
-            var interactivity = GetInteractivityInternal(message.GuildId ?? 0);
+            var interactivity = GetInteractivityInternal(message.Channel.GuildId ?? 0);
             var client = interactivity.Client;
             var yes = DiscordEmoji.FromGuildEmote(client, Emojis.ConfirmId);
             var no = DiscordEmoji.FromGuildEmote(client, Emojis.DeclineId);
 
-            await message.CreateReactionAsync(Emojis.ConfirmId);
-            await message.CreateReactionAsync(Emojis.DeclineId);
+            await message.CreateReactionAsync(yes);
+            await message.CreateReactionAsync(no);
 
             var result = await interactivity.WaitForReactionAsync(r => r.Emoji == yes || r.Emoji == no && r.User.Id == userId);
 

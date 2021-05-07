@@ -22,7 +22,6 @@ using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
-using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic
@@ -107,9 +106,7 @@ namespace Silk.Core.Logic
                 services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
                 services.AddSingleton(_ => new BotConfig(context.Configuration));
 
-
                 services.AddTransient<ConfigService>();
-                services.AddTransient<GuildContext>();
                 services.AddSingleton<AntiInviteCore>();
                 services.AddTransient<RoleAddedHandler>();
                 services.AddTransient<MemberAddedHandler>();
@@ -126,12 +123,13 @@ namespace Silk.Core.Logic
 
                 services.AddSingleton<TagService>();
 
-                services.AddSingleton<IMessageSender, MessageSenderService>();
+                //services.AddSingleton<IMessageSender, MessageSenderService>();
 
                 services.AddSingleton<Main>();
                 services.AddHostedService(s => s.GetRequiredService<Main>());
 
                 //Copped this hack from: https://stackoverflow.com/a/65552373 //
+                // Trace. I don't care what it is. Please shut up about it.  //
                 services.AddSingleton<ReminderService>();
                 services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 

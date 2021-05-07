@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using MediatR;
 using Serilog;
 using Silk.Core.Data.MediatR.CommandInvocations;
@@ -9,8 +10,6 @@ using Silk.Core.Data.Models;
 using Silk.Core.Discord.EventHandlers.Notifications;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;
-using Silk.Shared.Abstractions.DSharpPlus.Concrete;
-using User = Silk.Shared.Abstractions.DSharpPlus.Concrete.User;
 
 namespace Silk.Core.Discord.EventHandlers.MessageAdded
 {
@@ -30,29 +29,27 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
         {
 
-            bool isBot = notification.Message.Author.IsBot;
-            bool isEmpty = string.IsNullOrEmpty(notification.Message.Content);
-            User bot = notification.Client.CurrentUser;
+            bool isBot = notification.Event.Author.IsBot;
+            bool isEmpty = string.IsNullOrEmpty(notification.Event.Message.Content);
+            DiscordUser bot = notification.Client.CurrentUser;
             if (isBot || isEmpty) return;
 
             var commandsNext = notification.Client.GetCommandsNext();
-
-            string prefix = _prefixService.RetrievePrefix(notification.Message.GuildId);
-
+            string prefix = _prefixService.RetrievePrefix(notification.Event.Guild.Id);
 
             int prefixLength =
-                notification.Message.Channel.IsPrivate ? 0 :
-                    notification.Message.MentionedUsers.Contains(bot) ?
-                        GetStringMentionLength(notification.Message, bot) :
-                        GetStringPrefixLength(notification.Message, prefix);
+                notification.Event.Channel.IsPrivate ? 0 :
+                    notification.Event.MentionedUsers.Contains(bot) ?
+                        notification.Event.Message.GetMentionPrefixLength(bot) :
+                        notification.Event.Message.GetStringPrefixLength(prefix);
 
             if (prefixLength is -1) return;
 
-            string commandString = notification.Message.Content[prefixLength..];
+            string commandString = notification.Event.Message.Content[prefixLength..];
 
-            if (notification.Message.Guild is not null)
+            if (notification.Event.Guild is not null)
             {
-                GuildConfig config = await _cache.GetConfigAsync(notification.Message.Guild.Id);
+                GuildConfig config = await _cache.GetConfigAsync(notification.Event.Guild.Id);
                 if (config.DisabledCommands.Any(c => commandString.Contains(c.CommandName)))
                 {
                     return;
@@ -67,14 +64,11 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
                 return;
             }
 
-            var context = commandsNext.CreateContext(notification.Message, prefix, command, arguments);
+            var context = commandsNext.CreateContext(notification.Event.Message, prefix, command, arguments);
 
-            await _mediator.Send(new AddCommandInvocationRequest(notification.Message.Author.Id, notification.Message.Guild?.Id, command!.QualifiedName), CancellationToken.None);
+            await _mediator.Send(new AddCommandInvocationRequest(notification.Event.Author.Id, notification.Event.Guild?.Id, command!.QualifiedName), CancellationToken.None);
 
             _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context), CancellationToken.None);
         }
-        private int GetStringPrefixLength(Message message, string prefix) => message.Content.StartsWith(prefix) ? prefix.Length : -1;
-        private int GetStringMentionLength(Message message, User user) => message.Content.StartsWith(user.Mention) ? user.Mention.Length : -1;
     }
-
 }

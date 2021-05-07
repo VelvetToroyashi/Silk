@@ -22,12 +22,12 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod
 
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
         {
-            if (notification.Message.Channel.IsPrivate) return;
-            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(notification.Message.Guild!.Id), cancellationToken);
-            bool hasInvite = await AntiInviteCore.CheckForInviteAsync(notification.Client, notification.Message, config);
+            if (notification.Event.Channel.IsPrivate) return;
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(notification.Event.Guild!.Id), cancellationToken);
+            bool hasInvite = await AntiInviteCore.CheckForInviteAsync(notification.Client, notification.Event.Message, config);
 
             if (hasInvite)
-                await AntiInviteCore.TryAddInviteInfractionAsync(config, notification.Message, _infractionService);
+                await AntiInviteCore.TryAddInviteInfractionAsync(config, notification.Event.Message, _infractionService);
         }
     }
 }

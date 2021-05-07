@@ -20,9 +20,6 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             _mediator = mediator;
         }
 
-
-
-
         [Command]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]

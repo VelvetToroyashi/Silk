@@ -11,7 +11,6 @@ using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.HelpFormatter;
 using Silk.Extensions;
-using Silk.Shared.Abstractions.DSharpPlus.Interfaces;
 
 namespace Silk.Core.Logic.Commands.Moderation
 {
@@ -20,13 +19,12 @@ namespace Silk.Core.Logic.Commands.Moderation
     {
         private readonly ConfigService _configService;
         private readonly IInfractionService _infractionService;
-        private readonly IMessageSender _sender;
 
-        public MuteCommand(ConfigService configService, IInfractionService infractionService, IMessageSender sender)
+
+        public MuteCommand(ConfigService configService, IInfractionService infractionService)
         {
             _configService = configService;
             _infractionService = infractionService;
-            _sender = sender;
         }
 
         [Command("mute")]
@@ -47,7 +45,7 @@ namespace Silk.Core.Logic.Commands.Moderation
                     $"I can't do that! They're {roleDiff} role(s) above me!" :
                     "We have the same top role! I can't add roles to this person.";
 
-                await _sender.SendAsync(ctx.Channel.Id, message);
+                await ctx.RespondAsync(message);
                 return;
             }
 
@@ -60,13 +58,13 @@ namespace Silk.Core.Logic.Commands.Moderation
                     $"I can't do that! They're {roleDiff} role(s) above you!" :
                     "You two see eye to eye! c: I can't mute someone with the same role as you.";
 
-                await _sender.SendAsync(ctx.Channel.Id, message);
+                await ctx.RespondAsync(message);
                 return;
             }
 
             if (config.MuteRoleId is 0)
             {
-                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel.Id, _sender);
+                await ctx.RespondAsync("Mute role isn't configured for this server!"); // TODO: Generate mute role on-demand. 
                 return;
             }
 
@@ -91,7 +89,7 @@ namespace Silk.Core.Logic.Commands.Moderation
                     $"I can't do that! They're {roleDiff} role(s) above me!" :
                     "We have the same top role! I can't add roles to this person.";
 
-                await _sender.SendAsync(ctx.Channel.Id, message);
+                await ctx.RespondAsync(message);
                 return;
             }
 
@@ -104,7 +102,7 @@ namespace Silk.Core.Logic.Commands.Moderation
                     $"I can't do that! They're {roleDiff} role(s) above you!" :
                     "You two see eye to eye! c: I can't mute someone with the same role as you.";
 
-                await _sender.SendAsync(ctx.Channel.Id, message);
+                await ctx.RespondAsync(message);
                 return;
             }
 
@@ -112,7 +110,7 @@ namespace Silk.Core.Logic.Commands.Moderation
 
             if (config.MuteRoleId is 0)
             {
-                await ThrowHelper.MisconfiguredMuteRole(ctx.Channel.Id, _sender);
+                await ctx.RespondAsync("Mute role isn't configured on this server!"); // TODO: Generate mute role on-demand. 
                 return;
             }
 
