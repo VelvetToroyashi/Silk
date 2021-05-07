@@ -22,4 +22,8 @@
         <ProjectReference Include="..\Silk.Core.Discord\Silk.Core.Discord.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="Commands\Experimental"/>
+    </ItemGroup>
+
 </Project>
