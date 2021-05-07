@@ -108,8 +108,4 @@
         <Compile Remove="logs\**"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Commands\Experimental"/>
-    </ItemGroup>
-
 </Project>
