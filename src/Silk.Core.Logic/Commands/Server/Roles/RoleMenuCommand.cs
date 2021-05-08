@@ -90,19 +90,19 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                     }
                     else
                     {
-                        var titleAsync = await ValidateMessageAsync(input, initMessage, result);
+                        var titleAsync = await ValidateMessageAsync(input, initMessage, result.Result);
                         if (titleAsync != null) return titleAsync;
                     }
                 }
             }
         }
 
-        private async Task<Result<string>?> ValidateMessageAsync(InteractivityExtension input, DiscordMessage initMessage, InteractivityResult<DiscordMessage> result)
+        private async Task<Result<string>?> ValidateMessageAsync(InteractivityExtension input, DiscordMessage initMessage, DiscordMessage result)
         {
             await initMessage.ModifyAsync("Are you sure?");
             DiscordEmoji[] yesno = await initMessage.CreateReactionsAsync(Emojis.ConfirmId, Emojis.DeclineId);
 
-            var yesnoResult = await input.WaitForReactionAsync(r => r.Emoji == yesno.First() || r.Emoji == yesno.Last());
+            var yesnoResult = await input.WaitForReactionAsync(r => r.Emoji == yesno.First() || r.Emoji == yesno.Last() && r.User == result.Author);
 
             if (yesnoResult.TimedOut)
             {
@@ -115,7 +115,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             }
             else
             {
-                return new(true, result.Result.Content);
+                return new(true, result.Content);
             }
             return null;
         }
