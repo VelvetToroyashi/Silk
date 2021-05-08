@@ -23,6 +23,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
         {
             public static implicit operator T?(Result<T> result) => result.Value;
             public static implicit operator bool(Result<T> result) => result.Succeeded;
+            public static implicit operator Optional<T?>(Result<T> result) => result.Value;
         }
 
 
@@ -67,13 +68,13 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 await ctx.RespondAsync("Sorry, but you took too long to respond!");
                 return;
             }
+            await roleMenu.ModifyAsync(title);
 
         }
 
         private async Task<Result<string>> GetTitleAsync(CommandContext ctx, InteractivityExtension input)
         {
             var initMessage = await ctx.RespondAsync(InitialGetTitleMessage);
-            string? inputMessage = null;
 
             while (true)
             {
@@ -94,7 +95,10 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                         Result<string>? title = await ValidateMessageAsync(input, initMessage, result.Result);
 
                         if (title is not null)
+                        {
+                            await initMessage.DeleteAllReactionsAsync();
                             return title;
+                        }
                     }
                 }
             }
