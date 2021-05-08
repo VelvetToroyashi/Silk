@@ -73,7 +73,6 @@ namespace Silk.Core.Logic.Commands.Server.Roles
         private async Task<Result<string>> GetTitleAsync(CommandContext ctx, InteractivityExtension input)
         {
             var initMessage = await ctx.RespondAsync(InitialGetTitleMessage);
-            var maxLength = 50;
             string? inputMessage = null;
 
             while (true)
@@ -82,16 +81,20 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 if (result.TimedOut) return new(false);
                 else
                 {
-                    await result.Result.DeleteAsync();
-                    if (result.Result.Content.Length > maxLength)
+
+                    if (result.Result.Content.Length > 50)
                     {
-                        await initMessage.ModifyAsync($"Sorry, but that exceeds the {maxLength} character limit!");
+                        await result.Result.DeleteAsync();
+                        await initMessage.ModifyAsync(TitleInputLengthExceedsLimit);
                         await Task.Delay(TimeoutDelay);
+                        await initMessage.ModifyAsync(GetTitleMessageAfterLoop);
                     }
                     else
                     {
-                        var titleAsync = await ValidateMessageAsync(input, initMessage, result.Result);
-                        if (titleAsync != null) return titleAsync;
+                        Result<string>? title = await ValidateMessageAsync(input, initMessage, result.Result);
+
+                        if (title is not null)
+                            return title;
                     }
                 }
             }
@@ -112,12 +115,13 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             {
                 await initMessage.ModifyAsync(GetTitleMessageAfterLoop);
                 await initMessage.DeleteAllReactionsAsync();
+                return null;
             }
             else
             {
+                await result.DeleteAsync();
                 return new(true, result.Content);
             }
-            return null;
         }
     }
 }
