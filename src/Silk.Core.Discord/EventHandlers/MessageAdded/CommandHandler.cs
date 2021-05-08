@@ -28,7 +28,6 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
 
         public async Task Handle(MessageCreated notification, CancellationToken cancellationToken)
         {
-
             bool isBot = notification.Event.Author.IsBot;
             bool isEmpty = string.IsNullOrEmpty(notification.Event.Message.Content);
             DiscordUser bot = notification.Client.CurrentUser;
