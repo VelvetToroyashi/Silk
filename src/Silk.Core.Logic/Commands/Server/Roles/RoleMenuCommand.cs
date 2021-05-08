@@ -70,6 +70,10 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             }
             await roleMenu.ModifyAsync(title);
 
+
+            while (true) { }
+
+            // Do MediatR stuff here ig //
         }
 
         private async Task<Result<string>> GetTitleAsync(CommandContext ctx, InteractivityExtension input)
@@ -96,7 +100,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
 
                         if (title is not null)
                         {
-                            await initMessage.DeleteAllReactionsAsync();
+                            await initMessage.DeleteAsync();
                             return title;
                         }
                     }
