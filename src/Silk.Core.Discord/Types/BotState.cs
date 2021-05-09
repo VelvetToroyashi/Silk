@@ -3,6 +3,8 @@
     public enum BotState
     {
         Ready,
+        Started,
+        Stopped,
         Faulted,
         Caching,
         Starting,

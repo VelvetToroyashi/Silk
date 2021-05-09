@@ -19,7 +19,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.EventHandlers.Guilds
 {
-    public class GuildEventHandlerService : IHostedService
+    public class GuildEventHandlerService : BackgroundService
     {
         public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
@@ -47,10 +47,6 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                           "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
-
-
-        public async Task StartAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken); // This will stop itself. IHostedService blocks other services while its starting. //
-        public async Task StopAsync(CancellationToken cancellationToken) { }
 
         internal void MarkCompleted(int shardId) => _currentShardsCompleted++;
 
@@ -158,8 +154,9 @@ namespace Silk.Core.Discord.EventHandlers.Guilds
             return Math.Max(staffCount, 0);
         }
 
-        private async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Yield(); // Sync until an await, which means we block until we finish the queue. //
             _shardCount = _bot.ShardClient.ShardClients.Count;
             _guilds = new(_shardCount);
 

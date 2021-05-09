@@ -128,10 +128,12 @@ namespace Silk.Core.Logic
                 services.AddSingleton<Main>();
                 services.AddHostedService(s => s.GetRequiredService<Main>());
 
-                //Copped this hack from: https://stackoverflow.com/a/65552373 //
-                // Trace. I don't care what it is. Please shut up about it.  //
+                // Couldn't figure out how to get the service since AddHostedService adds it as //
+                // IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
                 services.AddSingleton<ReminderService>();
                 services.AddHostedService(b => b.GetRequiredService<ReminderService>());
+
+
 
                 services.AddHostedService<StatusService>();
 
@@ -140,6 +142,9 @@ namespace Silk.Core.Logic
 
                 services.AddSingleton<GuildEventHandlerService>();
                 services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
+
+                services.AddSingleton<UptimeService>();
+                services.AddHostedService(b => b.GetRequiredService<UptimeService>());
             });
         }
 

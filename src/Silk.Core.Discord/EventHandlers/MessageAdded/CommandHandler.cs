@@ -34,7 +34,7 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
             if (isBot || isEmpty) return;
 
             var commandsNext = notification.Client.GetCommandsNext();
-            string prefix = _prefixService.RetrievePrefix(notification.Event.Guild.Id);
+            string prefix = _prefixService.RetrievePrefix(notification.Event.Guild?.Id);
 
             int prefixLength =
                 notification.Event.Channel.IsPrivate ? 0 :
@@ -59,7 +59,7 @@ namespace Silk.Core.Discord.EventHandlers.MessageAdded
 
             if (command is null)
             {
-                Log.Logger.ForContext(typeof(CommandHandler)).Warning("Could not find command. Message: {@Message}", notification);
+                Log.Logger.ForContext(typeof(CommandHandler)).Warning("Could not find command. Message: {Message}", notification.Event.Message.Content);
                 return;
             }
 
