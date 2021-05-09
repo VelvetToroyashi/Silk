@@ -3,15 +3,19 @@
     public class ReactionRole
     {
         /// <summary>
-        /// The role Id of the reaction role.
+        /// The Id of the reaction role.
         /// </summary>
-        public ulong Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// The Id of the emoji related to the reaction role.
         /// </summary>
-        /// 
-        public ulong EmojiId { get; set; }
+        public string EmojiName { get; set; }
+
+        /// <summary>
+        /// The Id of the role to assign when receiving a reaction.
+        /// </summary>
+        public ulong RoleId { get; set; }
 
         /// <summary>
         /// The Id of the message this reaction role belongs to.

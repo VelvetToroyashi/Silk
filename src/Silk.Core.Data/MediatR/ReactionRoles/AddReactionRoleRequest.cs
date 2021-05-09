@@ -5,7 +5,7 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.ReactionRoles
 {
-    public record AddReactionRoleRequest(ulong RoleId, ulong ReactionId, ulong MessageId, int GuildConfigId) : IRequest;
+    public record AddReactionRoleRequest(ulong RoleId, string EmojiName, ulong MessageId, int GuildConfigId) : IRequest;
 
     public class AddReactionRoleHandler : IRequestHandler<AddReactionRoleRequest>
     {
@@ -14,7 +14,7 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
 
         public async Task<Unit> Handle(AddReactionRoleRequest request, CancellationToken cancellationToken)
         {
-            var role = new ReactionRole {Id = request.RoleId, EmojiId = request.ReactionId, MessageId = request.MessageId, GuildConfigId = request.GuildConfigId};
+            var role = new ReactionRole {RoleId = request.RoleId, EmojiName = request.EmojiName, MessageId = request.MessageId, GuildConfigId = request.GuildConfigId};
             _db.Add(role);
             await _db.SaveChangesAsync(cancellationToken);
             return new();
