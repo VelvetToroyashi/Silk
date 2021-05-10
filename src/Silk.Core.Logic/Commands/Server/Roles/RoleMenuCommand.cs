@@ -87,7 +87,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 await Task.Delay(1000);
             }
 
-            await _mediator.Send(new AddRoleMenuRequest(config.Id, ctx.Message.Id)
+            await _mediator.Send(new AddRoleMenuRequest(config.Id, message.Id)
             {
                 RoleDictionary = validOptions.ToDictionary(o => o.EmojiName, o => o.Role)
             });
