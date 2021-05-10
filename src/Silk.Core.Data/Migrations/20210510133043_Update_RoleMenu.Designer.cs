@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Data;
@@ -9,9 +10,10 @@ using Silk.Core.Data;
 namespace Silk.Core.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210510133043_Update_RoleMenu")]
+    partial class Update_RoleMenu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -327,7 +329,7 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("GuildConfigId")
+                    b.Property<int>("GuildId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("MessageId")
@@ -339,7 +341,7 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildConfigId");
+                    b.HasIndex("GuildId");
 
                     b.ToTable("RoleMenu");
                 });
@@ -487,11 +489,13 @@ namespace Silk.Core.Data.Migrations
 
             modelBuilder.Entity("Silk.Core.Data.Models.RoleMenu", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
+                    b.HasOne("Silk.Core.Data.Models.GuildConfig", "Guild")
                         .WithMany("RoleMenus")
-                        .HasForeignKey("GuildConfigId")
+                        .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.SelfAssignableRole", b =>

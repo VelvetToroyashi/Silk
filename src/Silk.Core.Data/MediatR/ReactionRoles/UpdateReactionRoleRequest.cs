@@ -7,7 +7,7 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.ReactionRoles
 {
-    public record UpdateReactionRoleRequest(ulong RoleId, string EmojiName, int GuildConfigId) : IRequest;
+    public record UpdateReactionRoleRequest(ulong MessageId, ulong RoleId, string EmojiName, int GuildConfigId) : IRequest;
 
     public class UpdateReactionRoleHandler : IRequestHandler<UpdateReactionRoleRequest>
     {
@@ -16,13 +16,23 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
 
         public async Task<Unit> Handle(UpdateReactionRoleRequest request, CancellationToken cancellationToken)
         {
-            GuildConfig config = await _db.GuildConfigs.Include(c => c.ReactionRoles).FirstAsync(g => g.Id == request.GuildConfigId, cancellationToken);
+            GuildConfig config = await _db.GuildConfigs.Include(c => c.RoleMenus).FirstAsync(g => g.Id == request.GuildConfigId, cancellationToken);
 
-            ReactionRole? role = config.ReactionRoles.FirstOrDefault(r => r.RoleId == request.RoleId);
+            RoleMenu? role = config.RoleMenus.FirstOrDefault(r => r.MessageId == request.MessageId);
 
             if (role is not null)
             {
-                role.EmojiName = request.EmojiName;
+                if (!role.RoleDictionary.ContainsKey(request.EmojiName))
+                {
+                    role.RoleDictionary.Remove(request.EmojiName);
+                    role.RoleDictionary.Add(request.EmojiName, request.RoleId);
+                }
+                else
+                {
+                    role.RoleDictionary[request.EmojiName] = request.RoleId;
+                }
+
+
                 await _db.SaveChangesAsync(cancellationToken);
             }
 

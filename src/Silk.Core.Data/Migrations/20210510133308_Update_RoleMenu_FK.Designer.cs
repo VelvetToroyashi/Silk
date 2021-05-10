@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Data;
@@ -9,9 +10,10 @@ using Silk.Core.Data;
 namespace Silk.Core.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210510133308_Update_RoleMenu_FK")]
+    partial class Update_RoleMenu_FK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

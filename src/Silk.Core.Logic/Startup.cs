@@ -28,13 +28,10 @@ namespace Silk.Core.Logic
 {
     public class Startup
     {
-        public static DateTime StartupTime { get; } = DateTime.Now;
-
         private static ILogger<Startup> _logger;
 
         public static async Task Main()
         {
-            _ = StartupTime; // Properties 
             // Make Generic Host here. //
             var builder = CreateBuilder();
 
@@ -50,7 +47,7 @@ namespace Silk.Core.Logic
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
-        public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder());
+        public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder(), false);
 
         private static IHostBuilder CreateBuilder()
         {
@@ -90,13 +87,13 @@ namespace Silk.Core.Logic
                 .UseSerilog();
         }
 
-        private static IHostBuilder ConfigureServices(IHostBuilder builder)
+        private static IHostBuilder ConfigureServices(IHostBuilder builder, bool addServices = true)
         {
             return builder.ConfigureServices((context, services) =>
             {
                 var config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
-
+                if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
                 services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
@@ -169,6 +166,7 @@ namespace Silk.Core.Logic
             foreach (var c in contexts)
                 c.Database.Migrate();
         }
+
         private static void AddDatabases(IServiceCollection services, string connectionString)
         {
             void Builder(DbContextOptionsBuilder b)

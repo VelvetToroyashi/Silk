@@ -80,7 +80,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         /// A list of roles that can be obtained via reacting to a message.
         /// </summary>
-        public List<ReactionRole> ReactionRoles { get; set; } = new();
+        public List<RoleMenu> RoleMenus { get; set; } = new();
 
         #region AutoMod/Moderation
 
