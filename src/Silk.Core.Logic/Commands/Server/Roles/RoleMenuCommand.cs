@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.ReactionRoles;
+using Silk.Core.Discord.Services.Interfaces;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
@@ -18,19 +19,23 @@ namespace Silk.Core.Logic.Commands.Server.Roles
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
-    [ModuleLifespan(ModuleLifespan.Transient)] // We're gonna hold some states. //
+    [RequireBotPermissions(Permissions.ManageRoles)]
     public class RoleMenuCommand : BaseCommandModule
     {
         private record RoleMenuOption(ulong Role, string EmojiName);
 
         private readonly IMediator _mediator;
+        private readonly IServiceCacheUpdaterService _updater;
         private readonly Regex _comboRegex = new(@".?(<a?:(.+):([0-9]+)>).?(<@&[0-9]+>).?");
 
-        public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
+        public RoleMenuCommand(IMediator mediator, IServiceCacheUpdaterService updater)
+        {
+            _mediator = mediator;
+            _updater = updater;
+        }
 
         [Command]
         [Description("Automagically configure a role menu based on a message! Must provide message link!\n Supported format: `<emoji> @Role` \n`<emoji> @Role`")]
-        [RequireBotPermissions(Permissions.ManageRoles)]
         public async Task Create(CommandContext ctx, DiscordMessage messageLink)
         {
             var message = await messageLink.Channel.GetMessageAsync(messageLink.Id);
@@ -84,18 +89,26 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 await progressMessageBuilder.ModifyAsync(progressMessage);
 
                 validOptions.Add(new(roleId, emojiName));
-                await Task.Delay(1000);
+                await Task.Delay(1400);
             }
 
-            await _mediator.Send(new AddRoleMenuRequest(config.Id, message.Id)
-            {
-                RoleDictionary = validOptions.ToDictionary(o => o.EmojiName, o => o.Role)
-            });
+
+            Dictionary<string, ulong> finalizedRoleMenu = validOptions.ToDictionary(o => o.EmojiName, o => o.Role);
+            await _mediator.Send(new AddRoleMenuRequest(config.Id, message.Id, finalizedRoleMenu));
 
             progressMessageBuilder.WithContent("Done!");
             await progressMessageBuilder.ModifyAsync(progressMessage);
 
+            await Task.Delay(1500);
 
+            if (failedOptions.Any())
+            {
+                string failedMessages = string.Join('\n', failedOptions);
+                progressMessageBuilder.WithContent($"There were some issues while setting up one or more reaction roles! Use `{ctx.Prefix}rolemenu fix` after you fix them!\n{failedMessages}");
+                await progressMessageBuilder.ModifyAsync(progressMessage);
+            }
+
+            _updater.UpdateGuild(ctx.Guild.Id);
         }
     }
 }

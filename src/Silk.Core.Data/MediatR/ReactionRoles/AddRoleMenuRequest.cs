@@ -7,10 +7,7 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.ReactionRoles
 {
-    public record AddRoleMenuRequest(int ConfigId, ulong MessageId) : IRequest
-    {
-        public Dictionary<string, ulong> RoleDictionary { get; init; }
-    }
+    public record AddRoleMenuRequest(int ConfigId, ulong MessageId, Dictionary<string, ulong> RoleDictionary) : IRequest;
 
     internal class AddRoleMenuHandler : IRequestHandler<AddRoleMenuRequest>
     {
