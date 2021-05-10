@@ -21,7 +21,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
     public class RoleMenuCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
-        private readonly Regex _comboRegex = new(@"((<a?(:.+:)([0-9]+)>).?(<@&[0-9]+>))");
+        private readonly Regex _comboRegex = new(@"((<a?(:.+:)([0-9]+)>).?(<@&[0-9]+>)).?");
 
         public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
 
@@ -30,7 +30,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
         [RequireBotPermissions(Permissions.ManageRoles)]
         public async Task Create(CommandContext ctx, DiscordMessage messageLink)
         {
-            var message = messageLink;
+            var message = await messageLink.Channel.GetMessageAsync(messageLink.Id);
             var matches = _comboRegex.Matches(message.Content);
             var config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
@@ -46,13 +46,13 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             await ctx.RespondAsync("Got it! This should only take a few seconds.");
 
             DiscordMessageBuilder progressMessageBuilder = new();
-            progressMessageBuilder.WithContent($"{loading} Checking message...").WithReply(0).WithoutMentions();
-            DiscordMessage progressMessage = await ctx.RespondAsync(progressMessageBuilder);
+            progressMessageBuilder.WithContent($"{loading} Checking message...").WithoutMentions();
+            DiscordMessage progressMessage = await ctx.Channel.SendMessageAsync(progressMessageBuilder);
 
             await Task.Delay(1000);
             var missingReactions = new List<string>();
 
-            for (int i = 0; i < matches.Count; i++)
+            for (int i = 0; i <= matches.Count; i++)
             {
                 if (message.Reactions.All(r => r.Emoji.Name != matches[i].Groups[3].Value))
                 {

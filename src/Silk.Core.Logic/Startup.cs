@@ -144,7 +144,7 @@ namespace Silk.Core.Logic
                 services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
 
                 services.AddSingleton<UptimeService>();
-                services.AddHostedService(b => b.GetRequiredService<UptimeService>());
+                //services.AddHostedService(b => b.GetRequiredService<UptimeService>());
             });
         }
 
