@@ -40,7 +40,7 @@ namespace Silk.Core.Data.MediatR.Guilds
         public List<DisabledCommand>? DisabledCommands { get; init; }
         public List<SelfAssignableRole>? SelfAssignableRoles { get; init; }
 
-        public RoleMenu RoleMenus { get; init; }
+        public RoleMenu RoleMenu { get; init; }
 
         public List<InfractionStep>? InfractionSteps { get; init; }
         //public List<BlacklistedWord>? BlacklistedWords { get; init; }

@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
+using Silk.Core.Data.MediatR.ReactionRoles;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
@@ -23,7 +24,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
         private record RoleMenuOption(ulong Role, string EmojiName);
 
         private readonly IMediator _mediator;
-        private readonly Regex _comboRegex = new(@"(<a?:(.+):([0-9]+)>).?(<@&[0-9]+>).?");
+        private readonly Regex _comboRegex = new(@".?(<a?:(.+):([0-9]+)>).?(<@&[0-9]+>).?");
 
         public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
 
@@ -53,35 +54,48 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             DiscordMessage progressMessage = await ctx.Channel.SendMessageAsync(progressMessageBuilder);
 
             await Task.Delay(1000);
-            var missingReactions = new List<string>();
+            var failedOptions = new List<string>();
             var validOptions = new List<RoleMenuOption>();
 
-            for (int i = 0; i <= matches.Count; i++)
+            for (int i = 0; i < matches.Count; i++)
             {
                 string emojiName = matches[i].Groups[2].Value;
                 if (message.Reactions.All(r => r.Emoji.Name != emojiName))
                 {
-                    missingReactions.Add(emojiName);
-                    progressMessageBuilder.WithContent($"{failed} {emojiName} is missing it's reaction! Skipping.");
+                    failedOptions.Add($"{failed} `{matches[i].Groups[1].Value}` was missing a reaction");
+                    progressMessageBuilder.WithContent($"{failed} {matches[i].Groups[1].Value} is missing it's reaction! Skipping.");
                     await progressMessageBuilder.ModifyAsync(progressMessage);
-                    await Task.Delay(1000);
+                    await Task.Delay(1400);
                     continue;
                 }
 
                 var roleId = ulong.Parse(matches[i].Groups[4].Value[3..^1]);
 
+                if (ctx.Guild.GetRole(roleId).Position >= ctx.Guild.CurrentMember.Roles.Last().Position)
+                {
+                    failedOptions.Add($"{failed} <@&{roleId}>'s position is greater than mine");
+                    progressMessageBuilder.WithContent($"{failed} Cannot assign <@&{roleId}> due to heiarchy! Skipping.");
+                    await progressMessageBuilder.ModifyAsync(progressMessage);
+                    await Task.Delay(1400);
+                    continue;
+                }
+
                 progressMessageBuilder.WithContent($"{success} I'll give people <@&{roleId}> when they react with {matches[i].Groups[1].Value}!");
                 await progressMessageBuilder.ModifyAsync(progressMessage);
 
                 validOptions.Add(new(roleId, emojiName));
-                await Task.Delay(600);
+                await Task.Delay(1000);
             }
 
-            foreach (var opt in validOptions)
+            await _mediator.Send(new AddRoleMenuRequest(config.Id, ctx.Message.Id)
             {
-                await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id)
-                    { });
-            }
+                RoleDictionary = validOptions.ToDictionary(o => o.EmojiName, o => o.Role)
+            });
+
+            progressMessageBuilder.WithContent("Done!");
+            await progressMessageBuilder.ModifyAsync(progressMessage);
+
+
         }
     }
 }
