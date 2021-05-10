@@ -19,7 +19,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
-    [RequireBotPermissions(Permissions.ManageRoles)]
+    [RequirePermissions(Permissions.ManageRoles)]
     public class RoleMenuCommand : BaseCommandModule
     {
         private record RoleMenuOption(ulong Role, string EmojiName);
