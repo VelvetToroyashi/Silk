@@ -86,7 +86,7 @@ namespace Silk.Core.Discord
             ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
             ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
             ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
-            ShardClient.MessageReactionAdded += services.Get<ReactionAddedHandlerService>()!.Handle;
+            ShardClient.MessageReactionAdded += services.Get<ReactionAddedHandlerService>()!.Add;
 
             // MediatR Dispatch //
             // These could have multiple things working subbed to them. //

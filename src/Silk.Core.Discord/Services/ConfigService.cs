@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
+using Silk.Core.Discord.Services.Interfaces;
 
 namespace Silk.Core.Discord.Services
 {
@@ -12,10 +13,12 @@ namespace Silk.Core.Discord.Services
     {
         private readonly IMemoryCache _cache;
         private readonly IMediator _mediator;
-        public ConfigService(IMemoryCache cache, IMediator mediator)
+
+        public ConfigService(IMemoryCache cache, IMediator mediator, IServiceCacheUpdaterService updater)
         {
             _cache = cache;
             _mediator = mediator;
+            updater.ConfigUpdated += u => cache.Remove(u);
         }
 
         public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
