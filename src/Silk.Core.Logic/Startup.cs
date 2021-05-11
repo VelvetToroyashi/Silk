@@ -18,6 +18,7 @@ using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.Guilds;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.MessageAdded.AutoMod;
+using Silk.Core.Discord.EventHandlers.Reactions;
 using Silk.Core.Discord.Services;
 using Silk.Core.Discord.Services.Interfaces;
 using Silk.Core.Discord.Utilities;
@@ -119,6 +120,7 @@ namespace Silk.Core.Logic
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
+                services.AddSingleton<ReactionAddedHandlerService>();
 
                 //services.AddSingleton<IMessageSender, MessageSenderService>();
 

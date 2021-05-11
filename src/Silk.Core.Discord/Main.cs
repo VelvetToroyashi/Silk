@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Discord.EventHandlers;
 using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.Notifications;
+using Silk.Core.Discord.EventHandlers.Reactions;
 using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
@@ -85,6 +86,7 @@ namespace Silk.Core.Discord
             ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
             ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
             ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
+            ShardClient.MessageReactionAdded += services.Get<ReactionAddedHandlerService>()!.Handle;
 
             // MediatR Dispatch //
             // These could have multiple things working subbed to them. //
