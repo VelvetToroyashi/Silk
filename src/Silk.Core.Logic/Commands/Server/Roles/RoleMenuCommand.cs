@@ -80,7 +80,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
 
             for (int i = 0; i < message.Reactions.Count; i++)
             {
-                if (i >= message.MentionedRoles.Count) return;
+                if (i >= message.MentionedRoles.Count) break;
 
                 if (message.MentionedRoles[i].Position >= ctx.Guild.CurrentMember.Roles.Last().Position)
                 {
@@ -98,10 +98,13 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                     await progressMessage.ModifyAsync(builder);
                 }
 
-                await Task.Delay(1400);
+                await Task.Delay(1000);
             }
 
             await _mediator.Send(new AddRoleMenuRequest(config.Id, message.Id, options.ToDictionary(o => o!.EmojiName, o => o!.Role)));
+
+            builder.WithContent("You should be set! I'll look for reactions and give people their roles. Thank you for choosing Silk! <3");
+            await ctx.RespondAsync(builder);
 
             _updater.UpdateGuild(ctx.Guild.Id);
         }
