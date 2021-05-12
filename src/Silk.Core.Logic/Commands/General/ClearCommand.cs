@@ -9,8 +9,8 @@ using DSharpPlus.Exceptions;
 using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
-using Silk.Core.Discord;
 using Silk.Core.Discord.Utilities.HelpFormatter;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic.Commands.General
 {
@@ -73,7 +73,7 @@ namespace Silk.Core.Logic.Commands.General
 
         private async Task<GuildConfig> GetOrCreateGuildConfig(CommandContext ctx)
         {
-            var guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, Main.DefaultCommandPrefix));
+            var guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
             return guild.Configuration;
         }
     }
