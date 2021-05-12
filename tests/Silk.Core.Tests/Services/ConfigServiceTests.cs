@@ -28,7 +28,7 @@ namespace Silk.Core.Tests.Services
                 .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                 .Verifiable("uHHHH");
 
-            _configService = new(_cache.Object, _mediator.Object);
+            _configService = new(_cache.Object, _mediator.Object, new ServiceCacheUpdaterService());
         }
 
         [Fact]
