@@ -9,11 +9,11 @@ using Silk.Core.Discord.Services;
 
 namespace Silk.Core.Discord.EventHandlers.Reactions
 {
-    public class ReactionAddedHandlerService
+    public class RoleMenuReractionService
     {
         private readonly ConfigService _configCache;
-        private readonly ILogger<ReactionAddedHandlerService> _logger;
-        public ReactionAddedHandlerService(ConfigService configCache, ILogger<ReactionAddedHandlerService> logger)
+        private readonly ILogger<RoleMenuReractionService> _logger;
+        public RoleMenuReractionService(ConfigService configCache, ILogger<RoleMenuReractionService> logger)
         {
             _configCache = configCache;
             _logger = logger;
@@ -21,7 +21,8 @@ namespace Silk.Core.Discord.EventHandlers.Reactions
 
         public async Task Add(DiscordClient _, MessageReactionAddEventArgs args)
         {
-            if (args.Channel.IsPrivate) return;
+            if (args.User.IsBot || args.Channel.IsPrivate) return; // ??? //
+
             ulong msgId = args.Message.Id;
 
             GuildConfig config = await _configCache.GetConfigAsync(args.Guild.Id); // Pulls from cache //
@@ -37,10 +38,12 @@ namespace Silk.Core.Discord.EventHandlers.Reactions
 
         public async Task Remove(DiscordClient _, MessageReactionRemoveEventArgs args)
         {
-            if (args.Channel.IsPrivate) return;
+            if (args.User.IsBot || args.Channel.IsPrivate) return; // ??? //
+
             ulong msgId = args.Message.Id;
             GuildConfig config = await _configCache.GetConfigAsync(args.Guild.Id); // Pulls from cache //
             RoleMenu? value = config.RoleMenus.SingleOrDefault(r => r.MessageId == msgId);
+
             if (value is null) return;
 
             if (value.RoleDictionary.TryGetValue(args.Emoji.Name, out ulong id))
@@ -48,7 +51,6 @@ namespace Silk.Core.Discord.EventHandlers.Reactions
                 DiscordRole role = args.Guild.GetRole(id);
                 await (args.User as DiscordMember)!.RevokeRoleAsync(role);
             }
-
         }
     }
 }

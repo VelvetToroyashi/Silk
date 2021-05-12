@@ -64,7 +64,6 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 return;
             }
 
-            DiscordEmoji loading = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.LoadingId);
             DiscordEmoji failed = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.DeclineId);
             DiscordEmoji success = DiscordEmoji.FromGuildEmote(ctx.Client, Emojis.ConfirmId);
 

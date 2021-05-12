@@ -59,6 +59,7 @@ namespace Silk.Core.Discord
             await ShardClient.StartAsync();
             _logger.LogInformation("Connected to Discord gateway as {Username}#{Discriminator}", ShardClient.CurrentUser.Username, ShardClient.CurrentUser.Discriminator);
         }
+
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping service");
@@ -76,6 +77,7 @@ namespace Silk.Core.Discord
 
             SubscribeToEvents();
         }
+
         private void SubscribeToEvents()
         {
             //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites; // I'll fix AutoMod eventually™ ~Velvet, May 3rd, 2021. //
@@ -86,7 +88,8 @@ namespace Silk.Core.Discord
             ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
             ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
             ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
-            ShardClient.MessageReactionAdded += services.Get<ReactionAddedHandlerService>()!.Add;
+            ShardClient.MessageReactionAdded += services.Get<RoleMenuReractionService>()!.Add;
+            ShardClient.MessageReactionRemoved += services.Get<RoleMenuReractionService>()!.Remove;
 
             // MediatR Dispatch //
             // These could have multiple things working subbed to them. //

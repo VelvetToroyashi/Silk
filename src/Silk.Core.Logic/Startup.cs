@@ -120,7 +120,7 @@ namespace Silk.Core.Logic
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
-                services.AddSingleton<ReactionAddedHandlerService>();
+                services.AddSingleton<RoleMenuReractionService>();
 
                 //services.AddSingleton<IMessageSender, MessageSenderService>();
 

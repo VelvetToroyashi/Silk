@@ -17,17 +17,16 @@ namespace Silk.Core.Logic.Commands.Bot
     public class EvalCommand : BaseCommandModule
     {
         [Command("eval")]
-        [Aliases("evalcs", "cseval", "roslyn")]
         [Description("Evaluates C# code.")]
         [Hidden]
         [RequireOwner]
         [Priority(1)]
         public async Task EvalCS(CommandContext ctx)
         {
-            if (ctx.Message.ReferencedMessage is null) await EvalCS(ctx, ctx.RawArgumentString);
+            if (ctx.Message.ReferencedMessage is null && ctx.Message.Content.Length > ctx.Prefix.Length + 4) await EvalCS(ctx, ctx.RawArgumentString);
             else
             {
-                string? code = ctx.Message.ReferencedMessage.Content;
+                string? code = ctx.Message.ReferencedMessage!.Content;
                 if (code.Contains(ctx.Prefix))
                 {
                     int index = code.IndexOf(' ');
@@ -99,7 +98,7 @@ namespace Silk.Core.Logic.Commands.Bot
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
-                        Description = $"**{ex.GetType()}**: {ex.Message}\n{Formatter.Sanitize(ex.StackTrace)}",
+                        Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')}",
                         Color = new DiscordColor("#FF0000")
                     }.Build())
                     .ConfigureAwait(false);
@@ -109,7 +108,6 @@ namespace Silk.Core.Logic.Commands.Bot
 
         public record TestVariables
         {
-
             public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
             {
                 Client = client;
@@ -118,10 +116,12 @@ namespace Silk.Core.Logic.Commands.Bot
                 Channel = msg.Channel;
                 Guild = Channel.Guild;
                 User = Message.Author;
+                Reply = Message.ReferencedMessage;
 
                 if (Guild != null) Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
             }
             public DiscordMessage Message { get; }
+            public DiscordMessage Reply { get; }
             public DiscordChannel Channel { get; }
             public DiscordGuild Guild { get; }
             public DiscordUser User { get; }
