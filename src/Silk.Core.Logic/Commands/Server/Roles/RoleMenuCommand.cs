@@ -21,7 +21,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
     [Aliases("rm")]
     [Group("rolemenu")]
     [RequirePermissions(Permissions.ManageRoles)]
-    public class RoleMenuCommand : BaseCommandModule
+    public partial class RoleMenuCommand : BaseCommandModule
     {
         private record Result<T>(T? Value, bool Succeeded, string? Reason = null)
         {
