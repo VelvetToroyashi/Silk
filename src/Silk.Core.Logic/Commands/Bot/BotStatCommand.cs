@@ -26,6 +26,9 @@ namespace Silk.Core.Logic.Commands.Bot
             using var process = Process.GetCurrentProcess();
             int guildCount = ctx.Client.Guilds.Count;
             int memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
+            GC.Collect(2, GCCollectionMode.Optimized, true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(0, GCCollectionMode.Optimized, true);
             DiscordEmbedBuilder embed = new();
             embed
                 .WithTitle("Stats for Silk!")
@@ -34,7 +37,7 @@ namespace Silk.Core.Logic.Commands.Bot
                 .AddField("Total Guilds", $"{guildCount}", true)
                 .AddField("Total Members", $"{memberCount}", true)
                 .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-                .AddField("Memory", $"{process.PrivateMemorySize64 / 1000 / 1000:n2} MB", true)
+                .AddField("Memory", $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB", true)
                 .AddField("Threads", $"{process.Threads.Count}", true)
                 .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
             await ctx.RespondAsync(embed);
