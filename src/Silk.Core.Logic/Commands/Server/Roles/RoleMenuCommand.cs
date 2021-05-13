@@ -20,14 +20,13 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Logic.Commands.Server.Roles
 {
-    [Hidden]
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
     [RequirePermissions(Permissions.ManageRoles)]
-    public partial class RoleMenuCommand : BaseCommandModule
+    [Description("Create a reaction-based role menu! Deletion/updating coming soon™")]
+    public class RoleMenuCommand : BaseCommandModule
     {
-
         /// <summary>
         /// Alan please add details.
         /// </summary>
@@ -47,7 +46,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
         }
 
         [Command]
-        [Description("Automagically configure a role menu based on a message! Must provide message link!\n **Warning!:** I will go based on the order of reactions! If you are missing any reactions, then I will skip that role!")]
+        [Description("Automagically configure a role menu based on a message! Provide a message link or emoji role combos (:green_circle: @Some Role).")]
         public async Task Create(CommandContext ctx, DiscordMessage messageLink)
         {
             if (messageLink.Reactions.Count is 0)
@@ -118,6 +117,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
 
 
         [Command("create_interactive")]
+        [Description("test?")]
         public async Task Create(CommandContext ctx, string menuName, [RemainingText] params DiscordRole[] roles)
         {
             roles = roles.Distinct().ToArray();
@@ -149,6 +149,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
             for (int i = 0; i < roles.Length; i++)
             {
                 builder.WithContent($"What emoji would you like to use for {roles[i].Mention}?");
+                await message.ModifyAsync(builder);
                 string? result = await _input.GetStringInputAsync(ctx.User.Id, ctx.Channel.Id, ctx.Guild.Id, TimeSpan.FromMinutes(2));
                 if (result is null)
                 {
@@ -165,6 +166,7 @@ namespace Silk.Core.Logic.Commands.Server.Roles
                 {
                     i--;
                     await message.ModifyAsync("That's not a valid emoji. Please try again.");
+                    await Task.Delay(2000);
                 }
             }
 
@@ -172,18 +174,22 @@ namespace Silk.Core.Logic.Commands.Server.Roles
 
             Result<DiscordEmoji?> TryGetEmoji(string name)
             {
-                DiscordClient client = ctx.Client;
-                DiscordEmoji? emote = name switch
+                try
                 {
-                    _ when DiscordEmoji.TryFromName(client, name, true, out DiscordEmoji emoji) => emoji,
-                    _ when DiscordEmoji.TryFromUnicode(name, out DiscordEmoji emoji) => emoji,
-                    _ => null
-                };
-
-                return new(emote, emote is null);
+                    DiscordClient client = ctx.Client;
+                    DiscordEmoji? emote = name switch
+                    {
+                        _ when DiscordEmoji.TryFromName(client, name, out DiscordEmoji emoji) => emoji,
+                        _ when DiscordEmoji.TryFromUnicode(name, out DiscordEmoji emoji) => emoji,
+                        _ => null
+                    };
+                    return new(emote, emote is null);
+                }
+                catch
+                {
+                    return new(null, false);
+                }
             }
-
-            async Task CleanupAsync() { }
         }
 
 
