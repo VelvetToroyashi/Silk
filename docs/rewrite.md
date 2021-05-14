@@ -16,7 +16,7 @@ Changes to the data project (where all data access is handled, via MediatR):
 
  * DTOs! Data Transfer Objects (DTOs): As it would turn out, passing/handling raw models isn't great. DTOs can be passed between layers, and prevent changing data that should be immutable. 
 
- ## Silk.Core
+## Silk.Core
 
  Changes to the what's refered to as the 'core' project(s):
 
@@ -24,5 +24,5 @@ Changes to the data project (where all data access is handled, via MediatR):
 * /Utilities should be sifted through and have unused classes tossed, and applicable classes either merged closer to where they're used, or put in Silk.Shared
 * /Notifications and /EventHandlers should be merged into a single folder, and possible have their types merged into a singular files, as they're used in one location.
 * Complex services (e.g. InfractionService) need to be overhauled. 
-* Commands need a good scrubbing, some larger commands broken up into more semenatic and easy-to-read methods.
+* 
 
