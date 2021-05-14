@@ -11,10 +11,14 @@ To contribute, please [fork the repo](https://github.com/VelvetThePanda/Silk) fr
 
 This document is subject to change! Check back regularly for the up-to-date list of outlined changes, and what's been completed.
 
+<br>
+
 ## Silk.Core.Data
 Changes to the data project (where all data access is handled, via MediatR):
 
  * DTOs! Data Transfer Objects (DTOs): As it would turn out, passing/handling raw models isn't great. DTOs can be passed between layers, and prevent changing data that should be immutable. 
+
+<br>
 
 ## Silk.Core
 
