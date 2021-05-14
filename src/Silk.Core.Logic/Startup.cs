@@ -29,8 +29,6 @@ namespace Silk.Core.Logic
 {
     public class Startup
     {
-        private static ILogger<Startup> _logger;
-
         public static async Task Main()
         {
             // Make Generic Host here. //

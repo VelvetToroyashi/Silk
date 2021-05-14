@@ -11,10 +11,7 @@ using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Discord.EventHandlers;
-using Silk.Core.Discord.EventHandlers.MemberAdded;
 using Silk.Core.Discord.EventHandlers.Notifications;
-using Silk.Core.Discord.EventHandlers.Reactions;
 using Silk.Core.Discord.Types;
 using Silk.Core.Discord.Utilities;
 using Silk.Core.Discord.Utilities.Bot;
@@ -85,11 +82,12 @@ namespace Silk.Core.Discord
             var mediator = services.Get<IMediator>()!;
 
             // Direct Dispatch //
-            ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
-            ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
-            ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
-            ShardClient.MessageReactionAdded += services.Get<RoleMenuReractionService>()!.Add;
-            ShardClient.MessageReactionRemoved += services.Get<RoleMenuReractionService>()!.Remove;
+            // TODO: FIX THESE GDI //
+            //ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
+            //ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
+            //ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
+            //ShardClient.MessageReactionAdded += services.Get<RoleMenuReractionService>()!.Add;
+            //ShardClient.MessageReactionRemoved += services.Get<RoleMenuReractionService>()!.Remove;
 
             // MediatR Dispatch //
             // These could have multiple things working subbed to them. //
@@ -98,11 +96,14 @@ namespace Silk.Core.Discord
             ShardClient.GuildDownloadCompleted += async (cl, __) =>
                 cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e)); };
 
+
+
             ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
-            ShardClient.GuildAvailable += async (c, e) => { await mediator.Publish(new GuildAvailable(c, e)); };
+            ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
+            ShardClient.GuildAvailable += async (c, e) => { _ = mediator.Publish(new GuildAvailable(c, e)); };
             ShardClient.GuildDownloadCompleted += async (c, e) => { _ = mediator.Publish(new GuildDownloadCompleted(c, e)); };
 
-            ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
+
         }
 
         private async Task InitializeCommandsNextAsync()
