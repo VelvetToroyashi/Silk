@@ -1,4 +1,4 @@
-# Silk! V1.6 -- The rewrite
+# Silk! V2 -- The rewrite!
 
 Over the months, Silk! has become a much larger project than I ever could've imagined, with plenty more planned, but sadly it's hard to add those features when the code is unweildy and somewhat hard to manage. On top of this, the code shouldn't only be maintainable, but understandable at a glance. 
 
