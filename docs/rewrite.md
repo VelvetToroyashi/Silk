@@ -26,7 +26,7 @@ Changes to the data project (where all data access is handled, via MediatR):
 
 * ~~Silk.Core.Logic may be removed all together~~
 * /Utilities should be sifted through and have unused classes tossed, and applicable classes either merged closer to where they're used, or put in Silk.Shared
-* /Notifications and /EventHandlers should be merged into a single folder, and possible have their types merged into a singular files, as they're used in one location.
+* ~~/Notifications and /EventHandlers should be merged into a single folder, and possible have their types merged into a singular files, as they're used in one location.~~
+* Event handlers should be restructured to categorize them into features (Guild, Messages, etc)
 * Complex services (e.g. InfractionService) need to be overhauled. 
-* 
 
