@@ -14,6 +14,7 @@ using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services
 {
@@ -57,6 +58,29 @@ namespace Silk.Core.Services
             }
 
             _ = channel.SendMessageAsync($":boot: Kicked **{member.Username}#{member.Discriminator}**!");
+        }
+
+        public async Task WarnAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
+        {
+            GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(member.Guild.Id));
+            Guild guild = await _mediator.Send(new GetGuildRequest(member.Guild.Id));
+            User user = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
+            await ApplyInfractionAsync(guild, user, infraction);
+
+            DiscordMember issuer = _client.GetMember(m => m.Id == infraction.Enforcer)!;
+            var embed = new DiscordEmbedBuilder();
+            embed
+                .WithColor(DiscordColor.Gold)
+                .WithTitle("Warning issued:")
+                .AddField("Warning issuer:", $"{issuer.Username} ({issuer.Id})")
+                .AddField("Channel:", channel.Mention)
+                .AddField("Time:", infraction.InfractionTime.ToString("dd/MM/yy - HH:mm UTC"))
+                .AddField("Warnings:", $" {guild.Infractions.Where(i => i.UserId == infraction.UserId)}")
+                .AddField("Reason:", infraction.Reason)
+                .WithAuthor(member.Username, member.GetUrl(), member.AvatarUrl)
+                .WithFooter("Silk! | A better bot for all!", member.Guild.CurrentMember.AvatarUrl);
+
+            await LogToModChannelAsync(config, member.Guild, embed);
         }
 
         public async Task BanAsync(DiscordMember member, DiscordChannel channel, Infraction infraction)
@@ -163,7 +187,7 @@ namespace Silk.Core.Services
         public async Task<Infraction> CreateInfractionAsync(DiscordMember member, DiscordMember enforcer, InfractionType type, string reason = "Not given.")
         {
             //Ensure the user will exist in the DB so we don't hit FK violations
-            _ = await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
+            await _mediator.Send(new GetOrCreateUserRequest(member.Guild.Id, member.Id));
             Infraction infraction = new()
             {
                 Enforcer = enforcer.Id,

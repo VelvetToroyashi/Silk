@@ -9,17 +9,17 @@ using Silk.Core.Services;
 
 namespace Silk.Core.EventHandlers.Reactions
 {
-    public class RoleMenuReractionService
+    public class RoleMenuReactionService
     {
         private readonly ConfigService _configCache;
-        private readonly ILogger<RoleMenuReractionService> _logger;
-        public RoleMenuReractionService(ConfigService configCache, ILogger<RoleMenuReractionService> logger)
+        private readonly ILogger<RoleMenuReactionService> _logger;
+        public RoleMenuReactionService(ConfigService configCache, ILogger<RoleMenuReactionService> logger)
         {
             _configCache = configCache;
             _logger = logger;
         }
 
-        public async Task Add(DiscordClient _, MessageReactionAddEventArgs args)
+        public async Task OnAdd(DiscordClient _, MessageReactionAddEventArgs args)
         {
             if (args.User.IsBot || args.Channel.IsPrivate) return; // ??? //
 
@@ -36,7 +36,7 @@ namespace Silk.Core.EventHandlers.Reactions
             }
         }
 
-        public async Task Remove(DiscordClient _, MessageReactionRemoveEventArgs args)
+        public async Task OnRemove(DiscordClient _, MessageReactionRemoveEventArgs args)
         {
             if (args.User.IsBot || args.Channel.IsPrivate) return; // ??? //
 

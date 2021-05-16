@@ -6,18 +6,26 @@ using Silk.Core.Data.Models;
 namespace Silk.Core.Services.Interfaces
 {
     /// <summary>
-    ///     Gatekeeper for infractions and semantic wrapper for handling moderation actions.
+    ///     Provides utility methods for handling infractions and logging actions to an appropriate channel, if set up.
     /// </summary>
     public interface IInfractionService
     {
         /// <summary>
-        ///     Kick a member from the guild.
+        ///     Kicks a member from the guild.
         /// </summary>
         /// <param name="member">The member to kick.</param>
         /// <param name="channel">The channel the command was executed in.</param>
         /// <param name="infraction">The infraction generated for the user.</param>
         /// <param name="embed">The embed to log to the appropriate log channel, if configured.</param>
         public Task KickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed);
+
+        /// <summary>
+        /// Warns a member on the guild.
+        /// </summary>
+        /// <param name="member">The member to warn.</param>
+        /// <param name="channel">The channel the infraction was generated in.</param>
+        /// <param name="infraction">The infraction generated for the member.</param>
+        public Task WarnAsync(DiscordMember member, DiscordChannel channel, Infraction infraction);
 
         /// <summary>
         ///     Bans a member indefinitely.

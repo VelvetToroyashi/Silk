@@ -16,7 +16,8 @@ using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
-using Silk.Core.EventHandlers.MessageAdded.AutoMod;
+using Silk.Core.EventHandlers.Messages;
+using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
@@ -24,7 +25,7 @@ using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Shared.Constants;
 
-namespace Silk.Core.Logic
+namespace Silk.Core
 {
     public class Startup
     {
@@ -110,6 +111,9 @@ namespace Silk.Core.Logic
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddTransient<MessageRemovedHandler>();
 
+                services.AddSingleton<CommandHandler>();
+                services.AddSingleton<MessageAddAntiInvite>();
+
                 services.AddScoped<IInputService, InputService>();
 
                 services.AddScoped<IInfractionService, InfractionService>();
@@ -117,7 +121,7 @@ namespace Silk.Core.Logic
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
-                services.AddSingleton<RoleMenuReractionService>();
+                services.AddSingleton<RoleMenuReactionService>();
 
                 //services.AddSingleton<IMessageSender, MessageSenderService>();
 

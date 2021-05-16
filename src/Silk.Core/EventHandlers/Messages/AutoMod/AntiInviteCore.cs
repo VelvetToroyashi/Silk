@@ -9,18 +9,16 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Shared.Constants;
 
-namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
+namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
     /// <summary>
-    ///     Utility class for all core Auto-Mod features.
+    ///     Utility class for anti-invite functionality. 
     /// </summary>
     public class AntiInviteCore
     {
         private static ILogger<AntiInviteCore> _logger;
-        public AntiInviteCore(ILogger<AntiInviteCore> logger)
-        {
-            _logger = logger;
-        }
+        public AntiInviteCore(ILogger<AntiInviteCore> logger) => _logger = logger;
+
 
         /// <summary>
         ///     Regex to match discord invites using discord's main invite URL (discord.gg)
@@ -39,9 +37,12 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         /// <param name="client">Client instance used to make API calls as necessary.</param>
         /// <param name="message">The message to check.</param>
         /// <param name="config">The configuration of the guild the message was sent on.</param>
+        /// <param name="invite">The invite that was matched, if any.</param>
         /// <returns>Whether further action should be taken</returns>
-        public static async Task<bool> CheckForInviteAsync(DiscordClient client, DiscordMessage message, GuildConfig config)
+        public static bool CheckForInvite(DiscordClient client, DiscordMessage message, GuildConfig config, out string invite)
         {
+            invite = "";
+
             if (!config.BlacklistInvites) return false;
             if (message.Channel.IsPrivate) return false;
             if (message.Author.IsBot) return false;
@@ -49,12 +50,9 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
             Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
             Match match = scanPattern.Match(message.Content);
 
-            if (match.Success)
-            {
-                string code = match.Groups.Values.Last().Captures.First().Value;
-                return await IsBlacklistedInvite(client, message, config, code);
-            }
-            return false;
+            invite = match.Groups.Values.Last().Captures.First().Value;
+
+            return match.Success;
         }
 
         /// <summary>
@@ -67,31 +65,28 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
         /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
         public static async Task<bool> IsBlacklistedInvite(DiscordClient client, DiscordMessage message, GuildConfig config, string invite)
         {
+            var blacklisted = true;
+            if (!config.ScanInvites) return blacklisted;
 
-
-            var handleInvite = true;
-            if (config.ScanInvites)
+            try
             {
-                try
-                {
-                    DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
+                DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
 
-                    if (apiInvite.Guild.Id != message.Channel.GuildId)
-                    {
-                        handleInvite = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.GuildId);
-                    }
-                    else
-                    {
-                        handleInvite = false;
-                        _logger.LogTrace("Matched invite points to current guild; skipping");
-                    }
-                }
-                catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
+                if (apiInvite.Guild.Id != message.Channel.GuildId)
                 {
-                    _logger.LogTrace("Matched invalid or corrupt invite");
+                    blacklisted = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.GuildId);
+                }
+                else
+                {
+                    blacklisted = false;
+                    _logger.LogTrace("Matched invite points to current guild; skipping");
                 }
             }
-            return handleInvite;
+            catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
+            {
+                _logger.LogTrace("Matched invalid or corrupt invite");
+            }
+            return blacklisted;
         }
 
         /// <summary>
@@ -107,8 +102,11 @@ namespace Silk.Core.EventHandlers.MessageAdded.AutoMod
             if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
             if (shouldPunish && config.WarnOnMatchedInvite)
             {
-                var infraction = await infractionService.CreateInfractionAsync((DiscordMember) message.Author,
-                    message.Channel.Guild.CurrentMember, InfractionType.Warn, "[AUTO-MOD] Sending an invite link");
+                Infraction infraction = await infractionService
+                    .CreateInfractionAsync((DiscordMember) message.Author, message.Channel.Guild.CurrentMember,
+                        InfractionType.Warn, "[AutoMod] Sending an invite link");
+
+
                 await infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, "");
             }
         }

@@ -73,7 +73,7 @@ namespace Silk.Core.Commands.Moderation
             }
         }
 
-        private async Task<DiscordEmbedBuilder> CreateHierarchyEmbedAsync(CommandContext ctx, DiscordMember bot, DiscordMember user)
+        private static async Task<DiscordEmbedBuilder> CreateHierarchyEmbedAsync(CommandContext ctx, DiscordMember bot, DiscordMember user)
         {
             bool isBot = user == bot;
             bool isOwner = user == ctx.Guild.Owner;

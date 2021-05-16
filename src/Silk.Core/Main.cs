@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -8,15 +7,12 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
-using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Extensions;
 
 namespace Silk.Core
 {
@@ -25,26 +21,25 @@ namespace Silk.Core
         public BotState State { get; private set; } = BotState.Starting;
         //public static DiscordSlashClient SlashClient { get; } // Soon™ //
         public DiscordShardedClient ShardClient { get; }
-        public static string DefaultCommandPrefix { get; } = "s!";
+        public static string DefaultCommandPrefix => "s!";
 
         private static ILogger<Main> _logger;
-        private readonly IServiceProvider _provider;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, IServiceProvider provider)
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
-            _logger = logger;
-            _provider = provider;
+            // And that's all it needs, since it subs to events in it's ctor.
+            _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
             ShardClient = shardClient;
+            _ = e;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void ChangeState(BotState state)
         {
-            if (State != state)
-            {
-                _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
-                State = state;
-            }
+            if (State == state) return;
+
+            _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
+            State = state;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -71,40 +66,9 @@ namespace Silk.Core
 
             await ShardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
-
-            SubscribeToEvents();
         }
 
-        private void SubscribeToEvents()
-        {
-            //Client.MessageCreated += _services.Get<AutoModInviteHandler>().MessageAddInvites; // I'll fix AutoMod eventually™ ~Velvet, May 3rd, 2021. //
-            var services = _provider;
-            var mediator = services.Get<IMediator>()!;
 
-            // Direct Dispatch //
-            // TODO: FIX THESE GDI //
-            //ShardClient.MessageDeleted += services.Get<MessageRemovedHandler>()!.MessageRemoved;
-            //ShardClient.GuildMemberAdded += services.Get<MemberAddedHandler>()!.OnMemberAdded;
-            //ShardClient.GuildMemberUpdated += services.Get<RoleAddedHandler>()!.CheckStaffRole;
-            //ShardClient.MessageReactionAdded += services.Get<RoleMenuReractionService>()!.Add;
-            //ShardClient.MessageReactionRemoved += services.Get<RoleMenuReractionService>()!.Remove;
-
-            // MediatR Dispatch //
-            // These could have multiple things working subbed to them. //
-            // Also, future groundwork for plugin-system. //
-
-            ShardClient.GuildDownloadCompleted += async (cl, __) =>
-                cl.MessageCreated += async (c, e) => { _ = mediator.Publish(new MessageCreated(c, e)); };
-
-
-
-            ShardClient.GuildCreated += async (c, e) => { _ = mediator.Publish(new GuildCreated(c, e)); };
-            ShardClient.MessageUpdated += async (c, e) => { _ = mediator.Publish(new MessageEdited(c, e)); };
-            ShardClient.GuildAvailable += async (c, e) => { _ = mediator.Publish(new GuildAvailable(c, e)); };
-            ShardClient.GuildDownloadCompleted += async (c, e) => { _ = mediator.Publish(new GuildDownloadCompleted(c, e)); };
-
-
-        }
 
         private async Task InitializeCommandsNextAsync()
         {

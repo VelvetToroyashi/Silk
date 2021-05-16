@@ -1,26 +1,19 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.Extensions.Logging;
-using Silk.Core.EventHandlers.Notifications;
+using DSharpPlus;
+using DSharpPlus.EventArgs;
 
 namespace Silk.Core.EventHandlers.Guilds
 {
-    public class GuildEventHandlers : INotificationHandler<GuildAvailable>, INotificationHandler<GuildCreated>, INotificationHandler<GuildDownloadCompleted>
+    public class GuildEventHandlers
     {
         private readonly GuildEventHandlerService _guildHandler;
-        private readonly ILogger<GuildEventHandlers> _logger;
+        public GuildEventHandlers(GuildEventHandlerService guildHandler) => _guildHandler = guildHandler;
 
-        public GuildEventHandlers(GuildEventHandlerService guildHandler, ILogger<GuildEventHandlers> logger)
-        {
-            _guildHandler = guildHandler;
-            _logger = logger;
-        }
-
-        public async Task Handle(GuildCreated notification, CancellationToken cancellationToken) =>
-            _guildHandler.CacheQueue.Enqueue(new(_guildHandler.JoinedGuild(notification)));
-        public async Task Handle(GuildAvailable notification, CancellationToken cancellationToken) =>
-            _guildHandler.CacheQueue.Enqueue(new(() => _guildHandler.CacheGuildAsync(notification.Args.Guild, notification.Client.ShardId)));
-        public async Task Handle(GuildDownloadCompleted notification, CancellationToken cancellationToken) => _guildHandler.MarkCompleted(notification.Client.ShardId);
+        public async Task OnGuildJoin(DiscordClient client, GuildCreateEventArgs args) =>
+            _guildHandler.CacheQueue.Enqueue(new(GuildEventHandlerService.JoinedGuild(args)));
+        public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs args, CancellationToken cancellationToken) =>
+            _guildHandler.CacheQueue.Enqueue(new(() => _guildHandler.CacheGuildAsync(args.Guild, client.ShardId)));
+        public async Task OnGuildDownload(DiscordClient client, GuildDownloadCompletedEventArgs _) => _guildHandler.MarkCompleted(client.ShardId);
     }
 }

@@ -6,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.EventHandlers.Notifications;
 using Silk.Core.Types;
 using Silk.Extensions;
 using Silk.Shared.Constants;
@@ -64,12 +64,10 @@ namespace Silk.Core.EventHandlers.Guilds
             CheckForCompletion();
         }
 
-        internal async Task JoinedGuild(GuildCreated guildNotification)
+        internal static async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            var guildEvent = guildNotification.Args;
-
-            var allChannels = (await guildEvent.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
-            DiscordMember bot = guildEvent.Guild.CurrentMember;
+            var allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            DiscordMember bot = args.Guild.CurrentMember;
             DiscordChannel? availableChannel = allChannels
                 .Where(c => c.Type is ChannelType.Text)
                 .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
