@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -31,10 +30,9 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
-
+            // This should be done in a seperate service //
             if (config.LogMemberJoing && config.LoggingChannel is not 0)
-                await e.Guild.GetChannel(config.LoggingChannel)
-                    .SendMessageAsync(GetJoinEmbed(e, DateTime.UtcNow));
+                await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
             bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetOnScreeningComplete;
             bool verifyMembers = config.GreetOnVerificationRole && config.VerificationRole is not 0;
@@ -46,7 +44,10 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
 
         private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)
         {
-            if (config.GreetMembers && config.GreetingChannel is not 0 && !string.IsNullOrWhiteSpace(config.GreetingText))
+            bool shouldGreet = config.GreetMembers;
+            bool hasValidGreetingChannel = config.GreetingChannel is not 0;
+            bool hasValidGreetingMessage = !string.IsNullOrWhiteSpace(config.GreetingText);
+            if (shouldGreet && hasValidGreetingChannel && hasValidGreetingMessage)
             {
                 DiscordChannel channel = member.Guild.GetChannel(config.GreetingChannel);
                 string formattedMessage = config.GreetingText
@@ -79,7 +80,7 @@ namespace Silk.Core.Discord.EventHandlers.MemberAdded
             }
         }
 
-        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e, DateTime now)
+        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e)
         {
             return new DiscordEmbedBuilder()
                 .WithTitle("User joined:")
