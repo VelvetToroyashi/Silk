@@ -114,10 +114,11 @@ namespace Silk.Core
                 services.AddSingleton<CommandHandler>();
                 services.AddSingleton<MessageAddAntiInvite>();
 
-                services.AddScoped<IInputService, InputService>();
+                services.AddSingleton<EventHelper>();
 
-                services.AddScoped<IInfractionService, InfractionService>();
-                services.AddTransient<IPrefixCacheService, PrefixCacheService>();
+                services.AddScoped<IInputService, InputService>();
+                services.AddScoped<IPrefixCacheService, PrefixCacheService>();
+                services.AddSingleton<IInfractionService, InfractionService>();
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
@@ -132,8 +133,6 @@ namespace Silk.Core
                 // IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
                 services.AddSingleton<ReminderService>();
                 services.AddHostedService(b => b.GetRequiredService<ReminderService>());
-
-
 
                 services.AddHostedService<StatusService>();
 
