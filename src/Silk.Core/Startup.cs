@@ -38,7 +38,6 @@ namespace Silk.Core
 
             ConfigureServices(builder);
             ConfigureDiscordClient(builder);
-            ConfigureDiscordClient(builder);
 
             IHost builtBuilder = builder.UseConsoleLifetime().Build();
             DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
