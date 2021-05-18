@@ -29,4 +29,4 @@ Changes to the data project (where all data access is handled, via MediatR):
 * ~~/Notifications and /EventHandlers should be merged into a single folder, and possible have their types merged into a singular files, as they're used in one location.~~
 * Event handlers should be restructured to categorize them into features (Guild, Messages, etc)
 * Complex services (e.g. InfractionService) need to be overhauled. 
-
+* Services registrations (in Startup.cs) needs to be shifted and sorted, for aesthetic and readability.
