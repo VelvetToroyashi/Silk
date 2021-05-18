@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.Types;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
@@ -27,8 +26,6 @@ namespace Silk.Core.EventHandlers.Guilds
         private DateTime? _startTime;
         private bool _cachedAllInitialGuilds;
 
-
-        private readonly Main _bot;
         private readonly IMediator _mediator;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
@@ -37,12 +34,11 @@ namespace Silk.Core.EventHandlers.Guilds
 
         private int _shardCount; // How many shards to wait for. //
         private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
-        public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger, Main bot)
+        public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger)
         {
             _mediator = mediator;
             _client = client;
             _logger = logger;
-            _bot = bot;
         }
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
@@ -54,7 +50,6 @@ namespace Silk.Core.EventHandlers.Guilds
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
             _startTime ??= DateTime.Now;
-            _bot.ChangeState(BotState.Caching);
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
 
             int members = await CacheMembersAsync(guild.Members.Values);
@@ -91,14 +86,14 @@ namespace Silk.Core.EventHandlers.Guilds
             {
                 message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
                 _logger.LogDebug(message, shardId + 1,
-                    _bot.ShardClient.ShardClients.Count,
+                    _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count);
             }
             else
             {
                 message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
                 _logger.LogDebug(message, shardId + 1,
-                    _bot.ShardClient.ShardClients.Count,
+                    _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
                     members, totalMembers);
             }
@@ -120,7 +115,6 @@ namespace Silk.Core.EventHandlers.Guilds
                     _client.ShardClients.Values.SelectMany(s => s.Guilds).Count(),
                     _client.ShardClients.Count, (DateTime.Now - _startTime).Value.TotalMilliseconds);
                 _logged = true;
-                _bot.ChangeState(BotState.Ready);
             }
         }
 
@@ -155,7 +149,7 @@ namespace Silk.Core.EventHandlers.Guilds
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield(); // Sync until an await, which means we block until we finish the queue. //
-            _shardCount = _bot.ShardClient.ShardClients.Count;
+            _shardCount = _client.ShardClients.Count;
             _guilds = new(_shardCount);
 
             for (var i = 0; i < _shardCount; i++)

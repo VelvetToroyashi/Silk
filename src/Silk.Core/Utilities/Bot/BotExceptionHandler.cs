@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -18,8 +19,8 @@ namespace Silk.Core.Utilities.Bot
     public class BotExceptionHandler
     {
         private readonly DiscordShardedClient _client;
-
         private readonly ILogger<BotExceptionHandler> _logger;
+
         public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client)
         {
             _logger = logger;
@@ -48,7 +49,8 @@ namespace Silk.Core.Utilities.Bot
             //_logger.LogWarning(e.Exception.InnerException ?? e.Exception , "A command threw an exception! Command: {CommandName}", e.Command.Name);
         }
 
-        private async Task ShowChecksFailedMessage(CommandErrorEventArgs e, DiscordClient c, ChecksFailedException cf)
+        [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "I don't care.")]
+        private static async Task ShowChecksFailedMessage(CommandEventArgs e, DiscordClient c, ChecksFailedException cf)
         {
             string owner = c.CurrentApplication.Owners.Select(o => $"{o.Username}#{o.Discriminator}").Join(", ");
             foreach (CheckBaseAttribute check in cf.FailedChecks)
@@ -65,11 +67,10 @@ namespace Silk.Core.Utilities.Bot
                     _ => null
                 };
 
-                if (message is not null)
-                {
-                    await e.Context.RespondAsync(message);
-                    return;
-                }
+                if (message is null) continue;
+
+                await e.Context.RespondAsync(message);
+                return;
             }
         }
 

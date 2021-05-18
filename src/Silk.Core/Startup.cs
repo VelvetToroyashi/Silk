@@ -102,6 +102,8 @@ namespace Silk.Core
                 services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
                 services.AddSingleton(_ => new BotConfig(context.Configuration));
 
+                services.AddSingleton<GuildEventHandlers>();
+
                 services.AddTransient<ConfigService>();
                 services.AddSingleton<AntiInviteCore>();
                 services.AddTransient<RoleAddedHandler>();
@@ -183,5 +185,15 @@ namespace Silk.Core
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
         }
+
+        private void Whatever()
+        {
+            try
+            {
+                throw new();
+            }
+            catch (Exception e) { }
+        }
+
     }
 }
