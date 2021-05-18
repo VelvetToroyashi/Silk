@@ -38,11 +38,12 @@ namespace Silk.Core
 
             ConfigureServices(builder);
             ConfigureDiscordClient(builder);
+            ConfigureDiscordClient(builder);
 
-            await builder
-                .UseConsoleLifetime()
-                .RunConsoleAsync()
-                .ConfigureAwait(false);
+            IHost builtBuilder = builder.UseConsoleLifetime().Build();
+            DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
+
+            await builtBuilder.RunAsync().ConfigureAwait(false);
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
@@ -158,8 +159,6 @@ namespace Silk.Core
 
                 client.ShardCount = shards;
                 client.Token = config.GetConnectionString("discord");
-
-                DiscordConfigurations.CommandsNext.Services = services.BuildServiceProvider();
             });
         }
 

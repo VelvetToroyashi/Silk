@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.Messages;
@@ -19,7 +20,7 @@ namespace Silk.Core.Utilities
             MessageRemovedHandler removeHandler,
             MemberAddedHandler memberAddedHandler,
             RoleAddedHandler staffCheck,
-            RoleMenuReactionService roleMenu)
+            RoleMenuReactionService roleMenu, ILogger<EventHelper> logger)
         {
 
             client.MessageCreated += commandHandler.Handle;
@@ -29,6 +30,7 @@ namespace Silk.Core.Utilities
             client.GuildMemberUpdated += staffCheck.CheckStaffRole;
             client.MessageReactionAdded += roleMenu.OnAdd;
             client.MessageReactionRemoved += roleMenu.OnRemove;
+            logger.LogWarning("Constructed.");
         }
     }
 }

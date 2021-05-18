@@ -60,7 +60,7 @@ namespace Silk.Core.EventHandlers.Messages
             var cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromMinutes(10));
 
-            _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context), cts.Token);
+            _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context), CancellationToken.None);
         }
     }
 }
