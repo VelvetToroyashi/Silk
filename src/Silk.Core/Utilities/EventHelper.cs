@@ -21,6 +21,7 @@ namespace Silk.Core.Utilities
             MemberAddedHandler memberAddedHandler,
             RoleAddedHandler staffCheck,
             RoleMenuReactionService roleMenu,
+            ButtonHandlerService buttonHandlerService,
             GuildEventHandlers guildHandlers)
         {
 
@@ -38,6 +39,7 @@ namespace Silk.Core.Utilities
             client.GuildCreated += guildHandlers.OnGuildJoin;
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
+            client.ComponentInteractionCreated += buttonHandlerService.OnButtonPress;
         }
     }
 }

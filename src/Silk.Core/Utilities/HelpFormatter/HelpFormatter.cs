@@ -15,7 +15,6 @@ namespace Silk.Core.Utilities.HelpFormatter
 {
     public class HelpFormatter : BaseHelpFormatter
     {
-
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Command = null;
@@ -41,7 +40,7 @@ namespace Silk.Core.Utilities.HelpFormatter
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
 
-            if (Command == null)
+            if (Command is null)
             {
                 embed.WithTitle("Silk Commands:")
                     .WithFooter("* = Group | ** = Executable group");
@@ -61,17 +60,17 @@ namespace Silk.Core.Utilities.HelpFormatter
             {
                 if (Command.IsExperimental())
                     embed.WithColor(DiscordColor.DarkRed)
-                        .WithFooter("\nThis command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
+                        .WithFooter("\nThis command is in testing, and marked as Experimental! Please open an issue if it breaks.");
 
 
-                IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+                IReadOnlyList<CommandArgument>? args = Command.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
-                string title = Command!.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
+                string title = Command.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
                 var builder = new StringBuilder(title);
                 if (args is not null) builder.Append(GetArgs(args));
                 builder.Append('`');
 
-                embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
+                embed.WithTitle(builder.ToString()).WithDescription(Command.Description ?? "This command is missing a description! Please [file an issue on GitHub!](https://github.com/VelvetThePanda/Silk/issues)");
 
                 if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
                     embed.AddField($"{CustomEmoji.Staff} Developer", "You can't use it!", true);
@@ -101,8 +100,10 @@ namespace Silk.Core.Utilities.HelpFormatter
             return new(null, embed.Build());
         }
 
-        private string GetArgs(IReadOnlyList<CommandArgument> args)
+        private string GetArgs(IEnumerable<CommandArgument> args)
         {
+            if (args.Count() is 1) return "(This can be invoked without parameters!)";
+
             string argString = string.Empty;
             foreach (CommandArgument arg in args)
             {

@@ -48,10 +48,6 @@
         <PackageReference Include="AsyncEnumerator" Version="4.0.2"/>
         <PackageReference Include="Colorful.Console" Version="1.2.15"/>
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1"/>
-        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00858"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00858"/>
-        <PackageReference Include="DSharpPlus.Interactivity" Version="4.1.0-nightly-00858"/>
-        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.1.0-nightly-00858"/>
         <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002"/>
         <PackageReference Include="Humanizer" Version="2.9.9"/>
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2"/>
@@ -92,6 +88,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus.CommandsNext\DSharpPlus.CommandsNext.csproj"/>
+        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus.Interactivity\DSharpPlus.Interactivity.csproj"/>
+        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus\DSharpPlus.csproj"/>
         <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj"/>
         <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
         <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj"/>

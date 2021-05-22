@@ -117,6 +117,7 @@ namespace Silk.Core
                 services.AddSingleton<MessageAddAntiInvite>();
 
                 services.AddSingleton<EventHelper>();
+                services.AddSingleton<ButtonHandlerService>();
 
                 services.AddScoped<IInputService, InputService>();
                 services.AddScoped<IPrefixCacheService, PrefixCacheService>();
