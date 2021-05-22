@@ -5,7 +5,6 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.VoiceNext;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Silk.Core.Utilities.HelpFormatter;
@@ -56,7 +55,7 @@ namespace Silk.Core.Commands.Bot
             string cs = code.Substring(cs1, cs2 - cs1);
 
             msg = await ctx.RespondAsync("", new DiscordEmbedBuilder()
-                    .WithColor(new DiscordColor("#FF007F"))
+                    .WithColor(new("#FF007F"))
                     .WithDescription("Evaluating...")
                     .Build())
                 .ConfigureAwait(false);
@@ -67,12 +66,11 @@ namespace Silk.Core.Commands.Bot
 
                 var sopts = ScriptOptions.Default;
                 sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "DSharpPlus.VoiceNext", "Silk.Core", "Silk.Extensions",
+                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions",
                     "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
                 var asm = AppDomain.CurrentDomain.GetAssemblies()
                     .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location));
-                asm = asm.Append(typeof(VoiceNextConnection).Assembly);
 
                 sopts = sopts.WithReferences(asm);
                 Script<object> script = CSharpScript.Create(cs, sopts, typeof(TestVariables));
@@ -98,7 +96,7 @@ namespace Silk.Core.Commands.Bot
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
-                        Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')}",
+                        Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')[0]}",
                         Color = new DiscordColor("#FF0000")
                     }.Build())
                     .ConfigureAwait(false);
