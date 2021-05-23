@@ -84,17 +84,21 @@ namespace Silk.Core.Commands.Tests
                     return;
                 }
 
+                await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+
                 if (buttonInput.Id.EndsWith("decline"))
                 {
                     await currentMessage.ModifyAsync(m => m.WithContent("All good role menus start with a name. What's this one's?"));
                     continue;
                 }
-                if (!buttonInput.Id.EndsWith("abort")) continue;
+
+                if (buttonInput.Id.EndsWith("abort"))
                 {
                     await currentMessage.ModifyAsync(m => m.WithContent("Aborted."));
                     return;
                 }
 
+                await messageInput.Result.DeleteAsync();
 
             }
         }
