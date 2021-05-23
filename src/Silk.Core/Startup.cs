@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Serilog.Filters;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
@@ -69,7 +70,7 @@ namespace Silk.Core
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Fatal);
+                        .Filter.ByExcluding(Matching.FromSource("DSharpPlus"));
 
                     Log.Logger = builder.Configuration["LogLevel"] switch
                     {

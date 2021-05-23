@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 
@@ -21,23 +23,80 @@ namespace Silk.Core.Commands.Tests
                                                        "\nYou can put a line break in your message with `\\n`." +
                                                        "\nYour message will automatically be appended with role directions!\n" +
                                                        "\n **e.g.** :emoji: -> @Some Role";
+        private readonly TimeSpan InteractionTimeout = TimeSpan.FromMinutes(15);
 
         [Aliases("ci")]
         [Command("create_interactive")]
         [Description("Create a button-base role menu! \nThis one is interactive.")]
         public async Task CreateInteractive(CommandContext ctx)
         {
-            var mBuilder = new DiscordMessageBuilder();
             InteractivityExtension input = ctx.Client.GetInteractivity();
-            var m = await ctx.RespondAsync("Poggies");
+            InteractivityResult<DiscordMessage> messageInput;
+            ComponentInteractionEventArgs buttonInput;
+            DiscordInteraction buttonInteraction;
+            DiscordFollowupMessageBuilder followupMessageBuilder = new DiscordFollowupMessageBuilder();
+            DiscordMessage currentMessage;
+            DiscordMessage messagePreview;
 
-            await Task.Delay(2000);
+            DiscordComponent[] YNC = new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ctx.User.Id} rolemenu confirm", "Yes", emoji: new("✅")),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ctx.User.Id} rolemenu decline", "No", emoji: new("❌")),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.User.Id} rolemenu abort", "Cancel", emoji: new("⚠️"))
+            };
 
-            var c = new DiscordComponent[] {new DiscordButtonComponent(ButtonStyle.Primary, "a", "Poggers")};
+            DiscordButtonComponent start = new DiscordButtonComponent(ButtonStyle.Success, $"{ctx.User.Id} rolemenu init", "Start");
 
-            await m.ModifyAsync(m => m.WithComponentRow(c));
+            DiscordMessageBuilder builder = new DiscordMessageBuilder()
+                .WithContent("Press start to start. This message is valid for 10 minutes, and the role menu setup expires 15 minutes after that.")
+                .WithComponents(start);
+
+            currentMessage = await builder.SendAsync(ctx.Channel);
+            buttonInput = (await input.WaitForButtonAsync(currentMessage, TimeSpan.FromMinutes(10))).Result;
+            buttonInteraction = buttonInput?.Interaction!;
+
+            start.Disabled = true;
+            await currentMessage.ModifyAsync(builder);
+
+            if (buttonInput is null) // null = timed out //
+            {
+                await ctx.RespondAsync($"{ctx.User.Mention} your setup has timed out.");
+                return;
+            }
+
+            await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+            currentMessage = await buttonInteraction.CreateFollowupMessageAsync(followupMessageBuilder.WithContent("All good role menus start with a name. What's this one's?"));
+
+            while (true)
+            {
+                messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User, InteractionTimeout);
+                if (messageInput.TimedOut)
+                {
+                    await ctx.RespondAsync($"{ctx.User.Mention} your setup has timed out.");
+                    return;
+                }
+                currentMessage = await buttonInteraction.EditFollowupMessageAsync(currentMessage.Id, new DiscordWebhookBuilder().WithContent("Are you sure?").WithComponents(YNC));
+                buttonInput = (await input.WaitForButtonAsync(currentMessage)).Result;
+
+                if (buttonInput is null)
+                {
+                    await ctx.RespondAsync($"{ctx.User.Mention} your role menu setup has timed out.");
+                    return;
+                }
+
+                if (buttonInput.Id.EndsWith("decline"))
+                {
+                    await currentMessage.ModifyAsync(m => m.WithContent("All good role menus start with a name. What's this one's?"));
+                    continue;
+                }
+                if (!buttonInput.Id.EndsWith("abort")) continue;
+                {
+                    await currentMessage.ModifyAsync(m => m.WithContent("Aborted."));
+                    return;
+                }
 
 
+            }
         }
 
         [Command]
@@ -92,10 +151,10 @@ namespace Silk.Core.Commands.Tests
                         throw new InvalidOperationException("Cannot assign role higher than your own!");
 
                     var e = new DiscordComponentEmoji {Id = emoji.Id, Name = emoji.Name};
-                    var b = new DiscordButtonComponent(ButtonStyle.Success, $"{role.Mention}", emoji: e);
+                    var b = new DiscordButtonComponent(ButtonStyle.Success, $"{role.Mention}", emoji, emoji: e);
                     buttons.Add(b);
                 }
-                builder.WithComponentRow(buttons.ToArray());
+                builder.WithComponents(buttons.ToArray());
                 buttons.Clear();
             }
             await builder.SendAsync(ctx.Channel);
