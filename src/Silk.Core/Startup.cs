@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
-using Serilog.Extensions.Logging;
+using Serilog.Hosting;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
@@ -67,7 +67,7 @@ namespace Silk.Core
                 {
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                         .MinimumLevel.Override("DSharpPlus", LogEventLevel.Fatal);
 
