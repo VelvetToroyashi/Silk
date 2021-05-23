@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Tests
 
             DiscordComponent[] YNC = new DiscordComponent[]
             {
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ctx.User.Id} rolemenu confirm", "Yes", emoji: new("✅")),
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ctx.User.Id}|rolemenu confirm", "Yes", emoji: new("✅")),
                 new DiscordButtonComponent(ButtonStyle.Danger, $"{ctx.User.Id} rolemenu decline", "No", emoji: new("❌")),
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{ctx.User.Id} rolemenu abort", "Cancel", emoji: new("⚠️"))
             };

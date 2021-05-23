@@ -40,6 +40,7 @@ namespace Silk.Core.Utilities
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
             client.ComponentInteractionCreated += buttonHandlerService.OnButtonPress;
+            client.InteractionCreated += buttonHandlerService.OnInteraction;
         }
     }
 }
