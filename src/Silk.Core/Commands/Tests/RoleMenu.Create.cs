@@ -84,6 +84,7 @@ namespace Silk.Core.Commands.Tests
                     return;
                 }
 
+
                 await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
 
                 if (buttonInput.Id.EndsWith("decline"))
@@ -98,8 +99,10 @@ namespace Silk.Core.Commands.Tests
                     return;
                 }
 
-                await messageInput.Result.DeleteAsync();
-
+                if (buttonInput.Id.EndsWith("confirm"))
+                {
+                    await messageInput.Result.DeleteAsync();
+                }
             }
         }
 
