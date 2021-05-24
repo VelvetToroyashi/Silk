@@ -26,7 +26,6 @@ namespace Silk.Core.EventHandlers.Messages
         }
         public async Task OnInteraction(DiscordClient client, InteractionCreateEventArgs args)
         {
-
             var p = new DiscordButtonComponent(ButtonStyle.Primary, "P_", "Blurple", emoji: new(833475075474063421));
             var c = new DiscordButtonComponent(ButtonStyle.Secondary, "C_", "Grey", emoji: new(833475015114358854));
             var b = new DiscordButtonComponent(ButtonStyle.Success, "B_", "Green", emoji: new(831306677449785394));
