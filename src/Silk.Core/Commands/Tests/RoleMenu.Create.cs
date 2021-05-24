@@ -56,11 +56,11 @@ namespace Silk.Core.Commands.Tests
             DiscordButtonComponent yes = new(ButtonStyle.Success, $"{buttonIdPrefix}confirm", "Yes", emoji: new("✅"));
             DiscordButtonComponent cancel = new(ButtonStyle.Secondary, $"{buttonIdPrefix}abort", "Cancel", emoji: new("⚠️"));
 
-            DiscordButtonComponent publish = new(ButtonStyle.Success, $"{buttonIdPrefix}publish", "Publish!", emoji: new("➡️"));
-            DiscordButtonComponent preview = new(ButtonStyle.Primary, $"{buttonIdPrefix}preview", "Preview!", emoji: new("📝")); // 642705992718483476 is an eyes emoji //
+            DiscordButtonComponent publish = new(ButtonStyle.Success, $"{buttonIdPrefix}publish", "Publish!", true, new("➡️"));
+            DiscordButtonComponent preview = new(ButtonStyle.Primary, $"{buttonIdPrefix}preview", "Preview!", emoji: new("📝"));
             DiscordButtonComponent add = new(ButtonStyle.Success, $"{buttonIdPrefix}add_option", "Add option (0/25)", emoji: new("➕"));
             DiscordButtonComponent remove = new(ButtonStyle.Danger, $"{buttonIdPrefix}remove_option", "Remove Option", true, new("➖"));
-            DiscordButtonComponent update = new(ButtonStyle.Primary, $"{buttonIdPrefix}update_option", "Update option", emoji: new("🔄"));
+            DiscordButtonComponent update = new(ButtonStyle.Primary, $"{buttonIdPrefix}update_option", "Update option", true, new("🔄"));
 
             DiscordComponent[] YNC = {yes, no, cancel};
             DiscordComponent[] roleMenuOptionsTop = {publish, preview, cancel};
@@ -244,8 +244,9 @@ namespace Silk.Core.Commands.Tests
                                 zipList.Add((emojiRes.Value, roleRes.Value));
                                 buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new(emojiRes.Value.Name)));
 
-                                add.Label = $"Add option ({buttons.Count}/25";
-
+                                add.Label = $"Add option ({buttons.Count}/25)";
+                                remove.Disabled = false;
+                                update.Disabled = false;
                                 if (buttons.Count is 25)
                                     add.Disabled = true;
 
@@ -263,20 +264,21 @@ namespace Silk.Core.Commands.Tests
                         zipList.Add((emojiRes.Value, roleRes.Value));
                         buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new() {Id = emojiRes.Value.Id, Name = emojiRes.Value.Name}));
 
-                        add.Label = $"Add option ({buttons.Count}/25";
+
+                        remove.Disabled = false;
+                        update.Disabled = false;
+                        add.Label = $"Add option ({buttons.Count}/25)";
 
                         if (buttons.Count is 25)
                             add.Disabled = true;
+
                         break;
-
                     } while (true);
-
-
                 }
 
                 else
                 {
-                    await ctx.Channel.SendMessageAsync($"{buttonInput.User.Mention} is a client modder, I see.");
+                    await ctx.Channel.SendMessageAsync("That's not a valid choice! A sign of a client modder, I see.");
                     return;
                 }
 
