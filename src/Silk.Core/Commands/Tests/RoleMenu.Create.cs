@@ -59,7 +59,7 @@ namespace Silk.Core.Commands.Tests
             DiscordButtonComponent publish = new(ButtonStyle.Success, $"{buttonIdPrefix}publish", "Publish!", true, new("➡️"));
             DiscordButtonComponent preview = new(ButtonStyle.Primary, $"{buttonIdPrefix}preview", "Preview!", emoji: new("📝"));
             DiscordButtonComponent add = new(ButtonStyle.Success, $"{buttonIdPrefix}add_option", "Add option (0/25)", emoji: new("➕"));
-            DiscordButtonComponent remove = new(ButtonStyle.Danger, $"{buttonIdPrefix}remove_option", "Remove Option", true, new("➖"));
+            DiscordButtonComponent remove = new(ButtonStyle.Danger, $"{buttonIdPrefix}remove_option", "Remove option", true, new("➖"));
             DiscordButtonComponent update = new(ButtonStyle.Primary, $"{buttonIdPrefix}update_option", "Update option", true, new("🔄"));
 
             DiscordComponent[] YNC = {yes, no, cancel};
