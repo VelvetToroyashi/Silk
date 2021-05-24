@@ -147,7 +147,7 @@ namespace Silk.Core.Commands.Tests
                     return;
                 }
                 await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
-                followupMessageBuilder.Clear();
+
 
                 if (buttonInput.Id.EndsWith("abort"))
                 {
@@ -164,11 +164,12 @@ namespace Silk.Core.Commands.Tests
                     //Todo: implement removal.
 
                 }
-                else if (buttonInput.Id.EndsWith("preview"))
+                if (buttonInput.Id.EndsWith("preview"))
                 {
                     var opts = buttons.Chunk(5);
 
-                    followupMessageBuilder.WithContent($"Your menu looks like this so far: \n{roleMenuTitle}\n{roleMenuMessage}").AsEphemeral(true);
+                    followupMessageBuilder.Clear();
+                    followupMessageBuilder.WithContent($"Your menu looks like this so far: \n{roleMenuTitle}\n{roleMenuMessage}\n{string.Join('\n', zipList.Select(z => $"{z.Item1} → {z.Item2.Mention}"))}").AsEphemeral(true);
                     foreach (var componentList in opts)
                         followupMessageBuilder.WithComponents(componentList);
 
@@ -247,6 +248,8 @@ namespace Silk.Core.Commands.Tests
                                 add.Label = $"Add option ({buttons.Count}/25)";
                                 remove.Disabled = false;
                                 update.Disabled = false;
+                                publish.Disabled = false;
+
                                 if (buttons.Count is 25)
                                     add.Disabled = true;
 
@@ -267,6 +270,7 @@ namespace Silk.Core.Commands.Tests
 
                         remove.Disabled = false;
                         update.Disabled = false;
+                        publish.Disabled = false;
                         add.Label = $"Add option ({buttons.Count}/25)";
 
                         if (buttons.Count is 25)
@@ -278,7 +282,7 @@ namespace Silk.Core.Commands.Tests
 
                 else
                 {
-                    await ctx.Channel.SendMessageAsync("That's not a valid choice! A sign of a client modder, I see.");
+                    await ctx.Channel.SendMessageAsync("That's not a valid choice! A sign of a client modder, you know.");
                     return;
                 }
 
