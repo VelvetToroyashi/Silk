@@ -16,6 +16,7 @@ namespace Silk.Core.Commands.Tests
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
+    [ModuleLifespan(ModuleLifespan.Transient)]
     public partial class RoleMenuCommands : BaseCommandModule
     {
         private const string CreateMethodDescription = "Create a button-based role menu!" +
@@ -31,25 +32,35 @@ namespace Silk.Core.Commands.Tests
         [Description("Create a button-base role menu! \nThis one is interactive.")]
         public async Task CreateInteractive(CommandContext ctx)
         {
+            string buttonIdPrefix = $"{ctx.Message.Id}|{ctx.User.Id}|rolemenu|";
+
             InteractivityExtension input = ctx.Client.GetInteractivity();
             InteractivityResult<DiscordMessage> messageInput;
             ComponentInteractionEventArgs buttonInput;
             DiscordInteraction buttonInteraction;
             DiscordFollowupMessageBuilder followupMessageBuilder = new();
             DiscordMessage currentMessage;
+
+            string roleMenuTitle;
+            string roleMenuMessage;
             DiscordMessage messagePreview;
+            List<DiscordComponent> buttons = new(25);
+            List<(DiscordEmoji, DiscordRole)> zipList = new(25);
 
-            string buttonIdPrefix = $"{ctx.Message.Id}|{ctx.User.Id}|rolemenu|";
-
-            DiscordComponent[] YNC = new DiscordButtonComponent[]
-            {
-                new(ButtonStyle.Success, $"{buttonIdPrefix}confirm", "Yes", emoji: new("✅")),
-                new(ButtonStyle.Danger, $"{buttonIdPrefix}decline", "No", emoji: new("❌")),
-                new(ButtonStyle.Secondary, $"{buttonIdPrefix}abort", "Cancel", emoji: new("⚠️"))
-            };
+            DiscordButtonComponent no = new(ButtonStyle.Danger, $"{buttonIdPrefix}decline", "No", emoji: new("❌"));
+            DiscordButtonComponent yes = new(ButtonStyle.Success, $"{buttonIdPrefix}confirm", "Yes", emoji: new("✅"));
+            DiscordButtonComponent cancel = new(ButtonStyle.Secondary, $"{buttonIdPrefix}abort", "Cancel", emoji: new("⚠️"));
 
             DiscordButtonComponent start = new(ButtonStyle.Success, $"{buttonIdPrefix}init", "Start");
-            DiscordButtonComponent preview = new(ButtonStyle.Primary, $"{buttonIdPrefix}preview", "Preview!", emoji: new(642705992718483476)); // 642705992718483476 is an eyes emoji //
+
+            DiscordButtonComponent publish = new(ButtonStyle.Success, $"{buttonIdPrefix}publish", "Publish!", emoji: new("➡️"));
+            DiscordButtonComponent preview = new(ButtonStyle.Primary, $"{buttonIdPrefix}preview", "Preview!", emoji: new("📝")); // 642705992718483476 is an eyes emoji //
+            DiscordButtonComponent add = new(ButtonStyle.Success, $"{buttonIdPrefix}add_option", "Add option (0/25)", emoji: new("➕"));
+            DiscordButtonComponent remove = new(ButtonStyle.Danger, $"{buttonIdPrefix}remove_option", "Remove Option", emoji: new("➖"));
+            DiscordButtonComponent update = new(ButtonStyle.Secondary, $"{buttonIdPrefix}update_option", "Update option", emoji: new("🔄"));
+
+            DiscordComponent[] YNC = {yes, no, cancel};
+
 
             DiscordMessageBuilder builder = new DiscordMessageBuilder()
                 .WithContent("Press start to start. This message is valid for 10 minutes, and the role menu setup expires 15 minutes after that.")
@@ -106,22 +117,36 @@ namespace Silk.Core.Commands.Tests
                     return;
                 }
 
-                if (!buttonInput.Id.EndsWith("confirm"))
-                {
-                    continue; // Consistency:tm: //
-                }
+                if (!buttonInput.Id.EndsWith("confirm")) { continue; }
 
+                roleMenuTitle = messageInput.Result.Content;
                 await messageInput.Result.DeleteAsync();
                 await currentMessage.ModifyAsync("Alright. Got it. Now on to emojis and roles. (I will delete your message, so avoid pinging roles in a public channel!");
-                await Task.Delay(MessageUserReadWaitDelay);
+                break;
+            }
 
-                var econ = (IArgumentConverter<DiscordEmoji>) new DiscordEmojiConverter();
-                var rcon = (IArgumentConverter<DiscordRole>) new DiscordRoleConverter();
+            await Task.Delay(MessageUserReadWaitDelay);
 
-                await currentMessage.ModifyAsync("Please format your message as such: `<emoji> <role>`! Place a space in between or I will not parse it!");
-                await Task.Delay(MessageUserReadWaitDelay);
+            var econ = (IArgumentConverter<DiscordEmoji>) new DiscordEmojiConverter();
+            var rcon = (IArgumentConverter<DiscordRole>) new DiscordRoleConverter();
 
-                while (true) { }
+            await currentMessage.ModifyAsync("Please format your message as such: `<emoji> <role>`! Place a space in between or I will not parse it!");
+            await Task.Delay(MessageUserReadWaitDelay);
+
+            while (true)
+            {
+                await currentMessage.ModifyAsync(m => m.WithContent("What would you like to do?").WithComponents(preview, cancel));
+                buttonInput = (await input.WaitForButtonAsync(currentMessage)).Result;
+
+                if (buttonInput is null)
+                {
+                    await currentMessage.ModifyAsync("Timed out.");
+                    await ctx.RespondAsync($"{ctx.User.Mention} your rolemenu setup has timed out!");
+                    return;
+                }
+
+
+                break;
             }
         }
 
