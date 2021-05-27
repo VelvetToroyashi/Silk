@@ -30,9 +30,9 @@ namespace Silk.Core.Commands.Tests
                                                        "\nYou can put a line break in your message with `\\n`." +
                                                        "\nYour message will automatically be appended with role directions!\n" +
                                                        "\n **e.g.** :emoji: -> @Some Role";
-        private readonly TimeSpan InteractionTimeout = TimeSpan.FromMinutes(15);
-        private readonly TimeSpan UserInteractionWaitTimeout = TimeSpan.FromMinutes(10);
-        private readonly TimeSpan MessageUserReadWaitDelay = TimeSpan.FromSeconds(6);
+        private readonly TimeSpan _interactionTimeout = TimeSpan.FromMinutes(15);
+        private readonly TimeSpan _userInteractionWaitTimeout = TimeSpan.FromMinutes(10);
+        private readonly TimeSpan _messageUserReadWaitDelay = TimeSpan.FromSeconds(6);
         private readonly IMediator _mediator;
 
         public RoleMenuCommands(IMediator mediator)
@@ -82,7 +82,7 @@ namespace Silk.Core.Commands.Tests
                 .WithComponents(start);
 
             currentMessage = await builder.SendAsync(ctx.Channel);
-            buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
+            buttonInput = await input.WaitForButtonAsync(currentMessage, _userInteractionWaitTimeout);
             start.Disabled = true;
             builder.WithContent("Rolemenu setup in progress.");
             await currentMessage.ModifyAsync(builder);
@@ -101,7 +101,7 @@ namespace Silk.Core.Commands.Tests
 
             if (!roleMenuNameResult) return;
 
-            await Task.Delay(MessageUserReadWaitDelay);
+            await Task.Delay(_messageUserReadWaitDelay);
 
             var econ = (IArgumentConverter<DiscordEmoji>) new DiscordEmojiConverter();
             var rcon = (IArgumentConverter<DiscordRole>) new DiscordRoleConverter();
@@ -109,7 +109,7 @@ namespace Silk.Core.Commands.Tests
             while (true)
             {
                 await currentMessage.ModifyAsync(m => m.WithContent("What would you like to do?").WithComponents(roleMenuOptionsTop).WithComponents(roleMenuOptionsBottom));
-                buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
+                buttonInput = await input.WaitForButtonAsync(currentMessage, _userInteractionWaitTimeout);
 
                 if (buttonInput.TimedOut)
                 {
@@ -160,7 +160,7 @@ namespace Silk.Core.Commands.Tests
                     if (messageInput.TimedOut)
                     {
                         await currentMessage.ModifyAsync("Sorry, but you took too long!");
-                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                        await Task.Delay(_messageUserReadWaitDelay / 4);
                         return;
                     }
 
@@ -172,7 +172,7 @@ namespace Silk.Core.Commands.Tests
                     if (split.Length is not 4)
                     {
                         await currentMessage.ModifyAsync("Sorry, but you provided incorrect parmeters!");
-                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                        await Task.Delay(_messageUserReadWaitDelay / 4);
                         continue;
                     }
 
@@ -201,7 +201,7 @@ namespace Silk.Core.Commands.Tests
                     if (oldEmoji == newEmoji || oldRole == newRole)
                     {
                         await currentMessage.ModifyAsync("New option must be different from old option!");
-                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                        await Task.Delay(_messageUserReadWaitDelay / 4);
                     }
                     else
                     {
@@ -209,13 +209,13 @@ namespace Silk.Core.Commands.Tests
                         if (index is -1)
                         {
                             await currentMessage.ModifyAsync("That option doesn't exist!");
-                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            await Task.Delay(_messageUserReadWaitDelay / 4);
                         }
                         else
                         {
                             zipList[index] = (newEmoji.Value, newRole.Value);
                             await currentMessage.ModifyAsync("Done!");
-                            await Task.Delay(MessageUserReadWaitDelay / 2);
+                            await Task.Delay(_messageUserReadWaitDelay / 2);
                         }
                     }
                 }
@@ -226,7 +226,7 @@ namespace Silk.Core.Commands.Tests
                         return true;
 
                     await currentMessage.ModifyAsync($"Sorry but that's not a valid {valueLabel}! Please try again.");
-                    await Task.Delay(MessageUserReadWaitDelay / 4);
+                    await Task.Delay(_messageUserReadWaitDelay / 4);
                     return false;
                 }
             }
@@ -240,7 +240,7 @@ namespace Silk.Core.Commands.Tests
                 if (buttonInput.TimedOut)
                 {
                     await currentMessage.ModifyAsync(m => m.WithContent("Sorry, but you took too long!"));
-                    await Task.Delay(MessageUserReadWaitDelay / 2);
+                    await Task.Delay(_messageUserReadWaitDelay / 2);
                     return false;
                 }
 
@@ -254,12 +254,12 @@ namespace Silk.Core.Commands.Tests
                         await currentMessage.ModifyAsync(m => m.WithContent("So, what channel would you like to publish to? Alternatively type cancel to cancel."));
                         messageInput = await input.WaitForMessageAsync(m => m.MentionedChannels.Count > 0 ||
                                                                             string.Equals("cancel", m.Content, StringComparison.OrdinalIgnoreCase)
-                                                                            && m.Author == ctx.User, UserInteractionWaitTimeout);
+                                                                            && m.Author == ctx.User, _userInteractionWaitTimeout);
 
                         if (messageInput.TimedOut)
                         {
                             await currentMessage.ModifyAsync("Sorry, but you took to long to respond!");
-                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            await Task.Delay(_messageUserReadWaitDelay / 4);
                             return false;
                         }
 
@@ -271,19 +271,19 @@ namespace Silk.Core.Commands.Tests
                         if (chn.Type is not ChannelType.Text)
                         {
                             await currentMessage.ModifyAsync("Sorry, but you can only publish to a text channel!");
-                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            await Task.Delay(_messageUserReadWaitDelay / 4);
                             continue;
                         }
 
                         if (!chn.PermissionsFor(ctx.Guild.CurrentMember).HasFlag(Permissions.SendMessages))
                         {
                             await currentMessage.ModifyAsync("I can't send messages to that channel!");
-                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            await Task.Delay(_messageUserReadWaitDelay / 4);
                             continue;
                         }
 
                         await currentMessage.ModifyAsync("Alright!");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
 
                         break;
                     }
@@ -345,7 +345,7 @@ namespace Silk.Core.Commands.Tests
 
                 await currentMessage.ModifyAsync(builder);
 
-                Task<InteractivityResult<DiscordMessage>> cancelInput = input.WaitForMessageAsync(m => string.Equals("cancel", m.Content, StringComparison.OrdinalIgnoreCase) && m.Author == ctx.User, UserInteractionWaitTimeout);
+                Task<InteractivityResult<DiscordMessage>> cancelInput = input.WaitForMessageAsync(m => string.Equals("cancel", m.Content, StringComparison.OrdinalIgnoreCase) && m.Author == ctx.User, _userInteractionWaitTimeout);
                 Task<InteractivityResult<ComponentInteractionCreateEventArgs>> buttonInputTask = input.WaitForButtonAsync(currentMessage);
 
                 Task inputResult = await Task.WhenAny(cancelInput, buttonInputTask);
@@ -362,7 +362,7 @@ namespace Silk.Core.Commands.Tests
                     DiscordComponent componentToRemove = buttons.Single(b => b.CustomId == buttonInput.Result.Id);
                     buttons.Remove(componentToRemove);
                     await currentMessage.ModifyAsync(m => m.WithContent("Alright! Done."));
-                    await Task.Delay(MessageUserReadWaitDelay / 2);
+                    await Task.Delay(_messageUserReadWaitDelay / 2);
                 }
 
                 if (buttons.Count is 0)
@@ -404,7 +404,7 @@ namespace Silk.Core.Commands.Tests
                     if (rSplit.Length is not 2)
                     {
                         await currentMessage.ModifyAsync("Sorry but you provided an incorrect amount of paremeters! Did you forgot a space?");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         continue;
                     }
 
@@ -417,36 +417,36 @@ namespace Silk.Core.Commands.Tests
                     if (!emojiRes.HasValue)
                     {
                         await currentMessage.ModifyAsync("Sorry but that's not a valid emoji! Please try again.");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         continue;
                     }
                     if (!roleRes.HasValue)
                     {
                         await currentMessage.ModifyAsync("Sorry but that's not a valid role! Please try again.");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         continue;
                     }
                     if (roleRes.Value.Position >= ctx.Guild.CurrentMember.Hierarchy)
                     {
                         await currentMessage.ModifyAsync("Sorry, but I can't assign that role!");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         continue;
                     }
                     if (zipList.Any(r => r.Item1 == emojiRes.Value || r.Item2 == roleRes.Value))
                     {
                         await currentMessage.ModifyAsync("You've already used that role or emoji!");
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         continue;
                     }
                     if (!emojiRes.Value.IsAvailable && emojiRes.Value.Id is not 0)
                     {
                         await currentMessage.ModifyAsync(m => m.WithContent("That's a custom emote from a server I'm not in! It won't render in the message, but the button will still work. \nDo you want to use it anyway?").WithComponents(yes, no));
-                        buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
+                        buttonInput = await input.WaitForButtonAsync(currentMessage, _userInteractionWaitTimeout);
 
                         if (buttonInput.TimedOut)
                         {
                             await currentMessage.ModifyAsync("Sorry, but you took to long to respond!");
-                            await Task.Delay(MessageUserReadWaitDelay / 2);
+                            await Task.Delay(_messageUserReadWaitDelay / 2);
                             return;
                         }
 
@@ -460,7 +460,7 @@ namespace Silk.Core.Commands.Tests
                         {
                             await currentMessage.ModifyAsync(m => m.WithContent("Alright!"));
                             await messageInput.Result.DeleteAsync();
-                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            await Task.Delay(_messageUserReadWaitDelay / 4);
                             zipList.Add((emojiRes.Value, roleRes.Value));
                             buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Id}", "", emoji: new(emojiRes.Value.Id)));
 
@@ -479,7 +479,7 @@ namespace Silk.Core.Commands.Tests
                     {
                         await currentMessage.ModifyAsync("Alright!");
                         await messageInput.Result.DeleteAsync();
-                        await Task.Delay(MessageUserReadWaitDelay / 3);
+                        await Task.Delay(_messageUserReadWaitDelay / 3);
                         zipList.Add((emojiRes.Value, roleRes.Value));
                         buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new() {Id = emojiRes.Value.Id, Name = emojiRes.Value}));
 
@@ -491,7 +491,7 @@ namespace Silk.Core.Commands.Tests
 
                         if (buttons.Count is 25)
                             add.Disabled = true;
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 2);
                         return;
                     }
                 } while (true);
@@ -502,7 +502,7 @@ namespace Silk.Core.Commands.Tests
             {
                 while (true)
                 {
-                    messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User, InteractionTimeout);
+                    messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User, _interactionTimeout);
 
                     if (messageInput.TimedOut)
                     {
