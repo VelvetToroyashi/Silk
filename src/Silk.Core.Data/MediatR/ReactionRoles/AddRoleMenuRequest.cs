@@ -16,8 +16,10 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
 
         public async Task<Unit> Handle(AddRoleMenuRequest request, CancellationToken cancellationToken)
         {
-            GuildConfig config = await _db.GuildConfigs.FirstOrDefaultAsync(c => c.Id == request.ConfigId, cancellationToken);
-            config.RoleMenus.Add(new() {MessageId = request.MessageId, RoleDictionary = request.RoleDictionary, GuildConfigId = request.ConfigId});
+            (int configId, ulong messageId, var roleDictionary) = request;
+
+            GuildConfig config = await _db.GuildConfigs.FirstOrDefaultAsync(c => c.Id == configId, cancellationToken);
+            config.RoleMenus.Add(new() {MessageId = messageId, RoleDictionary = roleDictionary, GuildConfigId = configId});
 
             await _db.SaveChangesAsync(cancellationToken);
 

@@ -11,6 +11,10 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
+using Silk.Core.Data.MediatR.Guilds;
+using Silk.Core.Data.MediatR.ReactionRoles;
+using Silk.Core.Data.Models;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Tests
@@ -29,6 +33,12 @@ namespace Silk.Core.Commands.Tests
         private readonly TimeSpan InteractionTimeout = TimeSpan.FromMinutes(15);
         private readonly TimeSpan UserInteractionWaitTimeout = TimeSpan.FromMinutes(10);
         private readonly TimeSpan MessageUserReadWaitDelay = TimeSpan.FromSeconds(6);
+        private readonly IMediator _mediator;
+
+        public RoleMenuCommands(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
         [Aliases("ci")]
         [Command("create_interactive")]
@@ -129,7 +139,9 @@ namespace Silk.Core.Commands.Tests
 
                     await currentMessage.ModifyAsync(m => m.WithContent($"Congratulations! Your role menu is set up. You can find it here: \n{roleMenuDiscordMessage.JumpLink}"));
 
-                    //TODO: IMPLEMENT DATABASE STUFF
+
+                    GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+                    await _mediator.Send(new AddRoleMenuRequest(config.Id, roleMenuDiscordMessage.Id, null!));
 
                     return;
                 }
@@ -450,7 +462,7 @@ namespace Silk.Core.Commands.Tests
                             await messageInput.Result.DeleteAsync();
                             await Task.Delay(MessageUserReadWaitDelay / 4);
                             zipList.Add((emojiRes.Value, roleRes.Value));
-                            buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new(emojiRes.Value.Id)));
+                            buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Id}", "", emoji: new(emojiRes.Value.Id)));
 
                             add.Label = $"Add option ({buttons.Count}/25)";
 
