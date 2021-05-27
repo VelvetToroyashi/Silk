@@ -11,9 +11,21 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using Serilog;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Tests
 {
+
+    public class MentionTest : BaseCommandModule
+    {
+        [Command]
+        public async Task Mention(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"Hey {ctx.User.Mention}, Listen!"); // No Mention :(
+        }
+    }
+
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
@@ -32,20 +44,26 @@ namespace Silk.Core.Commands.Tests
         [Aliases("ci")]
         [Command("create_interactive")]
         [Description("Create a button-base role menu! \nThis one is interactive.")]
+        public async Task CI(CommandContext ctx)
+        {
+            try { await CreateInteractive(ctx); }
+            catch (Exception e) { Log.Logger.Fatal(e, "Something went front with that!"); }
+        }
+
+
         public async Task CreateInteractive(CommandContext ctx)
         {
             string buttonIdPrefix = $"{ctx.Message.Id}|{ctx.User.Id}|rolemenu|";
 
             InteractivityExtension input = ctx.Client.GetInteractivity();
             InteractivityResult<DiscordMessage> messageInput;
-            ComponentInteractionEventArgs buttonInput;
-            DiscordInteraction buttonInteraction;
+            InteractivityResult<ComponentInteractionCreateEventArgs> buttonInput;
             DiscordFollowupMessageBuilder followupMessageBuilder = new();
             DiscordMessage currentMessage;
+            DiscordMessage roleMenuDiscordMessage = null!;
 
-            string roleMenuTitle;
+            string roleMenuTitle = string.Empty;
             StringBuilder roleMenuMessage = new();
-            DiscordMessage messagePreview;
             List<DiscordComponent> buttons = new(25);
             List<(DiscordEmoji, DiscordRole)> zipList = new(25);
 
@@ -72,63 +90,24 @@ namespace Silk.Core.Commands.Tests
                 .WithComponents(start);
 
             currentMessage = await builder.SendAsync(ctx.Channel);
-            buttonInput = (await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout)).Result;
-            buttonInteraction = buttonInput?.Interaction!;
-
+            buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
             start.Disabled = true;
             builder.WithContent("Rolemenu setup in progress.");
             await currentMessage.ModifyAsync(builder);
 
-            if (buttonInput is null) // null = timed out //
+            if (buttonInput.TimedOut)
             {
                 await ctx.RespondAsync($"{ctx.User.Mention} your setup has timed out.");
                 return;
             }
 
-            await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
-            currentMessage = await buttonInteraction.CreateFollowupMessageAsync(followupMessageBuilder.WithContent("All good role menus start with a name. What's this one's?"));
-
-            while (true)
-            {
-                messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User, InteractionTimeout);
-
-                if (messageInput.TimedOut)
-                {
-                    await ctx.RespondAsync($"{ctx.User.Mention} your setup has timed out.");
-                    return;
-                }
-
-                currentMessage = await buttonInteraction.EditFollowupMessageAsync(currentMessage.Id, new DiscordWebhookBuilder().WithContent("Are you sure?").WithComponents(YNC));
-                buttonInput = (await input.WaitForButtonAsync(currentMessage)).Result;
-
-                if (buttonInput is null)
-                {
-                    await ctx.RespondAsync($"{ctx.User.Mention} your role menu setup has timed out.");
-                    return;
-                }
+            await buttonInput.Result.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+            currentMessage = await buttonInput.Result.Interaction.CreateFollowupMessageAsync(followupMessageBuilder.WithContent("All good role menus start with a name. What's this one's?"));
 
 
-                await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+            bool roleMenuNameResult = await GetRoleMenuNameAsync();
 
-                if (buttonInput.Id.EndsWith("decline"))
-                {
-                    await currentMessage.ModifyAsync(m => m.WithContent("All good role menus start with a name. What's this one's?"));
-                    continue;
-                }
-
-                if (buttonInput.Id.EndsWith("abort"))
-                {
-                    await currentMessage.ModifyAsync(m => m.WithContent("Aborted."));
-                    return;
-                }
-
-                if (!buttonInput.Id.EndsWith("confirm")) { continue; }
-
-                roleMenuTitle = messageInput.Result.Content;
-                await messageInput.Result.DeleteAsync();
-                await currentMessage.ModifyAsync(m => m.WithContent("Alright. Got it. Now on to emojis and roles. \n(I will delete your message, so avoid pinging roles in a public channel!)"));
-                break;
-            }
+            if (!roleMenuNameResult) return;
 
             await Task.Delay(MessageUserReadWaitDelay);
 
@@ -138,134 +117,377 @@ namespace Silk.Core.Commands.Tests
             while (true)
             {
                 await currentMessage.ModifyAsync(m => m.WithContent("What would you like to do?").WithComponents(roleMenuOptionsTop).WithComponents(roleMenuOptionsBottom));
-                buttonInput = (await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout)).Result;
+                buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
 
-                if (buttonInput is null)
+                if (buttonInput.TimedOut)
                 {
-                    await currentMessage.ModifyAsync("Timed out.");
-                    await ctx.RespondAsync($"{ctx.User.Mention} your rolemenu setup has timed out!");
-                    return;
-                }
-                await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
-
-
-                if (buttonInput.Id.EndsWith("abort"))
-                {
-                    await currentMessage.ModifyAsync("Aborted.");
+                    await SendTimeoutMessageAsync();
                     return;
                 }
 
+                await buttonInput.Result.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
 
-                if (buttonInput.Id.EndsWith("remove_option"))
+                if (buttonInput.Result.Id.EndsWith("abort"))
+                    await currentMessage.ModifyAsync(m => m.WithContent("Aborted."));
+
+                if (buttonInput.Result.Id.EndsWith("remove_option"))
+                    await RemoveOptionAsync();
+
+                if (buttonInput.Result.Id.EndsWith("preview"))
+                    await PreviewRoleMenuAsync();
+
+                if (buttonInput.Result.Id.EndsWith("add_option"))
+                    await TryAddOptionAsync();
+
+                if (buttonInput.Result.Id.EndsWith("publish"))
                 {
-                    if (!buttons.Any())
-                        await buttonInput.Interaction.CreateFollowupMessageAsync(followupMessageBuilder.WithContent("You shouldn't be able to do this!"));
+                    bool messagePublished = await ShowPublishAsync();
+                    if (!messagePublished)
+                        continue;
 
-                    //Todo: implement removal.
+                    await currentMessage.ModifyAsync(m => m.WithContent($"Congratulations! Your role menu is set up. You can find it here: \n{roleMenuDiscordMessage.JumpLink}"));
 
+                    //TODO: IMPLEMENT DATABASE STUFF
+
+                    return;
                 }
-                if (buttonInput.Id.EndsWith("preview"))
+
+                if (buttonInput.Result.Id.EndsWith("update_option"))
+                    await UpdateOptionAsync();
+            }
+
+            async Task UpdateOptionAsync()
+            {
+                while (true)
                 {
-                    var opts = buttons.Chunk(5);
-
-                    followupMessageBuilder.Clear();
-                    followupMessageBuilder.WithContent($"Your menu looks like this so far: \n{roleMenuTitle}\n{roleMenuMessage}\n{string.Join('\n', zipList.Select(z => $"{z.Item1} → {z.Item2.Mention}"))}").AsEphemeral(true);
-                    foreach (var componentList in opts)
-                        followupMessageBuilder.WithComponents(componentList);
-
-                    await buttonInput.Interaction.CreateFollowupMessageAsync(followupMessageBuilder);
-                }
-                else if (buttonInput.Id.EndsWith("add_option"))
-                {
-                    await currentMessage.ModifyAsync(m => m.WithContent("What would you like to add?\n\n Note: the format`<emoji> <role>`! Place a space in between or I will not add it!"));
-
-                    do
+                    // I could've used buttons here, but I'm lazy. //
+                    await currentMessage.ModifyAsync(m => m.WithContent("Please format your message as such: `<old emoji> <old role> <new emoji> <new role>`! Or type cancel to cancel."));
+                    messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User);
+                    if (messageInput.TimedOut)
                     {
-                        await Task.Delay(MessageUserReadWaitDelay / 2);
-                        messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User);
+                        await currentMessage.ModifyAsync("Sorry, but you took too long!");
+                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                        return;
+                    }
+
+                    if (string.Equals("cancel", messageInput.Result.Content, StringComparison.OrdinalIgnoreCase))
+                        return;
+
+                    string[] split = messageInput.Result.Content.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                    if (split.Length is not 4)
+                    {
+                        await currentMessage.ModifyAsync("Sorry, but you provided incorrect parmeters!");
+                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                        continue;
+                    }
+
+                    string oldemoteraw = split[0];
+                    string oldroleraw = split[1];
+                    string newemoteraw = split[2];
+                    string newroleraw = split[3];
+
+                    Optional<DiscordEmoji> oldEmoji;
+                    Optional<DiscordEmoji> newEmoji;
+
+                    Optional<DiscordRole> oldRole;
+                    Optional<DiscordRole> newRole;
+
+                    oldEmoji = await econ.ConvertAsync(oldemoteraw, ctx);
+                    oldRole = await rcon.ConvertAsync(oldroleraw, ctx);
+
+                    newEmoji = await econ.ConvertAsync(newemoteraw, ctx);
+                    newRole = await rcon.ConvertAsync(newroleraw, ctx);
+
+                    if (!await TryCheckValue(oldEmoji, "emoji")) return;
+                    if (!await TryCheckValue(newEmoji, "emoji")) return;
+                    if (!await TryCheckValue(oldRole, "role")) return;
+                    if (!await TryCheckValue(newRole, "role")) return;
+
+                    if (oldEmoji == newEmoji || oldRole == newRole)
+                    {
+                        await currentMessage.ModifyAsync("New option must be different from old option!");
+                        await Task.Delay(MessageUserReadWaitDelay / 4);
+                    }
+                    else
+                    {
+                        int index = zipList.IndexOf((oldEmoji.Value, oldRole.Value));
+                        if (index is -1)
+                        {
+                            await currentMessage.ModifyAsync("That option doesn't exist!");
+                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                        }
+                        else
+                        {
+                            zipList[index] = (newEmoji.Value, newRole.Value);
+                            await currentMessage.ModifyAsync("Done!");
+                            await Task.Delay(MessageUserReadWaitDelay / 2);
+                        }
+                    }
+                }
+
+                async Task<bool> TryCheckValue<T>(Optional<T> valueContainer, string valueLabel)
+                {
+                    if (valueContainer.HasValue)
+                        return true;
+
+                    await currentMessage.ModifyAsync($"Sorry but that's not a valid {valueLabel}! Please try again.");
+                    await Task.Delay(MessageUserReadWaitDelay / 4);
+                    return false;
+                }
+            }
+
+            // Returns whether the menu was published. //
+            async Task<bool> ShowPublishAsync()
+            {
+                await currentMessage.ModifyAsync(m => m.WithContent("Are you sure you want to publish?").WithComponents(yes, no));
+                buttonInput = await input.WaitForButtonAsync(currentMessage, ctx.User);
+
+                if (buttonInput.TimedOut)
+                {
+                    await currentMessage.ModifyAsync(m => m.WithContent("Sorry, but you took too long!"));
+                    await Task.Delay(MessageUserReadWaitDelay / 2);
+                    return false;
+                }
+
+                if (buttonInput.Result.Id.EndsWith("decline"))
+                    return false;
+
+                if (buttonInput.Result.Id.EndsWith("confirm"))
+                {
+                    while (true)
+                    {
+                        await currentMessage.ModifyAsync(m => m.WithContent("So, what channel would you like to publish to? Alternatively type cancel to cancel."));
+                        messageInput = await input.WaitForMessageAsync(m => m.MentionedChannels.Count > 0 ||
+                                                                            string.Equals("cancel", m.Content, StringComparison.OrdinalIgnoreCase)
+                                                                            && m.Author == ctx.User, UserInteractionWaitTimeout);
 
                         if (messageInput.TimedOut)
                         {
-                            await currentMessage.ModifyAsync("Sorry, but you took too long!");
+                            await currentMessage.ModifyAsync("Sorry, but you took to long to respond!");
+                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            return false;
+                        }
+
+                        if (string.Equals("cancel", messageInput.Result.Content, StringComparison.OrdinalIgnoreCase))
+                            return false;
+
+                        DiscordChannel chn = messageInput.Result.MentionedChannels[0];
+
+                        if (chn.Type is not ChannelType.Text)
+                        {
+                            await currentMessage.ModifyAsync("Sorry, but you can only publish to a text channel!");
+                            await Task.Delay(MessageUserReadWaitDelay / 4);
                             continue;
                         }
 
-                        string[] rSplit = messageInput.Result.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                        if (rSplit.Length is not 2)
+                        if (!chn.PermissionsFor(ctx.Guild.CurrentMember).HasFlag(Permissions.SendMessages))
                         {
-                            await currentMessage.ModifyAsync("Sorry but you provided an incorrect amount of paremeters! Did you forgot a space?");
+                            await currentMessage.ModifyAsync("I can't send messages to that channel!");
+                            await Task.Delay(MessageUserReadWaitDelay / 4);
                             continue;
                         }
 
-                        var emojiRaw = rSplit[0];
-                        var roleRaw = rSplit[1];
+                        await currentMessage.ModifyAsync("Alright!");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
 
-                        var emojiRes = await econ.ConvertAsync(emojiRaw, ctx);
-                        var roleRes = await rcon.ConvertAsync(roleRaw, ctx);
+                        break;
+                    }
 
-                        if (!emojiRes.HasValue)
+
+                    builder.Clear();
+
+                    builder
+                        .WithoutMentions()
+                        .WithContent(BuildRoleMenuMessage().ToString());
+
+                    foreach (var chk in buttons.Chunk(5))
+                        builder.WithComponents(chk.ToArray());
+
+                    try
+                    {
+                        roleMenuDiscordMessage = await builder.SendAsync(messageInput.Result.MentionedChannels[0]);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        await currentMessage.ModifyAsync($"I'm so sorry! Something went wrong when trying to publish your message. :( \nThe response was `{e.Message}`. Feel free to shoot this to the developers!");
+                        return false;
+                    }
+                }
+
+                return false;
+
+                StringBuilder BuildRoleMenuMessage()
+                {
+                    roleMenuMessage.Clear();
+
+                    roleMenuMessage.AppendLine(roleMenuTitle);
+
+                    foreach ((DiscordEmoji e, DiscordRole r) in zipList)
+                        roleMenuMessage.AppendLine($"{e} **→** {r.Mention}");
+
+                    return roleMenuMessage;
+                }
+            }
+
+            async Task SendTimeoutMessageAsync()
+            {
+                await currentMessage.ModifyAsync("Timed out.");
+                await ctx.RespondAsync($"{ctx.User.Mention} your rolemenu setup has timed out!");
+            }
+
+            async Task RemoveOptionAsync()
+            {
+                if (!buttons.Any())
+                    await buttonInput.Result.Interaction.CreateFollowupMessageAsync(followupMessageBuilder.WithContent("You shouldn't be able to do this!"));
+
+                builder.Clear();
+                builder.WithContent($"Alright, what would you like to remove? Or type cancel to cancel. \n{string.Join('\n', zipList.Select((z, i) => $"**{i}**: {z.Item1} → {z.Item2.Mention}"))}");
+                var chnk = buttons.Chunk(5);
+
+                foreach (var chunk in chnk)
+                    builder.WithComponents(chunk.ToArray());
+
+                await currentMessage.ModifyAsync(builder);
+
+                Task<InteractivityResult<DiscordMessage>> cancelInput = input.WaitForMessageAsync(m => string.Equals("cancel", m.Content, StringComparison.OrdinalIgnoreCase) && m.Author == ctx.User, UserInteractionWaitTimeout);
+                Task<InteractivityResult<ComponentInteractionCreateEventArgs>> buttonInputTask = input.WaitForButtonAsync(currentMessage);
+
+                Task inputResult = await Task.WhenAny(cancelInput, buttonInputTask);
+
+                if (inputResult == cancelInput)
+                {
+                    await currentMessage.ModifyAsync(m => m.WithContent("Alright."));
+                    return;
+                }
+
+                if (inputResult == buttonInputTask)
+                {
+                    buttonInput = await buttonInputTask;
+                    DiscordComponent componentToRemove = buttons.Single(b => b.CustomId == buttonInput.Result.Id);
+                    buttons.Remove(componentToRemove);
+                    await currentMessage.ModifyAsync(m => m.WithContent("Alright! Done."));
+                    await Task.Delay(MessageUserReadWaitDelay / 2);
+                }
+
+                if (buttons.Count is 0)
+                {
+                    remove.Disabled = true;
+                    publish.Disabled = true;
+                }
+            }
+
+            async Task PreviewRoleMenuAsync()
+            {
+                List<List<DiscordComponent>> opts = buttons.Chunk(5);
+
+                followupMessageBuilder.Clear();
+                followupMessageBuilder.WithContent($"Your menu looks like this so far: \n{roleMenuTitle}\n{roleMenuMessage}\n{string.Join('\n', zipList.Select(z => $"{z.Item1} → {z.Item2.Mention}"))}").AsEphemeral(true);
+                foreach (var componentList in opts)
+                    followupMessageBuilder.WithComponents(componentList);
+
+
+                await buttonInput.Result.Interaction.CreateFollowupMessageAsync(followupMessageBuilder);
+            }
+
+            async Task TryAddOptionAsync()
+            {
+                do
+                {
+                    await currentMessage.ModifyAsync(m => m.WithContent("What would you like to add?\n\n Note: the format`<emoji> <role>`! Place a space in between or I will not add it!"));
+
+                    messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User);
+
+                    if (messageInput.TimedOut)
+                    {
+                        await currentMessage.ModifyAsync("Sorry, but you took too long!");
+                        return;
+                    }
+
+                    string[] rSplit = messageInput.Result.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                    if (rSplit.Length is not 2)
+                    {
+                        await currentMessage.ModifyAsync("Sorry but you provided an incorrect amount of paremeters! Did you forgot a space?");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        continue;
+                    }
+
+                    var emojiRaw = rSplit[0];
+                    var roleRaw = rSplit[1];
+
+                    var emojiRes = await econ.ConvertAsync(emojiRaw, ctx);
+                    var roleRes = await rcon.ConvertAsync(roleRaw, ctx);
+
+                    if (!emojiRes.HasValue)
+                    {
+                        await currentMessage.ModifyAsync("Sorry but that's not a valid emoji! Please try again.");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        continue;
+                    }
+                    if (!roleRes.HasValue)
+                    {
+                        await currentMessage.ModifyAsync("Sorry but that's not a valid role! Please try again.");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        continue;
+                    }
+                    if (roleRes.Value.Position >= ctx.Guild.CurrentMember.Hierarchy)
+                    {
+                        await currentMessage.ModifyAsync("Sorry, but I can't assign that role!");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        continue;
+                    }
+                    if (zipList.Any(r => r.Item1 == emojiRes.Value || r.Item2 == roleRes.Value))
+                    {
+                        await currentMessage.ModifyAsync("You've already used that role or emoji!");
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        continue;
+                    }
+                    if (!emojiRes.Value.IsAvailable && emojiRes.Value.Id is not 0)
+                    {
+                        await currentMessage.ModifyAsync(m => m.WithContent("That's a custom emote from a server I'm not in! It won't render in the message, but the button will still work. \nDo you want to use it anyway?").WithComponents(yes, no));
+                        buttonInput = await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout);
+
+                        if (buttonInput.TimedOut)
                         {
-                            await currentMessage.ModifyAsync("Sorry but that's not a valid emoji! Please try again.");
-                            continue;
+                            await currentMessage.ModifyAsync("Sorry, but you took to long to respond!");
+                            await Task.Delay(MessageUserReadWaitDelay / 2);
+                            return;
                         }
-                        if (!roleRes.HasValue)
+
+                        await buttonInput.Result.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+
+                        if (buttonInput.Result.Id.EndsWith("decline"))
                         {
-                            await currentMessage.ModifyAsync("Sorry but that's not a valid role! Please try again.");
-                            continue;
-                        }
-                        if (roleRes.Value.Position >= ctx.Guild.CurrentMember.Hierarchy)
-                        {
-                            await currentMessage.ModifyAsync("Sorry, but I can't assign that role!");
-                            continue;
-                        }
-                        if (zipList.Any(r => r.Item1 == emojiRes.Value || r.Item2 == roleRes.Value))
-                        {
-                            await currentMessage.ModifyAsync("You've already used that role or emoji!");
-                            continue;
-                        }
-                        if (!emojiRes.Value.IsAvailable && emojiRes.Value.Id is not 0)
-                        {
-                            await currentMessage.ModifyAsync(m => m.WithContent("That's a custom emote from a server I'm not in! It won't render in the message, but the button will still work. \nDo you want to use it anyway?").WithComponents(yes, no));
-                            buttonInput = (await input.WaitForButtonAsync(currentMessage, UserInteractionWaitTimeout)).Result;
-
-                            if (buttonInput is null)
-                            {
-                                await currentMessage.ModifyAsync("Sorry, but you took to long to respond!");
-                                break;
-                            }
-
-                            await buttonInput.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
-
-                            if (buttonInput.Id.EndsWith("confirm"))
-                            {
-                                await currentMessage.ModifyAsync(m => m.WithContent("Alright!"));
-                                await messageInput.Result.DeleteAsync();
-                                await Task.Delay(MessageUserReadWaitDelay / 3);
-                                zipList.Add((emojiRes.Value, roleRes.Value));
-                                buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new(emojiRes.Value.Name)));
-
-                                add.Label = $"Add option ({buttons.Count}/25)";
-                                remove.Disabled = false;
-                                update.Disabled = false;
-                                publish.Disabled = false;
-
-                                if (buttons.Count is 25)
-                                    add.Disabled = true;
-
-                                break;
-                            }
-
                             await currentMessage.ModifyAsync(m => m.WithContent("Alright then."));
-                            continue;
                         }
+                        else
+                        {
+                            await currentMessage.ModifyAsync(m => m.WithContent("Alright!"));
+                            await messageInput.Result.DeleteAsync();
+                            await Task.Delay(MessageUserReadWaitDelay / 4);
+                            zipList.Add((emojiRes.Value, roleRes.Value));
+                            buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new(emojiRes.Value.Id)));
 
+                            add.Label = $"Add option ({buttons.Count}/25)";
 
+                            remove.Disabled = false;
+                            update.Disabled = false;
+                            publish.Disabled = false;
+
+                            if (buttons.Count is 25)
+                                add.Disabled = true;
+                            return;
+                        }
+                    }
+                    else
+                    {
                         await currentMessage.ModifyAsync("Alright!");
                         await messageInput.Result.DeleteAsync();
                         await Task.Delay(MessageUserReadWaitDelay / 3);
                         zipList.Add((emojiRes.Value, roleRes.Value));
-                        buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new() {Id = emojiRes.Value.Id, Name = emojiRes.Value.Name}));
+                        buttons.Add(new DiscordButtonComponent(ButtonStyle.Success, $"rolemenu assign {roleRes.Value.Mention}", "", emoji: new() {Id = emojiRes.Value.Id, Name = emojiRes.Value}));
 
 
                         remove.Disabled = false;
@@ -275,17 +497,59 @@ namespace Silk.Core.Commands.Tests
 
                         if (buttons.Count is 25)
                             add.Disabled = true;
+                        await Task.Delay(MessageUserReadWaitDelay / 2);
+                        return;
+                    }
+                } while (true);
+            }
 
-                        break;
-                    } while (true);
-                }
-
-                else
+            // Returns false if the user cancels //
+            async Task<bool> GetRoleMenuNameAsync()
+            {
+                while (true)
                 {
-                    await ctx.Channel.SendMessageAsync("That's not a valid choice! A sign of a client modder, you know.");
-                    return;
-                }
+                    messageInput = await input.WaitForMessageAsync(m => m.Author == ctx.User, InteractionTimeout);
 
+                    if (messageInput.TimedOut)
+                    {
+                        await ctx.RespondAsync($"{ctx.User.Mention} your setup has timed out.");
+                        return false; // return;
+                    }
+
+                    currentMessage = await buttonInput.Result.Interaction.EditFollowupMessageAsync(currentMessage.Id, new DiscordWebhookBuilder().WithContent("Are you sure?").WithComponents(YNC));
+                    buttonInput = await input.WaitForButtonAsync(currentMessage);
+
+                    if (buttonInput.TimedOut)
+                    {
+                        await ctx.RespondAsync($"{ctx.User.Mention} your role menu setup has timed out.");
+                        return false; // return;
+                    }
+
+
+                    await buttonInput.Result.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
+
+                    if (buttonInput.Result.Id.EndsWith("decline"))
+                    {
+                        await currentMessage.ModifyAsync(m => m.WithContent("All good role menus start with a name. What's this one's?"));
+                        ; // continue;
+                    }
+
+                    if (buttonInput.Result.Id.EndsWith("abort"))
+                    {
+                        await currentMessage.ModifyAsync(m => m.WithContent("Aborted."));
+                        return false; // return;
+                    }
+
+                    if (!buttonInput.Result.Id.EndsWith("confirm"))
+                    {
+                        continue; // continue;
+                    }
+
+                    roleMenuTitle = messageInput.Result.Content;
+                    await messageInput.Result.DeleteAsync();
+                    await currentMessage.ModifyAsync(m => m.WithContent("Alright. Got it. Now on to emojis and roles. \n(I will delete your message, so avoid pinging roles in a public channel!)"));
+                    return true; // break;   
+                }
             }
         }
 

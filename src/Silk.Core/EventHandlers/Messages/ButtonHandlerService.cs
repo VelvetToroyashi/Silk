@@ -12,7 +12,7 @@ namespace Silk.Core.EventHandlers.Messages
         private readonly ILogger<ButtonHandlerService> _logger;
         public ButtonHandlerService(ILogger<ButtonHandlerService> logger) => _logger = logger;
 
-        public async Task OnButtonPress(DiscordClient client, ComponentInteractionEventArgs args)
+        public async Task OnButtonPress(DiscordClient client, ComponentInteractionCreateEventArgs args)
         {
             _logger.LogInformation("{User} pushed {Button}", args.User.Username, args.Id);
             //await args.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
@@ -30,7 +30,7 @@ namespace Silk.Core.EventHandlers.Messages
             var c = new DiscordButtonComponent(ButtonStyle.Secondary, "C_", "Grey", emoji: new(833475015114358854));
             var b = new DiscordButtonComponent(ButtonStyle.Success, "B_", "Green", emoji: new(831306677449785394));
             var y = new DiscordButtonComponent(ButtonStyle.Danger, "Y_", "Red", emoji: new(833886629792972860));
-            var z = new DiscordLinkButtonComponent("https://velvetthepanda.dev", "Link", new(826108356656758794));
+            var z = new DiscordLinkButtonComponent("https://velvetthepanda.dev", "Link", false, new(826108356656758794));
 
             var d1 = new DiscordButtonComponent(ButtonStyle.Primary, "disabled", "and", true);
             var d2 = new DiscordButtonComponent(ButtonStyle.Secondary, "disabled2", "these", true);
