@@ -11,21 +11,10 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Serilog;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Tests
 {
-
-    public class MentionTest : BaseCommandModule
-    {
-        [Command]
-        public async Task Mention(CommandContext ctx)
-        {
-            await ctx.RespondAsync($"Hey {ctx.User.Mention}, Listen!"); // No Mention :(
-        }
-    }
-
     [RequireGuild]
     [Aliases("rm")]
     [Group("rolemenu")]
@@ -44,13 +33,6 @@ namespace Silk.Core.Commands.Tests
         [Aliases("ci")]
         [Command("create_interactive")]
         [Description("Create a button-base role menu! \nThis one is interactive.")]
-        public async Task CI(CommandContext ctx)
-        {
-            try { await CreateInteractive(ctx); }
-            catch (Exception e) { Log.Logger.Fatal(e, "Something went front with that!"); }
-        }
-
-
         public async Task CreateInteractive(CommandContext ctx)
         {
             string buttonIdPrefix = $"{ctx.Message.Id}|{ctx.User.Id}|rolemenu|";
