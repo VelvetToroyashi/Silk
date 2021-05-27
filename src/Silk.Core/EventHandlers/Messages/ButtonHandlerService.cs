@@ -1,51 +1,67 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data.Models;
+using Silk.Core.Services;
 
 namespace Silk.Core.EventHandlers.Messages
 {
     public class ButtonHandlerService
     {
         private readonly ILogger<ButtonHandlerService> _logger;
-        public ButtonHandlerService(ILogger<ButtonHandlerService> logger) => _logger = logger;
+        private readonly ConfigService _config;
+        public ButtonHandlerService(ILogger<ButtonHandlerService> logger, ConfigService config)
+        {
+            _logger = logger;
+            _config = config;
+        }
 
         public async Task OnButtonPress(DiscordClient client, ComponentInteractionCreateEventArgs args)
         {
-            _logger.LogInformation("{User} pushed {Button}", args.User.Username, args.Id);
-            //await args.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate);
-            //await args.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent("Success!").AsEphemeral(true));
-            await Task.Delay(2000);
-            try { await args.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate); }
-            catch (NotFoundException)
+            if (args.Id.StartsWith("rolemenu assign ", StringComparison.OrdinalIgnoreCase))
             {
-                /* button was ACK'd already. */
+                try { await args.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate); }
+                catch
+                {
+                    /* We'll still try to assign/unassign the role. */
+                }
+
+                GuildConfig config = await _config.GetConfigAsync(args.Guild.Id);
+                if (config.RoleMenus.All(r => r.MessageId != args.Message.Id))
+                    return; // Not a valid role menu anymore. //
+
+                ulong roleId = ulong.Parse(args.Id.Split(' ')[2]);
+                DiscordRole? role = args.Guild.GetRole(roleId);
+
+                if (role is null)
+                {
+                    await args.Interaction.CreateFollowupMessageAsync(new() {Content = "Sorry, but it seems that role doesn't exist anymore!", IsEphemeral = true});
+                    return;
+                }
+
+                if (role.Position >= args.Guild.CurrentMember.Hierarchy)
+                {
+                    await args.Interaction.CreateFollowupMessageAsync(new() {Content = "Sorry, but that role was moved above mine, and thus I can't assign it!", IsEphemeral = true});
+                    return;
+                }
+
+                DiscordMember member = await args.Guild.GetMemberAsync(args.User.Id); // They may not be in cache. //
+
+                if (member.Roles.Contains(role))
+                {
+                    await member.RevokeRoleAsync(role);
+                    await args.Interaction.CreateFollowupMessageAsync(new() {Content = $"Done! You no longer have {role.Mention}.", IsEphemeral = true});
+                }
+                else
+                {
+                    await member.RevokeRoleAsync(role);
+                    await args.Interaction.CreateFollowupMessageAsync(new() {Content = $"Done! You now have {role.Mention}.", IsEphemeral = true});
+                }
             }
-        }
-        public async Task OnInteraction(DiscordClient client, InteractionCreateEventArgs args)
-        {
-            var p = new DiscordButtonComponent(ButtonStyle.Primary, "P_", "Blurple", emoji: new(833475075474063421));
-            var c = new DiscordButtonComponent(ButtonStyle.Secondary, "C_", "Grey", emoji: new(833475015114358854));
-            var b = new DiscordButtonComponent(ButtonStyle.Success, "B_", "Green", emoji: new(831306677449785394));
-            var y = new DiscordButtonComponent(ButtonStyle.Danger, "Y_", "Red", emoji: new(833886629792972860));
-            var z = new DiscordLinkButtonComponent("https://velvetthepanda.dev", "Link", false, new(826108356656758794));
-
-            var d1 = new DiscordButtonComponent(ButtonStyle.Primary, "disabled", "and", true);
-            var d2 = new DiscordButtonComponent(ButtonStyle.Secondary, "disabled2", "these", true);
-            var d3 = new DiscordButtonComponent(ButtonStyle.Success, "disabled3", "are", true);
-            var d4 = new DiscordButtonComponent(ButtonStyle.Danger, "disabled4", "disabled~!", true);
-
-
-            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder()
-                    .WithContent("Poggers")
-                    .AsEphemeral(true)
-                    .WithComponents(new[] {p})
-                    .WithComponents(new[] {c, b})
-                    .WithComponents(new DiscordComponent[] {y, z})
-                    .WithComponents(new[] {d1, d2, d3, d4}));
         }
     }
 }

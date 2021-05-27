@@ -283,7 +283,7 @@ namespace Silk.Core.Commands.Tests
                         }
 
                         await currentMessage.ModifyAsync("Alright!");
-                        await Task.Delay(_messageUserReadWaitDelay / 2);
+                        await Task.Delay(_messageUserReadWaitDelay / 4);
 
                         break;
                     }
