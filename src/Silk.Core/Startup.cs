@@ -68,7 +68,7 @@ namespace Silk.Core
                 {
                     var logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                         .Filter.ByExcluding(Matching.FromSource("DSharpPlus"));
 

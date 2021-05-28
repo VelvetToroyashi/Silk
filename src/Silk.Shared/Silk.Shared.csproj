@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus\DSharpPlus.csproj"/>
         <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
     </ItemGroup>
 
