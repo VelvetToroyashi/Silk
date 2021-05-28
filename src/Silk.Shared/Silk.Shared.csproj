@@ -4,10 +4,4 @@
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus\DSharpPlus.csproj"/>
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
-    </ItemGroup>
-
 </Project>

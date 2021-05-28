@@ -18,10 +18,4 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0-preview.2.21154.6"/>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.2.21154.6"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus.CommandsNext\DSharpPlus.CommandsNext.csproj"/>
-        <ProjectReference Include="..\..\..\DSharpPlus\DSharpPlus\DSharpPlus.csproj"/>
-    </ItemGroup>
-
 </Project>
