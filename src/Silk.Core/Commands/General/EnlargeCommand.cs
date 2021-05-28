@@ -1,12 +1,12 @@
-﻿using System.IO;
+﻿/*using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
-using SkiaSharp;
 using Svg.Skia;
+using SkiaSharp;
 
 namespace Silk.Core.Commands.General
 {
@@ -58,10 +58,10 @@ namespace Silk.Core.Commands.General
 
             var svg = new SKSvg();
             svg.Load(svgStream);
-            svg.Save(imageStream, SKColor.Empty, scaleX: 16.0f, scaleY: 16.0f);
+            svg.Save(imageStream, SkiaSharp.SKColor.Empty, scaleX: 16.0f, scaleY: 16.0f);
 
             imageStream.Position = 0;
             return imageStream;
         }
     }
-}
+}*/

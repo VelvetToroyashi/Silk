@@ -26,8 +26,4 @@
         <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="UnitTest1.cs"/>
-    </ItemGroup>
-
 </Project>
