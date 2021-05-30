@@ -27,6 +27,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         [Command("ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
+        [RequirePermissions(Permissions.BanMembers)]
         [Description("Ban a member from the Guild")]
         public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
