@@ -14,13 +14,11 @@ namespace Silk.Core.EventHandlers.MemberAdded
     public class MemberAddedHandler
     {
         private readonly ConfigService _configService;
-        private readonly ILogger<MemberAddedHandler> _logger;
 
         private readonly Timer _timer = new(500);
         public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
         {
             _configService = configService;
-            _logger = logger;
             _timer.AutoReset = true;
             _timer.Elapsed += async (_, _) => _ = OnTick();
             _timer.Start();
@@ -31,7 +29,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
         {
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
             // This should be done in a seperate service //
-            if (config.LogMemberJoing && config.LoggingChannel is not 0)
+            if (config.LogMemberJoins && config.LoggingChannel is not 0)
                 await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
             bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetOnScreeningComplete;

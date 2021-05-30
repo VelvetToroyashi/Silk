@@ -10,6 +10,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation.Ban
@@ -25,8 +26,8 @@ namespace Silk.Core.Commands.Moderation.Ban
 
         [RequireGuild]
         [Command("tempban")]
-        [RequireBotPermissions(Permissions.BanMembers)]
-        [RequireUserPermissions(Permissions.BanMembers)]
+        [RequireFlag(UserFlag.Staff)]
+        [RequirePermissions(Permissions.BanMembers)]
         [Description("Temporarily ban a member from the Guild")]
         public async Task TempBan(CommandContext ctx, DiscordUser user, TimeSpan duration, [RemainingText] string reason = "Not provided.")
         {

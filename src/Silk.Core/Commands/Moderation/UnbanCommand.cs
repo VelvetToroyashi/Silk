@@ -4,6 +4,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
@@ -13,7 +14,8 @@ namespace Silk.Core.Commands.Moderation
     public class UnbanCommand : BaseCommandModule
     {
         [Command("unban")]
-        [RequireUserPermissions(Permissions.BanMembers)]
+        [RequireFlag(UserFlag.Staff)]
+        [RequirePermissions(Permissions.BanMembers)]
         [Description("Unban a member from the Guild")]
         public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
         {
