@@ -74,7 +74,7 @@ namespace Silk.Core.Data.MediatR.Guilds
             config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
             config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
             config.BlacklistInvites = request.BlacklistInvites ?? config.BlacklistInvites;
-            config.LogMemberJoing = request.LogMembersJoining ?? config.LogMemberJoing;
+            config.LogMemberJoins = request.LogMembersJoining ?? config.LogMemberJoins;
             config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
             config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
             config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;

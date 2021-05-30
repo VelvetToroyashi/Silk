@@ -31,7 +31,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
         {
             GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
             // This should be done in a seperate service //
-            if (config.LogMemberJoing && config.LoggingChannel is not 0)
+            if (config.LogMemberJoins && config.LoggingChannel is not 0)
                 await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
             bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetOnScreeningComplete;

@@ -103,7 +103,11 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     Whether to log members joining or not.
         /// </summary>
-        public bool LogMemberJoing { get; set; }
+        public bool LogMemberJoins { get; set; }
+        /// <summary>
+        ///     Whether to log members leaving or not.
+        /// </summary>
+        public bool LogMemberLeaves { get; set; }
 
         /// <summary>
         ///     Blacklist certain invites.
