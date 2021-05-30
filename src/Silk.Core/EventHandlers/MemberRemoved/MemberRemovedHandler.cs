@@ -15,14 +15,11 @@ namespace Silk.Core.EventHandlers.MemberRemoved
     public class MemberRemovedHandler
     {
         private readonly ConfigService _configService;
-        private readonly ILogger<MemberRemovedHandler> _logger;
 
         public MemberRemovedHandler(ConfigService configService, ILogger<MemberRemovedHandler> logger)
         {
             _configService = configService;
-            _logger = logger;
         }
-        public List<DiscordMember> MemberQueue { get; private set; } = new();
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {

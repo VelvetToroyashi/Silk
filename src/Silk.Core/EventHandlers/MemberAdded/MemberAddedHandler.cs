@@ -14,13 +14,11 @@ namespace Silk.Core.EventHandlers.MemberAdded
     public class MemberAddedHandler
     {
         private readonly ConfigService _configService;
-        private readonly ILogger<MemberAddedHandler> _logger;
 
         private readonly Timer _timer = new(500);
         public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
         {
             _configService = configService;
-            _logger = logger;
             _timer.AutoReset = true;
             _timer.Elapsed += async (_, _) => _ = OnTick();
             _timer.Start();
