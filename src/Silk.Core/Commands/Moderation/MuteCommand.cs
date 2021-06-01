@@ -28,6 +28,7 @@ namespace Silk.Core.Commands.Moderation
         }
 
         [Command("mute")]
+        [RequireFlag(UserFlag.Staff)]
         [RequirePermissions(Permissions.ManageRoles)]
         [Description("Mute a guild member!")]
         [Priority(0)]

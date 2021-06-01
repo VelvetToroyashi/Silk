@@ -16,6 +16,7 @@ using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
+using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
@@ -108,6 +109,7 @@ namespace Silk.Core
                 services.AddSingleton<AntiInviteCore>();
                 services.AddTransient<RoleAddedHandler>();
                 services.AddTransient<MemberAddedHandler>();
+                services.AddTransient<MemberRemovedHandler>();
                 services.AddTransient<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
