@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
@@ -15,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Reminders;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
-using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services
 {
@@ -84,7 +80,7 @@ namespace Silk.Core.Services
         private async Task DispatchReminderAsync(Reminder reminder)
         {
             var guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
-            if (!(guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is { } guild))
+            if (guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is not { } guild)
             {
                 _logger.LogWarning("Couldn't find guild {GuildId}! Removing reminders from queue", reminder.GuildId);
                 _reminders.RemoveAll(r => r.GuildId == reminder.GuildId);

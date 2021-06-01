@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Silk.Extensions
 {
@@ -39,16 +40,6 @@ namespace Silk.Extensions
             return text[range];
         }
 
-        public static Stream AsStream(this string s)
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-
-            writer.Write(s);
-            writer.Flush();
-
-            stream.Position = 0;
-            return stream;
-        }
+        public static Stream AsStream(this string s) => new MemoryStream(Encoding.UTF8.GetBytes(s));
     }
 }
