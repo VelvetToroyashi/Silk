@@ -16,7 +16,7 @@ namespace Silk.Benchmarks
 
         public string CenterWithPad()
         {
-            var interpretedAnchor = anchor.Replace("\t", "    ");
+            string interpretedAnchor = anchor.Replace("\t", "    ");
             return input.PadLeft((interpretedAnchor.Length - input.Length) / 2).PadRight(interpretedAnchor.Length);
         }
 
@@ -71,7 +71,7 @@ namespace Silk.Benchmarks
             int refLength = anchor.Length;
             if (input.Contains('\t'))
             {
-                for (int i = 0; i < anchor.Length; i++)
+                for (var i = 0; i < anchor.Length; i++)
                     if (anchor[i] is '\t')
                         refLength += 3;
 

@@ -19,7 +19,7 @@ namespace Silk.Extensions.DSharpPlus
             var emojiArray = new DiscordEmoji[emojis.Length];
             for (var i = 0; i < emojis.Length; i++)
             {
-                var e = emojis[i];
+                ulong e = emojis[i];
                 DiscordEmoji emoji = DiscordEmoji.FromGuildEmote(client, e);
                 await msg.CreateReactionAsync(emoji);
                 emojiArray[i] = emoji;

@@ -33,8 +33,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
             var builder = new DiscordMessageBuilder();
-            builder.WithReply(ctx.Message.Id);
-            builder.WithoutMentions();
+            builder.WithReply(ctx.Message.Id).WithoutMentions();
 
             builder.WithContent($"Alright! I'll use {role.Mention} for muting!");
             await ctx.RespondAsync(builder);

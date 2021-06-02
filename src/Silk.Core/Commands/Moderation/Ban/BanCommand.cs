@@ -27,6 +27,7 @@ namespace Silk.Core.Commands.Moderation.Ban
         [Command("ban")]
         [RequireGuild]
         [RequireFlag(UserFlag.Staff)]
+        [RequirePermissions(Permissions.BanMembers)]
         [Description("Ban a member from the Guild")]
         public async Task Ban(CommandContext ctx, DiscordMember target, [RemainingText] string reason = "No reason given.")
         {
@@ -73,7 +74,7 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .WithTitle($"You've been banned from {ctx.Guild.Name}!")
                 .AddField("Reason:", $"{reason}")
                 .AddFooter(ctx)
-                .WithColor(new DiscordColor("#cc1400"));
+                .WithColor(new("#cc1400"));
 
             (string name, string url) = ctx.GetAuthor();
             DiscordEmbedBuilder logEmbed = new DiscordEmbedBuilder()

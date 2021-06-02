@@ -1,10 +1,12 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Silk.Core.Utilities.HelpFormatter;
@@ -18,7 +20,10 @@ namespace Silk.Core.Commands.Bot
         private const string EmbedTitle = "`|\t[Shard]\t|\t[Ping]\t|\t[Guilds]\t|\t[Members]\t|`";
 
         private readonly Main _main;
-        public ShardsCommand(Main main) => _main = main;
+        public ShardsCommand(Main main)
+        {
+            _main = main;
+        }
 
         [Command]
         public async Task Shards(CommandContext ctx)
@@ -26,15 +31,15 @@ namespace Silk.Core.Commands.Bot
             var builder = new DiscordMessageBuilder();
             builder.WithReply(ctx.Message.Id);
 
-            var interactivity = ctx.Client.GetInteractivity();
+            InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-            var embed = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Gold)
                 .WithTitle("Shard info:");
             var sb = new StringBuilder();
 
-            var shards = _main.ShardClient.ShardClients;
-            var averagePing = shards.Sum(c => c.Value.Ping) / shards.Count;
+            IReadOnlyDictionary<int, DiscordClient>? shards = _main.ShardClient.ShardClients;
+            int averagePing = shards.Sum(c => c.Value.Ping) / shards.Count;
 
             embed.AddField("​", $"**{EmbedTitle}**");
             embed.WithFooter($"You are shard {ctx.Client.ShardId + 1}!");
@@ -67,7 +72,7 @@ namespace Silk.Core.Commands.Bot
                 sb.AppendLine();
             }
 
-            var paginated = interactivity.GeneratePagesInEmbed(sb.ToString(), SplitType.Line, embed);
+            IEnumerable<Page>? paginated = interactivity.GeneratePagesInEmbed(sb.ToString(), SplitType.Line, embed);
 
             await ctx.Channel.SendPaginatedMessageAsync(ctx.User, paginated);
         }

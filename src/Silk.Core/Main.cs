@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -24,11 +25,13 @@ namespace Silk.Core
         public static string DefaultCommandPrefix => "s!";
 
         private static ILogger<Main> _logger;
+        private readonly BotExceptionHandler _handler;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
             // And that's all it needs, since it subs to events in it's ctor.
             _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
+            _handler = handler;
             ShardClient = shardClient;
             _ = e;
         }
@@ -47,6 +50,7 @@ namespace Silk.Core
             _logger.LogInformation("Starting service");
             await InitializeClientExtensions();
             await InitializeCommandsNextAsync();
+            await _handler.SubscribeToEventsAsync();
             _logger.LogDebug("Connecting to Discord gateway");
             await ShardClient.StartAsync();
             _logger.LogInformation("Connected to Discord gateway as {Username}#{Discriminator}", ShardClient.CurrentUser.Username, ShardClient.CurrentUser.Discriminator);
@@ -76,7 +80,7 @@ namespace Silk.Core
 
             var t = Stopwatch.StartNew();
             var asm = Assembly.GetEntryAssembly();
-            var cnext = await ShardClient.GetCommandsNextAsync();
+            IReadOnlyDictionary<int, CommandsNextExtension>? cnext = await ShardClient.GetCommandsNextAsync();
 
             foreach (var cnextExt in cnext.Values)
             {
@@ -86,7 +90,7 @@ namespace Silk.Core
             }
 
             t.Stop();
-            var registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
+            int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
             _logger.LogDebug("Registered {Commands} commands for {Shards} shards in {Time} ms", registeredCommands, ShardClient.ShardClients.Count, t.ElapsedMilliseconds);
         }

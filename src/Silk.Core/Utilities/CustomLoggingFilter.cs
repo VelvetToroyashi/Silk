@@ -29,7 +29,7 @@ namespace Silk.Core.Utilities
                 // Run other configuration first, we want to decorate.
                 next(builder);
 
-                var outerLogger =
+                ILogger? outerLogger =
                     _loggerFactory.CreateLogger($"System.Net.Http.HttpClient.{builder.Name}.LogicalHandler");
 
                 builder.AdditionalHandlers.Insert(0, new CustomLoggingScopeHttpMessageHandler(outerLogger));

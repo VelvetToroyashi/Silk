@@ -13,7 +13,10 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
     internal class UpdateRoleMenuHandler : IRequestHandler<UpdateRoleMenuRequest>
     {
         private readonly GuildContext _db;
-        public UpdateRoleMenuHandler(GuildContext db) => _db = db;
+        public UpdateRoleMenuHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<Unit> Handle(UpdateRoleMenuRequest request, CancellationToken ct)
         {

@@ -118,7 +118,7 @@ namespace Silk.Core.Commands.Miscellaneous
         private static string GetHierarchy(CommandContext ctx, DiscordRole role)
         {
             string roleString = string.Empty;
-            bool hasAboveRole = false;
+            var hasAboveRole = false;
 
             DiscordRole? rle = null;
 

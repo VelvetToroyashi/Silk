@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -33,8 +34,8 @@ namespace Silk.Core.Commands.Server.Roles
 
             if (roles.Any())
             {
-                var botPos = ctx.Guild.CurrentMember.Roles.Last()!.Position;
-                var unavailableRoles = roles.Where(r => r.Position > botPos);
+                int botPos = ctx.Guild.CurrentMember.Roles.Last()!.Position;
+                IEnumerable<DiscordRole>? unavailableRoles = roles.Where(r => r.Position > botPos);
 
                 if (unavailableRoles.Any())
                 {
@@ -51,7 +52,7 @@ namespace Silk.Core.Commands.Server.Roles
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("👍"));
             }
 
-            var embedBuilder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? embedBuilder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Gold)
                 .WithTitle("Currently assignable roles")
                 .WithDescription(string.Join('\n', config.SelfAssignableRoles.Select(r => $"<@&{r.Id}>")));
@@ -66,7 +67,7 @@ namespace Silk.Core.Commands.Server.Roles
             GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             if (!roles.Any())
             {
-                var embedBuilder = new DiscordEmbedBuilder()
+                DiscordEmbedBuilder? embedBuilder = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.Gold)
                     .WithTitle("Currently assignable roles")
                     .WithDescription(string.Join('\n', config.SelfAssignableRoles.Select(r => $"<@&{r.Id}>")));

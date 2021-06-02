@@ -30,7 +30,7 @@ namespace Silk.Core.Commands.Moderation
         [RequireFlag(UserFlag.Staff)]
         public async Task Cases(CommandContext ctx, DiscordUser user)
         {
-            var mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
+            DiscordMessageBuilder? mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
             var eBuilder = new DiscordEmbedBuilder();
 
             Guild guild = await _mediator.Send(new GetGuildRequest(ctx.Guild.Id));
@@ -44,9 +44,9 @@ namespace Silk.Core.Commands.Moderation
             else
             {
                 var sb = new StringBuilder();
-                for (int i = 0; i < guild.Infractions.Count; i++)
+                for (var i = 0; i < guild.Infractions.Count; i++)
                 {
-                    var currentInfraction = guild.Infractions[i];
+                    Infraction? currentInfraction = guild.Infractions[i];
                     if (currentInfraction.UserId == user.Id)
                     {
                         sb.AppendLine($"Case {i + 1}: {currentInfraction.InfractionType.Humanize(LetterCasing.Title)} by <@{currentInfraction.Enforcer}>, " +

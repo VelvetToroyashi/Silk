@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -69,7 +71,7 @@ namespace Silk.Core.Commands.Bot
                     "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions",
                     "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
-                var asm = AppDomain.CurrentDomain.GetAssemblies()
+                IEnumerable<Assembly>? asm = AppDomain.CurrentDomain.GetAssemblies()
                     .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location));
 
                 sopts = sopts.WithReferences(asm);

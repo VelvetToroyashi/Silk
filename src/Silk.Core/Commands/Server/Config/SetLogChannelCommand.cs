@@ -26,8 +26,8 @@ namespace Silk.Core.Commands.Server.Config
             [Command("Log")]
             public async Task SetLoggingChannel(CommandContext ctx, DiscordChannel channel)
             {
-                var msg = await ctx.RespondAsync($"Alright, so you would like me to log to {channel.Mention}?");
-                var result = await _input.GetConfirmationAsync(msg, ctx.Message.Author.Id);
+                DiscordMessage? msg = await ctx.RespondAsync($"Alright, so you would like me to log to {channel.Mention}?");
+                bool? result = await _input.GetConfirmationAsync(msg, ctx.Message.Author.Id);
 
                 if (result is null)
                 {

@@ -44,7 +44,10 @@ namespace Silk.Core.EventHandlers.Guilds
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
                                                           "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
 
-        internal void MarkCompleted(int shardId) => _currentShardsCompleted++;
+        internal void MarkCompleted(int shardId)
+        {
+            _currentShardsCompleted++;
+        }
 
 
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
@@ -61,7 +64,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal static async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            var allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            IOrderedEnumerable<DiscordChannel>? allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             DiscordMember bot = args.Guild.CurrentMember;
             DiscordChannel? availableChannel = allChannels
                 .Where(c => c.Type is ChannelType.Text)
@@ -70,7 +73,7 @@ namespace Silk.Core.EventHandlers.Guilds
             if (availableChannel is null)
                 return;
 
-            var builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
                 .WithDescription(OnGuildJoinThankYouMessage)
@@ -101,7 +104,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
         private void CheckForCompletion()
         {
-            var totalShards = _client.ShardClients.Count;
+            int totalShards = _client.ShardClients.Count;
             var completedShards = new bool[totalShards];
 
             for (var i = 0; i < totalShards; i++)
@@ -120,7 +123,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
         private async Task<int> CacheMembersAsync(IEnumerable<DiscordMember> members)
         {
-            int staffCount = 0;
+            var staffCount = 0;
             List<DiscordMember> staff = members.Where(m => !m.IsBot && (m.HasPermission(FlagConstants.CacheFlag) || m.IsAdministrator() || m.IsOwner)).ToList();
 
             foreach (var member in staff)

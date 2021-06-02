@@ -42,7 +42,7 @@ namespace Silk.Core.Commands.General
             sw.Stop();
 
             await Task.Delay(400);
-            var silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
+            PingReply? silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
             embed
                 .ClearFields()
                 .AddField("→ Message Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀') + "```", true)

@@ -10,12 +10,12 @@ using Silk.Shared.Constants;
 namespace Silk.Core.Utilities
 {
     /// <summary>
-    /// A class that holds the base configurations for various Discord-related entities.
+    ///     A class that holds the base configurations for various Discord-related entities.
     /// </summary>
     public static class DiscordConfigurations
     {
         /// <summary>
-        /// The base configuration used for <see cref="DiscordShardedClient"/>.
+        ///     The base configuration used for <see cref="DiscordShardedClient" />.
         /// </summary>
         public static DiscordConfiguration Discord { get; } = new()
         {
@@ -28,7 +28,7 @@ namespace Silk.Core.Utilities
         };
 
         /// <summary>
-        /// The base configuration used for <see cref="InteractivityExtension"/>.
+        ///     The base configuration used for <see cref="InteractivityExtension" />.
         /// </summary>
         public static InteractivityConfiguration Interactivity { get; } = new()
         {

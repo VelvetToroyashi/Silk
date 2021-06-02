@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DSharpPlus.Entities;
 
 namespace Silk.Extensions.DSharpPlus
@@ -17,6 +18,20 @@ namespace Silk.Extensions.DSharpPlus
             builder.WithAllowedMentions(Mentions.None);
             return builder;
         }
+
+
+        /// <summary>
+        ///     Clears the components of a <see cref="DiscordMessageBuilder" />.
+        /// </summary>
+        /// <param name="builder">The builder to clear.</param>
+        /// <returns>The updated builder to chain calls with.</returns>
+        public static DiscordMessageBuilder ClearComponents(this DiscordMessageBuilder builder)
+        {
+            object prop = typeof(DiscordMessageBuilder).GetField("_components", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(builder)!;
+            (prop as List<DiscordActionRowComponent>)!.Clear();
+            return builder;
+        }
+
         /// <summary>
         ///     Remove a single user mention from a message without having to form <see cref="IMention" /> for every mention and remove it manually.
         /// </summary>

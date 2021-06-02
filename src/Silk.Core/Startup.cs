@@ -17,6 +17,7 @@ using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
+using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
@@ -33,7 +34,7 @@ namespace Silk.Core
         public static async Task Main()
         {
             // Make Generic Host here. //
-            var builder = CreateBuilder();
+            IHostBuilder? builder = CreateBuilder();
 
             AddLogging(builder);
 
@@ -47,11 +48,14 @@ namespace Silk.Core
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
-        public static IHostBuilder CreateHostBuilder(string[] args) => ConfigureServices(CreateBuilder(), false);
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return ConfigureServices(CreateBuilder(), false);
+        }
 
         private static IHostBuilder CreateBuilder()
         {
-            var builder = Host.CreateDefaultBuilder();
+            IHostBuilder? builder = Host.CreateDefaultBuilder();
 
             builder.ConfigureAppConfiguration((_, configuration) =>
             {
@@ -66,7 +70,7 @@ namespace Silk.Core
         {
             host.ConfigureLogging((builder, _) =>
                 {
-                    var logger = new LoggerConfiguration()
+                    LoggerConfiguration? logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: SerilogThemes.Bot)
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -91,7 +95,7 @@ namespace Silk.Core
         {
             return builder.ConfigureServices((context, services) =>
             {
-                var config = context.Configuration;
+                IConfiguration? config = context.Configuration;
                 AddDatabases(services, config.GetConnectionString("core"));
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
@@ -109,6 +113,7 @@ namespace Silk.Core
                 services.AddSingleton<AntiInviteCore>();
                 services.AddTransient<RoleAddedHandler>();
                 services.AddTransient<MemberAddedHandler>();
+                services.AddTransient<MemberRemovedHandler>();
                 services.AddTransient<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
@@ -156,8 +161,8 @@ namespace Silk.Core
         {
             builder.ConfigureServices((context, services) =>
             {
-                var client = DiscordConfigurations.Discord;
-                var config = context.Configuration;
+                DiscordConfiguration? client = DiscordConfigurations.Discord;
+                IConfiguration? config = context.Configuration;
                 int.TryParse(context.Configuration["Shards"] ?? "1", out int shards);
 
                 client.ShardCount = shards;

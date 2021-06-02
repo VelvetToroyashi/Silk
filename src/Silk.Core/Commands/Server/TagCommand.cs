@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
@@ -12,6 +13,7 @@ using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
+using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 
@@ -66,7 +68,7 @@ namespace Silk.Core.Commands.Server
             else
             {
                 DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
-                var builder = new DiscordEmbedBuilder()
+                DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.Blurple)
                     .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
                     .WithTitle(dbTag.Name);
@@ -88,7 +90,7 @@ namespace Silk.Core.Commands.Server
         [Description("Create an Alias for a Tag")]
         public async Task Alias(CommandContext ctx, string aliasName, [RemainingText] string originalTag)
         {
-            var couldCreateAlias = await _tagService.AliasTagAsync(originalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult? couldCreateAlias = await _tagService.AliasTagAsync(originalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateAlias.Success)
             {
                 await ctx.RespondAsync(couldCreateAlias.Reason);
@@ -120,7 +122,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            var couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult? couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateTag.Success)
             {
                 await ctx.RespondAsync(couldCreateTag.Reason);
@@ -178,7 +180,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            var couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult? couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.Success)
             {
                 await ctx.RespondAsync(couldEditTag.Reason);
@@ -193,7 +195,7 @@ namespace Silk.Core.Commands.Server
         [Description("Search for a Tag by name")]
         public async Task Search(CommandContext ctx, string tagName)
         {
-            var tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
+            IEnumerable<Tag>? tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
             if (tags is null)
             {
                 await ctx.RespondAsync("No tags found :c");
@@ -211,7 +213,7 @@ namespace Silk.Core.Commands.Server
                     s += $" - <@{t.OwnerId}>";
                     return s;
                 }));
-            var builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Result for {tagName}:")
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}");
@@ -223,9 +225,9 @@ namespace Silk.Core.Commands.Server
             }
             else
             {
-                var interactivity = ctx.Client.GetInteractivity();
+                InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-                var pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
+                IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
 
@@ -269,7 +271,7 @@ namespace Silk.Core.Commands.Server
                     }
                     return s;
                 }));
-            var builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags in {ctx.Guild.Name}:")
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}");
@@ -281,9 +283,9 @@ namespace Silk.Core.Commands.Server
             }
             else
             {
-                var interactivity = ctx.Client.GetInteractivity();
+                InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-                var pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
+                IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
         }
@@ -320,7 +322,7 @@ namespace Silk.Core.Commands.Server
                     }
                     return s;
                 }));
-            var builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags for {user.Username}:")
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}");
@@ -332,9 +334,9 @@ namespace Silk.Core.Commands.Server
             }
             else
             {
-                var interactivity = ctx.Client.GetInteractivity();
+                InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-                var pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
+                IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
         }

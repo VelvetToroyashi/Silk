@@ -10,7 +10,10 @@ namespace Silk.Core.Commands.General
     public class ServerList : BaseCommandModule
     {
         private readonly Main _main;
-        public ServerList(Main main) => _main = main;
+        public ServerList(Main main)
+        {
+            _main = main;
+        }
 
         [Command("servers")]
         [Aliases("serverlist")]

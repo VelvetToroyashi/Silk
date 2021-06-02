@@ -47,7 +47,7 @@ namespace Silk.Core.Services
             {
                 if (!_isUp)
                 {
-                    var down = DateTime.Now;
+                    DateTime down = DateTime.Now;
 
                     await _reset.WaitAsync();
                     TimeSpan downTime = DateTime.Now - down;

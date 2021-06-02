@@ -36,7 +36,7 @@ namespace Silk.Core.Commands.General
 
             string result = string.Join('\n', selectedUsers);
 
-            var embed = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
                 .WithTitle($"Selected {sampleSize} random users!")
                 .WithDescription($"Result:\n{result}")
                 .WithColor(DiscordColor.SapGreen)

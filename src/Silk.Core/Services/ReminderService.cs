@@ -73,7 +73,7 @@ namespace Silk.Core.Services
         {
             // ReSharper disable once ForCanBeConvertedToForeach //
             //             Collection gets modified.             //
-            for (int i = 0; i < _reminders.Count; i++)
+            for (var i = 0; i < _reminders.Count; i++)
             {
                 Reminder r = _reminders[i];
                 if (r.Expiration < DateTime.UtcNow)
@@ -83,8 +83,8 @@ namespace Silk.Core.Services
 
         private async Task DispatchReminderAsync(Reminder reminder)
         {
-            var guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
-            if (!(guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is { } guild))
+            IEnumerable<KeyValuePair<ulong, DiscordGuild>>? guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
+            if (guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is not { } guild)
             {
                 _logger.LogWarning("Couldn't find guild {GuildId}! Removing reminders from queue", reminder.GuildId);
                 _reminders.RemoveAll(r => r.GuildId == reminder.GuildId);
@@ -133,7 +133,7 @@ namespace Silk.Core.Services
 
         private async Task SendRecurringReminderMessageAsync(Reminder reminder, DiscordChannel channel)
         {
-            var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
+            DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
             var message = $"Hey, <@{reminder.OwnerId}>! You wanted to reminded {reminder.Type.Humanize(LetterCasing.LowerCase)}: \n{reminder.MessageContent}";
             builder.WithContent(message);
 
@@ -144,8 +144,8 @@ namespace Silk.Core.Services
         private async Task SendGuildReminderMessageAsync(Reminder reminder, DiscordChannel channel)
         {
             _logger.LogTrace("Preparing to send reminder");
-            var builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
-            var mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
+            DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
+            string? mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
             var message = $"Hey, {mention}! {(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago:\n{reminder.MessageContent}";
 
             // These are misleading names (They don't actually dispatch a message) I know but w/e. //

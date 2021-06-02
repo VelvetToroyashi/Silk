@@ -32,7 +32,7 @@ namespace Silk.Core.EventHandlers.Messages
             DiscordUser bot = client.CurrentUser;
             if (isBot || isEmpty) return;
 
-            var commandsNext = client.GetCommandsNext();
+            CommandsNextExtension? commandsNext = client.GetCommandsNext();
             string prefix = _prefixService.RetrievePrefix(args.Guild?.Id);
 
             int prefixLength =

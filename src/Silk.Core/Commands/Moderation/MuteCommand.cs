@@ -28,6 +28,7 @@ namespace Silk.Core.Commands.Moderation
         }
 
         [Command("mute")]
+        [RequireFlag(UserFlag.Staff)]
         [RequirePermissions(Permissions.ManageRoles)]
         [Description("Mute a guild member!")]
         [Priority(0)]
@@ -38,7 +39,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (user.IsAbove(bot))
             {
-                var roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -51,7 +52,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (user.IsAbove(ctx.Member))
             {
-                var roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                int roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -82,7 +83,7 @@ namespace Silk.Core.Commands.Moderation
             DiscordMember bot = ctx.Guild.CurrentMember;
             if (user.IsAbove(bot))
             {
-                var roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -95,7 +96,7 @@ namespace Silk.Core.Commands.Moderation
 
             if (user.IsAbove(ctx.Member))
             {
-                var roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                int roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
                 string message;
 
                 message = roleDiff is not 0 ?

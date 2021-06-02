@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -29,7 +30,7 @@ namespace Silk.Core.Commands.Server
             DiscordGuild guild = ctx.Guild;
             GuildContext db = _dbFactory.CreateDbContext();
 
-            var staffMembers = db.Guilds.Include(g => g.Users)
+            IEnumerable<User>? staffMembers = db.Guilds.Include(g => g.Users)
                 .First(g => g.Id == guild.Id)
                 .Users
                 .Where(u => u.Flags.HasFlag(UserFlag.Staff));

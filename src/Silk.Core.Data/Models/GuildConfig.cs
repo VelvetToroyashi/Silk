@@ -78,7 +78,7 @@ namespace Silk.Core.Data.Models
         public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
 
         /// <summary>
-        /// A list of roles that can be obtained via reacting to a message.
+        ///     A list of roles that can be obtained via reacting to a message.
         /// </summary>
         public List<RoleMenu> RoleMenus { get; set; } = new();
 
@@ -103,7 +103,11 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     Whether to log members joining or not.
         /// </summary>
-        public bool LogMemberJoing { get; set; }
+        public bool LogMemberJoins { get; set; }
+        /// <summary>
+        ///     Whether to log members leaving or not.
+        /// </summary>
+        public bool LogMemberLeaves { get; set; }
 
         /// <summary>
         ///     Blacklist certain invites.

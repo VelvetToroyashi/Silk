@@ -17,7 +17,7 @@ namespace Silk.Core.Commands.Bot
         {
             string prefix = ctx.Prefix;
 
-            var description = ctx.Command.Description;
+            string? description = ctx.Command.Description;
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.CornflowerBlue)
