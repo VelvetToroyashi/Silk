@@ -10,7 +10,10 @@ namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
     ///     Request for updating a <see cref="GuildConfig" /> for a Guild.
-    /// <remarks>When it comes to collections, such as <see cref="SelfAssignableRoles"/> only the *added* elements should be passed to this request, else they'll be removed.</remarks>
+    ///     <remarks>
+    ///         When it comes to collections, such as <see cref="SelfAssignableRoles" /> only the *added* elements should be passed to this request,
+    ///         else they'll be removed.
+    ///     </remarks>
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig?>

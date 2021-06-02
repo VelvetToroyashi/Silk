@@ -45,7 +45,7 @@ namespace Silk.Core.Data.MediatR.Users
             {
                 _db.ChangeTracker.Clear();
 
-                var nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
+                List<User>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
                 nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
 
                 _db.Users.AddRange(nonAddedUsers);

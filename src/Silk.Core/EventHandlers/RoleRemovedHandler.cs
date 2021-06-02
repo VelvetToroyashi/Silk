@@ -30,7 +30,7 @@ namespace Silk.Core.EventHandlers
                 User? user = await _mediator.Send(new GetUserRequest(e.Member.Id, e.Guild.Id));
                 if (user is null) return;
 
-                var flag = user.Flags.HasFlag(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;
+                UserFlag flag = user.Flags.HasFlag(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;
                 flag |= UserFlag.InfractionExemption;
                 user.Flags = user.Flags.Remove(flag);
                 await _mediator.Send(new UpdateUserRequest(user.Id, user.GuildId, user.Flags));

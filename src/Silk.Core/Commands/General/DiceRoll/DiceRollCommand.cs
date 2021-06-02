@@ -35,7 +35,7 @@ namespace Silk.Core.Commands.General.DiceRoll
             var modifiers = new List<int>();
             var rolls = new List<int>();
 
-            for (int i = 0; i < steps.Count; i++)
+            for (var i = 0; i < steps.Count; i++)
             {
                 if (steps[i].Type is StepType.Addition)
                 {
@@ -44,7 +44,7 @@ namespace Silk.Core.Commands.General.DiceRoll
                 else
                 {
                     var localRolls = new List<int>();
-                    for (int j = 0; j < steps[i].TotalNumber; j++)
+                    for (var j = 0; j < steps[i].TotalNumber; j++)
                     {
                         int result = ran.Next(1, steps[i].DiceNoSides + 1);
                         localRolls.Add(result);

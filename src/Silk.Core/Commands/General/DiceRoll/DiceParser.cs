@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Silk.Shared.Types;
 
 namespace Silk.Core.Commands.General.DiceRoll
@@ -19,7 +18,7 @@ namespace Silk.Core.Commands.General.DiceRoll
             } while (ReadIf('+'));
 
             // Ensure there's no junk data at the end.
-            if (ReadChar() != EOT) throw new Exception($"Unexpected character at position {_currentPosition}!");
+            if (ReadChar() != EOT) throw new($"Unexpected character at position {_currentPosition}!");
 
             return result;
         }
@@ -29,16 +28,16 @@ namespace Silk.Core.Commands.General.DiceRoll
             // Fill in the quantity as "1" if there's no number and it's a dice.
             if (ReadIf('d')) return ParseDice(1);
 
-            var startNo = ReadNumber();
+            int startNo = ReadNumber();
 
             if (ReadIf('d')) return ParseDice(startNo);
-            return new Step(StepType.Addition, startNo, 0);
+            return new(StepType.Addition, startNo, 0);
         }
 
         Step ParseDice(int totalQuantity)
         {
-            var noOfSides = ReadNumber();
-            return new Step(StepType.Roll, totalQuantity, noOfSides);
+            int noOfSides = ReadNumber();
+            return new(StepType.Roll, totalQuantity, noOfSides);
         }
     }
 }

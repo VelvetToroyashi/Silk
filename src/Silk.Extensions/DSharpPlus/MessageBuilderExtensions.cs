@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DSharpPlus.Entities;
 
 namespace Silk.Extensions.DSharpPlus
 {
@@ -20,7 +21,7 @@ namespace Silk.Extensions.DSharpPlus
 
 
         /// <summary>
-        /// Clears the components of a <see cref="DiscordMessageBuilder"/>.
+        ///     Clears the components of a <see cref="DiscordMessageBuilder" />.
         /// </summary>
         /// <param name="builder">The builder to clear.</param>
         /// <returns>The updated builder to chain calls with.</returns>

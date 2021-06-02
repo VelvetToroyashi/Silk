@@ -10,7 +10,7 @@ using Silk.Core.EventHandlers.Reactions;
 namespace Silk.Core.Utilities
 {
     /// <summary>
-    /// Helper class for subscribing events to <see cref="DiscordShardedClient"/>
+    ///     Helper class for subscribing events to <see cref="DiscordShardedClient" />
     /// </summary>
     public class EventHelper
     {

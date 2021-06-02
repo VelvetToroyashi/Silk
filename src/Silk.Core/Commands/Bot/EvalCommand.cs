@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -56,7 +58,7 @@ namespace Silk.Core.Commands.Bot
             string cs = code.Substring(cs1, cs2 - cs1);
 
             msg = await ctx.RespondAsync("", new DiscordEmbedBuilder()
-                    .WithColor(new DiscordColor("#FF007F"))
+                    .WithColor(new("#FF007F"))
                     .WithDescription("Evaluating...")
                     .Build())
                 .ConfigureAwait(false);
@@ -70,7 +72,7 @@ namespace Silk.Core.Commands.Bot
                     "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "DSharpPlus.VoiceNext", "Silk.Core", "Silk.Extensions",
                     "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
-                var asm = AppDomain.CurrentDomain.GetAssemblies()
+                IEnumerable<Assembly>? asm = AppDomain.CurrentDomain.GetAssemblies()
                     .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location));
                 asm = asm.Append(typeof(VoiceNextConnection).Assembly);
 

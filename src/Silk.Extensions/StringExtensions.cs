@@ -40,6 +40,9 @@ namespace Silk.Extensions
             return text[range];
         }
 
-        public static Stream AsStream(this string s) => new MemoryStream(Encoding.UTF8.GetBytes(s));
+        public static Stream AsStream(this string s)
+        {
+            return new MemoryStream(Encoding.UTF8.GetBytes(s));
+        }
     }
 }

@@ -12,7 +12,10 @@ namespace Silk.Core.Data.MediatR.ReactionRoles
     internal class AddRoleMenuHandler : IRequestHandler<AddRoleMenuRequest>
     {
         private readonly GuildContext _db;
-        public AddRoleMenuHandler(GuildContext db) => _db = db;
+        public AddRoleMenuHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<Unit> Handle(AddRoleMenuRequest request, CancellationToken cancellationToken)
         {

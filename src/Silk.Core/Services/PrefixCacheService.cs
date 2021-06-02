@@ -70,6 +70,9 @@ namespace Silk.Core.Services
             return guild.Prefix;
         }
 
-        private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
+        private static string GetGuildString(ulong id)
+        {
+            return $"GUILD_PREFIX_KEY_{id}";
+        }
     }
 }

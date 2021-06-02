@@ -61,36 +61,53 @@ namespace Silk.Core.Commands.General
         // RECURRING REMINDERS //
 
         [Command]
-        public Task Hourly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, offset);
+        public Task Hourly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, offset);
+        }
 
 
         [Command]
-        public Task Hourly(CommandContext ctx, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, TimeSpan.Zero);
+        public Task Hourly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, TimeSpan.Zero);
+        }
 
         [Command]
-        public Task Daily(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Daily, offset);
+        public Task Daily(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Daily, offset);
+        }
 
         [Command]
-        public Task Daily(CommandContext ctx, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Daily, TimeSpan.Zero);
+        public Task Daily(CommandContext ctx, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Daily, TimeSpan.Zero);
+        }
 
         [Command]
-        public Task Weekly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, offset);
+        public Task Weekly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, offset);
+        }
 
         [Command]
-        public Task Weekly(CommandContext ctx, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, TimeSpan.Zero);
+        public Task Weekly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, TimeSpan.Zero);
+        }
 
         [Command]
-        public Task Monthly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, offset);
+        public Task Monthly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, offset);
+        }
 
         [Command]
-        public Task Monthly(CommandContext ctx, [RemainingText] string reminder) =>
-            CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, TimeSpan.Zero);
+        public Task Monthly(CommandContext ctx, [RemainingText] string reminder)
+        {
+            return CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, TimeSpan.Zero);
+        }
 
         private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type, TimeSpan offset)
         {
@@ -152,9 +169,9 @@ namespace Silk.Core.Commands.General
                 }
                 else
                 {
-                    var interactivity = ctx.Client.GetInteractivity();
+                    InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-                    var pages = allReminders
+                    List<Page>? pages = allReminders
                         .Select(reminder => new Page("You have too many reminders to fit in one embed, so I've paginated it for you!",
                             new DiscordEmbedBuilder()
                                 .WithColor(DiscordColor.Blurple)

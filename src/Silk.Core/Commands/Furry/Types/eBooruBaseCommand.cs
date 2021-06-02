@@ -68,7 +68,7 @@ namespace Silk.Core.Commands.Furry.Types
 
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
 
-            var cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
+            byte[]? cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
             request.Headers.Add("Authorization", $"Basic {Convert.ToBase64String(cred)}");
             // TODO: Log if API key is rejected.
             string result = await _client.Send(request).Content.ReadAsStringAsync();

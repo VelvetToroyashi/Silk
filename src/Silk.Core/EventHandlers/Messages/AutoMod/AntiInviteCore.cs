@@ -12,12 +12,15 @@ using Silk.Shared.Constants;
 namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
     /// <summary>
-    ///     Utility class for anti-invite functionality. 
+    ///     Utility class for anti-invite functionality.
     /// </summary>
     public class AntiInviteCore
     {
         private static ILogger<AntiInviteCore> _logger;
-        public AntiInviteCore(ILogger<AntiInviteCore> logger) => _logger = logger;
+        public AntiInviteCore(ILogger<AntiInviteCore> logger)
+        {
+            _logger = logger;
+        }
 
 
         /// <summary>

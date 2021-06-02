@@ -20,7 +20,7 @@ namespace Silk.Core.Services.Interfaces
         public Task KickAsync(DiscordMember member, DiscordChannel channel, Infraction infraction, DiscordEmbed embed);
 
         /// <summary>
-        /// Warns a member on the guild.
+        ///     Warns a member on the guild.
         /// </summary>
         /// <param name="member">The member to warn.</param>
         /// <param name="channel">The channel the infraction was generated in.</param>

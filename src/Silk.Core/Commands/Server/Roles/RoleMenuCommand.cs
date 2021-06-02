@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Server.Roles
     public class RoleMenuCommand : BaseCommandModule
     {
         /// <summary>
-        /// Alan please add details.
+        ///     Alan please add details.
         /// </summary>
         /// <param name="Role"></param>
         /// <param name="EmojiName"></param>
@@ -83,7 +83,7 @@ namespace Silk.Core.Commands.Server.Roles
             DiscordMessage progressMessage = await builder.SendAsync(ctx.Channel);
             List<RoleMenuOption> options = new();
 
-            for (int i = 0; i < message.Reactions.Count; i++)
+            for (var i = 0; i < message.Reactions.Count; i++)
             {
                 if (i >= message.MentionedRoles.Count) break;
 
@@ -146,7 +146,7 @@ namespace Silk.Core.Commands.Server.Roles
 
             DiscordMessage message = await ctx.RespondAsync("...");
 
-            for (int i = 0; i < roles.Length; i++)
+            for (var i = 0; i < roles.Length; i++)
             {
                 builder.WithContent($"What emoji would you like to use for {roles[i].Mention}?");
                 await message.ModifyAsync(builder);
@@ -194,18 +194,25 @@ namespace Silk.Core.Commands.Server.Roles
 
 
         /// <summary>
-        /// A paradigm ripped straight from functional programming, if you will.
-        /// <see cref="Result{T}"/> represents an operation that returns a result with semantic information about whether said operation succeeded,
-        /// as simply returning null (or the equivalent Result.NoValue) would not be entirely indicative of whether a function failed, or is returning no value and succeeded.
-        /// And thus we use <see cref="Result{T}"/> as there is no class that fulfills this role in the BCL.
+        ///     A paradigm ripped straight from functional programming, if you will.
+        ///     <see cref="Result{T}" /> represents an operation that returns a result with semantic information about whether said operation succeeded,
+        ///     as simply returning null (or the equivalent Result.NoValue) would not be entirely indicative of whether a function failed, or is returning no
+        ///     value and succeeded.
+        ///     And thus we use <see cref="Result{T}" /> as there is no class that fulfills this role in the BCL.
         /// </summary>
         /// <param name="Value">The value of the result, if any.</param>
-        /// <param name="Succeeded">Whether the result succeeded. <paramref name="Value"/> will be null if false.</param>
-        /// <typeparam name="T">The type of result to return. Null if <paramref name="Succeeded"/> is false.</typeparam>
+        /// <param name="Succeeded">Whether the result succeeded. <paramref name="Value" /> will be null if false.</param>
+        /// <typeparam name="T">The type of result to return. Null if <paramref name="Succeeded" /> is false.</typeparam>
         private record Result<T>(T? Value, bool Succeeded, string? Reason = null)
         {
-            public static implicit operator T?(Result<T> r) => r.Value;
-            public static implicit operator bool(Result<T> r) => r.Succeeded;
+            public static implicit operator T?(Result<T> r)
+            {
+                return r.Value;
+            }
+            public static implicit operator bool(Result<T> r)
+            {
+                return r.Succeeded;
+            }
         }
     }
 }

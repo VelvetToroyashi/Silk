@@ -18,6 +18,9 @@ namespace Silk.Shared.Types.Collections
             }
         }
 
-        public T Next() => unchecked(this[(int) _pos++]);
+        public T Next()
+        {
+            return unchecked(this[(int) _pos++]);
+        }
     }
 }

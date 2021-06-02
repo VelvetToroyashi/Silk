@@ -173,8 +173,8 @@ namespace Silk.Core.Services
                 }
                 else
                 {
-                    var inf = _tempInfractions.Single(m => m.InfractionType is InfractionType.Mute && m.UserId == member.Id);
-                    var index = _tempInfractions.IndexOf(inf);
+                    Infraction? inf = _tempInfractions.Single(m => m.InfractionType is InfractionType.Mute && m.UserId == member.Id);
+                    int index = _tempInfractions.IndexOf(inf);
                     _tempInfractions[index] = infraction;
                 }
             }
@@ -282,7 +282,7 @@ namespace Silk.Core.Services
         private async Task OnTick()
         {
             if (_tempInfractions.Count is 0) return;
-            var infractions = _tempInfractions
+            IEnumerable<IGrouping<ulong, Infraction>>? infractions = _tempInfractions
                 .Where(i => ((DateTime) i.Expiration!).Subtract(DateTime.Now).Seconds < 0)
                 .GroupBy(x => x.GuildId);
 
@@ -326,7 +326,7 @@ namespace Silk.Core.Services
                 if (!guild.Infractions.Any(inf => inf.Expiration > DateTime.Now))
                     continue;
 
-                var guildInfractions = guild.Infractions
+                IEnumerable<Infraction>? guildInfractions = guild.Infractions
                     .Where(g =>
                         g.InfractionType is
                             InfractionType.SoftBan or

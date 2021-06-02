@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Server
         {
             await HandleCommandToggleAsync(ctx, commands, (list, name) =>
             {
-                var c = list.SingleOrDefault(co => co.CommandName == name);
+                DisabledCommand? c = list.SingleOrDefault(co => co.CommandName == name);
                 if (c is not null) list.Remove(c!);
             });
 
@@ -63,7 +63,7 @@ namespace Silk.Core.Commands.Server
 
             GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
-            var commandNames = commands.Split(' ');
+            string[]? commandNames = commands.Split(' ');
 
             CommandsNextExtension cnext = ctx.Client.GetCommandsNext();
 
@@ -76,7 +76,7 @@ namespace Silk.Core.Commands.Server
 
             await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) {DisabledCommands = config.DisabledCommands});
 
-            var thumbsUp = DiscordEmoji.FromUnicode("👍");
+            DiscordEmoji? thumbsUp = DiscordEmoji.FromUnicode("👍");
             await ctx.Message.CreateReactionAsync(thumbsUp);
         }
     }

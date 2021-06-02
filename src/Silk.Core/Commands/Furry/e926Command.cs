@@ -62,6 +62,9 @@ namespace Silk.Core.Commands.Furry
         }
 
         [Command("e926")]
-        public async Task Search(CommandContext ctx, [RemainingText] string? search) => await Search(ctx, 3, search);
+        public async Task Search(CommandContext ctx, [RemainingText] string? search)
+        {
+            await Search(ctx, 3, search);
+        }
     }
 }

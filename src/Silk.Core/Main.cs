@@ -1,8 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Types;
@@ -75,7 +80,7 @@ namespace Silk.Core
 
             var t = Stopwatch.StartNew();
             var asm = Assembly.GetEntryAssembly();
-            var cnext = await ShardClient.GetCommandsNextAsync();
+            IReadOnlyDictionary<int, CommandsNextExtension>? cnext = await ShardClient.GetCommandsNextAsync();
 
             foreach (var cnextExt in cnext.Values)
             {
@@ -85,7 +90,7 @@ namespace Silk.Core
             }
 
             t.Stop();
-            var registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
+            int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
             _logger.LogDebug("Registered {Commands} commands for {Shards} shards in {Time} ms", registeredCommands, ShardClient.ShardClients.Count, t.ElapsedMilliseconds);
         }

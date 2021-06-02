@@ -16,7 +16,7 @@ namespace Silk.Benchmarks
         private readonly Regex mentionRegex = new(@"({@u[ser]?})", RegexOptions.Compiled);
         private readonly Regex serverRegex = new(@"({s[erver]?})", RegexOptions.Compiled);
 
-        private readonly Regex userRegex = new Regex(@"({u[ser]?)}", RegexOptions.Compiled);
+        private readonly Regex userRegex = new(@"({u[ser]?)}", RegexOptions.Compiled);
 
 
 

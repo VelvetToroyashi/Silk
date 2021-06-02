@@ -32,7 +32,7 @@ namespace Silk.Core.Utilities
             using (Log.BeginRequestPipelineScope(_logger, request))
             {
                 Log.RequestPipelineStart(_logger, request);
-                var response = await base.SendAsync(request, cancellationToken);
+                HttpResponseMessage? response = await base.SendAsync(request, cancellationToken);
                 Log.RequestPipelineEnd(_logger, response);
 
                 return response;

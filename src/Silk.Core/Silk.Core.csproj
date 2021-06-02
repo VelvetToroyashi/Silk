@@ -45,21 +45,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
-        <PackageReference Include="Colorful.Console" Version="1.2.15" />
-        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00863" />
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00863" />
-        <PackageReference Include="DSharpPlus.Interactivity" Version="4.1.0-nightly-00863" />
-        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.1.0-nightly-00863" />
-        <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002" />
-        <PackageReference Include="Humanizer" Version="2.10.1" />
-        <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
-        <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
-        <PackageReference Include="MediatR" Version="9.0.0" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-1.final" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
+        <PackageReference Include="AsyncEnumerator" Version="4.0.2"/>
+        <PackageReference Include="Colorful.Console" Version="1.2.15"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1"/>
+        <PackageReference Include="DSharpPlus" Version="4.1.0-experimental-05008"/>
+        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-experimental-05008"/>
+        <PackageReference Include="DSharpPlus.Interactivity" Version="4.1.0-experimental-05008"/>
+        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.1.0-experimental-05008"/>
+        <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002"/>
+        <PackageReference Include="Humanizer" Version="2.10.1"/>
+        <PackageReference Include="ini-parser-netstandard" Version="2.5.2"/>
+        <PackageReference Include="MathParser.org-mXparser" Version="4.4.2"/>
+        <PackageReference Include="MediatR" Version="9.0.0"/>
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-1.final"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

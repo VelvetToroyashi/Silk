@@ -3,6 +3,10 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using Humanizer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -28,8 +32,8 @@ namespace Silk.Core.Commands.Bot
             else if (json?.StartsWith("```") ?? false)
                 json = json[4..^3];
 
-            var client = _clientFactory.CreateClient();
-            var httpMethod = method.ToUpperInvariant() switch
+            HttpClient? client = _clientFactory.CreateClient();
+            HttpMethod? httpMethod = method.ToUpperInvariant() switch
             {
                 "GET" => HttpMethod.Get,
                 "PUT" => HttpMethod.Put,
@@ -54,7 +58,7 @@ namespace Silk.Core.Commands.Bot
             client.DefaultRequestHeaders.Add("Authorization", $"Bot {token}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            var res = await client.SendAsync(message);
+            HttpResponseMessage? res = await client.SendAsync(message);
             var jsn = JToken.Parse(await res.Content.ReadAsStringAsync() ?? "{}").ToString(Formatting.Indented);
 
             if (jsn.Length > 1000)

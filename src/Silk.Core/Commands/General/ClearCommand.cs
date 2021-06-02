@@ -33,13 +33,13 @@ namespace Silk.Core.Commands.General
             var commandIssuingUser = $"{ctx.User.Username}{ctx.User.Discriminator}";
             await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
 
-            var responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
+            DiscordEmbedBuilder? responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
             DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
 
             GuildConfig guildConfig = await GetOrCreateGuildConfig(ctx);
             DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
 
-            var clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
+            DiscordEmbedBuilder? clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
             if (loggingChannel is not null) await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
 
             await Task.Delay(5000);
@@ -72,7 +72,7 @@ namespace Silk.Core.Commands.General
 
         private async Task<GuildConfig> GetOrCreateGuildConfig(CommandContext ctx)
         {
-            var guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, Main.DefaultCommandPrefix));
+            Guild? guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, Main.DefaultCommandPrefix));
             return guild.Configuration;
         }
     }
