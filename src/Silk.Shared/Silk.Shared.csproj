@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.1.0-experimental-05008"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-experimental-05008"/>
+        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00875"/>
+        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00875"/>
     </ItemGroup>
 
     <ItemGroup>
