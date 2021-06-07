@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -10,7 +9,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Types;
+using Silk.Core.EventHandlers.Messages;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
@@ -19,31 +18,24 @@ namespace Silk.Core
 {
     public class Main : IHostedService
     {
-        public BotState State { get; private set; } = BotState.Starting;
         //public static DiscordSlashClient SlashClient { get; } // Soon™ //
         public DiscordShardedClient ShardClient { get; }
         public static string DefaultCommandPrefix => "s!";
 
         private static ILogger<Main> _logger;
         private readonly BotExceptionHandler _handler;
+        private CommandHandler _commandHandler;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
             // And that's all it needs, since it subs to events in it's ctor.
             _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
             _handler = handler;
+            _commandHandler = commandHandler;
             ShardClient = shardClient;
             _ = e;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void ChangeState(BotState state)
-        {
-            if (State == state) return;
-
-            _logger.LogDebug("State changed from {State} to {NewState}!", State, state);
-            State = state;
-        }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -72,8 +64,6 @@ namespace Silk.Core
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
         }
 
-
-
         private async Task InitializeCommandsNextAsync()
         {
             _logger.LogDebug("Registering commands");
@@ -87,6 +77,7 @@ namespace Silk.Core
                 cnextExt.RegisterCommands(asm);
                 cnextExt.SetHelpFormatter<HelpFormatter>();
                 cnextExt.RegisterConverter(new MemberConverter());
+                cnextExt.CommandExecuted += _commandHandler.AddCommandInvocation;
             }
 
             t.Stop();

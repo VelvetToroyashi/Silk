@@ -1,5 +1,4 @@
 ﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
@@ -43,8 +42,7 @@ namespace Silk.Core.Utilities
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
 
-            foreach ((_, var ext) in AsyncUtil.RunSync(client.GetCommandsNextAsync))
-                ext.CommandExecuted += commandHandler.AddCommandInvocation;
+
 
         }
     }

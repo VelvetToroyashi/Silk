@@ -19,7 +19,7 @@ namespace Silk.Core.Utilities
         {
             (ConsoleColor foreground, ConsoleColor background) = style switch
             {
-                ConsoleThemeStyle.Text => (ConsoleColor.Blue, ConsoleColor.White), // I don't actually know what this does. //
+                ConsoleThemeStyle.Scalar => (ConsoleColor.Blue, ConsoleColor.Black), // I don't actually know what this does. //
                 ConsoleThemeStyle.Number => (ConsoleColor.DarkBlue, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelDebug => (ConsoleColor.Green, ConsoleColor.Black),
                 ConsoleThemeStyle.LevelError => (ConsoleColor.Red, ConsoleColor.Black),

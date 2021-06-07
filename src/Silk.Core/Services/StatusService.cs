@@ -4,18 +4,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Types;
 using Silk.Shared.Types.Collections;
 
 namespace Silk.Core.Services
 {
-    public class StatusService : BackgroundService
+    public sealed class StatusService : BackgroundService
     {
-        private readonly Main _main;
         private readonly DiscordShardedClient _client;
         private readonly ILogger<StatusService> _logger;
+        private readonly AsyncManualResetEvent _tcs = new(false);
         private readonly LoopedList<string> _statuses = new()
         {
             "for s!help",
@@ -27,14 +27,18 @@ namespace Silk.Core.Services
             "ko-fi.com/VelvetThePanda",
             "for donations! (ko-fi/patreon: VelvetThePanda)"
         };
-        private bool _ready => _main.State is BotState.Ready or BotState.Caching;
 
-        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger, Main main)
+        public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
         {
             _client = client;
             _logger = logger;
-            _main = main;
         }
+
+        public void Clear() => _statuses.Clear();
+        public void AddOption(string option) => _statuses.Add(option);
+        public bool RemoveOption(string option) => _statuses.Remove(option);
+
+
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -54,7 +58,7 @@ namespace Silk.Core.Services
             catch (TaskCanceledException) { }
             finally
             {
-                _logger.LogDebug("Cancelation requested. Stopping service. ");
+                _logger.LogDebug("Cancelation requested. Stopping service.");
             }
         }
     }
