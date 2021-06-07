@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
-using Silk.Core.Utilities;
+using Silk.Core.Utilities.HttpClient;
 
 namespace Silk.Core.Commands.Furry.Types
 {

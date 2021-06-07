@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.HttpClient
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Overriding Logging Scope Handler for HttpClientFactory
     ///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
     /// </summary>
-    public class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
+    public sealed class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
     {
         private readonly ILogger _logger;
 

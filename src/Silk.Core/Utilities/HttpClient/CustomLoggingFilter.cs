@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Silk.Core.Utilities
+namespace Silk.Core.Utilities.HttpClient
 {
     /// <summary>
     ///     Overriding Logging Filter for HttpClientFactory
