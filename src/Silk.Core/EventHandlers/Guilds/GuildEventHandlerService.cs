@@ -18,7 +18,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Guilds
 {
-    public class GuildEventHandlerService : BackgroundService
+    public sealed class GuildEventHandlerService : BackgroundService
     {
         public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
@@ -52,6 +52,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
+
             _startTime ??= DateTime.Now;
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
 

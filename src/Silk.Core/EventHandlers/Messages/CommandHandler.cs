@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -13,7 +10,7 @@ using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.Messages
 {
-    public class CommandHandler
+    public sealed class CommandHandler
     {
         private readonly IMediator _mediator;
         private readonly ILogger<CommandHandler> _logger;
@@ -25,23 +22,25 @@ namespace Silk.Core.EventHandlers.Messages
             _logger = logger;
         }
 
+        public Task AddCommandInvocation(CommandsNextExtension ext, CommandEventArgs args) =>
+            _mediator.Send(new AddCommandInvocationRequest(args.Context.User.Id, args.Context.Guild?.Id, args.Command.QualifiedName));
+
         public async Task Handle(DiscordClient client, MessageCreateEventArgs args)
         {
             bool isBot = args.Author.IsBot;
             bool isEmpty = string.IsNullOrEmpty(args.Message.Content);
-            DiscordUser bot = client.CurrentUser;
-            if (isBot || isEmpty) return;
 
+            if (isBot || isEmpty)
+                return;
+
+            DiscordUser bot = client.CurrentUser;
             CommandsNextExtension? commandsNext = client.GetCommandsNext();
             string prefix = _prefixService.RetrievePrefix(args.Guild?.Id);
 
-            int prefixLength =
-                args.Channel.IsPrivate ? 0 :
-                    args.MentionedUsers.Contains(bot) ?
-                        args.Message.GetMentionPrefixLength(bot) :
-                        args.Message.GetStringPrefixLength(prefix);
+            int prefixLength = GetPrefixLength(prefix, args.Message, bot);
 
-            if (prefixLength is -1) return;
+            if (prefixLength is -1)
+                return;
 
             string commandString = args.Message.Content[prefixLength..];
 
@@ -55,12 +54,19 @@ namespace Silk.Core.EventHandlers.Messages
 
             CommandContext context = commandsNext.CreateContext(args.Message, prefix, command, arguments);
 
-            await _mediator.Send(new AddCommandInvocationRequest(args.Author.Id, args.Guild?.Id, command!.QualifiedName), CancellationToken.None);
 
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromMinutes(10));
 
-            _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context), cts.Token);
+            _ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context));
+        }
+
+        private static int GetPrefixLength(string prefix, DiscordMessage message, DiscordUser currentUser)
+        {
+            if (message.Channel is DiscordDmChannel)
+                return 0;
+
+            return message.Content.StartsWith(currentUser.Mention) ?
+                message.GetMentionPrefixLength(currentUser) :
+                message.GetStringPrefixLength(prefix);
         }
     }
 }

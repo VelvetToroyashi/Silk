@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
@@ -12,7 +13,7 @@ namespace Silk.Core.Utilities
     /// <summary>
     ///     Helper class for subscribing events to <see cref="DiscordShardedClient" />
     /// </summary>
-    public class EventHelper
+    public sealed class EventHelper
     {
         public EventHelper(
             DiscordShardedClient client,
@@ -41,6 +42,9 @@ namespace Silk.Core.Utilities
             client.GuildCreated += guildHandlers.OnGuildJoin;
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
+
+            foreach (var cnext in client.GetCommandsNextAsync().Result) { }
+
         }
     }
 }
