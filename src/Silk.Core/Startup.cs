@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
-using Serilog.Hosting;
+using Serilog.Extensions.Logging;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
@@ -118,6 +118,7 @@ namespace Silk.Core
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddTransient<MessageRemovedHandler>();
 
+                services.AddSingleton<ButtonHandlerService>();
                 services.AddSingleton<CommandHandler>();
                 services.AddSingleton<MessageAddAntiInvite>();
 

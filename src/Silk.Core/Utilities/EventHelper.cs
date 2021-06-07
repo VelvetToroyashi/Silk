@@ -23,7 +23,8 @@ namespace Silk.Core.Utilities
             RoleAddedHandler staffCheck,
             RoleMenuReactionService roleMenu,
             GuildEventHandlers guildHandlers,
-            MemberRemovedHandler memberRemovedHandler)
+            MemberRemovedHandler memberRemovedHandler,
+            ButtonHandlerService buttonHandler)
         {
 
             client.MessageCreated += commandHandler.Handle;
@@ -42,7 +43,7 @@ namespace Silk.Core.Utilities
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
 
-
+            client.ComponentInteractionCreated += buttonHandler.OnButtonPress;
 
         }
     }
