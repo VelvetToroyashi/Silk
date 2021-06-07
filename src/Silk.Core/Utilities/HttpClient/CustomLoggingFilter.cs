@@ -4,11 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Silk.Core.Utilities.HttpClient
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Overriding Logging Filter for HttpClientFactory
     ///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
     /// </summary>
-    public class CustomLoggingFilter : IHttpMessageHandlerBuilderFilter
+    public sealed class CustomLoggingFilter : IHttpMessageHandlerBuilderFilter
     {
         private readonly ILoggerFactory _loggerFactory;
 
