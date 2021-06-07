@@ -43,7 +43,8 @@ namespace Silk.Core.Utilities
             client.GuildAvailable += guildHandlers.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandlers.OnGuildDownload;
 
-            foreach (var cnext in client.GetCommandsNextAsync().Result) { }
+            foreach ((_, var ext) in AsyncUtil.RunSync(client.GetCommandsNextAsync))
+                ext.CommandExecuted += commandHandler.AddCommandInvocation;
 
         }
     }
