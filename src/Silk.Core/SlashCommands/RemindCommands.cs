@@ -10,6 +10,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Humanizer;
+using Humanizer.Localisation;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
 using Silk.Extensions;
@@ -18,6 +19,7 @@ namespace Silk.Core.SlashCommands
 {
     public sealed class RemindCommands : SlashCommandModule
     {
+        [SlashCommandGroup("remind", "Reminder related commands!")]
         public sealed class ReminderCommands : SlashCommandModule
         {
             private readonly ReminderService _reminders;
@@ -99,8 +101,8 @@ namespace Silk.Core.SlashCommands
                     return;
                 }
 
-                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, ctx.Guild?.Id, reminder);
-
+                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, 0, reminder);
+                await ctx.EditResponseAsync(new() {Content = $"Done. I'll remind you in {convRes.Value.Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)}!"});
             }
         }
 

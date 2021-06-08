@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using DSharpPlus.Net;
 using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
@@ -85,6 +87,11 @@ namespace Silk.Core.Services
 
         private async Task DispatchReminderAsync(Reminder reminder)
         {
+            if (reminder.GuildId is 0)
+            {
+                await DispatchSilentReminderAsync(reminder); // Was executed with a slash command. Don't send the reminder in the server. //
+                return;
+            }
             IEnumerable<KeyValuePair<ulong, DiscordGuild>> guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
             if (guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is not { } guild)
             {
@@ -118,6 +125,14 @@ namespace Silk.Core.Services
                     await SendRecurringReminderMessageAsync(reminder, channel);
                 }
             }
+        }
+        private async Task DispatchSilentReminderAsync(Reminder reminder)
+        {
+            var apiClient = (DiscordApiClient) typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
+            var channel = await (Task<DiscordDmChannel>) typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] {reminder.OwnerId})!;
+            _logger.LogTrace("Preparring to send reminder");
+            await channel.SendMessageAsync($"Hey! You wanted to be reminded you of something {(reminder.CreationTime - DateTime.Now).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+
         }
 
         private async Task UpdateRecurringReminderAsync(Reminder reminder)

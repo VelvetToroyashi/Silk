@@ -22,9 +22,9 @@ namespace Silk.Core.Data.Models
         public ulong OwnerId { get; init; }
 
         /// <summary>
-        ///     The user this reminder belongs to.
+        /// The guild this reminder belongs to, if any. 
         /// </summary>
-        public User Owner { get; set; }
+        public Guild? Guild { get; set; }
 
         /// <summary>
         ///     The channel the reminder was made in
@@ -34,7 +34,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     The guild this reminder was created in.
         /// </summary>
-        public ulong GuildId { get; set; }
+        public ulong? GuildId { get; set; }
 
         /// <summary>
         ///     The Id of the message to remind them of
@@ -73,13 +73,12 @@ namespace Silk.Core.Data.Models
 
 
         public Reminder() { }
-        public Reminder(int id, DateTime expiration, DateTime creationTime, ulong ownerId, User owner, ulong channelId, ulong guildId, ulong messageId, ReminderType type, string? messageContent, string? replyMessageContent, ulong? replyAuthorId, ulong? replyId, bool wasReply)
+        public Reminder(int id, DateTime expiration, DateTime creationTime, ulong ownerId, ulong channelId, ulong guildId, ulong messageId, ReminderType type, string? messageContent, string? replyMessageContent, ulong? replyAuthorId, ulong? replyId, bool wasReply)
         {
             Id = id;
             Expiration = expiration;
             CreationTime = creationTime;
             OwnerId = ownerId;
-            Owner = owner;
             ChannelId = channelId;
             GuildId = guildId;
             MessageId = messageId;
