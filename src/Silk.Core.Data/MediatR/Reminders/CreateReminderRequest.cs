@@ -34,7 +34,7 @@ namespace Silk.Core.Data.MediatR.Reminders
 
         public async Task<Reminder> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
         {
-            if (request.GuildId is not (null or 0))
+            if (request.MessageId is not 0 or null)
                 await _mediator.Send(new GetOrCreateUserRequest(request.GuildId.Value, request.OwnerId), cancellationToken);
 
             Reminder r = new()

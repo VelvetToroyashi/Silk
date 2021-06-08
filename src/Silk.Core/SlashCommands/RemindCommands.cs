@@ -13,6 +13,7 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services;
 using Silk.Core.Utilities.Bot;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands
 {
@@ -22,7 +23,12 @@ namespace Silk.Core.SlashCommands
         public sealed class ReminderCommands : SlashCommandModule
         {
             private readonly ReminderService _reminders;
-            public ReminderCommands(ReminderService reminders) => _reminders = reminders;
+            private readonly DiscordShardedClient _client;
+            public ReminderCommands(ReminderService reminders, DiscordShardedClient client)
+            {
+                _reminders = reminders;
+                _client = client;
+            }
 
             [SlashCommand("list", "Lists your active reminders!~")]
             public async Task List(InteractionContext ctx)
@@ -90,6 +96,13 @@ namespace Silk.Core.SlashCommands
                 string? reminder)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+
+                if (_client.GetMember(u => u.Id == ctx.User.Id) is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = $"Sorry, but I don't share any servers with you! You can contact your server owner to [invite me](https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands) to this server or your own!"});
+                    return;
+                }
+
                 var conv = new TimeSpanConverter();
                 var convRes = await conv.ConvertAsync(time);
 
@@ -99,7 +112,7 @@ namespace Silk.Core.SlashCommands
                     return;
                 }
 
-                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, ctx.Guild?.Id, reminder);
+                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Interaction.ChannelId, 0, ctx.Interaction.GuildId, reminder);
                 await ctx.EditResponseAsync(new() {Content = $"Done. I'll remind you in {convRes.Value.Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)}!"});
             }
 
@@ -107,7 +120,7 @@ namespace Silk.Core.SlashCommands
             public async Task Cancel(
                 InteractionContext ctx,
                 [Option("id", "The id of the reminder ")]
-                int reminderId)
+                long reminderId)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
                 var reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
@@ -117,8 +130,13 @@ namespace Silk.Core.SlashCommands
                     await ctx.EditResponseAsync(new() {Content = "Sorry, but it doesn't look like you have any reminders by that Id!"});
                     return;
                 }
-                await _reminders.RemoveReminderAsync(reminderId);
+                await _reminders.RemoveReminderAsync((int) reminderId);
             }
+
+
+            [SlashCommand("recurring", "Create a recurring reminder!")]
+            public async Task Create(InteractionContext ctx) { }
+
         }
     }
 }

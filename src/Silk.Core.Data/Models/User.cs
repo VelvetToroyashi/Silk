@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Silk.Core.Data.Models
+﻿namespace Silk.Core.Data.Models
 {
     public class User
     {
@@ -9,6 +7,7 @@ namespace Silk.Core.Data.Models
         public ulong GuildId { get; set; }
         public Guild Guild { get; set; } = null!;
         public UserFlag Flags { get; set; }
-        public List<Reminder> Reminders { get; set; } = new();
+
+        //public List<Reminder> Reminders { get; set; } = new();
     }
 }
