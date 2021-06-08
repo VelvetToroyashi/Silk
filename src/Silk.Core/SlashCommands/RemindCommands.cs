@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -13,6 +11,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
+using Silk.Core.Utilities.Bot;
 using Silk.Extensions;
 
 namespace Silk.Core.SlashCommands
@@ -91,9 +90,8 @@ namespace Silk.Core.SlashCommands
                 string? reminder)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
-                var conv = (IArgumentConverter<TimeSpan>) new TimeSpanConverter();
-                var fctx = ctx.Client.GetCommandsNext().CreateFakeContext(ctx.User, ctx.Channel, ctx.CommandName, "/", null, null);
-                var convRes = await conv.ConvertAsync(time, fctx);
+                var conv = new TimeSpanConverter();
+                var convRes = await conv.ConvertAsync(time);
 
                 if (!convRes.HasValue)
                 {
@@ -101,11 +99,26 @@ namespace Silk.Core.SlashCommands
                     return;
                 }
 
-                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, 0, reminder);
+                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, ctx.Guild?.Id, reminder);
                 await ctx.EditResponseAsync(new() {Content = $"Done. I'll remind you in {convRes.Value.Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)}!"});
             }
+
+            [SlashCommand("cancel", "Cancel a reminder!")]
+            public async Task Cancel(
+                InteractionContext ctx,
+                [Option("id", "The id of the reminder ")]
+                int reminderId)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                var reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
+
+                if (!reminder.Any() || reminder.All(r => r.Id != reminderId))
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but it doesn't look like you have any reminders by that Id!"});
+                    return;
+                }
+                await _reminders.RemoveReminderAsync(reminderId);
+            }
         }
-
-
     }
 }

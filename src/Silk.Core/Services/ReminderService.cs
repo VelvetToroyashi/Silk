@@ -80,14 +80,20 @@ namespace Silk.Core.Services
             for (var i = 0; i < _reminders.Count; i++)
             {
                 Reminder r = _reminders[i];
-                if (r.Expiration < DateTime.UtcNow)
-                    await DispatchReminderAsync(r);
+                if (r.Expiration > DateTime.UtcNow) continue;
+
+                Task t = DispatchReminderAsync(r);
+                Task timeout = Task.Delay(900);
+                Task tr = await Task.WhenAny(t, timeout);
+
+                if (tr == timeout)
+                    _logger.LogWarning("Slow dispatch on reminder! Expect failed dispatch log.");
             }
         }
 
         private async Task DispatchReminderAsync(Reminder reminder)
         {
-            if (reminder.GuildId is 0)
+            if (reminder.MessageId is 0)
             {
                 await DispatchSilentReminderAsync(reminder); // Was executed with a slash command. Don't send the reminder in the server. //
                 return;
@@ -130,9 +136,46 @@ namespace Silk.Core.Services
         {
             var apiClient = (DiscordApiClient) typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
             var channel = await (Task<DiscordDmChannel>) typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] {reminder.OwnerId})!;
-            _logger.LogTrace("Preparring to send reminder");
-            await channel.SendMessageAsync($"Hey! You wanted to be reminded you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+
             await RemoveReminderAsync(reminder.Id);
+            _logger.LogTrace("Removed reminder from queue");
+
+            _logger.LogTrace("Preparring to send reminder");
+            try
+            {
+                await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                _logger.LogTrace("Successfully dispatched reminder.");
+            }
+            catch (UnauthorizedException)
+            {
+                _logger.LogWarning("Failed to dispatch reminder invoked by slash-command. Did they leave they close their DMs?");
+
+                if (reminder.GuildId is 0 or null)
+                {
+                    _logger.LogWarning("Reminder does not have associated guild. Skipping.");
+                    return;
+                }
+
+                var shard = _client.GetShard(reminder.GuildId.Value);
+                var foundGuild = shard.Guilds.TryGetValue(reminder.GuildId.Value, out var guild);
+
+                if (!foundGuild)
+                {
+                    _logger.LogWarning("GuildId was present on reminder but not on the client. Skipping.");
+                    return;
+                }
+
+                var gotChannel = guild!.Channels.TryGetValue(reminder.ChannelId, out var guildChannel);
+
+                if (!gotChannel)
+                {
+                    _logger.LogWarning("Reminder pointed to guild channel, but is not present on guild. Skipping.");
+                    return;
+                }
+
+                await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                _logger.LogTrace("Successfully dispatched reminder.");
+            }
         }
 
         private async Task UpdateRecurringReminderAsync(Reminder reminder)
