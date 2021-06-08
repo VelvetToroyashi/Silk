@@ -100,7 +100,7 @@ namespace Silk.Core.Commands.Bot
                 await msg.ModifyAsync(new DiscordEmbedBuilder
                     {
                         Title = "Evaluation Failure",
-                        Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')}",
+                        Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')[0]}",
                         Color = new DiscordColor("#FF0000")
                     }.Build())
                     .ConfigureAwait(false);
