@@ -43,8 +43,11 @@ namespace Silk.Core
         {
             _logger.LogInformation("Starting service");
             await InitializeClientExtensions();
+            _logger.LogInformation("Initialized client");
             await InitializeCommandsNextAsync();
+            _logger.LogInformation("Initialized CommandsNext");
             await InitializeSlashCommandsAsync();
+            _logger.LogInformation("Initialized Slash-Commands");
             await _handler.SubscribeToEventsAsync();
             _logger.LogDebug("Connecting to Discord gateway");
             await ShardClient.StartAsync();
@@ -73,8 +76,9 @@ namespace Silk.Core
 
             sc.RegisterCommands<RemindersCommand>(721518523704410202);
             sc.RegisterCommands<RemindCommands>(721518523704410202);
+            sc.RegisterCommands<Test>(721518523704410202);
 
-
+            sc.SlashCommandErrored += async (c, e) => _logger.LogCritical("Slash command errored! Exception: {Ex}", e.Exception);
         }
 
         private async Task InitializeCommandsNextAsync()

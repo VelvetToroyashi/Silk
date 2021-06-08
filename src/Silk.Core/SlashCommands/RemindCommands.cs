@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -13,78 +16,93 @@ using Silk.Extensions;
 
 namespace Silk.Core.SlashCommands
 {
-    public sealed class RemindersCommand : SlashCommandModule
-    {
-        private readonly ReminderService _reminds;
-        public RemindersCommand(ReminderService reminds) => _reminds = reminds;
-
-        [SlashCommand("reminders", "Display all active reminders!")]
-        public Task Reminders(InteractionContext ctx) => new RemindCommands(_reminds).List(ctx);
-    }
-
-    [SlashCommandGroup("aaaaaa", "Reminder related commands!")]
     public sealed class RemindCommands : SlashCommandModule
     {
-        private readonly ReminderService _reminders;
-        public RemindCommands(ReminderService reminders) => _reminders = reminders;
-
-        [SlashCommand("list", "Lists your active reminders!~")]
-        public async Task List(InteractionContext ctx)
+        public sealed class ReminderCommands : SlashCommandModule
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+            private readonly ReminderService _reminders;
+            public ReminderCommands(ReminderService reminders) => _reminders = reminders;
 
-            IEnumerable<Reminder>? reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
-            if (reminders is null)
+            [SlashCommand("list", "Lists your active reminders!~")]
+            public async Task List(InteractionContext ctx)
             {
-                await ctx.EditResponseAsync(new() {Content = "Perhaps I'm forgetting something, but you don't seem to have any reminders!"});
-                return;
-            }
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
-            string[] allReminders = reminders
-                .Select(r =>
+                IEnumerable<Reminder>? reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
+                if (reminders is null)
                 {
-                    string s = r.Type is ReminderType.Once ?
-                        $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
-                        $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
+                    await ctx.EditResponseAsync(new() {Content = "Perhaps I'm forgetting something, but you don't seem to have any reminders!"});
+                    return;
+                }
 
-                    if (r.ReplyId is not null)
-                        s += $"[reply](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
+                string[] allReminders = reminders
+                    .Select(r =>
+                    {
+                        string s = r.Type is ReminderType.Once ?
+                            $"`{r.Id}` → Expiring {r.Expiration.Humanize()}:\n" :
+                            $"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
 
-                    s += $"`{r.MessageContent}`";
-                    return s;
-                })
-                .ToArray();
+                        if (r.ReplyId is not null)
+                            s += $"[reply](https://discord.com/channels/{r.GuildId}/{r.ChannelId}/{r.ReplyId})\n";
 
-            string remindersString = allReminders.Join("\n");
+                        s += $"`{r.MessageContent}`";
+                        return s;
+                    })
+                    .ToArray();
 
-            if (remindersString.Length <= 2048)
-            {
-                var builder = new DiscordEmbedBuilder();
+                string remindersString = allReminders.Join("\n");
 
-                builder.WithColor(DiscordColor.Blurple)
-                    .WithTitle($"Reminders for {ctx.User.Username}:")
-                    .WithFooter($"Silk! | Requested by {ctx.User.Id}")
-                    .WithDescription(remindersString);
+                if (remindersString.Length <= 2048)
+                {
+                    var builder = new DiscordEmbedBuilder();
 
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                    builder.WithColor(DiscordColor.Blurple)
+                        .WithTitle($"Reminders for {ctx.User.Username}:")
+                        .WithFooter($"Silk! | Requested by {ctx.User.Id}")
+                        .WithDescription(remindersString);
+
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                }
+                else
+                {
+                    InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
+
+                    List<Page> pages = allReminders
+                        .Select(reminder => new Page("You have too many reminders to fit in one embed, so I've paginated it for you!",
+                            new DiscordEmbedBuilder()
+                                .WithColor(DiscordColor.Blurple)
+                                .WithTitle($"Reminders for {ctx.User.Username}:")
+                                .WithDescription(reminder)
+                                .WithFooter($"Silk! | Requested by {ctx.User.Id}")))
+                        .ToList();
+                    await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
+                }
             }
-            else
-            {
-                InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-                List<Page> pages = allReminders
-                    .Select(reminder => new Page("You have too many reminders to fit in one embed, so I've paginated it for you!",
-                        new DiscordEmbedBuilder()
-                            .WithColor(DiscordColor.Blurple)
-                            .WithTitle($"Reminders for {ctx.User.Username}:")
-                            .WithDescription(reminder)
-                            .WithFooter($"Silk! | Requested by {ctx.User.Id}")))
-                    .ToList();
-                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
+            [SlashCommand("create", "Create a reminder!")]
+            public async Task Create(
+                InteractionContext ctx,
+                [Option("time", "The time from now you want to be reminded in. Example: 1d12h -> 1 Day, 12 Hours")]
+                string time,
+                [Option("reminder", "What do you want to be reminded of?")]
+                string? reminder)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                var conv = (IArgumentConverter<TimeSpan>) new TimeSpanConverter();
+                var fctx = ctx.Client.GetCommandsNext().CreateFakeContext(ctx.User, ctx.Channel, ctx.CommandName, "/", null, null);
+                var convRes = await conv.ConvertAsync(time, fctx);
+
+                if (!convRes.HasValue)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but that doesn't appear to be a valid time!"});
+                    return;
+                }
+
+                await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Channel.Id, 0, ctx.Guild?.Id, reminder);
+
             }
         }
 
-        [SlashCommand("create", "Create a reminder!")]
-        public async Task Create(InteractionContext ctx, string time, string reminder) { }
+
     }
 }

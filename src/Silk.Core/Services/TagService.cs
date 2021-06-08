@@ -78,13 +78,10 @@ namespace Silk.Core.Services
 
             await _mediator.Send(new UpdateTagRequest(tagName, guildId) {Content = content});
 
-            if (tag.Aliases?.Any() ?? false)
-            {
-                foreach (Tag alias in tag.Aliases)
-                {
-                    await _mediator.Send(new UpdateTagRequest(alias.Name, guildId) {Content = content});
-                }
-            }
+            if (!(tag.Aliases?.Any() ?? false)) return new(true, null);
+
+            foreach (Tag alias in tag.Aliases)
+                await _mediator.Send(new UpdateTagRequest(alias.Name, guildId) {Content = content});
 
             return new(true, null);
         }

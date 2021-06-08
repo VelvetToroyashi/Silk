@@ -49,7 +49,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     The content of the original reminder, in case a message can't be sent to the original channel.
         /// </summary>
-        public string MessageContent { get; set; }
+        public string? MessageContent { get; set; }
 
         /// <summary>
         ///     The content of the message the reply contained, if the reminder was a reply.
@@ -70,5 +70,26 @@ namespace Silk.Core.Data.Models
         ///     Whether or not the reminder was replying to a different message.
         /// </summary>
         public bool WasReply { get; set; }
+
+
+        public Reminder() { }
+        public Reminder(int id, DateTime expiration, DateTime creationTime, ulong ownerId, User owner, ulong channelId, ulong guildId, ulong messageId, ReminderType type, string? messageContent, string? replyMessageContent, ulong? replyAuthorId, ulong? replyId, bool wasReply)
+        {
+            Id = id;
+            Expiration = expiration;
+            CreationTime = creationTime;
+            OwnerId = ownerId;
+            Owner = owner;
+            ChannelId = channelId;
+            GuildId = guildId;
+            MessageId = messageId;
+            Type = type;
+            MessageContent = messageContent;
+            ReplyMessageContent = replyMessageContent;
+            ReplyAuthorId = replyAuthorId;
+            ReplyId = replyId;
+            WasReply = wasReply;
+        }
     }
+
 }

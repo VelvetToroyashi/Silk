@@ -39,8 +39,8 @@ namespace Silk.Core.Services
         public async Task CreateReminder
         (
             DateTime expiration, ulong ownerId,
-            ulong channelId, ulong messageId, ulong guildId,
-            string messageContent, bool wasReply,
+            ulong channelId, ulong messageId, ulong? guildId,
+            string? messageContent, bool wasReply = false,
             ReminderType type = ReminderType.Once, ulong? replyId = null,
             ulong? replyAuthorId = null, string? replyMessageContent = null)
         {

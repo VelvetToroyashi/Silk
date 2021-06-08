@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -23,7 +25,7 @@ namespace Silk.Core.Data.MediatR.Tags
     /// <summary>
     ///     The default handler for <see cref="UpdateTagRequest" />.
     /// </summary>
-    public class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
+    public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
     {
         private readonly GuildContext _db;
 
@@ -34,12 +36,17 @@ namespace Silk.Core.Data.MediatR.Tags
 
         public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
-            Tag tag = await _db.Tags.FirstAsync(t => t.Name.ToLower() == request.Name.ToLower() &&
-                                                     t.GuildId == request.GuildId, cancellationToken);
+            Tag tag = await _db.Tags.Include(t => t.Aliases)
+                .FirstAsync(t => string.Equals(t.Name, request.Name, StringComparison.OrdinalIgnoreCase) &&
+                                 t.GuildId == request.GuildId, cancellationToken);
             tag.Name = request.NewName ?? tag.Name;
             tag.Uses = request.Uses ?? tag.Uses;
             tag.Content = request.Content ?? tag.Content;
             tag.Aliases = request.Aliases ?? tag.Aliases;
+
+            if (tag.Aliases?.Any() ?? false)
+                foreach (var alias in request.Aliases!)
+                    alias.Content = tag.Content;
 
             await _db.SaveChangesAsync(cancellationToken);
             return tag;

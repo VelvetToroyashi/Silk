@@ -12,8 +12,8 @@ namespace Silk.Core.Data.MediatR.Reminders
     /// </summary>
     public record CreateReminderRequest(
         DateTime Expiration, ulong OwnerId,
-        ulong ChannelId, ulong MessageId, ulong GuildId,
-        string MessageContent, bool WasReply,
+        ulong ChannelId, ulong? MessageId, ulong? GuildId,
+        string? MessageContent, bool WasReply,
         ReminderType Type, ulong? ReplyId = null,
         ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
 
@@ -33,7 +33,8 @@ namespace Silk.Core.Data.MediatR.Reminders
 
         public async Task<Reminder> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new GetOrCreateUserRequest(request.GuildId, request.OwnerId), cancellationToken);
+            if (request.GuildId is not (null or 0))
+                await _mediator.Send(new GetOrCreateUserRequest(request.GuildId.Value, request.OwnerId), cancellationToken);
 
             Reminder r = new()
             {
@@ -41,8 +42,8 @@ namespace Silk.Core.Data.MediatR.Reminders
                 CreationTime = DateTime.UtcNow,
                 OwnerId = request.OwnerId,
                 ChannelId = request.ChannelId,
-                MessageId = request.MessageId,
-                GuildId = request.GuildId,
+                MessageId = request.MessageId ?? 0,
+                GuildId = request.GuildId ?? 0,
                 Type = request.Type,
                 ReplyId = request.ReplyId,
                 MessageContent = request.MessageContent,
