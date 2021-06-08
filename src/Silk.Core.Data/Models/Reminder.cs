@@ -22,11 +22,6 @@ namespace Silk.Core.Data.Models
         public ulong OwnerId { get; init; }
 
         /// <summary>
-        /// The guild this reminder belongs to, if any. 
-        /// </summary>
-        public Guild? Guild { get; set; }
-
-        /// <summary>
         ///     The channel the reminder was made in
         /// </summary>
         public ulong ChannelId { get; set; }

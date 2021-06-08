@@ -131,8 +131,8 @@ namespace Silk.Core.Services
             var apiClient = (DiscordApiClient) typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
             var channel = await (Task<DiscordDmChannel>) typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] {reminder.OwnerId})!;
             _logger.LogTrace("Preparring to send reminder");
-            await channel.SendMessageAsync($"Hey! You wanted to be reminded you of something {(reminder.CreationTime - DateTime.Now).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
-
+            await channel.SendMessageAsync($"Hey! You wanted to be reminded you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+            await RemoveReminderAsync(reminder.Id);
         }
 
         private async Task UpdateRecurringReminderAsync(Reminder reminder)
