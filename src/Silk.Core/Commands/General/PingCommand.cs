@@ -25,33 +25,37 @@ namespace Silk.Core.Commands.General
         [Description("Check the responsiveness of Silk")]
         public async Task Ping(CommandContext ctx)
         {
+            var sw = Stopwatch.StartNew();
+            await ctx.Channel.TriggerTypingAsync();
+            sw.Stop();
+            var apiLat = sw.ElapsedMilliseconds;
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blue)
                 .AddField("→ Message Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
-                .AddField("→ Discord API latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
+                .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("→ Silk! API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
                 // Make the databse latency centered. //
-                .AddField("​", "​", true)
                 .AddField("→ Database Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
-                .AddField("​", "​", true);
+                .AddField("​", "​", true)
+                .AddField("→ Discord API Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(12) + "```", true);
 
 
 
-            var sw = Stopwatch.StartNew();
+            sw.Restart();
             DiscordMessage message = await ctx.RespondAsync(embed);
             sw.Stop();
 
             await Task.Delay(400);
-            PingReply? silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
+            PingReply silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
             embed
                 .ClearFields()
                 .AddField("→ Message Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀') + "```", true)
-                .AddField("→ Discord API latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
+                .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("→ Silk! API Latency ←", "```cs\n" + $"{silkApiResponse.RoundtripTime} ms".PadLeft(10, '⠀') + "```", true)
                 // Make the databse latency centered. //
-                .AddField("​", "​", true)
                 .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
                 .AddField("​", "​", true)
+                .AddField("→ Discord API Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(12) + "```", true)
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
 
             await message.ModifyAsync(embed.Build());
