@@ -28,12 +28,12 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core
 {
-    public class Startup
+    public sealed class Startup
     {
         public static async Task Main()
         {
             // Make Generic Host here. //
-            IHostBuilder? builder = CreateBuilder();
+            IHostBuilder builder = CreateBuilder();
 
             AddLogging(builder);
 
@@ -42,6 +42,8 @@ namespace Silk.Core
 
             IHost builtBuilder = builder.UseConsoleLifetime().Build();
             DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
+            DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
+
 
             await builtBuilder.RunAsync().ConfigureAwait(false);
         }

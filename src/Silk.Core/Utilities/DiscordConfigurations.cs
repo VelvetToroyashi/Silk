@@ -3,6 +3,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Silk.Shared.Constants;
@@ -38,10 +39,15 @@ namespace Silk.Core.Utilities
             Timeout = TimeSpan.FromMinutes(1)
         };
 
+        /// <summary>
+        /// The base configuration used for <see cref="CommandsNextExtension"/>
+        /// </summary>
         public static CommandsNextConfiguration CommandsNext { get; } = new()
         {
             IgnoreExtraArguments = true,
             UseDefaultCommandHandler = false,
         };
+
+        public static SlashCommandsConfiguration SlashCommands { get; } = new();
     }
 }
