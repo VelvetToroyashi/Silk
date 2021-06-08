@@ -74,6 +74,7 @@ namespace Silk.Core
             sc.RegisterCommands<RemindersCommand>(721518523704410202);
             sc.RegisterCommands<RemindCommands>(721518523704410202);
 
+
         }
 
         private async Task InitializeCommandsNextAsync()

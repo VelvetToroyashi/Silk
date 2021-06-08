@@ -18,18 +18,15 @@ namespace Silk.Core.SlashCommands
         private readonly ReminderService _reminds;
         public RemindersCommand(ReminderService reminds) => _reminds = reminds;
 
-        [SlashCommand("reminders", "display all active reminders!")]
+        [SlashCommand("reminders", "Display all active reminders!")]
         public Task Reminders(InteractionContext ctx) => new RemindCommands(_reminds).List(ctx);
     }
 
-    [SlashCommandGroup("reminder", "Reminder related commands!")]
+    [SlashCommandGroup("aaaaaa", "Reminder related commands!")]
     public sealed class RemindCommands : SlashCommandModule
     {
         private readonly ReminderService _reminders;
         public RemindCommands(ReminderService reminders) => _reminders = reminders;
-
-        [SlashCommand("pog", "pog")]
-        public async Task Pog(InteractionContext ctx) { }
 
         [SlashCommand("list", "Lists your active reminders!~")]
         public async Task List(InteractionContext ctx)
@@ -86,5 +83,8 @@ namespace Silk.Core.SlashCommands
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
         }
+
+        [SlashCommand("create", "Create a reminder!")]
+        public async Task Create(InteractionContext ctx, string time, string reminder) { }
     }
 }
