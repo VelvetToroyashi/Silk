@@ -74,7 +74,6 @@ namespace Silk.Core
         {
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
 
-            sc.RegisterCommands<RemindersCommand>(721518523704410202);
             sc.RegisterCommands<RemindCommands>(721518523704410202);
             sc.RegisterCommands<Test>(721518523704410202);
 

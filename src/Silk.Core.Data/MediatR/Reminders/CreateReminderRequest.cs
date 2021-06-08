@@ -17,8 +17,9 @@ namespace Silk.Core.Data.MediatR.Reminders
         ReminderType Type, ulong? ReplyId = null,
         ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
 
+    /// <inheritdoc />
     /// <summary>
-    ///     The default handler for <see cref="CreateReminderRequest" />.
+    ///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Reminders.CreateReminderRequest" />.
     /// </summary>
     public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, Reminder>
     {

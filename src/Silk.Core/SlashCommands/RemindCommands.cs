@@ -28,8 +28,9 @@ namespace Silk.Core.SlashCommands
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
-                IEnumerable<Reminder>? reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
-                if (reminders is null)
+                Reminder[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
+
+                if (!reminders.Any())
                 {
                     await ctx.EditResponseAsync(new() {Content = "Perhaps I'm forgetting something, but you don't seem to have any reminders!"});
                     return;
