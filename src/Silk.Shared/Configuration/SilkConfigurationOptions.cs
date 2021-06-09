@@ -25,7 +25,8 @@
         public const string SectionKey = "Silk";
 
         /// <summary>
-        /// Property for whether this bot is self-hosted or not
+        /// Property for whether this bot is self-hosted or not. 
+        /// <remarks>Setting to false may lead to broken features that rely on specific information/services that are unavailable in self-hosted instances.</remarks>
         /// </summary>
         public bool SelfHosted { get; set; }
 
@@ -62,7 +63,6 @@
     /// <summary>
     /// Class which holds configuration information for the Database Connection properties
     /// <para>Note: Silk by default uses PostgresSQL, so the class is templated based off connection string convention for PostgreSQL</para>
-    ///
     /// <para>A pre-configured <b>docker-compose.yml</b> file can be found <a href="https://files.velvetthepanda.dev/docker/postgres/docker-compose.yml">here</a></para>
     /// <para>Default Username and Password: "silk".</para>
     /// </summary>
@@ -80,6 +80,7 @@
     /// </summary>
     public class SilkDiscordOptions
     {
+        public int Shards {get; set; } = 1;
         public string ClientId { get; set; } = string.Empty;
         public string ClientSecret { get; set; } = string.Empty;
         public string BotToken { get; set; } = string.Empty;
