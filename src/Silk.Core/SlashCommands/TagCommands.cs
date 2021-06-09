@@ -71,8 +71,7 @@ namespace Silk.Core.SlashCommands
 
             [SlashCommand("use", "Display a tag!")]
             public async Task Tag(
-                InteractionContext ctx,
-                [Option("tag-name", "whats the name of the tag you want to use?")]
+                InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")]
                 string tag)
             {
                 if (ctx.Guild is null)
@@ -92,7 +91,20 @@ namespace Silk.Core.SlashCommands
                 await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Guild.Id) {Uses = dbtag.Uses + 1});
             }
 
+            [SlashCommand("by", "See all a given user's tags!")]
+            public async Task UserTags(
+                InteractionContext ctx, [Option("user", "Who's tags do you want to see?")]
+                DiscordUser user)
+            {
+                if (ctx.Guild is null)
+                {
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be on a server to use this!"});
+                    return;
+                }
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
+                var tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+            }
 
 
 
