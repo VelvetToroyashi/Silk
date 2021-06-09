@@ -89,13 +89,9 @@ namespace Silk.Core.Commands.Server
         {
             TagCreationResult? couldCreateAlias = await _tagService.AliasTagAsync(originalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateAlias.Success)
-            {
                 await ctx.RespondAsync(couldCreateAlias.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync($"Alias `{aliasName}` that points to tag `{originalTag}` successfully created.");
-            }
         }
 
         [Command]
@@ -121,13 +117,9 @@ namespace Silk.Core.Commands.Server
 
             TagCreationResult? couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateTag.Success)
-            {
                 await ctx.RespondAsync(couldCreateTag.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync($"Successfully created tag **{tagName}**.");
-            }
         }
 
         [Command]
@@ -179,13 +171,9 @@ namespace Silk.Core.Commands.Server
 
             TagCreationResult? couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.Success)
-            {
                 await ctx.RespondAsync(couldEditTag.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync("Successfully edited tag!");
-            }
         }
 
         [Command]
@@ -203,10 +191,7 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     s += $" - <@{t.OwnerId}>";
                     return s;
                 }));
@@ -262,10 +247,7 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     return s;
                 }));
             DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
@@ -313,13 +295,11 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     return s;
                 }));
-            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags for {user.Username}:")
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}");

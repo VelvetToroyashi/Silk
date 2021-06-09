@@ -15,6 +15,7 @@ namespace Silk.Core.Data.MediatR.Tags
     /// <param name="GuildId">The Id of the Guild</param>
     public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<Tag>
     {
+        public ulong? Owner { get; init; }
         public string? NewName { get; init; }
         public int? Uses { get; init; }
         public string? Content { get; init; }
@@ -29,16 +30,20 @@ namespace Silk.Core.Data.MediatR.Tags
     {
         private readonly GuildContext _db;
 
-        public UpdateTagHandler(GuildContext db) => _db = db;
+        public UpdateTagHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
         public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
-            Tag tag = await _db.Tags.Include(t => t.Aliases)
-                .FirstAsync(t => t.Name == request.Name &&
-                                 t.GuildId == request.GuildId, cancellationToken);
+            Tag tag = await _db.Tags
+                .Include(t => t.Aliases)
+                .FirstAsync(t => t.Name == request.Name && t.GuildId == request.GuildId, cancellationToken);
 
-            tag.Name = request.NewName ?? tag.Name;
             tag.Uses = request.Uses ?? tag.Uses;
+            tag.Name = request.NewName ?? tag.Name;
+            tag.OwnerId = request.Owner ?? tag.OwnerId;
             tag.Content = request.Content ?? tag.Content;
             tag.Aliases = request.Aliases ?? tag.Aliases;
 

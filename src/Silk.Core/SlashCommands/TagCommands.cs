@@ -44,10 +44,7 @@ namespace Silk.Core.SlashCommands
                     .Select(t =>
                     {
                         var s = $"`{t.Name}`";
-                        if (t.OriginalTagId is not null)
-                        {
-                            s += $" → `{t.OriginalTag!.Name}`";
-                        }
+                        if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                         return s;
                     }));
                 DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
@@ -103,7 +100,7 @@ namespace Silk.Core.SlashCommands
                 }
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
-                var tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+                IEnumerable<Tag>? tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
 
                 if (!tags.Any())
                 {
@@ -141,8 +138,6 @@ namespace Silk.Core.SlashCommands
                 }
 
             }
-
-
         }
     }
 }
