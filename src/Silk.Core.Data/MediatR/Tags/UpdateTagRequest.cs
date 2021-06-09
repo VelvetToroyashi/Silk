@@ -21,23 +21,22 @@ namespace Silk.Core.Data.MediatR.Tags
         public List<Tag>? Aliases { get; init; }
     }
 
+    /// <inheritdoc />
     /// <summary>
-    ///     The default handler for <see cref="UpdateTagRequest" />.
+    ///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Tags.UpdateTagRequest" />.
     /// </summary>
     public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
     {
         private readonly GuildContext _db;
 
-        public UpdateTagHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateTagHandler(GuildContext db) => _db = db;
 
         public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
             Tag tag = await _db.Tags.Include(t => t.Aliases)
                 .FirstAsync(t => t.Name == request.Name &&
                                  t.GuildId == request.GuildId, cancellationToken);
+
             tag.Name = request.NewName ?? tag.Name;
             tag.Uses = request.Uses ?? tag.Uses;
             tag.Content = request.Content ?? tag.Content;
@@ -48,6 +47,7 @@ namespace Silk.Core.Data.MediatR.Tags
                     alias.Content = tag.Content;
 
             await _db.SaveChangesAsync(cancellationToken);
+
             return tag;
         }
     }
