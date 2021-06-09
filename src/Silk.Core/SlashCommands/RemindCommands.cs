@@ -88,12 +88,7 @@ namespace Silk.Core.SlashCommands
                 }
             }
 
-            private async Task CreateNonRecurringReminderAsync(
-                InteractionContext ctx,
-                [Option("time", "The time from now you want to be reminded in. Example: 1d12h -> 1 Day, 12 Hours")]
-                string time,
-                [Option("reminder", "What do you want to be reminded of?")]
-                string? reminder)
+            private async Task CreateNonRecurringReminderAsync(InteractionContext ctx, string time, string? reminder)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
@@ -145,7 +140,7 @@ namespace Silk.Core.SlashCommands
                 InteractionContext ctx,
                 [Option("timing", "How often should I remind you?")]
                 ReminderTypeOption type,
-                [Option("offset", "(Optional) How far in the future do you want to be reminded? Example: 2d5h -> 2 Days, 5 Hours | 3h30m -> 3 Hours, 30 Minutes.")]
+                [Option("offset", "(Optional) How far in the future do you want to be reminded? Example: 2d5h, 3h20m, 2w")]
                 string? time,
                 [Option("reminder", "What do you want to be reminded of?")]
                 string reminder)

@@ -132,6 +132,7 @@ namespace Silk.Core.Services
                 }
             }
         }
+
         private async Task DispatchSilentReminderAsync(Reminder reminder)
         {
             var apiClient = (DiscordApiClient) typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
