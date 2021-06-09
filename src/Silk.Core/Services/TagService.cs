@@ -11,15 +11,10 @@ namespace Silk.Core.Services
     public sealed class TagService
     {
         private readonly IMediator _mediator;
-        public TagService(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public TagService(IMediator mediator) => _mediator = mediator;
 
-        public async Task<Tag?> GetTagAsync(string tagName, ulong guildId)
-        {
-            return await _mediator.Send(new GetTagRequest(tagName, guildId));
-        }
+        public async Task<Tag?> GetTagAsync(string tagName, ulong guildId) 
+            => await _mediator.Send(new GetTagRequest(tagName, guildId));
 
         /// <summary>
         ///     Creates a tag that points to another tag.
@@ -125,10 +120,8 @@ namespace Silk.Core.Services
         /// </summary>
         /// <param name="tagName">The name of the tag to remove.</param>
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
-        public async Task RemoveTagAsync(string tagName, ulong guildId)
-        {
-            await _mediator.Send(new DeleteTagRequest(tagName, guildId));
-        }
+        public async Task RemoveTagAsync(string tagName, ulong guildId) 
+            => await _mediator.Send(new DeleteTagRequest(tagName, guildId));
 
 
         /// <summary>
@@ -137,19 +130,15 @@ namespace Silk.Core.Services
         /// <param name="ownerId">The Id of the tag owner.</param>
         /// <param name="guildId">The Id of the guild the tag owner is from.</param>
         /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
-        public async Task<IEnumerable<Tag>> GetUserTagsAsync(ulong ownerId, ulong guildId)
-        {
-            return await _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
-        }
+        public async Task<IEnumerable<Tag>> GetUserTagsAsync(ulong ownerId, ulong guildId) 
+            => await _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
 
         /// <summary>
         ///     Gets a collection of tags in a guild.
         /// </summary>
         /// <param name="guildId">The Id of the guild.</param>
         /// <returns>A collection of tags in the guild, or null if there are none.</returns>
-        public async Task<IEnumerable<Tag>> GetGuildTagsAsync(ulong guildId)
-        {
-            return await _mediator.Send(new GetTagByGuildRequest(guildId));
-        }
+        public async Task<IEnumerable<Tag>> GetGuildTagsAsync(ulong guildId) 
+            => await _mediator.Send(new GetTagByGuildRequest(guildId));
     }
 }
