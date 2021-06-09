@@ -68,16 +68,10 @@ namespace Silk.Core.Commands.General
 
 
         [Command]
-        public Task Hourly(CommandContext ctx, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, TimeSpan.Zero);
-        }
+        public Task Hourly(CommandContext ctx, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Hourly, TimeSpan.Zero);
 
         [Command]
-        public Task Daily(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Daily, offset);
-        }
+        public Task Daily(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Daily, offset);
 
         [Command]
         public Task Daily(CommandContext ctx, [RemainingText] string reminder)
@@ -86,30 +80,19 @@ namespace Silk.Core.Commands.General
         }
 
         [Command]
-        public Task Weekly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, offset);
-        }
+        public Task Weekly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, offset);
 
         [Command]
-        public Task Weekly(CommandContext ctx, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, TimeSpan.Zero);
-        }
+        public Task Weekly(CommandContext ctx, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Weekly, TimeSpan.Zero);
 
         [Command]
-        public Task Monthly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, offset);
-        }
+        public Task Monthly(CommandContext ctx, TimeSpan offset, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, offset);
 
         [Command]
-        public Task Monthly(CommandContext ctx, [RemainingText] string reminder)
-        {
-            return CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, TimeSpan.Zero);
-        }
+        public Task Monthly(CommandContext ctx, [RemainingText] string reminder) => CreateRecurringReminder(ctx, reminder, ReminderType.Monthly, TimeSpan.Zero);
 
         private async Task CreateRecurringReminder(CommandContext ctx, string reminder, ReminderType type, TimeSpan offset)
+
         {
             DateTime time = type switch
             {
@@ -131,9 +114,9 @@ namespace Silk.Core.Commands.General
         [Description("Gives you a list of your reminders")]
         public async Task List(CommandContext ctx)
         {
-            IEnumerable<Reminder>? reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
+            IEnumerable<Reminder> reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
 
-            if (reminders is null)
+            if (!reminders.Any())
             {
                 await ctx.RespondAsync("You don't have any active reminders!");
             }
