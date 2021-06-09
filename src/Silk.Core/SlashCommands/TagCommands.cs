@@ -104,11 +104,43 @@ namespace Silk.Core.SlashCommands
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
                 var tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+
+                if (!tags.Any())
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Looks like that user doesn't actually have any tags!"});
+                    return;
+                }
+
+                string allTags = string.Join('\n', tags
+                    .Select(t =>
+                    {
+                        var s = $"`{t.Name}`";
+
+                        if (t.OriginalTagId is not null)
+                            s += $" → `{t.OriginalTag!.Name}`";
+
+                        return s;
+                    }));
+
+                DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+                    .WithColor(DiscordColor.Blurple)
+                    .WithTitle($"Tags for {user.Username}:")
+                    .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+
+                if (tags.Count() < 10)
+                {
+                    builder.WithDescription(allTags);
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                }
+                else
+                {
+                    InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
+
+                    IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
+                    await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
+                }
+
             }
-
-
-
-
 
 
 

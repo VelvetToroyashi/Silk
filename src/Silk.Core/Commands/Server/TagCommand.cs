@@ -302,8 +302,8 @@ namespace Silk.Core.Commands.Server
         [Description("Get Tags created by a User")]
         public async Task Tags(CommandContext ctx, DiscordMember user)
         {
-            IEnumerable<Tag>? tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
-            if (tags is null)
+            IEnumerable<Tag> tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("User has no tags! :c");
                 return;

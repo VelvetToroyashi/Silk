@@ -110,7 +110,7 @@ namespace Silk.Core.Services
         /// <param name="ownerId">The Id of the tag owner.</param>
         /// <param name="guildId">The Id of the guild the tag owner is from.</param>
         /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
-        public async Task<IEnumerable<Tag>?> GetUserTagsAsync(ulong ownerId, ulong guildId)
+        public async Task<IEnumerable<Tag>> GetUserTagsAsync(ulong ownerId, ulong guildId)
             => await _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
 
         /// <summary>
