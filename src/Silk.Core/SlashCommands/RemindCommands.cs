@@ -132,16 +132,17 @@ namespace Silk.Core.SlashCommands
                     return;
                 }
                 await _reminders.RemoveReminderAsync((int) reminderId);
+                await ctx.EditResponseAsync(new() {Content = "Done."});
             }
 
 
             [SlashCommand("create", "Create a reminder! You will be reminded relative to when you set it!")]
             public async Task CreateRecurring(
                 InteractionContext ctx,
-                [Option("timing", "How often should I remind you?")]
+                [Option("occurence", "How often should I remind you?")]
                 ReminderTypeOption type,
-                [Option("offset", "(Optional) How far in the future do you want to be reminded? Example: 2d5h, 3h20m, 2w")]
-                string? time,
+                [Option("offset", "How long (from now) should I remind you? Ex: 2h40m, 3d, or `now`.")]
+                string time,
                 [Option("reminder", "What do you want to be reminded of?")]
                 string reminder)
             {
@@ -150,9 +151,44 @@ namespace Silk.Core.SlashCommands
                     await CreateNonRecurringReminderAsync(ctx, time!, reminder);
                     return;
                 }
+
                 await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                TimeSpan ts = TimeSpan.Zero;
+
+                if (!string.Equals("now", time, StringComparison.OrdinalIgnoreCase))
+                {
+                    var conv = new TimeSpanConverter();
+                    Optional<TimeSpan> res = await conv.ConvertAsync(time);
+
+                    if (res.HasValue)
+                    {
+                        ts = res.Value;
+                    }
+                    else
+                    {
+                        await ctx.EditResponseAsync(new() {Content = "Sorry, but that offset doesn't look quite right."});
+                        return;
+                    }
+                }
+
+                await SetReminderAsync(ctx, reminder, (ReminderType) type, ts);
             }
 
+            private async Task SetReminderAsync(InteractionContext ctx, string reminder, ReminderType type, TimeSpan offset)
+            {
+                DateTime time = type switch
+                {
+                    ReminderType.Hourly => DateTime.UtcNow + offset + TimeSpan.FromHours(1),
+                    ReminderType.Daily => DateTime.UtcNow + offset + TimeSpan.FromDays(1),
+                    ReminderType.Weekly => DateTime.UtcNow + offset + TimeSpan.FromDays(7),
+                    ReminderType.Monthly => DateTime.UtcNow + offset + TimeSpan.FromDays(30),
+                    ReminderType.Once => throw new ArgumentException($"{nameof(ReminderType.Once)} is not a supported type."),
+                    _ => throw new ArgumentException($"Unknown value for type of {nameof(ReminderType)}")
+                };
+
+                await _reminders.CreateReminder(time, ctx.User.Id, ctx.Interaction.ChannelId, 0, ctx.Interaction.GuildId, reminder, false, type);
+                await ctx.FollowUpAsync(new() {Content = $"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)}: {reminder}", IsEphemeral = true});
+            }
         }
     }
 }
