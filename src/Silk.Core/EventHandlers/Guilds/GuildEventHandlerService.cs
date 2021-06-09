@@ -14,6 +14,7 @@ using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Guilds
@@ -42,7 +43,7 @@ namespace Silk.Core.EventHandlers.Guilds
         }
 
         private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
-                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
+                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via Ko-Fi *greatly* aid in this endevour. <3";
 
         internal void MarkCompleted(int shardId)
         {
@@ -52,7 +53,6 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
-
             _startTime ??= DateTime.Now;
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
 
@@ -63,9 +63,9 @@ namespace Silk.Core.EventHandlers.Guilds
             CheckForCompletion();
         }
 
-        internal static async Task JoinedGuild(GuildCreateEventArgs args)
+        internal async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            IOrderedEnumerable<DiscordChannel>? allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
+            IOrderedEnumerable<DiscordChannel> allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             DiscordMember bot = args.Guild.CurrentMember;
             DiscordChannel? availableChannel = allChannels
                 .Where(c => c.Type is ChannelType.Text)
@@ -80,7 +80,9 @@ namespace Silk.Core.EventHandlers.Guilds
                 .WithDescription(OnGuildJoinThankYouMessage)
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
                 .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
+
             await availableChannel.SendMessageAsync(builder);
+            await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
         }
 
         private void LogMembers(int members, int totalMembers, int shardId)
