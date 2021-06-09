@@ -21,29 +21,32 @@ namespace Silk.Core.EventHandlers.Guilds
 {
     public sealed class GuildEventHandlerService : BackgroundService
     {
-        public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
-        private bool _logged;
-        private DateTime? _startTime;
-        private bool _cachedAllInitialGuilds;
-
-        private readonly IMediator _mediator;
+        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
+                                                          "\n\nI respond to mentions and `s!` by default, but you can change that with `s!prefix`" +
+                                                          "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
+                                                          "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
+                                                          "\nDonations via Ko-Fi *greatly* aid in this endevour. <3";
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
 
+        private readonly IMediator _mediator;
+        private bool _cachedAllInitialGuilds;
+        private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
+
         private Dictionary<int, int> _guilds;
 
+        private bool _logged;
+
         private int _shardCount; // How many shards to wait for. //
-        private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
+        private DateTime? _startTime;
         public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger)
         {
             _mediator = mediator;
             _client = client;
             _logger = logger;
         }
-
-        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
-                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via Ko-Fi *greatly* aid in this endevour. <3";
+        public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
         internal void MarkCompleted(int shardId)
         {
@@ -65,21 +68,28 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            IOrderedEnumerable<DiscordChannel> allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
             DiscordMember bot = args.Guild.CurrentMember;
-            DiscordChannel? availableChannel = allChannels
-                .Where(c => c.Type is ChannelType.Text)
-                .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+            DiscordChannel? availableChannel = args.Guild
+                .Channels.Values
+                .OrderBy(c => c.Position)
+                .FirstOrDefault(c => c.Type is ChannelType.Text &&
+                                     c.PermissionOverwrites
+                                         .Any(p => p.Id == args.Guild.Id &&
+                                                   p.Allowed.HasPermission(Permissions.SendMessages | Permissions.EmbedLinks)));
 
             if (availableChannel is null)
-                return;
+                return; // All channels are locked. //
 
-            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
                 .WithDescription(OnGuildJoinThankYouMessage)
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
                 .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
+
+            DiscordMessageBuilder? builder = new DiscordMessageBuilder()
+                .WithEmbed(embed)
+                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"), new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"), new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"));
 
             await availableChannel.SendMessageAsync(builder);
             await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
@@ -152,7 +162,7 @@ namespace Silk.Core.EventHandlers.Guilds
             return Math.Max(staffCount, 0);
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield(); // Sync until an await, which means we block until we finish the queue. //
             _shardCount = _client.ShardClients.Count;
