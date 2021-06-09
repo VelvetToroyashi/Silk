@@ -26,7 +26,7 @@
 
         /// <summary>
         /// Property for whether this bot is self-hosted or not. 
-        /// <remarks>Setting to false may lead to broken features that rely on specific information/services that are unavailable in self-hosted instances.</remarks>
+        /// <remarks>Setting to true may lead to broken features that rely on specific information/services that are unavailable in self-hosted instances.</remarks>
         /// </summary>
         public bool SelfHosted { get; set; }
 
