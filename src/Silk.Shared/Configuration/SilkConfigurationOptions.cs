@@ -2,8 +2,12 @@
 {
     /// <summary>
     /// A class which holds configuration information bound from an AppSettings or UserSecrets file.
-    /// To be used with IOptions and configured in ConfigureServices in a Startup.cs file />
+    /// To be used with IOptions and configured in ConfigureServices in a Startup.cs file.<br/>
     ///
+    /// <para>More info about <b>Options Pattern</b> can be found on Microsoft Docs
+    /// <a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0">Options pattern in ASP.NET Core</a>
+    /// </para><br/>
+    /// 
     /// Properties within this class correlate to the name of the key or sub-key property in the configuration file:
     /// Ex. Below, the "Persistence" key correlates to the Persistence property in this class with the same name
     /// <code>
