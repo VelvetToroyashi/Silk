@@ -5,7 +5,7 @@
     /// To be used with IOptions and configured in ConfigureServices in a Startup.cs file />
     ///
     /// Properties within this class correlate to the name of the key or sub-key property in the configuration file:
-    /// Ex. Below, the "Persistence" key correlated to the Persistence property in this class with the same name
+    /// Ex. Below, the "Persistence" key correlates to the Persistence property in this class with the same name
     /// <code>
     /// {
     ///     /* Root */
@@ -63,7 +63,8 @@
     /// <summary>
     /// Class which holds configuration information for the Database Connection properties
     /// <para>Note: Silk by default uses PostgresSQL, so the class is templated based off connection string convention for PostgreSQL</para>
-    /// <para>A pre-configured <b>docker-compose.yml</b> file can be found <a href="https://files.velvetthepanda.dev/docker/postgres/docker-compose.yml">here</a></para>
+    /// <para>A pre-configured <b>docker-compose.yml</b> file can be found
+    /// <a href="https://files.velvetthepanda.dev/docker/postgres/docker-compose.yml">here</a></para>
     /// <para>Default Username and Password: "silk".</para>
     /// </summary>
     public class SilkPersistenceOptions
