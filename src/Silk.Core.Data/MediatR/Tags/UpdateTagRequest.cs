@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +36,7 @@ namespace Silk.Core.Data.MediatR.Tags
         public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
             Tag tag = await _db.Tags.Include(t => t.Aliases)
-                .FirstAsync(t => string.Equals(t.Name, request.Name, StringComparison.OrdinalIgnoreCase) &&
+                .FirstAsync(t => t.Name == request.Name &&
                                  t.GuildId == request.GuildId, cancellationToken);
             tag.Name = request.NewName ?? tag.Name;
             tag.Uses = request.Uses ?? tag.Uses;
