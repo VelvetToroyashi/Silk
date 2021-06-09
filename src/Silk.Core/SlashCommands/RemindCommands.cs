@@ -11,6 +11,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
+using Silk.Core.Types;
 using Silk.Core.Utilities.Bot;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
@@ -87,8 +88,7 @@ namespace Silk.Core.SlashCommands
                 }
             }
 
-            [SlashCommand("create", "Create a reminder!")]
-            public async Task Create(
+            private async Task CreateNonRecurringReminderAsync(
                 InteractionContext ctx,
                 [Option("time", "The time from now you want to be reminded in. Example: 1d12h -> 1 Day, 12 Hours")]
                 string time,
@@ -96,6 +96,12 @@ namespace Silk.Core.SlashCommands
                 string? reminder)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+
+                if (string.IsNullOrEmpty(time))
+                {
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you have to specify a time!", IsEphemeral = true});
+                    return;
+                }
 
                 if (_client.GetMember(u => u.Id == ctx.User.Id) is null)
                 {
@@ -134,8 +140,23 @@ namespace Silk.Core.SlashCommands
             }
 
 
-            [SlashCommand("recurring", "Create a recurring reminder!")]
-            public async Task Create(InteractionContext ctx) { }
+            [SlashCommand("create", "Create a reminder! You will be reminded relative to when you set it!")]
+            public async Task CreateRecurring(
+                InteractionContext ctx,
+                [Option("timing", "How often should I remind you?")]
+                ReminderTypeOption type,
+                [Option("offset", "(Optional) How far in the future do you want to be reminded? Example: 2d5h -> 2 Days, 5 Hours | 3h30m -> 3 Hours, 30 Minutes.")]
+                string? time,
+                [Option("reminder", "What do you want to be reminded of?")]
+                string reminder)
+            {
+                if (type is ReminderTypeOption.Once)
+                {
+                    await CreateNonRecurringReminderAsync(ctx, time!, reminder);
+                    return;
+                }
+                await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+            }
 
         }
     }
