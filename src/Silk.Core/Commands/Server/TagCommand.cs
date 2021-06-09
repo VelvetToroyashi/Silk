@@ -321,8 +321,6 @@ namespace Silk.Core.Commands.Server
         [Command]
         [Description("Get Tags created by the Current User")]
         public async Task Tags(CommandContext ctx)
-        {
-            await Tags(ctx, ctx.Member);
-        }
+            => await Tags(ctx, ctx.Member);
     }
 }

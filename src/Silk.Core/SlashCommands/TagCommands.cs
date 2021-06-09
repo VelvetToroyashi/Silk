@@ -29,7 +29,7 @@ namespace Silk.Core.SlashCommands
 
 
             [SlashCommand("list", "List server tags!")]
-            public async Task Tag(InteractionContext ctx)
+            public async Task List(InteractionContext ctx)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
@@ -67,9 +67,7 @@ namespace Silk.Core.SlashCommands
             }
 
             [SlashCommand("use", "Display a tag!")]
-            public async Task Tag(
-                InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")]
-                string tag)
+            public async Task Use(InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")] string tag)
             {
                 if (ctx.Guild is null)
                 {
@@ -89,9 +87,7 @@ namespace Silk.Core.SlashCommands
             }
 
             [SlashCommand("by", "See all a given user's tags!")]
-            public async Task UserTags(
-                InteractionContext ctx, [Option("user", "Who's tags do you want to see?")]
-                DiscordUser user)
+            public async Task ListByUser(InteractionContext ctx, [Option("user", "Who's tags do you want to see?")] DiscordUser user)
             {
                 if (ctx.Guild is null)
                 {
@@ -100,7 +96,7 @@ namespace Silk.Core.SlashCommands
                 }
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
-                IEnumerable<Tag>? tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+                IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
 
                 if (!tags.Any())
                 {
@@ -138,6 +134,12 @@ namespace Silk.Core.SlashCommands
                 }
 
             }
+            
+            [SlashCommand("server", "Show the tags on this server! (Not implemented yet.)")]
+            public async Task Server(InteractionContext ctx){}
+
+            [SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
+            public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag) { }
         }
     }
 }
