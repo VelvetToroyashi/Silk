@@ -22,16 +22,15 @@ namespace Silk.Core.Services
         private readonly ILogger<UptimeService> _logger;
         public UptimeService(DiscordShardedClient client, ILogger<UptimeService> logger)
         {
-            DiscordShardedClient client1 = client;
             _logger = logger;
             _reset = new(false);
 
-            client1.SocketOpened += async (_, _) =>
+            client.SocketOpened += async (_, _) =>
             {
                 _isUp = true;
                 _ = _reset.SetAsync();
             };
-            client1.SocketClosed += async (_, _) =>
+            client.SocketClosed += async (_, _) =>
             {
                 _isUp = false;
                 _reset.Reset();
@@ -45,21 +44,20 @@ namespace Silk.Core.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (!_isUp)
+                if (_isUp) continue;
+
+                DateTime down = DateTime.Now;
+
+                await _reset.WaitAsync();
+                TimeSpan downTime = DateTime.Now - down;
+
+                if (downTime > TimeSpan.FromSeconds(1))
                 {
-                    DateTime down = DateTime.Now;
-
-                    await _reset.WaitAsync();
-                    TimeSpan downTime = DateTime.Now - down;
-
-                    if (downTime > TimeSpan.FromSeconds(1))
-                    {
-                        LastOutage = down;
-                        OutageTime = downTime;
-                    }
-
-                    UpTime = UpTime - downTime;
+                    LastOutage = down;
+                    OutageTime = downTime;
                 }
+
+                UpTime -= downTime;
             }
 
             _logger.LogInformation("Stopping service");
