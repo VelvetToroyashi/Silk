@@ -8,6 +8,8 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.EventArgs;
+using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers.Messages;
@@ -41,17 +43,21 @@ namespace Silk.Core
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var amre = new AsyncManualResetEvent(true); // We use this to unsub from the slash command logs after registering them, but simply doing this in a different 
+            // Service would work as well. I like my solution though :) //
             _logger.LogInformation("Starting service");
             await InitializeClientExtensions();
             _logger.LogInformation("Initialized client");
             await InitializeCommandsNextAsync();
             _logger.LogInformation("Initialized CommandsNext");
-            await InitializeSlashCommandsAsync();
+            await InitializeSlashCommandsAsync(amre);
             _logger.LogInformation("Initialized Slash-Commands");
             await _handler.SubscribeToEventsAsync();
             _logger.LogDebug("Connecting to Discord gateway");
             await ShardClient.StartAsync();
             _logger.LogInformation("Connected to Discord gateway as {Username}#{Discriminator}", ShardClient.CurrentUser.Username, ShardClient.CurrentUser.Discriminator);
+
+            await amre.SetAsync();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -70,13 +76,21 @@ namespace Silk.Core
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
         }
 
-        private async Task InitializeSlashCommandsAsync()
+        private async Task InitializeSlashCommandsAsync(AsyncManualResetEvent re)
         {
+            async Task LogFunc(SlashCommandsExtension _, SlashCommandErrorEventArgs e) => _logger.LogCritical("Slash command errored! Exception: {Ex}", e.Exception);
+
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
 
+            sc.SlashCommandErrored += LogFunc;
             sc.RegisterCommands<RemindCommands>(721518523704410202);
+            sc.RegisterCommands<TagCommands>(721518523704410202);
 
-            sc.SlashCommandErrored += async (c, e) => _logger.LogCritical("Slash command errored! Exception: {Ex}", e.Exception);
+            _ = Task.Run(async () =>
+            {
+                await re.WaitAsync();
+                sc.SlashCommandErrored -= LogFunc;
+            });
         }
 
         private async Task InitializeCommandsNextAsync()

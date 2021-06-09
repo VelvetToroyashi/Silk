@@ -31,6 +31,7 @@ namespace Silk.Core.Commands.Server
             "alias", "info", "claim",
             "raw", "list"
         };
+
         private readonly TagService _tagService;
         public TagCommand(IMediator mediator, TagService tagService)
         {
@@ -64,26 +65,22 @@ namespace Silk.Core.Commands.Server
             if (dbTag is null)
             {
                 await ctx.RespondAsync("Tag not found! :(");
+                return;
             }
-            else
-            {
-                DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
-                DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-                    .WithColor(DiscordColor.Blurple)
-                    .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
-                    .WithTitle(dbTag.Name);
 
-                builder
-                    .AddField("Uses:", dbTag.Uses.ToString())
-                    .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
+            DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Blurple)
+                .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                .WithTitle(dbTag.Name)
+                .AddField("Uses:", dbTag.Uses.ToString())
+                .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
 
-                if (dbTag.OriginalTag is not null)
-                {
-                    builder.AddField("Original:", dbTag.OriginalTag.Name);
-                }
+            if (dbTag.OriginalTag is not null)
+                builder.AddField("Original:", dbTag.OriginalTag.Name);
 
-                await ctx.RespondAsync(builder);
-            }
+            await ctx.RespondAsync(builder);
+
         }
 
         [Command]
@@ -254,8 +251,8 @@ namespace Silk.Core.Commands.Server
         [Description("Shows a List of All Tags in this Server")]
         public async Task List(CommandContext ctx)
         {
-            IEnumerable<Tag>? tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
-            if (tags is null)
+            IEnumerable<Tag> tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("No tags in this server! :c");
                 return;

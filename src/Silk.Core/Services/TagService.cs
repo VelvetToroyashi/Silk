@@ -118,7 +118,7 @@ namespace Silk.Core.Services
         /// </summary>
         /// <param name="guildId">The Id of the guild.</param>
         /// <returns>A collection of tags in the guild, or null if there are none.</returns>
-        public async Task<IEnumerable<Tag>?> GetGuildTagsAsync(ulong guildId)
+        public async Task<IEnumerable<Tag>> GetGuildTagsAsync(ulong guildId)
             => await _mediator.Send(new GetTagByGuildRequest(guildId));
     }
 }
