@@ -23,7 +23,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
         public async Task CheckForInvite(DiscordClient client, MessageCreateEventArgs args)
         {
-            if (!args.Channel.IsPrivate)
+            if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
             {
                 GuildConfig config = await _config.GetConfigAsync(args.Guild.Id);
 
