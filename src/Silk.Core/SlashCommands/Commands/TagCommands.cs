@@ -209,26 +209,13 @@ namespace Silk.Core.SlashCommands.Commands
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
             }
-
+            
+            [RequireGuild]
+            [RequireCommonGuild]
             [SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
             public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
             {
                 await ctx.CreateThinkingResponseAsync();
-                
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you have to be on a guild to use this!"});
-                    return;
-                }
-                if (ctx.Guild is null)
-                {
-                    await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder()
-                            .WithContent("Sorry, but to claim tags, I need to see if the member exists on the server." +
-                                         "\nThis isn't possible as I wasn't invited with the bot scope, and thus can't access the members.")
-                            .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
-                    return;
-                }
 
                 Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
                 
