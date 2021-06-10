@@ -29,31 +29,23 @@ namespace Silk.Core.SlashCommands.Commands
                 _tags = tags;
                 _mediator = mediator;
             }
-
-            [SlashCommand("create", "Create a tag!")]
+            
             [RequireGuild]
+            [SlashCommand("create", "Create a tag!")]
             public async Task Create(InteractionContext ctx,
                 [Option("name", "The name of the tag")] string tagname,
                 [Option("content", "The content of the tag")] string content)
             {
                 await ctx.CreateThinkingResponseAsync();
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you have to be in a guild to use this!"});
-                    return;
-                }
+
             }
             
+            
+            [RequireGuild]
             [SlashCommand("raw", "View the raw content of a tag!")]
             public async Task Raw(InteractionContext ctx, [Option("tag", "The tag to view")] string tag)
             {
                 await ctx.CreateThinkingResponseAsync();
-                
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
-                    return;
-                }
 
                 Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
 
@@ -66,6 +58,7 @@ namespace Silk.Core.SlashCommands.Commands
                 await ctx.EditResponseAsync(new() {Content = Formatter.Sanitize(dbTag.Content)});
             }
             
+            [RequireGuild]
             [SlashCommand("list", "List server tags!")]
             public async Task List(InteractionContext ctx)
             {
@@ -103,16 +96,11 @@ namespace Silk.Core.SlashCommands.Commands
                     await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
                 }
             }
-
+            
+            [RequireGuild]
             [SlashCommand("use", "Display a tag!")]
             public async Task Use(InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")] string tag)
             {
-
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be in a guild to use tags!", IsEphemeral = true});
-                    return;
-                }
 
                 Tag? dbtag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
                 if (dbtag is null)
@@ -124,17 +112,12 @@ namespace Silk.Core.SlashCommands.Commands
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = dbtag.Content});
                 await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Interaction.GuildId.Value) {Uses = dbtag.Uses + 1});
             }
-
+            
+            [RequireGuild]
             [SlashCommand("by", "See all a given user's tags!")]
             public async Task ListByUser(InteractionContext ctx, [Option("user", "Who's tags do you want to see?")] DiscordUser user)
             {
                 await ctx.CreateThinkingResponseAsync();
-                
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
-                    return;
-                }
 
                 IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Interaction.GuildId.Value);
 
@@ -174,18 +157,13 @@ namespace Silk.Core.SlashCommands.Commands
                 }
 
             }
-
+            
+            [RequireGuild]
             [SlashCommand("server", "Show the tags on this server!")]
             public async Task Server(InteractionContext ctx)
             {
                 await ctx.CreateThinkingResponseAsync();
                 
-                if (ctx.Interaction.GuildId is null)
-                {
-                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
-                    return;
-                }
-
                 IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
                 if (!tags.Any())
                 {
