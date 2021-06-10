@@ -33,6 +33,22 @@ namespace Silk.Core.SlashCommands
             public async Task Raw(InteractionContext ctx, [Option("tag", "The tag to view")] string tag)
             {
                 await ctx.CreateThinkingResponseAsync();
+                
+                if (ctx.Interaction.GuildId is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
+                    return;
+                }
+
+                Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
+
+                if (dbTag is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but I couldn't find a tag by that name!"});
+                    return;
+                }
+
+                await ctx.EditResponseAsync(new() {Content = Formatter.Sanitize(dbTag.Content)});
             }
             
             [SlashCommand("list", "List server tags!")]
