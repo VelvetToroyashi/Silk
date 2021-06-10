@@ -24,6 +24,7 @@ using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 
 namespace Silk.Core
@@ -95,7 +96,10 @@ namespace Silk.Core
             return builder.ConfigureServices((context, services) =>
             {
                 IConfiguration? config = context.Configuration;
+                
+                AddSilkConfigurationOptions(services, config);
                 AddDatabases(services, config.GetConnectionString("core"));
+                
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
@@ -175,6 +179,14 @@ namespace Silk.Core
                 c.Database.Migrate();
         }
 
+        private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
+        {
+            // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0
+            var silkConfigurationSection = configuration.GetSection(SilkConfigurationOptions.SectionKey);
+            services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
+        }
+        
         private static void AddDatabases(IServiceCollection services, string connectionString)
         {
             void Builder(DbContextOptionsBuilder b)
