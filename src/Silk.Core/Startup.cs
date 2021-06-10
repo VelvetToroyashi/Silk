@@ -25,6 +25,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Core

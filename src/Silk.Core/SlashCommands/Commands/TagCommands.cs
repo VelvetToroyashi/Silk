@@ -12,6 +12,7 @@ using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
+using Silk.Core.SlashCommands.Attributes;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
@@ -30,6 +31,7 @@ namespace Silk.Core.SlashCommands.Commands
             }
 
             [SlashCommand("create", "Create a tag!")]
+            [RequireGuild]
             public async Task Create(InteractionContext ctx,
                 [Option("name", "The name of the tag")] string tagname,
                 [Option("content", "The content of the tag")] string content)
