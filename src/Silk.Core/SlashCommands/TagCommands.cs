@@ -12,6 +12,7 @@ using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands
 {
@@ -28,11 +29,16 @@ namespace Silk.Core.SlashCommands
                 _mediator = mediator;
             }
 
-
+            [SlashCommand("raw", "View the raw content of a tag!")]
+            public async Task Raw(InteractionContext ctx, [Option("tag", "The tag to view")] string tag)
+            {
+                await ctx.CreateThinkingResponseAsync();
+            }
+            
             [SlashCommand("list", "List server tags!")]
             public async Task List(InteractionContext ctx)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                await ctx.CreateThinkingResponseAsync();
 
                 IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
                 if (!tags.Any())
@@ -70,6 +76,7 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("use", "Display a tag!")]
             public async Task Use(InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")] string tag)
             {
+
                 if (ctx.Interaction.GuildId is null)
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be in a guild to use tags!", IsEphemeral = true});
@@ -90,12 +97,13 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("by", "See all a given user's tags!")]
             public async Task ListByUser(InteractionContext ctx, [Option("user", "Who's tags do you want to see?")] DiscordUser user)
             {
+                await ctx.CreateThinkingResponseAsync();
+                
                 if (ctx.Interaction.GuildId is null)
                 {
-                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be on a server to use this!"});
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
                     return;
                 }
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
                 IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Interaction.GuildId.Value);
 
@@ -139,13 +147,13 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("server", "Show the tags on this server!")]
             public async Task Server(InteractionContext ctx)
             {
+                await ctx.CreateThinkingResponseAsync();
+                
                 if (ctx.Interaction.GuildId is null)
                 {
-                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be on a server to use this!", IsEphemeral = true});
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you need to be on a server to use this!"});
                     return;
                 }
-                
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
                 IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
                 if (!tags.Any())
@@ -174,26 +182,23 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
             public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
             {
+                await ctx.CreateThinkingResponseAsync();
+                
                 if (ctx.Interaction.GuildId is null)
                 {
-                    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {Content = "Sorry, but you have to be on a guild to use this!", IsEphemeral = true});
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you have to be on a guild to use this!"});
                     return;
                 }
                 if (ctx.Guild is null)
                 {
-                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
-                        new DiscordInteractionResponseBuilder()
-                            .AsEphemeral(true)
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder()
                             .WithContent("Sorry, but to claim tags, I need to see if the member exists on the server." +
-                                        "\nThis isn't possible as I wasn't invited with the bot scope, and thus can't access the members.")
+                                         "\nThis isn't possible as I wasn't invited with the bot scope, and thus can't access the members.")
                             .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
-                    
                     return;
                 }
 
-
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
-                    
                 Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
                 
                 if (dbTag is null)

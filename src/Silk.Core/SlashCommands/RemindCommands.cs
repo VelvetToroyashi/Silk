@@ -31,7 +31,7 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("list", "Lists your active reminders!~")]
             public async Task List(InteractionContext ctx)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                await ctx.CreateThinkingResponseAsync();
 
                 Reminder[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
 
@@ -70,11 +70,11 @@ namespace Silk.Core.SlashCommands
 
             private async Task CreateNonRecurringReminderAsync(InteractionContext ctx, string time, string? reminder)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                await ctx.CreateThinkingResponseAsync();
 
                 if (string.IsNullOrEmpty(time))
                 {
-                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you have to specify a time!", IsEphemeral = true});
+                    await ctx.EditResponseAsync( new() {Content = "Sorry, but you have to specify a time!"});
                     return;
                 }
 
@@ -100,7 +100,8 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("cancel", "Cancel a reminder!")]
             public async Task Cancel(InteractionContext ctx, [Option("id", "The id of the reminder ")] long reminderId)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                await ctx.CreateThinkingResponseAsync();
+                
                 var reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
 
                 if (!reminder.Any() || reminder.All(r => r.Id != reminderId))
@@ -115,6 +116,7 @@ namespace Silk.Core.SlashCommands
 
             [SlashCommand("create", "Create a reminder! You will be reminded relative to when you set it!")]
             public async Task CreateRecurring(InteractionContext ctx,
+                
                 [Option("occurence", "How often should I remind you?")]
                 ReminderTypeOption type,
                 
@@ -130,7 +132,8 @@ namespace Silk.Core.SlashCommands
                     return;
                 }
 
-                await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                await ctx.CreateThinkingResponseAsync();
+                
                 TimeSpan ts = TimeSpan.Zero;
 
                 if (!string.Equals("now", time, StringComparison.OrdinalIgnoreCase))
