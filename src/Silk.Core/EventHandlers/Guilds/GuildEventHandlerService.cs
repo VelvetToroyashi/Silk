@@ -68,16 +68,16 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            DiscordMember bot = args.Guild.CurrentMember;
-            DiscordChannel? availableChannel = args.Guild
+            _logger.LogInformation("Joined new guild! {GuildName} | {GuildMemberCount} members", args.Guild.Name, args.Guild.MemberCount);
+
+            var bot = args.Guild.CurrentMember;
+            
+            var thankYouChannel = args.Guild
                 .Channels.Values
                 .OrderBy(c => c.Position)
-                .FirstOrDefault(c => c.Type is ChannelType.Text &&
-                                     c.PermissionOverwrites
-                                         .Any(p => p.Id == args.Guild.Id &&
-                                                   p.Allowed.HasPermission(Permissions.SendMessages | Permissions.EmbedLinks)));
-
-            if (availableChannel is null)
+                .FirstOrDefault(c => c.Type is ChannelType.Text && c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+            
+            if (thankYouChannel is null)
                 return; // All channels are locked. //
 
             DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
@@ -91,7 +91,7 @@ namespace Silk.Core.EventHandlers.Guilds
                 .WithEmbed(embed)
                 .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"), new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"), new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"));
 
-            await availableChannel.SendMessageAsync(builder);
+            await thankYouChannel.SendMessageAsync(builder);
             await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
         }
 
@@ -100,14 +100,14 @@ namespace Silk.Core.EventHandlers.Guilds
             string message;
             if (members is 0)
             {
-                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
+                message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
                 _logger.LogDebug(message, shardId + 1,
                     _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count);
             }
             else
             {
-                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
+                message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
                 _logger.LogDebug(message, shardId + 1,
                     _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
@@ -177,10 +177,13 @@ namespace Silk.Core.EventHandlers.Guilds
                     await Task.Delay(200, stoppingToken);
 
                 if (!CacheQueue.IsEmpty)
-                    foreach (var t in CacheQueue)
-                        await t.Value;
+                    for (var i = 0; i < CacheQueue.Count; i++)
+                    {
+                        CacheQueue.TryDequeue(out var task);
+                        await task?.Value!;
+                    }
 
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
         }
     }
