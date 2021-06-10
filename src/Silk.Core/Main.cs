@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.SlashCommands;
+using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
@@ -28,13 +29,15 @@ namespace Silk.Core
         private static ILogger<Main> _logger;
         private readonly BotExceptionHandler _handler;
         private readonly CommandHandler _commandHandler;
+        private readonly SlashCommandExceptionHandler _slashExceptionHandler;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler, SlashCommandExceptionHandler slashExceptionHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
             // And that's all it needs, since it subs to events in it's ctor.
             _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
             _handler = handler;
             _commandHandler = commandHandler;
+            _slashExceptionHandler = slashExceptionHandler;
             ShardClient = shardClient;
             _ = e;
         }
@@ -82,6 +85,8 @@ namespace Silk.Core
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
 
             sc.SlashCommandErrored += LogFunc;
+            sc.SlashCommandErrored += _slashExceptionHandler.Handle;
+            
             sc.RegisterCommands<RemindCommands>(721518523704410202);
             sc.RegisterCommands<TagCommands>(721518523704410202);
 

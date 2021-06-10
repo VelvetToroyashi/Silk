@@ -22,6 +22,7 @@ using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Shared.Constants;
@@ -117,6 +118,7 @@ namespace Silk.Core
                 services.AddTransient<MemberRemovedHandler>();
                 services.AddTransient<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
+                services.AddSingleton<SlashCommandExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddTransient<MessageRemovedHandler>();
 

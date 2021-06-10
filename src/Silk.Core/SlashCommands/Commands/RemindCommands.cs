@@ -13,7 +13,7 @@ using Silk.Core.Utilities.Bot;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.SlashCommands
+namespace Silk.Core.SlashCommands.Commands
 {
     public sealed class RemindCommands : SlashCommandModule
     {

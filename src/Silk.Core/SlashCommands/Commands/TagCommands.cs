@@ -14,7 +14,7 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.SlashCommands
+namespace Silk.Core.SlashCommands.Commands
 {
     public class TagCommands : SlashCommandModule
     {
@@ -29,6 +29,19 @@ namespace Silk.Core.SlashCommands
                 _mediator = mediator;
             }
 
+            [SlashCommand("create", "Create a tag!")]
+            public async Task Create(InteractionContext ctx,
+                [Option("name", "The name of the tag")] string tagname,
+                [Option("content", "The content of the tag")] string content)
+            {
+                await ctx.CreateThinkingResponseAsync();
+                if (ctx.Interaction.GuildId is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you have to be in a guild to use this!"});
+                    return;
+                }
+            }
+            
             [SlashCommand("raw", "View the raw content of a tag!")]
             public async Task Raw(InteractionContext ctx, [Option("tag", "The tag to view")] string tag)
             {
