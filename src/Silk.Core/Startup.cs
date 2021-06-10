@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using MediatR;
@@ -22,11 +23,10 @@ using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
-using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
-using Silk.Shared.Configuration;
 using Silk.Shared;
+using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 
 namespace Silk.Core
@@ -64,10 +64,9 @@ namespace Silk.Core
                         .CreateDbContext();
                     
                     var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    
                     if (pendingMigrations.Any())
-                    {
                         await dbContext.Database.MigrateAsync();
-                    }
                 }
             }
             catch (Exception)
