@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
+using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
@@ -46,7 +47,7 @@ namespace Silk.Core.EventHandlers.Guilds
             _client = client;
             _logger = logger;
         }
-        public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
+        public ConcurrentQueue<Func<Task>> CacheQueue { get; } = new();
 
         internal void MarkCompleted(int shardId)
         {
@@ -177,11 +178,14 @@ namespace Silk.Core.EventHandlers.Guilds
                     await Task.Delay(200, stoppingToken);
 
                 if (!CacheQueue.IsEmpty)
-                    for (var i = 0; i < CacheQueue.Count; i++)
+                {
+                    lock (CacheQueue)
                     {
-                        CacheQueue.TryDequeue(out var task);
-                        await task?.Value!;
+                        foreach (var t in CacheQueue)
+                            AsyncUtil.RunSync(t); 
+                        CacheQueue.Clear();
                     }
+                }
 
                 await Task.Delay(1000, stoppingToken);
             }
