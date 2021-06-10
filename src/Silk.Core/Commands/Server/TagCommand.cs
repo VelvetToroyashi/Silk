@@ -121,7 +121,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            TagCreationResult? couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateTag.Success)
                 await ctx.RespondAsync(couldCreateTag.Reason);
             else
@@ -186,8 +186,8 @@ namespace Silk.Core.Commands.Server
         [Description("Search for a Tag by name")]
         public async Task Search(CommandContext ctx, string tagName)
         {
-            IEnumerable<Tag>? tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
-            if (tags is null)
+            IEnumerable<Tag> tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("No tags found :c");
                 return;

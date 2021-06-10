@@ -124,10 +124,10 @@ namespace Silk.Core.SlashCommands.Commands
             
             [RequireGuild]
             [SlashCommand("use", "Display a tag!")]
-            public async Task Use(InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")] string tag)
+            public async Task Use(InteractionContext ctx, [Option("tag-name", "What's the name of the tag you want to use?")] string tagname)
             {
 
-                Tag? dbtag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
+                Tag? dbtag = await _tags.GetTagAsync(tagname, ctx.Interaction.GuildId.Value);
                 if (dbtag is null)
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but I don't see a tag by that name!", IsEphemeral = true});
@@ -136,6 +136,31 @@ namespace Silk.Core.SlashCommands.Commands
 
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = dbtag.Content});
                 await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Interaction.GuildId.Value) {Uses = dbtag.Uses + 1});
+            }
+
+            [RequireGuild]
+            [SlashCommand("search", "Search for a tag!")]
+            public async Task Search(InteractionContext ctx, [Option("tag-name", "What tag do you want to look for?")] string tagName)
+            {
+                await ctx.CreateThinkingResponseAsync();
+
+                IEnumerable<Tag> tags = await _tags.SearchTagsAsync(tagName, ctx.Interaction.GuildId.Value);
+
+                if (!tags.Any())
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but I couldn't find any tags matching that search!"});
+                }
+                else
+                {
+                    string allTags = string.Join("\n\n", tags.Select(t => $"`{t.Name}`{(t.OriginalTag is null ? "" : $" → `{t.OriginalTag!.Name}`")} - <@{t.OwnerId}>"));
+                    
+                    DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+                        .WithColor(DiscordColor.Blurple)
+                        .WithTitle($"Result for {tagName}:")
+                        .WithDescription(allTags);
+
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                }
             }
             
             [RequireGuild]
@@ -227,8 +252,8 @@ namespace Silk.Core.SlashCommands.Commands
                     await ctx.EditResponseAsync(new() {Content = "Sorry, but that tag doesn't exist!"});
                     return;
                 }
-                
-                var exists = ctx.Guild.Members.TryGetValue(dbTag.OwnerId, out _);
+
+                var exists = ctx.Guild.Members.ContainsKey(dbTag.OwnerId);
                 
                 User? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
                 var staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
