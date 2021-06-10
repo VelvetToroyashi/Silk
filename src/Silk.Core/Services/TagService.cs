@@ -35,15 +35,8 @@ namespace Silk.Core.Services
 
             if (alias is not null)
                 return new(false, "Alias already exists!");
-
-
-            alias = await _mediator.Send(new CreateTagRequest(aliasName, guildId, ownerId, tag.Content, tag));
-
-            tag.Aliases ??= new();
-            tag.Aliases.Add(alias);
-
-            await _mediator.Send(new UpdateTagRequest(tagName, guildId) {Aliases = tag.Aliases});
-
+            
+            await _mediator.Send(new CreateTagRequest(aliasName, guildId, ownerId, tag.Content, tag));
             return new(true, null);
         }
 

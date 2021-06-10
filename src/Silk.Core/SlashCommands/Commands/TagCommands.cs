@@ -13,6 +13,7 @@ using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
 using Silk.Core.SlashCommands.Attributes;
+using Silk.Core.Types;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
@@ -22,6 +23,14 @@ namespace Silk.Core.SlashCommands.Commands
         [SlashCommandGroup("tag", "Tag related commands!")]
         public class TagCommandGroup : SlashCommandModule
         {
+            private readonly string[] _reservedWords =
+            {
+                "create", "update", "delete",
+                "alias", "info", "claim",
+                "raw", "list"
+            };
+
+            
             private readonly IMediator _mediator;
             private readonly TagService _tags;
             public TagCommandGroup(TagService tags, IMediator mediator)
@@ -38,8 +47,24 @@ namespace Silk.Core.SlashCommands.Commands
             {
                 await ctx.CreateThinkingResponseAsync();
 
+                TagCreationResult result = await _tags.CreateTagAsync(tagname, content, ctx.Interaction.GuildId.Value, ctx.User.Id);
+
+                await ctx.EditResponseAsync(new() {Content = result.Success ? $"Successfully created tag {Formatter.Bold(tagname)}." : result.Reason});
             }
-            
+
+            [RequireGuild]
+            [SlashCommand("alias", "Point a tag to another tag!")]
+            public async Task Alias(
+                InteractionContext ctx,
+                [Option("tag", "The tag to alias")] string tagname,
+                [Option("alias", "The name of th alias")] string aliasName)
+            {
+                await ctx.CreateThinkingResponseAsync();
+
+                TagCreationResult result = await _tags.AliasTagAsync(tagname, aliasName, ctx.Interaction.GuildId.Value, ctx.User.Id);
+
+                await ctx.EditResponseAsync(new() {Content = result.Reason ?? $"Successfuly aliased tag {Formatter.Bold(aliasName)} to {Formatter.Bold(tagname)}"});
+            }
             
             [RequireGuild]
             [SlashCommand("raw", "View the raw content of a tag!")]

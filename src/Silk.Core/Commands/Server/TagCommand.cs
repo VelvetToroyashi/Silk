@@ -43,6 +43,12 @@ namespace Silk.Core.Commands.Server
         [Description("Shows the Content of a Tag")]
         public async Task Tag(CommandContext ctx, [RemainingText] string tag)
         {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                await ctx.RespondAsync("You must specify a tag!");
+                return;
+            }
+            
             Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
 
             if (dbTag is null)

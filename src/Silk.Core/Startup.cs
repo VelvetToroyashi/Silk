@@ -23,6 +23,7 @@ using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Shared;
@@ -140,15 +141,16 @@ namespace Silk.Core
 
                 services.AddSingleton<GuildEventHandlers>();
 
-                services.AddTransient<ConfigService>();
+                services.AddSingleton<ConfigService>();
                 services.AddSingleton<AntiInviteCore>();
-                services.AddTransient<RoleAddedHandler>();
-                services.AddTransient<MemberAddedHandler>();
-                services.AddTransient<MemberRemovedHandler>();
-                services.AddTransient<RoleRemovedHandler>();
+                services.AddSingleton<RoleAddedHandler>();
+                services.AddSingleton<MemberAddedHandler>();
+                services.AddSingleton<MemberRemovedHandler>();
+                services.AddSingleton<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
+                services.AddSingleton<SlashCommandExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
-                services.AddTransient<MessageRemovedHandler>();
+                services.AddSingleton<MessageRemovedHandler>();
 
                 services.AddSingleton<ButtonHandlerService>();
                 services.AddSingleton<CommandHandler>();
@@ -192,7 +194,7 @@ namespace Silk.Core
         {
             builder.ConfigureServices((context, services) =>
             {
-                DiscordConfiguration? client = DiscordConfigurations.Discord;
+                DiscordConfiguration client = DiscordConfigurations.Discord;
                 IConfiguration? config = context.Configuration;
                 int.TryParse(context.Configuration["Shards"] ?? "1", out int shards);
 
@@ -200,13 +202,7 @@ namespace Silk.Core
                 client.Token = config.GetConnectionString("discord");
             });
         }
-
-        private static void MigrateDatabases(DbContext[] contexts)
-        {
-            foreach (var c in contexts)
-                c.Database.Migrate();
-        }
-
+        
         private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
         {
             // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure

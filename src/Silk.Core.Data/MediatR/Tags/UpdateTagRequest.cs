@@ -42,7 +42,9 @@ namespace Silk.Core.Data.MediatR.Tags
             tag.OwnerId = request.Owner ?? tag.OwnerId;
             tag.Content = request.Content ?? tag.Content;
             tag.Aliases = request.Aliases ?? tag.Aliases;
-
+            await _db.SaveChangesAsync(cancellationToken);
+            _db.ChangeTracker.Clear();
+            
             if (tag.Aliases?.Any() ?? false)
                 foreach (var alias in request.Aliases!)
                     alias.Content = tag.Content;
