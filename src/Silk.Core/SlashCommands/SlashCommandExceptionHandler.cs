@@ -8,7 +8,7 @@ using Silk.Core.SlashCommands.Attributes;
 
 namespace Silk.Core.SlashCommands
 {
-	public class SlashCommandExceptionHandler
+	public sealed class SlashCommandExceptionHandler
 	{
 		private readonly ILogger<SlashCommandExceptionHandler> _logger;
 		public SlashCommandExceptionHandler(ILogger<SlashCommandExceptionHandler> logger) => _logger = logger;
