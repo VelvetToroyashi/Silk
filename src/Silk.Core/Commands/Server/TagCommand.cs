@@ -140,7 +140,7 @@ namespace Silk.Core.Commands.Server
             }
             User? user = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, ctx.User.Id));
 
-            if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? true))
+            if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? false))
             {
                 await ctx.RespondAsync("You either do not own this tag, or are not staff!");
                 return;
@@ -169,7 +169,7 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            TagCreationResult? couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.Success)
                 await ctx.RespondAsync(couldEditTag.Reason);
             else
@@ -250,6 +250,7 @@ namespace Silk.Core.Commands.Server
                     if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     return s;
                 }));
+            
             DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags in {ctx.Guild.Name}:")

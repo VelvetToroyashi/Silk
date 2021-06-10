@@ -20,9 +20,8 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core
 {
-    public class Main : IHostedService
+    public sealed class Main : IHostedService
     {
-        //public static DiscordSlashClient SlashClient { get; } // Soon™ //
         public DiscordShardedClient ShardClient { get; }
         public static string DefaultCommandPrefix => "s!";
 
@@ -76,10 +75,10 @@ namespace Silk.Core
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
         }
 
-        private async Task InitializeSlashCommandsAsync(AsyncManualResetEvent re)
+        private Task InitializeSlashCommandsAsync(AsyncManualResetEvent re)
         {
             async Task LogFunc(SlashCommandsExtension _, SlashCommandErrorEventArgs e) => _logger.LogCritical("Slash command errored! Exception: {Ex}", e.Exception);
-
+            
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
 
             sc.SlashCommandErrored += LogFunc;
@@ -91,6 +90,8 @@ namespace Silk.Core
                 await re.WaitAsync();
                 sc.SlashCommandErrored -= LogFunc;
             });
+
+            return Task.CompletedTask;
         }
 
         private async Task InitializeCommandsNextAsync()

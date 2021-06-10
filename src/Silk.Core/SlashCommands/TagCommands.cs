@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using MediatR;
 using Silk.Core.Data.MediatR.Tags;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services;
 
@@ -33,7 +34,7 @@ namespace Silk.Core.SlashCommands
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-                IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Guild.Id);
+                IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
                 if (!tags.Any())
                 {
                     await ctx.EditResponseAsync(new() {Content = "This server doesn't have any tags!"});
@@ -69,13 +70,13 @@ namespace Silk.Core.SlashCommands
             [SlashCommand("use", "Display a tag!")]
             public async Task Use(InteractionContext ctx, [Option("tag-name", "whats the name of the tag you want to use?")] string tag)
             {
-                if (ctx.Guild is null)
+                if (ctx.Interaction.GuildId is null)
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be in a guild to use tags!", IsEphemeral = true});
                     return;
                 }
 
-                Tag? dbtag = await _tags.GetTagAsync(tag, ctx.Guild.Id);
+                Tag? dbtag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
                 if (dbtag is null)
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but I don't see a tag by that name!", IsEphemeral = true});
@@ -83,20 +84,20 @@ namespace Silk.Core.SlashCommands
                 }
 
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = dbtag.Content});
-                await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Guild.Id) {Uses = dbtag.Uses + 1});
+                await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Interaction.GuildId.Value) {Uses = dbtag.Uses + 1});
             }
 
             [SlashCommand("by", "See all a given user's tags!")]
             public async Task ListByUser(InteractionContext ctx, [Option("user", "Who's tags do you want to see?")] DiscordUser user)
             {
-                if (ctx.Guild is null)
+                if (ctx.Interaction.GuildId is null)
                 {
                     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be on a server to use this!"});
                     return;
                 }
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
 
-                IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+                IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Interaction.GuildId.Value);
 
                 if (!tags.Any())
                 {
@@ -134,12 +135,94 @@ namespace Silk.Core.SlashCommands
                 }
 
             }
-            
-            [SlashCommand("server", "Show the tags on this server! (Not implemented yet.)")]
-            public async Task Server(InteractionContext ctx){}
+
+            [SlashCommand("server", "Show the tags on this server!")]
+            public async Task Server(InteractionContext ctx)
+            {
+                if (ctx.Interaction.GuildId is null)
+                {
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() {Content = "Sorry, but you need to be on a server to use this!", IsEphemeral = true});
+                    return;
+                }
+                
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+
+                IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
+                if (!tags.Any())
+                {
+                    await ctx.EditResponseAsync(new() {Content = "This server doesn't have any tags! You could be the first."});
+                    return;
+                }
+                
+                string allTags = string.Join('\n', tags.Take(30)
+                    .Select(t =>
+                    {
+                        var s = $"`{t.Name}`";
+                        if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                        return s;
+                    }));
+                
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                    .WithColor(DiscordColor.Blurple)
+                    .WithTitle($"Tags in {ctx.Guild.Name}:")
+                    .WithDescription(allTags + (tags.Count() > 30 ? $"\n+ {tags.Count() - 30} more..." : ""))
+                    .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+            }
 
             [SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
-            public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag) { }
+            public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
+            {
+                if (ctx.Interaction.GuildId is null)
+                {
+                    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {Content = "Sorry, but you have to be on a guild to use this!", IsEphemeral = true});
+                    return;
+                }
+                if (ctx.Guild is null)
+                {
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
+                        new DiscordInteractionResponseBuilder()
+                            .AsEphemeral(true)
+                            .WithContent("Sorry, but to claim tags, I need to see if the member exists on the server." +
+                                        "\nThis isn't possible as I wasn't invited with the bot scope, and thus can't access the members.")
+                            .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
+                    
+                    return;
+                }
+
+
+                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
+                    
+                Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
+                
+                if (dbTag is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but that tag doesn't exist!"});
+                    return;
+                }
+                
+                var exists = ctx.Guild.Members.TryGetValue(dbTag.OwnerId, out _);
+                
+                User? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+                var staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
+
+                if (!staff)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but you're not allowed to claim tags!"});
+                    return;
+                }
+                
+                if (exists)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "The tag owner is still on the server."});
+                    return;
+                }
+
+                await _tags.ClaimTagAsync(tag, ctx.Interaction.GuildId.Value, ctx.User.Id);
+                await ctx.EditResponseAsync(new() {Content = "Successfully claimed tag!"});
+
+            }
         }
     }
 }

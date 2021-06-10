@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Humanizer;
 using Humanizer.Localisation;
@@ -60,32 +57,15 @@ namespace Silk.Core.SlashCommands
                     .ToArray();
 
                 string remindersString = allReminders.Join("\n");
+                
+                var builder = new DiscordEmbedBuilder();
 
-                if (remindersString.Length <= 2048)
-                {
-                    var builder = new DiscordEmbedBuilder();
+                builder.WithColor(DiscordColor.Blurple)
+                    .WithTitle($"Reminders for {ctx.User.Username}:")
+                    .WithFooter($"Silk! | Requested by {ctx.User.Id}")
+                    .WithDescription(remindersString);
 
-                    builder.WithColor(DiscordColor.Blurple)
-                        .WithTitle($"Reminders for {ctx.User.Username}:")
-                        .WithFooter($"Silk! | Requested by {ctx.User.Id}")
-                        .WithDescription(remindersString);
-
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
-                }
-                else
-                {
-                    InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
-
-                    List<Page> pages = allReminders
-                        .Select(reminder => new Page("You have too many reminders to fit in one embed, so I've paginated it for you!",
-                            new DiscordEmbedBuilder()
-                                .WithColor(DiscordColor.Blurple)
-                                .WithTitle($"Reminders for {ctx.User.Username}:")
-                                .WithDescription(reminder)
-                                .WithFooter($"Silk! | Requested by {ctx.User.Id}")))
-                        .ToList();
-                    await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
-                }
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
             }
 
             private async Task CreateNonRecurringReminderAsync(InteractionContext ctx, string time, string? reminder)
@@ -118,10 +98,7 @@ namespace Silk.Core.SlashCommands
             }
 
             [SlashCommand("cancel", "Cancel a reminder!")]
-            public async Task Cancel(
-                InteractionContext ctx,
-                [Option("id", "The id of the reminder ")]
-                long reminderId)
+            public async Task Cancel(InteractionContext ctx, [Option("id", "The id of the reminder ")] long reminderId)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = true});
                 var reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
@@ -137,12 +114,13 @@ namespace Silk.Core.SlashCommands
 
 
             [SlashCommand("create", "Create a reminder! You will be reminded relative to when you set it!")]
-            public async Task CreateRecurring(
-                InteractionContext ctx,
+            public async Task CreateRecurring(InteractionContext ctx,
                 [Option("occurence", "How often should I remind you?")]
                 ReminderTypeOption type,
+                
                 [Option("offset", "How long (from now) should I remind you? Ex: 2h40m, 3d, or `now`.")]
                 string time,
+                
                 [Option("reminder", "What do you want to be reminded of?")]
                 string reminder)
             {
