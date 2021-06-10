@@ -25,6 +25,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Shared.Configuration;
 using Silk.Shared;
 using Silk.Shared.Constants;
 
@@ -47,7 +48,32 @@ namespace Silk.Core
             DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
 
 
+            await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
             await builtBuilder.RunAsync().ConfigureAwait(false);
+        }
+        
+        private static async Task EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
+        {
+            try
+            {
+                using var serviceScope = builtBuilder.Services?.CreateScope();
+                if (serviceScope is not null)
+                {
+                    await using var dbContext = serviceScope.ServiceProvider
+                        .GetRequiredService<IDbContextFactory<GuildContext>>()
+                        .CreateDbContext();
+                    
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        await dbContext.Database.MigrateAsync();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                /* Ignored. Todo: Probably should handle? */
+            }
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
@@ -99,7 +125,10 @@ namespace Silk.Core
             return builder.ConfigureServices((context, services) =>
             {
                 IConfiguration? config = context.Configuration;
+                
+                AddSilkConfigurationOptions(services, config);
                 AddDatabases(services, config.GetConnectionString("core"));
+                
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
@@ -119,7 +148,6 @@ namespace Silk.Core
                 services.AddTransient<MemberRemovedHandler>();
                 services.AddTransient<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
-                services.AddSingleton<SlashCommandExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddTransient<MessageRemovedHandler>();
 
@@ -180,6 +208,14 @@ namespace Silk.Core
                 c.Database.Migrate();
         }
 
+        private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
+        {
+            // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0
+            var silkConfigurationSection = configuration.GetSection(SilkConfigurationOptions.SectionKey);
+            services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
+        }
+        
         private static void AddDatabases(IServiceCollection services, string connectionString)
         {
             void Builder(DbContextOptionsBuilder b)
