@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using MediatR;
@@ -44,7 +45,32 @@ namespace Silk.Core
             IHost builtBuilder = builder.UseConsoleLifetime().Build();
             DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
 
+            await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
             await builtBuilder.RunAsync().ConfigureAwait(false);
+        }
+        
+        private static async Task EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
+        {
+            try
+            {
+                using var serviceScope = builtBuilder.Services?.CreateScope();
+                if (serviceScope is not null)
+                {
+                    await using var dbContext = serviceScope.ServiceProvider
+                        .GetRequiredService<IDbContextFactory<GuildContext>>()
+                        .CreateDbContext();
+                    
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        await dbContext.Database.MigrateAsync();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                /* Ignored. Todo: Probably should handle? */
+            }
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
