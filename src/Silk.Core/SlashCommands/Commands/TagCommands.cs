@@ -38,6 +38,64 @@ namespace Silk.Core.SlashCommands.Commands
                 _tags = tags;
                 _mediator = mediator;
             }
+
+            [RequireGuild]
+            [SlashCommand("info", "Get info about a tag!")]
+            public async Task Info(InteractionContext ctx, [Option("tag", "The tag you want to get information about.")] string tagName)
+            {
+                await ctx.CreateThinkingResponseAsync();
+                Tag? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
+
+                if (tag is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but I couldn't find that tag!"});
+                    return;
+                }
+                
+                DiscordUser tagOwner = await ctx.Client.GetUserAsync(tag.OwnerId);
+                
+                DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                    .WithColor(DiscordColor.Blurple)
+                    .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                    .WithTitle(tag.Name)
+                    .AddField("Uses:", tag.Uses.ToString())
+                    .WithFooter("Created:")
+                    .WithTimestamp(tag.CreatedAt);
+
+                if (tag.OriginalTag is not null)
+                    builder.AddField("Original:", tag.OriginalTag.Name);
+
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+            }
+            
+            /*
+        [Command]
+        [Description("Get some Info about a Tag")]
+        public async Task Info(CommandContext ctx, [RemainingText] string tag)
+        {
+            Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
+
+            if (dbTag is null)
+            {
+                await ctx.RespondAsync("Tag not found! :(");
+                return;
+            }
+
+            DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Blurple)
+                .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                .WithTitle(dbTag.Name)
+                .AddField("Uses:", dbTag.Uses.ToString())
+                .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
+
+            if (dbTag.OriginalTag is not null)
+                builder.AddField("Original:", dbTag.OriginalTag.Name);
+
+            await ctx.RespondAsync(builder);
+
+        }
+             */
             
             [RequireGuild]
             [SlashCommand("create", "Create a tag!")]
@@ -47,6 +105,12 @@ namespace Silk.Core.SlashCommands.Commands
             {
                 await ctx.CreateThinkingResponseAsync();
 
+                if (_reservedWords.Contains(tagname.ToLower()))
+                {
+                    await ctx.EditResponseAsync(new() {Content = $"Sorry, but you can't create a tag that contains a reserved word! Reserved words are: {string.Join(", ", _reservedWords)}"});
+                    return;
+                }
+                
                 TagCreationResult result = await _tags.CreateTagAsync(tagname, content, ctx.Interaction.GuildId.Value, ctx.User.Id);
 
                 await ctx.EditResponseAsync(new() {Content = result.Success ? $"Successfully created tag {Formatter.Bold(tagname)}." : result.Reason});
