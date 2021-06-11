@@ -127,7 +127,7 @@ namespace Silk.Core
                 IConfiguration? config = context.Configuration;
                 
                 AddSilkConfigurationOptions(services, config);
-                AddDatabases(services, "Host=localhost;Username=silk;Password=silk;Database=silk");
+                AddDatabases(services, config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>().Persistence);
                 
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
@@ -206,11 +206,11 @@ namespace Silk.Core
             services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
         }
         
-        private static void AddDatabases(IServiceCollection services, string connectionString)
+        private static void AddDatabases(IServiceCollection services, SilkPersistenceOptions connectionString)
         {
             void Builder(DbContextOptionsBuilder b)
             {
-                b.UseNpgsql(connectionString);
+                b.UseNpgsql(connectionString.ToString());
                 #if DEBUG
                 b.EnableSensitiveDataLogging();
                 b.EnableDetailedErrors();
@@ -220,7 +220,7 @@ namespace Silk.Core
 
             services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
+            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString.ToString()).Options);
         }
     }
 }
