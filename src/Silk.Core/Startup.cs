@@ -127,7 +127,7 @@ namespace Silk.Core
                 IConfiguration? config = context.Configuration;
                 
                 AddSilkConfigurationOptions(services, config);
-                AddDatabases(services, config.GetConnectionString("core"));
+                AddDatabases(services, "Host=localhost;Username=silk;Password=silk;Database=silk");
                 
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
@@ -137,7 +137,6 @@ namespace Silk.Core
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
                 services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
-                services.AddSingleton(_ => new BotConfig(context.Configuration));
 
                 services.AddSingleton<GuildEventHandlers>();
 
@@ -205,8 +204,6 @@ namespace Silk.Core
             // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0
             var silkConfigurationSection = configuration.GetSection(SilkConfigurationOptions.SectionKey);
             services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
-            silkConfigurationSection.Bind(new SilkConfigurationOptions());
-            
         }
         
         private static void AddDatabases(IServiceCollection services, string connectionString)
