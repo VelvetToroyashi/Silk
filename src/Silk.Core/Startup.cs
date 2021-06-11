@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -26,6 +27,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -40,15 +42,13 @@ namespace Silk.Core
             IHostBuilder builder = CreateBuilder();
 
             AddLogging(builder);
-
             ConfigureServices(builder);
-            ConfigureDiscordClient(builder);
 
             IHost builtBuilder = builder.UseConsoleLifetime().Build();
             DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
             DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
 
-
+            ConfigureDiscordClient(builtBuilder.Services);
             await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
             await builtBuilder.RunAsync().ConfigureAwait(false);
         }
@@ -190,17 +190,13 @@ namespace Silk.Core
         }
 
 
-        private static void ConfigureDiscordClient(IHostBuilder builder)
+        private static void ConfigureDiscordClient(IServiceProvider services)
         {
-            builder.ConfigureServices((context, services) =>
-            {
-                DiscordConfiguration client = DiscordConfigurations.Discord;
-                IConfiguration? config = context.Configuration;
-                int.TryParse(context.Configuration["Shards"] ?? "1", out int shards);
+            DiscordConfiguration client = DiscordConfigurations.Discord;
+            var config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
 
-                client.ShardCount = shards;
-                client.Token = config.GetConnectionString("discord");
-            });
+            client.ShardCount =  config!.Discord.Shards;
+            client.Token = config.Discord.BotToken;
         }
         
         private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
@@ -209,6 +205,8 @@ namespace Silk.Core
             // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0
             var silkConfigurationSection = configuration.GetSection(SilkConfigurationOptions.SectionKey);
             services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
+            silkConfigurationSection.Bind(new SilkConfigurationOptions());
+            
         }
         
         private static void AddDatabases(IServiceCollection services, string connectionString)
@@ -227,15 +225,5 @@ namespace Silk.Core
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
         }
-
-        private void Whatever()
-        {
-            try
-            {
-                throw new();
-            }
-            catch (Exception e) { }
-        }
-
     }
 }

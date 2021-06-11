@@ -39,6 +39,41 @@ namespace Silk.Core.SlashCommands.Commands
                 _mediator = mediator;
             }
 
+            
+            [RequireBot]
+            [RequireGuild]
+            [SlashCommand("delete", "Delete a tag. This can't be undone!")]
+            public async Task Delete(InteractionContext ctx, [Option("tag", "The tag to delete")] string tagName)
+            {
+                await ctx.CreateThinkingResponseAsync();
+                Tag? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
+                
+                if (tag is null)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "Sorry, but I can't delete something that doesn't exist!"});
+                    return;
+                }
+
+                if (tag.OwnerId == ctx.User.Id)
+                {
+                    await _tags.RemoveTagAsync(tagName, ctx.Interaction.GuildId.Value);
+                    await ctx.EditResponseAsync(new() {Content = $"{(tag.OriginalTag is null ? "Tag" : "Alias")} {Formatter.Bold(tagName)} {(tag.Aliases?.Any() ?? false ? "" : "and all associated aliases")} successfully deleted!"});
+                    return;
+                }
+                
+                User? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+                var staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
+
+                if (!staff)
+                {
+                    await ctx.EditResponseAsync(new() {Content = "You don't own this tag!"});
+                    return;
+                }
+                
+                await _tags.RemoveTagAsync(tagName, ctx.Interaction.GuildId.Value);
+                await ctx.EditResponseAsync(new() {Content = $"{(tag.OriginalTag is null ? "Tag" : "Alias")} {Formatter.Bold(tagName)} {(tag.Aliases?.Any() ?? false ? "" : "and all associated aliases")} successfully deleted!"});
+            }
+            
             [RequireGuild]
             [SlashCommand("info", "Get info about a tag!")]
             public async Task Info(InteractionContext ctx, [Option("tag", "The tag you want to get information about.")] string tagName)
@@ -67,35 +102,6 @@ namespace Silk.Core.SlashCommands.Commands
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
             }
-            
-            /*
-        [Command]
-        [Description("Get some Info about a Tag")]
-        public async Task Info(CommandContext ctx, [RemainingText] string tag)
-        {
-            Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
-
-            if (dbTag is null)
-            {
-                await ctx.RespondAsync("Tag not found! :(");
-                return;
-            }
-
-            DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blurple)
-                .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
-                .WithTitle(dbTag.Name)
-                .AddField("Uses:", dbTag.Uses.ToString())
-                .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
-
-            if (dbTag.OriginalTag is not null)
-                builder.AddField("Original:", dbTag.OriginalTag.Name);
-
-            await ctx.RespondAsync(builder);
-
-        }
-             */
             
             [RequireGuild]
             [SlashCommand("create", "Create a tag!")]
@@ -302,8 +308,8 @@ namespace Silk.Core.SlashCommands.Commands
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
             }
             
+            [RequireBot]
             [RequireGuild]
-            [RequireCommonGuild]
             [SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
             public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
             {
