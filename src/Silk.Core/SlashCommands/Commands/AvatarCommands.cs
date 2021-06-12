@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Silk.Extensions.DSharpPlus;
@@ -16,14 +15,6 @@ namespace Silk.Core.SlashCommands.Commands
 	}
 	public class AvatarCommands : SlashCommandModule
 	{
-		[SlashCommand("test", "test")]
-		public async Task A(InteractionContext ctx, [Option("test", "a")] bool a = false) 
-			=> await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-				new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.CornflowerBlue)
-					.WithImageUrl(ctx.User.AvatarUrl)
-					.WithTitle($"{ctx.User.Username}'s Avatar")).AsEphemeral(true));
-		
 		[SlashCommand("avatar", "View someone's avatar!")]
 		public async Task Avatar(
 			InteractionContext ctx,
