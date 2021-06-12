@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
@@ -17,6 +16,11 @@ namespace Silk.Core.Services.Server
 	/// </summary>
 	public sealed class GuildConfigService
 	{
+		#region Class Initialization
+
+		
+
+		
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<GuildConfigService> _logger;
 		private readonly ConcurrentHashSet<ulong> _activeMenus = new();
@@ -32,12 +36,15 @@ namespace Silk.Core.Services.Server
 			ConfigDropdown = Config + Split + Dropdown, 
 			Greeting = "grtn",
 			View = "view",
-			Edit = "edit";
+			Edit = "edit",
+			Main = "main";
 
-		private readonly Dictionary<string, Func<GuildConfigService, ComponentInteractionCreateEventArgs, Task>> _compMethDict = new()
+		private readonly Dictionary<string, Func<GuildConfigService, DiscordInteraction, Task>> _compMethDict = new()
 		{
 			[$"{ConfigDropdown}"] = (g, i) => g.HandleDropdownAsync(i),
-			[$"{ConfigDropdown}{Split}{Greeting}"] = (g, i) => g.ShowWelcomeScreenAsync(i)
+			[$"{Config}{Split}{Main}"] = (g, i) => Task.CompletedTask, /* TODO: Implement main menu because I'm somehow this stupid */
+			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}"] = (g, i) => g.ViewCurrentGreetingAsync(i)
+			
 		};
 		
 		public GuildConfigService(DiscordShardedClient client, ILogger<GuildConfigService> logger, ConfigService config, IServiceCacheUpdaterService updater)
@@ -49,18 +56,14 @@ namespace Silk.Core.Services.Server
 			_client.ComponentInteractionCreated += HandleComponentAsync;
 
 		}
-
+		#endregion
 		/// <summary>
 		/// Presents a view for the configuration of the provided guild's Id.
 		/// </summary>
 		/// <param name="interaction">The slash command context to respond with.</param>
 		public async Task ViewCurrentServerConfig(InteractionContext interaction) { }
 
-		/// <summary>
-		/// Presents a view for the configuration of the provided guild's Id.
-		/// </summary>
-		/// <param name="context">The command context to respond with.</param>
-		public async Task ViewCurrentServerConfig(CommandContext context) { } /* I'll implement this soon. TODO: Implment */
+
 
 		private async Task HandleComponentAsync(DiscordClient sender, ComponentInteractionCreateEventArgs e)
 		{
@@ -73,7 +76,7 @@ namespace Silk.Core.Services.Server
 
 			if (_compMethDict.TryGetValue(e.Id, out var me))
 			{
-				await me(this, e);
+				await me(this, e.Interaction);
 				return;
 			}
 
@@ -84,23 +87,51 @@ namespace Silk.Core.Services.Server
 			});
 		}
 		
-		private Task HandleDropdownAsync(ComponentInteractionCreateEventArgs args) 
-			=> args.Interaction.EditOriginalResponseAsync(new() {Content = "Oh no, this hasn't been implemented yet!"});
+		private Task HandleDropdownAsync(DiscordInteraction args) 
+			=> args.EditOriginalResponseAsync(new() {Content = "Oh no, this hasn't been implemented yet!"});
 
-		public async Task ShowWelcomeScreenAsync(ComponentInteractionCreateEventArgs args)
+		#region Welcome / Greeting
+		
+		/// <summary>
+		/// Presents two options 
+		/// </summary>
+		/// <param name="interaction">The interaction to edit.</param>
+		public async Task ShowWelcomeScreenAsync(DiscordInteraction interaction)
 		{
 			var builder = new DiscordWebhookBuilder();
 			var components = new[]
 			{
-				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current welcome"),
-				new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}", "Edit current greeting")
+				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config"),
+				new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}", "Edit current greeting config")
 			};
 			
 			builder.WithContent("Please make a selection.");
 			builder.AddComponents(components);
 			
-			await args.Interaction.EditOriginalResponseAsync(builder);
+			await interaction.EditOriginalResponseAsync(builder);
 		}
+
+		private async Task ViewCurrentGreetingAsync(DiscordInteraction interaction)
+		{
+			var currentConfig = await _config.GetConfigAsync(interaction.GuildId.Value);
+			
+			// This shouldn't be possible, since the button that invokes this command is
+			//disabled when the config isn't set to greet members, but we should check again anyways.
+			if (!currentConfig.GreetMembers)
+			{
+				var builder = new DiscordWebhookBuilder();
+				builder.WithContent("Sorry, but this server isn't set up to greet members...yet.");
+				builder.AddComponents(
+					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Main}", "Return to main config menu"),
+					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config"));
+					
+				await interaction.EditOriginalResponseAsync(builder);
+				
+			}
+		}
+
+		#endregion
+		
 		
 	}
 }
