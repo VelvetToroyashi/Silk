@@ -86,9 +86,9 @@ namespace Silk.Core
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
             sc.SlashCommandErrored += _slashExceptionHandler.Handle;
             
-            sc.RegisterCommands<RemindCommands>(721518523704410202);
-            sc.RegisterCommands<TagCommands>(721518523704410202);
-            sc.RegisterCommands<AvatarCommands>(721518523704410202);
+            sc.RegisterCommands<RemindCommands>();
+            sc.RegisterCommands<TagCommands>();
+            sc.RegisterCommands<AvatarCommands>();
             
             return Task.CompletedTask;
         }
