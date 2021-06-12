@@ -24,6 +24,7 @@ using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
@@ -163,7 +164,9 @@ namespace Silk.Core
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
+                services.AddSingleton<GuildConfigService>();
                 services.AddSingleton<RoleMenuReactionService>();
+                
 
                 //services.AddSingleton<IMessageSender, MessageSenderService>();
 

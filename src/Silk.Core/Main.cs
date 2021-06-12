@@ -12,6 +12,7 @@ using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers.Messages;
+using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands;
 using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
@@ -30,7 +31,7 @@ namespace Silk.Core
         private readonly CommandHandler _commandHandler;
         private readonly SlashCommandExceptionHandler _slashExceptionHandler;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler, SlashCommandExceptionHandler slashExceptionHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler, SlashCommandExceptionHandler slashExceptionHandler, GuildConfigService config) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
             // And that's all it needs, since it subs to events in it's ctor.
             _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
@@ -39,6 +40,7 @@ namespace Silk.Core
             _slashExceptionHandler = slashExceptionHandler;
             ShardClient = shardClient;
             _ = e;
+            _ = config;
         }
 
 
