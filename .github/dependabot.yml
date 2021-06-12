@@ -4,6 +4,6 @@ updates:
   directory: "/"
   target-branch: "development"
   schedule:
-    interval: weekly
+    interval: bi-weekly
     day: "saturday"
   open-pull-requests-limit: 10
