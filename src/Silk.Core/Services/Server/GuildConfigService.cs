@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using DSharpPlus;
@@ -29,22 +31,25 @@ namespace Silk.Core.Services.Server
 
 
 		private const string 
-			Config = "cnfg",
-			Button = "bttn",
+			Config = "cf",
+			Button = "bt",
 			Split = "|",
-			Dropdown = "drpn",
+			Dropdown = "dd",
 			ConfigDropdown = Config + Split + Dropdown, 
-			Greeting = "grtn",
-			View = "view",
-			Edit = "edit",
-			Main = "main";
+			Greeting = "gt",
+			View = "vw",
+			Edit = "ed",
+			Main = "mn",
+			Toggle = "tg";
 
 		private readonly Dictionary<string, Func<GuildConfigService, DiscordInteraction, Task>> _compMethDict = new()
 		{
 			[$"{ConfigDropdown}"] = (g, i) => g.HandleDropdownAsync(i),
-			[$"{Config}{Split}{Main}"] = (g, i) => Task.CompletedTask, /* TODO: Implement main menu because I'm somehow this stupid */
-			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}"] = (g, i) => g.ViewCurrentGreetingAsync(i)
-			
+			/* TODO: Implement main menu because I'm somehow this stupid */
+			[$"{Config}{Split}{Main}"] = (_, _) => Task.CompletedTask, 
+			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}"] = (g, i) => g.ViewCurrentGreetingAsync(i),
+			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}"] = (g, i) => g.EditCurrentGreetingAsync(i),
+			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}"] = (g, i) => g.ToggleGreetingAsync(i)
 		};
 		
 		public GuildConfigService(DiscordShardedClient client, ILogger<GuildConfigService> logger, ConfigService config, IServiceCacheUpdaterService updater)
@@ -57,6 +62,8 @@ namespace Silk.Core.Services.Server
 
 		}
 		#endregion
+		
+		
 		/// <summary>
 		/// Presents a view for the configuration of the provided guild's Id.
 		/// </summary>
@@ -64,6 +71,7 @@ namespace Silk.Core.Services.Server
 		public async Task ViewCurrentServerConfig(InteractionContext interaction) { }
 
 
+		#region Event Dispatching
 
 		private async Task HandleComponentAsync(DiscordClient sender, ComponentInteractionCreateEventArgs e)
 		{
@@ -90,18 +98,23 @@ namespace Silk.Core.Services.Server
 		private Task HandleDropdownAsync(DiscordInteraction args) 
 			=> args.EditOriginalResponseAsync(new() {Content = "Oh no, this hasn't been implemented yet!"});
 
+		#endregion
+		
+
 		#region Welcome / Greeting
 		
 		/// <summary>
-		/// Presents two options 
+		/// Allows the user to view or edit the current server greeting, if configured.
 		/// </summary>
 		/// <param name="interaction">The interaction to edit.</param>
 		public async Task ShowWelcomeScreenAsync(DiscordInteraction interaction)
 		{
 			var builder = new DiscordWebhookBuilder();
+			var currentConfig = await _config.GetConfigAsync(interaction.GuildId.Value); // This is cached in memory. //
+			
 			var components = new[]
 			{
-				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config"),
+				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config", !currentConfig.GreetMembers),
 				new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}", "Edit current greeting config")
 			};
 			
@@ -128,6 +141,39 @@ namespace Silk.Core.Services.Server
 				await interaction.EditOriginalResponseAsync(builder);
 				
 			}
+		}
+
+		private async Task EditCurrentGreetingAsync(DiscordInteraction interaction)
+		{
+			var currentConfig = await _config.GetConfigAsync(interaction.GuildId.Value);
+			var builder = new DiscordWebhookBuilder();
+			builder.WithContent("What would you like to do?");
+			var components = new[]
+			{
+				new DiscordButtonComponent(currentConfig.GreetMembers ? ButtonStyle.Success : ButtonStyle.Danger, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}", currentConfig.GreetMembers ? "Enabled" : "Disabled"),
+			};
+
+			builder.AddComponents(components);
+			await interaction.EditOriginalResponseAsync(builder);
+		}
+
+		private async Task ToggleGreetingAsync(DiscordInteraction interaction)
+		{
+			var msg = typeof(DiscordInteraction)
+				.GetProperty("Message", BindingFlags.NonPublic | BindingFlags.Instance)!
+				.GetValue(interaction) as DiscordMessage;
+			
+			var cmps = msg!.Components.First().Components.Skip(1).ToList();
+			var style = ((DiscordButtonComponent) cmps[0]).Style is ButtonStyle.Danger ? ButtonStyle.Success : ButtonStyle.Danger;
+			var text = style is ButtonStyle.Danger ? "Disabled" : "Enabled";
+
+			var builder = new DiscordWebhookBuilder();
+			var bcmps = cmps.Skip(1).Prepend(new DiscordButtonComponent(style, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}", text));
+
+			builder.WithContent("What do you want to do?");
+			builder.AddComponents(bcmps);
+
+			await interaction.EditOriginalResponseAsync(builder);
 		}
 
 		#endregion
