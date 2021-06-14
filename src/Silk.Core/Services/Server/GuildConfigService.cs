@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using DSharpPlus;
@@ -99,7 +100,6 @@ namespace Silk.Core.Services.Server
 			=> args.EditOriginalResponseAsync(new() {Content = "Oh no, this hasn't been implemented yet!"});
 
 		#endregion
-		
 
 		#region Welcome / Greeting
 		
@@ -156,21 +156,23 @@ namespace Silk.Core.Services.Server
 			builder.AddComponents(components);
 			await interaction.EditOriginalResponseAsync(builder);
 		}
-
+		
 		private async Task ToggleGreetingAsync(DiscordInteraction interaction)
 		{
 			var msg = typeof(DiscordInteraction)
 				.GetProperty("Message", BindingFlags.NonPublic | BindingFlags.Instance)!
 				.GetValue(interaction) as DiscordMessage;
 			
-			var cmps = msg!.Components.First().Components.Skip(1).ToList();
-			var style = ((DiscordButtonComponent) cmps[0]).Style is ButtonStyle.Danger ? ButtonStyle.Success : ButtonStyle.Danger;
+			var cmps = msg!.Components.First().Components.ToArray();
+			
+			var style = Unsafe.As<DiscordButtonComponent>(cmps[0]).Style == ButtonStyle.Danger ? ButtonStyle.Success : ButtonStyle.Danger;
+			
 			var text = style is ButtonStyle.Danger ? "Disabled" : "Enabled";
 
 			var builder = new DiscordWebhookBuilder();
 			var bcmps = cmps.Skip(1).Prepend(new DiscordButtonComponent(style, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}", text));
 
-			builder.WithContent("What do you want to do?");
+			builder.WithContent("What would you like to do?");
 			builder.AddComponents(bcmps);
 
 			await interaction.EditOriginalResponseAsync(builder);
