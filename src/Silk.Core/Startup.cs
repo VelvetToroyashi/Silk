@@ -144,7 +144,7 @@ namespace Silk.Core
                 services.AddSingleton<ConfigService>();
                 services.AddSingleton<AntiInviteCore>();
                 services.AddSingleton<RoleAddedHandler>();
-                services.AddSingleton<MemberAddedHandler>();
+                services.AddSingleton<MemberGreetingService>();
                 services.AddSingleton<MemberRemovedHandler>();
                 services.AddSingleton<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();

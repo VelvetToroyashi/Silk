@@ -11,19 +11,19 @@ using Silk.Core.Services;
 
 namespace Silk.Core.EventHandlers.MemberAdded
 {
-    public class MemberAddedHandler
+    public sealed class MemberGreetingService
     {
         private readonly ConfigService _configService;
 
         private readonly Timer _timer = new(500);
-        public MemberAddedHandler(ConfigService configService, ILogger<MemberAddedHandler> logger)
+        public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
         {
             _configService = configService;
             _timer.AutoReset = true;
-            _timer.Elapsed += async (_, _) => _ = OnTick();
+            _timer.Elapsed += async (_, _) => { OnTick(); };
             _timer.Start();
         }
-        public List<DiscordMember> MemberQueue { get; private set; } = new();
+        public List<DiscordMember> MemberQueue { get; } = new();
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
@@ -32,8 +32,8 @@ namespace Silk.Core.EventHandlers.MemberAdded
             if (config.LogMemberJoins && config.LoggingChannel is not 0)
                 await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
-            bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetOnScreeningComplete;
-            bool verifyMembers = config.GreetOnVerificationRole && config.VerificationRole is not 0;
+            bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetingOption is GreetingOption.GreetOnScreening;
+            bool verifyMembers = config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is not 0;
 
             if (screenMembers || verifyMembers)
                 MemberQueue.Add(e.Member);
@@ -42,7 +42,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)
         {
-            bool shouldGreet = config.GreetMembers;
+            bool shouldGreet = config.GreetingOption is not GreetingOption.DoNotGreet;
             bool hasValidGreetingChannel = config.GreetingChannel is not 0;
             bool hasValidGreetingMessage = !string.IsNullOrWhiteSpace(config.GreetingText);
             if (shouldGreet && hasValidGreetingChannel && hasValidGreetingMessage)
@@ -60,21 +60,27 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         private async Task OnTick()
         {
-            if (MemberQueue.Count is 0) return;
-            var verifiedMembers = new List<DiscordMember>();
+            if (MemberQueue.Count is 0) 
+                return;
+            
             foreach (DiscordMember member in MemberQueue)
             {
                 GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
 
-                if (config.GreetOnScreeningComplete && member.IsPending is true) return;
-                if (config.GreetOnVerificationRole && member.Roles.All(r => r.Id != config.VerificationRole)) return;
-                verifiedMembers.Add(member);
-                await GreetMemberAsync(member, config);
-            }
+                if (config.GreetingOption is GreetingOption.GreetOnJoin)
+                {
+                    await GreetMemberAsync(member, config);
+                    MemberQueue.Remove(member);
+                    continue;
+                }
 
-            if (verifiedMembers.Any())
-            {
-                MemberQueue = MemberQueue.Except(verifiedMembers).ToList();
+                if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true) 
+                    continue;
+                
+                if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole)) 
+                    continue;
+                await GreetMemberAsync(member, config);
+                MemberQueue.Remove(member);
             }
         }
 

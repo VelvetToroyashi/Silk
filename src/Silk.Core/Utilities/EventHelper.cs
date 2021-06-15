@@ -19,7 +19,7 @@ namespace Silk.Core.Utilities
             CommandHandler commandHandler,
             MessageAddAntiInvite antiInvite,
             MessageRemovedHandler removeHandler,
-            MemberAddedHandler memberAddedHandler,
+            MemberGreetingService memberGreetingService,
             RoleAddedHandler staffCheck,
             RoleMenuReactionService roleMenu,
             GuildEventHandlers guildHandlers,
@@ -31,7 +31,7 @@ namespace Silk.Core.Utilities
             client.MessageCreated += antiInvite.CheckForInvite;
             client.MessageDeleted += removeHandler.MessageRemoved;
 
-            client.GuildMemberAdded += memberAddedHandler.OnMemberAdded;
+            client.GuildMemberAdded += memberGreetingService.OnMemberAdded;
             client.GuildMemberRemoved += memberRemovedHandler.OnMemberRemoved;
             client.GuildMemberUpdated += staffCheck.CheckStaffRole;
 

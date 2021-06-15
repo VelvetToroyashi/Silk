@@ -23,6 +23,11 @@ namespace Silk.Core.Data.Models
         public ulong MuteRoleId { get; set; }
 
         /// <summary>
+        /// The trigger to greet new members, if any. Default to DoNotGreet.
+        /// </summary>
+        public GreetingOption GreetingOption { get; set; } = GreetingOption.DoNotGreet;
+        
+        /// <summary>
         ///     Whether to send a greeting message in the server when someone joins.
         /// </summary>
         public bool GreetMembers { get; set; }
@@ -81,6 +86,11 @@ namespace Silk.Core.Data.Models
         ///     A list of roles that can be obtained via reacting to a message.
         /// </summary>
         public List<RoleMenu> RoleMenus { get; set; } = new();
+
+        /// <summary>
+        /// A list of role menu menus; allowing a user to select different categories of roles.
+        /// </summary>
+        public List<RoleMenuMenu> RoleMenuMenus { get; set; } = new();
 
         #region AutoMod/Moderation
 

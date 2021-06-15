@@ -11,18 +11,17 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services.Interfaces;
+using Silk.Shared.Types.Collections;
 
 namespace Silk.Core.Services.Server
 {
 	/// <summary>
 	/// A service class that provides API and backend functionality for per-server configuration UI handling.
 	/// </summary>
+	/* TODO: Finish the implementation of this. Will probably need to get some help tbqh. */
 	public sealed class GuildConfigService
 	{
 		#region Class Initialization
-
-		
-
 		
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<GuildConfigService> _logger;
@@ -30,13 +29,17 @@ namespace Silk.Core.Services.Server
 		private readonly IServiceCacheUpdaterService _updater;
 		private readonly ConfigService _config;
 
+		private readonly LoopedList<DiscordButtonComponent> _greetingEnableToggle = new()
+		{
+			new(ButtonStyle.Danger, $"{Config}{Button}{Greeting}{Edit}{Toggle}", "Disabled"),
+			new(ButtonStyle.Success, $"{Config}{Button}{Greeting}{Edit}{Toggle}", "Enabled")
+		};
+		
 
 		private const string 
 			Config = "cf",
 			Button = "bt",
-			Split = "|",
 			Dropdown = "dd",
-			ConfigDropdown = Config + Split + Dropdown, 
 			Greeting = "gt",
 			View = "vw",
 			Edit = "ed",
@@ -45,12 +48,12 @@ namespace Silk.Core.Services.Server
 
 		private readonly Dictionary<string, Func<GuildConfigService, DiscordInteraction, Task>> _compMethDict = new()
 		{
-			[$"{ConfigDropdown}"] = (g, i) => g.HandleDropdownAsync(i),
+			[$"{Config}{Dropdown}"] = (g, i) => g.HandleDropdownAsync(i),
 			/* TODO: Implement main menu because I'm somehow this stupid */
-			[$"{Config}{Split}{Main}"] = (_, _) => Task.CompletedTask, 
-			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}"] = (g, i) => g.ViewCurrentGreetingAsync(i),
-			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}"] = (g, i) => g.EditCurrentGreetingAsync(i),
-			[$"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}"] = (g, i) => g.ToggleGreetingAsync(i)
+			[$"{Config}{Main}"] = (_, _) => Task.CompletedTask, 
+			[$"{Config}{Button}{Greeting}{View}"] = (g, i) => g.ViewCurrentGreetingAsync(i),
+			[$"{Config}{Button}{Greeting}{Edit}"] = (g, i) => g.EditCurrentGreetingAsync(i),
+			[$"{Config}{Button}{Greeting}{Edit}{Toggle}"] = (g, i) => g.ToggleGreetingAsync(i)
 		};
 		
 		public GuildConfigService(DiscordShardedClient client, ILogger<GuildConfigService> logger, ConfigService config, IServiceCacheUpdaterService updater)
@@ -114,8 +117,8 @@ namespace Silk.Core.Services.Server
 			
 			var components = new[]
 			{
-				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config", !currentConfig.GreetMembers),
-				new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}", "Edit current greeting config")
+				new DiscordButtonComponent(ButtonStyle.Primary, $"{Config}{Button}{Greeting}{View}", "View current greeting config", !currentConfig.GreetMembers),
+				new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Button}{Greeting}{Edit}", "Edit current greeting config")
 			};
 			
 			builder.WithContent("Please make a selection.");
@@ -135,8 +138,8 @@ namespace Silk.Core.Services.Server
 				var builder = new DiscordWebhookBuilder();
 				builder.WithContent("Sorry, but this server isn't set up to greet members...yet.");
 				builder.AddComponents(
-					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Main}", "Return to main config menu"),
-					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{View}", "View current greeting config"));
+					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Main}", "Return to main config menu"),
+					new DiscordButtonComponent(ButtonStyle.Secondary, $"{Config}{Button}{Greeting}{View}", "View current greeting config"));
 					
 				await interaction.EditOriginalResponseAsync(builder);
 				
@@ -147,10 +150,10 @@ namespace Silk.Core.Services.Server
 		{
 			var currentConfig = await _config.GetConfigAsync(interaction.GuildId.Value);
 			var builder = new DiscordWebhookBuilder();
-			builder.WithContent("What would you like to do?");
+			builder.WithContent("Greeting config:");
 			var components = new[]
 			{
-				new DiscordButtonComponent(currentConfig.GreetMembers ? ButtonStyle.Success : ButtonStyle.Danger, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}", currentConfig.GreetMembers ? "Enabled" : "Disabled"),
+				new DiscordButtonComponent(currentConfig.GreetMembers ? ButtonStyle.Success : ButtonStyle.Danger, $"{Config}{Button}{Greeting}{Edit}{Toggle}", currentConfig.GreetMembers ? "Enabled" : "Disabled"),
 			};
 
 			builder.AddComponents(components);
@@ -159,20 +162,21 @@ namespace Silk.Core.Services.Server
 		
 		private async Task ToggleGreetingAsync(DiscordInteraction interaction)
 		{
-			var msg = typeof(DiscordInteraction)
+			var msg = (DiscordMessage)typeof(DiscordInteraction)
 				.GetProperty("Message", BindingFlags.NonPublic | BindingFlags.Instance)!
-				.GetValue(interaction) as DiscordMessage;
-			
-			var cmps = msg!.Components.First().Components.ToArray();
+				.GetValue(interaction)!;
+
+			var cmps = msg.Components.First().Components.ToArray();
+			var btn = (cmps[0] as DiscordButtonComponent)!;
 			
 			var style = Unsafe.As<DiscordButtonComponent>(cmps[0]).Style == ButtonStyle.Danger ? ButtonStyle.Success : ButtonStyle.Danger;
 			
 			var text = style is ButtonStyle.Danger ? "Disabled" : "Enabled";
 
 			var builder = new DiscordWebhookBuilder();
-			var bcmps = cmps.Skip(1).Prepend(new DiscordButtonComponent(style, $"{Config}{Split}{Button}{Split}{Greeting}{Split}{Edit}{Split}{Toggle}", text));
+			var bcmps = cmps.Skip(1).Prepend(new DiscordButtonComponent(style, btn.CustomId, text));
 
-			builder.WithContent("What would you like to do?");
+			builder.WithContent("Greeting config:");
 			builder.AddComponents(bcmps);
 
 			await interaction.EditOriginalResponseAsync(builder);

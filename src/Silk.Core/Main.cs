@@ -92,6 +92,7 @@ namespace Silk.Core
             sc.RegisterCommands<TagCommands>(847615746745958520);
             sc.RegisterCommands<AvatarCommands>(847615746745958520);
             sc.RegisterCommands<ConfigTests>(847615746745958520);
+            sc.RegisterCommands<Moosh>(847615746745958520);
             
             return Task.CompletedTask;
         }
