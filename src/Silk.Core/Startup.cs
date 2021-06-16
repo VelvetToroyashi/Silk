@@ -114,7 +114,7 @@ namespace Silk.Core
                         "Warning" => logger.MinimumLevel.Warning().CreateLogger(),
                         "Error" => logger.MinimumLevel.Error().CreateLogger(),
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
-                        _ => logger.MinimumLevel.Information().CreateLogger()
+                        _ => logger.MinimumLevel.Verbose().CreateLogger()
                     };
                     Log.Logger.ForContext(typeof(Startup)).Information("Logging initialized!");
                 })

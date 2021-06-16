@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.SlashCommands;
 using Silk.Core.Services.Server;
-using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
 {
@@ -11,10 +10,7 @@ namespace Silk.Core.SlashCommands.Commands
 		public ConfigTests(GuildConfigService config) => _config = config;
 
 		[SlashCommand("config", "Config thing")]
-		public async Task ConfigTest(InteractionContext ctx)
-		{
-			await ctx.CreateThinkingResponseAsync(false);
-			await _config.ShowWelcomeScreenAsync(ctx.Interaction);
-		}
+		public Task ConfigTest(InteractionContext ctx)
+			=> _config.DisplayMainMenuAsync(ctx.Interaction);
 	}
 }
