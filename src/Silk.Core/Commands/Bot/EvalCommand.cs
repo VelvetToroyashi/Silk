@@ -7,7 +7,6 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.VoiceNext;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Silk.Core.Utilities.HelpFormatter;
@@ -69,18 +68,22 @@ namespace Silk.Core.Commands.Bot
 
                 var sopts = ScriptOptions.Default;
                 sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "DSharpPlus.VoiceNext", "Silk.Core", "Silk.Extensions",
+                    "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions",
                     "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
                     "Microsoft.Extensions.Logging");
-                IEnumerable<Assembly>? asm = AppDomain.CurrentDomain.GetAssemblies()
+                IEnumerable<Assembly> asm = AppDomain.CurrentDomain.GetAssemblies()
                     .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location));
-                asm = asm.Append(typeof(VoiceNextConnection).Assembly);
+
 
                 sopts = sopts.WithReferences(asm);
+                
                 Script<object> script = CSharpScript.Create(cs, sopts, typeof(TestVariables));
                 script.Compile();
+                
                 ScriptState<object> result = await script.RunAsync(globals).ConfigureAwait(false);
-                if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
+                if (result?.ReturnValue is (DiscordEmbedBuilder or DiscordEmbed))
+                    await msg.ModifyAsync(m => m.WithEmbed(result.ReturnValue as DiscordEmbedBuilder ?? result.ReturnValue as DiscordEmbed));
+                else if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
                     await msg.ModifyAsync(new DiscordEmbedBuilder
                         {
                             Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
