@@ -12,7 +12,6 @@ using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers.Messages;
-using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands;
 using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
@@ -31,7 +30,7 @@ namespace Silk.Core
         private readonly CommandHandler _commandHandler;
         private readonly SlashCommandExceptionHandler _slashExceptionHandler;
 
-        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler, SlashCommandExceptionHandler slashExceptionHandler, GuildConfigService config) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+        public Main(DiscordShardedClient shardClient, ILogger<Main> logger, EventHelper e, BotExceptionHandler handler, CommandHandler commandHandler, SlashCommandExceptionHandler slashExceptionHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
         {
             // And that's all it needs, since it subs to events in it's ctor.
             _logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
@@ -40,7 +39,6 @@ namespace Silk.Core
             _slashExceptionHandler = slashExceptionHandler;
             ShardClient = shardClient;
             _ = e;
-            _ = config;
         }
 
 
@@ -54,14 +52,13 @@ namespace Silk.Core
             _logger.LogInformation("Initialized client");
             
             await InitializeCommandsNextAsync();
-            _logger.LogInformation("Initialized CommandsNext");
+            
             
             await InitializeSlashCommandsAsync();
-            _logger.LogInformation("Initialized Slash-Commands");
             
             await _handler.SubscribeToEventsAsync();
-            _logger.LogDebug("Connecting to Discord gateway");
             
+            _logger.LogDebug("Connecting to Discord gateway");
             await ShardClient.StartAsync();
             _logger.LogInformation("Connected to Discord gateway as {Username}#{Discriminator}", ShardClient.CurrentUser.Username, ShardClient.CurrentUser.Discriminator);
 
@@ -85,13 +82,13 @@ namespace Silk.Core
 
         private Task InitializeSlashCommandsAsync()
         {
+            _logger.LogInformation("Initializing Slash-Commands");
             var sc = ShardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
             sc.SlashCommandErrored += _slashExceptionHandler.Handle;
             
             sc.RegisterCommands<RemindCommands>(847615746745958520);
             sc.RegisterCommands<TagCommands>(847615746745958520);
             sc.RegisterCommands<AvatarCommands>(847615746745958520);
-            sc.RegisterCommands<ConfigTests>(847615746745958520);
             sc.RegisterCommands<Moosh>(847615746745958520);
             
             return Task.CompletedTask;
@@ -99,7 +96,7 @@ namespace Silk.Core
 
         private async Task InitializeCommandsNextAsync()
         {
-            _logger.LogDebug("Registering commands");
+            _logger.LogInformation("Initializing command framework");
 
             var t = Stopwatch.StartNew();
             var asm = Assembly.GetEntryAssembly();
@@ -117,6 +114,7 @@ namespace Silk.Core
             int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
             _logger.LogDebug("Registered {Commands} commands for {Shards} shards in {Time} ms", registeredCommands, ShardClient.ShardClients.Count, t.ElapsedMilliseconds);
+            _logger.LogInformation("Initialized command framework");
         }
     }
 }
