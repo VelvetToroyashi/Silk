@@ -10,9 +10,11 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- master
-- development
-- rewrite/core/*
+  branches:
+    include:
+    - master
+    - development
+    - rewrite/core/*
 
 resources:
 - repo: self
