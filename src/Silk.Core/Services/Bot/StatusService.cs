@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Shared.Types.Collections;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Bot
 {
     public sealed class StatusService : BackgroundService
     {

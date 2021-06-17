@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Data;
 
 namespace Silk.Core.EventHandlers.MemberAdded
 {

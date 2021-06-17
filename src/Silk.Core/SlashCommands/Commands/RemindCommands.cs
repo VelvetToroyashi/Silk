@@ -7,7 +7,7 @@ using DSharpPlus.SlashCommands;
 using Humanizer;
 using Humanizer.Localisation;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.Bot;
 using Silk.Extensions;

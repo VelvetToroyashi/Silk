@@ -6,7 +6,7 @@ using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.Models;
 using Silk.Core.Types;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Server
 {
     public sealed class TagService
     {
@@ -80,7 +80,7 @@ namespace Silk.Core.Services
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
         /// <param name="newOwnerId">The Id of the tag's new owner.</param>
         public Task ClaimTagAsync(string tag, ulong guildId, ulong newOwnerId)
-            => _mediator.Send(new UpdateTagRequest(tag, guildId) {Owner = newOwnerId});
+            => _mediator.Send(new UpdateTagRequest(tag, guildId) {OwnerId = newOwnerId});
 
         /// <summary>
         ///     Creates a tag with a given name.

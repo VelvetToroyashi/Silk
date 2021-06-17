@@ -7,7 +7,7 @@ using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Bot
 {
     public class UptimeService : BackgroundService
     {

@@ -11,7 +11,7 @@ using MediatR;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands.Attributes;
 using Silk.Core.Types;
 using Silk.Extensions.DSharpPlus;

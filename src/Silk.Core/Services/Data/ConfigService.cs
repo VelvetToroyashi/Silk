@@ -7,7 +7,7 @@ using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Data
 {
     public class ConfigService
     {

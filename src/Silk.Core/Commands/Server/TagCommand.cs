@@ -12,7 +12,7 @@ using MediatR;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;

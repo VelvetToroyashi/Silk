@@ -19,7 +19,7 @@ using Silk.Core.Data.Models;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Server
 {
     public sealed class ReminderService : BackgroundService
     {

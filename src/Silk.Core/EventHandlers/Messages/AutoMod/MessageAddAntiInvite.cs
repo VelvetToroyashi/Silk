@@ -3,7 +3,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod

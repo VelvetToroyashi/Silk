@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Services;
+using Silk.Core.Services.Data;
 using Xunit;
 
 namespace Silk.Core.Tests.Services

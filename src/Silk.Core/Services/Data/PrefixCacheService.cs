@@ -9,7 +9,7 @@ using Silk.Core.Data;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Data
 {
     /// <inheritdoc cref="IPrefixCacheService" />
     public class PrefixCacheService : IPrefixCacheService
