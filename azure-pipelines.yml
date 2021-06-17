@@ -1,38 +1,39 @@
-# Build a Docker image 
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
+name : Docker-CI
 trigger:
   branches:
     include:
-    - master
-    - development
-    - rewrite/core/*
-
-resources:
-- repo: self
-
+      - master
+ 
+pool:
+  vmImage: 'ubuntu-latest'
+ 
 variables:
-  tag: '$(Build.BuildId)'
-
+  ImageName: 'velvetthepanda/silk:$(Build.BuildId)'
+ 
 stages:
 - stage: Build
   displayName: Build image
   jobs:  
   - job: Build
-    displayName: Build
-    pool:
-      vmImage: 'ubuntu-latest'
+    displayName: Build and push Docker image
     steps:
-    - task: Docker@2
-      displayName: Build an image
+    - task: Docker@1
+      displayName: 'Build the Docker image'
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(tag)
-- task: Docker@2
-  inputs:
-    repository: 'velvetthepanda/silk'
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
-    addPipelineData: false
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: 'Docker Hub'
+        command: 'Build an image'
+        dockerFile: '**/Dockerfile'
+        imageName: '$(ImageName)'
+        includeLatestTag: true
+        useDefaultContext: false
+        buildContext: '.'
+     
+    - task: Docker@1
+      displayName: 'Push the Docker image to Dockerhub'
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: 'Docker Hub'
+        command: 'Push an image'
+        imageName: '$(ImageName)'
+      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
