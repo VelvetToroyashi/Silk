@@ -10,7 +10,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.Bot;
 using Silk.Shared.Constants;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Bot
 {
     /// <inheritdoc cref="IInputService" />
     public class InputService : IInputService

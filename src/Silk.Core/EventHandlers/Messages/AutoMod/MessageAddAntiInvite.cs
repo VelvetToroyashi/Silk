@@ -3,7 +3,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
@@ -23,7 +23,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
         public async Task CheckForInvite(DiscordClient client, MessageCreateEventArgs args)
         {
-            if (!args.Channel.IsPrivate)
+            if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
             {
                 GuildConfig config = await _config.GetConfigAsync(args.Guild.Id);
 

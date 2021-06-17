@@ -6,14 +6,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00875"/>
-        <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002"/>
-        <PackageReference Include="MediatR" Version="9.0.0"/>
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210429-01"/>
-        <PackageReference Include="Moq" Version="4.16.1"/>
-        <PackageReference Include="NUnit" Version="3.13.2"/>
-        <PackageReference Include="xunit" Version="2.4.1"/>
+        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00888" />
+        <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002" />
+        <PackageReference Include="MediatR" Version="9.0.0" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210429-01" />
+        <PackageReference Include="Moq" Version="4.16.1" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -25,6 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj"/>
+        <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj" />
     </ItemGroup>
 </Project>

@@ -22,11 +22,6 @@ namespace Silk.Core.Data.Models
         public ulong OwnerId { get; init; }
 
         /// <summary>
-        ///     The user this reminder belongs to.
-        /// </summary>
-        public User Owner { get; set; }
-
-        /// <summary>
         ///     The channel the reminder was made in
         /// </summary>
         public ulong ChannelId { get; set; }
@@ -34,7 +29,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     The guild this reminder was created in.
         /// </summary>
-        public ulong GuildId { get; set; }
+        public ulong? GuildId { get; set; }
 
         /// <summary>
         ///     The Id of the message to remind them of
@@ -49,7 +44,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     The content of the original reminder, in case a message can't be sent to the original channel.
         /// </summary>
-        public string MessageContent { get; set; }
+        public string? MessageContent { get; set; }
 
         /// <summary>
         ///     The content of the message the reply contained, if the reminder was a reply.
@@ -70,5 +65,25 @@ namespace Silk.Core.Data.Models
         ///     Whether or not the reminder was replying to a different message.
         /// </summary>
         public bool WasReply { get; set; }
+
+
+        public Reminder() { }
+        public Reminder(int id, DateTime expiration, DateTime creationTime, ulong ownerId, ulong channelId, ulong guildId, ulong messageId, ReminderType type, string? messageContent, string? replyMessageContent, ulong? replyAuthorId, ulong? replyId, bool wasReply)
+        {
+            Id = id;
+            Expiration = expiration;
+            CreationTime = creationTime;
+            OwnerId = ownerId;
+            ChannelId = channelId;
+            GuildId = guildId;
+            MessageId = messageId;
+            Type = type;
+            MessageContent = messageContent;
+            ReplyMessageContent = replyMessageContent;
+            ReplyAuthorId = replyAuthorId;
+            ReplyId = replyId;
+            WasReply = wasReply;
+        }
     }
+
 }

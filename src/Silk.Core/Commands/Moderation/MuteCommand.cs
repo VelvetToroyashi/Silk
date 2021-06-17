@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;

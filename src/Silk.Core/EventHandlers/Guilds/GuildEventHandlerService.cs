@@ -13,36 +13,41 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
+using Silk.Core.Utilities;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Guilds
 {
     public sealed class GuildEventHandlerService : BackgroundService
     {
-        public ConcurrentQueue<Lazy<Task>> CacheQueue { get; } = new();
 
-        private bool _logged;
-        private DateTime? _startTime;
-        private bool _cachedAllInitialGuilds;
-
-        private readonly IMediator _mediator;
+        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
+                                                          "\n\nI respond to mentions and `s!` by default, but you can change that with `s!prefix`" +
+                                                          "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
+                                                          "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
+                                                          "\nDonations via Ko-Fi *greatly* aid in this endevour. <3";
         private readonly DiscordShardedClient _client;
         private readonly ILogger<GuildEventHandlerService> _logger;
 
+        private readonly IMediator _mediator;
+        private bool _cachedAllInitialGuilds;
+        private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
+
         private Dictionary<int, int> _guilds;
 
+        private bool _logged;
+
         private int _shardCount; // How many shards to wait for. //
-        private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
+        private DateTime? _startTime;
         public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger)
         {
             _mediator = mediator;
             _client = client;
             _logger = logger;
         }
-
-        private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs. I respond to mentions and `s!` by default, but you can change the prefix by using the prefix command.\n" +
-                                                          "Also! Development, hosting, infrastructure, etc. is expensive! Donations via [Patreon](https://patreon.com/VelvetThePanda) and [Ko-Fi](https://ko-fi.com/velvetthepanda) *greatly* aid in this endevour. <3";
+        public ConcurrentQueue<Func<Task>> CacheQueue { get; } = new();
 
         internal void MarkCompleted(int shardId)
         {
@@ -52,7 +57,6 @@ namespace Silk.Core.EventHandlers.Guilds
 
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
-
             _startTime ??= DateTime.Now;
             await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
 
@@ -63,24 +67,33 @@ namespace Silk.Core.EventHandlers.Guilds
             CheckForCompletion();
         }
 
-        internal static async Task JoinedGuild(GuildCreateEventArgs args)
+        internal async Task JoinedGuild(GuildCreateEventArgs args)
         {
-            IOrderedEnumerable<DiscordChannel>? allChannels = (await args.Guild.GetChannelsAsync()).OrderBy(channel => channel.Position);
-            DiscordMember bot = args.Guild.CurrentMember;
-            DiscordChannel? availableChannel = allChannels
-                .Where(c => c.Type is ChannelType.Text)
-                .FirstOrDefault(c => c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+            _logger.LogInformation("Joined new guild! {GuildName} | {GuildMemberCount} members", args.Guild.Name, args.Guild.MemberCount);
 
-            if (availableChannel is null)
-                return;
+            var bot = args.Guild.CurrentMember;
+            
+            var thankYouChannel = args.Guild
+                .Channels.Values
+                .OrderBy(c => c.Position)
+                .FirstOrDefault(c => c.Type is ChannelType.Text && c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
+            
+            if (thankYouChannel is null)
+                return; // All channels are locked. //
 
-            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+            DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
                 .WithTitle("Thank you for adding me!")
                 .WithColor(new("94f8ff"))
                 .WithDescription(OnGuildJoinThankYouMessage)
                 .WithThumbnail("https://files.velvetthepanda.dev/silk.png")
                 .WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
-            await availableChannel.SendMessageAsync(builder);
+
+            DiscordMessageBuilder? builder = new DiscordMessageBuilder()
+                .WithEmbed(embed)
+                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"), new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"), new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"));
+
+            await thankYouChannel.SendMessageAsync(builder);
+            await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
         }
 
         private void LogMembers(int members, int totalMembers, int shardId)
@@ -88,14 +101,14 @@ namespace Silk.Core.EventHandlers.Guilds
             string message;
             if (members is 0)
             {
-                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
+                message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
                 _logger.LogDebug(message, shardId + 1,
                     _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count);
             }
             else
             {
-                message = "Caching Complete! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
+                message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
                 _logger.LogDebug(message, shardId + 1,
                     _client.ShardClients.Count,
                     _guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
@@ -150,7 +163,7 @@ namespace Silk.Core.EventHandlers.Guilds
             return Math.Max(staffCount, 0);
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield(); // Sync until an await, which means we block until we finish the queue. //
             _shardCount = _client.ShardClients.Count;
@@ -165,10 +178,16 @@ namespace Silk.Core.EventHandlers.Guilds
                     await Task.Delay(200, stoppingToken);
 
                 if (!CacheQueue.IsEmpty)
-                    foreach (var t in CacheQueue)
-                        await t.Value;
+                {
+                    lock (CacheQueue)
+                    {
+                        foreach (var t in CacheQueue)
+                            AsyncUtil.RunSync(t); 
+                        CacheQueue.Clear();
+                    }
+                }
 
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
         }
     }

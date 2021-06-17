@@ -66,4 +66,70 @@ namespace Silk.Core.Utilities.Bot
             return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();
         }
     }
+
+    public sealed class TimeSpanConverter
+    {
+        private static Regex TimeSpanRegex { get; }
+
+        static TimeSpanConverter() => TimeSpanRegex = new("^(?<days>\\d+d\\s*)?(?<hours>\\d{1,2}h\\s*)?(?<minutes>\\d{1,2}m\\s*)?(?<seconds>\\d{1,2}s\\s*)?$", RegexOptions.Compiled | RegexOptions.ECMAScript);
+
+        public Task<Optional<TimeSpan>> ConvertAsync(string value)
+        {
+            if (value == "0")
+                return Task.FromResult(Optional.FromValue(TimeSpan.Zero));
+
+            if (int.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out int result1))
+                return Task.FromResult(Optional.FromNoValue<TimeSpan>());
+
+            value = value.ToLowerInvariant();
+
+            if (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out TimeSpan result2))
+                return Task.FromResult(Optional.FromValue(result2));
+
+            string[] strArray1 =
+            {
+                "days",
+                "hours",
+                "minutes",
+                "seconds"
+            };
+
+            Match match = TimeSpanRegex.Match(value);
+            if (!match.Success)
+                return Task.FromResult(Optional.FromNoValue<TimeSpan>());
+            int days = 0;
+            int hours = 0;
+            int minutes = 0;
+            int seconds = 0;
+            for (result1 = 0; result1 < strArray1.Length; ++result1)
+            {
+                string groupname = strArray1[result1];
+                string str = match.Groups[groupname].Value;
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    char ch = str[^1];
+                    int.TryParse(str[..^1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int result3);
+                    switch (ch)
+                    {
+                        case 'd':
+                            days = result3;
+                            continue;
+                        case 'h':
+                            hours = result3;
+                            continue;
+                        case 'm':
+                            minutes = result3;
+                            continue;
+                        case 's':
+                            seconds = result3;
+                            continue;
+                        default:
+                            continue;
+                    }
+                }
+            }
+            result2 = new(days, hours, minutes, seconds);
+            return Task.FromResult(Optional.FromValue(result2));
+        }
+    }
 }

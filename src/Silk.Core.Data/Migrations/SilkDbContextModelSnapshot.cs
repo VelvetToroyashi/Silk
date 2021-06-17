@@ -131,6 +131,9 @@ namespace Silk.Core.Data.Migrations
                     b.Property<decimal>("GreetingChannel")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<int>("GreetingOption")
+                        .HasColumnType("integer");
+
                     b.Property<string>("GreetingText")
                         .IsRequired()
                         .HasColumnType("text");
@@ -288,11 +291,10 @@ namespace Silk.Core.Data.Migrations
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal?>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("MessageContent")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("MessageId")
@@ -317,8 +319,6 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OwnerId", "GuildId");
 
                     b.ToTable("Reminders");
                 });
@@ -345,6 +345,70 @@ namespace Silk.Core.Data.Migrations
                     b.HasIndex("GuildConfigId");
 
                     b.ToTable("RoleMenu");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuEmoji", b =>
+                {
+                    b.Property<decimal>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("Unicode")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RoleMenuEmoji");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("GuildConfigId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildConfigId");
+
+                    b.ToTable("RoleMenuMenu");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal?>("EmojiId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int?>("RoleMenuMenuId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmojiId");
+
+                    b.HasIndex("RoleMenuMenuId");
+
+                    b.ToTable("RoleMenuOption");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.SelfAssignableRole", b =>
@@ -477,17 +541,6 @@ namespace Silk.Core.Data.Migrations
                         .HasForeignKey("GuildConfigId");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Reminder", b =>
-                {
-                    b.HasOne("Silk.Core.Data.Models.User", "Owner")
-                        .WithMany("Reminders")
-                        .HasForeignKey("OwnerId", "GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-                });
-
             modelBuilder.Entity("Silk.Core.Data.Models.RoleMenu", b =>
                 {
                     b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
@@ -495,6 +548,28 @@ namespace Silk.Core.Data.Migrations
                         .HasForeignKey("GuildConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
+                {
+                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
+                        .WithMany("RoleMenuMenus")
+                        .HasForeignKey("GuildConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuOption", b =>
+                {
+                    b.HasOne("Silk.Core.Data.Models.RoleMenuEmoji", "Emoji")
+                        .WithMany()
+                        .HasForeignKey("EmojiId");
+
+                    b.HasOne("Silk.Core.Data.Models.RoleMenuMenu", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("RoleMenuMenuId");
+
+                    b.Navigation("Emoji");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.SelfAssignableRole", b =>
@@ -550,19 +625,21 @@ namespace Silk.Core.Data.Migrations
 
                     b.Navigation("InfractionSteps");
 
+                    b.Navigation("RoleMenuMenus");
+
                     b.Navigation("RoleMenus");
 
                     b.Navigation("SelfAssignableRoles");
                 });
 
+            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
+                {
+                    b.Navigation("Roles");
+                });
+
             modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
                 {
                     b.Navigation("Aliases");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.User", b =>
-                {
-                    b.Navigation("Reminders");
                 });
 #pragma warning restore 612, 618
         }

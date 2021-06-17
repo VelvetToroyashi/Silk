@@ -78,6 +78,8 @@
         public string Database { get; set; } = string.Empty;
         public string Username { get; set; } = "postgres";
         public string Password { get; set; } = string.Empty;
+
+        public override string ToString() => $"Host={Host}; Port={Port}; Database={Database}; Username={Username}; Password={Password};";
     }
 
     /// <summary>

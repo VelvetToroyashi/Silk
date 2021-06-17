@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using DSharpPlus.Net;
 using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
@@ -17,55 +19,57 @@ using Silk.Core.Data.Models;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Server
 {
-    public class ReminderService : BackgroundService
+    public sealed class ReminderService : BackgroundService
     {
         private const string MissingChannel = "Hey!, you wanted me to remind you of something, but the channel was deleted, or is otherwise inaccessible to me now.\n";
         private readonly DiscordShardedClient _client;
         private readonly ILogger<ReminderService> _logger;
-
+        private readonly IMediator _mediator;
         private readonly IServiceProvider _services;
 
         private List<Reminder> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
 
-        public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client)
+        public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client, IMediator mediator)
         {
             _logger = logger;
             _services = services;
             _client = client;
+            _mediator = mediator;
+
         }
 
         public async Task CreateReminder
         (
             DateTime expiration, ulong ownerId,
-            ulong channelId, ulong messageId, ulong guildId,
-            string messageContent, bool wasReply,
+            ulong channelId, ulong messageId, ulong? guildId,
+            string? messageContent, bool wasReply = false,
             ReminderType type = ReminderType.Once, ulong? replyId = null,
             ulong? replyAuthorId = null, string? replyMessageContent = null)
         {
-            using IServiceScope scope = _services.CreateScope();
-            var mediator = scope.ServiceProvider.Get<IMediator>();
-            Reminder reminder = await mediator!.Send(new CreateReminderRequest(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, type, replyId, replyAuthorId, replyMessageContent));
+            Reminder reminder = await _mediator.Send(new CreateReminderRequest(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, type, replyId, replyAuthorId, replyMessageContent));
             _reminders.Add(reminder);
         }
 
-        public async Task<IEnumerable<Reminder>?> GetRemindersAsync(ulong userId)
+        public async Task<IEnumerable<Reminder>> GetRemindersAsync(ulong userId)
         {
             IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
-            if (reminders.Count() is 0) return null;
-            return reminders;
+            Reminder[] reminderArr = reminders as Reminder[] ?? reminders.ToArray();
+            return reminderArr.Length is 0 ? Array.Empty<Reminder>() : reminderArr;
         }
 
         public async Task RemoveReminderAsync(int id)
         {
             Reminder? reminder = _reminders.SingleOrDefault(r => r.Id == id);
-            if (reminder is not null)
+            if (reminder is null)
+            {
+                _logger.LogWarning("Reminder was not present in memory. Was it dispatched already?");
+            }
+            else
             {
                 _reminders.Remove(reminder);
-                using IServiceScope scope = _services.CreateScope();
-                var mediator = _services.CreateScope().ServiceProvider.Get<IMediator>();
-                await mediator!.Send(new RemoveReminderRequest(id));
+                await _mediator.Send(new RemoveReminderRequest(id));
             }
         }
 
@@ -76,17 +80,29 @@ namespace Silk.Core.Services
             for (var i = 0; i < _reminders.Count; i++)
             {
                 Reminder r = _reminders[i];
-                if (r.Expiration < DateTime.UtcNow)
-                    await DispatchReminderAsync(r);
+                if (r.Expiration > DateTime.UtcNow) continue;
+
+                Task t = DispatchReminderAsync(r);
+                Task timeout = Task.Delay(900);
+                Task tr = await Task.WhenAny(t, timeout);
+
+                if (tr == timeout)
+                    _logger.LogWarning("Slow dispatch on reminder! Expect failed dispatch log.");
             }
         }
 
         private async Task DispatchReminderAsync(Reminder reminder)
         {
-            IEnumerable<KeyValuePair<ulong, DiscordGuild>>? guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
+            if (reminder.MessageId is 0)
+            {
+                await DispatchSilentReminderAsync(reminder); // Was executed with a slash command. Don't send the reminder in the server. //
+                return;
+            }
+            IEnumerable<KeyValuePair<ulong, DiscordGuild>> guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
             if (guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is not { } guild)
             {
-                _logger.LogWarning("Couldn't find guild {GuildId}! Removing reminders from queue", reminder.GuildId);
+                _logger.LogWarning("{GuildId} is not present on the client. Was the guild removed?", reminder.GuildId);
+                _logger.LogTrace("Removing all reminders from memory pointing to {GuildId}", reminder.GuildId);
                 _reminders.RemoveAll(r => r.GuildId == reminder.GuildId);
             }
             else
@@ -100,26 +116,82 @@ namespace Silk.Core.Services
                 {
                     guild.Channels.TryGetValue(reminder.ChannelId, out var channel);
                     channel ??= await _client.GetMember(m => m.Id == reminder.OwnerId)?.CreateDmChannelAsync()!;
-                    if (channel is null) return; // Member doesn't exist //
+
+                    if (channel is null)
+                    {
+                        _logger.LogWarning("Member has a recurring reminder but is not present on the guild. Were they kicked?");
+                        _logger.LogTrace("Removing all {UserId}'s reminders...", reminder.OwnerId);
+
+                        foreach (var remind in _reminders.Where(r => r.OwnerId == reminder.OwnerId))
+                            await RemoveReminderAsync(remind.Id);
+
+                        return; // Member doesn't exist //
+                    }
+
                     await SendRecurringReminderMessageAsync(reminder, channel);
                 }
             }
         }
 
+        private async Task DispatchSilentReminderAsync(Reminder reminder)
+        {
+            var apiClient = (DiscordApiClient) typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
+            var channel = await (Task<DiscordDmChannel>) typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] {reminder.OwnerId})!;
+
+            await RemoveReminderAsync(reminder.Id);
+            _logger.LogTrace("Removed reminder from queue");
+
+            _logger.LogTrace("Preparring to send reminder");
+            try
+            {
+                await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                _logger.LogTrace("Successfully dispatched reminder.");
+            }
+            catch (UnauthorizedException)
+            {
+                _logger.LogWarning("Failed to dispatch reminder invoked by slash-command. Did they leave they close their DMs?");
+
+                if (reminder.GuildId is 0 or null)
+                {
+                    _logger.LogWarning("Reminder does not have associated guild. Skipping.");
+                    return;
+                }
+
+                var shard = _client.GetShard(reminder.GuildId.Value);
+                var foundGuild = shard.Guilds.TryGetValue(reminder.GuildId.Value, out var guild);
+
+                if (!foundGuild)
+                {
+                    _logger.LogWarning("GuildId was present on reminder but not on the client. Skipping.");
+                    return;
+                }
+
+                var gotChannel = guild!.Channels.TryGetValue(reminder.ChannelId, out var guildChannel);
+
+                if (!gotChannel)
+                {
+                    _logger.LogWarning("Reminder pointed to guild channel, but is not present on guild. Skipping.");
+                    return;
+                }
+
+                await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                _logger.LogTrace("Successfully dispatched reminder.");
+            }
+        }
+
         private async Task UpdateRecurringReminderAsync(Reminder reminder)
         {
-            using IServiceScope scope = _services.CreateScope();
-            var mediator = scope.ServiceProvider.Get<IMediator>();
             DateTime time = reminder.Type switch
             {
                 ReminderType.Hourly => DateTime.UtcNow + TimeSpan.FromHours(1),
                 ReminderType.Daily => DateTime.UtcNow + TimeSpan.FromDays(1),
                 ReminderType.Weekly => DateTime.UtcNow + TimeSpan.FromDays(7),
                 ReminderType.Monthly => DateTime.UtcNow + TimeSpan.FromDays(30),
+                ReminderType.Once => throw new ArgumentException("Non-recurring reminders are not supported."),
                 _ => throw new ArgumentException()
             };
             int index = _reminders.IndexOf(reminder);
-            _reminders[index] = await mediator!.Send(new UpdateReminderRequest(reminder, time));
+            _reminders[index] = await _mediator.Send(new UpdateReminderRequest(reminder, time));
         }
 
         private async Task SendGuildReminderAsync(Reminder reminder, DiscordGuild guild)

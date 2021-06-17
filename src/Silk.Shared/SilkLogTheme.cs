@@ -2,7 +2,7 @@
 using System.IO;
 using Serilog.Sinks.SystemConsole.Themes;
 
-namespace Silk.Core.Utilities
+namespace Silk.Shared
 {
     public sealed class SilkLogTheme : ConsoleTheme
     {

@@ -6,9 +6,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
+using Microsoft.Extensions.Options;
 using Silk.Core.Commands.Furry.Types;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Shared.Configuration;
 
 namespace Silk.Core.Commands.Furry
 {
@@ -19,11 +21,14 @@ namespace Silk.Core.Commands.Furry
     {
 
         private readonly BotConfig _config;
-        public e621Command(IHttpClientFactory httpClientFactory, BotConfig config) : base(httpClientFactory)
+        private readonly SilkConfigurationOptions _options;
+        public e621Command(IHttpClientFactory httpClientFactory, BotConfig config, IOptions<SilkConfigurationOptions> options) : base(httpClientFactory)
         {
             baseUrl = "https://e621.net/posts.json?tags=";
             _config = config;
+            _options = options.Value;
             username = _config.e6API.Value;
+            username = _options.E621.Username;
         }
 
         [RequireNsfw]
@@ -47,7 +52,7 @@ namespace Silk.Core.Commands.Furry
             eBooruPostResult? result;
             if (username is null)
                 result = await DoQueryAsync(query); // May return empty results locked behind API key //
-            else result = await DoKeyedQueryAsync(query, _config.e6API.Key, true);
+            else result = await DoKeyedQueryAsync(query, _options.E621.ApiKey, true);
 
             if (result is null || result.Posts?.Count is 0)
             {

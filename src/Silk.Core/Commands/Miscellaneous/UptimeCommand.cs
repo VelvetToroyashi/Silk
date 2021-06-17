@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Humanizer;
 using Humanizer.Localisation;
-using Silk.Core.Services;
+using Silk.Core.Services.Bot;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous

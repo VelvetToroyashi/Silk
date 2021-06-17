@@ -16,7 +16,7 @@ using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.Services
+namespace Silk.Core.Services.Server
 {
     /// <inheritdoc cref="IInfractionService" />
     public sealed class InfractionService : IInfractionService

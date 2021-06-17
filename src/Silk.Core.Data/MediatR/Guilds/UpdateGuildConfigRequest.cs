@@ -24,7 +24,7 @@ namespace Silk.Core.Data.MediatR.Guilds
         public ulong? VerificationRoleId { get; init; }
 
         public bool? ScanInvites { get; init; }
-        public bool? GreetMembers { get; init; }
+        public GreetingOption? GreetingOption { get; init; }
         public bool? BlacklistWords { get; init; }
         public bool? BlacklistInvites { get; init; }
         public bool? LogMembersJoining { get; init; }
@@ -69,7 +69,7 @@ namespace Silk.Core.Data.MediatR.Guilds
                 .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
             config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
-            config.GreetMembers = request.GreetMembers ?? config.GreetMembers;
+            config.GreetingOption = request.GreetingOption ?? config.GreetingOption;
             config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
             config.GreetingChannel = request.GreetingChannelId ?? config.GreetingChannel;
             config.VerificationRole = request.VerificationRoleId ?? config.VerificationRole;

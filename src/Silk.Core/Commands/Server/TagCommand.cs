@@ -12,7 +12,7 @@ using MediatR;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
-using Silk.Core.Services;
+using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -31,6 +31,7 @@ namespace Silk.Core.Commands.Server
             "alias", "info", "claim",
             "raw", "list"
         };
+
         private readonly TagService _tagService;
         public TagCommand(IMediator mediator, TagService tagService)
         {
@@ -42,6 +43,12 @@ namespace Silk.Core.Commands.Server
         [Description("Shows the Content of a Tag")]
         public async Task Tag(CommandContext ctx, [RemainingText] string tag)
         {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                await ctx.RespondAsync("You must specify a tag!");
+                return;
+            }
+            
             Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
 
             if (dbTag is null)
@@ -64,26 +71,22 @@ namespace Silk.Core.Commands.Server
             if (dbTag is null)
             {
                 await ctx.RespondAsync("Tag not found! :(");
+                return;
             }
-            else
-            {
-                DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
-                DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-                    .WithColor(DiscordColor.Blurple)
-                    .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
-                    .WithTitle(dbTag.Name);
 
-                builder
-                    .AddField("Uses:", dbTag.Uses.ToString())
-                    .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
+            DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Blurple)
+                .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                .WithTitle(dbTag.Name)
+                .AddField("Uses:", dbTag.Uses.ToString())
+                .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
 
-                if (dbTag.OriginalTag is not null)
-                {
-                    builder.AddField("Original:", dbTag.OriginalTag.Name);
-                }
+            if (dbTag.OriginalTag is not null)
+                builder.AddField("Original:", dbTag.OriginalTag.Name);
 
-                await ctx.RespondAsync(builder);
-            }
+            await ctx.RespondAsync(builder);
+
         }
 
         [Command]
@@ -92,13 +95,9 @@ namespace Silk.Core.Commands.Server
         {
             TagCreationResult? couldCreateAlias = await _tagService.AliasTagAsync(originalTag, aliasName, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateAlias.Success)
-            {
                 await ctx.RespondAsync(couldCreateAlias.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync($"Alias `{aliasName}` that points to tag `{originalTag}` successfully created.");
-            }
         }
 
         [Command]
@@ -122,15 +121,11 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            TagCreationResult? couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult couldCreateTag = await _tagService.CreateTagAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldCreateTag.Success)
-            {
                 await ctx.RespondAsync(couldCreateTag.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync($"Successfully created tag **{tagName}**.");
-            }
         }
 
         [Command]
@@ -151,7 +146,7 @@ namespace Silk.Core.Commands.Server
             }
             User? user = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, ctx.User.Id));
 
-            if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? true))
+            if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? false))
             {
                 await ctx.RespondAsync("You either do not own this tag, or are not staff!");
                 return;
@@ -180,23 +175,19 @@ namespace Silk.Core.Commands.Server
                 return;
             }
 
-            TagCreationResult? couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
+            TagCreationResult couldEditTag = await _tagService.UpdateTagContentAsync(tagName, content, ctx.Guild.Id, ctx.User.Id);
             if (!couldEditTag.Success)
-            {
                 await ctx.RespondAsync(couldEditTag.Reason);
-            }
             else
-            {
                 await ctx.RespondAsync("Successfully edited tag!");
-            }
         }
 
         [Command]
         [Description("Search for a Tag by name")]
         public async Task Search(CommandContext ctx, string tagName)
         {
-            IEnumerable<Tag>? tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
-            if (tags is null)
+            IEnumerable<Tag> tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("No tags found :c");
                 return;
@@ -206,10 +197,7 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     s += $" - <@{t.OwnerId}>";
                     return s;
                 }));
@@ -254,8 +242,8 @@ namespace Silk.Core.Commands.Server
         [Description("Shows a List of All Tags in this Server")]
         public async Task List(CommandContext ctx)
         {
-            IEnumerable<Tag>? tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
-            if (tags is null)
+            IEnumerable<Tag> tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("No tags in this server! :c");
                 return;
@@ -265,12 +253,10 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     return s;
                 }));
+            
             DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags in {ctx.Guild.Name}:")
@@ -305,8 +291,8 @@ namespace Silk.Core.Commands.Server
         [Description("Get Tags created by a User")]
         public async Task Tags(CommandContext ctx, DiscordMember user)
         {
-            IEnumerable<Tag>? tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
-            if (tags is null)
+            IEnumerable<Tag> tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+            if (!tags.Any())
             {
                 await ctx.RespondAsync("User has no tags! :c");
                 return;
@@ -316,13 +302,11 @@ namespace Silk.Core.Commands.Server
                 .Select(t =>
                 {
                     var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null)
-                    {
-                        s += $" → `{t.OriginalTag!.Name}`";
-                    }
+                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
                     return s;
                 }));
-            DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
+
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle($"Tags for {user.Username}:")
                 .WithFooter($"Silk! | Requested by {ctx.User.Id}");
@@ -344,8 +328,6 @@ namespace Silk.Core.Commands.Server
         [Command]
         [Description("Get Tags created by the Current User")]
         public async Task Tags(CommandContext ctx)
-        {
-            await Tags(ctx, ctx.Member);
-        }
+            => await Tags(ctx, ctx.Member);
     }
 }

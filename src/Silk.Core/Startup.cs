@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -21,30 +22,35 @@ using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
 using Silk.Core.EventHandlers.Reactions;
-using Silk.Core.Services;
+using Silk.Core.Services.Bot;
+using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Services.Server;
+using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Extensions;
+using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 
 namespace Silk.Core
 {
-    public class Startup
+    public sealed class Startup
     {
         public static async Task Main()
         {
             // Make Generic Host here. //
-            IHostBuilder? builder = CreateBuilder();
+            IHostBuilder builder = CreateBuilder();
 
             AddLogging(builder);
-
             ConfigureServices(builder);
-            ConfigureDiscordClient(builder);
 
             IHost builtBuilder = builder.UseConsoleLifetime().Build();
             DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
+            DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
 
+            ConfigureDiscordClient(builtBuilder.Services);
             await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
             await builtBuilder.RunAsync().ConfigureAwait(false);
         }
@@ -61,10 +67,9 @@ namespace Silk.Core
                         .CreateDbContext();
                     
                     var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    
                     if (pendingMigrations.Any())
-                    {
                         await dbContext.Database.MigrateAsync();
-                    }
                 }
             }
             catch (Exception)
@@ -110,7 +115,7 @@ namespace Silk.Core
                         "Warning" => logger.MinimumLevel.Warning().CreateLogger(),
                         "Error" => logger.MinimumLevel.Error().CreateLogger(),
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
-                        _ => logger.MinimumLevel.Information().CreateLogger()
+                        _ => logger.MinimumLevel.Verbose().CreateLogger()
                     };
                     Log.Logger.ForContext(typeof(Startup)).Information("Logging initialized!");
                 })
@@ -124,7 +129,7 @@ namespace Silk.Core
                 IConfiguration? config = context.Configuration;
                 
                 AddSilkConfigurationOptions(services, config);
-                AddDatabases(services, config.GetConnectionString("core"));
+                AddDatabases(services, config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>().Persistence);
                 
                 if (!addServices) return;
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
@@ -134,19 +139,19 @@ namespace Silk.Core
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
                 services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
-                services.AddSingleton(_ => new BotConfig(context.Configuration));
 
                 services.AddSingleton<GuildEventHandlers>();
 
-                services.AddTransient<ConfigService>();
+                services.AddSingleton<ConfigService>();
                 services.AddSingleton<AntiInviteCore>();
-                services.AddTransient<RoleAddedHandler>();
-                services.AddTransient<MemberAddedHandler>();
-                services.AddTransient<MemberRemovedHandler>();
-                services.AddTransient<RoleRemovedHandler>();
+                services.AddSingleton<RoleAddedHandler>();
+                services.AddSingleton<MemberGreetingService>();
+                services.AddSingleton<MemberRemovedHandler>();
+                services.AddSingleton<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();
+                services.AddSingleton<SlashCommandExceptionHandler>();
                 services.AddSingleton<SerilogLoggerFactory>();
-                services.AddTransient<MessageRemovedHandler>();
+                services.AddSingleton<MessageRemovedHandler>();
 
                 services.AddSingleton<ButtonHandlerService>();
                 services.AddSingleton<CommandHandler>();
@@ -161,6 +166,7 @@ namespace Silk.Core
 
                 services.AddSingleton<TagService>();
                 services.AddSingleton<RoleMenuReactionService>();
+                
 
                 //services.AddSingleton<IMessageSender, MessageSenderService>();
 
@@ -186,25 +192,15 @@ namespace Silk.Core
         }
 
 
-        private static void ConfigureDiscordClient(IHostBuilder builder)
+        private static void ConfigureDiscordClient(IServiceProvider services)
         {
-            builder.ConfigureServices((context, services) =>
-            {
-                DiscordConfiguration? client = DiscordConfigurations.Discord;
-                IConfiguration? config = context.Configuration;
-                int.TryParse(context.Configuration["Shards"] ?? "1", out int shards);
+            DiscordConfiguration client = DiscordConfigurations.Discord;
+            var config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
 
-                client.ShardCount = shards;
-                client.Token = config.GetConnectionString("discord");
-            });
+            client.ShardCount =  config!.Discord.Shards;
+            client.Token = config.Discord.BotToken;
         }
-
-        private static void MigrateDatabases(DbContext[] contexts)
-        {
-            foreach (var c in contexts)
-                c.Database.Migrate();
-        }
-
+        
         private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
         {
             // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure
@@ -213,11 +209,11 @@ namespace Silk.Core
             services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
         }
         
-        private static void AddDatabases(IServiceCollection services, string connectionString)
+        private static void AddDatabases(IServiceCollection services, SilkPersistenceOptions connectionString)
         {
             void Builder(DbContextOptionsBuilder b)
             {
-                b.UseNpgsql(connectionString);
+                b.UseNpgsql(connectionString.ToString());
                 #if DEBUG
                 b.EnableSensitiveDataLogging();
                 b.EnableDetailedErrors();
@@ -227,17 +223,7 @@ namespace Silk.Core
 
             services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString).Options);
+            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString.ToString()).Options);
         }
-
-        private void Whatever()
-        {
-            try
-            {
-                throw new();
-            }
-            catch (Exception e) { }
-        }
-
     }
 }
