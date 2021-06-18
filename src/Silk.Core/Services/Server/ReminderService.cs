@@ -8,6 +8,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Net;
+using FluentAssertions.Common;
 using Humanizer;
 using Humanizer.Localisation;
 using MediatR;
@@ -144,7 +145,7 @@ namespace Silk.Core.Services.Server
             _logger.LogTrace("Preparring to send reminder");
             try
             {
-                await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                await channel.SendMessageAsync($"Hey! You wanted me to remind you of something <t:{reminder.CreationTime.ToDateTimeOffset().ToUnixTimeSeconds()}:R>! \nReminder: {reminder.MessageContent}");
                 _logger.LogTrace("Successfully dispatched reminder.");
             }
             catch (UnauthorizedException)
@@ -174,7 +175,7 @@ namespace Silk.Core.Services.Server
                     return;
                 }
 
-                await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something {(reminder.CreationTime - DateTime.UtcNow).Humanize(3, maxUnit: TimeUnit.Month, minUnit: TimeUnit.Second)} ago! \nReminder: {reminder.MessageContent}");
+                await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something <t:{reminder.CreationTime.ToDateTimeOffset().ToUnixTimeSeconds()}:R>! \nReminder: {reminder.MessageContent}");
                 _logger.LogTrace("Successfully dispatched reminder.");
             }
         }
@@ -273,7 +274,7 @@ namespace Silk.Core.Services.Server
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(reminder.OwnerId);
-                await member.SendMessageAsync(MissingChannel + $"{(DateTime.UtcNow - reminder.CreationTime).Humanize(2, minUnit: TimeUnit.Second)} ago: \n{reminder.MessageContent}");
+                await member.SendMessageAsync(MissingChannel + $"<t:{reminder.CreationTime.ToDateTimeOffset().ToUnixTimeSeconds()}:R>: \n{reminder.MessageContent}");
             }
             catch (UnauthorizedException) { _logger.LogWarning("Failed to message user, skipping "); }
             catch (NotFoundException) { _logger.LogWarning("Member left guild, skipping"); }
