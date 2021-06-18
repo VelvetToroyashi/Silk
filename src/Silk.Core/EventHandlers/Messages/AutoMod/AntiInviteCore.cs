@@ -93,24 +93,24 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         }
 
         /// <summary>
-        ///     Checks if a memeber should be punished for sending a Discord invite, and calls <see cref="IInfractionService.ProgressInfractionStepAsync" /> if
+        ///     Checks if a memeber should be punished for sending a Discord invite, and calls <see cref="IModerationService.ProgressInfractionStepAsync" /> if
         ///     it succeeds.
         /// </summary>
         /// <param name="config">The configuration for the guild.</param>
         /// <param name="message">The offending message, to be deleted, if configured.</param>
-        /// <param name="infractionService">The infraction service reference to make a call to if checks succeed.</param>
-        public static async Task TryAddInviteInfractionAsync(GuildConfig config, DiscordMessage message, IInfractionService infractionService)
+        /// <param name="moderationService">The infraction service reference to make a call to if checks succeed.</param>
+        public static async Task TryAddInviteInfractionAsync(GuildConfig config, DiscordMessage message, IModerationService moderationService)
         {
-            bool shouldPunish = await infractionService.ShouldAddInfractionAsync((DiscordMember) message.Author);
+            bool shouldPunish = await moderationService.ShouldAddInfractionAsync((DiscordMember) message.Author);
             if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
             if (shouldPunish && config.WarnOnMatchedInvite)
             {
-                Infraction infraction = await infractionService
+                Infraction infraction = await moderationService
                     .CreateInfractionAsync((DiscordMember) message.Author, message.Channel.Guild.CurrentMember,
                         InfractionType.Warn, "[AutoMod] Sending an invite link");
 
 
-                await infractionService.ProgressInfractionStepAsync((DiscordMember) message.Author, "");
+                await moderationService.ProgressInfractionStepAsync((DiscordMember) message.Author, "");
             }
         }
     }

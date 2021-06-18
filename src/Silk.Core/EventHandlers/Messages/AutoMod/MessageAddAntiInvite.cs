@@ -11,12 +11,12 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
     public class MessageAddAntiInvite
     {
         private readonly ConfigService _config;
-        private readonly IInfractionService _infractionService;
+        private readonly IModerationService _moderationService;
         private readonly IMediator _mediator;
 
-        public MessageAddAntiInvite(IInfractionService infractionService, IMediator mediator, ConfigService config)
+        public MessageAddAntiInvite(IModerationService moderationService, IMediator mediator, ConfigService config)
         {
-            _infractionService = infractionService;
+            _moderationService = moderationService;
             _mediator = mediator;
             _config = config;
         }
@@ -31,7 +31,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
                 bool isBlacklisted = await AntiInviteCore.IsBlacklistedInvite(client, args.Message, config, invite!);
 
                 if (hasInvite && isBlacklisted)
-                    await AntiInviteCore.TryAddInviteInfractionAsync(config, args.Message, _infractionService);
+                    await AntiInviteCore.TryAddInviteInfractionAsync(config, args.Message, _moderationService);
             }
         }
     }

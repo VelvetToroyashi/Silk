@@ -18,13 +18,13 @@ namespace Silk.Core.Commands.Moderation
     public class MuteCommand : BaseCommandModule
     {
         private readonly ConfigService _configService;
-        private readonly IInfractionService _infractionService;
+        private readonly IModerationService _moderationService;
 
 
-        public MuteCommand(ConfigService configService, IInfractionService infractionService)
+        public MuteCommand(ConfigService configService, IModerationService moderationService)
         {
             _configService = configService;
-            _infractionService = infractionService;
+            _moderationService = moderationService;
         }
 
         [Command("mute")]
@@ -69,9 +69,9 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member, InfractionType.Mute, reason);
+            Infraction infraction = await _moderationService.CreateTempInfractionAsync(user, ctx.Member, InfractionType.Mute, reason);
 
-            await _infractionService.MuteAsync(user, ctx.Channel, infraction);
+            await _moderationService.MuteAsync(user, ctx.Channel, infraction);
             await ctx.RespondAsync($":white_check_mark: Muted {user.Username} indefinitely.");
         }
 
@@ -115,10 +115,10 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            Infraction infraction = await _infractionService.CreateTempInfractionAsync(user, ctx.Member,
+            Infraction infraction = await _moderationService.CreateTempInfractionAsync(user, ctx.Member,
                 InfractionType.Mute, reason, DateTime.Now.Add(duration));
 
-            await _infractionService.MuteAsync(user, ctx.Channel, infraction);
+            await _moderationService.MuteAsync(user, ctx.Channel, infraction);
             await ctx.RespondAsync($":white_check_mark: Muted {user.Username}.");
         }
     }

@@ -23,7 +23,7 @@ namespace Silk.Core.Data.Models
         /// <summary>
         ///     The reason this infraction was given. Infractions added by Auto-Mod will be prefixed with "[AUTO-MOD]".
         /// </summary>
-        public string Reason { get; set; } // Why was this infraction given
+        public string Reason { get; set; } = "Not given."; // Why was this infraction given
 
         /// <summary>
         ///     Whether this infraction has been processed.
@@ -46,8 +46,7 @@ namespace Silk.Core.Data.Models
         public DateTime InfractionTime { get; set; } //When it happened
 
         /// <summary>
-        ///     The type of infraction. Infractions of type <see cref="Models.InfractionType.SoftBan" /> and <see cref="Models.InfractionType.Mute" /> are loaded
-        ///     into memory upon startup.
+        ///     The type of infraction.
         /// </summary>
         public InfractionType InfractionType { get; set; } //What happened
 

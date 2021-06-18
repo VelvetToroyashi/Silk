@@ -18,10 +18,10 @@ namespace Silk.Core.Commands.Moderation.Ban
     [Category(Categories.Mod)]
     public class TempBanCommand : BaseCommandModule
     {
-        private readonly IInfractionService _infractionService;
-        public TempBanCommand(IInfractionService infractionService)
+        private readonly IModerationService _moderationService;
+        public TempBanCommand(IModerationService moderationService)
         {
-            _infractionService = infractionService;
+            _moderationService = moderationService;
         }
 
         [RequireGuild]
@@ -66,9 +66,9 @@ namespace Silk.Core.Commands.Moderation.Ban
                 .AddField("Reason:", reason);
 
             DateTime dur = DateTime.Now + duration;
-            Infraction infraction = await _infractionService.CreateTempInfractionAsync(member, ctx.Member, InfractionType.SoftBan, reason, dur);
+            Infraction infraction = await _moderationService.CreateTempInfractionAsync(member, ctx.Member, InfractionType.SoftBan, reason, dur);
 
-            await _infractionService.TempBanAsync(member, ctx.Channel, infraction, embed);
+            await _moderationService.TempBanAsync(member, ctx.Channel, infraction, embed);
         }
     }
 }

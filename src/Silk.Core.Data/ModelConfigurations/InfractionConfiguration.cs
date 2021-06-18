@@ -9,7 +9,8 @@ namespace Silk.Core.Data.ModelConfigurations
 
         public void Configure(EntityTypeBuilder<Infraction> builder)
         {
-            builder.HasKey(i => i.Id);
+            builder.HasKey(inf => new {inf.Id, inf.GuildId});
+            builder.Property(inf => inf.Id).ValueGeneratedOnAdd();
         }
     }
 }

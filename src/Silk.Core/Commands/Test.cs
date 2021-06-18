@@ -1,69 +1,49 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
+using Silk.Core.Data;
+using Silk.Core.Data.Models;
+using Silk.Core.Utilities;
+using Silk.Extensions;
 
 namespace Silk.Core.Commands
 {
 	public class Test : BaseCommandModule
 	{
-		[Command("mention"), Description("Attempts to mention a user")]
-        public async Task MentionablesAsync(CommandContext ctx, DiscordUser user)
-        {
-            var content = $"Hey, {user.Mention}! Listen!";
-            await ctx.Channel.SendMessageAsync("✔ should ping, ❌ should not ping.").ConfigureAwait(false);
+		private readonly GuildContext _context;
+		public Test(GuildContext context) => _context = context;
 
-            await ctx.RespondAsync("✔ Default Behaviour: " + content).ConfigureAwait(false);                                                                                            //Should ping User
+		[Command("infract")]
+		public async Task Infract(CommandContext ctx)
+		{
+			var inf = new Infraction()
+			{
+				Enforcer = ctx.Guild.CurrentMember.Id,
+				GuildId = ctx.Guild.Id,
+				UserId = ctx.User.Id
+			};
 
-            await new DiscordMessageBuilder()
-                .WithContent("✔ UserMention(user): " + content)
-                .WithAllowedMentions(new IMention[] { new UserMention(user) })
-                .WithReply(ctx.Message.Id)
-                .SendAsync(ctx.Channel)
-                .ConfigureAwait(false);                                                                                                                      //Should ping user
+			_context.Infractions.Add(inf);
+			try
+			{
+				await _context.SaveChangesAsync();
+			}
+			catch (Exception e)
+			{
+				await ctx.RespondAsync($"Sorry, but something went wrong with saving the infraction. {e.Message}");
+				return;
+			}
 
-            await new DiscordMessageBuilder()
-                .WithContent("✔ UserMention(): " + content)
-                .WithAllowedMentions(new IMention[] { new UserMention() })
-                .WithReply(ctx.Message.Id)
-                .SendAsync(ctx.Channel)
-                .ConfigureAwait(false);                                                                                                                      //Should ping user
+			var g = await _context
+				.Guilds
+				.AsQueryable()
+				.Include(g => g.Infractions)
+				.FirstAsync(g => g.Id == ctx.Guild.Id);
+			inf.Guild.Configuration = null!;
+			await ctx.RespondAsync(m => m.WithContent("Successfully saved infraction.").WithFile("result.json", ObjectDumper.DumpAsJson(g.Infractions).AsStream()));
 
-            await new DiscordMessageBuilder()
-                .WithContent("✔ User Mention Everyone & Self: " + content)
-                .WithAllowedMentions(new IMention[] { new UserMention(), new UserMention(user) })
-                .WithReply(ctx.Message.Id)
-                .SendAsync(ctx.Channel)
-                .ConfigureAwait(false);                                                                                                                      //Should ping user
-
-
-            await new DiscordMessageBuilder()
-               .WithContent("✔ UserMention.All: " + content)
-               .WithAllowedMentions(new IMention[] { UserMention.All })
-               .WithReply(ctx.Message.Id)
-               .SendAsync(ctx.Channel)
-               .ConfigureAwait(false);                                                                                                                       //Should ping user
-
-            await new DiscordMessageBuilder()
-               .WithContent("❌ Empty Mention Array: " + content)
-               .WithAllowedMentions(new IMention[0])
-               .WithReply(ctx.Message.Id)
-               .SendAsync(ctx.Channel)
-               .ConfigureAwait(false);                                                                                                                       //Should ping no one
-
-            await new DiscordMessageBuilder()
-               .WithContent("❌ UserMention(SomeoneElse): " + content)
-               .WithAllowedMentions(new IMention[] { new UserMention(545836271960850454L) })
-               .WithReply(ctx.Message.Id)
-               .SendAsync(ctx.Channel)
-               .ConfigureAwait(false);                                                                                                                       //Should ping no one (@user was not pinged)
-
-            await new DiscordMessageBuilder()
-               .WithContent("❌ Everyone():" + content)
-               .WithAllowedMentions(new IMention[] { new EveryoneMention() })
-               .WithReply(ctx.Message.Id)
-               .SendAsync(ctx.Channel)
-               .ConfigureAwait(false);                                                                                                                          //Should ping no one (@everyone was not pinged)
-        }
+		}
 	}
 }

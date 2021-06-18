@@ -19,13 +19,13 @@ namespace Silk.Core.Commands.Moderation
     [Category(Categories.Mod)]
     public class KickCommand : BaseCommandModule
     {
-        private readonly IInfractionService _infractionService;
+        private readonly IModerationService _moderationService;
         private readonly ILogger<KickCommand> _logger;
 
-        public KickCommand(ILogger<KickCommand> logger, IInfractionService infractionService)
+        public KickCommand(ILogger<KickCommand> logger, IModerationService moderationService)
         {
             _logger = logger;
-            _infractionService = infractionService;
+            _moderationService = moderationService;
         }
 
         [Command]
@@ -50,7 +50,7 @@ namespace Silk.Core.Commands.Moderation
                     .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
                     .AddField("Reason:", reason);
 
-                Infraction infraction = await _infractionService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
+                Infraction infraction = await _moderationService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
                 string message = string.Empty;
                 try
                 {
@@ -64,7 +64,7 @@ namespace Silk.Core.Commands.Moderation
                     message = "(Could not message user).";
                 }
 
-                await _infractionService.KickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
+                await _moderationService.KickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
                     .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
                     .WithColor(DiscordColor.SpringGreen)
                     .WithDescription($":boot: Kicked {user.Mention}! {message}")
