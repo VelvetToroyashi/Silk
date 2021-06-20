@@ -1,5 +1,5 @@
 # Docker
-  task: DockerCompose@0
+  - task: DockerCompose@0
     inputs:
       containerregistrytype: 'Azure Container Registry'
       azureSubscription: 'Azure subscription 1(9c27cd86-8cb6-4d7c-a1cd-c1b4990ee2de)'
