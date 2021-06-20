@@ -107,7 +107,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
             {
                 Infraction infraction = await moderationService
                     .CreateInfractionAsync((DiscordMember) message.Author, message.Channel.Guild.CurrentMember,
-                        InfractionType.Warn, "[AutoMod] Sending an invite link");
+                        InfractionType.Strike, "[AutoMod] Sending an invite link");
 
 
                 await moderationService.ProgressInfractionStepAsync((DiscordMember) message.Author, "");

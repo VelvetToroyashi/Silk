@@ -19,6 +19,11 @@ namespace Silk.Core.Data.Models
         ///     The guild this infraction was given on.
         /// </summary>
         public Guild Guild { get; set; }
+        
+        /// <summary>
+        /// The User this infraction was given to. 
+        /// </summary>
+        public User User { get; set; }
 
         /// <summary>
         ///     The reason this infraction was given. Infractions added by Auto-Mod will be prefixed with "[AUTO-MOD]".

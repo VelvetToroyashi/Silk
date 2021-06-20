@@ -54,14 +54,7 @@
         /// <see cref="SilkPersistenceOptions"/>
         /// </summary>
         /// <returns>The full connection string given the options, or invalid/incomplete connection string if pieces of configuration file are left blank</returns>
-        public string GetConnectionString()
-        {
-            return $"Server={Persistence.Host};" +
-                   $"Port={Persistence.Port};" +
-                   $"Database={Persistence.Database};" +
-                   $"Username={Persistence.Username};" +
-                   $"Password={Persistence.Password};";
-        }
+        public string GetConnectionString() => $"Server={Persistence.Host};Port={Persistence.Port};Database={Persistence.Database};Username={Persistence.Username};Password={Persistence.Password};";
     }
 
     /// <summary>
@@ -79,7 +72,7 @@
         public string Username { get; set; } = "postgres";
         public string Password { get; set; } = string.Empty;
 
-        public override string ToString() => $"Host={Host}; Port={Port}; Database={Database}; Username={Username}; Password={Password};";
+        public override string ToString() => $"Host={Host}; Port={Port}; Database={Database}; Username={Username}; Password={Password}; Include Error Detail = true";
     }
 
     /// <summary>

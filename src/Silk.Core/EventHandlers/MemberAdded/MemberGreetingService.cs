@@ -8,6 +8,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
+using Silk.Core.Utilities;
 
 namespace Silk.Core.EventHandlers.MemberAdded
 {
@@ -15,12 +16,12 @@ namespace Silk.Core.EventHandlers.MemberAdded
     {
         private readonly ConfigService _configService;
 
-        private readonly Timer _timer = new(500);
+        private readonly Timer _timer = new(5000);
         public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
         {
             _configService = configService;
             _timer.AutoReset = true;
-            _timer.Elapsed += async (_, _) => { OnTick(); };
+            _timer.Elapsed += OnTick;
             _timer.Start();
         }
         public List<DiscordMember> MemberQueue { get; } = new();
@@ -58,6 +59,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
             }
         }
 
+        private void OnTick(object _, ElapsedEventArgs __) => AsyncUtil.RunSync(async () => await OnTick());
         private async Task OnTick()
         {
             if (MemberQueue.Count is 0) 

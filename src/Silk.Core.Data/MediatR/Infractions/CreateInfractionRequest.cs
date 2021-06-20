@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Models;
 
-namespace Silk.Core.Data.MediatR.Infractions.cs
+namespace Silk.Core.Data.MediatR.Infractions
 {
 	public sealed record CreateInfractionRequest(ulong User, ulong Enforcer, ulong Guild, string Reason, InfractionType Type, DateTime? Expiration, bool HeldAgainstUser = true) : IRequest<InfractionDTO>;
 	

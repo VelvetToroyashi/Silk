@@ -1,24 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
-using MediatR;
-using Microsoft.Extensions.Logging;
-using Silk.Core.Data.DTOs;
-using Silk.Core.Data.MediatR.Infractions.cs;
-using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
-using Silk.Core.Services.Data;
-using Silk.Core.Services.Interfaces;
-using Silk.Extensions.DSharpPlus;
-
-namespace Silk.Core.Services.Server
+﻿namespace Silk.Core.Services.Server
 {
-	public class InfractionService : IInfractionService
+	public class InfractionService //: IInfractionService
 	{
-		private readonly List<InfractionDTO> _infractions = new();
+		/*private readonly List<InfractionDTO> _infractions = new();
 		private readonly IMediator _mediator;
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<InfractionService> _logger;
@@ -33,7 +17,24 @@ namespace Silk.Core.Services.Server
 		}
 		public async Task KickAsync(ulong userId, ulong guildId, string reason) { }
 		public async Task BanAsync(ulong userId, ulong guildId, string reason, DateTime? expiration = null) { }
-		public async Task StrikeAsync(ulong userId, ulong guildId, string reason, bool isAutoMod = false) { }
+		public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false)
+		{
+			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId, UserFlag.WarnedPrior));
+			user.Flags |= UserFlag.WarnedPrior;
+
+			var inf = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Strike, reason, null);
+			_infractions.Add(inf);
+
+			var config = await _config.GetConfigAsync(guildId);
+			if (config.AutoEscalateInfractions)
+			{
+				var guild = await _mediator.Send(new GetGuildRequest(guildId));
+				//var userInfractions = await _mediator.Send(new GetUserInfractionsAsync)
+				//var infractionLevel = Math.Min()
+			}
+
+		}
+		
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 		{
 			var inf = _infractions.Find(i => 
@@ -42,6 +43,7 @@ namespace Silk.Core.Services.Server
 			                                 i.Type is InfractionType.Mute);
 			return ValueTask.FromResult(inf is not null);
 		}
+		
 		public async Task<bool> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, TimeSpan? duration, string reason)
 		{
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId));
@@ -71,6 +73,7 @@ namespace Silk.Core.Services.Server
 				user.Flags |= UserFlag.ActivelyMuted;
 				await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
 				var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, duration.HasValue ? DateTime.UtcNow + duration : null);
+				
 				_infractions.Add(infraction);
 			}
 			return true;
@@ -90,7 +93,7 @@ namespace Silk.Core.Services.Server
 		private Task EnsureUserExistsAsync(ulong userId, ulong guildId)
 			=> _mediator.Send(new GetOrCreateUserRequest(guildId, userId));
 
-		private async Task<bool> SendDMLogAsync(ulong userId, DiscordEmbed embed)
+		private async Task<bool> NotifyUserAsync(ulong userId, DiscordEmbed embed)
 		{
 			var member = _client.GetMember(m => m.Id == userId);
 			if (member is null)
@@ -112,6 +115,6 @@ namespace Silk.Core.Services.Server
 					return false;
 				}
 			}
-		}
+		}*/
 	}
 }

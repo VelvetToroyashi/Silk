@@ -139,7 +139,12 @@ namespace Silk.Core.Data.Models
         ///     Represents whether to match only discord.gg/ or all possible invite codes.
         /// </summary>
         public bool UseAggressiveRegex { get; set; }
-
+        
+        /// <summary>
+        /// Whether or not infractions will escalate based on the number of infractions a user has.
+        /// </summary>
+        public bool AutoEscalateInfractions { get; set; }
+        
         /// <summary>
         ///     Whether to automatically dehoist members. Guild must be premium.
         /// </summary>

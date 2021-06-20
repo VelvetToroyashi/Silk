@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Data;
@@ -9,9 +10,10 @@ using Silk.Core.Data;
 namespace Silk.Core.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210620222505_DoubleFK")]
+    partial class DoubleFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,14 +198,14 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
                     b.Property<decimal>("Enforcer")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("Handled")
                         .HasColumnType("boolean");
@@ -221,14 +223,20 @@ namespace Silk.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<decimal>("UserGuildId")
+                        .HasColumnType("numeric(20,0)");
+
                     b.Property<decimal>("UserId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("Id");
+                    b.Property<decimal>("UserId1")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id", "GuildId");
 
                     b.HasIndex("GuildId");
 
-                    b.HasIndex("UserId", "GuildId");
+                    b.HasIndex("UserId1", "UserGuildId");
 
                     b.ToTable("Infractions");
                 });
@@ -525,15 +533,13 @@ namespace Silk.Core.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Silk.Core.Data.Models.User", "User")
+                    b.HasOne("Silk.Core.Data.Models.User", null)
                         .WithMany("Infractions")
-                        .HasForeignKey("UserId", "GuildId")
+                        .HasForeignKey("UserId1", "UserGuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Guild");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.InfractionStep", b =>
