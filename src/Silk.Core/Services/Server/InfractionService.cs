@@ -17,7 +17,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services.Server
 {
-	public class InfractionService : IInfractionService
+	public sealed class InfractionService : IInfractionService
 	{
 		private readonly List<InfractionDTO> _infractions = new();
 		private readonly IMediator _mediator;
@@ -32,29 +32,58 @@ namespace Silk.Core.Services.Server
 			_logger = logger;
 			_config = config;
 		}
-		public async Task KickAsync(ulong userId, ulong guildId, string reason) { }
-		public async Task BanAsync(ulong userId, ulong guildId, string reason, DateTime? expiration = null) { }
+		public async Task KickAsync(ulong userId, ulong guildId, ulong enforcerId,  string reason) { }
+		public async Task BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null) { }
 		public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false)
 		{
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId, UserFlag.WarnedPrior));
 			user.Flags |= UserFlag.WarnedPrior;
 
-
+			InfractionDTO infraction;
 			var config = await _config.GetConfigAsync(guildId);
-			if (config.AutoEscalateInfractions || isAutoMod)
+			if (!config.AutoEscalateInfractions && !isAutoMod)
+			{
+				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Strike, reason, null);
+			}
+			else
 			{
 				var userInfractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-
-				var infractionIndex = Math.Max(0, Math.Min(userInfractions.Count() + 1, config.InfractionSteps.Count) - 1);
-				InfractionStep? infractionLevel = null;
-				if (config.InfractionSteps.Any())
-					infractionLevel = config.InfractionSteps[infractionIndex];
-
-				var action = isAutoMod ? infractionLevel?.Type ?? InfractionType.Strike : InfractionType.Strike;
-				var inf = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration);
 				
+				InfractionStep? infractionLevel = null;
+				
+				if (config.InfractionSteps.Any())
+					infractionLevel = await GetCurrentInfractionStepAsync(guildId, userInfractions.Count());
+ 
+				var action = isAutoMod || config.AutoEscalateInfractions ? infractionLevel?.Type ?? InfractionType.Strike : InfractionType.Strike;
+				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration);
 			}
+			
+			
+			var guild = _client.GetShard(guildId).Guilds[guildId];
+			var enforcer = await guild.GetMemberAsync(infraction.EnforcerId);
+			
+			var embed = new DiscordEmbedBuilder();
+			embed.WithAuthor(enforcer.Username, enforcer.GetUrl(), enforcer.AvatarUrl);
 
+			var title = infraction.Type switch
+			{
+				InfractionType.Strike => $"You've received a strike in {guild.Name}!",
+				InfractionType.Mute => $"You've received a mute in {guild.Name}!",
+				InfractionType.SoftBan => $"You've been temporarily banned from {guild.Name}!",
+				InfractionType.Ban => $"You've been permenantly banned from {guild.Name}!",
+				InfractionType.Kick => $"You've been kicked from {guild.Name}!",
+				InfractionType.AutoModMute => throw new InvalidOperationException("How did you even manage to do this?"),
+				_ => throw new ArgumentException($"Unknown enum value: {infraction.Type}")
+			};
+
+			embed.WithTitle(title)
+				.WithDescription($"Reason: {infraction.Reason}");
+
+			if (infraction.Duration is not null)
+				embed.AddField("Expires:", Formatter.Timestamp(DateTime.UtcNow - (DateTime) infraction.Duration));
+			
+			await NotifyUserAsync(userId, embed);
+			
 		}
 		
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
@@ -108,7 +137,7 @@ namespace Silk.Core.Services.Server
 		{
 			// This is primarily used by AutoMod //
 			var conf = await _config.GetConfigAsync(guildId);
-			var index = Math.Min(conf.InfractionSteps.Count - 1, infractions);
+			var index = Math.Max(0, Math.Min(conf.InfractionSteps.Count - 1, infractions));
 			return conf.InfractionSteps[index];
 		}
 
@@ -123,19 +152,16 @@ namespace Silk.Core.Services.Server
 				_logger.LogWarning("Attempted to DM user that does not exist anymore");
 				return false;
 			}
-			else
+			try
 			{
-				try
-				{
-					await member.SendMessageAsync(embed);
-					_logger.LogTrace("Succesfully dispatched message to user");
-					return true;
-				}
-				catch
-				{
-					_logger.LogWarning("Could not DM user");
-					return false;
-				}
+				await member.SendMessageAsync(embed);
+				_logger.LogTrace("Succesfully dispatched message to user");
+				return true;
+			}
+			catch
+			{
+				_logger.LogWarning("Could not DM user");
+				return false;
 			}
 		}
 	}
