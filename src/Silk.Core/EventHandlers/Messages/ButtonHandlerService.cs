@@ -25,7 +25,7 @@ namespace Silk.Core.EventHandlers.Messages
             if (!args.Id.StartsWith("rolemenu assign ", StringComparison.OrdinalIgnoreCase))
                 return;
 
-            try { await args.Interaction.CreateResponseAsync(InteractionResponseType.DefferedMessageUpdate); }
+            try { await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate); }
             catch
             {
                 /* We'll still try to assign/unassign the role. */
