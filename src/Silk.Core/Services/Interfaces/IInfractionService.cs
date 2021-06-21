@@ -7,8 +7,8 @@ namespace Silk.Core.Services.Interfaces
 {
 	public interface IInfractionService
 	{
-		public Task KickAsync(ulong userId, ulong guildId, string reason);
-		public Task BanAsync(ulong userId, ulong guildId, string reason, DateTime? expiration = null);
+		public Task KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason);
+		public Task BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null);
 		public Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false);
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId);
 		public Task<bool> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, TimeSpan? duration, string reason);
