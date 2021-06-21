@@ -53,11 +53,10 @@ namespace Silk.Core.Services.Server
 				
 				if (config.InfractionSteps.Any())
 					infractionLevel = await GetCurrentInfractionStepAsync(guildId, userInfractions.Count());
- 
-				var action = isAutoMod || config.AutoEscalateInfractions ? infractionLevel?.Type ?? InfractionType.Strike : InfractionType.Strike;
+
+				var action = infractionLevel?.Type ?? InfractionType.Strike;
 				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration);
 			}
-			
 			
 			var guild = _client.GetShard(guildId).Guilds[guildId];
 			var enforcer = await guild.GetMemberAsync(infraction.EnforcerId);
@@ -73,6 +72,7 @@ namespace Silk.Core.Services.Server
 				InfractionType.Ban => $"You've been permenantly banned from {guild.Name}!",
 				InfractionType.Kick => $"You've been kicked from {guild.Name}!",
 				InfractionType.AutoModMute => throw new InvalidOperationException("How did you even manage to do this?"),
+				InfractionType.Ignore => null, /* We shouldn't be logging to the user. */
 				_ => throw new ArgumentException($"Unknown enum value: {infraction.Type}")
 			};
 
@@ -83,9 +83,22 @@ namespace Silk.Core.Services.Server
 				embed.AddField("Expires:", Formatter.Timestamp(DateTime.UtcNow - (DateTime) infraction.Duration));
 			
 			await NotifyUserAsync(userId, embed);
-			
+
+			Func<ulong, ulong, ulong, string, DateTime?, Task> t = infraction.Type switch
+			{
+				InfractionType.Ban  or InfractionType.SoftBan => BanAsync,
+				InfractionType.Mute or InfractionType.AutoModMute => MuteAsync,
+				InfractionType.Strike => LogToLogChannel,
+				InfractionType.Kick => (u, g, e, r, _) => KickAsync(u, g, e, r),
+				_ => throw new ArgumentException("I don't know. I am just wah.")
+			};
+
+			await t(userId, guildId, enforcerId, reason, infraction.Duration);
 		}
-		
+		private async Task LogToLogChannel(ulong arg1, ulong arg2, ulong arg3, string arg4, DateTime? arg5)
+		{
+		}
+
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 		{
 			var inf = _infractions.Find(i => 
@@ -95,7 +108,7 @@ namespace Silk.Core.Services.Server
 			return ValueTask.FromResult(inf is not null);
 		}
 		
-		public async Task<bool> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, TimeSpan? duration, string reason)
+		public async Task<bool> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 		{
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId));
 			
@@ -123,7 +136,7 @@ namespace Silk.Core.Services.Server
 			{
 				user.Flags |= UserFlag.ActivelyMuted;
 				await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
-				var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, duration.HasValue ? DateTime.UtcNow + duration : null);
+				var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, expiration);
 				
 				_infractions.Add(infraction);
 			}
