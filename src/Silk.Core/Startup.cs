@@ -161,6 +161,7 @@ namespace Silk.Core
 
                 services.AddScoped<IInputService, InputService>();
                 services.AddScoped<IPrefixCacheService, PrefixCacheService>();
+                services.AddSingleton<IInfractionService, InfractionService>();
                 services.AddSingleton<IModerationService, ModerationService>();
                 services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
 

@@ -21,7 +21,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 				.Include(g => g.Infractions)
 				.FirstAsync(g => g.Id == request.Guild, cancellationToken);
 
-			var infraction = new Infraction()
+			var infraction = new Infraction
 			{
 				GuildId = request.Guild,
 				Enforcer = request.Enforcer,

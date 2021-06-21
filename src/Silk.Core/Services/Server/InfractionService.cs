@@ -1,8 +1,25 @@
-﻿namespace Silk.Core.Services.Server
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using Silk.Core.Data.DTOs;
+using Silk.Core.Data.MediatR.Infractions;
+using Silk.Core.Data.MediatR.Users;
+using Silk.Core.Data.Models;
+using Silk.Core.Services.Data;
+using Silk.Core.Services.Interfaces;
+using Silk.Extensions.DSharpPlus;
+
+namespace Silk.Core.Services.Server
 {
-	public class InfractionService //: IInfractionService
+	public class InfractionService : IInfractionService
 	{
-		/*private readonly List<InfractionDTO> _infractions = new();
+		private readonly List<InfractionDTO> _infractions = new();
 		private readonly IMediator _mediator;
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<InfractionService> _logger;
@@ -22,15 +39,20 @@
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId, UserFlag.WarnedPrior));
 			user.Flags |= UserFlag.WarnedPrior;
 
-			var inf = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Strike, reason, null);
-			_infractions.Add(inf);
 
 			var config = await _config.GetConfigAsync(guildId);
-			if (config.AutoEscalateInfractions)
+			if (config.AutoEscalateInfractions || isAutoMod)
 			{
-				var guild = await _mediator.Send(new GetGuildRequest(guildId));
-				//var userInfractions = await _mediator.Send(new GetUserInfractionsAsync)
-				//var infractionLevel = Math.Min()
+				var userInfractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+
+				var infractionIndex = Math.Max(0, Math.Min(userInfractions.Count() + 1, config.InfractionSteps.Count) - 1);
+				InfractionStep? infractionLevel = null;
+				if (config.InfractionSteps.Any())
+					infractionLevel = config.InfractionSteps[infractionIndex];
+
+				var action = isAutoMod ? infractionLevel?.Type ?? InfractionType.Strike : InfractionType.Strike;
+				var inf = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration);
+				
 			}
 
 		}
@@ -115,6 +137,6 @@
 					return false;
 				}
 			}
-		}*/
+		}
 	}
 }

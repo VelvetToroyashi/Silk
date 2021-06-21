@@ -25,17 +25,5 @@
     <ItemGroup>
         <Folder Include="Migrations" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="MediatR\Infractions\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="MediatR\Infractions\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="MediatR\Infractions\**" />
-    </ItemGroup>
-
+    
 </Project>

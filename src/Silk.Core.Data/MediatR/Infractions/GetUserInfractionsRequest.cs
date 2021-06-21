@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.DTOs;
 
 namespace Silk.Core.Data.MediatR.Infractions
@@ -16,8 +17,12 @@ namespace Silk.Core.Data.MediatR.Infractions
 		
 		public async Task<IEnumerable<InfractionDTO>> Handle(GetUserInfractionsRequest request, CancellationToken cancellationToken)
 		{
-
-			return Array.Empty<InfractionDTO>();
+			var user = await _context
+				.Users
+				.Include(u => u.Infractions)
+				.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+			
+			return user.Infractions.Select(inf => new InfractionDTO(inf));
 		}
 	}
 }
