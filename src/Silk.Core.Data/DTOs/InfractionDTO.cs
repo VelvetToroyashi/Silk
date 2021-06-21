@@ -1,13 +1,15 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.DTOs
 {
+	[NotMapped]
 	public sealed record InfractionDTO
 	{
 		public InfractionDTO(Infraction infraction)
-			: this(infraction.Id, infraction.UserId, infraction.GuildId, infraction.Enforcer, infraction.InfractionType, infraction.Reason, !infraction.HeldAgainstUser, infraction.Expiration) { }
-		public InfractionDTO(int id, ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, bool rescinded, DateTime? duration = null)
+			: this(infraction.Id, infraction.UserId, infraction.GuildId, infraction.Enforcer, infraction.InfractionType, infraction.Reason, !infraction.HeldAgainstUser, infraction.Expiration - DateTime.UtcNow) { }
+		public InfractionDTO(int id, ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, bool rescinded, TimeSpan? duration = null)
 		{
 			Id = id;
 			UserId = userId;
@@ -24,7 +26,7 @@ namespace Silk.Core.Data.DTOs
 		public ulong EnforcerId { get; init; }
 		public bool Rescinded { get; init; }
 		
-		public DateTime? Duration { get; init; }
+		public TimeSpan? Duration { get; init; }
 		public InfractionType Type { get; init; }
 		public string Reason { get; init; }
 	}

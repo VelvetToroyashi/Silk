@@ -38,7 +38,7 @@ namespace Silk.Core.Services.Server
 		{
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId, UserFlag.WarnedPrior));
 			user.Flags |= UserFlag.WarnedPrior;
-
+			
 			InfractionDTO infraction;
 			var config = await _config.GetConfigAsync(guildId);
 			if (!config.AutoEscalateInfractions && !isAutoMod)
@@ -55,7 +55,7 @@ namespace Silk.Core.Services.Server
 					infractionLevel = await GetCurrentInfractionStepAsync(guildId, userInfractions.Count());
 
 				var action = infractionLevel?.Type ?? InfractionType.Strike;
-				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration);
+				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration == default ? null : DateTime.UtcNow + infractionLevel.Expiration.Time);
 			}
 			
 			var guild = _client.GetShard(guildId).Guilds[guildId];
@@ -80,7 +80,7 @@ namespace Silk.Core.Services.Server
 				.WithDescription($"Reason: {infraction.Reason}");
 
 			if (infraction.Duration is not null)
-				embed.AddField("Expires:", Formatter.Timestamp(DateTime.UtcNow - (DateTime) infraction.Duration));
+				embed.AddField("Expires:", Formatter.Timestamp(infraction.Duration.Value));
 			
 			await NotifyUserAsync(userId, embed);
 
@@ -93,7 +93,7 @@ namespace Silk.Core.Services.Server
 				_ => throw new ArgumentException("I don't know. I am just wah.")
 			};
 
-			await t(userId, guildId, enforcerId, reason, infraction.Duration);
+			await t(userId, guildId, enforcerId, reason, DateTime.UtcNow + infraction.Duration);
 		}
 		private async Task LogToLogChannel(ulong arg1, ulong arg2, ulong arg3, string arg4, DateTime? arg5)
 		{
