@@ -7,10 +7,11 @@ namespace Silk.Core.Data.ModelConfigurations
 {
 	public class InfractionStepConfiguration : IEntityTypeConfiguration<InfractionStep>
 	{
+
 		public void Configure(EntityTypeBuilder<InfractionStep> builder)
 		{
-			builder.Property(inf => inf.Expiration)
-				.HasConversion(ts => ts.TotalTicks, ts => NpgsqlTimeSpan.FromTicks(ts));
+			builder.Property(infs => infs.Duration)
+				.HasConversion(d => d.Ticks, d => NpgsqlTimeSpan.FromTicks(d));
 		}
 	}
 }

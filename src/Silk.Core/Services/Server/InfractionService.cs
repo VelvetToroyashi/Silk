@@ -8,11 +8,14 @@ using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Types;
+using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services.Server
@@ -44,6 +47,7 @@ namespace Silk.Core.Services.Server
 			if (!config.AutoEscalateInfractions && !isAutoMod)
 			{
 				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Strike, reason, null);
+				await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
 			}
 			else
 			{
@@ -52,15 +56,72 @@ namespace Silk.Core.Services.Server
 				InfractionStep? infractionLevel = null;
 				
 				if (config.InfractionSteps.Any())
-					infractionLevel = await GetCurrentInfractionStepAsync(guildId, userInfractions.Count());
+					infractionLevel = await GetCurrentInfractionStepAsync(guildId, userInfractions.Count() + 1);
 
 				var action = infractionLevel?.Type ?? InfractionType.Strike;
-				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Expiration == default ? null : DateTime.UtcNow + infractionLevel.Expiration.Time);
+				infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, action, reason, infractionLevel?.Duration == default ? null : DateTime.UtcNow + infractionLevel.Duration.Time);
 			}
 			
+			Func<ulong, ulong, ulong, string, DateTime?, Task> t = infraction.Type switch
+			{
+				InfractionType.Ban  or InfractionType.SoftBan => BanAsync,
+				InfractionType.Mute or InfractionType.AutoModMute => MuteAsync,
+				InfractionType.Strike => LogStrikeAsync,
+				InfractionType.Kick => (u, g, e, r, _) => KickAsync(u, g, e, r),
+				_ => throw new ArgumentException("I don't know. I am just wah.")
+			};
+
+			await t(userId, guildId, enforcerId, reason, DateTime.UtcNow + infraction.Duration);
+
+			async Task LogStrikeAsync(ulong userId, ulong enforcerId, ulong guildId, string reason, DateTime? expiration)
+			{
+				if (config.LoggingChannel is 0)
+					return;
+
+				var guild = _client.GetShard(guildId).Guilds[guildId];
+				var exists = guild.Channels.TryGetValue(config.LoggingChannel, out var chn);
+
+				if (!exists)
+				{
+					_logger.LogWarning("Channel exists in config but is not present on guild!");
+					return;
+				}
+
+				if (!CanLogToLogChannel())
+				{
+					_logger.LogWarning("Cannot log strike to channel due to insufficient permissions!");
+					return;
+				}
+
+
+				var enforcer = await guild.GetMemberAsync(enforcerId);
+				DiscordMember victim = await guild.GetMemberAsync(userId);
+				
+				var cases = await _mediator.Send(new GetGuildInfractionsRequest(guildId));
+				TimeSpan infractionOccured = DateTime.UtcNow - infraction.CreatedAt;
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle($"Strike : Case #{cases.Count()}")
+					.WithAuthor(victim.Username, victim.GetUrl(), victim.GuildAvatarUrl)
+					.WithThumbnail(enforcer.GuildAvatarUrl, 4096, 4096)
+					.AddField("Staff member:", $"{enforcer.Username}#{enforcer.Discriminator}\n({enforcer.Id})", true)
+					.AddField("Applied to:", $"{victim.Username}#{victim.Discriminator}\n({victim.Id})", true)
+					.AddField("Infraction occured:", $"{Formatter.Timestamp(infractionOccured, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(infractionOccured)})")
+					.AddField("Reason:", reason);
+
+				await chn.SendMessageAsync(embed);
+				
+				bool CanLogToLogChannel() => 
+					(chn!.PermissionsFor(guild!.CurrentMember) & (Permissions.SendMessages | Permissions.EmbedLinks)) is not 0;
+			}
+			
+		}
+		
+		private async Task<DiscordEmbedBuilder?> GenerateNotificationembedAsync(InfractionDTO infraction)
+		{
+			ulong guildId = infraction.GuildId;
 			var guild = _client.GetShard(guildId).Guilds[guildId];
 			var enforcer = await guild.GetMemberAsync(infraction.EnforcerId);
-			
+
 			var embed = new DiscordEmbedBuilder();
 			embed.WithAuthor(enforcer.Username, enforcer.GetUrl(), enforcer.AvatarUrl);
 
@@ -81,22 +142,7 @@ namespace Silk.Core.Services.Server
 
 			if (infraction.Duration is not null)
 				embed.AddField("Expires:", Formatter.Timestamp(infraction.Duration.Value));
-			
-			await NotifyUserAsync(userId, embed);
-
-			Func<ulong, ulong, ulong, string, DateTime?, Task> t = infraction.Type switch
-			{
-				InfractionType.Ban  or InfractionType.SoftBan => BanAsync,
-				InfractionType.Mute or InfractionType.AutoModMute => MuteAsync,
-				InfractionType.Strike => LogToLogChannel,
-				InfractionType.Kick => (u, g, e, r, _) => KickAsync(u, g, e, r),
-				_ => throw new ArgumentException("I don't know. I am just wah.")
-			};
-
-			await t(userId, guildId, enforcerId, reason, DateTime.UtcNow + infraction.Duration);
-		}
-		private async Task LogToLogChannel(ulong arg1, ulong arg2, ulong arg3, string arg4, DateTime? arg5)
-		{
+			return embed;
 		}
 
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
@@ -104,45 +150,67 @@ namespace Silk.Core.Services.Server
 			var inf = _infractions.Find(i => 
 											 i.UserId == userId && 
 			                                 i.GuildId == guildId &&
-			                                 i.Type is InfractionType.Mute);
+			                                 i.Type is InfractionType.Mute or InfractionType.AutoModMute);
 			return ValueTask.FromResult(inf is not null);
 		}
 		
-		public async Task<bool> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
+		public async Task<MuteResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 		{
 			var user = await _mediator.Send(new GetOrCreateUserRequest(guildId, userId));
 			
 			var shard = _client.GetShard(guildId);
 			var guild = shard.Guilds[guildId];
 			var conf = await _config.GetConfigAsync(guildId);
+
+			if (await IsMutedAsync(userId, guildId))
+			{
+				var currentInfraction = GetTemporaryInfractionForUser(userId, guildId, InfractionType.Mute) ?? 
+				                        GetTemporaryInfractionForUser(userId, guildId, InfractionType.AutoModMute);
+
+				await _mediator.Send(new UpdateInfractionRequest(currentInfraction!.Id, expiration));
+			}
 			
 			try
 			{
 				var role = guild.GetRole(conf.MuteRoleId);
+				
+				if (!await EnsureMuteRoleExistsAsync(guild))
+					return MuteResult.CouldNotCreateMuteRole;
+				
 				await guild.Members[userId].GrantRoleAsync(role, user.Flags.HasFlag(UserFlag.ActivelyMuted) ? "Re-applying mute." : reason);
 				_logger.LogTrace("Successfully muted member");
+
+				
 			}
 			catch (KeyNotFoundException)
 			{
 				_logger.LogWarning("Member left guild whilst applying mute. Reapplying on re-join");
-				return false;
+				return MuteResult.MemberLeftBeforeMute;
 			}
 			catch (UnauthorizedException)
 			{
 				_logger.LogTrace("Role grant denied by guild heirarchy");
-				return false;
+				return MuteResult.CouldNotApplyMuteRole;
 			}
-			finally
+			
+			user.Flags |= UserFlag.ActivelyMuted;
+			await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
+			var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, expiration);
+			
+			_infractions.Add(infraction);
+
+			try
 			{
-				user.Flags |= UserFlag.ActivelyMuted;
-				await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
-				var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, expiration);
-				
-				_infractions.Add(infraction);
+				await NotifyUserAsync(userId, await GenerateNotificationembedAsync(infraction));
 			}
-			return true;
+			catch (UnauthorizedException)
+			{
+				return MuteResult.SucceededWithoutNotification;
+			}
+			
+			return MuteResult.SucceededWithNotification;
 		}
-		
+
 		public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong enforcerId, ulong guildId, InfractionType type, string reason, DateTime? expiration, bool holdAgainstUser = true)
 			=> _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration, holdAgainstUser));
 		
@@ -157,6 +225,79 @@ namespace Silk.Core.Services.Server
 		private Task EnsureUserExistsAsync(ulong userId, ulong guildId)
 			=> _mediator.Send(new GetOrCreateUserRequest(guildId, userId));
 
+
+		private InfractionDTO? GetTemporaryInfractionForUser(ulong userId, ulong guild, InfractionType type)
+			=> _infractions.Find(i => i.GuildId == guild && i.UserId == userId && i.Type == type);
+		
+		private async Task LogToLogChannel(ulong userId, ulong enforcerId, ulong guildId, InfractionDTO infraction)
+		{
+			var config = await _config.GetConfigAsync(guildId);
+			
+			if (config.LoggingChannel is 0)
+				return;
+
+			var guild = _client.GetShard(guildId).Guilds[guildId];
+			var exists = guild.Channels.TryGetValue(config.LoggingChannel, out var chn);
+
+			if (!exists)
+			{
+				_logger.LogWarning("Channel exists in config but is not present on guild!");
+				return;
+			}
+
+			if (!CanLogToLogChannel())
+			{
+				_logger.LogWarning("Cannot log strike to channel due to insufficient permissions!");
+				return;
+			}
+			
+			var enforcer = await guild.GetMemberAsync(enforcerId);
+			DiscordMember victim = await guild.GetMemberAsync(userId);
+				
+			var cases = await _mediator.Send(new GetGuildInfractionsRequest(guildId));
+			TimeSpan infractionOccured = DateTime.UtcNow - infraction.CreatedAt;
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Strike : Case #{cases.Count()}")
+				.WithAuthor(victim.Username, victim.GetUrl(), victim.GuildAvatarUrl)
+				.WithThumbnail(enforcer.GuildAvatarUrl, 4096, 4096)
+				.AddField("Staff member:", $"{enforcer.Username}#{enforcer.Discriminator}\n({enforcer.Id})", true)
+				.AddField("Applied to:", $"{victim.Username}#{victim.Discriminator}\n({victim.Id})", true)
+				.AddField("Infraction occured:", $"{Formatter.Timestamp(infractionOccured, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(infractionOccured)})")
+				.AddField("Reason:", infraction.Reason);
+
+			await chn.SendMessageAsync(embed);
+				
+			bool CanLogToLogChannel() => 
+				(chn!.PermissionsFor(guild!.CurrentMember) & (Permissions.SendMessages | Permissions.EmbedLinks)) is not 0;
+		}
+		
+		private async Task<bool> EnsureMuteRoleExistsAsync(DiscordGuild guild)
+		{
+			var config = await _config.GetConfigAsync(guild.Id);
+			
+			if (RoleExistsAndIsRestrictive(guild, config.MuteRoleId))
+				return true;
+
+			// Attempt to generate the role and update the guild config. //
+			if (!guild.CurrentMember.HasPermission(Permissions.ManageRoles))
+			{
+				_logger.LogWarning("Could not generate mute role for guild | Insufficient permissions");
+				return false;
+			}
+			
+			var role = await guild.CreateRoleAsync("Muted",
+				Permissions.None | Permissions.AccessChannels,
+				DiscordColor.Gray, false, false,
+				"Mute role was not present on guild.");
+
+			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+			return true;
+
+			static bool RoleExistsAndIsRestrictive(DiscordGuild guild, ulong roleId)
+				=> guild.Roles.TryGetValue(roleId, out var role) && !role.HasPermission(Permissions.SendMessages);
+		}
+
+		
 		private async Task<bool> NotifyUserAsync(ulong userId, DiscordEmbed embed)
 		{
 			var member = _client.GetMember(m => m.Id == userId);
