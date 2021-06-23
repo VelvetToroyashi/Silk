@@ -133,7 +133,7 @@ namespace Silk.Core.Services.Server
 				InfractionType.SoftBan => $"You've been temporarily banned from {guild.Name}!",
 				InfractionType.Ban => $"You've been permenantly banned from {guild.Name}!",
 				InfractionType.Kick => $"You've been kicked from {guild.Name}!",
-				InfractionType.AutoModMute => throw new InvalidOperationException("How did you even manage to do this?"),
+				InfractionType.AutoModMute => $"You've been automatically muted on {guild.Name}",
 				InfractionType.Ignore => null, /* We shouldn't be logging to the user. */
 				_ => throw new ArgumentException($"Unknown enum value: {infraction.Type}")
 			};
@@ -169,12 +169,24 @@ namespace Silk.Core.Services.Server
 				                        GetTemporaryInfractionForUser(userId, guildId, InfractionType.AutoModMute);
 
 				await _mediator.Send(new UpdateInfractionRequest(currentInfraction!.Id, expiration));
+
+				var infractions = (await _mediator.Send(new GetGuildInfractionsRequest(guildId))).ToList();
+
+				var usr = await _client.ShardClients[0].GetUserAsync(userId);
+				var enfcr = await _client.ShardClients[0].GetUserAsync(enforcerId);
+
+				int caseIndex = infractions.FindIndex(inf => inf.Id == currentInfraction.Id);
+				var msg = $"**Case: {caseIndex + 1} | {usr.Username}#{usr.Discriminator}'s ({usr.Id}) " +
+				          $"mute was updated by {enfcr.Username}#{enfcr.Discriminator} ({enfcr.Id})**\n" +
+				          $"{currentInfraction.Duration?.ToString() ?? "Indefinte"} -> {infractions[caseIndex].Duration?.ToString() ?? "Indefinite"}";
+				var chn = guild.GetChannel(conf.LoggingChannel);
+				await chn?.SendMessageAsync(msg)!;
+
+				return MuteResult.UpdatedInfraction;
 			}
 			
 			try
 			{
-				
-				
 				if (!await EnsureMuteRoleExistsAsync(guild))
 					return MuteResult.CouldNotCreateMuteRole;
 				
@@ -183,7 +195,6 @@ namespace Silk.Core.Services.Server
 				
 				await guild.Members[userId].GrantRoleAsync(role, user.Flags.HasFlag(UserFlag.ActivelyMuted) ? "Re-applying mute." : reason);
 				_logger.LogTrace("Successfully muted member");
-
 				
 			}
 			catch (KeyNotFoundException)
@@ -284,10 +295,14 @@ namespace Silk.Core.Services.Server
 			}
 			
 			var role = await guild.CreateRoleAsync("Muted",
-				Permissions.None | Permissions.AccessChannels,
+				Permissions.None.Grant(Permissions.AccessChannels),
 				DiscordColor.Gray, false, false,
 				"Mute role was not present on guild.");
 			await role.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1); // Set it below the bot, and attempt to apply //
+
+			foreach (var channel in guild.Channels.Values.Where(c => c.Type is ChannelType.Text && (c.PermissionsFor(guild.CurrentMember) & (Permissions.SendMessages | Permissions.AccessChannels)) != 0))
+				await channel.AddOverwriteAsync(role, Permissions.None, Permissions.SendMessages);
+			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
 			_updater.UpdateGuild(guild.Id);
 			return true;
