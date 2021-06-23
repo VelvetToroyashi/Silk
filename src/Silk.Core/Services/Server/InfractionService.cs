@@ -195,20 +195,13 @@ namespace Silk.Core.Services.Server
 			
 			user.Flags |= UserFlag.ActivelyMuted;
 			await _mediator.Send(new UpdateUserRequest(guildId, userId, user.Flags));
-			var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, InfractionType.Mute, reason, expiration);
+			var infraction = await GenerateInfractionAsync(userId, enforcerId, guildId, enforcerId == _client.CurrentUser.Id ? InfractionType.AutoModMute : InfractionType.Mute, reason, expiration);
 			
 			_infractions.Add(infraction);
 
-			try
-			{
-				await NotifyUserAsync(userId, await GenerateNotificationembedAsync(infraction));
-			}
-			catch (UnauthorizedException)
-			{
-				return MuteResult.SucceededWithoutNotification;
-			}
-			
-			return MuteResult.SucceededWithNotification;
+			var notified = await NotifyUserAsync(userId, await GenerateNotificationembedAsync(infraction));
+
+			return notified ? MuteResult.SucceededWithNotification : MuteResult.SucceededWithoutNotification;
 		}
 
 		public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong enforcerId, ulong guildId, InfractionType type, string reason, DateTime? expiration, bool holdAgainstUser = true)
@@ -251,21 +244,22 @@ namespace Silk.Core.Services.Server
 				return;
 			}
 			
-			var enforcer = await guild.GetMemberAsync(enforcerId);
+			DiscordMember enforcer = await guild.GetMemberAsync(enforcerId);
 			DiscordMember victim = await guild.GetMemberAsync(userId);
 				
 			var cases = await _mediator.Send(new GetGuildInfractionsRequest(guildId));
 			TimeSpan infractionOccured = DateTime.UtcNow - infraction.CreatedAt;
 			var embed = new DiscordEmbedBuilder()
-				.WithTitle($"Strike : Case #{cases.Count()}")
+				.WithTitle($"Infraction : Case #{cases.Count()}")
 				.WithAuthor(victim.Username, victim.GetUrl(), victim.GuildAvatarUrl)
 				.WithThumbnail(enforcer.GuildAvatarUrl, 4096, 4096)
 				.AddField("Staff member:", $"{enforcer.Username}#{enforcer.Discriminator}\n({enforcer.Id})", true)
 				.AddField("Applied to:", $"{victim.Username}#{victim.Discriminator}\n({victim.Id})", true)
-				.AddField("Infraction occured:", $"{Formatter.Timestamp(infractionOccured, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(infractionOccured)})")
-				.AddField("Reason:", infraction.Reason);
+				.AddField("Infraction occured:", $"{Formatter.Timestamp(infractionOccured, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(infractionOccured)})", true)
+				.AddField("Reason:", infraction.Reason, true)
+				.AddField("Type:", infraction.Type.ToString(), true);
 
-			await chn.SendMessageAsync(embed);
+			await chn!.SendMessageAsync(embed);
 				
 			bool CanLogToLogChannel() => 
 				(chn!.PermissionsFor(guild!.CurrentMember) & (Permissions.SendMessages | Permissions.EmbedLinks)) is not 0;
@@ -289,7 +283,7 @@ namespace Silk.Core.Services.Server
 				Permissions.None | Permissions.AccessChannels,
 				DiscordColor.Gray, false, false,
 				"Mute role was not present on guild.");
-
+			await role.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1); // Set it below the bot, and attempt to apply //
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
 			return true;
 
