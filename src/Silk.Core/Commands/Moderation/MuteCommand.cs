@@ -19,12 +19,14 @@ namespace Silk.Core.Commands.Moderation
     {
         private readonly ConfigService _configService;
         private readonly IModerationService _moderationService;
+        private readonly IInfractionService _infractions;
 
 
-        public MuteCommand(ConfigService configService, IModerationService moderationService)
+        public MuteCommand(ConfigService configService, IModerationService moderationService, IInfractionService infractions)
         {
             _configService = configService;
             _moderationService = moderationService;
+            _infractions = infractions;
         }
 
         [Command("mute")]
@@ -35,7 +37,7 @@ namespace Silk.Core.Commands.Moderation
         public async Task Mute(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
-            GuildConfig config = (await _configService.GetConfigAsync(ctx.Guild.Id))!;
+
 
             if (user.IsAbove(bot))
             {
@@ -50,9 +52,9 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (user.IsAbove(ctx.Member))
+            if (false && user.IsAbove(ctx.Member))
             {
-                int roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -62,16 +64,8 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync(message);
                 return;
             }
-
-            if (config.MuteRoleId is 0)
-            {
-                await ctx.RespondAsync("Mute role isn't configured for this server!"); // TODO: Generate mute role on-demand. 
-                return;
-            }
-
-            Infraction infraction = await _moderationService.CreateTempInfractionAsync(user, ctx.Member, InfractionType.Mute, reason);
-
-            await _moderationService.MuteAsync(user, ctx.Channel, infraction);
+            
+            await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
             await ctx.RespondAsync($":white_check_mark: Muted {user.Username} indefinitely.");
         }
 

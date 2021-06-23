@@ -58,7 +58,7 @@ namespace Silk.Core.EventHandlers.Guilds
         internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
         {
             _startTime ??= DateTime.Now;
-            await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, Main.DefaultCommandPrefix));
+            await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, StringConstants.DefaultCommandPrefix));
 
             int members = await CacheMembersAsync(guild.Members.Values);
             ++_guilds[shardId];

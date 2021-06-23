@@ -23,8 +23,6 @@ namespace Silk.Core
     public sealed class Main : IHostedService
     {
         public DiscordShardedClient ShardClient { get; }
-        public static string DefaultCommandPrefix => "s!";
-
         private static ILogger<Main> _logger;
         private readonly BotExceptionHandler _handler;
         private readonly CommandHandler _commandHandler;

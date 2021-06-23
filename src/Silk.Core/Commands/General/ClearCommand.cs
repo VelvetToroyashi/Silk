@@ -10,6 +10,7 @@ using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands.General
 {
@@ -72,7 +73,7 @@ namespace Silk.Core.Commands.General
 
         private async Task<GuildConfig> GetOrCreateGuildConfig(CommandContext ctx)
         {
-            Guild? guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, Main.DefaultCommandPrefix));
+            Guild? guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
             return guild.Configuration;
         }
     }
