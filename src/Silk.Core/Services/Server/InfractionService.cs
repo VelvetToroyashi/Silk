@@ -27,13 +27,14 @@ namespace Silk.Core.Services.Server
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<InfractionService> _logger;
 		private readonly ConfigService _config;
-		
-		public InfractionService(IMediator mediator, DiscordShardedClient client, ILogger<InfractionService> logger, ConfigService config)
+		private readonly IServiceCacheUpdaterService _updater;
+		public InfractionService(IMediator mediator, DiscordShardedClient client, ILogger<InfractionService> logger, ConfigService config, IServiceCacheUpdaterService updater)
 		{
 			_mediator = mediator;
 			_client = client;
 			_logger = logger;
 			_config = config;
+			_updater = updater;
 		}
 		public async Task KickAsync(ulong userId, ulong guildId, ulong enforcerId,  string reason) { }
 		public async Task BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null) { }
@@ -172,10 +173,13 @@ namespace Silk.Core.Services.Server
 			
 			try
 			{
-				var role = guild.GetRole(conf.MuteRoleId);
+				
 				
 				if (!await EnsureMuteRoleExistsAsync(guild))
 					return MuteResult.CouldNotCreateMuteRole;
+				
+				conf = await _config.GetConfigAsync(guildId);
+				var role = guild.GetRole(conf.MuteRoleId);
 				
 				await guild.Members[userId].GrantRoleAsync(role, user.Flags.HasFlag(UserFlag.ActivelyMuted) ? "Re-applying mute." : reason);
 				_logger.LogTrace("Successfully muted member");
@@ -285,6 +289,7 @@ namespace Silk.Core.Services.Server
 				"Mute role was not present on guild.");
 			await role.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1); // Set it below the bot, and attempt to apply //
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+			_updater.UpdateGuild(guild.Id);
 			return true;
 
 			static bool RoleExistsAndIsRestrictive(DiscordGuild guild, ulong roleId)
