@@ -20,7 +20,7 @@ namespace Silk.Core.Services.Data
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly Stopwatch _sw = new();
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<GuildContext> dbFactory, IMemoryCache memoryCache, IServiceCacheUpdaterService cacheUpdater)
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<GuildContext> dbFactory, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater)
         {
             _logger = logger;
             _dbFactory = dbFactory;
