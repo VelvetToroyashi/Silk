@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using Humanizer;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Silk.Core.Data.DTOs;
 using Silk.Core.Data.MediatR.Guilds;
+using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -19,9 +22,11 @@ namespace Silk.Core.Services.Server
 {
     public sealed class InfractionService : IInfractionService
     {
+	    private readonly ILogger<IInfractionService> _logger;
 	    private readonly IMediator _mediator;
-	    private readonly ConfigService _config;
 	    private readonly DiscordShardedClient _client;
+
+	    private readonly ConfigService _config;
 	    private readonly ICacheUpdaterService _updater;
 	    
 		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
@@ -30,12 +35,13 @@ namespace Silk.Core.Services.Server
 		// Fast lookup for mutes. Populated on startup. //
 		private readonly HashSet<(ulong user, ulong guild)> _mutes = new();
 	    
-	    public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config, ICacheUpdaterService updater)
+	    public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config, ICacheUpdaterService updater, ILogger<IInfractionService> logger)
 	    {
 		    _mediator = mediator;
 		    _client = client;
 		    _config = config;
 		    _updater = updater;
+		    _logger = logger;
 	    }
 
 		/* TODO: Make these methods return Task<InfractionResult>
@@ -81,9 +87,9 @@ namespace Silk.Core.Services.Server
 	    {
 		    return null;
 	    }
-	    public async Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration)
+	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration)
 	    {
-		    return null;
+		    return _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration));
 	    }
 
 	    private static DiscordEmbedBuilder CreateUserInfractionEmbed(DiscordUser enforcer, string guildName, InfractionType type, string reason, DateTime? expiration = default)
@@ -112,15 +118,45 @@ namespace Silk.Core.Services.Server
 		    return embed;
 	    }
 		
-	    /// <summary>
-	    /// Logs to the designated mod-log channel, if any.
-	    /// </summary>
-	    /// <param name="inf">The infraction to log.</param>
-	    private async Task LogToModChannel(InfractionDTO inf)
-	    {
-		    var config = await _config.GetConfigAsync(inf.GuildId);
+		/// <summary>
+		/// Logs to the designated mod-log channel, if any.
+		/// </summary>
+		/// <param name="inf">The infraction to log.</param>
+		private async Task LogToModChannel(InfractionDTO inf)
+		{
+		    await EnsureModLogChannelExistsAsync(inf.GuildId);
 		    
-	    }
+		    var config = await _config.GetConfigAsync(inf.GuildId);
+		    var guild = _client.GetShard(inf.GuildId).Guilds[inf.GuildId];
+		    
+		    if (config.LoggingChannel is 0)
+			    return; /* It couldn't create a mute channel :(*/
+
+		    var user = await _client.ShardClients[0].GetUserAsync(inf.UserId); /* User may not exist on the server anymore. */
+		    var enforcer = _client.GetShard(inf.GuildId).Guilds[inf.GuildId].Members[inf.EnforcerId];
+		    
+		    var builder = new DiscordEmbedBuilder();
+		    var infractions = await _mediator.Send(new GetGuildInfractionsRequest(inf.GuildId));
+		    
+		    builder
+			    .WithTitle($"Case #{infractions.Count()}")
+			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
+			    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
+			    .WithDescription("A new case has been added to this guild's list of infractions.")
+			    .WithColor(DiscordColor.Gold)
+			    .AddField("Type:", inf.Type.Humanize(LetterCasing.Title), true)
+			    .AddField("Created:", Formatter.Timestamp(inf.CreatedAt - DateTime.UtcNow, TimestampFormat.LongDateTime), true)
+			    .AddField("​", "​", true)
+			    .AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
+			    .AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
+			    .AddField("Reason:", inf.Reason);
+
+		    if (inf.Duration is TimeSpan ts) /* {} (object) pattern is cursed but works. */
+			    builder.AddField("Expires:", Formatter.Timestamp(ts));
+		    
+		    try { await guild.Channels[config.LoggingChannel].SendMessageAsync(builder); }
+		    catch (UnauthorizedException) { /* Log something here, and to the backup channel. */ }
+		}
 	    
 	    /// <summary>
 	    /// Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
@@ -133,13 +169,14 @@ namespace Silk.Core.Services.Server
 		    if (config.Id is 0)
 		    {
 			    if (!guild.CurrentMember.HasPermission(Permissions.ManageChannels))
-				    return; /* We can't create channels. Sad. */ 
-			    
+				    return; /* We can't create channels. Sad. */
 			    try
 			    {
 				    var overwrites = new DiscordOverwriteBuilder().For(guild.EveryoneRole).Allow(Permissions.None).Deny(Permissions.All);
 				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, (DiscordChannel) guild.Channels.Values.EntityOfType(ChannelType.Category).First(), overwrites: new[] { overwrites});
 				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
+				    _updater.UpdateGuild(guildId);
+				    _logger.LogTrace("Updated guild");
 			    }
 			    catch { /* Igonre. We can't do anything about it :( */}
 		    }
