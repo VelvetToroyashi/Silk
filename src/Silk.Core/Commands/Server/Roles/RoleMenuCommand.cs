@@ -36,9 +36,9 @@ namespace Silk.Core.Commands.Server.Roles
 
         private readonly IMediator _mediator;
         private readonly IInputService _input;
-        private readonly IServiceCacheUpdaterService _updater;
+        private readonly ICacheUpdaterService _updater;
 
-        public RoleMenuCommand(IMediator mediator, IServiceCacheUpdaterService updater, IInputService input)
+        public RoleMenuCommand(IMediator mediator, ICacheUpdaterService updater, IInputService input)
         {
             _mediator = mediator;
             _updater = updater;

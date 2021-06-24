@@ -163,7 +163,7 @@ namespace Silk.Core
                 services.AddScoped<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
                 services.AddSingleton<IModerationService, ModerationService>();
-                services.AddSingleton<IServiceCacheUpdaterService, ServiceCacheUpdaterService>();
+                services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
                 services.AddSingleton<RoleMenuReactionService>();

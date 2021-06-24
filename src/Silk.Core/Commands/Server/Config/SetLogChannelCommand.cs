@@ -14,8 +14,8 @@ namespace Silk.Core.Commands.Server.Config
         {
             private readonly IInputService _input;
             private readonly IMediator _mediator;
-            private readonly IServiceCacheUpdaterService _updater;
-            public SetLogChannelConfigCommand(IInputService input, IServiceCacheUpdaterService updater, IMediator mediator)
+            private readonly ICacheUpdaterService _updater;
+            public SetLogChannelConfigCommand(IInputService input, ICacheUpdaterService updater, IMediator mediator)
             {
                 _input = input;
                 _updater = updater;
