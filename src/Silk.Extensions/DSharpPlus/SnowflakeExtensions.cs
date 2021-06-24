@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -8,6 +10,27 @@ namespace Silk.Extensions.DSharpPlus
 {
     public static class SnowflakeExtensions
     {
+        public static IEnumerable<SnowflakeObject> EntityOfType<T>(this IEnumerable<SnowflakeObject> collection, T type)
+        {
+            var snowflakeObjects = collection as SnowflakeObject[] ?? collection.ToArray();
+            
+            if (!snowflakeObjects.Any())
+                yield break;
+
+            var prop = snowflakeObjects.First().GetType().GetProperty("Type", BindingFlags.Public | BindingFlags.Instance);
+
+            if (prop is null)
+                throw new ArgumentException("Snowflake object in collection does not contain a 'Type' property to check.");
+            
+            foreach (var entity in snowflakeObjects)
+            {
+                var value = (T)prop.GetValue(entity)!;
+
+                if (value.Equals(type))
+                    yield return entity;
+            }
+        }
+        
         public static DiscordClient GetClient(this SnowflakeObject snowflake)
         {
             Type type = snowflake.GetType() == typeof(SnowflakeObject) ? snowflake.GetType() : snowflake.GetType().BaseType!;
