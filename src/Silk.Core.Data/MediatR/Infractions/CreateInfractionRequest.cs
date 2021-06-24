@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Infractions
@@ -13,7 +14,12 @@ namespace Silk.Core.Data.MediatR.Infractions
 	public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, InfractionDTO>
 	{
 		private readonly GuildContext _db;
-		public CreateInfractionHandler(GuildContext db) => _db = db;
+		private readonly IMediator _mediator;
+		public CreateInfractionHandler(GuildContext db, IMediator mediator)
+		{
+			_db = db;
+			_mediator = mediator;
+		}
 
 		public async Task<InfractionDTO> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
 		{
@@ -34,7 +40,8 @@ namespace Silk.Core.Data.MediatR.Infractions
 			};
 			
 			guild.Infractions.Add(infraction);
-
+			await _mediator.Send(new GetOrCreateUserRequest(request.Guild, request.User), cancellationToken);
+			
 			await _db.SaveChangesAsync(cancellationToken);
 
 			return new(infraction);
