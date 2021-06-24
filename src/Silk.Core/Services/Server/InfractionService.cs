@@ -7,6 +7,7 @@ using DSharpPlus.Exceptions;
 using MediatR;
 using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Models;
+using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Extensions.DSharpPlus;
@@ -16,32 +17,46 @@ namespace Silk.Core.Services.Server
     public sealed class InfractionService : IInfractionService
     {
 	    private readonly IMediator _mediator;
+	    private readonly ConfigService _config;
 	    private readonly DiscordShardedClient _client;
-	    private readonly List<InfractionDTO> _infractions = new();
-	    private readonly HashSet<(ulong user, ulong guild)> _mutes = new();
 	    
-	    public InfractionService(IMediator mediator, DiscordShardedClient client)
+		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
+		private readonly List<InfractionDTO> _infractions = new();
+
+		// Fast lookup for mutes. Populated on startup. //
+		private readonly HashSet<(ulong user, ulong guild)> _mutes = new();
+	    
+	    public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config)
 	    {
 		    _mediator = mediator;
 		    _client = client;
+		    _config = config;
 	    }
 
 		/* TODO: Make these methods return Task<InfractionResult>
 		 Also did I mention how much I *love* Multi-line to-do statements */
-	    public async Task KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason)
-	    {
+		public async Task<InfractionResult> KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason)
+		{
 		    var guild = _client.GetShard(guildId).Guilds[guildId];
 		    var member = guild.Members[userId];
 		    var enforcer = guild.Members[enforcerId];
 		    var embed = CreateUserInfractionEmbed(enforcer, guild.Name, InfractionType.Kick, reason);
-		    try
-		    {
-			    await member.SendMessageAsync(embed);
-			    await member.RemoveAsync(reason);
-		    }
-		    catch (NotFoundException) { }
-		    catch (UnauthorizedException) { }
-	    }
+		    
+		    var notified = true;
+		    
+		    try { await member.SendMessageAsync(embed); }
+		    catch (UnauthorizedException) { notified = false; }
+
+		    try { await member.RemoveAsync(reason); }
+		    catch (NotFoundException) { return InfractionResult.FailedMemberGuildCache; }
+		    catch (UnauthorizedException) { return InfractionResult.FailedSelfPermissions; }
+
+		    var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Kick, reason, null);
+
+		    await LogToModChannel(inf);
+		    return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification; 
+		}
+	    
 	    public async Task BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null) { }
 	    public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
 	    public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
@@ -52,7 +67,7 @@ namespace Silk.Core.Services.Server
 	    {
 		    return InfractionResult.SucceededWithNotification;
 	    }
-	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, int infractions)
+	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
 	    {
 		    return null;
 	    }
@@ -85,6 +100,24 @@ namespace Silk.Core.Services.Server
 			    embed.AddField("Expires:", Formatter.Timestamp(expiration.Value - DateTime.UtcNow));
 
 		    return embed;
+	    }
+
+	    private async Task LogToModChannel(InfractionDTO inf)
+	    {
+
+	    }
+	    
+	    /// <summary>
+	    /// Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
+	    /// </summary>
+	    private async Task EnsureModLogChannelExistsAsync(ulong guildId)
+	    {
+		    GuildConfig config = await _config.GetConfigAsync(guildId);
+		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    if (config.Id is 0)
+		    {
+
+		    }
 	    }
     }
 }
