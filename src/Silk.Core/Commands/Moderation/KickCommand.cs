@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -21,11 +20,12 @@ namespace Silk.Core.Commands.Moderation
     {
         private readonly IModerationService _moderationService;
         private readonly ILogger<KickCommand> _logger;
-
-        public KickCommand(ILogger<KickCommand> logger, IModerationService moderationService)
+        private readonly IInfractionService _infractionService;
+        public KickCommand(ILogger<KickCommand> logger, IModerationService moderationService, IInfractionService infractionService)
         {
             _logger = logger;
             _moderationService = moderationService;
+            _infractionService = infractionService;
         }
 
         [Command]
@@ -36,40 +36,23 @@ namespace Silk.Core.Commands.Moderation
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
 
-            if (user.IsAbove(bot) || user.IsAbove(ctx.Member) || ctx.User == user)
+            if (!user.IsAbove(bot) && !user.IsAbove(ctx.Member) && ctx.User != user)
             {
-                DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
-                await ctx.RespondAsync(embed);
+                var response = await _infractionService.KickAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
+                var message = response switch
+                {
+                    InfractionResult.FailedGuildHeirarchy => "I can't kick that person due to role heiarchy!",
+                    InfractionResult.FailedSelfPermissions => "I don't have permission to kick members!", /* In rectrospect, these should never happen, but. */
+                    InfractionResult.SucceededWithNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")}  (Notified with direct message).",
+                    InfractionResult.SucceededWithoutNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")} (Unable to notify with Direct Message)."
+                };
+
+                await ctx.RespondAsync(message);
             }
             else
             {
-                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.Blurple)
-                    .WithThumbnail(ctx.Guild.IconUrl)
-                    .WithDescription($"You've been kicked from `{ctx.Guild.Name}`!")
-                    .AddField("Reason:", reason);
-
-                Infraction infraction = await _moderationService.CreateInfractionAsync(user, ctx.Member, InfractionType.Kick, reason!);
-                string message = string.Empty;
-                try
-                {
-                    await user.SendMessageAsync(embed);
-                    message = "(User notified with Direct Message).";
-                }
-                catch (ArgumentException) { }
-                catch (UnauthorizedException)
-                {
-                    _logger.LogWarning("Couldn't DM member when notifying kick");
-                    message = "(Could not message user).";
-                }
-
-                await _moderationService.KickAsync(user, ctx.Channel, infraction, new DiscordEmbedBuilder()
-                    .WithAuthor(ctx.Member.DisplayName, "", ctx.Member.AvatarUrl)
-                    .WithColor(DiscordColor.SpringGreen)
-                    .WithDescription($":boot: Kicked {user.Mention}! {message}")
-                    .AddField("Reason:", reason)
-                    .AddField("Time:", DateTime.UtcNow.ToString("MM/dd/yyyy - h:mm UTC")));
+                DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
+                await ctx.RespondAsync(embed);
             }
         }
 
