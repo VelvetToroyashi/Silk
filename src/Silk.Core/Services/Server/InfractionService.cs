@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
+using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services.Server
@@ -19,6 +22,7 @@ namespace Silk.Core.Services.Server
 	    private readonly IMediator _mediator;
 	    private readonly ConfigService _config;
 	    private readonly DiscordShardedClient _client;
+	    private readonly ICacheUpdaterService _updater;
 	    
 		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
 		private readonly List<InfractionDTO> _infractions = new();
@@ -26,11 +30,12 @@ namespace Silk.Core.Services.Server
 		// Fast lookup for mutes. Populated on startup. //
 		private readonly HashSet<(ulong user, ulong guild)> _mutes = new();
 	    
-	    public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config)
+	    public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config, ICacheUpdaterService updater)
 	    {
 		    _mediator = mediator;
 		    _client = client;
 		    _config = config;
+		    _updater = updater;
 	    }
 
 		/* TODO: Make these methods return Task<InfractionResult>
@@ -41,7 +46,12 @@ namespace Silk.Core.Services.Server
 		    var member = guild.Members[userId];
 		    var enforcer = guild.Members[enforcerId];
 		    var embed = CreateUserInfractionEmbed(enforcer, guild.Name, InfractionType.Kick, reason);
-		    
+
+		    if (member.IsAbove(enforcer))
+			    return InfractionResult.FailedGuildHeirarchy;
+		    if (!guild.CurrentMember.HasPermission(Permissions.KickMembers))
+			    return InfractionResult.FailedSelfPermissions;
+			
 		    var notified = true;
 		    
 		    try { await member.SendMessageAsync(embed); }
@@ -49,7 +59,7 @@ namespace Silk.Core.Services.Server
 
 		    try { await member.RemoveAsync(reason); }
 		    catch (NotFoundException) { return InfractionResult.FailedMemberGuildCache; }
-		    catch (UnauthorizedException) { return InfractionResult.FailedSelfPermissions; }
+		    catch (UnauthorizedException) { return InfractionResult.FailedSelfPermissions; } /* This shouldn't apply, but. */
 
 		    var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Kick, reason, null);
 
@@ -101,10 +111,15 @@ namespace Silk.Core.Services.Server
 
 		    return embed;
 	    }
-
+		
+	    /// <summary>
+	    /// Logs to the designated mod-log channel, if any.
+	    /// </summary>
+	    /// <param name="inf">The infraction to log.</param>
 	    private async Task LogToModChannel(InfractionDTO inf)
 	    {
-
+		    var config = await _config.GetConfigAsync(inf.GuildId);
+		    
 	    }
 	    
 	    /// <summary>
@@ -114,9 +129,19 @@ namespace Silk.Core.Services.Server
 	    {
 		    GuildConfig config = await _config.GetConfigAsync(guildId);
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    
 		    if (config.Id is 0)
 		    {
-
+			    if (!guild.CurrentMember.HasPermission(Permissions.ManageChannels))
+				    return; /* We can't create channels. Sad. */ 
+			    
+			    try
+			    {
+				    var overwrites = new DiscordOverwriteBuilder().For(guild.EveryoneRole).Allow(Permissions.None).Deny(Permissions.All);
+				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, (DiscordChannel) guild.Channels.Values.EntityOfType(ChannelType.Category).First(), overwrites: new[] { overwrites});
+				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
+			    }
+			    catch { /* Igonre. We can't do anything about it :( */}
 		    }
 	    }
     }
