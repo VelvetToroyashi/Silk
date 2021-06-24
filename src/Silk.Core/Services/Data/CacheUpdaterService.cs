@@ -2,7 +2,7 @@
 
 namespace Silk.Core.Services.Data
 {
-    public class ServiceCacheUpdaterService : IServiceCacheUpdaterService
+    public sealed class CacheUpdaterService : ICacheUpdaterService
     {
         public event GuildConfigUpdated? ConfigUpdated;
 

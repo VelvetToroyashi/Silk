@@ -14,7 +14,7 @@ namespace Silk.Core.Services.Data
         private readonly IMemoryCache _cache;
         private readonly IMediator _mediator;
 
-        public ConfigService(IMemoryCache cache, IMediator mediator, IServiceCacheUpdaterService updater)
+        public ConfigService(IMemoryCache cache, IMediator mediator, ICacheUpdaterService updater)
         {
             _cache = cache;
             _mediator = mediator;

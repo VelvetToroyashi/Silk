@@ -2,7 +2,7 @@
 {
     public delegate void GuildConfigUpdated(ulong id);
 
-    public interface IServiceCacheUpdaterService
+    public interface ICacheUpdaterService
     {
         public event GuildConfigUpdated ConfigUpdated;
 
