@@ -104,7 +104,7 @@ namespace Silk.Core
                     LoggerConfiguration? logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null)
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                         .MinimumLevel.Override("DSharpPlus", LogEventLevel.Fatal);
 
                     Log.Logger = builder.Configuration["LogLevel"] switch
@@ -218,8 +218,6 @@ namespace Silk.Core
                 #if DEBUG
                 b.EnableSensitiveDataLogging();
                 b.EnableDetailedErrors();
-                b.LogTo(Console.WriteLine);
-                b.LogTo(Log.Logger.Verbose);
                 #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
             }
             

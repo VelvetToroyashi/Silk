@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ namespace Silk.Core.Data.MediatR.Guilds
                 .Include(g => g.Infractions)
                 .Include(g => g.Configuration)
                 .AsSplitQuery()
+                .OrderBy(g => g.Id)
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
             if (guild is not null)
