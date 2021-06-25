@@ -113,7 +113,7 @@ namespace Silk.Core.Services.Server
 				    .AddField("Enforcer:", enforcer.Id.ToString());
 
 		    if (expiration.HasValue)
-			    embed.AddField("Expires:", Formatter.Timestamp(expiration.Value - DateTime.UtcNow));
+			    embed.AddField("Expires:", Formatter.Timestamp(expiration.Value));
 
 		    return embed;
 	    }
@@ -123,8 +123,8 @@ namespace Silk.Core.Services.Server
 		/// </summary>
 		/// <param name="inf">The infraction to log.</param>
 		private async Task LogToModChannel(InfractionDTO inf)
-		{
-		    await EnsureModLogChannelExistsAsync(inf.GuildId);
+		{ 
+			await EnsureModLogChannelExistsAsync(inf.GuildId);
 		    
 		    var config = await _config.GetConfigAsync(inf.GuildId);
 		    var guild = _client.GetShard(inf.GuildId).Guilds[inf.GuildId];
@@ -145,7 +145,7 @@ namespace Silk.Core.Services.Server
 			    .WithDescription("A new case has been added to this guild's list of infractions.")
 			    .WithColor(DiscordColor.Gold)
 			    .AddField("Type:", inf.Type.Humanize(LetterCasing.Title), true)
-			    .AddField("Created:", Formatter.Timestamp(inf.CreatedAt - DateTime.UtcNow, TimestampFormat.LongDateTime), true)
+			    .AddField("Created:", Formatter.Timestamp(inf.CreatedAt, TimestampFormat.LongDateTime), true)
 			    .AddField("​", "​", true)
 			    .AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
 			    .AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
@@ -155,7 +155,13 @@ namespace Silk.Core.Services.Server
 			    builder.AddField("Expires:", Formatter.Timestamp(ts));
 		    
 		    try { await guild.Channels[config.LoggingChannel].SendMessageAsync(builder); }
-		    catch (UnauthorizedException) { /* Log something here, and to the backup channel. */ }
+		    catch (UnauthorizedException) 
+		    { 
+			    /*
+				Log something here, and to the backup channel. 
+				-- Update -- I have no idea wth "the backup channel" is. 
+				*/ 
+		    }
 		}
 	    
 	    /// <summary>
@@ -166,19 +172,25 @@ namespace Silk.Core.Services.Server
 		    GuildConfig config = await _config.GetConfigAsync(guildId);
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
 		    
-		    if (config.Id is 0)
+		    if (config.LoggingChannel is 0)
 		    {
 			    if (!guild.CurrentMember.HasPermission(Permissions.ManageChannels))
 				    return; /* We can't create channels. Sad. */
+
 			    try
 			    {
-				    var overwrites = new DiscordOverwriteBuilder().For(guild.EveryoneRole).Allow(Permissions.None).Deny(Permissions.All);
-				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, (DiscordChannel) guild.Channels.Values.EntityOfType(ChannelType.Category).First(), overwrites: new[] { overwrites});
+				    var overwrites = new DiscordOverwriteBuilder[]
+				    {
+					    new(guild.EveryoneRole) {Denied = Permissions.AccessChannels},
+					    new(guild.CurrentMember) {Allowed = Permissions.AccessChannels}
+				    };
+
+				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, (DiscordChannel) guild.Channels.Values.EntityOfType(ChannelType.Category).Last(), overwrites: overwrites);
+				    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
 				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
 				    _updater.UpdateGuild(guildId);
-				    _logger.LogTrace("Updated guild");
 			    }
-			    catch { /* Igonre. We can't do anything about it :( */}
+			    catch { /* Igonre. We can't do anything about it :( */ }
 		    }
 	    }
     }
