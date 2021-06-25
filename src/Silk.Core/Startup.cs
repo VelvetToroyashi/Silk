@@ -219,12 +219,12 @@ namespace Silk.Core
                 b.EnableSensitiveDataLogging();
                 b.EnableDetailedErrors();
                 b.LogTo(Console.WriteLine);
+                b.LogTo(Log.Logger.Verbose);
                 #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
             }
-
+            
             services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
             services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-            services.AddTransient(_ => new DbContextOptionsBuilder<GuildContext>().UseNpgsql(connectionString.ToString()).Options);
         }
     }
 }
