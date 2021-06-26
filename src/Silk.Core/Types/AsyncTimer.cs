@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -12,14 +14,25 @@ namespace Silk.Core.Types
   public delegate Task AsyncTimerDelegate<in T1, in T2>(T1 t1, T2 t2);
   
   
-	public sealed class AsyncTimer
+	public sealed class AsyncTimer : IDisposable
   {
+    /// <summary>
+    /// Whether this timer has been started.
+    /// </summary>
     public bool Started => _started;
-    public bool YieldsWhenRunning => _yieldToTask;
-
-    public event EventHandler<Exception> Errored;
     
+    /// <summary>
+    /// Whether the timer yields when executing the callback.
+    /// </summary>
+    public bool YieldsWhenRunning => _yieldToTask;
+    
+    /// <summary>
+    /// An event fired when the callback throws an exception.
+    /// </summary>
+    public event EventHandler<Exception> Errored;
+
     private readonly TimeSpan _interval;
+
     private readonly bool _yieldToTask;
     
     private bool _started;
@@ -29,6 +42,14 @@ namespace Silk.Core.Types
     private readonly object[]? _args = Array.Empty<object>();
 
 
+    /// <summary>
+    /// Constructs an instance of an AsyncTimer.
+    /// </summary>
+    /// <param name="method">The method to invoke.</param>
+    /// <param name="interval">How often the timer should fire.</param>
+    /// <param name="yieldToTask">Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times if the callback's execution time is greater than the interval.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
     public AsyncTimer(AsyncTimerDelegate method, TimeSpan interval, bool yieldToTask = false)
     {
       if (interval == null)
@@ -48,7 +69,16 @@ namespace Silk.Core.Types
       _taskDelegate = method;
     }
 
-    public AsyncTimer(AsyncTimerDelegate<object> method, object paremeter, TimeSpan interval, bool yieldToTask = false)
+    /// <summary>
+    /// Constructs an instance of an AsyncTimer.
+    /// </summary>
+    /// <param name="method">The method to invoke.</param>
+    /// <param name="parameter">A state parameter to pass to <paramref name="method"/> to avoid a closure.</param>
+    /// <param name="interval">How often the timer should fire.</param>
+    /// <param name="yieldToTask">Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times if the callback's execution time is greater than the interval.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
+    public AsyncTimer(AsyncTimerDelegate<object> method, object parameter, TimeSpan interval, bool yieldToTask = false)
     {
       if (interval == null)
         throw new ArgumentNullException(nameof(interval), "Interval must be non-null.");
@@ -64,11 +94,43 @@ namespace Silk.Core.Types
 
       _interval = interval;
       _taskDelegate = method;
-      _args = new[] {paremeter};
+      _args = new[] {parameter};
       _yieldToTask = yieldToTask;
     }
     
+    /// <summary>
+    /// Constructs an instance of an AsyncTimer.
+    /// </summary>
+    /// <param name="method">The method to invoke.</param>
+    /// <param name="parameters">A collection of objects to pass to <paramref name="method"/> to avoid a closure.</param>
+    /// <param name="interval">How often the timer should fire.</param>
+    /// <param name="yieldToTask">Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times if the callback's execution time is greater than the interval.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
+    public AsyncTimer(AsyncTimerDelegate<object, object> method, IEnumerable<object>? parameters, TimeSpan interval, bool yieldToTask = false)
+    {
+      if (interval == null)
+        throw new ArgumentNullException(nameof(interval), "Interval must be non-null.");
+      
+      if (interval < TimeSpan.Zero)
+        throw new ArgumentOutOfRangeException(nameof(interval), $"Interval must be greater than {nameof(TimeSpan.Zero)}.");
 
+      if (interval > TimeSpan.MaxValue)
+        throw new ArgumentOutOfRangeException(nameof(interval), $"Interval must be smaller than {nameof(TimeSpan.MaxValue)}.");
+
+      if (method.Target is null)
+        throw new ArgumentNullException(nameof(method), "Delegate cannot point to null target.");
+
+      _interval = interval;
+      _taskDelegate = method;
+      _args = parameters as object[] ?? parameters?.ToArray();
+      _yieldToTask = yieldToTask;
+    }
+    
+    /// <summary>
+    /// Starts the timer. The callback is executed immediately on the first call.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the timer is already started.</exception>
     public async void Start()
     {
       if (_started)
@@ -116,6 +178,11 @@ namespace Silk.Core.Types
       _running = false;
       _started = false;
     }
-    
+
+    public void Dispose()
+    {
+      _running = false;
+      _started = false;
+    }
   }
 }
