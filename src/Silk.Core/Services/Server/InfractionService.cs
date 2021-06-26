@@ -55,6 +55,7 @@ namespace Silk.Core.Services.Server
 
 		    if (member.IsAbove(enforcer))
 			    return InfractionResult.FailedGuildHeirarchy;
+		    
 		    if (!guild.CurrentMember.HasPermission(Permissions.KickMembers))
 			    return InfractionResult.FailedSelfPermissions;
 			
