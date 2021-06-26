@@ -97,8 +97,11 @@ namespace Silk.Core.Services.Server
 				await guild.BanMemberAsync(userId, 0, reason);
 
 				var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, expiration is null ? InfractionType.Ban : InfractionType.SoftBan, reason, expiration);
-				await LogToModChannel(inf);
 				
+				if (inf.Duration is not null)
+					_infractions.Add(inf);
+				
+				await LogToModChannel(inf);
 				return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
 			}
 			catch (UnauthorizedException)
