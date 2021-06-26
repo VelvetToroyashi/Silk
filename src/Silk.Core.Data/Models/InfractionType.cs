@@ -13,24 +13,28 @@
         /// </summary>
         Kick,
         /// <summary>
-        ///     Signifies that the user was muted, either temporarily or indefinetly. These infractions are not held against the user.
+        /// A mute. Indefintite or temporary. 
         /// </summary>
         Mute,
         /// <summary>
-        ///     Signifies the user was muted temporarily by auto-mod. These infractions are held against the user.
+        /// A mute given by the AutoMod system.
         /// </summary>
         AutoModMute,
         /// <summary>
-        ///     Signifies the user was banned temporarily.
+        /// A temporary ban.
         /// </summary>
         SoftBan,
         /// <summary>
-        ///     Signifies the user was banned indefinitely.
+        /// An permenant ban.
         /// </summary>
         Ban,
         /// <summary>
-        ///     Used for <see cref="InfractionStep" />. This value signifies that no action will be taken against the user for this infraction.
+        /// Treated as <see cref="Strike"/>, but it is not held against the user. 
         /// </summary>
-        Ignore
+        Ignore,
+        /// <summary>
+        /// The user was unmuted.
+        /// </summary>
+        Unmute
     }
 }

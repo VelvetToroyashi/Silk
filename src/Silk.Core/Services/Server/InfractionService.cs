@@ -72,8 +72,40 @@ namespace Silk.Core.Services.Server
 		    await LogToModChannel(inf);
 		    return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification; 
 		}
-	    
-	    public async Task BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null) { }
+
+		public async Task<InfractionResult> BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null)
+		{
+			var guild = _client.GetShard(guildId).Guilds[guildId];
+			var enforcer = guild.Members[enforcerId];
+			var userExists = guild.Members.TryGetValue(userId, out var member);
+			var embed = CreateUserInfractionEmbed(enforcer, guild.Name, expiration is null ? InfractionType.Ban : InfractionType.SoftBan, reason, expiration);
+
+			var notified = false;
+
+			try
+			{
+				if (userExists)
+				{
+					await member?.SendMessageAsync(embed)!;
+					notified = true;
+				}
+			}
+			catch (UnauthorizedException) { }
+
+			try
+			{
+				await guild.BanMemberAsync(userId, 0, reason);
+
+				var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, expiration is null ? InfractionType.Ban : InfractionType.SoftBan, reason, expiration);
+				await LogToModChannel(inf);
+				
+				return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
+			}
+			catch (UnauthorizedException)
+			{
+				return InfractionResult.FailedSelfPermissions;
+			}
+		}
 	    public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
 	    public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 	    {
@@ -87,11 +119,20 @@ namespace Silk.Core.Services.Server
 	    {
 		    return null;
 	    }
-	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration)
-	    {
-		    return _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration));
-	    }
+	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration) 
+		    => _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration));
 
+
+	    /// <summary>
+	    /// Creates a formatted embed to be sent to a user.
+	    /// </summary>
+	    /// <param name="enforcer">The user that created this infraction.</param>
+	    /// <param name="guildName">The name of the guild the infraction occured on.</param>
+	    /// <param name="type">The type of infraction.</param>
+	    /// <param name="reason">Why the infraction was created.</param>
+	    /// <param name="expiration">When the infraction expires.</param>
+	    /// <returns>A <see cref="DiscordEmbed"/> populated with relevant inforamtion.</returns>
+	    /// <exception cref="ArgumentException">An unknown infraction type was passed.</exception>
 	    private static DiscordEmbedBuilder CreateUserInfractionEmbed(DiscordUser enforcer, string guildName, InfractionType type, string reason, DateTime? expiration = default)
 	    {
 		    var action = type switch
@@ -101,7 +142,9 @@ namespace Silk.Core.Services.Server
 			    InfractionType.SoftBan		=> $"You've been temporarily banned from {guildName}!",
 			    InfractionType.Mute			=> $"You've been muted on {guildName}!",
 			    InfractionType.AutoModMute	=> $"You've been automatically muted on {guildName}!",
-			    InfractionType.Strike		=> $"You've been warned on {guildName}!"
+			    InfractionType.Strike		=> $"You've been warned on {guildName}!",
+			    InfractionType.Unmute		=> $"You've been unmuted on {guildName}!",
+			    _ => throw new ArgumentException($"Unexpected enum value: {type}")
 		    };
 		    
 		    var embed = new DiscordEmbedBuilder()
