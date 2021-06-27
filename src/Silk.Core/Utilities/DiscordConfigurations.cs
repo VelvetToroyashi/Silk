@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Silk.Shared.Constants;
@@ -49,5 +50,10 @@ namespace Silk.Core.Utilities
         };
 
         public static SlashCommandsConfiguration SlashCommands { get; } = new();
+        public static VoiceNextConfiguration VoiceNext { get; set; } = new()
+        {
+            EnableIncoming = false,
+            AudioFormat = new(48000, 2, VoiceApplication.Music),
+        };
     }
 }

@@ -8,6 +8,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.VoiceNext;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -76,6 +77,7 @@ namespace Silk.Core
 
             await ShardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
             await ShardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
+            await ShardClient.UseVoiceNextAsync(DiscordConfigurations.VoiceNext);
         }
 
         private Task InitializeSlashCommandsAsync()
