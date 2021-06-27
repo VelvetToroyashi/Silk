@@ -28,8 +28,6 @@ namespace Silk.Core.Tests.Types
 			Assert.True(executed);
 		}
 		
-		private sealed record NumBox(int Num);
-
 		[Test]
 		public void AsyncTimer_Executes_Task_WithParameters()
 		{
@@ -64,11 +62,11 @@ namespace Silk.Core.Tests.Types
 			
 			//Act
 			timer.Start();
-			Thread.Sleep(999);
+			Thread.Sleep(1200);
 			timer.Stop();
 
 			//Assert
-			Assert.Equal(2, num);
+			Assert.Equal(3, num);
 		}
 
 		[Test]
@@ -89,6 +87,32 @@ namespace Silk.Core.Tests.Types
 			
 			//Assert
 			Assert.Equal(2, num);
+		}
+
+		[Test]
+		public void AsyncTimer_Does_Not_StartTwice()
+		{
+			//Arange
+			using var timer = new AsyncTimer(() => Task.FromResult(0), TimeSpan.FromSeconds(1));
+			
+			//Act
+			timer.Start();
+			Thread.Sleep(200);
+			
+			//Assert
+			Assert.Throws<InvalidOperationException>(() => timer.Start());
+		}
+
+		[Test]
+		public void AsyncTimer_Does_Not_Stop_If_NotStarted()
+		{
+			//Arrange
+			var timer = new AsyncTimer(() => Task.CompletedTask, TimeSpan.Zero);
+			
+			//Act
+			
+			//Assert
+			Assert.Throws<InvalidOperationException>(() => timer.Stop());
 		}
 	}
 }
