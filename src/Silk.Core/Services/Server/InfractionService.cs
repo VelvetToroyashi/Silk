@@ -155,16 +155,24 @@ namespace Silk.Core.Services.Server
 		    
 		    var notified = false;
 		    
-		    try
+		    // ReSharper disable once InvertIf
+		    if (exists)
 		    {
-			    DiscordEmbed muteEmbed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, infractionType, reason, expiration);
-			    await member.SendMessageAsync(muteEmbed);
-			    notified = true;
+			    try
+			    {
+				    DiscordEmbed muteEmbed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, infractionType, reason, expiration);
+				    await member.SendMessageAsync(muteEmbed);
+				    notified = true;
+			    }
+			    catch { /* This could only be unauth'd exception. */ }
 		    }
-		    catch { /* This could only be unauth'd exception. */}
 
-
-		    return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
+		    _mutes.Add((userId, guildId));
+		    _infractions.Add(infraction);
+		    
+		    return notified ?
+			    InfractionResult.SucceededWithNotification : 
+			    InfractionResult.SucceededWithoutNotification;
 	    }
 
 	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
