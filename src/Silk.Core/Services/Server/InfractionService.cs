@@ -129,16 +129,42 @@ namespace Silk.Core.Services.Server
 			    /*We're updating a mute*/
 			    return InfractionResult.SucceededDoesNotNotify;
 		    }
-
-		    DiscordRole muteRole;
+		    
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    bool exists = guild.Members.TryGetValue(userId, out DiscordMember? member);
+		    
 		    GuildConfig conf = await _config.GetConfigAsync(guildId);
-
-		    if (conf.MuteRoleId is 0)
+		    DiscordRole? muteRole = guild.GetRole(conf.MuteRoleId);
+		    
+		    if (conf.MuteRoleId is 0 || muteRole is null)
 			    muteRole = await GenerateMuteRoleAsync(guild);
+
+		    try
+		    {
+			    await member!.GrantRoleAsync(muteRole, reason);
+		    }
+		    catch (NotFoundException)
+		    {
+			    return InfractionResult.FailedMemberGuildCache;
+		    }
 		    
+		    InfractionType infractionType = enforcerId == _client.CurrentUser.Id ? InfractionType.AutoModMute : InfractionType.Mute;
+		    InfractionDTO infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, infractionType, reason, expiration);
+
+		    await LogToModChannel(infraction);
 		    
-		    return InfractionResult.SucceededWithNotification;
+		    var notified = false;
+		    
+		    try
+		    {
+			    DiscordEmbed muteEmbed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, infractionType, reason, expiration);
+			    await member.SendMessageAsync(muteEmbed);
+			    notified = true;
+		    }
+		    catch { /* This could only be unauth'd exception. */}
+
+
+		    return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
 	    }
 
 	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)

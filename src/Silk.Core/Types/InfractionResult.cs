@@ -18,6 +18,10 @@
 		/// </summary>
 		FailedMemberGuildCache,
 		/// <summary>
+		/// A necessary resource was configured, but did not exist.
+		/// </summary>
+		FailedResourceDeleted,
+		/// <summary>
 		/// The operation succeeded, but does not notify the member the infraction applies to.
 		/// </summary>
 		SucceededDoesNotNotify,
