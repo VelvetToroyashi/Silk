@@ -10,7 +10,7 @@ namespace Silk.Extensions.DSharpPlus
 {
     public static class SnowflakeExtensions
     {
-        public static IEnumerable<SnowflakeObject> EntityOfType<T>(this IEnumerable<SnowflakeObject> collection, T type)
+        public static IEnumerable<TType> EntityOfType<T, TType>(this IEnumerable<TType> collection, T type) where TType : SnowflakeObject where T : Enum
         {
             var snowflakeObjects = collection as SnowflakeObject[] ?? collection.ToArray();
             
@@ -27,7 +27,7 @@ namespace Silk.Extensions.DSharpPlus
                 var value = (T)prop.GetValue(entity)!;
 
                 if (value.Equals(type))
-                    yield return entity;
+                    yield return (entity as TType)!;
             }
         }
         
