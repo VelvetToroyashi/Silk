@@ -10,7 +10,7 @@ namespace Silk.Extensions.DSharpPlus
 {
     public static class SnowflakeExtensions
     {
-        public static IEnumerable<TType> EntityOfType<T, TType>(this IEnumerable<TType> collection, T type) where TType : SnowflakeObject where T : Enum
+        public static IEnumerable<TType> OfType<T, TType>(this IEnumerable<TType> collection, T type) where TType : SnowflakeObject where T : Enum
         {
             var snowflakeObjects = collection as SnowflakeObject[] ?? collection.ToArray();
             

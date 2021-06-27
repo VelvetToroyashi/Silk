@@ -304,7 +304,7 @@ namespace Silk.Core.Services.Server
 			
 			
 			var channels = guild.Channels.Values
-				.EntityOfType(ChannelType.Text)
+				.OfType(ChannelType.Text)
 				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels))
 				.ToArray();
 			
@@ -353,7 +353,7 @@ namespace Silk.Core.Services.Server
 					    new(guild.CurrentMember) {Allowed = Permissions.AccessChannels}
 				    };
 
-				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.EntityOfType(ChannelType.Category).Last(), overwrites: overwrites);
+				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.OfType(ChannelType.Category).Last(), overwrites: overwrites);
 				    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
 				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
 				    _updater.UpdateGuild(guildId);
