@@ -16,5 +16,8 @@ namespace Silk.Core.Services.Interfaces
 		public Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration);
 		public Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions);
 		public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration);
+		public Task<InfractionResult> AddNoteAsync(ulong userId, ulong guildId, ulong noterId, string note);
+		public Task<InfractionResult> UpdateNoteAsync(ulong userId, ulong guildId, ulong noterId, string newNote);
+
 	}
 }

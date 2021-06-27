@@ -35,6 +35,10 @@
         /// <summary>
         /// The user was unmuted.
         /// </summary>
-        Unmute
+        Unmute,
+        /// <summary>
+        /// A note on a user's infraction history.
+        /// </summary>
+        Note
     }
 }

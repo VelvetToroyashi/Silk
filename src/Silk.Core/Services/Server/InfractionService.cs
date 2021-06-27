@@ -105,7 +105,7 @@ namespace Silk.Core.Services.Server
 				await LogToModChannel(inf);
 				return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
 			}
-			catch (UnauthorizedException)
+			catch (UnauthorizedException) /*Shouldn't happen, but you know.*/
 			{
 				return InfractionResult.FailedSelfPermissions;
 			}
@@ -113,18 +113,50 @@ namespace Silk.Core.Services.Server
 	    public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
 	    public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 	    {
-		    return false;
+		    var memInf = _mutes.Contains((userId, guildId));
+		    
+		    if (memInf)
+			    return true;
+
+		    var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+
+		    return dbInf.Any(inf => !inf.Rescinded && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 	    }
 	    public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 	    {
+		    if (await IsMutedAsync(userId, guildId))
+		    {
+			    /*We're updating a mute*/
+			    return InfractionResult.SucceededDoesNotNotify;
+		    }
+
+		    DiscordRole muteRole;
+		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    GuildConfig conf = await _config.GetConfigAsync(guildId);
+
+		    if (conf.MuteRoleId is 0)
+			    muteRole = await GenerateMuteRoleAsync(guild);
+		    
+		    
 		    return InfractionResult.SucceededWithNotification;
 	    }
+
 	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
 	    {
 		    return null;
 	    }
 	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration) 
 		    => _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration));
+	    
+	    public async Task<InfractionResult> AddNoteAsync(ulong userId, ulong guildId, ulong noterId, string note)
+	    {
+		    return InfractionResult.FailedGuildHeirarchy;
+	    }
+	    public async Task<InfractionResult> UpdateNoteAsync(ulong userId, ulong guildId, ulong noterId, string newNote)
+	    {
+		    
+		    return InfractionResult.FailedGuildHeirarchy;
+	    }
 
 
 	    /// <summary>
@@ -165,6 +197,16 @@ namespace Silk.Core.Services.Server
 		    return embed;
 	    }
 		
+	    
+	    /// <summary>
+	    /// Sends a message to the appropriate log channel that an infraction (note, reason, or duration) was updated.
+	    /// </summary>
+	    /// <param name="inf"></param>
+	    private async Task LogUpdatedInfractionAsync(InfractionDTO inf)
+	    {
+		    
+	    }
+	    
 		/// <summary>
 		/// Logs to the designated mod-log channel, if any.
 		/// </summary>
@@ -209,6 +251,15 @@ namespace Silk.Core.Services.Server
 				-- Update -- I have no idea wth "the backup channel" is. 
 				*/ 
 		    }
+		}
+		
+		private async Task<DiscordRole> GenerateMuteRoleAsync(DiscordGuild guild)
+		{
+			var mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
+			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
+
+			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
+			return mute;
 		}
 	    
 	    /// <summary>
