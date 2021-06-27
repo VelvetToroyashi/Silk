@@ -214,6 +214,7 @@ namespace Silk.Core.Services.Server
 			    InfractionType.AutoModMute	=> $"You've been automatically muted on {guildName}!",
 			    InfractionType.Strike		=> $"You've been warned on {guildName}!",
 			    InfractionType.Unmute		=> $"You've been unmuted on {guildName}!",
+			    InfractionType.Ignore or InfractionType.Note => null,
 			    _ => throw new ArgumentException($"Unexpected enum value: {type}")
 		    };
 		    
@@ -225,9 +226,15 @@ namespace Silk.Core.Services.Server
 					    $"{Formatter.Timestamp(TimeSpan.Zero, TimestampFormat.LongDateTime)}\n\n({Formatter.Timestamp(TimeSpan.Zero)})")
 				    .AddField("Enforcer:", enforcer.Id.ToString());
 
-		    if (expiration.HasValue)
+		    
+		    if (!expiration.HasValue && type is InfractionType.Mute or InfractionType.AutoModMute)
+			    embed.AddField("Expires:", "This infraction does not have an expiry date.");
+		    
+		    else if (expiration.HasValue)
 			    embed.AddField("Expires:", Formatter.Timestamp(expiration.Value));
 
+		    
+		    
 		    return embed;
 	    }
 		
