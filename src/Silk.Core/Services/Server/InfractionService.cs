@@ -299,9 +299,15 @@ namespace Silk.Core.Services.Server
 			if (!guild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles))
 				throw new InvalidOperationException("Current member does not have permission to create roles.");
 			
+			if (!guild.CurrentMember.Permissions.HasPermission(Permissions.ManageChannels))
+				throw new InvalidOperationException("Current member does not have permission to manage channels.");
+			
 			DiscordRole mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
 			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
-
+			
+			foreach (var c in guild.Channels.Values.Where(c => c.Type is ChannelType.Text && c.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels)))
+				await c.AddOverwriteAsync(mute, Permissions.None, Permissions.SendMessages);
+			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
 			return mute;
 		}
