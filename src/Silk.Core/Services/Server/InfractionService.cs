@@ -296,7 +296,10 @@ namespace Silk.Core.Services.Server
 		
 		private async Task<DiscordRole> GenerateMuteRoleAsync(DiscordGuild guild)
 		{
-			var mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
+			if (!guild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles))
+				throw new InvalidOperationException("Current member does not have permission to create roles.");
+			
+			DiscordRole mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
 			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
 
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
