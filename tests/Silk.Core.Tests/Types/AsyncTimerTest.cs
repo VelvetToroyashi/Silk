@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Silk.Core.Types;
+using Xunit;
 using Assert = Xunit.Assert;
 
 namespace Silk.Core.Tests.Types
@@ -113,6 +114,49 @@ namespace Silk.Core.Tests.Types
 			
 			//Assert
 			Assert.Throws<InvalidOperationException>(() => timer.Stop());
+		}
+
+		[Test]
+		public void AsyncTimer_Does_Not_PropogateExceptions()
+		{
+			//Arrange
+			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
+			
+			//Act
+			var ex = Record.Exception(() => timer.Start());
+
+			//Assert
+			Assert.Null(ex);
+		}
+
+		[Test]
+		public void AsyncTimer_Fires_Errored_Event_On_Error()
+		{
+			//Arrange
+			var errored = false;
+			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
+			timer.Errored += (_, _) => errored = true;
+			
+			//Act
+			timer.Start();
+			Thread.Sleep(100);
+			//Assert
+			Assert.True(errored);
+		}
+
+		[Test]
+		public void AsyncTimer_Fires_Errored_Event_On_Error_When_Yielding()
+		{
+			//Arrange
+			var errored = false;
+			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
+			timer.Errored += (_, _) => errored = true;
+			
+			//Act
+			timer.Start();
+			Thread.Sleep(100);
+			//Assert
+			Assert.True(errored);
 		}
 	}
 }
