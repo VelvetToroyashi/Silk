@@ -65,8 +65,8 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
             
-            await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
-            await ctx.RespondAsync($":white_check_mark: Muted {user.Username} indefinitely.");
+            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
+            await ctx.RespondAsync($"Mute result returned {res}");
         }
 
         [Priority(1)]

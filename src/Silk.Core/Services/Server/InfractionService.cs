@@ -137,7 +137,7 @@ namespace Silk.Core.Services.Server
 		    DiscordRole? muteRole = guild.GetRole(conf.MuteRoleId);
 		    
 		    if (conf.MuteRoleId is 0 || muteRole is null)
-			    muteRole = await GenerateMuteRoleAsync(guild);
+			    muteRole = await GenerateMuteRoleAsync(guild, member!);
 
 		    try
 		    {
@@ -294,7 +294,7 @@ namespace Silk.Core.Services.Server
 		    }
 		}
 		
-		private async Task<DiscordRole> GenerateMuteRoleAsync(DiscordGuild guild)
+		private async Task<DiscordRole> GenerateMuteRoleAsync(DiscordGuild guild, DiscordMember member)
 		{
 			if (!guild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles))
 				throw new InvalidOperationException("Current member does not have permission to create roles.");
@@ -302,10 +302,30 @@ namespace Silk.Core.Services.Server
 			if (!guild.CurrentMember.Permissions.HasPermission(Permissions.ManageChannels))
 				throw new InvalidOperationException("Current member does not have permission to manage channels.");
 			
+			
+			var channels = guild.Channels.Values
+				.EntityOfType(ChannelType.Text)
+				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels))
+				.ToArray();
+			
+			foreach (var role in guild.Roles.Values)
+			{
+				if (role.Position <= member.Hierarchy)
+					continue;
+				
+				if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
+					continue;
+
+				await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+				return role;
+			}
+			
+			
 			DiscordRole mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
 			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
+
 			
-			foreach (var c in guild.Channels.Values.Where(c => c.Type is ChannelType.Text && c.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels)))
+			foreach (var c in channels)
 				await c.AddOverwriteAsync(mute, Permissions.None, Permissions.SendMessages);
 			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
@@ -333,7 +353,7 @@ namespace Silk.Core.Services.Server
 					    new(guild.CurrentMember) {Allowed = Permissions.AccessChannels}
 				    };
 
-				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, (DiscordChannel) guild.Channels.Values.EntityOfType(ChannelType.Category).Last(), overwrites: overwrites);
+				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.EntityOfType(ChannelType.Category).Last(), overwrites: overwrites);
 				    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
 				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
 				    _updater.UpdateGuild(guildId);
