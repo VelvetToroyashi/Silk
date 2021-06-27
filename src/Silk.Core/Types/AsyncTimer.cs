@@ -153,21 +153,20 @@ namespace Silk.Core.Types
         DateTime invoketime = DateTime.UtcNow;
         Task task = _taskDelegate is AsyncTimerDelegate del ? del() : (Task)_taskDelegate.DynamicInvoke(_args)!;
         
+        
+        _ = task.ContinueWith((t, timer) =>
+        {
+          var time = Unsafe.As<AsyncTimer>(timer)!;
+          time.Errored?.Invoke(time, t.Exception!.Flatten());
+        }, this, TaskContinuationOptions.OnlyOnFaulted);
+        
         if (_yieldToTask && !task.IsCompleted)
         {
           try { await task; }
           catch { /* Handled in continutation */ }
         }
         /* Else we just let it run in the background. */
-
-        _ = task.ContinueWith((t, timer) =>
-        {
-          if (!t.IsFaulted) return;
-          
-          var time = Unsafe.As<AsyncTimer>(timer)!;
-          time.Errored?.Invoke(time, t.Exception!.Flatten());
-        }, this);
-
+        
           
         TimeSpan execTime = DateTime.UtcNow - invoketime;
 
