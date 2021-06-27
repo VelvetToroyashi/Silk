@@ -27,7 +27,7 @@ namespace Silk.Core.Commands.Miscellaneous
         [Description("Set your nickname on the current Guild")]
         public async Task SetNickName(CommandContext ctx, DiscordMember target, [RemainingText] string nick)
         {
-            await ctx.Message.DeleteAsync();
+            
             if (nick.Length > 32)
             {
                 await ctx.RespondAsync("Nickname out of bounds! Limit: 32 characters");
