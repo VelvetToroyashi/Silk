@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 				.Include(u => u.Infractions)
 				.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 			
-			return user.Infractions.Select(inf => new InfractionDTO(inf));
+			return user?.Infractions.Select(inf => new InfractionDTO(inf)) ?? Array.Empty<InfractionDTO>();
 		}
 	}
 }
