@@ -95,7 +95,7 @@ namespace Silk.Core.Commands.Miscellaneous
                 .ToList();
             string roles = string.Join(' ', roleList);
             embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
-            embed.AddField("Flags:", member.Flags.ToString());
+            embed.AddField("Flags:", string.IsNullOrWhiteSpace(member.Flags.ToString()) ? "None" : member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
             await ctx.RespondAsync(embed).ConfigureAwait(false);
         }
@@ -105,7 +105,7 @@ namespace Silk.Core.Commands.Miscellaneous
             string roleString = string.Empty;
             var hasAboveRole = false;
 
-            DiscordRole? rle = null;
+            DiscordRole? rle;
 
             var roles = ctx.Guild.Roles.Values.OrderBy(r => r.Position).ToArray();
 
