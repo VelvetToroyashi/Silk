@@ -22,8 +22,7 @@ namespace Silk.Core.Commands.Moderation
         private readonly ConfigService _configService;
         private readonly IModerationService _moderationService;
         private readonly IInfractionService _infractions;
-
-
+        
         public MuteCommand(ConfigService configService, IModerationService moderationService, IInfractionService infractions)
         {
             _configService = configService;
