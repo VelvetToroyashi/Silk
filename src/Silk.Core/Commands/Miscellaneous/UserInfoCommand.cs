@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -45,24 +44,7 @@ namespace Silk.Core.Commands.Miscellaneous
 
             await ctx.RespondAsync(embed);
         }
-
-        [Command("info")]
-        [Description("Get info about a member")]
-        public async Task GetUserInfo(CommandContext ctx, DiscordUser member)
-        {
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithAuthor(member.Username, iconUrl: member.AvatarUrl)
-                .WithDescription($"Information about {member.Mention}!")
-                .WithColor(DiscordColor.Goldenrod);
-            
-            embed.AddField("Name:", member.Username);
-            embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow)})");
-            
-            embed.AddField("Flags:", string.IsNullOrWhiteSpace(member.Flags.ToString()) ? "None" : member.Flags.ToString());
-            embed.AddField("Bot:", member.IsBot.ToString());
-            await ctx.RespondAsync(embed);
-        }
-
+        
         [Command("info")]
         [Description("Get info about a member")]
         public async Task GetUserInfo(CommandContext ctx, DiscordMember member)
@@ -73,13 +55,13 @@ namespace Silk.Core.Commands.Miscellaneous
                 .WithColor(DiscordColor.Orange);
 
             var status = string.Empty;
-            DiscordEmoji? emoji = null;
+            DiscordEmoji? emoji;
 
             try
             {
                 emoji = GetPresenceEmoji(ctx.Client, member, out status);
             }
-            catch (Exception)
+            catch
             {
                 // If here, emoji wasn't able to be grabbed from Guild and threw an exception
                 emoji = DiscordEmoji.FromName(ctx.Client, ":question:");
@@ -87,7 +69,7 @@ namespace Silk.Core.Commands.Miscellaneous
 
             embed.AddField("Status:", $"{emoji}  {status}");
             embed.AddField("Name:", member.Username);
-            embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
+            embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow)})");
 
             List<string> roleList = member.Roles
                 .OrderByDescending(r => r.Position)
@@ -125,51 +107,34 @@ namespace Silk.Core.Commands.Miscellaneous
 
             return roleString;
         }
-
-        private static string GetCreationTime(DateTimeOffset offset)
-        {
-            TimeSpan creationTime = DateTime.Now.Subtract(offset.DateTime);
-            var sb = new StringBuilder();
-            if (creationTime.Days > 365)
-            {
-                int years = creationTime.Days / 365;
-                sb.Append($"{years} {(years > 1 ? "years" : "year")}, ");
-                creationTime = creationTime.Subtract(TimeSpan.FromDays(years * 365));
-            }
-
-            if (creationTime.Days > 30)
-            {
-                int months = creationTime.Days / 30;
-                sb.Append($"{months} {(months > 1 ? "months" : "month")}, ");
-                creationTime = creationTime.Subtract(TimeSpan.FromDays(months * 30));
-            }
-
-            sb.Append($"{creationTime.Days} {(creationTime.Days > 1 ? "days" : "day")}");
-
-            return sb.ToString();
-        }
-
+        
         private static DiscordEmoji GetPresenceEmoji(DiscordClient client, DiscordUser member, out string status)
         {
             status = string.Empty;
+            DiscordEmoji emoji = null!;
             switch (member.Presence?.Status)
             {
                 case UserStatus.Online:
                     status = "Online";
-                    return DiscordEmoji.FromGuildEmote(client, 743339430672203796);
+                    return DiscordEmoji.TryFromGuildEmote(client, 743339430672203796, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟢");
                 case UserStatus.Idle:
                     status = "Away";
-                    return DiscordEmoji.FromGuildEmote(client, 743339431720910889);
+                    return DiscordEmoji.TryFromGuildEmote(client, 743339431720910889, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟡");
                 case UserStatus.DoNotDisturb:
                     status = "Do Not Disturb";
-                    return DiscordEmoji.FromGuildEmote(client, 743339431632568450);
+                    return DiscordEmoji.TryFromGuildEmote(client, 743339431632568450, out emoji) ? emoji : DiscordEmoji.FromUnicode("🔴");
                 case UserStatus.Offline:
                     status = "Offline";
-                    return DiscordEmoji.FromGuildEmote(client, 743339431905198100);
+                    return DiscordEmoji.TryFromGuildEmote(client, 743339431905198100, out emoji) ? emoji : DiscordEmoji.FromUnicode("⚫");
+                case UserStatus.Invisible:
+                    break;
+                case null:
+                    break;
                 default:
                     status = "Offline";
                     return DiscordEmoji.FromGuildEmote(client, 743339431905198100);
             }
+            return emoji;
         }
     }
 }
