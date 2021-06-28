@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Humanizer;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -64,9 +66,10 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync(message);
                 return;
             }
-            
+            var sw = Stopwatch.StartNew();
             var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
-            await ctx.RespondAsync($"Mute result returned {res}");
+            sw.Stop();
+            await ctx.RespondAsync($"Mute result returned {res.Humanize(LetterCasing.Sentence)} in {sw.ElapsedMilliseconds} ms");
         }
 
         [Priority(1)]
