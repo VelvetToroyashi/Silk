@@ -16,11 +16,6 @@ namespace Silk.Extensions
 
         public static string GetRoleMention(this DiscordMember member) => member.Roles.Last().Mention;
 
-        public static bool IsAbove(this DiscordMember target, DiscordMember comparison)
-        {
-            return target.Roles.Any() &&
-                   target.Roles.Max(r => r.Position) >=
-                   comparison.Roles.Max(r => r.Position);
-        }
+        public static bool IsAbove(this DiscordMember target, DiscordMember comparison) => target.Roles.Any() && target.Hierarchy >= comparison.Hierarchy;
     }
 }

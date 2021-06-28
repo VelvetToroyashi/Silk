@@ -33,7 +33,7 @@ namespace Silk.Core.Commands.Miscellaneous
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle($"Info for {role.Name} ( {role.Id} ):")
                 .AddField("Color:", role.Color.ToString())
-                .AddField("Created:", role.CreationTimestamp.Date.ToShortDateString())
+                .AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp.Date - DateTime.UtcNow)})")
                 .AddField("Hoisted:", role.IsHoisted.ToString())
                 .AddField("Hierarchy:", GetHierarchy(ctx, role))
                 .AddField("Bot role:", role.IsManaged.ToString())
@@ -53,27 +53,12 @@ namespace Silk.Core.Commands.Miscellaneous
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor(member.Username, iconUrl: member.AvatarUrl)
                 .WithDescription($"Information about {member.Mention}!")
-                .WithColor(DiscordColor.Orange);
-
-            var status = string.Empty;
-            DiscordEmoji? emoji = null;
-
-            try
-            {
-                emoji = GetPresenceEmoji(ctx.Client, member, out status);
-            }
-            catch (Exception)
-            {
-                // If here, emoji wasn't able to be grabbed from Guild and threw an exception
-                emoji = DiscordEmoji.FromName(ctx.Client, ":question:");
-            }
-
-            embed.AddField("Status:", $"{emoji}  {status}");
+                .WithColor(DiscordColor.Goldenrod);
+            
             embed.AddField("Name:", member.Username);
-            embed.AddField("Creation Date:", GetCreationTime(member.CreationTimestamp) + " ago");
-
-
-            embed.AddField("Flags:", member.Flags.ToString() == "" ? "None" : member.Flags.ToString());
+            embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow)})");
+            
+            embed.AddField("Flags:", string.IsNullOrWhiteSpace(member.Flags.ToString()) ? "None" : member.Flags.ToString());
             embed.AddField("Bot:", member.IsBot.ToString());
             await ctx.RespondAsync(embed);
         }
@@ -122,9 +107,9 @@ namespace Silk.Core.Commands.Miscellaneous
 
             DiscordRole? rle = null;
 
-            IOrderedEnumerable<DiscordRole> roles = ctx.Guild.Roles.Values.OrderBy(r => r.Position);
+            var roles = ctx.Guild.Roles.Values.OrderBy(r => r.Position).ToArray();
 
-            if (roles.Any(r => r.Position > role.Position))
+            if (roles.Any(r1 => r1.Position > role.Position))
             {
                 hasAboveRole = true;
                 rle = roles.First(r => r.Position > role.Position);
@@ -132,11 +117,11 @@ namespace Silk.Core.Commands.Miscellaneous
             }
 
             roleString += $"{(hasAboveRole ? "⠀⠀↑" : "")}\n{role.Mention}\n";
-            if (roles.Any(r => r.Position < role.Position))
-            {
-                rle = roles.Last(r => r.Position < role.Position);
-                roleString += $"⠀⠀↑\n{rle.Mention}";
-            }
+            if (!roles.Any(r => r.Position < role.Position)) 
+                return roleString;
+
+            rle = roles.Last(r => r.Position < role.Position);
+            roleString += $"⠀⠀↑\n{rle.Mention}";
 
             return roleString;
         }
