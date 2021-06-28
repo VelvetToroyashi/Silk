@@ -338,6 +338,7 @@ namespace Silk.Core.Services.Server
 			}
 			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
+			_updater.UpdateGuild(guild.Id);
 			return mute;
 		}
 	    

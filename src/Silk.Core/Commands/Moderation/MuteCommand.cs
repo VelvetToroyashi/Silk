@@ -39,7 +39,6 @@ namespace Silk.Core.Commands.Moderation
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
 
-
             if (user.IsAbove(bot))
             {
                 int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
