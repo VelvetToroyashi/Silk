@@ -1,4 +1,9 @@
-﻿namespace Silk.Shared.Configuration
+﻿using System.Collections.Generic;
+using System.Reflection;
+using Serilog;
+using Silk.Shared.Constants;
+
+namespace Silk.Shared.Configuration
 {
     /// <summary>
     /// A class which holds configuration information bound from an AppSettings or UserSecrets file.
@@ -50,11 +55,9 @@
         public SilkE621Options E621 { get; set; }
 
         /// <summary>
-        /// Convenience method to compose the ConnectionString based on the provided Persistence options
-        /// <see cref="SilkPersistenceOptions"/>
+        /// Property for holding serialized emoji Ids in json form to populate <see cref="Silk.Shared.Constants.Emojis"/>.
         /// </summary>
-        /// <returns>The full connection string given the options, or invalid/incomplete connection string if pieces of configuration file are left blank</returns>
-        public string GetConnectionString() => $"Server={Persistence.Host};Port={Persistence.Port};Database={Persistence.Database};Username={Persistence.Username};Password={Persistence.Password};";
+        public SilkEmojiOptions? Emojis { get; set; }
     }
 
     /// <summary>
@@ -87,11 +90,31 @@
     }
 
     /// <summary>
-    /// Class which holds configuration information for the E621 Api properties
+    /// Class which holds configuration information for the E621 Api properties.
+    ///
+    /// 99% of content will be accessible without this, but <i>some</i> content may be on the public blacklist. Use at your own discretion.
     /// </summary>
     public class SilkE621Options
     {
         public string ApiKey { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
+    }
+
+    public class SilkEmojiOptions
+    {
+        public Dictionary<string, ulong> EmojiIds { get; set; }
+
+        public void PopulateEmojiConstants()
+        {
+            foreach (var prop in typeof(Emojis).GetProperties(BindingFlags.Static | BindingFlags.Public))
+            {
+                if (!EmojiIds.TryGetValue(prop.Name, out var val)) continue;
+                
+                prop.SetValue(null, val);
+                Log.Logger.Verbose("Successfully set {Property} to {Value}", prop.Name, val);
+
+
+            }
+        }
     }
 }

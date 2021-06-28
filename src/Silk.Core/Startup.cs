@@ -127,11 +127,15 @@ namespace Silk.Core
             return builder.ConfigureServices((context, services) =>
             {
                 IConfiguration? config = context.Configuration;
-                
+                var silkConfig = config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
                 AddSilkConfigurationOptions(services, config);
-                AddDatabases(services, config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>().Persistence);
+                AddDatabases(services, silkConfig.Persistence);
                 
                 if (!addServices) return;
+                
+                if (silkConfig.Emojis?.EmojiIds is not null)
+                    silkConfig.Emojis.PopulateEmojiConstants();    
+                
                 services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
                 services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
