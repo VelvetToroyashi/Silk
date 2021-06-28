@@ -64,6 +64,8 @@ namespace Silk.Core.Data.MediatR.Guilds
         public async Task<GuildConfig?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
         {
             GuildConfig config = await _db.GuildConfigs
+                .Include(c => c.RoleMenuMenus)
+                .Include(c => c.InfractionSteps)
                 .Include(c => c.SelfAssignableRoles)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);

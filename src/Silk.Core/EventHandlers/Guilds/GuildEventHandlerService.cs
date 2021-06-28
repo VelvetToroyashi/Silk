@@ -138,7 +138,7 @@ namespace Silk.Core.EventHandlers.Guilds
         private async Task<int> CacheMembersAsync(IEnumerable<DiscordMember> members)
         {
             var staffCount = 0;
-            List<DiscordMember> staff = members.Where(m => !m.IsBot && (m.HasPermission(FlagConstants.CacheFlag) || m.IsAdministrator() || m.IsOwner)).ToList();
+            List<DiscordMember> staff = members.Where(m => !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag)).ToList();
 
             foreach (var member in staff)
             {

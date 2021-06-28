@@ -309,7 +309,7 @@ namespace Silk.Core.Services.Server
 			
 			var channels = guild.Channels.Values
 				.OfType(ChannelType.Text)
-				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels | Permissions.AccessChannels | Permissions.SendMessages))
+				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels | Permissions.AccessChannels | Permissions.SendMessages | Permissions.ManageRoles))
 				.ToArray();
 			
 			foreach (var role in guild.Roles.Values)
@@ -332,9 +332,9 @@ namespace Silk.Core.Services.Server
 
 			foreach (var c in channels)
 			{
-				if (!c.PermissionsFor(member).HasPermission(Permissions.SendMessages))
+				if (!c.PermissionsFor(member).HasPermission(Permissions.SendMessages | Permissions.AccessChannels))
 					continue;
-				await c.AddOverwriteAsync(mute, Permissions.AccessChannels, Permissions.SendMessages);
+				await c.AddOverwriteAsync(mute, Permissions.None, Permissions.SendMessages);
 			}
 			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});

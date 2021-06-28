@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (user.IsAbove(ctx.Member))
+            if (false && user.IsAbove(ctx.Member))
             {
                 int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
