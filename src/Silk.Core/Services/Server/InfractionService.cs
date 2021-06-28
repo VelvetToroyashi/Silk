@@ -312,31 +312,31 @@ namespace Silk.Core.Services.Server
 				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels | Permissions.AccessChannels | Permissions.SendMessages))
 				.ToArray();
 			
-			// foreach (var role in guild.Roles.Values)
-			// {
-			// 	if (role.Position <= member.Hierarchy)
-			// 		continue;
-			// 	
-			// 	if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
-			// 		continue;
-			//
-			// 	await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
-			// 	return role;
-			// }
+			foreach (var role in guild.Roles.Values)
+			{
+				if (role.Position <= member.Hierarchy)
+					continue;
+
+				if (member.Roles.Contains(role))
+					continue;
+				
+				if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
+					continue;
 			
+				await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+				return role;
+			}
 			
 			DiscordRole mute = await guild.CreateRoleAsync("Muted", null, new("#363636"), false, false, "Mute role was not present on guild");
 			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
-			DiscordChannel chn = null!;
+
 			foreach (var c in channels)
 			{
 				if (!c.PermissionsFor(member).HasPermission(Permissions.SendMessages))
 					continue;
-				chn = c;
 				await c.AddOverwriteAsync(mute, Permissions.AccessChannels, Permissions.SendMessages);
 			}
-
-
+			
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
 			return mute;
 		}
@@ -348,27 +348,27 @@ namespace Silk.Core.Services.Server
 	    {
 		    GuildConfig config = await _config.GetConfigAsync(guildId);
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+
+		    if (config.LoggingChannel is not 0)
+			    return;
 		    
-		    if (config.LoggingChannel is 0)
+		    if (!guild.CurrentMember.HasPermission(Permissions.ManageChannels))
+			    return; /* We can't create channels. Sad. */
+
+		    try
 		    {
-			    if (!guild.CurrentMember.HasPermission(Permissions.ManageChannels))
-				    return; /* We can't create channels. Sad. */
-
-			    try
+			    var overwrites = new DiscordOverwriteBuilder[]
 			    {
-				    var overwrites = new DiscordOverwriteBuilder[]
-				    {
-					    new(guild.EveryoneRole) {Denied = Permissions.AccessChannels},
-					    new(guild.CurrentMember) {Allowed = Permissions.AccessChannels}
-				    };
+				    new(guild.EveryoneRole) {Denied = Permissions.AccessChannels},
+				    new(guild.CurrentMember) {Allowed = Permissions.AccessChannels}
+			    };
 
-				    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.OfType(ChannelType.Category).Last(), overwrites: overwrites);
-				    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
-				    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
-				    _updater.UpdateGuild(guildId);
-			    }
-			    catch { /* Igonre. We can't do anything about it :( */ }
+			    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.OfType(ChannelType.Category).Last(), overwrites: overwrites);
+			    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
+			    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
+			    _updater.UpdateGuild(guildId);
 		    }
+		    catch { /* Igonre. We can't do anything about it :( */ }
 	    }
     }
 }
