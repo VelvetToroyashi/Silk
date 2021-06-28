@@ -110,9 +110,12 @@ namespace Silk.Core.Services.Server
 				return InfractionResult.FailedSelfPermissions;
 			}
 		}
-	    public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
-	    public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
-	    {
+	    
+		public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
+	    
+		public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
+		{
+			return false;
 		    var memInf = _mutes.Contains((userId, guildId));
 		    
 		    if (memInf)
@@ -122,6 +125,7 @@ namespace Silk.Core.Services.Server
 
 		    return dbInf.Any(inf => !inf.Rescinded && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 	    }
+	    
 	    public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 	    {
 		    if (await IsMutedAsync(userId, guildId))
@@ -305,29 +309,34 @@ namespace Silk.Core.Services.Server
 			
 			var channels = guild.Channels.Values
 				.OfType(ChannelType.Text)
-				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels))
+				.Where(c => guild.CurrentMember.PermissionsIn(c).HasPermission(Permissions.ManageChannels | Permissions.AccessChannels | Permissions.SendMessages))
 				.ToArray();
 			
-			foreach (var role in guild.Roles.Values)
-			{
-				if (role.Position <= member.Hierarchy)
-					continue;
-				
-				if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
-					continue;
-
-				await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
-				return role;
-			}
+			// foreach (var role in guild.Roles.Values)
+			// {
+			// 	if (role.Position <= member.Hierarchy)
+			// 		continue;
+			// 	
+			// 	if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
+			// 		continue;
+			//
+			// 	await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+			// 	return role;
+			// }
 			
 			
-			DiscordRole mute = await guild.CreateRoleAsync("Muted", Permissions.None | Permissions.AccessChannels | Permissions.ReadMessageHistory, new("#363636"), false, false, "Mute role was not present on guild");
+			DiscordRole mute = await guild.CreateRoleAsync("Muted", null, new("#363636"), false, false, "Mute role was not present on guild");
 			await mute.ModifyPositionAsync(guild.CurrentMember.Hierarchy - 1);
-
-			
+			DiscordChannel chn = null!;
 			foreach (var c in channels)
-				await c.AddOverwriteAsync(mute, Permissions.None, Permissions.SendMessages);
-			
+			{
+				if (!c.PermissionsFor(member).HasPermission(Permissions.SendMessages))
+					continue;
+				chn = c;
+				await c.AddOverwriteAsync(mute, Permissions.AccessChannels, Permissions.SendMessages);
+			}
+
+
 			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
 			return mute;
 		}
