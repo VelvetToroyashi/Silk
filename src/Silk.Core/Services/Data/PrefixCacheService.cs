@@ -1,30 +1,25 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
-using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Data
 {
     /// <inheritdoc cref="IPrefixCacheService" />
-    public class PrefixCacheService : IPrefixCacheService
+    public sealed class PrefixCacheService : IPrefixCacheService
     {
-        private readonly ConcurrentDictionary<ulong, string> _cache = new();
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        private readonly ILogger _logger;
+        private readonly IMediator _mediator;
+        private readonly ILogger<PrefixCacheService> _logger;
         private readonly IMemoryCache _memoryCache;
-        private readonly Stopwatch _sw = new();
-        public PrefixCacheService(ILogger<PrefixCacheService> logger, IDbContextFactory<GuildContext> dbFactory, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater)
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
         {
             _logger = logger;
-            _dbFactory = dbFactory;
             _memoryCache = memoryCache;
+            _mediator = mediator;
 
             cacheUpdater.ConfigUpdated += PurgeCache;
         }
@@ -32,11 +27,10 @@ namespace Silk.Core.Services.Data
         [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         public string RetrievePrefix(ulong? guildId)
         {
-            if (guildId == default || guildId == 0) return string.Empty;
+            if (guildId is null or 0) return string.Empty;
             if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string) prefix;
-            return GetPrefixFromDatabase(guildId.Value);
+            return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
         }
-
 
         // I don't know if updating a reference will update 
         public void UpdatePrefix(ulong id, string prefix)
@@ -48,32 +42,15 @@ namespace Silk.Core.Services.Data
             _logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
         }
 
-        public void PurgeCache(ulong id)
+        public void PurgeCache(ulong id) => _ = GetDatabasePrefixAsync(id);
+
+        private async Task<string> GetDatabasePrefixAsync(ulong guildId)
         {
-            _cache.TryRemove(id, out _);
-            //GetPrefix caches, so no need for the result.//
-            _ = GetPrefixFromDatabase(id);
-        }
-
-        private string GetPrefixFromDatabase(ulong guildId)
-        {
-            _sw.Restart();
-
-            GuildContext db = _dbFactory.CreateDbContext();
-
-            Guild? guild = db.Guilds.AsNoTracking().FirstOrDefault(g => g.Id == guildId);
-            if (guild is null)
-            {
-                _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database");
-                return StringConstants.DefaultCommandPrefix;
-            }
+            Guild guild = await _mediator.Send(new GetGuildRequest(guildId));
             _memoryCache.Set(GetGuildString(guildId), guild.Prefix);
             return guild.Prefix;
         }
 
-        private static string GetGuildString(ulong id)
-        {
-            return $"GUILD_PREFIX_KEY_{id}";
-        }
+        private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
     }
 }
