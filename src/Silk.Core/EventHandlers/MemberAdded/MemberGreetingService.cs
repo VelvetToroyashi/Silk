@@ -28,7 +28,9 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
-            GuildConfig config = await _configService.GetConfigAsync(e.Guild.Id);
+            GuildConfig? config = await _configService.GetConfigAsync(e.Guild.Id);
+            if (config is null) // Wasn't cached yet //
+                return;
             // This should be done in a seperate service //
             if (config.LogMemberJoins && config.LoggingChannel is not 0)
                 await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
