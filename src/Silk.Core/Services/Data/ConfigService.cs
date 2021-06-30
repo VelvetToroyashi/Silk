@@ -21,7 +21,7 @@ namespace Silk.Core.Services.Data
             updater.ConfigUpdated += u => cache.Remove(u);
         }
 
-        public async ValueTask<GuildConfig?> GetConfigAsync(ulong guildId)
+        public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
         {
             if (_cache.TryGetValue(guildId, out GuildConfig config)) return config;
             return await GetConfigFromDatabaseAsync(guildId);
