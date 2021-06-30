@@ -24,15 +24,17 @@ namespace Silk.Core.Commands.Bot
         [Priority(1)]
         public async Task EvalCS(CommandContext ctx)
         {
-            if (ctx.Message.ReferencedMessage is null && ctx.Message.Content.Length > ctx.Prefix.Length + 4) await EvalCS(ctx, ctx.RawArgumentString);
+            if (ctx.Message.ReferencedMessage is null ^ ctx.Message.Content.Length > ctx.Prefix.Length + 4) 
+                await EvalCS(ctx, ctx.RawArgumentString);
             else
             {
-                string? code = ctx.Message.ReferencedMessage!.Content;
-                if (code.Contains(ctx.Prefix))
+                string? code = ctx.Message.ReferencedMessage?.Content ?? ctx.Message.Content;
+                if (code?.Contains(ctx.Prefix) ?? false)
                 {
                     int index = code.IndexOf(' ');
                     code = code[++index..];
                 }
+                
                 await EvalCS(ctx, code);
             }
         }
