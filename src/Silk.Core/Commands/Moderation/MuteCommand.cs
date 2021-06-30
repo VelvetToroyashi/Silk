@@ -76,9 +76,10 @@ namespace Silk.Core.Commands.Moderation
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;
+
             if (user.IsAbove(bot))
             {
-                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -89,9 +90,9 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (user.IsAbove(ctx.Member))
+            if (false && user.IsAbove(ctx.Member))
             {
-                int roleDiff = user.Roles.Max()!.Position - ctx.Member.Roles.Max()!.Position;
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
 
                 message = roleDiff is not 0 ?
@@ -101,20 +102,9 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync(message);
                 return;
             }
-
-            GuildConfig config = (await _configService.GetConfigAsync(ctx.Guild.Id))!;
-
-            if (config.MuteRoleId is 0)
-            {
-                await ctx.RespondAsync("Mute role isn't configured on this server!"); // TODO: Generate mute role on-demand. 
-                return;
-            }
-
-            Infraction infraction = await _moderationService.CreateTempInfractionAsync(user, ctx.Member,
-                InfractionType.Mute, reason, DateTime.Now.Add(duration));
-
-            await _moderationService.MuteAsync(user, ctx.Channel, infraction);
-            await ctx.RespondAsync($":white_check_mark: Muted {user.Username}.");
-        }
+            var sw = Stopwatch.StartNew();
+            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
+            sw.Stop();
+            await ctx.RespondAsync($"Mute result returned {res.Humanize(LetterCasing.Sentence)} in {sw.ElapsedMilliseconds} ms");        }
     }
 }
