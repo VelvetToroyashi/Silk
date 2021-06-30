@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -23,13 +24,15 @@ namespace Silk.Core.Data.MediatR.Infractions
 
 		public async Task<InfractionDTO> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
 		{
-			var guild = await _db.Guilds
-				.Include(g => g.Infractions)
-				.FirstAsync(g => g.Id == request.Guild, cancellationToken);
+			var guildInfracionCount = await _db.Infractions
+				.Where(inf => inf.InfractionType != InfractionType.Note)
+				.Where(inf => inf.GuildId == request.Guild)				
+				.MaxAsync(inf => inf.CaseNumber) + 1;
 
 			var infraction = new Infraction
 			{
 				GuildId = request.Guild,
+				CaseNumber = guildInfracionCount,
 				Enforcer = request.Enforcer,
 				Reason = request.Reason,
 				HeldAgainstUser = request.HeldAgainstUser,
@@ -38,8 +41,8 @@ namespace Silk.Core.Data.MediatR.Infractions
 				UserId = request.User,
 				InfractionType = request.Type
 			};
-			
-			guild.Infractions.Add(infraction);
+
+			_db.Infractions.Add(infraction);
 			await _mediator.Send(new GetOrCreateUserRequest(request.Guild, request.User), cancellationToken);
 			
 			await _db.SaveChangesAsync(cancellationToken);
