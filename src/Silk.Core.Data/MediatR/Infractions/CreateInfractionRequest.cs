@@ -27,7 +27,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 			var guildInfracionCount = await _db.Infractions
 				.Where(inf => inf.InfractionType != InfractionType.Note)
 				.Where(inf => inf.GuildId == request.Guild)				
-				.MaxAsync(inf => inf.CaseNumber) + 1;
+				.CountAsync(cancellationToken) + 1;
 
 			var infraction = new Infraction
 			{

@@ -158,18 +158,20 @@ namespace Silk.Core.Services.Server
 						Anyway thanks for coming to my TedTalk
 					 */
 				}
-				else
+				
+				muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
+				/* It *should* be almost impossible for someone to leave a server this fast without selfbotting */
+				try
 				{
-					muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
-					/* It *should* be almost impossible for someone to leave a server this fast without selfbotting */
-					try
-					{
-						await guild.Members[userId].GrantRoleAsync(muteRole, "Reapplying active mute.");
-					}
-					catch (NotFoundException) { }
-					catch (ServerErrorException) { }
-					catch (UnauthorizedException) { }
+					var mem = guild.Members[userId];
+					
+					if (!mem.Roles.Contains(muteRole))
+						await mem.GrantRoleAsync(muteRole, "Reapplying active mute.");
 				}
+				catch (NotFoundException) { }
+				catch (ServerErrorException) { }
+				catch (UnauthorizedException) { }
+				
 				
 				return InfractionResult.SucceededDoesNotNotify;
 			}
@@ -302,28 +304,15 @@ namespace Silk.Core.Services.Server
 		    var user = await _client.ShardClients[0].GetUserAsync(infOld.UserId); /* User may not exist on the server anymore. */
 		    var enforcer = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId].Members[infNew.EnforcerId];
 
-		    var oldInf = GenerateUpdateEmbed(user, enforcer, infOld);
-		    var newInf = GenerateUpdateEmbed(user, enforcer, infNew);
+		    var infractionEmbeds = GenerateUpdateEmbed(user, enforcer, infOld, infNew);
 
-		    var expiry = (infOld.Duration, infNew.Duration) switch
-		    {
-			    (TimeSpan t, null) => $"{Formatter.Timestamp(t, TimestampFormat.LongDateTime)} → Never", 
-			    (null, TimeSpan t) => $"Never → {Formatter.Timestamp(t, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(t)})",
-			    (TimeSpan t1, TimeSpan t2) when t1 != t2 => $"{Formatter.Timestamp(t1, TimestampFormat.LongDateTime)}\t↓\n{Formatter.Timestamp(t2, TimestampFormat.LongDateTime)}",
-			    (null, null) => "Never",
-			    _ => throw new()
-		    };
-		    
-		    
 		    try
 		    {
 			    var builder = new DiscordMessageBuilder();
-
-			    if (infOld.Type is not (InfractionType.Mute or InfractionType.AutoModMute or InfractionType.SoftBan))
-				    builder.AddEmbed(oldInf);
-			    else newInf.AddField("Expiration:", expiry);
 			    
-			    await chn.SendMessageAsync(builder);
+			    builder.AddEmbeds(infractionEmbeds);
+			    
+			     await chn.SendMessageAsync(builder);
 		    }
 		    catch (UnauthorizedException) 
 		    { 
@@ -335,22 +324,44 @@ namespace Silk.Core.Services.Server
 		    return InfractionResult.SucceededDoesNotNotify;
 
 
-		    DiscordEmbedBuilder GenerateUpdateEmbed(DiscordUser victim, DiscordUser enforcer, InfractionDTO infraction)
+		    IEnumerable<DiscordEmbed> GenerateUpdateEmbed(DiscordUser victim, DiscordUser enforcer, InfractionDTO infractionOLD, InfractionDTO infractionNEW)
 		    {
 			    var builder = new DiscordEmbedBuilder();
-
-			    return builder
-				    .WithTitle($"Case #{infraction.CaseNumber}")
+			    builder
+				    .WithTitle("An infraction in this guild has been updated.")
 				    .WithAuthor($"{victim.Username}#{victim.Discriminator}", victim.GetUrl(), victim.AvatarUrl)
 				    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
 				    .WithDescription("An infraction in this guild has been updated.")
 				    .WithColor(DiscordColor.Gold)
-				    .AddField("Type:", infraction.Type.Humanize(LetterCasing.Title), true)
-				    .AddField("Created:", Formatter.Timestamp(infraction.CreatedAt, TimestampFormat.LongDateTime), true)
-				    .AddField("​", "​", true)
+				    .AddField("Type:", infractionOLD.Type.Humanize(LetterCasing.Title), true)
+				    .AddField("Created:", Formatter.Timestamp(infractionOLD.CreatedAt, TimestampFormat.LongDateTime), true)
+				    .AddField("Case Number", $"#{infractionOLD.CaseNumber}", true)
 				    .AddField("Offender:", $"**{victim.ToDiscordName()}**\n(`{victim.Id}`)", true)
-				    .AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
-				    .AddField("Reason:", infraction.Reason);
+				    .AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
+					
+			    
+			    if (infractionOLD.Duration.HasValue || infractionNEW.Duration.HasValue)
+			    {
+				    string expiry = (infractionOLD.Duration, infractionNEW.Duration) switch
+				    {
+					    (TimeSpan t1, TimeSpan t2) => $"{Formatter.Timestamp(t1, TimestampFormat.LongDateTime)} → {Formatter.Timestamp(t2, TimestampFormat.LongDateTime)}",
+					    (TimeSpan t, null) => $"{Formatter.Timestamp(t, TimestampFormat.LongDateTime)} → Never",
+					    (null, TimeSpan t) => $"Never → {Formatter.Timestamp(t, TimestampFormat.LongDateTime)}",
+					    (null, null) => "Never"
+				    };
+				    builder.AddField("Expiration", expiry);
+			    }
+			    
+			    if (infractionOLD.Reason.Length < 2000 && infractionNEW.Reason.Length < 2000)
+			    {
+				    if (!string.Equals(infractionOLD.Reason, infractionNEW.Reason))
+					    builder.WithDescription($"Old reason: ```\n\n{infractionOLD.Reason}``` \n\nNew reason: ```\n{infractionNEW.Reason}```");
+				    return new DiscordEmbed[] {builder};
+			    }
+			    
+			    builder.WithFooter("The reason was over 2000 characters, and have been added to a second embed!");
+			    var b2 = new DiscordEmbedBuilder().WithColor(DiscordColor.Gold).WithDescription(infractionNEW.Reason);
+			    return new DiscordEmbed[] {builder, b2};
 		    }
 	    }
 	    
