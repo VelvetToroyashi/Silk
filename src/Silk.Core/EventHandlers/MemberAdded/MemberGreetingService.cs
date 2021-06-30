@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -8,6 +9,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
+using Silk.Core.Types;
 using Silk.Core.Utilities;
 
 namespace Silk.Core.EventHandlers.MemberAdded
@@ -16,12 +18,11 @@ namespace Silk.Core.EventHandlers.MemberAdded
     {
         private readonly ConfigService _configService;
 
-        private readonly Timer _timer = new(5000);
+        private readonly AsyncTimer _timer;
         public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
         {
             _configService = configService;
-            _timer.AutoReset = true;
-            _timer.Elapsed += OnTick;
+            _timer = new(OnTick, TimeSpan.FromSeconds(1));
             _timer.Start();
         }
         public List<DiscordMember> MemberQueue { get; } = new();
@@ -69,22 +70,22 @@ namespace Silk.Core.EventHandlers.MemberAdded
             
             foreach (DiscordMember member in MemberQueue)
             {
-                GuildConfig config = await _configService.GetConfigAsync(member.Guild.Id);
+                GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id))!;
 
-                if (config.GreetingOption is GreetingOption.GreetOnJoin)
-                {
-                    await GreetMemberAsync(member, config);
-                    MemberQueue.Remove(member);
-                    continue;
-                }
-
-                if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true) 
-                    continue;
-                
-                if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole)) 
-                    continue;
+            if (config.GreetingOption is GreetingOption.GreetOnJoin)
+            {
                 await GreetMemberAsync(member, config);
                 MemberQueue.Remove(member);
+                continue;
+            }
+
+            if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true) 
+                continue;
+
+            if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole)) 
+                continue;
+            await GreetMemberAsync(member, config);
+            MemberQueue.Remove(member);
             }
         }
 
