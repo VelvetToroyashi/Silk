@@ -115,10 +115,9 @@ namespace Silk.Core.Services.Server
 	    
 		public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 		{
-			return false;
-		    var memInf = _mutes.Contains((userId, guildId));
+			var isInMemory = _mutes.Contains((userId, guildId));
 		    
-		    if (memInf)
+		    if (isInMemory)
 			    return true;
 
 		    var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
@@ -247,9 +246,73 @@ namespace Silk.Core.Services.Server
 	    /// Sends a message to the appropriate log channel that an infraction (note, reason, or duration) was updated.
 	    /// </summary>
 	    /// <param name="inf"></param>
-	    private async Task LogUpdatedInfractionAsync(InfractionDTO inf)
+	    private async Task<InfractionResult> LogUpdatedInfractionAsync(InfractionDTO infOld, InfractionDTO infNew)
 	    {
+		    await EnsureModLogChannelExistsAsync(infNew.GuildId);
+		    var conf = await _config.GetConfigAsync(infNew.GuildId);
+
+		    var modLog = conf.LoggingChannel;
+		    var guild = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId];
+
+		    if (modLog is 0)
+			    return InfractionResult.FailedNotConfigured;
 		    
+		    if (!guild.Channels.TryGetValue(modLog, out var chn))
+			    return InfractionResult.FailedResourceDeleted;
+
+		    var user = await _client.ShardClients[0].GetUserAsync(infOld.UserId); /* User may not exist on the server anymore. */
+		    var enforcer = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId].Members[infNew.EnforcerId];
+
+		    var oldInf = GenerateUpdateEmbed(user, enforcer, infOld);
+		    var newInf = GenerateUpdateEmbed(user, enforcer, infNew);
+
+		    var expiry = (infOld.Duration, infNew.Duration) switch
+		    {
+			    (TimeSpan t, null) => $"{Formatter.Timestamp(t, TimestampFormat.LongDateTime)} → Never", 
+			    (null, TimeSpan t) => $"Never → {Formatter.Timestamp(t, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(t)})",
+			    (TimeSpan t1, TimeSpan t2) when t1 != t2 => $"{Formatter.Timestamp(t1, TimestampFormat.LongDateTime)}\t↓\n{Formatter.Timestamp(t2, TimestampFormat.LongDateTime)}",
+			    (null, null) => "Never",
+			    _ => throw new()
+		    };
+		    
+		    
+		    try
+		    {
+			    var builder = new DiscordMessageBuilder();
+
+			    if (infOld.Type is not (InfractionType.Mute or InfractionType.AutoModMute or InfractionType.SoftBan))
+				    builder.AddEmbed(oldInf);
+			    else newInf.AddField("Expiration:", expiry);
+			    
+			    await chn.SendMessageAsync(builder);
+		    }
+		    catch (UnauthorizedException) 
+		    { 
+			    /*
+				Log something here, and to the backup channel. 
+				-- Update -- I have no idea wth "the backup channel" is. 
+				*/ 
+		    }
+		    return InfractionResult.SucceededDoesNotNotify;
+
+
+		    DiscordEmbedBuilder GenerateUpdateEmbed(DiscordUser victim, DiscordUser enforcer, InfractionDTO infraction)
+		    {
+			    var builder = new DiscordEmbedBuilder();
+
+			    return builder
+				    .WithTitle($"Case #{infraction.CaseNumber}")
+				    .WithAuthor($"{victim.Username}#{victim.Discriminator}", victim.GetUrl(), victim.AvatarUrl)
+				    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
+				    .WithDescription("An infraction in this guild has been updated.")
+				    .WithColor(DiscordColor.Gold)
+				    .AddField("Type:", infraction.Type.Humanize(LetterCasing.Title), true)
+				    .AddField("Created:", Formatter.Timestamp(infraction.CreatedAt, TimestampFormat.LongDateTime), true)
+				    .AddField("​", "​", true)
+				    .AddField("Offender:", $"**{victim.ToDiscordName()}**\n(`{victim.Id}`)", true)
+				    .AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
+				    .AddField("Reason:", infraction.Reason);
+		    }
 	    }
 	    
 		/// <summary>
@@ -270,10 +333,9 @@ namespace Silk.Core.Services.Server
 		    var enforcer = _client.GetShard(inf.GuildId).Guilds[inf.GuildId].Members[inf.EnforcerId];
 		    
 		    var builder = new DiscordEmbedBuilder();
-		    var infractions = await _mediator.Send(new GetGuildInfractionsRequest(inf.GuildId));
-		    
+
 		    builder
-			    .WithTitle($"Case #{infractions.Count()}")
+			    .WithTitle($"Case #{inf.CaseNumber}")
 			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
 			    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
 			    .WithDescription("A new case has been added to this guild's list of infractions.")

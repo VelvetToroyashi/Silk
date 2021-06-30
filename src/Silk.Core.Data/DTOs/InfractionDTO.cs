@@ -11,13 +11,18 @@ namespace Silk.Core.Data.DTOs
 			: this(infraction.Id, infraction.UserId, 
 				infraction.GuildId, infraction.Enforcer, 
 				infraction.InfractionType, infraction.Reason, 
-				!infraction.HeldAgainstUser, infraction.InfractionTime, 
-				infraction.Expiration - DateTime.UtcNow) { }
-		public InfractionDTO(int id, ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, bool rescinded, DateTime createdAt, TimeSpan? duration = null)
+				!infraction.HeldAgainstUser, infraction.InfractionTime,
+				infraction.CaseNumber, infraction.Expiration - DateTime.UtcNow) { }
+		public InfractionDTO(int id, ulong userId,
+			ulong guildId, ulong enforcerId, 
+			InfractionType type, string reason, 
+			bool rescinded, DateTime createdAt, 
+			int caseNumber, TimeSpan? duration = null)
 		{
 			Id = id;
 			UserId = userId;
 			GuildId = guildId;
+			CaseNumber = caseNumber;
 			Type = type;
 			Reason = reason;
 			Rescinded = rescinded;
@@ -30,10 +35,12 @@ namespace Silk.Core.Data.DTOs
 		public ulong UserId { get; init; }
 		public ulong GuildId { get; init; }
 		public ulong EnforcerId { get; init; }
+		public int CaseNumber { get; init; }
 		public bool Rescinded { get; init; }
 		public DateTime CreatedAt { get; init; }
 		public TimeSpan? Duration { get; init; }
 		public InfractionType Type { get; init; }
 		public string Reason { get; init; }
+		
 	}
 }
