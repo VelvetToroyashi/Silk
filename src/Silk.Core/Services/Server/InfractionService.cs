@@ -127,21 +127,48 @@ namespace Silk.Core.Services.Server
 	    
 	    public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 	    {
-		    if (await IsMutedAsync(userId, guildId))
-		    {
-			    /*We're updating a mute*/
-			    return InfractionResult.SucceededDoesNotNotify;
-		    }
-		    
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    
+			if (await IsMutedAsync(userId, guildId))
+			{
+			    /*We're updating a mute*/
+			    InfractionDTO? inf;
+			    if (_mutes.Contains((userId, guildId)))
+			    {
+				    inf = _infractions
+					    .Find(infract => infract.UserId == userId && infract.GuildId == guildId &&
+					                 infract.Type is InfractionType.Mute or InfractionType.AutoModMute);
+			    }
+			    else
+			    {
+				    inf = (await _mediator.Send(new GetUserInfractionRequest(userId, guildId, InfractionType.Mute)) ??
+				           await _mediator.Send(new GetUserInfractionRequest(userId, guildId, InfractionType.AutoModMute)))!;
+			    }
+				
+			    var newInf = await _mediator.Send(new UpdateInfractionRequest(inf!.Id, expiration, reason));
+			    await LogUpdatedInfractionAsync(inf, newInf);
+
+			    _ = inf = newInf; // Update in memory by-ref //
+			    
+			    return InfractionResult.SucceededDoesNotNotify;
+			}
+		    
+		    
 		    bool exists = guild.Members.TryGetValue(userId, out DiscordMember? member);
 		    
-		    GuildConfig conf = await _config.GetConfigAsync(guildId);
-		    DiscordRole? muteRole = guild.GetRole(conf.MuteRoleId);
+		    GuildConfig? conf = await _config.GetConfigAsync(guildId);
+		    DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 		    
 		    if (conf.MuteRoleId is 0 || muteRole is null)
 			    muteRole = await GenerateMuteRoleAsync(guild, member!);
+		    
+		    InfractionType infractionType = enforcerId == _client.CurrentUser.Id ? InfractionType.AutoModMute : InfractionType.Mute;
+		    InfractionDTO infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, infractionType, reason, expiration);
 
+		    await LogToModChannel(infraction);
+		    _mutes.Add((userId, guildId));
+		    _infractions.Add(infraction);
+		    
 		    try
 		    {
 			    await member!.GrantRoleAsync(muteRole, reason);
@@ -150,11 +177,6 @@ namespace Silk.Core.Services.Server
 		    {
 			    return InfractionResult.FailedMemberGuildCache;
 		    }
-		    
-		    InfractionType infractionType = enforcerId == _client.CurrentUser.Id ? InfractionType.AutoModMute : InfractionType.Mute;
-		    InfractionDTO infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, infractionType, reason, expiration);
-
-		    await LogToModChannel(infraction);
 		    
 		    var notified = false;
 		    
@@ -170,8 +192,7 @@ namespace Silk.Core.Services.Server
 			    catch { /* This could only be unauth'd exception. */ }
 		    }
 
-		    _mutes.Add((userId, guildId));
-		    _infractions.Add(infraction);
+		    
 		    
 		    return notified ?
 			    InfractionResult.SucceededWithNotification : 
