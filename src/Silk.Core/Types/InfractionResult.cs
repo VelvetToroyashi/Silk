@@ -6,6 +6,10 @@
 	public enum InfractionResult
 	{
 		/// <summary>
+		/// The operation failed because the necessary configuration was not set up.
+		/// </summary>
+		FailedNotConfigured,
+		/// <summary>
 		/// Heirarchy [of roles] prevented an operation from being performed.
 		/// </summary>
 		FailedGuildHeirarchy,
@@ -33,5 +37,7 @@
 		/// The operation succeeded, but the member the infraction applies to was not notified.
 		/// </summary>
 		SucceededWithoutNotification,
+		
+		
 	}
 }
