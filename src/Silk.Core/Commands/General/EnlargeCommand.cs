@@ -1,4 +1,4 @@
-﻿/*using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -6,7 +6,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Svg.Skia;
-using SkiaSharp;
 
 namespace Silk.Core.Commands.General
 {
@@ -64,4 +63,4 @@ namespace Silk.Core.Commands.General
             return imageStream;
         }
     }
-}*/
+}
