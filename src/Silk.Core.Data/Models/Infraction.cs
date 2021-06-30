@@ -16,6 +16,11 @@ namespace Silk.Core.Data.Models
         public ulong GuildId { get; set; }
 
         /// <summary>
+        /// The guild-specific case Id of this infraction.
+        /// </summary>
+        public int CaseNumber { get; set; }
+
+        /// <summary>
         ///     The guild this infraction was given on.
         /// </summary>
         public Guild Guild { get; set; }
