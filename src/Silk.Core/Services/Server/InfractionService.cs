@@ -121,43 +121,61 @@ namespace Silk.Core.Services.Server
 			    return true;
 
 		    var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-
-		    return dbInf.Any(inf => !inf.Rescinded && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
-	    }
+		    var inf = dbInf.SingleOrDefault(inf => !inf.Rescinded && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+		    
+		    // ReSharper disable once InvertIf
+		    if (inf is not null)
+		    {
+			    _infractions.Add(inf);
+			    _mutes.Add((userId, guildId));
+		    }
+		    
+		    return inf is not null;
+		}
 	    
 	    public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 	    {
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+		    GuildConfig? conf = await _config.GetConfigAsync(guildId);
+		    DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 		    
 			if (await IsMutedAsync(userId, guildId))
 			{
-			    /*We're updating a mute*/
-			    InfractionDTO? inf;
-			    if (_mutes.Contains((userId, guildId)))
-			    {
-				    inf = _infractions
-					    .Find(infract => infract.UserId == userId && infract.GuildId == guildId &&
-					                 infract.Type is InfractionType.Mute or InfractionType.AutoModMute);
-			    }
-			    else
-			    {
-				    inf = (await _mediator.Send(new GetUserInfractionRequest(userId, guildId, InfractionType.Mute)) ??
-				           await _mediator.Send(new GetUserInfractionRequest(userId, guildId, InfractionType.AutoModMute)))!;
-			    }
-				
-			    var newInf = await _mediator.Send(new UpdateInfractionRequest(inf!.Id, expiration, reason));
-			    await LogUpdatedInfractionAsync(inf, newInf);
+				InfractionDTO? inf = _infractions.Find(inf => inf.UserId == userId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+				/* Repplying mute */
+								
+				if (expiration != inf!.Expiration)
+				{
+					var newInf = await _mediator.Send(new UpdateInfractionRequest(inf!.Id, expiration, reason));
+					await LogUpdatedInfractionAsync(inf, newInf);
 
-			    _ = inf = newInf; // Update in memory by-ref //
-			    
-			    return InfractionResult.SucceededDoesNotNotify;
+					_ = inf = newInf; 
+					/*
+						All that's really necessary is inf = newInf;
+						I don't know why Roslyn analyzers don't pick up on this "usage"; it says it's assigned but never used
+						But if you were to do: inf = newInf; _ = inf;
+						Analyzers are more than happy to say "Yep! This variable is being used. 
+						Anyway thanks for coming to my TedTalk
+					 */
+				}
+				else
+				{
+					muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
+					/* It *should* be almost impossible for someone to leave a server this fast without selfbotting */
+					try
+					{
+						await guild.Members[userId].GrantRoleAsync(muteRole, "Reapplying active mute.");
+					}
+					catch (NotFoundException) { }
+					catch (ServerErrorException) { }
+					catch (UnauthorizedException) { }
+				}
+				
+				return InfractionResult.SucceededDoesNotNotify;
 			}
 		    
 		    
 		    bool exists = guild.Members.TryGetValue(userId, out DiscordMember? member);
-		    
-		    GuildConfig? conf = await _config.GetConfigAsync(guildId);
-		    DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 		    
 		    if (conf.MuteRoleId is 0 || muteRole is null)
 			    muteRole = await GenerateMuteRoleAsync(guild, member!);
