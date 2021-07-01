@@ -37,7 +37,9 @@
 		/// The operation succeeded, but the member the infraction applies to was not notified.
 		/// </summary>
 		SucceededWithoutNotification,
-		
-		
+		/// <summary>
+		/// The operation <i>likely</i> succeeded, but could not log to the configured log channel.
+		/// </summary>
+		FailedLogPermissions
 	}
 }

@@ -28,6 +28,8 @@ namespace Silk.Core.Services.Server
 
 	    private readonly ConfigService _config;
 	    private readonly ICacheUpdaterService _updater;
+
+	    private readonly InfractionStep _ignoreStep = new() {Type = InfractionType.Ignore};
 	    
 		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
 		private readonly List<InfractionDTO> _infractions = new();
@@ -211,18 +213,27 @@ namespace Silk.Core.Services.Server
 			    }
 			    catch { /* This could only be unauth'd exception. */ }
 		    }
-
-		    
 		    
 		    return notified ?
 			    InfractionResult.SucceededWithNotification : 
 			    InfractionResult.SucceededWithoutNotification;
 	    }
 
-	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
-	    {
-		    return null;
-	    }
+		public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
+		{
+		    GuildConfig conf = await _config.GetConfigAsync(guildId);
+		    if (!conf.InfractionSteps.Any())
+			    return _ignoreStep;
+		    
+		    var infractionCount = GetElegibleInfractions(infractions);
+		    var infLevels = conf.InfractionSteps;
+
+		    int index = Math.Max(infLevels.Count - 1, infractionCount - 1);
+
+		    return infLevels[index];
+		    int GetElegibleInfractions(IEnumerable<InfractionDTO> inf) => inf.Count(i => !i.Rescinded && i.EnforcerId == _client.CurrentUser.Id);
+		}
+	    
 	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration) 
 		    => _mediator.Send(new CreateInfractionRequest(userId, enforcerId, guildId, reason, type, expiration));
 	    
@@ -314,12 +325,9 @@ namespace Silk.Core.Services.Server
 			    
 			     await chn.SendMessageAsync(builder);
 		    }
-		    catch (UnauthorizedException) 
-		    { 
-			    /*
-				Log something here, and to the backup channel. 
-				-- Update -- I have no idea wth "the backup channel" is. 
-				*/ 
+		    catch (UnauthorizedException)
+		    {
+			    return InfractionResult.FailedLogPermissions;
 		    }
 		    return InfractionResult.SucceededDoesNotNotify;
 
