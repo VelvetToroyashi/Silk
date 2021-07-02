@@ -31,25 +31,40 @@ namespace Silk.Core.Commands.Moderation
 		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			var esclated = await CheckForEscalationAsync(ctx, user, reason);
-			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, esclated);
+			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, esclated.Item1);
+			var response = "";
 			
-			var response = result switch
+			if (esclated.Item1)
 			{
-				InfractionResult.SucceededWithNotification => "Successfully warned user (Notified with Direct Message)",
-				InfractionResult.SucceededWithoutNotification => "Successfully warned user (Failed to Direct Message)",
-				InfractionResult.FailedLogPermissions => "Successfully warned user (Failed to Log).",
-				_ => $"This user's warn has been recorded the API response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
-			};
+				response = result switch
+				{
+					InfractionResult.SucceededWithNotification => $"Successfully {esclated.Item2} (Notified with Direct Message)",
+					InfractionResult.SucceededWithoutNotification => $"Successfully {esclated.Item2} user (Failed to Direct Message)",
+					InfractionResult.FailedLogPermissions => $"Successfully {esclated.Item2} user (Failed to Log).",
+					_ => $"I attempted to {esclated.Item2} {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
+				};
+			}
+			else
+			{
+				response = result switch
+				{
+					InfractionResult.SucceededWithNotification => $"Successfully warned user (Notified with Direct Message)",
+					InfractionResult.SucceededWithoutNotification => $"Successfully warned user (Failed to Direct Message)",
+					InfractionResult.FailedLogPermissions => $"Successfully warned user (Failed to Log).",
+					_ => $"I attempted to warn {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
+				};
+			}
+			
 			await ctx.RespondAsync(response);
 		}
 		
-		private async Task<bool> CheckForEscalationAsync(CommandContext ctx, DiscordUser user, string reason)
+		private async Task<(bool, InfractionType)> CheckForEscalationAsync(CommandContext ctx, DiscordUser user, string reason)
 		{
 			var infractions = await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id));
 			var interactivity = ctx.Client.GetInteractivity();
 			
 			if (infractions.Count(inf => inf.Type != InfractionType.Note) < 6)
-				return false;
+				return (false, default);
 
 			var currentStep = await _infractionHelper.GetCurrentInfractionStepAsync(ctx.Guild.Id, infractions);
 			var currentStepType = currentStep.Type is InfractionType.Ignore ? InfractionType.Ban : currentStep.Type;
@@ -63,12 +78,12 @@ namespace Silk.Core.Commands.Moderation
 			var res = await interactivity.WaitForButtonAsync(msg, ctx.User);
 
 			if (res.TimedOut)
-				return false;
+				return (false, default);
 
 			var escalated = res.Result.Id.StartsWith("escalate");
 			await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new() {Content = escalated ? "Got it." : "Proceeding with strike."});
 			_ = TimedDelete();
-			return escalated;
+			return (escalated, currentStepType);
 
 			async Task TimedDelete()
 			{
