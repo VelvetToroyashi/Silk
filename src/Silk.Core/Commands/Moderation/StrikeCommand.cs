@@ -30,18 +30,18 @@ namespace Silk.Core.Commands.Moderation
 		[RequireFlag(UserFlag.Staff)]
 		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
-			var esclated = await CheckForEscalationAsync(ctx, user, reason);
-			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, esclated.Item1);
+			var escalated = await CheckForEscalationAsync(ctx, user, reason);
+			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, escalated.Item1);
 			var response = "";
 			
-			if (esclated.Item1)
+			if (escalated.Item1)
 			{
 				response = result switch
 				{
-					InfractionResult.SucceededWithNotification => $"Successfully {esclated.Item2} (Notified with Direct Message)",
-					InfractionResult.SucceededWithoutNotification => $"Successfully {esclated.Item2} user (Failed to Direct Message)",
-					InfractionResult.FailedLogPermissions => $"Successfully {esclated.Item2} user (Failed to Log).",
-					_ => $"I attempted to {esclated.Item2} {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
+					InfractionResult.SucceededWithNotification => $"Successfully {escalated.Item2} (Notified with Direct Message)",
+					InfractionResult.SucceededWithoutNotification => $"Successfully {escalated.Item2} user (Failed to Direct Message)",
+					InfractionResult.FailedLogPermissions => $"Successfully {escalated.Item2} user (Failed to Log).",
+					_ => $"I attempted to {escalated.Item2} {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
 				};
 			}
 			else
@@ -71,7 +71,7 @@ namespace Silk.Core.Commands.Moderation
 			var builder = new DiscordMessageBuilder()
 				.WithContent("User has 5 or more infractions on record. Would you like to escalate?")
 				.AddComponents(
-					new DiscordButtonComponent(ButtonStyle.Success, $"escalate_{ctx.Message.Id}", $"Esclate to {currentStepType.Humanize(LetterCasing.Sentence)}", emoji: new(834860005685198938)),
+					new DiscordButtonComponent(ButtonStyle.Success, $"escalate_{ctx.Message.Id}", $"Escalate to {currentStepType.Humanize(LetterCasing.Sentence)}", emoji: new(834860005685198938)),
 					new DiscordButtonComponent(ButtonStyle.Danger, $"do_not_escalate_{ctx.Message.Id}", "Do not escalate", emoji: new(834860005584666644)));
 
 			var msg = await ctx.RespondAsync(builder);
