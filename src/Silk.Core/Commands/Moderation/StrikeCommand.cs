@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Moderation
 		[Command("strike")]
 		[Aliases("warn", "w", "bonk")]
 		[RequireFlag(UserFlag.Staff)]
-		public async Task Strike(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
+		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			var esclated = await CheckForEscalationAsync(ctx, user, reason);
 			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, esclated);
@@ -38,7 +38,7 @@ namespace Silk.Core.Commands.Moderation
 				InfractionResult.SucceededWithNotification => "Successfully warned user (Notified with Direct Message)",
 				InfractionResult.SucceededWithoutNotification => "Successfully warned user (Failed to Direct Message)",
 				InfractionResult.FailedLogPermissions => "Successfully warned user (Failed to Log).",
-				_ => $"The command returned a result that I'm not sure how to respond to! If it makes any sense to you, the response was: {result.Humanize(LetterCasing.Sentence)}"
+				_ => $"This user's warn has been recorded the API response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
 			};
 			await ctx.RespondAsync(response);
 		}
@@ -56,8 +56,8 @@ namespace Silk.Core.Commands.Moderation
 			var builder = new DiscordMessageBuilder()
 				.WithContent("User has 5 or more infractions on record. Would you like to escalate?")
 				.AddComponents(
-					new DiscordButtonComponent(ButtonStyle.Success, $"escalate_{ctx.Message.Id}", $"Esclate to {currentStepType.Humanize(LetterCasing.Sentence)}", emoji: new("✔")),
-					new DiscordButtonComponent(ButtonStyle.Danger, $"do_not_escalate_{ctx.Message.Id}", "Do not escalate", emoji: new("❌")));
+					new DiscordButtonComponent(ButtonStyle.Success, $"escalate_{ctx.Message.Id}", $"Esclate to {currentStepType.Humanize(LetterCasing.Sentence)}", emoji: new(834860005685198938)),
+					new DiscordButtonComponent(ButtonStyle.Danger, $"do_not_escalate_{ctx.Message.Id}", "Do not escalate", emoji: new(834860005584666644)));
 
 			var msg = await ctx.RespondAsync(builder);
 			var res = await interactivity.WaitForButtonAsync(msg, ctx.User);
