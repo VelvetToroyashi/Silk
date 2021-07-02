@@ -105,15 +105,62 @@ namespace Silk.Core.Services.Server
 					_infractions.Add(inf);
 				
 				await LogToModChannel(inf);
-				return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification;
+				return notified ? 
+					InfractionResult.SucceededWithNotification :
+					InfractionResult.SucceededWithoutNotification;
 			}
 			catch (UnauthorizedException) /*Shouldn't happen, but you know.*/
 			{
 				return InfractionResult.FailedSelfPermissions;
 			}
 		}
-	    
-		public async Task StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool isAutoMod = false) { }
+
+		public async Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool autoEscalate = false)
+		{
+			var guild = _client.GetShard(guildId).Guilds[guildId];
+			var enforcer = guild.Members[enforcerId];
+			var exists = guild.Members.TryGetValue(userId, out var victim);
+			var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Strike, reason, null);
+			
+			if (!autoEscalate)
+			{
+				var embed = CreateUserInfractionEmbed(enforcer, guild.Name, InfractionType.Strike, reason);
+
+				var logResult = await LogToModChannel(infraction);
+
+				if (logResult is InfractionResult.FailedLogPermissions)
+					return logResult;
+				
+				if (!exists) 
+					return InfractionResult.FailedMemberGuildCache;
+				
+				try
+				{
+					await victim!.SendMessageAsync(embed);
+					return InfractionResult.SucceededWithNotification;
+				}
+				catch (UnauthorizedException)
+				{
+					return InfractionResult.SucceededWithoutNotification;
+				}
+			}
+			
+			var infractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+			var step = await GetCurrentInfractionStepAsync(guildId, infractions);
+
+			var task = step.Type switch
+			{
+				InfractionType.Ignore when enforcer == _client.CurrentUser => AddNoteAsync(userId, guildId, enforcerId, reason),
+				InfractionType.Ignore when enforcer != _client.CurrentUser => BanAsync(userId, guildId, enforcerId, reason),
+				InfractionType.Kick => KickAsync(userId, guildId, enforcerId, reason),
+				InfractionType.Ban => BanAsync(userId, guildId, enforcerId, reason),
+				InfractionType.SoftBan => BanAsync(userId, guildId, enforcerId, reason, DateTime.UtcNow + step.Duration.Time),
+				InfractionType.Mute => MuteAsync(userId, guildId, enforcerId, reason, DateTime.Now + step.Duration.Time),
+				_ => Task.FromResult(InfractionResult.SucceededDoesNotNotify)
+			};
+			
+			return await task;
+		}
 	    
 		public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 		{
@@ -292,12 +339,11 @@ namespace Silk.Core.Services.Server
 		    
 		    return embed;
 	    }
-		
-	    
+
+
 	    /// <summary>
 	    /// Sends a message to the appropriate log channel that an infraction (note, reason, or duration) was updated.
 	    /// </summary>
-	    /// <param name="inf"></param>
 	    private async Task<InfractionResult> LogUpdatedInfractionAsync(InfractionDTO infOld, InfractionDTO infNew)
 	    {
 		    await EnsureModLogChannelExistsAsync(infNew.GuildId);
@@ -377,7 +423,7 @@ namespace Silk.Core.Services.Server
 		/// Logs to the designated mod-log channel, if any.
 		/// </summary>
 		/// <param name="inf">The infraction to log.</param>
-		private async Task LogToModChannel(InfractionDTO inf)
+		private async Task<InfractionResult> LogToModChannel(InfractionDTO inf)
 		{ 
 			await EnsureModLogChannelExistsAsync(inf.GuildId);
 		    
@@ -385,7 +431,7 @@ namespace Silk.Core.Services.Server
 		    var guild = _client.GetShard(inf.GuildId).Guilds[inf.GuildId];
 		    
 		    if (config.LoggingChannel is 0)
-			    return; /* It couldn't create a mute channel :(*/
+			    return InfractionResult.FailedNotConfigured; /* It couldn't create a mute channel :(*/
 
 		    var user = await _client.ShardClients[0].GetUserAsync(inf.UserId); /* User may not exist on the server anymore. */
 		    var enforcer = _client.GetShard(inf.GuildId).Guilds[inf.GuildId].Members[inf.EnforcerId];
@@ -409,13 +455,11 @@ namespace Silk.Core.Services.Server
 			    builder.AddField("Expires:", Formatter.Timestamp(ts));
 		    
 		    try { await guild.Channels[config.LoggingChannel].SendMessageAsync(builder); }
-		    catch (UnauthorizedException) 
-		    { 
-			    /*
-				Log something here, and to the backup channel. 
-				-- Update -- I have no idea wth "the backup channel" is. 
-				*/ 
+		    catch (UnauthorizedException)
+		    {
+			    return InfractionResult.FailedLogPermissions;
 		    }
+		    return InfractionResult.SucceededDoesNotNotify;
 		}
 		
 		private async Task<DiscordRole> GenerateMuteRoleAsync(DiscordGuild guild, DiscordMember member)
