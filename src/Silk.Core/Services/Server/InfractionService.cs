@@ -67,7 +67,7 @@ namespace Silk.Core.Services.Server
 		    catch (UnauthorizedException) { notified = false; }
 
 		    try { await member.RemoveAsync(reason); }
-		    catch (NotFoundException) { return InfractionResult.FailedMemberGuildCache; }
+		    catch (NotFoundException) { return InfractionResult.FailedGuildMemberCache; }
 		    catch (UnauthorizedException) { return InfractionResult.FailedSelfPermissions; } /* This shouldn't apply, but. */
 
 		    var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Kick, reason, null);
@@ -132,7 +132,7 @@ namespace Silk.Core.Services.Server
 					return logResult;
 				
 				if (!exists) 
-					return InfractionResult.FailedMemberGuildCache;
+					return InfractionResult.FailedGuildMemberCache;
 				
 				try
 				{
@@ -244,7 +244,7 @@ namespace Silk.Core.Services.Server
 		    }
 		    catch (NotFoundException)
 		    {
-			    return InfractionResult.FailedMemberGuildCache;
+			    return InfractionResult.FailedGuildMemberCache;
 		    }
 		    
 		    var notified = false;

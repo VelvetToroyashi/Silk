@@ -20,7 +20,7 @@
 		/// <summary>
 		/// The member the infraction applied to left before or during the operation.
 		/// </summary>
-		FailedMemberGuildCache,
+		FailedGuildMemberCache,
 		/// <summary>
 		/// A necessary resource was configured, but did not exist.
 		/// </summary>
