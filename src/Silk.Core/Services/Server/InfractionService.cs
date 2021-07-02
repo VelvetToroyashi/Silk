@@ -286,12 +286,35 @@ namespace Silk.Core.Services.Server
 	    
 	    public async Task<InfractionResult> AddNoteAsync(ulong userId, ulong guildId, ulong noterId, string note)
 	    {
-		    return InfractionResult.FailedGuildHeirarchy;
+		    var infractionNote = await GenerateInfractionAsync(userId, guildId, noterId, InfractionType.Note, note, null);
+		    
+		    var builder = new DiscordEmbedBuilder();
+		    var guild = _client.GetShard(guildId).Guilds[guildId];
+
+		    DiscordUser? user;
+		    _ = guild.Members.TryGetValue(noterId, out var enforcer);
+		    _ = guild.Members.TryGetValue(userId, out var tmem);
+		    user = tmem;
+		    user ??= await _client.ShardClients[0].GetUserAsync(userId);
+
+		    builder
+			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
+			    .WithThumbnail(enforcer!.AvatarUrl, 4096, 4096)
+			    .WithDescription("A new case has been added to this guild's list of infractions.")
+			    .WithColor(DiscordColor.Gold)
+			    .AddField("Type:", infractionNote.Type.Humanize(LetterCasing.Title), true)
+			    .AddField("Created:", Formatter.Timestamp(infractionNote.CreatedAt, TimestampFormat.LongDateTime), true)
+			    .AddField("Case Id:", $"#{infractionNote.CaseNumber}", true)
+			    .AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
+			    .AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
+			    .AddField("Reason:", infractionNote.Reason);
+		    
+		    return InfractionResult.SucceededDoesNotNotify;
 	    }
 	    public async Task<InfractionResult> UpdateNoteAsync(ulong userId, ulong guildId, ulong noterId, string newNote)
 	    {
 		    
-		    return InfractionResult.FailedGuildHeirarchy;
+		    return InfractionResult.SucceededDoesNotNotify;
 	    }
 
 
@@ -382,14 +405,13 @@ namespace Silk.Core.Services.Server
 		    {
 			    var builder = new DiscordEmbedBuilder();
 			    builder
-				    .WithTitle("An infraction in this guild has been updated.")
 				    .WithAuthor($"{victim.Username}#{victim.Discriminator}", victim.GetUrl(), victim.AvatarUrl)
 				    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
 				    .WithDescription("An infraction in this guild has been updated.")
 				    .WithColor(DiscordColor.Gold)
 				    .AddField("Type:", infractionOLD.Type.Humanize(LetterCasing.Title), true)
 				    .AddField("Created:", Formatter.Timestamp(infractionOLD.CreatedAt, TimestampFormat.LongDateTime), true)
-				    .AddField("Case Number", $"#{infractionOLD.CaseNumber}", true)
+				    .AddField("Case Id:", $"#{infractionOLD.CaseNumber}", true)
 				    .AddField("Offender:", $"**{victim.ToDiscordName()}**\n(`{victim.Id}`)", true)
 				    .AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
 					
@@ -439,14 +461,13 @@ namespace Silk.Core.Services.Server
 		    var builder = new DiscordEmbedBuilder();
 
 		    builder
-			    .WithTitle($"Case #{inf.CaseNumber}")
 			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
 			    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
 			    .WithDescription("A new case has been added to this guild's list of infractions.")
 			    .WithColor(DiscordColor.Gold)
 			    .AddField("Type:", inf.Type.Humanize(LetterCasing.Title), true)
 			    .AddField("Created:", Formatter.Timestamp(inf.CreatedAt, TimestampFormat.LongDateTime), true)
-			    .AddField("​", "​", true)
+			    .AddField("Case Id:", $"#{inf.CaseNumber}", true)
 			    .AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
 			    .AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
 			    .AddField("Reason:", inf.Reason);
