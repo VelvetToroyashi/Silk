@@ -7,7 +7,7 @@ using Silk.Core.Data.DTOs;
 
 namespace Silk.Core.Data.MediatR.Infractions
 {
-	public sealed record UpdateInfractionRequest(int InfractionId, DateTime? Expiration, string? Reason = null) : IRequest<InfractionDTO>;
+	public sealed record UpdateInfractionRequest(int InfractionId, DateTime? Expiration, string? Reason = null, bool Rescinded = false) : IRequest<InfractionDTO>;
 	
 	public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRequest, InfractionDTO>
 	{
