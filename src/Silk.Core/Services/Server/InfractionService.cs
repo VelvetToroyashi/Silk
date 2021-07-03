@@ -309,7 +309,10 @@ namespace Silk.Core.Services.Server
 					    _semaphoreDict[guildId].Release();
 				    }
 			    }
+			    
+			    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason);
 		    }
+		    
 		    _semaphoreDict[guildId].Release();
 		    return InfractionResult.SucceededDoesNotNotify;
 		}
@@ -380,6 +383,11 @@ namespace Silk.Core.Services.Server
 	    }
 	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, DateTime? expiration = null)
 	    {
+		    var infraction = await _mediator.Send(new GetUserInfractionRequest(0, 0, InfractionType.Mute));
+		    await EnsureModLogChannelExistsAsync(infraction!.GuildId);
+		    
+		    
+		    
 		    return InfractionResult.FailedNotConfigured;
 	    }
 
@@ -470,10 +478,10 @@ namespace Silk.Core.Services.Server
 		    {
 			    var builder = new DiscordEmbedBuilder();
 			    builder
-				    .WithAuthor($"{victim.Username}#{victim.Discriminator}", victim.GetUrl(), victim.AvatarUrl)
-				    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
-				    .WithDescription("An infraction in this guild has been updated.")
 				    .WithColor(DiscordColor.Gold)
+				    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
+				    .WithTitle("An infraction in this guild has been updated.")
+				    .WithAuthor($"{victim.Username}#{victim.Discriminator}", victim.GetUrl(), victim.AvatarUrl)
 				    .AddField("Type:", infractionOLD.Type.Humanize(LetterCasing.Title), true)
 				    .AddField("Created:", Formatter.Timestamp(infractionOLD.CreatedAt, TimestampFormat.LongDateTime), true)
 				    .AddField("Case Id:", $"#{infractionOLD.CaseNumber}", true)
