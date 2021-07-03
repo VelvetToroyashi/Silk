@@ -114,6 +114,10 @@ namespace Silk.Core.Services.Server
 				return InfractionResult.FailedSelfPermissions;
 			}
 		}
+		public async Task<InfractionResult> UnBanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
+		{
+			return InfractionResult.FailedNotConfigured;
+		}
 
 		public async Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool autoEscalate = false)
 		{
@@ -265,8 +269,12 @@ namespace Silk.Core.Services.Server
 			    InfractionResult.SucceededWithNotification : 
 			    InfractionResult.SucceededWithoutNotification;
 	    }
+	    public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
+	    {
+		    return InfractionResult.FailedNotConfigured;
+	    }
 
-		public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
+	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
 		{
 		    GuildConfig conf = await _config.GetConfigAsync(guildId);
 		    if (!conf.InfractionSteps.Any())
@@ -330,12 +338,10 @@ namespace Silk.Core.Services.Server
 		    
 		    return InfractionResult.SucceededDoesNotNotify;
 	    }
-	    public async Task<InfractionResult> UpdateNoteAsync(ulong userId, ulong guildId, ulong noterId, string newNote)
+	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, DateTime? expiration = null)
 	    {
-		    
-		    return InfractionResult.SucceededDoesNotNotify;
+		    return InfractionResult.FailedNotConfigured;
 	    }
-
 
 	    /// <summary>
 	    /// Creates a formatted embed to be sent to a user.
