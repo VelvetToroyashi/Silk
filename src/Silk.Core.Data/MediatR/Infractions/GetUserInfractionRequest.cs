@@ -21,8 +21,6 @@ namespace Silk.Core.Data.MediatR.Infractions
 			if (request.CaseId is not null)
 			{
 				inf = await _db.Infractions
-					.Where(inf => inf.UserId == request.UserId)
-					.Where(inf => inf.GuildId == request.GuildId)
 					.Where(inf => inf.CaseNumber == request.CaseId)
 					.SingleOrDefaultAsync(cancellationToken);
 			}
