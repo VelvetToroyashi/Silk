@@ -90,7 +90,10 @@ namespace Silk.Core.EventHandlers.Guilds
 
             DiscordMessageBuilder? builder = new DiscordMessageBuilder()
                 .WithEmbed(embed)
-                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"), new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"), new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"));
+                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"),
+                    new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"),
+                    new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"),
+                    new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source code!"));
 
             await thankYouChannel.SendMessageAsync(builder);
             await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
