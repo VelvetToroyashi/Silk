@@ -21,13 +21,11 @@ namespace Silk.Core.Data.MediatR.Infractions
 				.Where(inf => inf.UserId == request.UserId)
 				.Where(inf => inf.GuildId == request.GuildId)
 				.Where(inf => inf.InfractionType == request.Type)
+				.Where(inf => !inf.HeldAgainstUser)
 				.OrderBy(inf => inf.CaseNumber)
-				.FirstOrDefaultAsync(cancellationToken);
+				.LastOrDefaultAsync(cancellationToken);
 
-			if (inf is null)
-				return null;
-			
-			return new(inf);
+			return inf is null ? null : new(inf);
 		}
 	}
 }
