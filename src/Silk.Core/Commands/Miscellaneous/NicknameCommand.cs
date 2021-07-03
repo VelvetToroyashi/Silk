@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
@@ -10,8 +11,8 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
+    [RequireFlag(UserFlag.Staff)]
     [Category(Categories.Misc)]
-    [Hidden]
     public class NicknameCommand : BaseCommandModule
     {
         private readonly ILogger<NicknameCommand> _logger;
@@ -20,29 +21,23 @@ namespace Silk.Core.Commands.Miscellaneous
         {
             _logger = logger;
         }
-
-        [RequireFlag(UserFlag.Staff)]
-        [Command("nickname")]
+        
+        
+        [Priority(1)]
         [Aliases("nick")]
-        [Description("Set your nickname on the current Guild")]
-        public async Task SetNickName(CommandContext ctx, DiscordMember target, [RemainingText] string nick)
+        [Command("nickname")]
+        [RequirePermissions(Permissions.ManageNicknames)]
+        [Description("Set members whom's name matches to the new nickname. This may take a while on large servers.")]
+        public async Task SetNickname(CommandContext ctx, string match, [RemainingText] string nickname)
         {
-            
-            if (nick.Length > 32)
-            {
-                await ctx.RespondAsync("Nickname out of bounds! Limit: 32 characters");
-                return;
-            }
+            var members = await ctx.Guild.SearchMembersAsync(match, 1000);
+            var skipped = members.Where(m => m.Hierarchy > ctx.Guild.CurrentMember.Hierarchy);
+            members = members.Except(skipped).ToArray();
+            var reqs = members.Select(mem => mem.ModifyAsync(m => m.Nickname = nickname)).ToArray();
 
-            try
-            {
-                await target.ModifyAsync(t => t.Nickname = nick);
-            }
-            catch (Exception)
-            {
-                await ctx.RespondAsync("Could not set nickname!");
-                _logger.LogWarning($"Attempted to modify {target.Username} ({target.Nickname} -> {nick}), but an exception was thrown.");
-            }
+            await ctx.RespondAsync($"Found {members.Count} members, skipping {skipped.Count()} extra. \nEstimated time: {Formatter.Timestamp(TimeSpan.FromMilliseconds(ctx.Client.Ping * reqs.Length))}");
+
+            await Task.WhenAll(reqs);
         }
     }
 }
