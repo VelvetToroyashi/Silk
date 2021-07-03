@@ -288,7 +288,7 @@ namespace Silk.Core.Services.Server
 	    {
 		    var infractionNote = await GenerateInfractionAsync(userId, guildId, noterId, InfractionType.Note, note, null);
 		    
-		    var builder = new DiscordEmbedBuilder();
+		    var mainNoteEmbed = new DiscordEmbedBuilder();
 		    var guild = _client.GetShard(guildId).Guilds[guildId];
 
 		    DiscordUser? user;
@@ -297,7 +297,7 @@ namespace Silk.Core.Services.Server
 		    user = tmem;
 		    user ??= await _client.ShardClients[0].GetUserAsync(userId);
 
-		    builder
+		    mainNoteEmbed
 			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
 			    .WithThumbnail(enforcer!.AvatarUrl, 4096, 4096)
 			    .WithDescription("A new case has been added to this guild's list of infractions.")
@@ -305,9 +305,28 @@ namespace Silk.Core.Services.Server
 			    .AddField("Type:", infractionNote.Type.Humanize(LetterCasing.Title), true)
 			    .AddField("Created:", Formatter.Timestamp(infractionNote.CreatedAt, TimestampFormat.LongDateTime), true)
 			    .AddField("Case Id:", $"#{infractionNote.CaseNumber}", true)
-			    .AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
-			    .AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
-			    .AddField("Reason:", infractionNote.Reason);
+			    .AddField("User:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
+			    .AddField("Noted by:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
+
+		    var noteReasonEmbed = new DiscordEmbedBuilder()
+			    .WithDescription(note)
+			    .WithColor(DiscordColor.Gold)
+			    .WithTitle($"Note (case {infractionNote.CaseNumber})");
+		    
+		    await EnsureModLogChannelExistsAsync(guildId);
+		    var conf = await _config.GetConfigAsync(guildId);
+		    if (conf.LoggingChannel is 0)
+			    return InfractionResult.FailedNotConfigured;
+		    var channel = guild.Channels[conf.LoggingChannel];
+		    
+			if (!channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks))
+			    return InfractionResult.FailedLogPermissions;
+
+			try
+			{
+			    await channel.SendMessageAsync(buil => buil.AddEmbed(mainNoteEmbed).AddEmbed(noteReasonEmbed));
+			}
+			catch { /* ??? */ }
 		    
 		    return InfractionResult.SucceededDoesNotNotify;
 	    }
@@ -527,11 +546,11 @@ namespace Silk.Core.Services.Server
 			return mute;
 		}
 	    
-	    /// <summary>
-	    /// Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
-	    /// </summary>
-	    private async Task EnsureModLogChannelExistsAsync(ulong guildId)
-	    {
+		/// <summary>
+		/// Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
+		/// </summary>
+		private async Task EnsureModLogChannelExistsAsync(ulong guildId)
+		{
 		    GuildConfig config = await _config.GetConfigAsync(guildId);
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
 
@@ -555,6 +574,6 @@ namespace Silk.Core.Services.Server
 			    _updater.UpdateGuild(guildId);
 		    }
 		    catch { /* Igonre. We can't do anything about it :( */ }
-	    }
+		}
     }
 }

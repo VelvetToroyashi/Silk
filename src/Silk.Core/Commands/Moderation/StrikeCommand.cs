@@ -12,9 +12,11 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation
 {
+	[Category(Categories.Mod)]
 	public class StrikeCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractionHelper;
@@ -26,8 +28,9 @@ namespace Silk.Core.Commands.Moderation
 		}
 
 		[Command("strike")]
-		[Aliases("warn", "w", "bonk")]
 		[RequireFlag(UserFlag.Staff)]
+		[Aliases("warn", "w", "bonk")]
+		[Description("Strike a user and add it to their moderation history.")]
 		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			var escalated = await CheckForEscalationAsync(ctx, user, reason);
