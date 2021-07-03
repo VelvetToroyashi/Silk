@@ -29,7 +29,7 @@ namespace Silk.Core.Commands.Bot
 
             int guilds = _main.ShardClient.ShardClients.Values.SelectMany(x => x.Guilds).Count();
 
-            DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
+            var embed = new DiscordEmbedBuilder()
                 .WithTitle("About Silk!")
                 .WithColor(DiscordColor.Gold)
                 .AddField("Total guilds", $"{guilds}", true)
@@ -38,7 +38,14 @@ namespace Silk.Core.Commands.Bot
                 .AddField("Bot version", StringConstants.Version, true)
                 .AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
 
-            await ctx.RespondAsync(embed);
+            
+           var builder = new DiscordMessageBuilder()
+                .WithEmbed(embed)
+                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Keeps this bot going!)"),
+                    new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"),
+                    new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"),
+                    new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source code!"));
+            await ctx.RespondAsync(builder);
         }
     }
 }
