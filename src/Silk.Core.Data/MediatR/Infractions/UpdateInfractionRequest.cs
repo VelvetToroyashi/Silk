@@ -19,6 +19,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 
 			infraction.Expiration = request.Expiration;
 			infraction.Reason = request.Reason ?? infraction.Reason;
+			infraction.HeldAgainstUser = !request.Rescinded;
 
 			await _db.SaveChangesAsync(cancellationToken);
 			return new(infraction);
