@@ -7,9 +7,11 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation
 {
+	[Category(Categories.Mod)]
 	public class NoteCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractionHelper;

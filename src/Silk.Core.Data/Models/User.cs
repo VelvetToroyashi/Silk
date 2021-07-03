@@ -14,6 +14,8 @@ namespace Silk.Core.Data.Models
         
         public UserFlag Flags { get; set; }
         
+        //public DateTime InitialJoinDate { get; set; }
+        
         public List<Infraction> Infractions { get; set; }
         //public List<Reminder> Reminders { get; set; } = new();
     }

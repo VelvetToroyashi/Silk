@@ -305,12 +305,12 @@ namespace Silk.Core.Services.Server
 				    catch (UnauthorizedException) { return InfractionResult.SucceededWithoutNotification; }
 				    finally
 				    {
-					    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason);
+					    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
 					    _semaphoreDict[guildId].Release();
 				    }
 			    }
 			    
-			    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason);
+			    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
 		    }
 		    
 		    _semaphoreDict[guildId].Release();
@@ -381,7 +381,7 @@ namespace Silk.Core.Services.Server
 		    
 		    return InfractionResult.SucceededDoesNotNotify;
 	    }
-	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, DateTime? expiration = null)
+	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, bool rescinded = false, DateTime? expiration = null)
 	    {
 		    var infraction = await _mediator.Send(new GetUserInfractionRequest(0, 0, InfractionType.Mute));
 		    await EnsureModLogChannelExistsAsync(infraction!.GuildId);

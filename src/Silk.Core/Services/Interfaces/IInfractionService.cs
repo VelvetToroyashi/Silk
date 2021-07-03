@@ -134,6 +134,6 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="reason">The new reason for the infraction, if any.</param>
 		/// <param name="expiration">The new expiration of infraction, if applicable.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
-		public Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, DateTime? expiration = null);
+		public Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, bool rescinded = false, DateTime? expiration = null);
 	}
 }
