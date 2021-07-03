@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
@@ -29,6 +32,9 @@ namespace Silk.Core.Services.Server
 	    private readonly ConfigService _config;
 	    private readonly ICacheUpdaterService _updater;
 
+	    private readonly ConcurrentDictionary<ulong, SemaphoreSlim> _semaphoreDict = new();
+	    private readonly ConcurrentHashSet<ulong> _dequedInfractions = new();
+	    
 	    private readonly InfractionStep _ignoreStep = new() {Type = InfractionType.Ignore};
 	    
 		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
@@ -269,10 +275,44 @@ namespace Silk.Core.Services.Server
 			    InfractionResult.SucceededWithNotification : 
 			    InfractionResult.SucceededWithoutNotification;
 	    }
-	    public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
-	    {
-		    return InfractionResult.FailedNotConfigured;
-	    }
+		public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
+		{
+			_semaphoreDict.TryAdd(guildId, new(1));
+		    await _semaphoreDict[guildId].WaitAsync();
+		    
+		    if (await IsMutedAsync(userId, guildId))
+		    {
+			    _mutes.Remove((userId, guildId));
+			    var index = _infractions.FindIndex(inf => inf.UserId == userId && inf.GuildId == guildId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+			    var infraction = _infractions[index];
+
+			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, null, null, true)); // Only set it to say it's handled. //
+
+			    var guild = _client.GetShard(guildId).Guilds[guildId];
+			    if (guild.Members.TryGetValue(userId, out var member))
+			    {
+				    var conf = await _config.GetConfigAsync(guildId);
+				    var role = guild.Roles[conf.MuteRoleId];
+				    await member.RevokeRoleAsync(role);
+
+				    var embed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, InfractionType.Unmute, reason);
+
+				    try
+				    {
+					    await member.SendMessageAsync(embed);
+					    return InfractionResult.SucceededWithNotification;
+				    }
+				    catch (UnauthorizedException) { return InfractionResult.SucceededWithoutNotification; }
+				    finally
+				    {
+					    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason);
+					    _semaphoreDict[guildId].Release();
+				    }
+			    }
+		    }
+		    _semaphoreDict[guildId].Release();
+		    return InfractionResult.SucceededDoesNotNotify;
+		}
 
 	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
 		{
@@ -286,7 +326,7 @@ namespace Silk.Core.Services.Server
 		    int index = Math.Max(infLevels.Count - 1, infractionCount - 1);
 
 		    return infLevels[index];
-		    int GetElegibleInfractions(IEnumerable<InfractionDTO> inf) => inf.Count(i => !i.Rescinded && i.EnforcerId == _client.CurrentUser.Id);
+		    int GetElegibleInfractions(IEnumerable<InfractionDTO> inf) => inf.Count(i => !i.Rescinded && i.EnforcerId == _client.CurrentUser.Id && i.Type is InfractionType.Strike);
 		}
 	    
 	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration) 
