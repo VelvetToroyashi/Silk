@@ -14,11 +14,8 @@ namespace Silk.Core.Commands.Bot
     [Category(Categories.Bot)]
     public class AboutCommand : BaseCommandModule
     {
-        private readonly Main _main;
-        public AboutCommand(Main main)
-        {
-            _main = main;
-        }
+        private readonly DiscordShardedClient _client;
+        public AboutCommand(DiscordShardedClient client) => _client = client;
 
         [Command("about")]
         [Description("Shows relevant information, data and links about Silk!")]
@@ -27,7 +24,7 @@ namespace Silk.Core.Commands.Bot
             DiscordApplication? app = await ctx.Client.GetCurrentApplicationAsync();
             Version? dsp = typeof(DiscordClient).Assembly.GetName().Version;
 
-            int guilds = _main.ShardClient.ShardClients.Values.SelectMany(x => x.Guilds).Count();
+            int guilds = _client.ShardClients.Values.Sum(c => c.Guilds.Count);
 
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("About Silk!")
