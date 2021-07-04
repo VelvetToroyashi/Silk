@@ -30,7 +30,6 @@ namespace Silk.Core.Commands.Bot
                 .WithTitle("About Silk!")
                 .WithColor(DiscordColor.Gold)
                 .AddField("Total guilds", $"{guilds}", true)
-                .AddField("Host", Environment.MachineName, true)
                 .AddField("Owner(s)", app.Owners.Select(x => x.Username).Join(", "), true)
                 .AddField("Bot version", StringConstants.Version, true)
                 .AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
@@ -38,10 +37,13 @@ namespace Silk.Core.Commands.Bot
             
            var builder = new DiscordMessageBuilder()
                 .WithEmbed(embed)
-                .AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Keeps this bot going!)"),
-                    new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"),
+                .AddComponents(
+                    new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support Server!"),
                     new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"),
-                    new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source code!"));
+                    new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source Code!"))
+                .AddComponents(
+                    new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Supports Development!)"),
+                    new DiscordLinkButtonComponent("https://trello.com/b/WlPlu9CQ/the-silk-project", "Our Trello Board!"));
             await ctx.RespondAsync(builder);
         }
     }
