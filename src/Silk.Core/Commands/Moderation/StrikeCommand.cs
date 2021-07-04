@@ -33,6 +33,7 @@ namespace Silk.Core.Commands.Moderation
 		[Description("Strike a user and add it to their moderation history.")]
 		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
+			
 			var escalated = await CheckForEscalationAsync(ctx, user, reason);
 			var result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, escalated.Item1);
 			var response = "";
