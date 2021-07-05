@@ -59,7 +59,12 @@ namespace Silk.Core.Data.Models
         ///     The type of infraction.
         /// </summary>
         public InfractionType InfractionType { get; set; } //What happened
-
+        
+        /// <summary>
+        /// Whether this was initially intented to be a strike.
+        /// </summary>
+        public bool EscalatedFromStrike { get; set; }
+        
         /// <summary>
         ///     Whether this is an active infraction and/or this infraction counts toward any auto-incrementing severity of infractions.
         ///     Infraction will still hold on the user's record but is not held against them if set to false.
