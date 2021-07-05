@@ -20,6 +20,7 @@ namespace Silk.Core.Data.DTOs
 			Duration = infraction.Expiration - DateTime.UtcNow;
 			Expiration = infraction.Expiration;
 			Type = infraction.InfractionType;
+			EscalatedFromStrike = infraction.EscalatedFromStrike;
 			Reason = infraction.Reason;
 		}
 		
@@ -34,6 +35,7 @@ namespace Silk.Core.Data.DTOs
 		public TimeSpan? Duration { get; init; }
 		public DateTime? Expiration { get; init; }
 		public InfractionType Type { get; init; }
+		public bool EscalatedFromStrike { get; init; }
 		public string Reason { get; init; }
 	}
 }
