@@ -24,7 +24,7 @@ namespace Silk.Core.Commands.Bot
         [Priority(1)]
         public async Task EvalCS(CommandContext ctx)
         {
-            if (ctx.Message.ReferencedMessage is null ^ ctx.Message.Content.Length > ctx.Prefix.Length + 4) 
+            if (ctx.Message.ReferencedMessage is null && ctx.Message.Content.Length > ctx.Prefix.Length + 4) 
                 await EvalCS(ctx, ctx.RawArgumentString);
             else
             {
