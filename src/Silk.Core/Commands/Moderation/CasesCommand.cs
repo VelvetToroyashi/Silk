@@ -50,13 +50,14 @@ namespace Silk.Core.Commands.Moderation
                         InfractionDTO currentInfraction = infractions[i];
                         stringBuilder
                             .Append($"Case {currentInfraction.CaseNumber}: ")
-                            .Append($"{currentInfraction.Type.Humanize(LetterCasing.Title)}");
+                            .Append($"`{currentInfraction.Type.Humanize(LetterCasing.Title)}`\n");
                         if (currentInfraction.EscalatedFromStrike)
-                            stringBuilder.Append($"[ESCALATED FROM STRIKE] ");
+                        stringBuilder.AppendLine("\n[ESCALATED FROM STRIKE] ");
+                        
 
                         var reason = 
                             currentInfraction.Reason.Length <= 200 ?
-                            $"Reason: {currentInfraction}" :
+                            $"Reason: {currentInfraction.Reason}" :
                             $"Reason: {currentInfraction.Reason[..200]}";
                         stringBuilder.AppendLine(reason);
                     }
