@@ -17,7 +17,7 @@ using Silk.Core.Utilities.HelpFormatter;
 namespace Silk.Core.Commands.Moderation
 {
     [Experimental]
-    [Category(Categories.Mod)]
+    [Category(Categories.Mod)] 
     public class CasesCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
