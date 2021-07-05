@@ -146,7 +146,7 @@ namespace Silk.Core.Types
     }
 
 
-    public async void StartInternal()
+    internal async void StartInternal()
     {
       do
       {
