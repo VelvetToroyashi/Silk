@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ConcurrentCollections;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Humanizer;
 using MediatR;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.DTOs;
 using Silk.Core.Data.MediatR.Guilds;
@@ -23,7 +23,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Services.Server
 {
-    public sealed class InfractionService : IInfractionService
+    public sealed class InfractionService : IHostedService, IInfractionService
     {
 	    private readonly ILogger<IInfractionService> _logger;
 	    private readonly IMediator _mediator;
@@ -33,7 +33,7 @@ namespace Silk.Core.Services.Server
 	    private readonly ICacheUpdaterService _updater;
 
 	    private readonly ConcurrentDictionary<ulong, SemaphoreSlim> _semaphoreDict = new();
-	    private readonly ConcurrentHashSet<ulong> _dequedInfractions = new();
+	    private readonly AsyncTimer _timer;
 	    
 	    private readonly InfractionStep _ignoreStep = new() {Type = InfractionType.Ignore};
 	    
@@ -50,6 +50,7 @@ namespace Silk.Core.Services.Server
 		    _config = config;
 		    _updater = updater;
 		    _logger = logger;
+		    _timer = new(DequeueInfractionsAsync, TimeSpan.FromSeconds(1), true);
 	    }
 
 		/* TODO: Make these methods return Task<InfractionResult>
@@ -628,6 +629,46 @@ namespace Silk.Core.Services.Server
 			    _updater.UpdateGuild(guildId);
 		    }
 		    catch { /* Igonre. We can't do anything about it :( */ }
+		}
+		public async Task StartAsync(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Started!");
+			var now = DateTime.UtcNow;
+			await Task.Yield();
+
+			_logger.LogInformation("Loading infractions");
+			var infractionsTask = _mediator.Send(new GetCurrentInfractionsRequest(), cancellationToken);
+			var delayTask = Task.Delay(200, cancellationToken);
+
+			if (await Task.WhenAny(infractionsTask, delayTask) != delayTask)
+			{
+				await LoadAndCacheInfractionsAsync();
+			}
+			else
+			{
+				_logger.LogWarning("Slow load for infractions. Offloading to ThreadPool.");
+				_ = Task.Run(async () => await LoadAndCacheInfractionsAsync());
+			}
+
+			async Task LoadAndCacheInfractionsAsync()
+			{
+				var allInfractions = await infractionsTask;
+				foreach (var infraction in allInfractions)
+				{
+					if (infraction.Type is InfractionType.AutoModMute or InfractionType.Mute)
+						_mutes.Add((infraction.UserId, infraction.GuildId));
+					_infractions.Add(infraction);
+				}
+				var tsNow = now - DateTime.UtcNow;
+				_logger.LogInformation("Loaded {Infractions} in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
+				_timer.StartInternal();
+			}
+		}
+		public async Task StopAsync(CancellationToken cancellationToken) { }
+
+		private async Task DequeueInfractionsAsync()
+		{
+			
 		}
     }
 }

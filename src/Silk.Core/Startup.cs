@@ -178,6 +178,9 @@ namespace Silk.Core
                 services.AddSingleton<Main>();
                 services.AddHostedService(s => s.GetRequiredService<Main>());
 
+                services.AddSingleton<IInfractionService, InfractionService>();
+                services.AddHostedService(s => s.Get<IInfractionService>() as InfractionService);
+
                 // Couldn't figure out how to get the service since AddHostedService adds it as //
                 // IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
                 services.AddSingleton<ReminderService>();
