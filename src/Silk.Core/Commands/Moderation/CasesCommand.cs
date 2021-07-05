@@ -42,34 +42,31 @@ namespace Silk.Core.Commands.Moderation
             }
             else
             {
-                if (infractions.Length < 15)
+                var stringBuilder = new StringBuilder();
+                foreach (InfractionDTO currentInfraction in infractions)
                 {
-                    var stringBuilder = new StringBuilder();
-                    for (var i = 0; i < infractions.Length; i++)
-                    {
-                        InfractionDTO currentInfraction = infractions[i];
-                        stringBuilder
-                            .Append($"Case {currentInfraction.CaseNumber}: ")
-                            .Append($"`{currentInfraction.Type.Humanize(LetterCasing.Title)}`\n");
-                        if (currentInfraction.EscalatedFromStrike)
+                    stringBuilder
+                        .Append($"Case {currentInfraction.CaseNumber}: ")
+                        .Append($"`{currentInfraction.Type.Humanize(LetterCasing.Title)}`\n");
+                    if (currentInfraction.EscalatedFromStrike)
                         stringBuilder.AppendLine("\n[ESCALATED FROM STRIKE] ");
-                        
+                    
 
-                        var reason = 
-                            currentInfraction.Reason.Length <= 200 ?
+                    var reason = 
+                        currentInfraction.Reason.Length <= 200 ?
                             $"Reason: {currentInfraction.Reason}" :
                             $"Reason: {currentInfraction.Reason[..200]}";
-                        stringBuilder.AppendLine(reason);
-                    }
-
-                    eBuilder
-                        .WithColor(DiscordColor.Gold)
-                        .WithTitle($"Cases for {user.Id}")
-                        .WithDescription(stringBuilder.ToString());
-                    mBuilder.WithEmbed(eBuilder);
-
-                    await ctx.RespondAsync(mBuilder);  
+                    stringBuilder.AppendLine(reason);
                 }
+
+                eBuilder
+                    .WithColor(DiscordColor.Gold)
+                    .WithTitle($"Cases for {user.Id}")
+                    .WithDescription(stringBuilder.ToString());
+                mBuilder.WithEmbed(eBuilder);
+
+                await ctx.RespondAsync(mBuilder);  
+                
                 /*
                  * TODO: Pagination
                  */
