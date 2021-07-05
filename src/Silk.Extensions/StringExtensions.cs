@@ -33,11 +33,9 @@ namespace Silk.Extensions
             if (range.Start.Value >= text.Length || range.Start.Value < 0)
                 return text;
 
-            if (!range.End.IsFromEnd)
-            {
-                return text[range.Start..Math.Min(text.Length, range.End.Value)];
-            }
-            return text[range];
+            if (range.End.IsFromEnd) return text[range];
+            
+            return text[range.Start..Math.Min(text.Length, range.End.Value)];
         }
 
         public static Stream AsStream(this string s)
