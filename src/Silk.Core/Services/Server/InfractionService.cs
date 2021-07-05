@@ -661,14 +661,34 @@ namespace Silk.Core.Services.Server
 				}
 				var tsNow = now - DateTime.UtcNow;
 				_logger.LogInformation("Loaded {Infractions} in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
-				_timer.StartInternal();
+				_timer.Start();
 			}
 		}
-		public async Task StopAsync(CancellationToken cancellationToken) { }
+		public async Task StopAsync(CancellationToken cancellationToken)
+		{
+			
+		}
 
 		private async Task DequeueInfractionsAsync()
 		{
-			
+			foreach (var infraction in _infractions) 
+				if (infraction.Expiration < DateTime.UtcNow)
+					ThreadPool.UnsafeQueueUserWorkItem(DequeueTask, (this, infraction));
+
+			async void DequeueTask(object? infract)
+			{
+				var id = _client.CurrentUser.Id;
+				(InfractionService service, InfractionDTO infraction) = (KeyValuePair<InfractionService, InfractionDTO>)infract!;
+
+				var guildId = infraction.GuildId;
+				var task = infraction.Type switch
+				{
+					InfractionType.Mute or InfractionType.AutoModMute => service.UnMuteAsync(infraction.UserId, guildId, id, "Automatic unmute | This infraction has expired."),
+					InfractionType.SoftBan => service.UnBanAsync(infraction.UserId, guildId, id, "Automatic unban | This infraction has expired."),
+					_ => Task.CompletedTask
+				};
+				await task;
+			}
 		}
     }
 }
