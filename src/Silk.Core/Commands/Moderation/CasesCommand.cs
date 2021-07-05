@@ -13,7 +13,6 @@ using Silk.Core.Data.Models;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Extensions;
 
 namespace Silk.Core.Commands.Moderation
 {
@@ -45,18 +44,27 @@ namespace Silk.Core.Commands.Moderation
             {
                 if (infractions.Length < 15)
                 {
-                    var sb = new StringBuilder();
+                    var stringBuilder = new StringBuilder();
                     for (var i = 0; i < infractions.Length; i++)
                     {
                         InfractionDTO currentInfraction = infractions[i];
-                        sb.AppendLine($"Case {i + 1}: {currentInfraction.Type.Humanize(LetterCasing.Title)} by <@{currentInfraction.EnforcerId}>, " +
-                                      $"Reason:\n{currentInfraction.Reason.Pull(..80)}");
+                        stringBuilder
+                            .Append($"Case {currentInfraction.CaseNumber}: ")
+                            .Append($"{currentInfraction.Type.Humanize(LetterCasing.Title)}");
+                        if (currentInfraction.EscalatedFromStrike)
+                            stringBuilder.Append($"[ESCALATED FROM STRIKE] ");
+
+                        var reason = 
+                            currentInfraction.Reason.Length <= 200 ?
+                            $"Reason: {currentInfraction}" :
+                            $"Reason: {currentInfraction.Reason[..200]}";
+                        stringBuilder.AppendLine(reason);
                     }
 
                     eBuilder
                         .WithColor(DiscordColor.Gold)
                         .WithTitle($"Cases for {user.Id}")
-                        .WithDescription(sb.ToString());
+                        .WithDescription(stringBuilder.ToString());
                     mBuilder.WithEmbed(eBuilder);
 
                     await ctx.RespondAsync(mBuilder);  
