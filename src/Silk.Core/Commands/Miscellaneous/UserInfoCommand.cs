@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -50,7 +51,7 @@ namespace Silk.Core.Commands.Miscellaneous
         public async Task GetUserInfo(CommandContext ctx, DiscordMember member)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithAuthor(member.DisplayName, iconUrl: member.AvatarUrl)
+                .WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
                 .WithDescription($"Information about {member.Mention}!")
                 .WithColor(DiscordColor.Orange);
 
