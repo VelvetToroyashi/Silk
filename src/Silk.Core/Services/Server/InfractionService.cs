@@ -79,7 +79,7 @@ namespace Silk.Core.Services.Server
 
 		    var inf = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Kick, reason, null);
 
-		    await LogToModChannel(inf);
+		    await LogInfractionAsync(inf);
 		    return notified ? InfractionResult.SucceededWithNotification : InfractionResult.SucceededWithoutNotification; 
 		}
 
@@ -111,7 +111,7 @@ namespace Silk.Core.Services.Server
 				if (inf.Duration is not null)
 					_infractions.Add(inf);
 				
-				await LogToModChannel(inf);
+				await LogInfractionAsync(inf);
 				return notified ? 
 					InfractionResult.SucceededWithNotification :
 					InfractionResult.SucceededWithoutNotification;
@@ -131,13 +131,14 @@ namespace Silk.Core.Services.Server
 			var guild = _client.GetShard(guildId).Guilds[guildId];
 			var enforcer = guild.Members[enforcerId];
 			var exists = guild.Members.TryGetValue(userId, out var victim);
-			var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Strike, reason, null);
+			
 			
 			if (!autoEscalate)
 			{
+				var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Strike, reason, null);
 				var embed = CreateUserInfractionEmbed(enforcer, guild.Name, InfractionType.Strike, reason);
 
-				var logResult = await LogToModChannel(infraction);
+				var logResult = await LogInfractionAsync(infraction);
 
 				if (logResult is InfractionResult.FailedLogPermissions)
 					return logResult;
@@ -170,7 +171,11 @@ namespace Silk.Core.Services.Server
 				_ => Task.FromResult(InfractionResult.SucceededDoesNotNotify)
 			};
 			
-			return await task;
+			var res = await task;
+			var lastInfraction = _infractions.Last(inf => inf.UserId == userId && inf.Reason == reason);
+			await _mediator.Send(new UpdateInfractionRequest(lastInfraction.Id, lastInfraction.Expiration, reason, false, true));
+
+			return res;
 		}
 	    
 		public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
@@ -245,7 +250,7 @@ namespace Silk.Core.Services.Server
 		    InfractionType infractionType = enforcerId == _client.CurrentUser.Id ? InfractionType.AutoModMute : InfractionType.Mute;
 		    InfractionDTO infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, infractionType, reason, expiration);
 
-		    await LogToModChannel(infraction);
+		    await LogInfractionAsync(infraction);
 		    _mutes.Add((userId, guildId));
 		    _infractions.Add(infraction);
 		    
@@ -278,7 +283,8 @@ namespace Silk.Core.Services.Server
 	    }
 		public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 		{
-			_semaphoreDict.TryAdd(guildId, new(1));
+			
+			EnsureSemaphoreExists(guildId);
 		    await _semaphoreDict[guildId].WaitAsync();
 		    
 		    if (await IsMutedAsync(userId, guildId))
@@ -286,9 +292,11 @@ namespace Silk.Core.Services.Server
 			    _mutes.Remove((userId, guildId));
 			    var index = _infractions.FindIndex(inf => inf.UserId == userId && inf.GuildId == guildId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 			    var infraction = _infractions[index];
+			    _infractions.RemoveAt(index);
 
-			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, null, null, true)); // Only set it to say it's handled. //
-
+			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, infraction.Expiration, infraction.Reason, true)); // Only set it to say it's handled. //
+			    var unmute = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unmute, reason, null);
+			    
 			    var guild = _client.GetShard(guildId).Guilds[guildId];
 			    if (guild.Members.TryGetValue(userId, out var member))
 			    {
@@ -307,11 +315,18 @@ namespace Silk.Core.Services.Server
 				    finally
 				    {
 					    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
+					    await LogUnmuteAsync(unmute);
 					    _semaphoreDict[guildId].Release();
 				    }
 			    }
 			    
 			    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
+			    await LogUnmuteAsync(unmute);
+
+			    async Task LogUnmuteAsync(InfractionDTO inf)
+			    {
+				    await LogInfractionAsync(inf);
+			    }
 		    }
 		    
 		    _semaphoreDict[guildId].Release();
@@ -384,7 +399,7 @@ namespace Silk.Core.Services.Server
 	    }
 	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, bool rescinded = false, DateTime? expiration = null)
 	    {
-		    var infraction = await _mediator.Send(new GetUserInfractionRequest(0, 0, InfractionType.Mute));
+		    var infraction = await _mediator.Send(new GetUserInfractionRequest(0, 0, InfractionType.Mute, caseId));
 		    await EnsureModLogChannelExistsAsync(infraction!.GuildId);
 		    
 		    
@@ -519,7 +534,7 @@ namespace Silk.Core.Services.Server
 		/// Logs to the designated mod-log channel, if any.
 		/// </summary>
 		/// <param name="inf">The infraction to log.</param>
-		private async Task<InfractionResult> LogToModChannel(InfractionDTO inf)
+		private async Task<InfractionResult> LogInfractionAsync(InfractionDTO inf)
 		{ 
 			await EnsureModLogChannelExistsAsync(inf.GuildId);
 		    
@@ -535,7 +550,7 @@ namespace Silk.Core.Services.Server
 		    var builder = new DiscordEmbedBuilder();
 
 		    builder
-			    .WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
+			    .WithAuthor(user.ToDiscordName(), user.GetUrl(), user.AvatarUrl)
 			    .WithThumbnail(enforcer.AvatarUrl, 4096, 4096)
 			    .WithDescription("A new case has been added to this guild's list of infractions.")
 			    .WithColor(DiscordColor.Gold)
@@ -647,7 +662,7 @@ namespace Silk.Core.Services.Server
 			else
 			{
 				_logger.LogWarning("Slow load for infractions. Offloading to ThreadPool.");
-				_ = Task.Run(async () => await LoadAndCacheInfractionsAsync());
+				_ = Task.Run(async () => await LoadAndCacheInfractionsAsync(), cancellationToken);
 			}
 
 			async Task LoadAndCacheInfractionsAsync()
@@ -659,26 +674,33 @@ namespace Silk.Core.Services.Server
 						_mutes.Add((infraction.UserId, infraction.GuildId));
 					_infractions.Add(infraction);
 				}
-				var tsNow = now - DateTime.UtcNow;
-				_logger.LogInformation("Loaded {Infractions} in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
+				var tsNow = DateTime.UtcNow - now;
+				_logger.LogInformation("Loaded {Infractions} infractions in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
 				_timer.Start();
 			}
 		}
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
-			
+			_timer.Dispose(); // Stops the timer. It's fine. //
 		}
 
+
+		private void EnsureSemaphoreExists(ulong guildId)
+		{
+			if (!_semaphoreDict.TryGetValue(guildId, out _))
+				_semaphoreDict[guildId] = new(1);
+		}
+		
 		private async Task DequeueInfractionsAsync()
 		{
 			foreach (var infraction in _infractions) 
 				if (infraction.Expiration < DateTime.UtcNow)
-					ThreadPool.UnsafeQueueUserWorkItem(DequeueTask, (this, infraction));
+					ThreadPool.QueueUserWorkItem(DequeueTask, (this, infraction));
 
 			async void DequeueTask(object? infract)
 			{
 				var id = _client.CurrentUser.Id;
-				(InfractionService service, InfractionDTO infraction) = (KeyValuePair<InfractionService, InfractionDTO>)infract!;
+				(InfractionService service, InfractionDTO infraction) = (ValueTuple<InfractionService, InfractionDTO>)infract!;
 
 				var guildId = infraction.GuildId;
 				var task = infraction.Type switch
