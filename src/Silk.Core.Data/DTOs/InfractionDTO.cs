@@ -22,8 +22,7 @@ namespace Silk.Core.Data.DTOs
 			Type = infraction.InfractionType;
 			Reason = infraction.Reason;
 		}
-
-
+		
 		public int Id { get; init; }
 		public ulong UserId { get; init; }
 		public ulong GuildId { get; init; }
@@ -36,6 +35,5 @@ namespace Silk.Core.Data.DTOs
 		public DateTime? Expiration { get; init; }
 		public InfractionType Type { get; init; }
 		public string Reason { get; init; }
-		
 	}
 }
