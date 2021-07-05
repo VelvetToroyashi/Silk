@@ -43,7 +43,7 @@ namespace Silk.Core.Commands.Moderation
             }
             else
             {
-                if (infractions.Length > 15)
+                if (infractions.Length < 15)
                 {
                     var sb = new StringBuilder();
                     for (var i = 0; i < infractions.Length; i++)
