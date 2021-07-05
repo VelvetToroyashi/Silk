@@ -56,6 +56,11 @@ namespace Silk.Core.Data.Models
         public DateTime InfractionTime { get; set; } //When it happened
 
         /// <summary>
+        /// When this infraction was last changed.
+        /// </summary>
+        public DateTime? LastUpdated { get; set; }
+        
+        /// <summary>
         ///     The type of infraction.
         /// </summary>
         public InfractionType InfractionType { get; set; } //What happened

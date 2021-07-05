@@ -7,41 +7,29 @@ namespace Silk.Core.Data.DTOs
 	[NotMapped]
 	public sealed record InfractionDTO
 	{
-		public InfractionDTO(Infraction infraction)
-			: this(infraction.Id, infraction.UserId, 
-				infraction.GuildId, infraction.Enforcer, 
-				infraction.InfractionType, infraction.Reason, 
-				!infraction.HeldAgainstUser, infraction.InfractionTime,
-				infraction.CaseNumber, infraction.Expiration) { }
-		public InfractionDTO(
-			int id, ulong userId,
-			ulong guildId, ulong enforcerId, 
-			InfractionType type, string reason, 
-			bool rescinded, DateTime createdAt, 
-			int caseNumber, DateTime? expiration = null, 
-			DateTime? lastUpdated = null)
+		public InfractionDTO(Infraction infraction) 
 		{
-			Id = id;
-			UserId = userId;
-			GuildId = guildId;
-			CaseNumber = caseNumber;
-			Type = type;
-			Reason = reason;
-			Rescinded = rescinded;
-			EnforcerId = enforcerId;
-			CreatedAt = createdAt;
-			Duration = expiration is null ? null : expiration - (lastUpdated ?? createdAt);
-			LastUpdated = lastUpdated;
-			Expiration = expiration;
+			Id = infraction.Id;
+			UserId = infraction.UserId;
+			GuildId = infraction.GuildId;
+			EnforcerId = infraction.Enforcer;
+			CaseNumber = infraction.CaseNumber;
+			HeldAgainstUser = infraction.HeldAgainstUser;
+			CreatedAt = infraction.InfractionTime;
+			LastUpdated = infraction.LastUpdated;
+			Duration = infraction.Expiration - DateTime.UtcNow;
+			Expiration = infraction.Expiration;
+			Type = infraction.InfractionType;
+			Reason = infraction.Reason;
 		}
-		
+
 
 		public int Id { get; init; }
 		public ulong UserId { get; init; }
 		public ulong GuildId { get; init; }
 		public ulong EnforcerId { get; init; }
 		public int CaseNumber { get; init; }
-		public bool Rescinded { get; init; }
+		public bool HeldAgainstUser { get; init; }
 		public DateTime CreatedAt { get; init; }
 		public DateTime? LastUpdated { get; init; }
 		public TimeSpan? Duration { get; init; }

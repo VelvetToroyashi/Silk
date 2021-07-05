@@ -180,7 +180,7 @@ namespace Silk.Core.Services.Server
 			    return true;
 
 		    var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-		    var inf = dbInf.SingleOrDefault(inf => !inf.Rescinded && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+		    var inf = dbInf.SingleOrDefault(inf => !inf.HeldAgainstUser && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 		    
 		    // ReSharper disable once InvertIf
 		    if (inf is not null)
@@ -329,7 +329,7 @@ namespace Silk.Core.Services.Server
 		    int index = Math.Max(infLevels.Count - 1, infractionCount - 1);
 
 		    return infLevels[index];
-		    int GetElegibleInfractions(IEnumerable<InfractionDTO> inf) => inf.Count(i => !i.Rescinded && i.EnforcerId == _client.CurrentUser.Id && i.Type is InfractionType.Strike);
+		    int GetElegibleInfractions(IEnumerable<InfractionDTO> inf) => inf.Count(i => !i.HeldAgainstUser && i.EnforcerId == _client.CurrentUser.Id && i.Type is InfractionType.Strike);
 		}
 	    
 	    public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason, DateTime? expiration) 
