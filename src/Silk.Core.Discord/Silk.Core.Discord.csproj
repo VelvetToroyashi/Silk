@@ -82,7 +82,7 @@
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.2-dev-10289"/>
         <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0-dev-00272"/>
         <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0-dev-00909"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
         <PackageReference Include="SharpYaml" Version="1.6.6"/>
         <PackageReference Include="Svg.Skia" Version="0.5.5.1"/>
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7"/>
