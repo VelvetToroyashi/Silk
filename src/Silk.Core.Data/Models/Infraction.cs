@@ -69,12 +69,12 @@ namespace Silk.Core.Data.Models
         /// Whether this was initially intented to be a strike.
         /// </summary>
         public bool EscalatedFromStrike { get; set; }
-        
+
         /// <summary>
         ///     Whether this is an active infraction and/or this infraction counts toward any auto-incrementing severity of infractions.
         ///     Infraction will still hold on the user's record but is not held against them if set to false.
         /// </summary>
-        public bool HeldAgainstUser { get; set; } // Used for infraction service to determine whether to escalate or not //
+        public bool HeldAgainstUser { get; set; } = true; // Used for infraction service to determine whether to escalate or not //
 
         /// <summary>
         ///     When this infraction is set to expire. Resolves to null
