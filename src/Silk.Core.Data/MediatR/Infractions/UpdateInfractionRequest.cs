@@ -7,7 +7,7 @@ using Silk.Core.Data.DTOs;
 
 namespace Silk.Core.Data.MediatR.Infractions
 {
-	public sealed record UpdateInfractionRequest(int InfractionId, DateTime? Expiration, string? Reason = null, bool Rescinded = false) : IRequest<InfractionDTO>;
+	public sealed record UpdateInfractionRequest(int InfractionId, DateTime? Expiration, string? Reason = null, bool Rescinded = false, bool WasEscalated = false) : IRequest<InfractionDTO>;
 	
 	public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRequest, InfractionDTO>
 	{
@@ -20,7 +20,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 			infraction.Expiration = request.Expiration;
 			infraction.Reason = request.Reason ?? infraction.Reason;
 			infraction.HeldAgainstUser = !request.Rescinded;
-
+			infraction.EscalatedFromStrike = request.WasEscalated;
 			await _db.SaveChangesAsync(cancellationToken);
 			return new(infraction);
 		}
