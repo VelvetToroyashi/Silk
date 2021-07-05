@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -11,6 +13,7 @@ using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
+using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -29,21 +32,35 @@ namespace Silk.Core.Commands.Miscellaneous
                         members.Count())
                     .Select(m => m.Mention)
                     .Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : null)}";
-
+            
+            
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithTitle($"Info for {role.Name} ( {role.Id} ):")
+                .WithTitle($"Info for {role.Name} ({role.Id}):")
                 .AddField("Color:", role.Color.ToString())
-                .AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp.Date - DateTime.UtcNow)})")
+                .AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow)})")
                 .AddField("Hoisted:", role.IsHoisted.ToString())
                 .AddField("Hierarchy:", GetHierarchy(ctx, role))
                 .AddField("Bot role:", role.IsManaged.ToString())
                 .AddField("Members:", memberString)
                 .AddField("Mentionable:", role.IsMentionable.ToString())
                 .AddField("Permissions:", role.Permissions.ToPermissionString())
-                .WithColor(role.Color)
-                .WithThumbnail(ctx.Guild.IconUrl);
+                .WithColor(role.Color);
+            await using var str = GetRoleColorStream();
+            await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("roleColor.png", str));
 
-            await ctx.RespondAsync(embed);
+            Stream GetRoleColorStream()
+            {
+                var str = new MemoryStream();
+                using var bmp = new Bitmap(1280, 256);
+                using var gfx = Graphics.FromImage(bmp);
+
+                var r = role.Color;
+                gfx.Clear(Color.FromArgb(r.R, r.G, r.B));
+
+                bmp.Save(str, ImageFormat.Png);
+                str.Position = 0;
+                return str;
+            }
         }
         
         [Command("info")]
@@ -70,7 +87,7 @@ namespace Silk.Core.Commands.Miscellaneous
 
             embed.AddField("Status:", $"{emoji}  {status}");
             embed.AddField("Name:", member.Username);
-            embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp.Date - DateTime.UtcNow)})");
+            embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp - DateTime.UtcNow)})");
 
             List<string> roleList = member.Roles
                 .OrderByDescending(r => r.Position)
