@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -88,7 +89,7 @@ namespace Silk.Core.Commands.Server
             stringBuilder.Clear();
 
 
-            var creation = $"{DSharpPlus.Formatter.Timestamp(guild.CreationTimestamp.Date, TimestampFormat.LongDateTime)} ({DSharpPlus.Formatter.Timestamp(guild.CreationTimestamp.Date)})";
+            var creation = $"{DSharpPlus.Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({DSharpPlus.Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow)})";
             embed.AddField("Server Owner:", guild.Owner.Mention, true)
                 .AddField("Most recent member:", guild.Members.OrderBy(m => m.Value.JoinedAt).Last().Value.Mention, true)
                 .AddField("Creation date:", creation);
