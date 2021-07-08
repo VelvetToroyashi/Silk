@@ -40,6 +40,10 @@
 		/// <summary>
 		/// The operation <i>likely</i> succeeded, but could not log to the configured log channel.
 		/// </summary>
-		FailedLogPermissions
+		FailedLogPermissions,
+		/// <summary>
+		/// The operation failed due to a requirement not being met, but does not warrant a specific return value.
+		/// </summary>
+		FailedGenericRequirementsNotFulfilled
 	}
 }

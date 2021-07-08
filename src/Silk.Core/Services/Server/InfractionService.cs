@@ -401,7 +401,11 @@ namespace Silk.Core.Services.Server
 	    public async Task<InfractionResult> PardonAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 	    {
 		    var infractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-		    var rescindedInfraction = infractions.OrderBy(inf => inf.CreatedAt).Last(inf => inf.Type is InfractionType.Strike || inf.EscalatedFromStrike);
+		    var rescindedInfraction = infractions.OrderBy(inf => inf.CreatedAt).LastOrDefault(inf => inf.HeldAgainstUser && inf.Type is InfractionType.Strike || inf.EscalatedFromStrike);
+		    
+		    if (rescindedInfraction is null)
+			    return InfractionResult.FailedGenericRequirementsNotFulfilled;
+		    
 		    await _mediator.Send(new UpdateInfractionRequest(rescindedInfraction.Id, rescindedInfraction.Expiration, rescindedInfraction.Reason, true));
 
 		    var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Pardon, reason, null);
