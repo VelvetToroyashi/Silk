@@ -124,16 +124,16 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="note">The note to add.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
 		public Task<InfractionResult> AddNoteAsync(ulong userId, ulong guildId, ulong noterId, string note);
+
 		
 		/// <summary>
-		/// Updates an infraction's reason or expiration.
+		/// Pardons a user from their most recent infraction (strike or escalated).
 		/// </summary>
-		/// <param name="guildId">The id of the guild that the infraction occured on</param>
-		/// <param name="enforcerId">The id of the member that is updating this case</param>
-		/// <param name="caseId">The id of the case being updated.</param>
-		/// <param name="reason">The new reason for the infraction, if any.</param>
-		/// <param name="expiration">The new expiration of infraction, if applicable.</param>
-		/// <returns>A value indicating the resulting state of the operation.</returns>
-		public Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, bool rescinded = false, DateTime? expiration = null);
+		/// <param name="userId"></param>
+		/// <param name="guildId"></param>
+		/// <param name="enforcerId"></param>
+		/// <param name="reason"></param>
+		/// <returns></returns>
+		public Task<InfractionResult> PardonAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
 	}
 }

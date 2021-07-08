@@ -314,13 +314,13 @@ namespace Silk.Core.Services.Server
 				    catch (UnauthorizedException) { return InfractionResult.SucceededWithoutNotification; }
 				    finally
 				    {
-					    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
+					    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
 					    await LogUnmuteAsync(unmute);
 					    _semaphoreDict[guildId].Release();
 				    }
 			    }
 			    
-			    await UpdateInfractionAsync(guildId, enforcerId, infraction.CaseNumber, reason, true);
+			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
 			    await LogUnmuteAsync(unmute);
 
 			    async Task LogUnmuteAsync(InfractionDTO inf)
@@ -391,21 +391,16 @@ namespace Silk.Core.Services.Server
 
 			try
 			{
-			    await channel.SendMessageAsync(buil => buil.AddEmbed(mainNoteEmbed).AddEmbed(noteReasonEmbed));
+				await channel.SendMessageAsync(buil => buil.AddEmbeds(new DiscordEmbed[] {mainNoteEmbed, noteReasonEmbed}));
 			}
 			catch { /* ??? */ }
 		    
 		    return InfractionResult.SucceededDoesNotNotify;
 	    }
-	    public async Task<InfractionResult> UpdateInfractionAsync(ulong guildId, ulong enforcerId, int caseId, string? reason = null, bool rescinded = false, DateTime? expiration = null)
-	    {
-		    var infraction = await _mediator.Send(new GetUserInfractionRequest(0, 0, InfractionType.Mute, caseId));
-		    await EnsureModLogChannelExistsAsync(infraction!.GuildId);
-		    
-		    
-		    
-		    return InfractionResult.FailedNotConfigured;
-	    }
+	    
+	    public async Task<InfractionResult> PardonAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
+		    => throw new NotImplementedException();
+	    
 
 	    /// <summary>
 	    /// Creates a formatted embed to be sent to a user.
