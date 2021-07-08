@@ -39,6 +39,10 @@
         /// <summary>
         /// A note on a user's infraction history.
         /// </summary>
-        Note
+        Note,
+        /// <summary>
+        /// This user was pardoned from an infraction.
+        /// </summary>
+        Pardon
     }
 }

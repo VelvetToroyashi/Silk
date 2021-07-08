@@ -397,9 +397,34 @@ namespace Silk.Core.Services.Server
 		    
 		    return InfractionResult.SucceededDoesNotNotify;
 	    }
-	    
+
 	    public async Task<InfractionResult> PardonAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
-		    => throw new NotImplementedException();
+	    {
+		    var infractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+		    var rescindedInfraction = infractions.OrderBy(inf => inf.CreatedAt).Last(inf => inf.Type is InfractionType.Strike || inf.EscalatedFromStrike);
+		    await _mediator.Send(new UpdateInfractionRequest(rescindedInfraction.Id, rescindedInfraction.Expiration, rescindedInfraction.Reason, true));
+
+		    var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Pardon, reason, null);
+		    
+		    await EnsureModLogChannelExistsAsync(guildId);
+		    await LogInfractionAsync(infraction);
+
+		    var guild = _client.GetShard(guildId).Guilds[guildId];
+		    
+		    if (!guild.Members.TryGetValue(userId, out var member)) 
+			    return InfractionResult.SucceededDoesNotNotify;
+		    
+		    var user = await _client.ShardClients[0].GetUserAsync(enforcerId);
+		    try
+		    {
+			    await member.SendMessageAsync(CreateUserInfractionEmbed(user, guild.Name, InfractionType.Pardon, reason));
+			    return InfractionResult.SucceededWithNotification;
+		    }
+		    catch
+		    {
+			    return InfractionResult.SucceededWithoutNotification;
+		    }
+	    }
 	    
 
 	    /// <summary>
@@ -423,6 +448,7 @@ namespace Silk.Core.Services.Server
 			    InfractionType.AutoModMute	=> $"You've been automatically muted on {guildName}!",
 			    InfractionType.Strike		=> $"You've been warned on {guildName}!",
 			    InfractionType.Unmute		=> $"You've been unmuted on {guildName}!",
+			    InfractionType.Pardon		=> $"You've been pardoned from one (1) infraction on {guildName}!",
 			    InfractionType.Ignore or InfractionType.Note => null,
 			    _ => throw new ArgumentException($"Unexpected enum value: {type}")
 		    };
