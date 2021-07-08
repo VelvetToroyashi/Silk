@@ -8,7 +8,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using Silk.Core.Data.Models;
-using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
@@ -19,14 +18,10 @@ namespace Silk.Core.Commands.Moderation
     [Category(Categories.Mod)]
     public class MuteCommand : BaseCommandModule
     {
-        private readonly ConfigService _configService;
-        private readonly IModerationService _moderationService;
         private readonly IInfractionService _infractions;
         
-        public MuteCommand(ConfigService configService, IModerationService moderationService, IInfractionService infractions)
+        public MuteCommand(IInfractionService infractions)
         {
-            _configService = configService;
-            _moderationService = moderationService;
             _infractions = infractions;
         }
 
@@ -52,7 +47,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (false && user.IsAbove(ctx.Member))
+            if (user.IsAbove(ctx.Member))
             {
                 int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
