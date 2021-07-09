@@ -110,8 +110,4 @@
         <Compile Remove="logs\**" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Commands\Economy" />
-    </ItemGroup>
-
 </Project>
