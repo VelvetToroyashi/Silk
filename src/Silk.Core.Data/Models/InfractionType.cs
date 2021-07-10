@@ -29,7 +29,7 @@
         /// </summary>
         Ban,
         /// <summary>
-        /// Treated as <see cref="Strike"/>, but it is not held against the user. 
+        /// Used for auto-mod config. If this is the current infraction level, it is swapped for <see cref="Note"/>.
         /// </summary>
         Ignore,
         /// <summary>
@@ -43,6 +43,10 @@
         /// <summary>
         /// This user was pardoned from an infraction.
         /// </summary>
-        Pardon
+        Pardon,
+        /// <summary>
+        /// The user was unbanned from a server.
+        /// </summary>
+        Unban
     }
 }

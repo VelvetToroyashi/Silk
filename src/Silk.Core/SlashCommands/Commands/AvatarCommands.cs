@@ -5,7 +5,6 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
 {
-
 	public enum AvatarOption
 	{
 		[ChoiceName("guild-specific")]
