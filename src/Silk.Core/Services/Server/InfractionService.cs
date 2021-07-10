@@ -90,6 +90,12 @@ namespace Silk.Core.Services.Server
 			var userExists = guild.Members.TryGetValue(userId, out var member);
 			var embed = CreateUserInfractionEmbed(enforcer, guild.Name, expiration is null ? InfractionType.Ban : InfractionType.SoftBan, reason, expiration);
 
+			if ((member?.Hierarchy ?? -1) > enforcer.Hierarchy)
+				return InfractionResult.FailedGuildHeirarchy;
+
+			if ((member?.Hierarchy ?? -1) > guild.CurrentMember.Hierarchy)
+				return InfractionResult.FailedGuildHeirarchy;
+				
 			var notified = false;
 
 			try
@@ -121,9 +127,33 @@ namespace Silk.Core.Services.Server
 				return InfractionResult.FailedSelfPermissions;
 			}
 		}
+		
 		public async Task<InfractionResult> UnBanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 		{
-			return InfractionResult.FailedNotConfigured;
+			var guild = _client.GetShard(guildId).Guilds[guildId];
+			
+			if (!guild.CurrentMember.HasPermission(Permissions.BanMembers))
+				return InfractionResult.FailedSelfPermissions;
+			try
+			{
+				await guild.UnbanMemberAsync(userId, reason);
+			}
+			catch (NotFoundException)
+			{
+				return InfractionResult.FailedGuildMemberCache; // User isn't banned. //
+			}
+
+			_infractions.RemoveAll(inf => inf.Type is InfractionType.Ban or InfractionType.SoftBan && inf.UserId == userId);
+			
+			var userInfractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+			var banInfraction = userInfractions.OrderByDescending(inf => inf.CreatedAt).FirstOrDefault(inf => inf.Type is InfractionType.Ban or InfractionType.SoftBan);
+			await _mediator.Send(new UpdateInfractionRequest(banInfraction.Id, banInfraction.Expiration, banInfraction.Reason, true));
+			
+			//TODO: Make expiration parameter optional because it bugs me ~Velvet
+			var infraction = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unban, reason, null);
+			await LogInfractionAsync(infraction);
+			
+			return InfractionResult.SucceededDoesNotNotify;
 		}
 
 		public async Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool autoEscalate = false)
@@ -177,44 +207,54 @@ namespace Silk.Core.Services.Server
 
 			return res;
 		}
-	    
+
 		public async ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId)
 		{
-			var isInMemory = _mutes.Contains((userId, guildId));
-		    
-		    if (isInMemory)
-			    return true;
+			EnsureSemaphoreExists(guildId);
+			await _semaphoreDict[guildId].WaitAsync();
+			
+			try
+			{
+				var isInMemory = _mutes.Contains((userId, guildId));
 
-		    var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-		    var inf = dbInf.SingleOrDefault(inf => !inf.HeldAgainstUser && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
-		    
-		    // ReSharper disable once InvertIf
-		    if (inf is not null)
-		    {
-			    _infractions.Add(inf);
-			    _mutes.Add((userId, guildId));
-		    }
-		    
-		    return inf is not null;
+				if (isInMemory)
+					return true;
+
+				var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
+				var inf = dbInf.SingleOrDefault(inf => !inf.HeldAgainstUser && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+
+				// ReSharper disable once InvertIf
+				if (inf is not null)
+				{
+					_infractions.Add(inf);
+					_mutes.Add((userId, guildId));
+				}
+
+				return inf is not null;
+			}
+			finally
+			{
+				_semaphoreDict[guildId].Release();
+			}
 		}
-	    
-	    public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
+
+		public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
 	    {
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
-		    GuildConfig? conf = await _config.GetConfigAsync(guildId);
+		    GuildConfig conf = await _config.GetConfigAsync(guildId);
 		    DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 		    
 			if (await IsMutedAsync(userId, guildId))
 			{
-				InfractionDTO? inf = _infractions.Find(inf => inf.UserId == userId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+				InfractionDTO? memInfraction = _infractions.Find(inf => inf.UserId == userId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 				/* Repplying mute */
 								
-				if (expiration != inf!.Expiration)
+				if (expiration != memInfraction!.Expiration)
 				{
-					var newInf = await _mediator.Send(new UpdateInfractionRequest(inf!.Id, expiration, reason));
-					await LogUpdatedInfractionAsync(inf, newInf);
+					var newInf = await _mediator.Send(new UpdateInfractionRequest(memInfraction!.Id, expiration, reason));
+					await LogUpdatedInfractionAsync(memInfraction, newInf);
 
-					_ = inf = newInf; 
+					_ = memInfraction = newInf; 
 					/*
 						All that's really necessary is inf = newInf;
 						I don't know why Roslyn analyzers don't pick up on this "usage"; it says it's assigned but never used
@@ -283,7 +323,6 @@ namespace Silk.Core.Services.Server
 	    }
 		public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 		{
-			
 			EnsureSemaphoreExists(guildId);
 		    await _semaphoreDict[guildId].WaitAsync();
 		    
