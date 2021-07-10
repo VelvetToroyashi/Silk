@@ -221,7 +221,7 @@ namespace Silk.Core.Services.Server
 					return true;
 
 				var dbInf = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
-				var inf = dbInf.SingleOrDefault(inf => !inf.HeldAgainstUser && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+				var inf = dbInf.SingleOrDefault(inf => inf.HeldAgainstUser && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 
 				// ReSharper disable once InvertIf
 				if (inf is not null)
