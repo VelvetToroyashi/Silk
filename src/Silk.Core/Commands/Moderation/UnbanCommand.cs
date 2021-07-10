@@ -1,47 +1,35 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Data.Models;
-using Silk.Core.Utilities;
+using Silk.Core.Services.Interfaces;
+using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
     [Category(Categories.Mod)]
     public class UnbanCommand : BaseCommandModule
     {
+        private readonly IInfractionService _infractions;
+        public UnbanCommand(IInfractionService infractions) => _infractions = infractions;
+
         [Command("unban")]
-        [RequireFlag(UserFlag.Staff)]
-        [RequirePermissions(Permissions.BanMembers)]
-        [Description("Unban a member from the Guild")]
-        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "No reason given.")
+        [RequireBotPermissions(Permissions.BanMembers)]
+        [RequireUserPermissions(Permissions.BanMembers)]
+        [Description("Un-bans someone from the current server!")]
+        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
         {
-            if ((await ctx.Guild.GetBansAsync()).Select(b => b.User.Id).Contains(user.Id))
+	        var res = await _infractions.UnBanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
+            var message = res switch
             {
-                await user.UnbanAsync(ctx.Guild, reason);
-                DiscordEmbedBuilder embed =
-                    new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "",
-                        $"Unbanned {user.Username}#{user.Discriminator} `({user.Id})`! ")).AddField("Reason:", reason);
-
-                //TODO: Refactor this to use IInfractionService
-
-                // var infraction =
-                //     (TimedInfraction) _eventService.Events.FirstOrDefault(e => ((TimedInfraction) e).Id == user.Id);
-                // if (infraction is not null) _eventService.Events.TryRemove(infraction);
-
-                await ctx.RespondAsync(embed);
-            }
-            else
-            {
-                DiscordEmbedBuilder embed =
-                    new DiscordEmbedBuilder(EmbedHelper.CreateEmbed(ctx, "", $"{user.Mention} is not banned!"))
-                        .WithColor(new("#d11515"));
-
-                await ctx.RespondAsync(embed);
-            }
+                InfractionResult.SucceededDoesNotNotify => $"Unbanned **{user.ToDiscordName()}**!",
+                InfractionResult.FailedGuildMemberCache => $"That member doesn't appear to be banned!"
+            };
+            
+            await ctx.RespondAsync(message);
         }
     }
 }
