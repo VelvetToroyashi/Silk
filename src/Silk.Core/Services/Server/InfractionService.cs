@@ -323,16 +323,16 @@ namespace Silk.Core.Services.Server
 	    }
 		public async Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 		{
-			EnsureSemaphoreExists(guildId);
-		    await _semaphoreDict[guildId].WaitAsync();
-
-		    if (!await IsMutedAsync(userId, guildId))
+			if (!await IsMutedAsync(userId, guildId))
 			    return InfractionResult.FailedGenericRequirementsNotFulfilled;
+			
+		    await _semaphoreDict[guildId].WaitAsync();
 		    
-		    _mutes.Remove((userId, guildId));
 		    var index = _infractions.FindIndex(inf => inf.UserId == userId && inf.GuildId == guildId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 		    var infraction = _infractions[index];
+		    
 		    _infractions.RemoveAt(index);
+		    _mutes.Remove((userId, guildId));
 
 		    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, infraction.Expiration, infraction.Reason, true)); // Only set it to say it's handled. //
 		    var unmute = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unmute, reason, null);
@@ -355,19 +355,14 @@ namespace Silk.Core.Services.Server
 			    finally
 			    {
 				    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
-				    await LogUnmuteAsync(unmute);
+				    await LogInfractionAsync(unmute);
 				    _semaphoreDict[guildId].Release();
 			    }
 		    }
 
 		    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
-		    await LogUnmuteAsync(unmute);
-
-		    async Task LogUnmuteAsync(InfractionDTO inf)
-		    {
-			    await LogInfractionAsync(inf);
-		    }
-
+		    await LogInfractionAsync(unmute);
+		    
 		    _semaphoreDict[guildId].Release();
 		    return InfractionResult.SucceededDoesNotNotify;
 		}
