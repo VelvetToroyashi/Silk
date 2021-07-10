@@ -325,49 +325,49 @@ namespace Silk.Core.Services.Server
 		{
 			EnsureSemaphoreExists(guildId);
 		    await _semaphoreDict[guildId].WaitAsync();
+
+		    if (!await IsMutedAsync(userId, guildId))
+			    return InfractionResult.FailedGenericRequirementsNotFulfilled;
 		    
-		    if (await IsMutedAsync(userId, guildId))
+		    _mutes.Remove((userId, guildId));
+		    var index = _infractions.FindIndex(inf => inf.UserId == userId && inf.GuildId == guildId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+		    var infraction = _infractions[index];
+		    _infractions.RemoveAt(index);
+
+		    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, infraction.Expiration, infraction.Reason, true)); // Only set it to say it's handled. //
+		    var unmute = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unmute, reason, null);
+
+		    var guild = _client.GetShard(guildId).Guilds[guildId];
+		    if (guild.Members.TryGetValue(userId, out var member))
 		    {
-			    _mutes.Remove((userId, guildId));
-			    var index = _infractions.FindIndex(inf => inf.UserId == userId && inf.GuildId == guildId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
-			    var infraction = _infractions[index];
-			    _infractions.RemoveAt(index);
+			    var conf = await _config.GetConfigAsync(guildId);
+			    var role = guild.Roles[conf.MuteRoleId];
+			    await member.RevokeRoleAsync(role);
 
-			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, infraction.Expiration, infraction.Reason, true)); // Only set it to say it's handled. //
-			    var unmute = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unmute, reason, null);
-			    
-			    var guild = _client.GetShard(guildId).Guilds[guildId];
-			    if (guild.Members.TryGetValue(userId, out var member))
+			    var embed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, InfractionType.Unmute, reason);
+
+			    try
 			    {
-				    var conf = await _config.GetConfigAsync(guildId);
-				    var role = guild.Roles[conf.MuteRoleId];
-				    await member.RevokeRoleAsync(role);
-
-				    var embed = CreateUserInfractionEmbed(guild.Members[enforcerId], guild.Name, InfractionType.Unmute, reason);
-
-				    try
-				    {
-					    await member.SendMessageAsync(embed);
-					    return InfractionResult.SucceededWithNotification;
-				    }
-				    catch (UnauthorizedException) { return InfractionResult.SucceededWithoutNotification; }
-				    finally
-				    {
-					    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
-					    await LogUnmuteAsync(unmute);
-					    _semaphoreDict[guildId].Release();
-				    }
+				    await member.SendMessageAsync(embed);
+				    return InfractionResult.SucceededWithNotification;
 			    }
-			    
-			    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
-			    await LogUnmuteAsync(unmute);
-
-			    async Task LogUnmuteAsync(InfractionDTO inf)
+			    catch (UnauthorizedException) { return InfractionResult.SucceededWithoutNotification; }
+			    finally
 			    {
-				    await LogInfractionAsync(inf);
+				    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
+				    await LogUnmuteAsync(unmute);
+				    _semaphoreDict[guildId].Release();
 			    }
 		    }
-		    
+
+		    await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTime.UtcNow, infraction.Reason, true));
+		    await LogUnmuteAsync(unmute);
+
+		    async Task LogUnmuteAsync(InfractionDTO inf)
+		    {
+			    await LogInfractionAsync(inf);
+		    }
+
 		    _semaphoreDict[guildId].Release();
 		    return InfractionResult.SucceededDoesNotNotify;
 		}
