@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Humanizer;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
@@ -59,10 +59,15 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync(message);
                 return;
             }
-            var sw = Stopwatch.StartNew();
+            
             var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
-            sw.Stop();
-            await ctx.RespondAsync($"Mute result returned {res.Humanize(LetterCasing.Sentence)} in {sw.ElapsedMilliseconds} ms");
+            var msg = res switch
+            {
+                InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (User notified with Direct Message).",
+                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Failed to DM).",
+                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server)."
+            };
+            await ctx.RespondAsync(msg);
         }
 
         [Priority(1)]
@@ -85,7 +90,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            if (false && user.IsAbove(ctx.Member))
+            if (user.IsAbove(ctx.Member))
             {
                 int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
                 string message;
@@ -97,9 +102,15 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync(message);
                 return;
             }
-            var sw = Stopwatch.StartNew();
-            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
-            sw.Stop();
-            await ctx.RespondAsync($"Mute result returned {res.Humanize(LetterCasing.Sentence)} in {sw.ElapsedMilliseconds} ms");        }
+
+            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
+            var msg = res switch
+            {
+                InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
+                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Failed to DM).",
+                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server)."
+            };
+            await ctx.RespondAsync(msg);
+        }
     }
 }
