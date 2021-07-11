@@ -16,7 +16,6 @@ namespace Silk.Core.Services.Bot
     public class InputService : IInputService
     {
         private readonly DiscordShardedClient _client;
-        private readonly BotConfig _config;
 
         public InputService(DiscordShardedClient client)
         {
