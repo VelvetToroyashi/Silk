@@ -9,14 +9,17 @@ namespace Silk.Core.Data.Models
         ///     The Primary Key (PK) of the model.
         /// </summary>
         public int Id { get; set; }
+
         /// <summary>
         ///     Requisite property to form a Foreign Key (FK)
         /// </summary>
         public ulong GuildId { get; set; }
+
         /// <summary>
         ///     Requisite property to form a Foreign Key (FK)
         /// </summary>
         public Guild Guild { get; set; }
+
         /// <summary>
         ///     Id of the role to apply when muting members.
         /// </summary>
@@ -26,11 +29,6 @@ namespace Silk.Core.Data.Models
         /// The trigger to greet new members, if any. Default to DoNotGreet.
         /// </summary>
         public GreetingOption GreetingOption { get; set; } = GreetingOption.DoNotGreet;
-        
-        /// <summary>
-        ///     Whether to send a greeting message in the server when someone joins.
-        /// </summary>
-        public bool GreetMembers { get; set; }
 
         /// <summary>
         ///     Whether to wait for the newly joined member to complete guild membership screening
@@ -63,7 +61,7 @@ namespace Silk.Core.Data.Models
 
 
         /// <summary>
-        ///     A list of whitlisted invites.
+        ///     A list of whitelisted invites.
         /// </summary>
         public List<Invite> AllowedInvites { get; set; } = new();
         ///// <summary>
@@ -77,6 +75,7 @@ namespace Silk.Core.Data.Models
         ///     A list of disabled commands on this server
         /// </summary>
         public List<DisabledCommand> DisabledCommands { get; set; } = new();
+
         /// <summary>
         ///     A list of roles that can be obtained from Silk!.
         /// </summary>
@@ -98,22 +97,27 @@ namespace Silk.Core.Data.Models
         ///     The maximum amount of users that can be mentioned in a single message.
         /// </summary>
         public int MaxUserMentions { get; set; }
+
         /// <summary>
         ///     The maximum amount of roles that can be mentioned in a single role.
         /// </summary>
         public int MaxRoleMentions { get; set; }
+
         /// <summary>
         ///     Channel Id to log moderation/message changes to.
         /// </summary>
         public ulong LoggingChannel { get; set; }
+
         /// <summary>
         ///     Whether to log when messages are edited/deleted.
         /// </summary>
         public bool LogMessageChanges { get; set; }
+
         /// <summary>
         ///     Whether to log members joining or not.
         /// </summary>
         public bool LogMemberJoins { get; set; }
+
         /// <summary>
         ///     Whether to log members leaving or not.
         /// </summary>
@@ -123,32 +127,37 @@ namespace Silk.Core.Data.Models
         ///     Blacklist certain invites.
         /// </summary>
         public bool BlacklistInvites { get; set; }
+
         /// <summary>
         ///     Blacklist certain words.
         /// </summary>
         public bool BlacklistWords { get; set; }
+
         /// <summary>
         ///     Represents whether to add an infraction to the user after sending an invite.
         /// </summary>
         public bool WarnOnMatchedInvite { get; set; }
+
         /// <summary>
         ///     Represents whether to delete a message containing an invite.
         /// </summary>
         public bool DeleteMessageOnMatchedInvite { get; set; }
+
         /// <summary>
         ///     Represents whether to match only discord.gg/ or all possible invite codes.
         /// </summary>
         public bool UseAggressiveRegex { get; set; }
-        
+
         /// <summary>
         /// Whether or not infractions will escalate based on the number of infractions a user has.
         /// </summary>
         public bool AutoEscalateInfractions { get; set; }
-        
+
         /// <summary>
-        ///     Whether to automatically dehoist members. Guild must be premium.
+        ///     Whether to automatically de-hoist members. Guild must be premium.
         /// </summary>
         public bool AutoDehoist { get; set; }
+
         /// <summary>
         ///     Whether to scan matched invites. Server must be premium and blacklist invites.
         /// </summary>
