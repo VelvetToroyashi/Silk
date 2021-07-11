@@ -6,10 +6,12 @@ using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
+using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
+	[Category(Categories.Mod)]
 	public class PardonCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractions;
@@ -17,7 +19,7 @@ namespace Silk.Core.Commands.Moderation
 
 		[Command("pardon")]
 		[RequireFlag(UserFlag.Staff)]
-		[Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction automod, or escalated strike.\nThis will not undo mutes or bans.")]
+		[DSharpPlus.CommandsNext.Attributes.Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction automod, or escalated strike.\nThis will not undo mutes or bans.")]
 		public async Task PardonAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			if (ctx.User == user)

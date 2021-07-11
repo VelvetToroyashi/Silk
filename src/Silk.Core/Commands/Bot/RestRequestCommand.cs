@@ -15,6 +15,7 @@ using Silk.Shared.Configuration;
 
 namespace Silk.Core.Commands.Bot
 {
+    [Hidden]
     public class RestRequestCommand : BaseCommandModule
     {
         private const string baseUri = "https://discord.com/api/v9";
