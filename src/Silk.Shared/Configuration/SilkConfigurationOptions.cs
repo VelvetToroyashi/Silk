@@ -112,8 +112,6 @@ namespace Silk.Shared.Configuration
                 
                 prop.SetValue(null, val);
                 Log.Logger.Verbose("Successfully set {Property} to {Value}", prop.Name, val);
-
-
             }
         }
     }
