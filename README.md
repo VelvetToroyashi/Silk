@@ -31,10 +31,10 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
 
 
 ### **Configuration / Secrets Management**
-- To manage storage of the needed ```Discord Token``` and ```Database Connection String```, and other important project configuration/settings, Silk uses an ```appSettings.json``` file.
+- To manage storage of the needed `Discord Token` and `Database Connection String`, and other important project configuration/settings, Silk uses an `appSettings.json` file.
 
 #### **Default**
-#### When you clone Silk, before running project, you'll need to edit the template ```appSettings.json``` file in the following directory: ```src\Silk.Core```
+#### When you clone Silk, before running project, you'll need to edit the template `appSettings.json` file in the following directory: `src\Silk.Core`
 
 <br/>
 
@@ -62,22 +62,22 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
       }
       ```
    - From there, just give set the `BotToken` key a value (your Discord Bot Token)
-     - If you don't have your token off-hand, you can get it from the [Discord Developer Portal](https://discord.com/developers); Select your application once logged in, then select ```Bot``` in the menu, and you should be able to Reveal your token from there.
+     - If you don't have your token off-hand, you can get it from the [Discord Developer Portal](https://discord.com/developers); Select your application once logged in, then select `Bot` in the menu, and you should be able to Reveal your token from there.
 
 #### **App Secrets**
-- The alternative, and more recommended (but still **NOT** suitable for ```Production```) for managing the configuration file is using ```User Secrets```
+- The alternative, and more recommended (but still **NOT** suitable for `Production`) for managing the configuration file is using `User Secrets`
 
 - The great advantage of using User Secrets, is that the file is stored in a separate location from the project tree, and because of this, secrets also aren't checked into source control.
 
-1. In Silk's Core project, a ```UserSecretsId``` is defined:
+1. In Silk's Core project, a `UserSecretsId` is defined:
    - ```
      <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
      ```
-2. The location of the ```secrets.json``` file is different between Operating Systems, but in a system-protected user profile folder on your computer.
-   - Windows: ```%APPDATA%\Microsoft\UserSecrets\VelvetThePanda-SilkBot\secrets.json```
-   - Linux / Mac: ```~/.microsoft/usersecrets/VelvetThePanda-SilkBot/secrets.json```
+2. The location of the `secrets.json` file is different between Operating Systems, but in a system-protected user profile folder on your computer.
+   - Windows: `%APPDATA%\Microsoft\UserSecrets\VelvetThePanda-SilkBot\secrets.json`
+   - Linux / Mac: `~/.microsoft/usersecrets/VelvetThePanda-SilkBot/secrets.json`
 
-3. The structure is the same for the [Default](#default) - ```appSettings.json``` approach
+3. The structure is the same for the [Default](#default) - `appSettings.json` approach
    - Just fill out the skeleton and you're good to go!
 
 
