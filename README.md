@@ -12,7 +12,7 @@ Silk is a simple and fastest Discord bot written in C# until proven otherwise. S
 
 
 ## **Development** 
-Silk! Is an open source bot, obviously, and if you know C#, you're more than welcome to contribute! If you're on the server, and your PR gets merged, you get a nice light blue role on the server to signify your contributions. Active contributors are given a special role as well.
+Silk! is an open-source bot, and if you know C#, you're more than welcome to contribute! If you're on the server, and your PR gets merged, you get a nice light blue role on the server to signify your contributions. Active contributors are given a special role as well.
 
 ### **Resources**
 - [PostgreSQL](https://www.postgresql.org/)
