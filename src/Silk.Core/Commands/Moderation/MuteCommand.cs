@@ -100,7 +100,7 @@ namespace Silk.Core.Commands.Moderation
                 return;
             }
 
-            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, null);
+            var res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
             var msg = res switch
             {
                 InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
