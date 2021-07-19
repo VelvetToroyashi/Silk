@@ -62,7 +62,8 @@ namespace Silk.Core.Commands.Moderation
             {
                 InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (User notified with Direct Message).",
                 InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Failed to DM).",
-                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server)."
+                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server).",
+                InfractionResult.SucceededDoesNotNotify => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Updating active mute does not notify)."
             };
             await ctx.RespondAsync(msg);
         }
@@ -105,7 +106,8 @@ namespace Silk.Core.Commands.Moderation
             {
                 InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
                 InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Failed to DM).",
-                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server)."
+                InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server).",
+                InfractionResult.SucceededDoesNotNotify => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Updating active mute does not notify)."
             };
             await ctx.RespondAsync(msg);
         }
