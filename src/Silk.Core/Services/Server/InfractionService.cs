@@ -256,7 +256,7 @@ namespace Silk.Core.Services.Server
 
 					_ = memInfraction = newInf; // Update the in memory infraction //
 				}
-				
+
 				muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
 				/* It *should* be almost impossible for someone to leave a server this fast without selfbotting */
 				try

@@ -3,6 +3,8 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Services.Interfaces;
+using Silk.Extensions.DSharpPlus;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.AutoMod
 {
@@ -25,10 +27,15 @@ namespace Silk.Core.AutoMod
 		private async Task HandleMemberJoinAsync(DiscordClient client, GuildMemberAddEventArgs memberArgs)
 		{
 			var isMuted = await _infractions.IsMutedAsync(memberArgs.Member.Id, memberArgs.Guild.Id);
-			_logger.LogInformation("Member is muted: {Muted}", isMuted);
+			var member = memberArgs.Member.Id;
+			var guild = memberArgs.Guild.Id;
+			var automod = _client.CurrentUser.Id;
+			
+			
 			if (isMuted)
 			{
-				await _infractions.MuteAsync(memberArgs.Member.Id, memberArgs.Guild.Id, _client.CurrentUser.Id, "Re-applied active mute on join.", updateExpiration: false);
+				await _infractions.MuteAsync(member, guild, automod, "Re-applied active mute on join.", updateExpiration: false);
+				await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied {memberArgs.Member.ToDiscordName()}'s mute on rejoin.");
 			}
 		}
 		

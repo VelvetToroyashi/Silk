@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using Silk.Core.AutoMod;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
 using Silk.Core.EventHandlers.MemberAdded;
@@ -24,7 +25,8 @@ namespace Silk.Core.Utilities
             RoleMenuReactionService roleMenu,
             GuildEventHandlers guildHandlers,
             MemberRemovedHandler memberRemovedHandler,
-            ButtonHandlerService buttonHandler)
+            ButtonHandlerService buttonHandler, 
+            AutoModMuteApplier _)
         {
 
             client.MessageCreated += commandHandler.Handle;
