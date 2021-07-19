@@ -20,10 +20,7 @@ namespace Silk.Core.Commands.Moderation
     {
         private readonly IInfractionService _infractions;
         
-        public MuteCommand(IInfractionService infractions)
-        {
-            _infractions = infractions;
-        }
+        public MuteCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command("mute")]
         [RequireFlag(UserFlag.Staff)]

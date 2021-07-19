@@ -66,7 +66,7 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="guildId">The id of the guild to check.</param>
 		/// <returns>Whether the user is currently muted.</returns>
 		public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId);
-		
+
 		/// <summary>
 		/// Mutes a user on the guild, either temporarily or permanently.
 		/// </summary>
@@ -75,8 +75,9 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="enforcerId">The member that's muting the user.</param>
 		/// <param name="reason">The reason the user is beign muted.</param>
 		/// <param name="expiration">If temporarily muting, when this mute is set to expire.</param>
+		/// <param name="updateExpiration">Whether or not the expiration of the mute should be updated.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
-		public Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", DateTime? expiration = null);
+		public Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", DateTime? expiration = null, bool updateExpiration = true);
 		
 		/// <summary>
 		/// Un-mutes a member on the specified guild.

@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Silk.Core.AutoMod;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
 using Silk.Core.EventHandlers.Guilds;
@@ -103,7 +104,7 @@ namespace Silk.Core
                 {
                     LoggerConfiguration? logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
-                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null)
+                        .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval:RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                         .MinimumLevel.Override("DSharpPlus", LogEventLevel.Fatal);
 
@@ -146,10 +147,22 @@ namespace Silk.Core
 
                 services.AddSingleton<GuildEventHandlers>();
 
+                #region Services
+                
                 services.AddSingleton<ConfigService>();
+                services.AddSingleton<MemberGreetingService>();
+                
+                #endregion
+
+                #region AutoMod
+
+                services.AddSingleton<AutoModMuteApplier>();
+                
+                #endregion
+                
                 services.AddSingleton<AntiInviteCore>();
                 services.AddSingleton<RoleAddedHandler>();
-                services.AddSingleton<MemberGreetingService>();
+                
                 services.AddSingleton<MemberRemovedHandler>();
                 services.AddSingleton<RoleRemovedHandler>();
                 services.AddSingleton<BotExceptionHandler>();

@@ -238,7 +238,7 @@ namespace Silk.Core.Services.Server
 			}
 		}
 
-		public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration)
+		public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration, bool updateExpiration = true)
 	    {
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
 		    GuildConfig conf = await _config.GetConfigAsync(guildId);
@@ -249,19 +249,12 @@ namespace Silk.Core.Services.Server
 				InfractionDTO? memInfraction = _infractions.Find(inf => inf.UserId == userId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 				/* Repplying mute */
 								
-				if (expiration != memInfraction!.Expiration)
+				if (updateExpiration && expiration != memInfraction!.Expiration)
 				{
 					var newInf = await _mediator.Send(new UpdateInfractionRequest(memInfraction!.Id, expiration, reason));
 					await LogUpdatedInfractionAsync(memInfraction, newInf);
 
-					_ = memInfraction = newInf; 
-					/*
-						All that's really necessary is inf = newInf;
-						I don't know why Roslyn analyzers don't pick up on this "usage"; it says it's assigned but never used
-						But if you were to do: inf = newInf; _ = inf;
-						Analyzers are more than happy to say "Yep! This variable is being used. 
-						Anyway thanks for coming to my TedTalk
-					 */
+					_ = memInfraction = newInf; // Update the in memory infraction //
 				}
 				
 				muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
