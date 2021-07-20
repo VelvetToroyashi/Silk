@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -31,6 +32,7 @@ using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
+using Silk.Core.Utilities.HttpClient;
 using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
@@ -145,7 +147,11 @@ namespace Silk.Core
 
                 services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
-                services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
+                services.AddHttpClient(StringConstants.HttpClientName,
+                    client => client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                        $"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
+                
+                services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
 
                 services.AddSingleton<GuildEventHandler>();
 
