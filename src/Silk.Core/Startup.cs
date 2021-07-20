@@ -118,7 +118,7 @@ namespace Silk.Core
                         "Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
                         _ => logger.MinimumLevel.Verbose().CreateLogger()
                     };
-                    Log.Logger.ForContext(typeof(Startup)).Information("Logging initialized!");
+                    Log.Logger.ForContext(typeof(Startup)).Information("Logging Initialized!");
                 })
                 .UseSerilog();
         }
@@ -145,7 +145,7 @@ namespace Silk.Core
 
                 services.AddHttpClient(StringConstants.HttpClientName, client => client.DefaultRequestHeaders.UserAgent.ParseAdd($"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
 
-                services.AddSingleton<GuildEventHandlers>();
+                services.AddSingleton<GuildEventHandler>();
 
                 #region Services
                 
