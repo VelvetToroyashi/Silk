@@ -30,7 +30,6 @@ namespace Silk.Core.Data.MediatR.Guilds
                     .Include(c => c.InfractionSteps)
                     .Include(c => c.DisabledCommands)
                     //.Include(c => c.BlackListedWords)
-                    .Include(c => c.RoleMenus)
                     .AsSplitQuery()
                     .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
             return config;

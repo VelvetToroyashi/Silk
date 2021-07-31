@@ -22,4 +22,8 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models\Guild\Config" />
+    </ItemGroup>
+
 </Project>

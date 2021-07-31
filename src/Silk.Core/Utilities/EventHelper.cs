@@ -6,7 +6,6 @@ using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
-using Silk.Core.EventHandlers.Reactions;
 
 namespace Silk.Core.Utilities
 {
@@ -22,10 +21,8 @@ namespace Silk.Core.Utilities
             MessageRemovedHandler removeHandler,
             MemberGreetingService memberGreetingService,
             RoleAddedHandler staffCheck,
-            RoleMenuReactionService roleMenu,
             GuildEventHandler guildHandler,
             MemberRemovedHandler memberRemovedHandler,
-            ButtonHandlerService buttonHandler, 
             AutoModMuteApplier _)
         {
 
@@ -37,16 +34,9 @@ namespace Silk.Core.Utilities
             client.GuildMemberRemoved += memberRemovedHandler.OnMemberRemoved;
             client.GuildMemberUpdated += staffCheck.CheckStaffRole;
 
-            client.MessageReactionAdded += roleMenu.OnAdd;
-            client.MessageReactionRemoved += roleMenu.OnRemove;
-
-
             client.GuildCreated += guildHandler.OnGuildJoin;
             client.GuildAvailable += guildHandler.OnGuildAvailable;
             client.GuildDownloadCompleted += guildHandler.OnGuildDownload;
-
-            client.ComponentInteractionCreated += buttonHandler.OnButtonPress;
-
         }
     }
 }

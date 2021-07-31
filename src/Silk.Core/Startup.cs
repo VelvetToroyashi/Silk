@@ -24,7 +24,6 @@ using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
-using Silk.Core.EventHandlers.Reactions;
 using Silk.Core.Services.Bot;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -165,10 +164,11 @@ namespace Silk.Core
                 #region AutoMod
 
                 services.AddSingleton<AutoModMuteApplier>();
+                services.AddSingleton<AntiInviteCore>();
                 
                 #endregion
                 
-                services.AddSingleton<AntiInviteCore>();
+
                 services.AddSingleton<RoleAddedHandler>();
                 
                 services.AddSingleton<MemberRemovedHandler>();
@@ -178,7 +178,7 @@ namespace Silk.Core
                 services.AddSingleton<SerilogLoggerFactory>();
                 services.AddSingleton<MessageRemovedHandler>();
 
-                services.AddSingleton<ButtonHandlerService>();
+
                 services.AddSingleton<CommandHandler>();
                 services.AddSingleton<MessageAddAntiInvite>();
 
@@ -191,8 +191,7 @@ namespace Silk.Core
                 services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
                 services.AddSingleton<TagService>();
-                services.AddSingleton<RoleMenuReactionService>();
-
+                
                 services.AddSingleton<Main>();
                 services.AddHostedService(s => s.GetRequiredService<Main>());
 

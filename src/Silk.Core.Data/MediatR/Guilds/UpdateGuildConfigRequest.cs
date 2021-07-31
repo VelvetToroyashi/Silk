@@ -42,9 +42,7 @@ namespace Silk.Core.Data.MediatR.Guilds
         public List<Invite>? AllowedInvites { get; init; }
         public List<DisabledCommand>? DisabledCommands { get; init; }
         public List<SelfAssignableRole>? SelfAssignableRoles { get; init; }
-
-        public RoleMenu RoleMenu { get; init; }
-
+        
         public List<InfractionStep>? InfractionSteps { get; init; }
         //public List<BlacklistedWord>? BlacklistedWords { get; init; }
     }
@@ -56,15 +54,11 @@ namespace Silk.Core.Data.MediatR.Guilds
     {
         private readonly GuildContext _db;
 
-        public UpdateGuildConfigHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateGuildConfigHandler(GuildContext db) => _db = db;
 
         public async Task<GuildConfig?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
         {
             GuildConfig config = await _db.GuildConfigs
-                .Include(c => c.RoleMenuMenus)
                 .Include(c => c.InfractionSteps)
                 .Include(c => c.SelfAssignableRoles)
                 .AsSplitQuery()
