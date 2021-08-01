@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.General
             DiscordEmbedBuilder? responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
             DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
 
-            GuildConfig guildConfig = await GetOrCreateGuildConfig(ctx);
+            GuildModConfig guildConfig = await GetOrCreateGuildConfig(ctx);
             DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
 
             DiscordEmbedBuilder? clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
@@ -71,10 +71,10 @@ namespace Silk.Core.Commands.General
                 .WithColor(DiscordColor.Red);
         }
 
-        private async Task<GuildConfig> GetOrCreateGuildConfig(CommandContext ctx)
+        private async Task<GuildModConfig> GetOrCreateGuildConfig(CommandContext ctx)
         {
-            Guild? guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
-            return guild.Configuration;
+            Guild guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
+            return guild.ModConfig;
         }
     }
 }

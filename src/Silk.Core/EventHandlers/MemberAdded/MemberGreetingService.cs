@@ -29,12 +29,14 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
-            GuildConfig? config = await _configService.GetConfigAsync(e.Guild.Id);
+            var config = await _configService.GetConfigAsync(e.Guild.Id);
+            var modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
+            
             if (config is null!) // Wasn't cached yet //
                 return;
             // This should be done in a seperate service //
-            if (config.LogMemberJoins && config.LoggingChannel is not 0)
-                await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
+            if (modConfig.LogMemberJoins && modConfig.LoggingChannel is not 0)
+                await e.Guild.GetChannel(modConfig.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
             bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetingOption is GreetingOption.GreetOnScreening;
             bool verifyMembers = config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is not 0;

@@ -164,7 +164,7 @@ namespace Silk.Core
                 #region AutoMod
 
                 services.AddSingleton<AutoModMuteApplier>();
-                services.AddSingleton<AntiInviteCore>();
+                services.AddSingleton<AntiInviteHelper>();
                 
                 #endregion
                 
@@ -187,7 +187,7 @@ namespace Silk.Core
                 services.AddScoped<IInputService, InputService>();
                 services.AddScoped<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
-                services.AddSingleton<IModerationService, ModerationService>();
+                
                 services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
                 services.AddSingleton<TagService>();

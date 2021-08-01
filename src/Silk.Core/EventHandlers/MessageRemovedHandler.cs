@@ -3,19 +3,15 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using MediatR;
-using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Models;
+using Silk.Core.Services.Data;
 
 namespace Silk.Core.EventHandlers
 {
-    public class MessageRemovedHandler
+    public sealed class MessageRemovedHandler
     {
-        private readonly IMediator _mediator;
-        public MessageRemovedHandler(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly ConfigService _cache;
+        public MessageRemovedHandler(ConfigService cache) => _cache = cache;
 
         public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
         {
@@ -24,7 +20,7 @@ namespace Silk.Core.EventHandlers
             if (e.Channel.IsPrivate) return; // Goes without saying.                           //
             _ = Task.Run(async () =>
             {
-                GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(e.Guild.Id));
+                GuildModConfig config = await _cache.GetModConfigAsync(e.Guild.Id);
 
                 if (!config.LogMessageChanges) return;
                 if (config.LoggingChannel is 0) return;

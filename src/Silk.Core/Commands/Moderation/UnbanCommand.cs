@@ -26,7 +26,7 @@ namespace Silk.Core.Commands.Moderation
             var message = res switch
             {
                 InfractionResult.SucceededDoesNotNotify => $"Unbanned **{user.ToDiscordName()}**!",
-                InfractionResult.FailedGuildMemberCache => $"That member doesn't appear to be banned!"
+                InfractionResult.FailedResourceDeleted => $"That member doesn't appear to be banned!"
             };
             
             await ctx.RespondAsync(message);

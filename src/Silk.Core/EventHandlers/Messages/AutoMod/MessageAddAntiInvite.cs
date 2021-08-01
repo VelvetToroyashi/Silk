@@ -1,37 +1,32 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using MediatR;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Data;
-using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
-    public class MessageAddAntiInvite
+    public sealed class MessageAddAntiInvite
     {
         private readonly ConfigService _config;
-        private readonly IModerationService _moderationService;
-        private readonly IMediator _mediator;
+        private readonly AntiInviteHelper _inviteHelper;
 
-        public MessageAddAntiInvite(IModerationService moderationService, IMediator mediator, ConfigService config)
+        public MessageAddAntiInvite(ConfigService config, AntiInviteHelper inviteHelper)
         {
-            _moderationService = moderationService;
-            _mediator = mediator;
             _config = config;
+            _inviteHelper = inviteHelper;
         }
 
         public async Task CheckForInvite(DiscordClient client, MessageCreateEventArgs args)
         {
             if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
             {
-                GuildConfig config = await _config.GetConfigAsync(args.Guild.Id);
+                var config = await _config.GetModConfigAsync(args.Guild.Id);
 
-                bool hasInvite = AntiInviteCore.CheckForInvite(client, args.Message, config, out string invite);
-                bool isBlacklisted = await AntiInviteCore.IsBlacklistedInvite(client, args.Message, config, invite!);
+                bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
+                bool isBlacklisted = await _inviteHelper.IsBlacklistedInvite(args.Message, config, invite);
 
                 if (hasInvite && isBlacklisted)
-                    await AntiInviteCore.TryAddInviteInfractionAsync(config, args.Message, _moderationService);
+                    await _inviteHelper.TryAddInviteInfractionAsync(args.Message);
             }
         }
     }

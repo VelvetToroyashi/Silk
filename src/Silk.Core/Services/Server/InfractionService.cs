@@ -138,15 +138,16 @@ namespace Silk.Core.Services.Server
 			{
 				await guild.UnbanMemberAsync(userId, reason);
 			}
-			catch (NotFoundException)
-			{
-				return InfractionResult.FailedGuildMemberCache; // User isn't banned. //
-			}
+			catch (NotFoundException) { }
 
 			_infractions.RemoveAll(inf => inf.Type is InfractionType.Ban or InfractionType.SoftBan && inf.UserId == userId);
 			
 			var userInfractions = await _mediator.Send(new GetUserInfractionsRequest(guildId, userId));
 			var banInfraction = userInfractions.OrderByDescending(inf => inf.CreatedAt).FirstOrDefault(inf => inf.Type is InfractionType.Ban or InfractionType.SoftBan);
+
+			if (!userInfractions.Any() || banInfraction is null)
+				return InfractionResult.FailedResourceDeleted;
+			
 			await _mediator.Send(new UpdateInfractionRequest(banInfraction.Id, banInfraction.Expiration, banInfraction.Reason, true));
 			
 			//TODO: Make expiration parameter optional because it bugs me ~Velvet
@@ -241,7 +242,7 @@ namespace Silk.Core.Services.Server
 		public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration, bool updateExpiration = true)
 	    {
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
-		    GuildConfig conf = await _config.GetConfigAsync(guildId);
+		    GuildModConfig conf = await _config.GetModConfigAsync(guildId);
 		    DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 		    
 			if (await IsMutedAsync(userId, guildId))
@@ -333,7 +334,7 @@ namespace Silk.Core.Services.Server
 		    var guild = _client.GetShard(guildId).Guilds[guildId];
 		    if (guild.Members.TryGetValue(userId, out var member))
 		    {
-			    var conf = await _config.GetConfigAsync(guildId);
+			    var conf = await _config.GetModConfigAsync(guildId);
 			    var role = guild.Roles[conf.MuteRoleId];
 			    await member.RevokeRoleAsync(role);
 
@@ -362,7 +363,7 @@ namespace Silk.Core.Services.Server
 
 	    public async Task<InfractionStep> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions)
 		{
-		    GuildConfig conf = await _config.GetConfigAsync(guildId);
+		    GuildModConfig conf = await _config.GetModConfigAsync(guildId);
 		    if (!conf.InfractionSteps.Any())
 			    return _ignoreStep;
 		    
@@ -408,7 +409,7 @@ namespace Silk.Core.Services.Server
 			    .WithTitle($"Note (case {infractionNote.CaseNumber})");
 		    
 		    await EnsureModLogChannelExistsAsync(guildId);
-		    var conf = await _config.GetConfigAsync(guildId);
+		    var conf = await _config.GetModConfigAsync(guildId);
 		    if (conf.LoggingChannel is 0)
 			    return InfractionResult.FailedNotConfigured;
 		    var channel = guild.Channels[conf.LoggingChannel];
@@ -511,7 +512,7 @@ namespace Silk.Core.Services.Server
 	    private async Task<InfractionResult> LogUpdatedInfractionAsync(InfractionDTO infOld, InfractionDTO infNew)
 	    {
 		    await EnsureModLogChannelExistsAsync(infNew.GuildId);
-		    var conf = await _config.GetConfigAsync(infNew.GuildId);
+		    var conf = await _config.GetModConfigAsync(infNew.GuildId);
 
 		    var modLog = conf.LoggingChannel;
 		    var guild = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId];
@@ -590,7 +591,7 @@ namespace Silk.Core.Services.Server
 		{ 
 			await EnsureModLogChannelExistsAsync(inf.GuildId);
 		    
-		    var config = await _config.GetConfigAsync(inf.GuildId);
+		    var config = await _config.GetModConfigAsync(inf.GuildId);
 		    var guild = _client.GetShard(inf.GuildId).Guilds[inf.GuildId];
 		    
 		    if (config.LoggingChannel is 0)
@@ -649,7 +650,7 @@ namespace Silk.Core.Services.Server
 				if (!channels.All(r => r.PermissionOverwrites.Any(p => p.Id == role.Id))) 
 					continue;
 			
-				await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = role.Id});
+				await _mediator.Send(new UpdateGuildModConfigRequest(guild.Id) {MuteRoleId = role.Id});
 				return role;
 			}
 			
@@ -663,7 +664,7 @@ namespace Silk.Core.Services.Server
 				await c.AddOverwriteAsync(mute, Permissions.None, Permissions.SendMessages);
 			}
 			
-			await _mediator.Send(new UpdateGuildConfigRequest(guild.Id) {MuteRoleId = mute.Id});
+			await _mediator.Send(new UpdateGuildModConfigRequest(guild.Id) {MuteRoleId = mute.Id});
 			_updater.UpdateGuild(guild.Id);
 			return mute;
 		}
@@ -673,7 +674,7 @@ namespace Silk.Core.Services.Server
 		/// </summary>
 		private async Task EnsureModLogChannelExistsAsync(ulong guildId)
 		{
-		    GuildConfig config = await _config.GetConfigAsync(guildId);
+		    GuildModConfig config = await _config.GetModConfigAsync(guildId);
 		    DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
 
 		    if (config.LoggingChannel is not 0)
@@ -692,7 +693,7 @@ namespace Silk.Core.Services.Server
 
 			    var chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.OfType(ChannelType.Category).Last(), overwrites: overwrites);
 			    await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
-			    await _mediator.Send(new UpdateGuildConfigRequest(guildId) {LoggingChannel = chn.Id});
+			    await _mediator.Send(new UpdateGuildModConfigRequest(guildId) {LoggingChannel = chn.Id});
 			    _updater.UpdateGuild(guildId);
 		    }
 		    catch { /* Igonre. We can't do anything about it :( */ }

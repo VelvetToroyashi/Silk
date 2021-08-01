@@ -27,7 +27,6 @@ namespace Silk.Core.Data.MediatR.Guilds
         {
             GuildConfig config =
                 await _db.GuildConfigs
-                    .Include(c => c.InfractionSteps)
                     .Include(c => c.DisabledCommands)
                     //.Include(c => c.BlackListedWords)
                     .AsSplitQuery()

@@ -4,9 +4,12 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
+using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
@@ -14,15 +17,21 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
     /// <summary>
     ///     Utility class for anti-invite functionality.
     /// </summary>
-    public class AntiInviteCore
+    public sealed class AntiInviteHelper
     {
-        private static ILogger<AntiInviteCore> _logger;
-        public AntiInviteCore(ILogger<AntiInviteCore> logger)
+        private readonly ILogger<AntiInviteHelper> _logger;
+        private readonly IMediator _mediator;
+        private readonly IInfractionService _infractions;
+        private readonly DiscordShardedClient _client;
+       
+        public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordShardedClient client)
         {
             _logger = logger;
+            _mediator = mediator;
+            _infractions = infractions;
+            _client = client;
         }
-
-
+        
         /// <summary>
         ///     Regex to match discord invites using discord's main invite URL (discord.gg)
         /// </summary>
@@ -37,12 +46,11 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <summary>
         ///     Checks if a <see cref="DiscordMessage" /> has a valid <see cref="DiscordInvite" />.
         /// </summary>
-        /// <param name="client">Client instance used to make API calls as necessary.</param>
         /// <param name="message">The message to check.</param>
         /// <param name="config">The configuration of the guild the message was sent on.</param>
         /// <param name="invite">The invite that was matched, if any.</param>
         /// <returns>Whether further action should be taken</returns>
-        public static bool CheckForInvite(DiscordClient client, DiscordMessage message, GuildConfig config, out string invite)
+        public bool CheckForInvite(DiscordMessage message, GuildModConfig config, out string invite)
         {
             invite = "";
 
@@ -59,20 +67,21 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         }
 
         /// <summary>
-        ///     Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
+        /// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
         /// </summary>
         /// <param name="client">A client object to make API calls with.</param>
         /// <param name="message">The message to check.</param>
         /// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
         /// <param name="invite">The invite to check.</param>
         /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
-        public static async Task<bool> IsBlacklistedInvite(DiscordClient client, DiscordMessage message, GuildConfig config, string invite)
+        public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfig config, string invite)
         {
             var blacklisted = true;
             if (!config.ScanInvites) return blacklisted;
 
             try
             {
+                var client = _client.GetShard(message.Channel.Guild);
                 DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
 
                 if (apiInvite.Guild.Id != message.Channel.GuildId)
@@ -93,25 +102,17 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         }
 
         /// <summary>
-        ///     Checks if a memeber should be punished for sending a Discord invite, and calls <see cref="IModerationService.ProgressInfractionStepAsync" /> if
-        ///     it succeeds.
+        /// Attempts to infract a member for posting an invite.
         /// </summary>
-        /// <param name="config">The configuration for the guild.</param>
-        /// <param name="message">The offending message, to be deleted, if configured.</param>
-        /// <param name="moderationService">The infraction service reference to make a call to if checks succeed.</param>
-        public static async Task TryAddInviteInfractionAsync(GuildConfig config, DiscordMessage message, IModerationService moderationService)
+        /// <param name="message"></param>
+        public async Task TryAddInviteInfractionAsync(DiscordMessage message)
         {
-            bool shouldPunish = await moderationService.ShouldAddInfractionAsync((DiscordMember) message.Author);
-            if (shouldPunish && config.DeleteMessageOnMatchedInvite) _ = message.DeleteAsync();
-            if (shouldPunish && config.WarnOnMatchedInvite)
-            {
-                Infraction infraction = await moderationService
-                    .CreateInfractionAsync((DiscordMember) message.Author, message.Channel.Guild.CurrentMember,
-                        InfractionType.Strike, "[AutoMod] Sending an invite link");
+            var user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
+            
+            if (user.Flags.HasFlag(UserFlag.InfractionExemption))
+                return;
 
-
-                await moderationService.ProgressInfractionStepAsync((DiscordMember) message.Author, "");
-            }
+            await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", true);
         }
     }
 }
