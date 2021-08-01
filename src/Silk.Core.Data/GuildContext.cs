@@ -32,7 +32,6 @@ namespace Silk.Core.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
-            builder.Entity<SelfAssignableRole>().Property(r => r.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }
     }

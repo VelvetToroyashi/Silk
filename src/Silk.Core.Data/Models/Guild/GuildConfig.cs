@@ -54,6 +54,13 @@ namespace Silk.Core.Data.Models
         ///     The text that will be used to greet new members.
         /// </summary>
         public string GreetingText { get; set; } = "";
+        
+        /// <summary>
+        ///     A list of disabled commands on this server
+        /// </summary>
+        public List<DisabledCommand> DisabledCommands { get; set; } = new();
+        
+        #region AutoMod/Moderation
 
         //This will be used eventually.
         //TODO: Have infraction type be it's own format
@@ -69,21 +76,7 @@ namespace Silk.Core.Data.Models
         ///// </summary>
         //// ReSharper disable once CollectionNeverUpdated.Global
         //public List<BlacklistedWord> BlackListedWords { get; set; } = new();
-
-
-        /// <summary>
-        ///     A list of disabled commands on this server
-        /// </summary>
-        public List<DisabledCommand> DisabledCommands { get; set; } = new();
-
-        /// <summary>
-        ///     A list of roles that can be obtained from Silk!.
-        /// </summary>
-        public List<SelfAssignableRole> SelfAssignableRoles { get; set; } = new();
         
-
-        #region AutoMod/Moderation
-
         /// <summary>
         ///     The maximum amount of users that can be mentioned in a single message.
         /// </summary>

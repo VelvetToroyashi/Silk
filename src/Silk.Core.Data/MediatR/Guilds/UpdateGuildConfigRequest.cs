@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -41,8 +40,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 
         public List<Invite>? AllowedInvites { get; init; }
         public List<DisabledCommand>? DisabledCommands { get; init; }
-        public List<SelfAssignableRole>? SelfAssignableRoles { get; init; }
-        
+
         public List<InfractionStep>? InfractionSteps { get; init; }
         //public List<BlacklistedWord>? BlacklistedWords { get; init; }
     }
@@ -60,7 +58,6 @@ namespace Silk.Core.Data.MediatR.Guilds
         {
             GuildConfig config = await _db.GuildConfigs
                 .Include(c => c.InfractionSteps)
-                .Include(c => c.SelfAssignableRoles)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
@@ -88,17 +85,7 @@ namespace Silk.Core.Data.MediatR.Guilds
             config.InfractionSteps = request.InfractionSteps ?? config.InfractionSteps;
             config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
             config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
-
-            if (request.SelfAssignableRoles is not null)
-            {
-                foreach (var r in request.SelfAssignableRoles)
-                {
-                    if (config.SelfAssignableRoles.Any(ro => ro.Id == r.Id))
-                        config.SelfAssignableRoles.Remove(r);
-                    else config.SelfAssignableRoles.Add(r);
-                }
-            }
-
+            
             await _db.SaveChangesAsync(cancellationToken);
             return config;
         }

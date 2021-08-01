@@ -2,7 +2,5 @@
 
 namespace Silk.Core.Commands
 {
-	public class Test : BaseCommandModule
-	{
-	}
+	public class Test : BaseCommandModule { }
 }
