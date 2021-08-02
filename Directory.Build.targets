@@ -1,5 +1,5 @@
 ﻿<Project>
-    <ItemGroup>
+    <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="DSharpPlus" Version="4.1.0-nightly-00934"/>
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00934"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0-nightly-00934"/>

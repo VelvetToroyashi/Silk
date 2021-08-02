@@ -3,8 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Silk.Core.Types;
-using Xunit;
-using Assert = Xunit.Assert;
 
 namespace Silk.Core.Tests.Types
 {
@@ -67,7 +65,7 @@ namespace Silk.Core.Tests.Types
 			timer.Stop();
 
 			//Assert
-			Assert.Equal(3, num);
+			Assert.Equals(3, num);
 		}
 
 		[Test]
@@ -87,7 +85,7 @@ namespace Silk.Core.Tests.Types
 			timer.Stop();
 			
 			//Assert
-			Assert.Equal(2, num);
+			Assert.Equals(2, num);
 		}
 
 		[Test]
@@ -123,7 +121,7 @@ namespace Silk.Core.Tests.Types
 			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
 			
 			//Act
-			var ex = Record.Exception(() => timer.Start());
+			var ex = Assert.Catch(() => timer.Start());
 
 			//Assert
 			Assert.Null(ex);
