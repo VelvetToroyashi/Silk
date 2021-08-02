@@ -1,0 +1,9 @@
+﻿<Project>
+  <PropertyGroup>
+    <Product>Silk!</Product>
+    <Authors>VelvetThePanda, CalebABG97, NatsumiHB</Authors>
+    <Company>The Silk Dev Team</Company>
+    <!--Todo: update-->
+    <PackageProjectUrl>https://github.com/VelvetThePanda/Silk</PackageProjectUrl>
+  </PropertyGroup>
+</Project>
