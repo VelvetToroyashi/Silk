@@ -25,10 +25,12 @@ namespace Silk.Core.Data
 
         public DbSet<GuildConfig> GuildConfigs { get; set; } = null!;
 
+        public DbSet<GuildModConfig> GuildModConfigs { get; set; } = null!;
+        
         public DbSet<Tag> Tags { get; set; } = null!;
 
         public DbSet<Reminder> Reminders { get; set; } = null!;
-        public DbSet<GuildModConfig> GuildModConfigs { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -18,12 +18,9 @@ namespace Silk.Core.Data.MediatR.Guilds
     public class GetGuildHandler : IRequestHandler<GetGuildRequest, Guild>
     {
         private readonly GuildContext _db;
+        public GetGuildHandler(GuildContext db) => _db = db;
 
-        public GetGuildHandler(GuildContext db)
-        {
-            _db = db;
-        }
-
+        
         public async Task<Guild> Handle(GetGuildRequest request, CancellationToken cancellationToken)
         {
             Guild? guild =

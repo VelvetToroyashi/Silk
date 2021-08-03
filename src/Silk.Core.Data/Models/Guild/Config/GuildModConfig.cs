@@ -6,6 +6,7 @@ namespace Silk.Core.Data.Models
 	{
 		public int Id { get; set; }
 		public ulong GuildId { get; set; }
+		public Guild Guild { get; set; }
 		
 		#region AutoMod/Moderation
 		

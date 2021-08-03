@@ -17,6 +17,7 @@ using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core
 {
@@ -79,6 +80,7 @@ namespace Silk.Core
             await _shardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
             await _shardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
             await _shardClient.UseVoiceNextAsync(DiscordConfigurations.VoiceNext);
+            await _shardClient.UseMenusAsync();
         }
 
         private Task InitializeSlashCommandsAsync()

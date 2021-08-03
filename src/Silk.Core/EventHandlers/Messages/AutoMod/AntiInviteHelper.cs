@@ -54,6 +54,8 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         {
             invite = "";
 
+            if (config is null) return false;
+            
             if (!config.BlacklistInvites) return false;
             if (message.Channel.IsPrivate) return false;
             if (message.Author.IsBot) return false;
@@ -76,9 +78,10 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
         public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfig config, string invite)
         {
-            var blacklisted = true;
-            if (!config.ScanInvites) return blacklisted;
+            if (config is null) return false;
+            if (!config.ScanInvites) return true;
 
+            var blacklisted = true;
             try
             {
                 var client = _client.GetShard(message.Channel.Guild);
