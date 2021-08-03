@@ -108,7 +108,7 @@ namespace Silk.Core
                         .WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
                         .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval:RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Verbose);
+                        .MinimumLevel.Override("DSharpPlus", LogEventLevel.Error);
 
                     var configOptions = builder.Configuration.GetSilkConfigurationOptionsFromSection();
                     Log.Logger = configOptions.LogLevel switch
