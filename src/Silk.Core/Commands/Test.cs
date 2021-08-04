@@ -19,19 +19,25 @@ namespace Silk.Core.Commands
 		[Command]
 		public async Task Config(CommandContext ctx)
 		{
-			var menu = new BaseConfigMenu(ctx.Client);
+			var menu = new BaseConfigMenu(ctx.Client) {Owner = ctx.User};
 			await menu.StartAsync();
 			await ctx.RespondAsync(m => m.WithContent("** **").AddMenu(menu));
 		}
-
 	}
 	
-	public class BaseConfigMenu : Menu
+	public sealed class BaseConfigMenu : Menu
 	{
+		public DiscordUser Owner { get; init; }
+
+		public override async Task<bool> CanBeExecuted(ButtonContext args) => args.Interaction.User == Owner;
+
 		public BaseConfigMenu(DiscordClient client, TimeSpan? timeout = null) : base(client, timeout) { }
 		
 		private async Task Interact(ButtonContext ctx)
-			=> await ctx.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddMenu(this).WithContent("** **"));
+		{
+			await ctx.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddMenu(this).WithContent("** **"));
+			await Task.Delay(2000);
+		}
 
 
 		private async Task ShowNewMenuAsync(ButtonContext ctx)
@@ -43,20 +49,14 @@ namespace Silk.Core.Commands
 
 		// For this button to be registered it must have one of the button attributes,
 		// have `ComponentInteractionCreateEventArgs` as first and only parameter and return `Task`
-		[PrimaryButton("Test one", Row = ButtonPosition.First)]
-		public Task DangerAsync(ButtonContext ctx) => ShowNewMenuAsync(ctx);
+		[PrimaryButton("Moderation settings", Row = ButtonPosition.First)]
+		public Task DangerAsync(ButtonContext ctx) => Interact(ctx);
 		
 	}
 
 	public sealed class ModConfigMenu : StagedMenu
 	{
+		public override DiscordUser User { get; init; }
 		public ModConfigMenu(DiscordClient client, Menu previous , TimeSpan? timeout = null) : base(client, previous, timeout) { }
-		
-		
-		
-		
-		[SecondaryButton("Back!", Row = ButtonPosition.Fifth, Location = ButtonPosition.Fifth)]
-		public override Task BackAsync(ButtonContext ctx)
-			=> ctx.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(ctx.Message.Content).AddMenu(_previous));
 	}
 }
