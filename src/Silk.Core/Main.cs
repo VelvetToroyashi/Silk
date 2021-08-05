@@ -88,7 +88,7 @@ namespace Silk.Core
             _logger.LogInformation("Initializing Slash-Commands");
             var sc = _shardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
             sc.SlashCommandErrored += _slashExceptionHandler.Handle;
-            
+             
             sc.RegisterCommands<RemindCommands>();
             sc.RegisterCommands<TagCommands>();
             sc.RegisterCommands<AvatarCommands>();
