@@ -15,14 +15,17 @@ namespace Silk.Core.Commands.Moderation
 	public class NoteCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractionHelper;
-		public NoteCommand(IInfractionService infractionHelper) => _infractionHelper = infractionHelper;
+		public NoteCommand(IInfractionService infractionHelper)
+		{
+			_infractionHelper = infractionHelper;
+		}
 
 		[Command]
 		[RequireFlag(UserFlag.Staff)]
 		[Description("Adds a moderation note to a user. Does not impact automatic infraction escalation.")]
 		public async Task Note(CommandContext ctx, DiscordUser user, [RemainingText] string note)
 		{
-			var res = await _infractionHelper.AddNoteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, note);
+			InfractionResult res = await _infractionHelper.AddNoteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, note);
 			string response = res switch
 			{
 				InfractionResult.SucceededDoesNotNotify => "Succesfully added note!",

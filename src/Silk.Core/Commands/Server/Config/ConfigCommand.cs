@@ -14,16 +14,19 @@ namespace Silk.Core.Commands.Server.Config
 		private readonly IMediator _mediator;
 		private readonly DiscordShardedClient _client;
 		private readonly ConcurrentDictionary<ulong, ulong> _menus = new();
-		
+
 		public ConfigCommand(IMediator mediator, DiscordShardedClient client)
 		{
 			_mediator = mediator;
 			_client = client;
 			_client.ComponentInteractionCreated += HandleConfigButton;
 		}
-		~ConfigCommand() => _client.ComponentInteractionCreated -= HandleConfigButton;
-		
-		
+		~ConfigCommand()
+		{
+			_client.ComponentInteractionCreated -= HandleConfigButton;
+		}
+
+
 		private async Task HandleConfigButton(DiscordClient c, ComponentInteractionCreateEventArgs e)
 		{
 			if (!e.Id.StartsWith("config"))
@@ -31,25 +34,25 @@ namespace Silk.Core.Commands.Server.Config
 
 			if (e.Id.Split(' ').Last() != e.User.Id.ToString())
 			{
-				await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new() {Content = "Aha, this isn't your menu, silly!", IsEphemeral = true});
+				await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new() { Content = "Aha, this isn't your menu, silly!", IsEphemeral = true });
 			}
 
-			var task = e.Id.Split(' ')[1] switch
+			Task? task = e.Id.Split(' ')[1] switch
 			{
 				"main" => new MainConfigMenu().EditAsync(e.Message),
 				_ => Task.CompletedTask
 			};
-			
+
 		}
 
 		private record MainConfigMenu
 		{
-			private readonly DiscordSelectComponentOption[] _options = new[]
+			private readonly DiscordSelectComponentOption[] _options =
 			{
 				new DiscordSelectComponentOption("Greeting settings", "greeting", "Edit greeting-related settings"),
 				new DiscordSelectComponentOption("Moderation settings", "moderation", "Edit moderation-related settings")
 			};
-			
+
 			private readonly DiscordMessageBuilder _builder;
 
 			public MainConfigMenu()
@@ -59,9 +62,15 @@ namespace Silk.Core.Commands.Server.Config
 					.WithContent("Please make a selection.")
 					.AddComponents(select);
 			}
-			
-			public Task<DiscordMessage> EditAsync(DiscordMessage msg) => msg.ModifyAsync(_builder);
-			public Task<DiscordMessage> SendAsync(DiscordChannel chn) => chn.SendMessageAsync(_builder);
+
+			public Task<DiscordMessage> EditAsync(DiscordMessage msg)
+			{
+				return msg.ModifyAsync(_builder);
+			}
+			public Task<DiscordMessage> SendAsync(DiscordChannel chn)
+			{
+				return chn.SendMessageAsync(_builder);
+			}
 		}
 	}
 }

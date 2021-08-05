@@ -12,31 +12,34 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Server
 {
-    [Category(Categories.Server)]
-    public class SetMuteCommand : BaseCommandModule
-    {
-        private readonly IMediator _mediator;
-        public SetMuteCommand(IMediator mediator) => _mediator = mediator;
+	[Category(Categories.Server)]
+	public class SetMuteCommand : BaseCommandModule
+	{
+		private readonly IMediator _mediator;
+		public SetMuteCommand(IMediator mediator)
+		{
+			_mediator = mediator;
+		}
 
-        [Command]
-        [RequireGuild]
-        [RequireFlag(UserFlag.Staff)]
-        [Description("Set the mute role to use when calling mute command, or auto-mod")]
-        public async Task SetMute(CommandContext ctx, DiscordRole role)
-        {
-            if (role.Permissions.HasPermission(Permissions.SendMessages)) // Does not have permission
-            {
-                await ctx.RespondAsync("That role isn't restrictive!");
-                return;
-            }
-            
-            var builder = new DiscordMessageBuilder();
-            builder.WithReply(ctx.Message.Id).WithoutMentions();
+		[Command]
+		[RequireGuild]
+		[RequireFlag(UserFlag.Staff)]
+		[Description("Set the mute role to use when calling mute command, or auto-mod")]
+		public async Task SetMute(CommandContext ctx, DiscordRole role)
+		{
+			if (role.Permissions.HasPermission(Permissions.SendMessages)) // Does not have permission
+			{
+				await ctx.RespondAsync("That role isn't restrictive!");
+				return;
+			}
 
-            builder.WithContent($"Alright! I'll use {role.Mention} for muting!");
-            await ctx.RespondAsync(builder);
-            await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {MuteRoleId = role.Id});
+			var builder = new DiscordMessageBuilder();
+			builder.WithReply(ctx.Message.Id).WithoutMentions();
 
-        }
-    }
+			builder.WithContent($"Alright! I'll use {role.Mention} for muting!");
+			await ctx.RespondAsync(builder);
+			await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { MuteRoleId = role.Id });
+
+		}
+	}
 }

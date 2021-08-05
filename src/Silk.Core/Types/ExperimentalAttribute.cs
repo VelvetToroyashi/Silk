@@ -8,13 +8,13 @@ namespace Silk.Core.Types
     ///     Denotes this command is experimental, and may not work properly.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class ExperimentalAttribute : Attribute { }
+	public class ExperimentalAttribute : Attribute { }
 
-    public static class ExperimentalAttributeExtensions
-    {
-        public static bool IsExperimental(this Command c)
-        {
-            return c.CustomAttributes.OfType<ExperimentalAttribute>().Any();
-        }
-    }
+	public static class ExperimentalAttributeExtensions
+	{
+		public static bool IsExperimental(this Command c)
+		{
+			return c.CustomAttributes.OfType<ExperimentalAttribute>().Any();
+		}
+	}
 }

@@ -13,30 +13,30 @@ namespace Silk.Core.Utilities
     ///     Helper class for subscribing events to <see cref="DiscordShardedClient" />
     /// </summary>
     public sealed class EventHelper
-    {
-        public EventHelper(
-            DiscordShardedClient client,
-            CommandHandler commandHandler,
-            MessageAddAntiInvite antiInvite,
-            MessageRemovedHandler removeHandler,
-            MemberGreetingService memberGreetingService,
-            RoleAddedHandler staffCheck,
-            GuildEventHandler guildHandler,
-            MemberRemovedHandler memberRemovedHandler,
-            AutoModMuteApplier _)
-        {
+	{
+		public EventHelper(
+			DiscordShardedClient client,
+			CommandHandler commandHandler,
+			MessageAddAntiInvite antiInvite,
+			MessageRemovedHandler removeHandler,
+			MemberGreetingService memberGreetingService,
+			RoleAddedHandler staffCheck,
+			GuildEventHandler guildHandler,
+			MemberRemovedHandler memberRemovedHandler,
+			AutoModMuteApplier _)
+		{
 
-            client.MessageCreated += commandHandler.Handle;
-            client.MessageCreated += antiInvite.CheckForInvite;
-            client.MessageDeleted += removeHandler.MessageRemoved;
+			client.MessageCreated += commandHandler.Handle;
+			client.MessageCreated += antiInvite.CheckForInvite;
+			client.MessageDeleted += removeHandler.MessageRemoved;
 
-            client.GuildMemberAdded += memberGreetingService.OnMemberAdded;
-            client.GuildMemberRemoved += memberRemovedHandler.OnMemberRemoved;
-            client.GuildMemberUpdated += staffCheck.CheckStaffRole;
+			client.GuildMemberAdded += memberGreetingService.OnMemberAdded;
+			client.GuildMemberRemoved += memberRemovedHandler.OnMemberRemoved;
+			client.GuildMemberUpdated += staffCheck.CheckStaffRole;
 
-            client.GuildCreated += guildHandler.OnGuildJoin;
-            client.GuildAvailable += guildHandler.OnGuildAvailable;
-            client.GuildDownloadCompleted += guildHandler.OnGuildDownload;
-        }
-    }
+			client.GuildCreated += guildHandler.OnGuildJoin;
+			client.GuildAvailable += guildHandler.OnGuildAvailable;
+			client.GuildDownloadCompleted += guildHandler.OnGuildDownload;
+		}
+	}
 }

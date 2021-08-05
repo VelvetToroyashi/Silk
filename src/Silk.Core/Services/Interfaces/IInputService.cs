@@ -4,8 +4,8 @@ using DSharpPlus.Entities;
 
 namespace Silk.Core.Services.Interfaces
 {
-    public interface IInputService
-    {
+	public interface IInputService
+	{
         /// <summary>
         ///     Gets input from a specific user.
         /// </summary>
@@ -40,9 +40,9 @@ namespace Silk.Core.Services.Interfaces
         /// <returns>The emoji the user reacted with, or null if it timed out.</returns>
         public Task<DiscordReaction?> GetReactionInputAsync(ulong userId, ulong messageId, ulong? guildId = null, TimeSpan? timeOut = null);
 
-        public Task<DiscordChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null);
+		public Task<DiscordChannel?> GetChannelAsync(ulong userId, ulong channelId, ulong guildId, TimeSpan? timeOut = null);
 
-        public Task<bool?> GetConfirmationAsync(DiscordMessage message, ulong userId, TimeSpan? timeOut = null);
-        //public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
-    }
+		public Task<bool?> GetConfirmationAsync(DiscordMessage message, ulong userId, TimeSpan? timeOut = null);
+		//public Task<ulong?> GetUlongIdInputAsync(ulong userId, ulong channelId, ulong? guildId = null, TimeSpan? timeOut = null);
+	}
 }

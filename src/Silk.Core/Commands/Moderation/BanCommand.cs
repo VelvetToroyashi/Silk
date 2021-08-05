@@ -15,7 +15,10 @@ namespace Silk.Core.Commands.Moderation
 	public class BanCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractions;
-		public BanCommand(IInfractionService infractions) => _infractions = infractions;
+		public BanCommand(IInfractionService infractions)
+		{
+			_infractions = infractions;
+		}
 
 		[Command]
 		[RequireGuild]
@@ -36,9 +39,9 @@ namespace Silk.Core.Commands.Moderation
 				return;
 			}
 
-			var result = await _infractions.BanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
+			InfractionResult result = await _infractions.BanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
 
-			var message = result switch
+			string? message = result switch
 			{
 				InfractionResult.SucceededWithNotification => $"Banned **{user.ToDiscordName()}** (User notified with Direct Message)",
 				InfractionResult.SucceededWithoutNotification => $"Banned **{user.ToDiscordName()}**! (Failed to DM.)",
@@ -48,8 +51,8 @@ namespace Silk.Core.Commands.Moderation
 
 			await ctx.RespondAsync(message);
 		}
-		
-		
+
+
 		[Command]
 		[RequireGuild]
 		[RequireBotPermissions(Permissions.BanMembers)]
@@ -69,9 +72,9 @@ namespace Silk.Core.Commands.Moderation
 				return;
 			}
 
-			var result = await _infractions.BanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
+			InfractionResult result = await _infractions.BanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
 
-			var message = result switch
+			string? message = result switch
 			{
 				InfractionResult.SucceededWithNotification => $"Banned **{user.ToDiscordName()}** (User notified with Direct Message)",
 				InfractionResult.SucceededWithoutNotification => $"Banned **{user.ToDiscordName()}**! (Failed to DM.)",

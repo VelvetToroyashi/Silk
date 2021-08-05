@@ -6,11 +6,13 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Attributes
 {
-    public class RequireCommonGuildAttribute : SlashCheckBaseAttribute
-    {
-        public async override Task<bool> ExecuteChecksAsync(InteractionContext ctx)
-            => ctx.Services
-                .Get<DiscordShardedClient>()!
-                .GetMember(m => m == ctx.User) is not null;
-    }
+	public class RequireCommonGuildAttribute : SlashCheckBaseAttribute
+	{
+		public async override Task<bool> ExecuteChecksAsync(InteractionContext ctx)
+		{
+			return ctx.Services
+				.Get<DiscordShardedClient>()!
+				.GetMember(m => m == ctx.User) is not null;
+		}
+	}
 }

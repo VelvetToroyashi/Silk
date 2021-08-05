@@ -7,7 +7,7 @@ namespace Silk.Core.Services.Interfaces
     ///     <see cref="Guild" />'s <seealso cref="string" /> prefix, which is used for command recognition.
     /// </summary>
     public interface IPrefixCacheService : ICacheService
-    {
+	{
         /// <summary>
         ///     Retrieve the corresponding prefix for a <see cref="Guild" />.
         /// </summary>
@@ -21,5 +21,5 @@ namespace Silk.Core.Services.Interfaces
         /// <param name="guildId">The Id of the guild to update.</param>
         /// <param name="prefix">The prefix to assign to the guild.</param>
         public void UpdatePrefix(ulong guildId, string prefix);
-    }
+	}
 }

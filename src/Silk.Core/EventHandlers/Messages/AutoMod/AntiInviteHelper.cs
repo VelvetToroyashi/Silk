@@ -18,20 +18,20 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
     ///     Utility class for anti-invite functionality.
     /// </summary>
     public sealed class AntiInviteHelper
-    {
-        private readonly ILogger<AntiInviteHelper> _logger;
-        private readonly IMediator _mediator;
-        private readonly IInfractionService _infractions;
-        private readonly DiscordShardedClient _client;
-       
-        public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordShardedClient client)
-        {
-            _logger = logger;
-            _mediator = mediator;
-            _infractions = infractions;
-            _client = client;
-        }
-        
+	{
+		private readonly ILogger<AntiInviteHelper> _logger;
+		private readonly IMediator _mediator;
+		private readonly IInfractionService _infractions;
+		private readonly DiscordShardedClient _client;
+
+		public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordShardedClient client)
+		{
+			_logger = logger;
+			_mediator = mediator;
+			_infractions = infractions;
+			_client = client;
+		}
+
         /// <summary>
         ///     Regex to match discord invites using discord's main invite URL (discord.gg)
         /// </summary>
@@ -51,25 +51,25 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <param name="invite">The invite that was matched, if any.</param>
         /// <returns>Whether further action should be taken</returns>
         public bool CheckForInvite(DiscordMessage message, GuildModConfig config, out string invite)
-        {
-            invite = "";
+		{
+			invite = "";
 
-            if (config is null) return false;
-            
-            if (!config.BlacklistInvites) return false;
-            if (message.Channel.IsPrivate) return false;
-            if (message.Author.IsBot) return false;
+			if (config is null) return false;
 
-            Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
-            Match match = scanPattern.Match(message.Content);
+			if (!config.BlacklistInvites) return false;
+			if (message.Channel.IsPrivate) return false;
+			if (message.Author.IsBot) return false;
 
-            invite = match.Groups.Values.Last().Captures.First().Value;
+			Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
+			Match match = scanPattern.Match(message.Content);
 
-            return match.Success;
-        }
+			invite = match.Groups.Values.Last().Captures.First().Value;
+
+			return match.Success;
+		}
 
         /// <summary>
-        /// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
+        ///     Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
         /// </summary>
         /// <param name="client">A client object to make API calls with.</param>
         /// <param name="message">The message to check.</param>
@@ -77,45 +77,45 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <param name="invite">The invite to check.</param>
         /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
         public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfig config, string invite)
-        {
-            if (config is null) return false;
-            if (!config.ScanInvites) return true;
+		{
+			if (config is null) return false;
+			if (!config.ScanInvites) return true;
 
-            var blacklisted = true;
-            try
-            {
-                var client = _client.GetShard(message.Channel.Guild);
-                DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
+			var blacklisted = true;
+			try
+			{
+				DiscordClient? client = _client.GetShard(message.Channel.Guild);
+				DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
 
-                if (apiInvite.Guild.Id != message.Channel.GuildId)
-                {
-                    blacklisted = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.GuildId);
-                }
-                else
-                {
-                    blacklisted = false;
-                    _logger.LogTrace("Matched invite points to current guild; skipping");
-                }
-            }
-            catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
-            {
-                _logger.LogTrace("Matched invalid or corrupt invite");
-            }
-            return blacklisted;
-        }
+				if (apiInvite.Guild.Id != message.Channel.GuildId)
+				{
+					blacklisted = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.GuildId);
+				}
+				else
+				{
+					blacklisted = false;
+					_logger.LogTrace("Matched invite points to current guild; skipping");
+				}
+			}
+			catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
+			{
+				_logger.LogTrace("Matched invalid or corrupt invite");
+			}
+			return blacklisted;
+		}
 
         /// <summary>
-        /// Attempts to infract a member for posting an invite.
+        ///     Attempts to infract a member for posting an invite.
         /// </summary>
         /// <param name="message"></param>
         public async Task TryAddInviteInfractionAsync(DiscordMessage message)
-        {
-            var user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
-            
-            if (user.Flags.HasFlag(UserFlag.InfractionExemption))
-                return;
+		{
+			User? user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
 
-            await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", true);
-        }
-    }
+			if (user.Flags.HasFlag(UserFlag.InfractionExemption))
+				return;
+
+			await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", true);
+		}
+	}
 }
