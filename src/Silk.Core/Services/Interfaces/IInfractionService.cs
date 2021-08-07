@@ -8,7 +8,7 @@ using Silk.Core.Types;
 namespace Silk.Core.Services.Interfaces
 {
 	/// <summary>
-	///     A robust set of moderation-related methods for handling and enforcing infractions.
+	/// A robust set of moderation-related methods for handling and enforcing infractions.
 	/// </summary>
 	public interface IInfractionService
 	{
