@@ -20,8 +20,6 @@ namespace Silk.Core.Data.Models
         /// </summary>
         public Guild Guild { get; set; }
 
-        
-
         /// <summary>
         /// The trigger to greet new members, if any. Default to DoNotGreet.
         /// </summary>

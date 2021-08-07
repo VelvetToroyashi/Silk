@@ -168,8 +168,7 @@ namespace Silk.Core
 				services.AddSingleton<AntiInviteHelper>();
 
 				#endregion
-
-
+				
 				services.AddSingleton<RoleAddedHandler>();
 
 				services.AddSingleton<MemberRemovedHandler>();
