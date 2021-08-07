@@ -79,7 +79,7 @@ namespace Silk.Core.Data.Models
         public bool AutoEscalateInfractions { get; set; }
 
         /// <summary>
-        /// Whether to automatically de-hoist members. Guild must be premium.
+        /// Whether to automatically de-hoist members.
         /// </summary>
         public bool AutoDehoist { get; set; }
 
