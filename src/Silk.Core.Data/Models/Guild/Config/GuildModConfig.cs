@@ -7,9 +7,7 @@ namespace Silk.Core.Data.Models
 		public int Id { get; set; }
 		public ulong GuildId { get; set; }
 		public Guild Guild { get; set; }
-		
-		#region AutoMod/Moderation
-		
+
 		/// <summary>
 		/// Id of the role to apply when muting members.
 		/// </summary>
@@ -94,7 +92,5 @@ namespace Silk.Core.Data.Models
         ///     A list of steps depending on the number of infractions a <see cref="User" /> has.
         /// </summary>
         public List<InfractionStep> InfractionSteps { get; set; } = new();
-
-        #endregion
 	}
 }
