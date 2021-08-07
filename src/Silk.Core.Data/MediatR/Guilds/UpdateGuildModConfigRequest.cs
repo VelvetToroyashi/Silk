@@ -51,6 +51,8 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
 			config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
 			config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
+
+			await _db.SaveChangesAsync(cancellationToken);
 			
 			return Unit.Value;
 		}
