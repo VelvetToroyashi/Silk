@@ -25,7 +25,7 @@ namespace Silk.Core.Commands
 			private readonly IMediator _mediator;
 			public ViewConfigModule(IMediator mediator) => _mediator = mediator;
 
-			private string GetCountString(int count) => count is 0 ? "Not set" : count.ToString();
+			private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
 			
 			
 			[GroupCommand]
@@ -44,9 +44,14 @@ namespace Silk.Core.Commands
 					.AppendLine($"> Greetting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
 					.AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"[See {ctx.Prefix}config view greeting]")}")
 					.AppendLine()
+					.AppendLine()
 					.AppendLine("**Moderation Config:**")
-					.AppendLine($"")
-					.AppendLine($"> Max Mentions (Role): {GetCountString(modConfig.MaxRoleMentions)} | Max Mentions (User): {GetCountString(modConfig.MaxUserMentions)}");
+					.AppendLine($"Max role mentions: {GetCountString(modConfig.MaxRoleMentions)}")
+					.AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
+					.AppendLine()
+					.AppendLine($"Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
+					.AppendLine($"Logging channel: {(modConfig.LoggingChannel is 0 ? "Not set" : $"<#{modConfig.LoggingChannel}>")}");
+				
 				embed
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
 					.WithColor(DiscordColor.Azure)
