@@ -92,5 +92,11 @@ namespace Silk.Core.Data.Models
         ///     A list of steps depending on the number of infractions a <see cref="User" /> has.
         /// </summary>
         public List<InfractionStep> InfractionSteps { get; set; } = new();
+
+        /// <summary>
+        /// A dictionary contianing "named" infraction steps, where the key to the dictionary represents a discriminated action,
+        /// which may have different consequences than another. In the event a key is not found in this dictionary, it should be assumed the action would result to <see cref="InfractionType.Strike"/>.
+        /// </summary>
+        public Dictionary<string, InfractionStep> NamedInfractionSteps { get; set; } = new();
 	}
 }
