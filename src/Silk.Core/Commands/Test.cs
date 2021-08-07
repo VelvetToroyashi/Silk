@@ -52,14 +52,20 @@ namespace Silk.Core.Commands
 					.AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
 					.AppendLine()
 					.AppendLine($"Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
-					.AppendLine($"Logging channel: {(modConfig.LoggingChannel is 0 ? "Not set" : $"<#{modConfig.LoggingChannel}>")}")
+					.AppendLine($"Logging channel: {(modConfig.LoggingChannel is var count and not 0 ? $"<#{count}>" : "Not set")}")
 					.AppendLine()
 					.AppendLine("__Invites:__")
 					.AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infract on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($"> Allowed invites: {(modConfig.AllowedInvites.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}");
-				
+					.AppendLine($"> Allowed invites: {(modConfig.AllowedInvites.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
+					.AppendLine($@"> Use agressive invite matching (`disc((ord)?(((app)?\\.com\/invite)|(\\.gg)))\\/([A-z0-9-_]{{2,}})`): <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}")
+					.AppendLine()
+					.AppendLine("__Infractions:__")
+					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
+					.AppendLine($"> Infraction steps (named): {(modConfig.NamedInfractionSteps.Count is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
+					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> ");
 				embed
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
 					.WithColor(DiscordColor.Azure)
