@@ -14,6 +14,9 @@ namespace Silk.Core.Data.MediatR.Guilds.Config
 		public GetGuildModConfigHandler(GuildContext db) => _db = db;
 
 		public Task<GuildModConfig> Handle(GetGuildModConfigRequest request, CancellationToken cancellationToken)
-			=> _db.GuildModConfigs.FirstOrDefaultAsync(c => c.GuildId == request.guildId, cancellationToken);
+			=> _db.GuildModConfigs
+				.Include(c => c.AllowedInvites)
+				.Include(c => c.InfractionSteps)
+				.FirstOrDefaultAsync(c => c.GuildId == request.guildId, cancellationToken);
 	}
 }
