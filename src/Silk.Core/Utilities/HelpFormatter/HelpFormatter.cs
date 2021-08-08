@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
 using Silk.Core.Types;
 using Silk.Extensions;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Utilities.HelpFormatter
 {
@@ -39,7 +40,7 @@ namespace Silk.Core.Utilities.HelpFormatter
 
 		public override CommandHelpMessage Build()
 		{
-			DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.PhthaloBlue);
+			DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Azure);
 
 			if (Command == null)
 			{
@@ -67,9 +68,9 @@ namespace Silk.Core.Utilities.HelpFormatter
 				IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
 				string title = Command!.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
-				var builder = new StringBuilder(title);
-				if (args is not null) builder.Append(GetArgs(args));
-				builder.Append('`');
+				var builder = new StringBuilder(title)
+					.Append(GetArgs(args))
+					.Append('`');
 
 				embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
@@ -96,13 +97,18 @@ namespace Silk.Core.Utilities.HelpFormatter
 						.Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
 						.Join("\n"));
 
+				if (Command.Parent?.IsExecutableWithoutSubcommands ?? false)
+					embed.WithFooter($"This command is a group that can be executed directly! ex: {StringConstants.DefaultCommandPrefix}{Command.QualifiedName}");
 			}
 
 			return new(null, embed.Build());
 		}
 
-		private string GetArgs(IReadOnlyList<CommandArgument> args)
+		private string GetArgs(IReadOnlyList<CommandArgument>? args)
 		{
+			if (args is null)
+				return null!;
+			
 			string argString = string.Empty;
 			foreach (CommandArgument arg in args)
 			{
