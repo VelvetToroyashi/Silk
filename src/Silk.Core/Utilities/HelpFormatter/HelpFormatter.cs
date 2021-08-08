@@ -97,8 +97,8 @@ namespace Silk.Core.Utilities.HelpFormatter
 						.Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
 						.Join("\n"));
 
-				if (Command.Parent?.IsExecutableWithoutSubcommands ?? false)
-					embed.WithFooter($"This command is a group that can be executed directly! ex: {StringConstants.DefaultCommandPrefix}{Command.QualifiedName}");
+				if ((Command as CommandGroup)?.IsExecutableWithoutSubcommands ?? false)
+					embed.WithFooter($"Tip: this can be run directly! ex: {StringConstants.DefaultCommandPrefix}{Command.QualifiedName}");
 			}
 
 			return new(null, embed.Build());
