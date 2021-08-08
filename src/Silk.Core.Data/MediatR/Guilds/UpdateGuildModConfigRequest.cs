@@ -19,7 +19,6 @@ namespace Silk.Core.Data.MediatR.Guilds
 		public bool? UseAggressiveRegex { get; init; }
 		public bool? WarnOnMatchedInvite { get; init; }
 		public bool? DeleteOnMatchedInvite { get; init; }
-		public bool? GreetOnVerificationRole { get; init; }
 		public int? MaxUserMentions { get; init; }
 		public int? MaxRoleMentions { get; init; }
 		public List<Invite>? AllowedInvites { get; init; }
