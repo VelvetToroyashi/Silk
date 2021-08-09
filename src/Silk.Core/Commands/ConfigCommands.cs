@@ -382,6 +382,7 @@ namespace Silk.Core.Commands
 				}
 				
 				[Command("member-joins")]
+				[Aliases("members-joining", "mj")]
 				[Description("Edit whether or not I log members that join")]
 				public async Task MembersJoin(CommandContext ctx, bool log)
 				{
@@ -395,6 +396,7 @@ namespace Silk.Core.Commands
 				}
 				
 				[Command("member-leaves")]
+				[Aliases("members-leaving", "ml")]
 				[Description("Edit whether or not I log members that leave")]
 				public async Task MembersLeave(CommandContext ctx, bool log)
 				{
@@ -406,7 +408,22 @@ namespace Silk.Core.Commands
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMembersLeaving = log });
 				}
+
+				[Command("message-edits")]
+				[Description("Whether or not I log message edits and deletions. Requires a log channel to be set.")]
+				public async Task MessageEdits(CommandContext ctx, bool log)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMessageChanges = log });
+				}
+				
 			}
+			
 			
 			
 			/// <summary>

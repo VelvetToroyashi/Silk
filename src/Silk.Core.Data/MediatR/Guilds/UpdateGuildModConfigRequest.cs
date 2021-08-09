@@ -26,6 +26,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 		public List<InfractionStep>? InfractionSteps { get; init; }
 		public ulong? MuteRoleId { get; init; }
 		public ulong? LoggingChannel { get; init; }
+		public bool? LogMessageChanges { get; init; }
 	}
 	
 	public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest>
@@ -39,6 +40,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 				.FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
 			
 			config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
+			config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
 			config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
 			config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
 			config.InfractionSteps = request.InfractionSteps ?? config.InfractionSteps;
