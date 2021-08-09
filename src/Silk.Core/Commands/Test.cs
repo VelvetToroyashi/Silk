@@ -204,6 +204,7 @@ namespace Silk.Core.Commands
 		[Group("edit")]
 		public sealed class TestEditConfigModule : BaseCommandModule
 		{
+			// Someone's gonna chew me a new one with this many statics lmao //
 			private static readonly DiscordButtonComponent _yesButton = new(ButtonStyle.Success, "confirm action", null, false, new(Emojis.ConfirmId));
 			private static readonly DiscordButtonComponent _noButton = new(ButtonStyle.Danger, "decline action", null, false, new(Emojis.DeclineId));
 
@@ -238,8 +239,7 @@ namespace Silk.Core.Commands
 				
 					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
-					if (res is false)
-						return;
+					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LoggingChannel = channel.Id });
 				}
@@ -249,20 +249,63 @@ namespace Silk.Core.Commands
 				public async Task Members(CommandContext ctx, bool log)
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
-					
-					
-					
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMembersJoining = log });
 				}
 			}
 			
 			[Command]
-			[Description("Edit whether or not I greet members")]
-			public async Task GreetMembers(CommandContext ctx, bool greet)
+			[Aliases("welcome")]
+			[Description("Edit whether or not I greet members\nOptions: \n\n`role` -> greet on role, \n`join` -> greet on join, \n`disable` -> disable greetings \n`screening` -> greet when membership screening is passed")]
+			public async Task Greeting(CommandContext ctx, string option)
 			{
+				var parsedOption = option.ToLower() switch
+				{
+					"disable" => GreetingOption.DoNotGreet,
+					"role" => GreetingOption.GreetOnRole,
+					"join" => GreetingOption.GreetOnJoin,
+					"screening" => GreetingOption.GreetOnScreening,
+					_ => (GreetingOption) (-1)
+				};
+
+				if ((int)parsedOption is -1)
+				{
+					await ctx.RespondAsync("That doesn't appear to be a valid option!");
+					return;
+				}
+				
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 				
 				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+
+				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingOption = parsedOption });
 			}
+
+
+			[Command]
+			[Aliases("welcomechannel", "welcome-channel", "gc", "wc")]
+			public async Task GreetingChannel(CommandContext ctx, DiscordChannel channel)
+			{
+				var conf = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+
+				if (string.IsNullOrEmpty(conf.GreetingText))
+				{
+					await ctx.RespondAsync("Set a welcome message first!");
+					return;
+				}
+				
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+			}			
 			
 			/// <summary>
 			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
