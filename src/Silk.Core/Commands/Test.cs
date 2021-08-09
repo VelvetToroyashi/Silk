@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -6,10 +7,12 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using MediatR;
+using NpgsqlTypes;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
+using Silk.Extensions;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands
@@ -59,14 +62,15 @@ namespace Silk.Core.Commands
 					.AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infract on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($@"> Use agressive invite matching (`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{{2,}})`): <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>>>")
+					.AppendLine($@"> Use agressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>>>")
 					.AppendLine($"> Allowed invites: {(modConfig.AllowedInvites.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
+					.AppendLine("Aggressive pattern matching regex:")
+					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
 					.AppendLine()
 					.AppendLine("__Infractions:__")
 					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
-
 
 				embed
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
@@ -115,9 +119,70 @@ namespace Silk.Core.Commands
 			[Command]
 			public async Task Invites(CommandContext ctx)
 			{
+				//TODO: config view invites-list
 				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+				var contentBuilder = new StringBuilder();
+
+				contentBuilder
+					.Clear()
+					.AppendLine("__Invites:__")
+					.AppendLine($"> Scan invite: <:_:{(config.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Infract on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($@"> Use agressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine()
+					.AppendLine($"> Allowed invites: {(config.AllowedInvites.Count is 0 ? "There are no whitelisted invites!" : $"{config.AllowedInvites.Count} allowed invites:")}")
+					.AppendLine($"> {config.AllowedInvites.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
+
+				if (config.AllowedInvites.Count > 15)
+					contentBuilder.AppendLine($"..Plus {config.AllowedInvites.Count - 15} more");
+				
+				contentBuilder
+					.AppendLine("Aggressive pattern matching are any invites that match this rule:")
+					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`");
+
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle($"Configuration for {ctx.Guild.Name}:")
+					.WithColor(DiscordColor.Azure)
+					.WithDescription(contentBuilder.ToString());
+
+				await ctx.RespondAsync(embed);
 			}
-			
+
+			[Command]
+			public async Task Infractions(CommandContext ctx)
+			{
+				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+				
+				var contentBuilder = new StringBuilder()
+					.AppendLine("__Infractions:__")
+					.AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
+					.AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
+					.AppendLine($"> Auto-escalate automod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
+
+				if (config.InfractionSteps.Any())
+				{
+					contentBuilder
+						.AppendLine()
+						.AppendLine("Infraction steps:")
+						.AppendLine(config.InfractionSteps.Select((inf, count) => $"` {count + 1} ` strikes -> {inf.Type} {(inf.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Duration.Time.Humanize()}")}").Join("\n"));
+				}
+				
+				if (config.NamedInfractionSteps?.Any() ?? false)
+				{
+					contentBuilder
+					.AppendLine()
+					.AppendLine("Auto-Mod action steps:")
+					.AppendLine(config.NamedInfractionSteps.Select(inf => $"`{inf.Key}` -> {inf.Value.Type} {(inf.Value.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Value.Duration.Time.Humanize()}")}").Join("\n"));
+				}
+				
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle($"Configuration for {ctx.Guild.Name}:")
+					.WithColor(DiscordColor.Azure)
+					.WithDescription(contentBuilder.ToString());
+
+				await ctx.RespondAsync(embed);
+			}
 		}
 	}
 }
