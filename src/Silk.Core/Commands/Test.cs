@@ -289,7 +289,7 @@ namespace Silk.Core.Commands
 
 
 			[Command]
-			[Aliases("welcomechannel", "welcome-channel", "gc", "wc")]
+			[Aliases("greeting-channel", "welcomechannel", "welcome-channel", "gc", "wc")]
 			public async Task GreetingChannel(CommandContext ctx, DiscordChannel channel)
 			{
 				var conf = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
@@ -305,7 +305,34 @@ namespace Silk.Core.Commands
 				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
-			}			
+
+				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingChannelId = channel.Id });
+			}
+
+			[Command]
+			[Aliases("greeting-channel","welcomemessage", "wm", "gm")]
+			public async Task GreetingMessage(CommandContext ctx, [RemainingText] string message)
+			{
+				if (message.Length > 2000)
+				{
+					await ctx.RespondAsync("Welcome message must be 2000 characters or less!");
+					return;
+				}
+
+				if (string.IsNullOrEmpty(message))
+				{
+					await ctx.RespondAsync("You must provide a message!");
+					return;
+				}
+				
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+
+				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingText = message });
+			}
 			
 			/// <summary>
 			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
