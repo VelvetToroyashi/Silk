@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using MediatR;
 using NpgsqlTypes;
@@ -13,6 +17,7 @@ using Silk.Core.Data.MediatR.Guilds.Config;
 using Silk.Core.Data.Models;
 using Silk.Core.Utilities;
 using Silk.Extensions;
+using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands
@@ -196,9 +201,59 @@ namespace Silk.Core.Commands
 			}
 		}
 
+		[Group("edit")]
 		public sealed class TestEditConfigModule : BaseCommandModule
 		{
+			private readonly DiscordButtonComponent _yesButton = new(ButtonStyle.Success, "confirm action", null, false, new(Emojis.ConfirmId));
+			private readonly DiscordButtonComponent _noButton = new(ButtonStyle.Danger, "decline action", null, false, new(Emojis.DeclineId));
 
+			private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens = new();
+
+			
+			
+			/// <summary>
+			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
+			/// </summary>
+			/// <param name="user">The id of the user to assign a token to and wait for input from.</param>
+			/// <param name="channel">The channel to send a message to, to request user input.</param>
+			/// <returns>True if the user selected true, or false if the user selected no OR the cancellation token was cancelled.</returns>
+			private async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
+			{
+				var builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
+
+				var message = await builder.SendAsync(channel);
+
+				var interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, CancellationToken.None);
+
+				if (interactivityResult.TimedOut) // CT was yeeted. //
+					return false;
+				
+				// Nobody likes 'This interaction failed'. //
+				await interactivityResult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				
+				return interactivityResult.Result.Id == _yesButton.CustomId;
+			}
+
+			
+			/// <summary>
+			/// Cancels and removes the token with the specified id if it exists.
+			/// </summary>
+			/// <param name="id">The id of the user to look up.</param>
+			private void CancelCurrentTokenIfApplicable(ulong id)
+			{
+				if (_tokens.TryRemove(id, out var token))
+				{
+					token.Cancel();
+					token.Dispose();
+				}
+			}
+			
+			/// <summary>
+			/// Gets a <see cref="CancellationToken"/>, creating one if necessary.
+			/// </summary>
+			/// <param name="id">The id of the user to assign the token to.</param>
+			/// <returns>The returned or generated token.</returns>
+			private CancellationToken GetTokenFromWaitQueue(ulong id) => _tokens.GetOrAdd(id, id => _tokens[id] = new()).Token;
 		}
 	}
 }
