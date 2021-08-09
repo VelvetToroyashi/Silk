@@ -77,6 +77,10 @@ namespace Silk.Core.Commands
 					.AppendLine()
 					.AppendLine()
 					.AppendLine("**Moderation Config:**")
+					.AppendLine()
+					.AppendLine($"Log members joining: <:_:{(modConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"Log members leaving: <:_:{(modConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine()
 					.AppendLine($"Max role mentions: {GetCountString(modConfig.MaxRoleMentions)}")
 					.AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
 					.AppendLine()
@@ -87,7 +91,7 @@ namespace Silk.Core.Commands
 					.AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infract on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($@"> Use agressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>>>")
+					.AppendLine($@"> Use agressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Allowed invites: {(modConfig.AllowedInvites.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
 					.AppendLine("Aggressive pattern matching regex:")
 					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
@@ -369,12 +373,10 @@ namespace Silk.Core.Commands
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LoggingChannel = channel.Id });
 				}
-
-
 				
-				[Command]
-				[Description("Edit whether or not I log members that join and leave")]
-				public async Task Members(CommandContext ctx, bool log)
+				[Command("member-joins")]
+				[Description("Edit whether or not I log members that join")]
+				public async Task MembersJoin(CommandContext ctx, bool log)
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
@@ -383,6 +385,19 @@ namespace Silk.Core.Commands
 					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMembersJoining = log });
+				}
+				
+				[Command("member-leaves")]
+				[Description("Edit whether or not I log members that leave")]
+				public async Task MembersLeave(CommandContext ctx, bool log)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMembersLeaving = log });
 				}
 			}
 			
