@@ -17,13 +17,19 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands
 {
-	[RequireFlag(UserFlag.Staff)]
 	[Group("config")]
+	[RequireFlag(UserFlag.Staff)]
 	public class TestConfigModule : BaseCommandModule
 	{
 		private readonly IMediator _mediator;
 		public TestConfigModule(IMediator mediator) => _mediator = mediator;
-
+		
+		
+		// Wrapper that points to config view //
+		[GroupCommand]
+		public Task Default(CommandContext ctx) =>
+			ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
+		
 		[Group("view")]
 		public sealed class ViewConfigModule : BaseCommandModule
 		{
@@ -183,6 +189,11 @@ namespace Silk.Core.Commands
 
 				await ctx.RespondAsync(embed);
 			}
+		}
+
+		public sealed class EditConfigModule : BaseCommandModule
+		{
+
 		}
 	}
 }
