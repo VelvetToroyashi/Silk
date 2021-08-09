@@ -204,12 +204,65 @@ namespace Silk.Core.Commands
 		[Group("edit")]
 		public sealed class TestEditConfigModule : BaseCommandModule
 		{
-			private readonly DiscordButtonComponent _yesButton = new(ButtonStyle.Success, "confirm action", null, false, new(Emojis.ConfirmId));
-			private readonly DiscordButtonComponent _noButton = new(ButtonStyle.Danger, "decline action", null, false, new(Emojis.DeclineId));
+			private static readonly DiscordButtonComponent _yesButton = new(ButtonStyle.Success, "confirm action", null, false, new(Emojis.ConfirmId));
+			private static readonly DiscordButtonComponent _noButton = new(ButtonStyle.Danger, "decline action", null, false, new(Emojis.DeclineId));
 
-			private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens = new();
+			private static readonly DiscordButtonComponent _yesButtonDisabled = new DiscordButtonComponent(_yesButton).Disable();
+			private static readonly DiscordButtonComponent _noButtonDisabled = new DiscordButtonComponent(_noButton).Disable();
 
+			private static readonly DiscordInteractionResponseBuilder _confirmBuilder = new DiscordInteractionResponseBuilder().WithContent("Alright!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
+			private static readonly DiscordInteractionResponseBuilder _declineBuilder = new DiscordInteractionResponseBuilder().WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
+
+			private readonly IMediator _mediator;
+			private static readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens = new();
+			public TestEditConfigModule(IMediator mediator) => _mediator = mediator;
 			
+
+			[Group("log")]
+			public sealed class TestEditLogModule : BaseCommandModule
+			{
+				private readonly IMediator _mediator;
+				public TestEditLogModule(IMediator mediator) => _mediator = mediator;
+				
+				[Command]
+				[Description("Edit the channel I logs infractions, users, etc to!")]
+				public async Task Channel(CommandContext ctx, DiscordChannel channel)
+				{
+					if (!channel.PermissionsFor(ctx.Guild.CurrentMember).HasPermission(FlagConstants.LoggingPermissions))
+					{
+						await ctx.RespondAsync($"I don't have proper permissions to log there! I need {FlagConstants.LoggingPermissions.ToPermissionString()}");
+						return;
+					}
+				
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+				
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (res is false)
+						return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LoggingChannel = channel.Id });
+				}
+
+				[Command]
+				[Description("Edit whether or not I log members that join and leave")]
+				public async Task Members(CommandContext ctx, bool log)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+					
+					
+					
+				}
+			}
+			
+			[Command]
+			[Description("Edit whether or not I greet members")]
+			public async Task GreetMembers(CommandContext ctx, bool greet)
+			{
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+				
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+			}
 			
 			/// <summary>
 			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
@@ -217,21 +270,38 @@ namespace Silk.Core.Commands
 			/// <param name="user">The id of the user to assign a token to and wait for input from.</param>
 			/// <param name="channel">The channel to send a message to, to request user input.</param>
 			/// <returns>True if the user selected true, or false if the user selected no OR the cancellation token was cancelled.</returns>
-			private async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
+			private static async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
 			{
 				var builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
 
 				var message = await builder.SendAsync(channel);
-
-				var interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, CancellationToken.None);
+				var token = GetTokenFromWaitQueue(user.Id);
+				
+				var interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, token);
 
 				if (interactivityResult.TimedOut) // CT was yeeted. //
+				{
+					await message.ModifyAsync(b => b.WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled));
 					return false;
+				}
 				
 				// Nobody likes 'This interaction failed'. //
-				await interactivityResult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-				
-				return interactivityResult.Result.Id == _yesButton.CustomId;
+				if (interactivityResult.Result.Id == _yesButton.CustomId)
+				{
+					await interactivityResult.Result
+						.Interaction
+						.CreateResponseAsync(InteractionResponseType.UpdateMessage, _confirmBuilder);
+					
+					return true;
+				}
+				else
+				{
+					await interactivityResult.Result
+						.Interaction
+						.CreateResponseAsync(InteractionResponseType.UpdateMessage, _declineBuilder);
+					
+					return false;
+				}
 			}
 
 			
@@ -239,7 +309,7 @@ namespace Silk.Core.Commands
 			/// Cancels and removes the token with the specified id if it exists.
 			/// </summary>
 			/// <param name="id">The id of the user to look up.</param>
-			private void CancelCurrentTokenIfApplicable(ulong id)
+			private static void EnsureCancellationTokenCancellation(ulong id)
 			{
 				if (_tokens.TryRemove(id, out var token))
 				{
@@ -253,7 +323,7 @@ namespace Silk.Core.Commands
 			/// </summary>
 			/// <param name="id">The id of the user to assign the token to.</param>
 			/// <returns>The returned or generated token.</returns>
-			private CancellationToken GetTokenFromWaitQueue(ulong id) => _tokens.GetOrAdd(id, id => _tokens[id] = new()).Token;
+			private static CancellationToken GetTokenFromWaitQueue(ulong id) => _tokens.GetOrAdd(id, id => _tokens[id] = new()).Token;
 		}
 	}
 }
