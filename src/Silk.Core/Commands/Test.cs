@@ -19,6 +19,7 @@ namespace Silk.Core.Commands
 {
 	[Group("config")]
 	[RequireFlag(UserFlag.Staff)]
+	[Description("View and edit configuration for the current guild.")]
 	public class TestConfigModule : BaseCommandModule
 	{
 		private readonly IMediator _mediator;
@@ -40,6 +41,7 @@ namespace Silk.Core.Commands
 
 
 			[GroupCommand]
+			[Description("View the current config.")]
 			public async Task View(CommandContext ctx)
 			{
 				var config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
@@ -87,6 +89,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
+			[Description("View in-depth greeting-related config.")]
 			public async Task Greeting(CommandContext ctx)
 			{
 				var contentBuilder = new StringBuilder();
@@ -123,6 +126,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
+			[Description("View in-depth invite related config.")]
 			public async Task Invites(CommandContext ctx)
 			{
 				//TODO: config view invites-list
@@ -156,6 +160,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
+			[Description("View in-depth infraction-ralated config.")]
 			public async Task Infractions(CommandContext ctx)
 			{
 				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
