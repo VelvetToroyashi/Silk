@@ -15,6 +15,7 @@ using NpgsqlTypes;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
 using Silk.Core.Data.Models;
+using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
@@ -27,9 +28,19 @@ namespace Silk.Core.Commands
 	[Description("View and edit configuration for the current guild.")]
 	public class TestConfigModule : BaseCommandModule
 	{
-		private readonly IMediator _mediator;
-		public TestConfigModule(IMediator mediator) => _mediator = mediator;
-		
+		private readonly ICacheUpdaterService _updater;
+		public TestConfigModule(ICacheUpdaterService updater) => _updater = updater;
+
+		[Command]
+		[Description("Reloads the config from the database. May temporarily slow down response time. (Configs are automatically reloaded every 10 minutes!)")]
+		public async Task Reload(CommandContext ctx)
+		{
+			var res = await TestEditConfigModule.GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+			if (!res) return;
+			
+			_updater.UpdateGuild(ctx.Guild.Id);
+		}
 		
 		// Wrapper that points to config view //
 		[GroupCommand]
@@ -340,7 +351,7 @@ namespace Silk.Core.Commands
 			/// <param name="user">The id of the user to assign a token to and wait for input from.</param>
 			/// <param name="channel">The channel to send a message to, to request user input.</param>
 			/// <returns>True if the user selected true, or false if the user selected no OR the cancellation token was cancelled.</returns>
-			private static async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
+			internal static async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
 			{
 				var builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
 
