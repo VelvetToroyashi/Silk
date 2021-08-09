@@ -196,7 +196,7 @@ namespace Silk.Core.Commands
 			}
 		}
 
-		public sealed class EditConfigModule : BaseCommandModule
+		public sealed class TestEditConfigModule : BaseCommandModule
 		{
 
 		}
