@@ -56,7 +56,6 @@ namespace Silk.Core.Commands
 
 			private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
 
-
 			[GroupCommand]
 			[Description("View the current config.")]
 			public async Task View(CommandContext ctx)
@@ -70,7 +69,7 @@ namespace Silk.Core.Commands
 				contentBuilder
 					.Clear()
 					.AppendLine("**General Config:**")
-					.AppendLine("__Greeting:__ ")
+					.AppendLine("__Greeting:__")
 					.AppendLine($"> Option: {config.GreetingOption.Humanize()}")
 					.AppendLine($"> Greetting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
 					.AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"[See {ctx.Prefix}config view greeting]")}")
@@ -78,14 +77,14 @@ namespace Silk.Core.Commands
 					.AppendLine()
 					.AppendLine("**Moderation Config:**")
 					.AppendLine()
-					.AppendLine($"Log members joining: <:_:{(modConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($"Log members leaving: <:_:{(modConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine("__Logging:__")
+					.AppendLine($"> Channel: {(modConfig.LoggingChannel is var channel and not 0 ? $"<#{channel}>" : "Not set")}")
+					.AppendLine($"> Log members joining: <:_:{(modConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Log members leaving: <:_:{(modConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Log message edits/deletions: <:_:{(modConfig.LogMessageChanges ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine()
 					.AppendLine($"Max role mentions: {GetCountString(modConfig.MaxRoleMentions)}")
 					.AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
-					.AppendLine()
-					.AppendLine($"Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
-					.AppendLine($"Logging channel: {(modConfig.LoggingChannel is var count and not 0 ? $"<#{count}>" : "Not set")}")
 					.AppendLine()
 					.AppendLine("__Invites:__")
 					.AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
@@ -97,6 +96,7 @@ namespace Silk.Core.Commands
 					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
 					.AppendLine()
 					.AppendLine("__Infractions:__")
+					.AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
 					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
@@ -108,7 +108,14 @@ namespace Silk.Core.Commands
 				
 				await ctx.RespondAsync(embed);
 			}
-
+			
+			// Justification for ommiting a Log command in the View group:			//
+			// The commands below exist because they house complex information		//
+			// that would otherwise bloat the main embed to > 4096 characters,		//
+			// which is the limit for embed descriptions. Log however only houses	//
+			// A few booleans, and thus does not need it's own command in the view	//
+			// group.																//
+			
 			[Command]
 			[Description("View in-depth greeting-related config.")]
 			public async Task Greeting(CommandContext ctx)
