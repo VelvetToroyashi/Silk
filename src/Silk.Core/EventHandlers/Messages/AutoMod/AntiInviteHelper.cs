@@ -108,14 +108,18 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         ///     Attempts to infract a member for posting an invite.
         /// </summary>
         /// <param name="message"></param>
-        public async Task TryAddInviteInfractionAsync(DiscordMessage message)
+        public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfig config)
 		{
 			User? user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
 
 			if (user.Flags.HasFlag(UserFlag.InfractionExemption))
 				return;
 
-			await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", true);
+			if (config.DeleteMessageOnMatchedInvite)
+				await message.DeleteAsync("[AutoMod] Detected a blacklisted invite.");
+			
+			if (config.WarnOnMatchedInvite)
+				await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", config.AutoEscalateInfractions);
 		}
 	}
 }

@@ -26,14 +26,8 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 				bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
 				bool isBlacklisted = await _inviteHelper.IsBlacklistedInvite(args.Message, config, invite);
 
-				if (hasInvite && isBlacklisted && config.WarnOnMatchedInvite)
-					await _inviteHelper.TryAddInviteInfractionAsync(args.Message);
-				
-				if (hasInvite && isBlacklisted && config.DeleteMessageOnMatchedInvite)
-				{
-					try { await args.Message.DeleteAsync("Blacklisted invite."); }
-					catch { /* Ignored */ }
-				}
+				if (hasInvite && isBlacklisted)
+					await _inviteHelper.TryAddInviteInfractionAsync(args.Message, config);
 			}
 		}
 	}
