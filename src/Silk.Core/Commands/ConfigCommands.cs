@@ -49,6 +49,7 @@ namespace Silk.Core.Commands
 			ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
 		
 		[Group("view")]
+		[Description("View the current config, or specify a sub-command to see detailed information.")]
 		public sealed class ViewConfigModule : BaseCommandModule
 		{
 			private readonly IMediator _mediator;
@@ -225,6 +226,7 @@ namespace Silk.Core.Commands
 		}
 
 		[Group("edit")]
+		[Description("Edit various settings through these commands:")]
 		public sealed class EditConfigModule : BaseCommandModule
 		{
 			// Someone's gonna chew me a new one with this many statics lmao //
@@ -356,13 +358,15 @@ namespace Silk.Core.Commands
 			}
 
 			[Group("invite")]
-			[Aliases("invites")]
+			[Aliases("invites", "inv")]
+			[Description("Invite related settings.")]
 			public sealed class EditInviteModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
 				public EditInviteModule(IMediator mediator) => _mediator = mediator;
 				
 				[Group("whitelist")]
+				[Description("Invite whitelist related settings.")]
 				public sealed class EditInviteWhitelistModule : BaseCommandModule
 				{
 					private readonly IMediator _mediator;
@@ -485,6 +489,8 @@ namespace Silk.Core.Commands
 				}
 				
 				[Command]
+				[Aliases("so", "scan")]
+				[Description("Whether or not an effort should be made to check the origin of an invite before taking action. \nLow impact to AutoMod latency.")]
 				public async Task ScanOrigin(CommandContext ctx, bool scan)
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
@@ -509,9 +515,24 @@ namespace Silk.Core.Commands
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeleteOnMatchedInvite = delete});
 				}
+
+				[Command]
+				[Aliases("ma")]
+				[Description("Whether or not to use the aggressive invite matching regex. \n`disc((ord)?(((app)?\\.com\\/invite)|(\\.gg)))\\/([A-z0-9-_]{2,})`")]
+				public async Task MatchAggressively(CommandContext ctx, bool match)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { UseAggressiveRegex = match});
+				}
 			}
 
 			[Group("log")]
+			[Description("Logging related settings.")]
 			public sealed class EditLogModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
