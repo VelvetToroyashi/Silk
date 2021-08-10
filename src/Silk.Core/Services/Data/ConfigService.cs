@@ -19,7 +19,11 @@ namespace Silk.Core.Services.Data
 		{
 			_cache = cache;
 			_mediator = mediator;
-			updater.ConfigUpdated += u => cache.Remove(u);
+			updater.ConfigUpdated += u =>
+			{
+				cache.Remove(u);
+				cache.Remove(u + "_mod");
+			};
 		}
 
 		public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
