@@ -281,6 +281,15 @@ namespace Silk.Core.Commands
 
 				await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { MuteRoleId = role.Id });
 			}
+
+
+			[Command]
+			[Aliases("mum", "max_user_mentions", "max-user-mentions")]
+			[Description("Edit the maximum amount of user mentions allowed in a single message. Set to 0 to disable.")]
+			public async Task MaxUserMentions(CommandContext ctx, uint mentions)
+			{
+				
+			}
 			
 			[Command]
 			[Aliases("welcome")]
