@@ -356,12 +356,160 @@ namespace Silk.Core.Commands
 			}
 
 			[Group("invite")]
+			[Aliases("invites")]
 			public sealed class EditInviteModule : BaseCommandModule
 			{
-				[Command]
-				public async Task Whitelist(CommandContext ctx, DiscordInvite invite)
+				private readonly IMediator _mediator;
+				public EditInviteModule(IMediator mediator) => _mediator = mediator;
+				
+				[Group("whitelist")]
+				public sealed class EditInviteWhitelistModule : BaseCommandModule
 				{
+					private readonly IMediator _mediator;
+					public EditInviteWhitelistModule(IMediator mediator) => _mediator = mediator;
 					
+					[Command]
+					public async Task Add(CommandContext ctx, string invite)
+					{
+						DiscordInvite inviteObj;
+						try
+						{
+							inviteObj = await ctx.Client.GetInviteByCodeAsync(invite.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Last());
+						}
+						catch
+						{
+							await ctx.RespondAsync("That doesn't appear to be a valid invite, sorry!");
+							return;
+						}
+
+						if (inviteObj.Guild.Id == ctx.Guild.Id)
+						{
+							await ctx.RespondAsync("Don't worry, invites from your server are automatically whitelisted!");
+							return;
+						}
+
+						if (inviteObj.IsRevoked || inviteObj.MaxAge < 0)
+						{
+							await ctx.RespondAsync("That invite is expired!");
+							return;
+						}
+
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						if (inviteObj.Guild.VanityUrlCode is null || inviteObj.Guild.VanityUrlCode != inviteObj.Code)
+							await ctx.RespondAsync(":warning: Warning, this code is not a vanity code!");
+						
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code});
+					
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+					}
+
+					[Command]
+					public async Task Remove(CommandContext ctx, string invite)
+					{
+						DiscordInvite inviteObj;
+						try
+						{
+							inviteObj = await ctx.Client.GetInviteByCodeAsync(invite.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Last());
+						}
+						catch
+						{
+							await ctx.RespondAsync("That doesn't appear to be a valid invite, sorry!");
+							return;
+						}
+
+						if (inviteObj.Guild.Id == ctx.Guild.Id)
+						{
+							await ctx.RespondAsync("Don't worry, invites from your server are automatically whitelisted!");
+							return;
+						}
+						
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+						
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
+						var inv = config.AllowedInvites.SingleOrDefault(i => i.VanityURL == inviteObj.Code);
+
+						if (inv is null) return;
+
+						config.AllowedInvites.Remove(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code});
+					
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+					}
+
+					[Command]
+					[RequireFlag(UserFlag.EscalatedStaff)]
+					public async Task Clear(CommandContext ctx)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = Array.Empty<Invite>().ToList() });
+					}
+					
+					[Command]
+					public async Task Enable(CommandContext ctx)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { BlacklistInvites = true });
+					}
+					
+					[Command]
+					public async Task Disable(CommandContext ctx)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { BlacklistInvites = false });
+					}
+				}
+				
+									
+				[Command]
+				public async Task ScanOrigin(CommandContext ctx, bool scan)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+						
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { ScanInvites = scan });
+				}
+					
+					
+				[Command]
+				[Aliases("dom", "delete")]
+				[Description("Whether or not invites will be deleted when they're detected in messages.")]
+				public async Task DeleteOnMatch(CommandContext ctx, bool delete)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeleteOnMatchedInvite = delete});
 				}
 			}
 
