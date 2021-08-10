@@ -63,7 +63,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
 			Match match = scanPattern.Match(message.Content);
 
-			invite = match.Groups.Values.Last().Captures.First().Value;
+			invite = match.Groups.Values.Last().Captures.FirstOrDefault()?.Value ?? "";
 
 			return match.Success;
 		}
