@@ -194,7 +194,7 @@ namespace Silk.Core.Services.Server
 			Task<InfractionResult>? task = step.Type switch
 			{
 				InfractionType.Ignore when enforcer == _client.CurrentUser => AddNoteAsync(userId, guildId, enforcerId, reason),
-				InfractionType.Ignore when enforcer != _client.CurrentUser => BanAsync(userId, guildId, enforcerId, reason),
+				InfractionType.Ignore when enforcer != _client.CurrentUser => StrikeAsync(userId, guildId, enforcerId, reason),
 				InfractionType.Kick => KickAsync(userId, guildId, enforcerId, reason),
 				InfractionType.Ban => BanAsync(userId, guildId, enforcerId, reason),
 				InfractionType.SoftBan => BanAsync(userId, guildId, enforcerId, reason, DateTime.UtcNow + step.Duration.Time),
