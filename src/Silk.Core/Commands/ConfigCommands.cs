@@ -484,7 +484,6 @@ namespace Silk.Core.Commands
 					}
 				}
 				
-									
 				[Command]
 				public async Task ScanOrigin(CommandContext ctx, bool scan)
 				{
@@ -496,8 +495,7 @@ namespace Silk.Core.Commands
 						
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { ScanInvites = scan });
 				}
-					
-					
+
 				[Command]
 				[Aliases("dom", "delete")]
 				[Description("Whether or not invites will be deleted when they're detected in messages.")]
@@ -512,7 +510,6 @@ namespace Silk.Core.Commands
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeleteOnMatchedInvite = delete});
 				}
 			}
-
 
 			[Group("log")]
 			public sealed class EditLogModule : BaseCommandModule
