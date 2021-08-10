@@ -354,8 +354,18 @@ namespace Silk.Core.Commands
 
 				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingText = message });
 			}
-			
-			
+
+			[Group("invite")]
+			public sealed class EditInviteModule : BaseCommandModule
+			{
+				[Command]
+				public async Task Whitelist(CommandContext ctx, DiscordInvite invite)
+				{
+					
+				}
+			}
+
+
 			[Group("log")]
 			public sealed class EditLogModule : BaseCommandModule
 			{
@@ -423,9 +433,7 @@ namespace Silk.Core.Commands
 				}
 				
 			}
-			
-			
-			
+
 			/// <summary>
 			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
 			/// </summary>
