@@ -12,6 +12,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 		public UpdateGuildModConfigRequest(ulong guildId) => GuildId = guildId;
 		public ulong GuildId { get; init; }
 		
+		public bool? EscalateInfractions { get; init; }
 		public bool? ScanInvites { get; init; }
 		public bool? BlacklistWords { get; init; }
 		public bool? BlacklistInvites { get; init; }
@@ -40,6 +41,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 				.FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
 			
 			config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
+			config.AutoEscalateInfractions = request.EscalateInfractions ?? config.AutoEscalateInfractions;
 			config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
 			config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
 			config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;

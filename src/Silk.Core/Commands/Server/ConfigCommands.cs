@@ -285,11 +285,32 @@ namespace Silk.Core.Commands
 
 			[Command]
 			[Aliases("mum", "max_user_mentions", "max-user-mentions")]
-			[Description("Edit the maximum amount of user mentions allowed in a single message. Set to 0 to disable.")]
+			[Description("Edit the maximum amount of unique user mentions allowed in a single message. Set to 0 to disable.")]
 			public async Task MaxUserMentions(CommandContext ctx, uint mentions)
 			{
-				
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+
+				await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { MaxUserMentions = (int)mentions });
 			}
+
+			[Command]
+			[Aliases("mrm", "max_role_mentions", "max-role-mentions")]
+			[Description("Edit the maximum amount of unique role mentions allowed in a single message. Set to 0 to disable.")]
+			public async Task MaxRoleMentions(CommandContext ctx, uint mentions)
+			{
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+
+				await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { MaxRoleMentions = (int)mentions });
+			}
+			
 			
 			[Command]
 			[Aliases("welcome")]
@@ -619,6 +640,31 @@ namespace Silk.Core.Commands
 					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMessageChanges = log });
+				}
+				
+			}
+
+			[Group("infractions")]
+			[Description("Infraction related settings.")]
+			public sealed class EditInfractionModule : BaseCommandModule
+			{
+				private readonly IMediator _mediator;
+				public EditInfractionModule(IMediator mediator) => _mediator = mediator;
+				
+				[Command]
+				[Description("Whether strikes should be automatically escalated. " +
+				             "\n\n In the case of automod, if a category does not have a defined, strikes are used instead.\n" +
+				             "If this is set to true, AutoMod will attempt to use the configured infraction for the given user's current amount of infractions.\n\n" +
+				             "For manual strikes, if this is enabled, when a user has >= 5 strikes, moderators will be prompted if they want to escalate, which will follow the same procedure.")]
+				public async Task AutoEscalate(CommandContext ctx, bool escalate)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { EscalateInfractions = escalate});
 				}
 				
 			}

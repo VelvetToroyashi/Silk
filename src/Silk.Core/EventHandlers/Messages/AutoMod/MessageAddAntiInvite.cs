@@ -24,9 +24,11 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 				GuildModConfig? config = await _config.GetModConfigAsync(args.Guild.Id);
 
 				bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
+				if (!hasInvite) return;
+				
 				bool isBlacklisted = await _inviteHelper.IsBlacklistedInvite(args.Message, config, invite);
 
-				if (hasInvite && isBlacklisted)
+				if (isBlacklisted)
 					await _inviteHelper.TryAddInviteInfractionAsync(args.Message, config);
 			}
 		}
