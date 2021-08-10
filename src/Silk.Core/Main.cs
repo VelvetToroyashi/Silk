@@ -108,6 +108,7 @@ namespace Silk.Core
 				cnextExt.RegisterCommands(asm);
 				cnextExt.SetHelpFormatter<HelpFormatter>();
 				cnextExt.RegisterConverter(new MemberConverter());
+				cnextExt.RegisterConverter(new InfractionTypeConverter());
 				cnextExt.CommandExecuted += _commandHandler.AddCommandInvocation;
 			}
 

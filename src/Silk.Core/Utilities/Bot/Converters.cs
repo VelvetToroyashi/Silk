@@ -11,6 +11,17 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Utilities.Bot
 {
+	
+	public class InfractionTypeConverter : IArgumentConverter<InfractionType>
+	{
+		public Task<Optional<InfractionType>> ConvertAsync(string value, CommandContext ctx)
+		{
+			var res = Enum.TryParse(typeof(InfractionType), value, true, out var inf);
+
+			return res ? Task.FromResult(Optional.FromValue((InfractionType)inf!)) : Task.FromResult(Optional.FromNoValue<InfractionType>());
+		}
+	}
+	
 	public class MemberConverter : IArgumentConverter<DiscordMember>
 	{
 		private static Regex UserRegex { get; } =
@@ -24,17 +35,6 @@ namespace Silk.Core.Utilities.Bot
 			return await ConvertMemberAsync(value, ctx);
 		}
 		
-		
-		public class InfractionTypeConverter : IArgumentConverter<InfractionType>
-		{
-			public Task<Optional<InfractionType>> ConvertAsync(string value, CommandContext ctx)
-			{
-				var res = Enum.TryParse(typeof(InfractionType), value, true, out var inf);
-
-				return res ? Task.FromResult(Optional.FromValue((InfractionType)inf!)) : Task.FromResult(Optional.FromNoValue<InfractionType>());
-			}
-		}
-
 		// Basically ripped from the source since we can't call this from the built-in one *shrug*
 
 		private static async Task<Optional<DiscordMember>> ConvertMemberAsync(string value, CommandContext ctx)
