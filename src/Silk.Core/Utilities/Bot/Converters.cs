@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
+using Silk.Core.Data.Models;
 
 namespace Silk.Core.Utilities.Bot
 {
@@ -17,13 +18,22 @@ namespace Silk.Core.Utilities.Bot
 
 		public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
 		{
-
 			DiscordMember? user = ctx.Guild?.Members.Values.FirstOrDefault(m =>
 				m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
 			if (user is not null) return Optional.FromValue(user);
 			return await ConvertMemberAsync(value, ctx);
 		}
+		
+		
+		public class InfractionTypeConverter : IArgumentConverter<InfractionType>
+		{
+			public Task<Optional<InfractionType>> ConvertAsync(string value, CommandContext ctx)
+			{
+				var res = Enum.TryParse(typeof(InfractionType), value, true, out var inf);
 
+				return res ? Task.FromResult(Optional.FromValue((InfractionType)inf!)) : Task.FromResult(Optional.FromNoValue<InfractionType>());
+			}
+		}
 
 		// Basically ripped from the source since we can't call this from the built-in one *shrug*
 
