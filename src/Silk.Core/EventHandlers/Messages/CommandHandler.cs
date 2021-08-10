@@ -35,7 +35,7 @@ namespace Silk.Core.EventHandlers.Messages
 			if (isBot || isEmpty)
 				return;
 
-			DiscordUser bot = client.CurrentUser;
+			DiscordMember? bot = args.Guild?.CurrentMember;
 			CommandsNextExtension? commandsNext = client.GetCommandsNext();
 			string prefix = _prefixService.RetrievePrefix(args.Guild?.Id);
 
@@ -59,12 +59,12 @@ namespace Silk.Core.EventHandlers.Messages
 			_ = Task.Run(async () => await commandsNext.ExecuteCommandAsync(context));
 		}
 
-		private static int GetPrefixLength(string prefix, DiscordMessage message, DiscordUser currentUser)
+		private static int GetPrefixLength(string prefix, DiscordMessage message, DiscordMember? currentUser)
 		{
 			if (message.Channel is DiscordDmChannel)
 				return 0;
 
-			return message.Content.StartsWith(currentUser.Mention) ?
+			return message.Content.StartsWith(currentUser?.Mention!) ?
 				message.GetMentionPrefixLength(currentUser) :
 				message.GetStringPrefixLength(prefix);
 		}

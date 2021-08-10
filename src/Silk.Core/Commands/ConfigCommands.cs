@@ -364,14 +364,14 @@ namespace Silk.Core.Commands
 			{
 				private readonly IMediator _mediator;
 				public EditInviteModule(IMediator mediator) => _mediator = mediator;
-				
+
 				[Group("whitelist")]
 				[Description("Invite whitelist related settings.")]
 				public sealed class EditInviteWhitelistModule : BaseCommandModule
 				{
 					private readonly IMediator _mediator;
 					public EditInviteWhitelistModule(IMediator mediator) => _mediator = mediator;
-					
+
 					[Command]
 					public async Task Add(CommandContext ctx, string invite)
 					{
@@ -402,14 +402,14 @@ namespace Silk.Core.Commands
 
 						if (inviteObj.Guild.VanityUrlCode is null || inviteObj.Guild.VanityUrlCode != inviteObj.Code)
 							await ctx.RespondAsync(":warning: Warning, this code is not a vanity code!");
-						
+
 						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
 						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code});
-					
+						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
 					}
 
@@ -432,9 +432,9 @@ namespace Silk.Core.Commands
 							await ctx.RespondAsync("Don't worry, invites from your server are automatically whitelisted!");
 							return;
 						}
-						
+
 						EnsureCancellationTokenCancellation(ctx.User.Id);
-						
+
 						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
@@ -445,8 +445,8 @@ namespace Silk.Core.Commands
 
 						if (inv is null) return;
 
-						config.AllowedInvites.Remove(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code});
-					
+						config.AllowedInvites.Remove(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
 					}
 
@@ -459,10 +459,10 @@ namespace Silk.Core.Commands
 						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
-						
+
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = Array.Empty<Invite>().ToList() });
 					}
-					
+
 					[Command]
 					public async Task Enable(CommandContext ctx)
 					{
@@ -474,7 +474,7 @@ namespace Silk.Core.Commands
 
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { BlacklistInvites = true });
 					}
-					
+
 					[Command]
 					public async Task Disable(CommandContext ctx)
 					{
@@ -487,7 +487,7 @@ namespace Silk.Core.Commands
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { BlacklistInvites = false });
 					}
 				}
-				
+
 				[Command]
 				[Aliases("so", "scan")]
 				[Description("Whether or not an effort should be made to check the origin of an invite before taking action. \nLow impact to AutoMod latency.")]
@@ -498,8 +498,22 @@ namespace Silk.Core.Commands
 					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
-						
+
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { ScanInvites = scan });
+				}
+
+				[Command]
+				[Aliases("warn", "wom")]
+				[Description("Whether members should be warned for sending non-whitelisted invites. \nIf `auto-esclate-infractions` is set to true, the configured auto-mod setting will be used, else it will fallback to the configured infraction step depending on the user's current infraction count.")]
+				public async Task WarnOnMatch(CommandContext ctx, bool warn)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { WarnOnMatchedInvite = warn});
 				}
 
 				[Command]
