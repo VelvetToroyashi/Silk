@@ -189,7 +189,7 @@ namespace Silk.Core.SlashCommands.Commands
 					InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
 					IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
-					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages, token: null);
+					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
 				}
 			}
 
@@ -274,7 +274,7 @@ namespace Silk.Core.SlashCommands.Commands
 					InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
 					IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(allTags, SplitType.Line, builder);
-					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages, token: null);
+					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
 				}
 
 			}

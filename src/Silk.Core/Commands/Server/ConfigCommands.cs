@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,6 +11,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
+using Humanizer.Localisation;
 using MediatR;
 using NpgsqlTypes;
 using Silk.Core.Data.MediatR.Guilds;
@@ -98,9 +100,9 @@ namespace Silk.Core.Commands
 					.AppendLine()
 					.AppendLine("__Infractions:__")
 					.AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
+					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
-					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
-					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
+					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}");
 				
 				embed
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
@@ -645,6 +647,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Group("infractions")]
+			[Aliases("infraction", "inf")]
 			[Description("Infraction related settings.")]
 			public sealed class EditInfractionModule : BaseCommandModule
 			{
@@ -652,9 +655,10 @@ namespace Silk.Core.Commands
 				public EditInfractionModule(IMediator mediator) => _mediator = mediator;
 				
 				[Command]
+				[Aliases("esclate", "esc")]
 				[Description("Whether strikes should be automatically escalated. " +
-				             "\n\n In the case of automod, if a category does not have a defined, strikes are used instead.\n" +
-				             "If this is set to true, AutoMod will attempt to use the configured infraction for the given user's current amount of infractions.\n\n" +
+				             "\n\n In the case of automod, if a category does not have a defined action, strikes are used instead.\n" +
+				             "If this is set to true, AutoMod will attempt to use the configured action depending on how many infractions the user currently has.\n\n" +
 				             "For manual strikes, if this is enabled, when a user has >= 5 strikes, moderators will be prompted if they want to escalate, which will follow the same procedure.")]
 				public async Task AutoEscalate(CommandContext ctx, bool escalate)
 				{
@@ -666,7 +670,141 @@ namespace Silk.Core.Commands
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { EscalateInfractions = escalate});
 				}
-				
+
+				[Group("steps")]
+				[Description("Infraction step related settings.")]
+				public sealed class InfractionStepsModule : BaseCommandModule
+				{
+					private readonly IMediator _mediator;
+					public InfractionStepsModule(IMediator mediator) => _mediator = mediator;
+					
+					[Command]
+					[Description("Adds a new infraction step. This action will be used when the user has n infractions.\n\n" +
+					             "If the infraction step count (see `config view`) is 2, when a user has one strikes\n" +
+					             "(or strikes that were escalated), and the second infraction step is set to a 10 minute mute,\n" +
+					             "they will be muted for 10 minutes the next time they are striked.\n\n" +
+					             "Duration is only applicable to Mute and SoftBan.\n\n" +
+					             "Availble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
+					             "A note on `Ignore`: If the step is set to ignore, AutoMod will add a note to the user. The strike comand will esclate to ban if the current step is ignore.")]
+					public async Task Add(CommandContext ctx, InfractionType type, [RemainingText] TimeSpan? duration = null)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						conf.InfractionSteps.Add(new() { Type = type, Duration = duration.HasValue ? NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration.Value) : NpgsqlTimeSpan.Zero});
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
+
+					[Command]
+					[Description("Edits an infraction step. Availble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
+					public async Task Edit(CommandContext ctx)
+					{
+						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+						var token = GetTokenFromWaitQueue(ctx.User.Id);
+
+						var interactivity = ctx.Client.GetInteractivity();
+
+						var infractionSelectOptions = new List<DiscordSelectComponentOption>();
+						for (var i = 0; i < conf.InfractionSteps.Count; i++)
+						{
+							var step = conf.InfractionSteps[i];
+							infractionSelectOptions.Add(new($"{i + 1} Infractions: {step.Type}", i.ToString(),
+								step.Duration == NpgsqlTimeSpan.Zero ? null : $"Duration: {step.Duration.Time.Humanize(3, minUnit: TimeUnit.Second)}"));
+						}
+
+						var infractionSelectMenu = new DiscordSelectComponent("step", "Select an infraction step", infractionSelectOptions);
+
+						var typeSelectOptions = new DiscordSelectComponentOption[]
+						{
+							new("Ignore", InfractionType.Ignore.ToString(), "AutoMod: Will note, but will not take action."),
+							new("Kick", InfractionType.Kick.ToString(), "Kicks the user."),
+							new("Ban", InfractionType.Ban.ToString(), "Bans the user indefinitely."),
+							new("Temp Ban", InfractionType.SoftBan.ToString(), "Bans the user temporarily."),
+							new("Mute", InfractionType.Mute.ToString(), "Mutes the user."),
+							new("Strike", InfractionType.Strike.ToString(), "Strikes the user. Counts toward infraction count."),
+						};
+						
+						var typeSelectMenu = new DiscordSelectComponent("type", "Select the type of infraction", typeSelectOptions);
+						
+						var duratitonSelectOptions = new DiscordSelectComponentOption[]
+						{
+							new ("1 minute", "00:01:00"),
+							new ("5 minutes", "00:05:00"),
+							new ("10 minutes", "00:10:00"),
+							new ("15 minutes", "00:15:00"),
+							new ("30 minutes", "00:30:00"),
+							
+							new ("1 hour", "01:00:00"),
+							new ("4 hours", "04:00:00"),
+							new ("6 hours", "06:00:00"),
+							new ("8 hours", "08:00:00"),
+							new ("12 hours", "12:00:00"),
+							
+							new ("1 day", "1.00:00:00"),
+							new ("2 days", "2.00:00:00"),
+							new ("3 days", "3.00:00:00"),
+							new ("5 days", "5.00:00:00"),
+							new ("1 week", "7.00:00:00"),
+							
+							new ("2 weeks",  "14.00:00:00"),
+							new ("1 month", "60.00:00:00"),
+							new ("3 month", "90.00:00:00"),
+							new ("6 month", "180.00:00:00"),
+							new ("1 year", "360.00:00:00"),
+							
+							new ("Indefinitely", "00:00:00")
+						};
+
+						var durationSelectMenu = new DiscordSelectComponent("duration", "Select a duration", duratitonSelectOptions);
+
+						var message = await ctx.RespondAsync(m => m
+							.WithContent("** **")
+							.AddComponents(infractionSelectMenu)
+							.AddComponents(typeSelectMenu)
+							.AddComponents(durationSelectMenu));
+
+						InfractionStep selectedStep = null!;
+						InfractionType selectedType = default;
+						TimeSpan selectedTime = default;
+						
+						while (!token.IsCancellationRequested)
+						{
+							var t1 =  interactivity.WaitForSelectAsync(message, ctx.User, "step", token);
+							var t2 =  interactivity.WaitForSelectAsync(message, ctx.User, "type", token);
+							var t3 =  interactivity.WaitForSelectAsync(message, ctx.User, "duration", token);
+							var returned = await await Task.WhenAny(t1, t2, t3);
+
+
+							if (token.IsCancellationRequested)
+								return; //TODO: Disable dropdowns
+
+							switch (returned.Result.Id)
+							{
+								case "step":
+									selectedStep = conf.InfractionSteps[int.Parse(returned.Result.Values[0])];
+									await returned.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+									break;
+								case "type":
+									
+
+									break;
+							}
+						}
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						
+						//conf.InfractionSteps.Add(new() { Type = type, Duration = duration.HasValue ? NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration.Value) : NpgsqlTimeSpan.Zero});
+						//await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
+				}
 			}
 
 			/// <summary>
