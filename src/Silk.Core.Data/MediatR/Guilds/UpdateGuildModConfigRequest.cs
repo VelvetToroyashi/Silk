@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -48,8 +49,8 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
 			config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
 			config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
-			config.InfractionSteps = request.InfractionSteps ?? config.InfractionSteps;
-			config.AllowedInvites = request.AllowedInvites ?? config.AllowedInvites;
+			
+			
 			config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
 			config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
 			config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
@@ -60,6 +61,19 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
 			config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
 
+
+			if (request.InfractionSteps?.Any() ?? false)
+			{
+				_db.RemoveRange(config.InfractionSteps.Except(request.InfractionSteps!));
+				config.InfractionSteps = request.InfractionSteps!;
+			}
+
+			if (request.AllowedInvites?.Any() ?? false)
+			{
+				_db.RemoveRange(config.AllowedInvites.Except(request.AllowedInvites!));
+				config.AllowedInvites = request.AllowedInvites!;
+			}
+			
 			_db.GuildModConfigs.Update(config);
 			await _db.SaveChangesAsync(cancellationToken);
 			
