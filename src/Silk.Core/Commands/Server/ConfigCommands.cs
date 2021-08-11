@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +10,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
-using Humanizer.Localisation;
 using MediatR;
 using NpgsqlTypes;
 using Silk.Core.Data.MediatR.Guilds;
@@ -700,109 +698,61 @@ namespace Silk.Core.Commands
 					}
 
 					[Command]
-					[Description("Edits an infraction step. Availble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
-					public async Task Edit(CommandContext ctx)
+					[Description("Edits an infraction step. `index` is the number of infractions. If you want to edit the third step (3 infractions), simply pass 3. \nAvailble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
+					public async Task Edit(CommandContext ctx, uint index, InfractionType type, TimeSpan? duration = null)
 					{
 						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						if (!conf.InfractionSteps.Any())
+						{
+							await ctx.RespondAsync("There are no infraction steps to edit.");
+							return;
+						}
+						
+						if (index is 0 || index > conf.InfractionSteps.Count )
+						{
+							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
+							return;
+						}
 						
 						EnsureCancellationTokenCancellation(ctx.User.Id);
-						var token = GetTokenFromWaitQueue(ctx.User.Id);
-
-						var interactivity = ctx.Client.GetInteractivity();
-
-						var infractionSelectOptions = new List<DiscordSelectComponentOption>();
-						for (var i = 0; i < conf.InfractionSteps.Count; i++)
-						{
-							var step = conf.InfractionSteps[i];
-							infractionSelectOptions.Add(new($"{i + 1} Infractions: {step.Type}", i.ToString(),
-								step.Duration == NpgsqlTimeSpan.Zero ? null : $"Duration: {step.Duration.Time.Humanize(3, minUnit: TimeUnit.Second)}"));
-						}
-
-						var infractionSelectMenu = new DiscordSelectComponent("step", "Select an infraction step", infractionSelectOptions);
-
-						var typeSelectOptions = new DiscordSelectComponentOption[]
-						{
-							new("Ignore", InfractionType.Ignore.ToString(), "AutoMod: Will note, but will not take action."),
-							new("Kick", InfractionType.Kick.ToString(), "Kicks the user."),
-							new("Ban", InfractionType.Ban.ToString(), "Bans the user indefinitely."),
-							new("Temp Ban", InfractionType.SoftBan.ToString(), "Bans the user temporarily."),
-							new("Mute", InfractionType.Mute.ToString(), "Mutes the user."),
-							new("Strike", InfractionType.Strike.ToString(), "Strikes the user. Counts toward infraction count."),
-						};
-						
-						var typeSelectMenu = new DiscordSelectComponent("type", "Select the type of infraction", typeSelectOptions);
-						
-						var duratitonSelectOptions = new DiscordSelectComponentOption[]
-						{
-							new ("1 minute", "00:01:00"),
-							new ("5 minutes", "00:05:00"),
-							new ("10 minutes", "00:10:00"),
-							new ("15 minutes", "00:15:00"),
-							new ("30 minutes", "00:30:00"),
-							
-							new ("1 hour", "01:00:00"),
-							new ("4 hours", "04:00:00"),
-							new ("6 hours", "06:00:00"),
-							new ("8 hours", "08:00:00"),
-							new ("12 hours", "12:00:00"),
-							
-							new ("1 day", "1.00:00:00"),
-							new ("2 days", "2.00:00:00"),
-							new ("3 days", "3.00:00:00"),
-							new ("5 days", "5.00:00:00"),
-							new ("1 week", "7.00:00:00"),
-							
-							new ("2 weeks",  "14.00:00:00"),
-							new ("1 month", "60.00:00:00"),
-							new ("3 month", "90.00:00:00"),
-							new ("6 month", "180.00:00:00"),
-							new ("1 year", "360.00:00:00"),
-							
-							new ("Indefinitely", "00:00:00")
-						};
-
-						var durationSelectMenu = new DiscordSelectComponent("duration", "Select a duration", duratitonSelectOptions);
-
-						var message = await ctx.RespondAsync(m => m
-							.WithContent("** **")
-							.AddComponents(infractionSelectMenu)
-							.AddComponents(typeSelectMenu)
-							.AddComponents(durationSelectMenu));
-
-						InfractionStep selectedStep = null!;
-						InfractionType selectedType = default;
-						TimeSpan selectedTime = default;
-						
-						while (!token.IsCancellationRequested)
-						{
-							var t1 =  interactivity.WaitForSelectAsync(message, ctx.User, "step", token);
-							var t2 =  interactivity.WaitForSelectAsync(message, ctx.User, "type", token);
-							var t3 =  interactivity.WaitForSelectAsync(message, ctx.User, "duration", token);
-							var returned = await await Task.WhenAny(t1, t2, t3);
-
-
-							if (token.IsCancellationRequested)
-								return; //TODO: Disable dropdowns
-
-							switch (returned.Result.Id)
-							{
-								case "step":
-									selectedStep = conf.InfractionSteps[int.Parse(returned.Result.Values[0])];
-									await returned.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-									break;
-								case "type":
-									
-
-									break;
-							}
-						}
 
 						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
+						var step = conf.InfractionSteps[(int)index - 1];
 						
-						//conf.InfractionSteps.Add(new() { Type = type, Duration = duration.HasValue ? NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration.Value) : NpgsqlTimeSpan.Zero});
-						//await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+						step.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
+						step.Type = type;
+						
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
+
+					[Command]
+					[Description("Removes an infraction step at the given index. If you want to remove the third step (3 infractions) pass 3. \n**This cannot be undone!**\n" +
+					             "All subsequent steps will be shifted left. If you want to edit a step, see `config edit infraction step edit`.")]
+					public async Task Remove(CommandContext ctx, uint index)
+					{
+						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						if (!conf.InfractionSteps.Any())
+						{
+							await ctx.RespondAsync("There are no infraction steps to edit.");
+							return;
+						}
+						
+						if (index is 0 || index > conf.InfractionSteps.Count )
+						{
+							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
+							return;
+						}
+						
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						conf.InfractionSteps.RemoveAt((int)index - 1);
+
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
 					}
 				}
 			}

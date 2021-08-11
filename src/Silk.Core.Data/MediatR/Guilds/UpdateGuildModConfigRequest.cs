@@ -38,6 +38,9 @@ namespace Silk.Core.Data.MediatR.Guilds
 		public async Task<Unit> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
 		{
 			var config = await _db.GuildModConfigs
+				.AsNoTracking()
+				.Include(c => c.InfractionSteps)
+				.Include(c => c.AllowedInvites)
 				.FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
 			
 			config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
@@ -57,6 +60,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
 			config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
 
+			_db.GuildModConfigs.Update(config);
 			await _db.SaveChangesAsync(cancellationToken);
 			
 			return Unit.Value;
