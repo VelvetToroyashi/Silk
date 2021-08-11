@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Concurrent;
+
 namespace Silk.Shared.Constants
 {
 	/// <summary>
@@ -19,5 +21,11 @@ namespace Silk.Shared.Constants
 		public const string MaxRoleMentions = "max_role_mentions";
 		
 		//TODO: More automod strings
+
+		public static ConcurrentDictionary<string, string> ActionStrings { get; } = new()
+		{
+			[MaxUserMentions] = "Maxiumim unique user pings",
+			[MaxRoleMentions] = "Maxiumim unique role pings",
+		};
 	}
 }
