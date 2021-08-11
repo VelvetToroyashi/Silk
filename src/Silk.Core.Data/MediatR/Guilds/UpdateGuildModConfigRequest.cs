@@ -29,6 +29,8 @@ namespace Silk.Core.Data.MediatR.Guilds
 		public ulong? MuteRoleId { get; init; }
 		public ulong? LoggingChannel { get; init; }
 		public bool? LogMessageChanges { get; init; }
+		
+		public Dictionary<string, InfractionStep>? AutoModActions { get; init; }
 	}
 	
 	public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest>
@@ -49,8 +51,6 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
 			config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
 			config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
-			
-			
 			config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
 			config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
 			config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
@@ -60,7 +60,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 			config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
 			config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
 			config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
-
+			config.NamedInfractionSteps = request.AutoModActions ?? config.NamedInfractionSteps;
 
 			if (request.InfractionSteps?.Any() ?? false)
 			{

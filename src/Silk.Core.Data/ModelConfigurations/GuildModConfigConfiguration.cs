@@ -11,7 +11,7 @@ namespace Silk.Core.Data.ModelConfigurations
 		public void Configure(EntityTypeBuilder<GuildModConfig> builder)
 		{
 			builder.Property(b => b.NamedInfractionSteps)
-				.HasConversion(b => JsonConvert.SerializeObject(b),
+				.HasConversion(b => JsonConvert.SerializeObject(b, new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore}),
 					b => JsonConvert.DeserializeObject<Dictionary<string, InfractionStep>>(b));
 		}
 	}

@@ -8,6 +8,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using MediatR;
@@ -56,7 +57,7 @@ namespace Silk.Core.Commands
 			public ViewConfigModule(IMediator mediator) => _mediator = mediator;
 
 			private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
-
+			
 			[GroupCommand]
 			[Description("View the current config.")]
 			public async Task View(CommandContext ctx)
@@ -116,6 +117,24 @@ namespace Silk.Core.Commands
 			// which is the limit for embed descriptions. Log however only houses	//
 			// A few booleans, and thus does not need it's own command in the view	//
 			// group.																//
+
+			[Command("automod-options")]
+			[Aliases("automodoptions", "amo")]
+			[Description("View available auto-mod actions.")]
+			public async Task AutoModOptions(CommandContext ctx)
+			{
+				var options = AutoModConstants.ActionStrings.Select(o => $"`{o.Key}` Definition: {o.Value}").Join("\n");
+				if (options.Length <= 4000)
+				{
+					await ctx.RespondAsync(new DiscordEmbedBuilder().WithColor(DiscordColor.Azure).WithDescription(options));
+				}
+				else
+				{
+					var interactivity = ctx.Client.GetInteractivity();
+					var pages = interactivity.GeneratePagesInEmbed(options, SplitType.Line, new() { Color = DiscordColor.Azure });
+					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
+				}
+			}
 			
 			[Command]
 			[Description("View in-depth greeting-related config.")]
@@ -754,6 +773,42 @@ namespace Silk.Core.Commands
 
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
 					}
+				}
+
+				[Command]
+				[Description("Adds or overwrites an action for automod. To see available options, use `config view automod-options`")]
+				public async Task Add(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
+				{
+					if (!AutoModConstants.ActionStrings.ContainsKey(option))
+					{
+						await ctx.RespondAsync("Sorry, but that doesn't seem to be a valid option.");
+						return;
+					}
+					
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
+					if (config.NamedInfractionSteps.TryGetValue(option, out var action))
+					{
+						action.Type = type;
+						action.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
+					}
+					else
+					{
+						config.NamedInfractionSteps[option] = new()
+						{
+							Type = type,
+							Config = config,
+							Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero),
+						};
+					}
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
 				}
 			}
 
