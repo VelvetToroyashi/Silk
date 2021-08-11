@@ -776,7 +776,9 @@ namespace Silk.Core.Commands
 				}
 
 				[Command]
-				[Description("Adds or overwrites an action for automod. To see available options, use `config view automod-options`")]
+				[Description("Adds or overwrites an action for automod. \nTo see available options, use `config view automod-options`" +
+				             "Available options: Ignore, Kick, Ban, SoftBan, Mute, Strike\n\n" +
+				             "**A note about AutoMod**: If `Ignore` is chosen, AutoMod will add a note to the user. Notes do not notify the user.")]
 				public async Task Add(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
 				{
 					if (!AutoModConstants.ActionStrings.ContainsKey(option))
@@ -809,6 +811,29 @@ namespace Silk.Core.Commands
 					}
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
+				}
+
+				
+				[Command]
+				[Description("Removes a defined AutoMod action. See `config view automod-actions` for a full list.")]
+				public async Task Remove(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
+				{
+					if (!AutoModConstants.ActionStrings.ContainsKey(option))
+					{
+						await ctx.RespondAsync("Sorry, but that doesn't seem to be a valid option.");
+						return;
+					}
+					
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
+					if (config.NamedInfractionSteps.Remove(option))
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
 				}
 			}
 
