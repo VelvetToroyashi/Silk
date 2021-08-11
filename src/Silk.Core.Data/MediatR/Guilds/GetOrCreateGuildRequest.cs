@@ -46,7 +46,8 @@ namespace Silk.Core.Data.MediatR.Guilds
                 Id = request.GuildId,
                 Users = new(),
                 Prefix = request.Prefix,
-                Configuration = new() {GuildId = request.GuildId}
+                Configuration = new() {GuildId = request.GuildId},
+                ModConfig = new() { GuildId = request.GuildId} 
             };
             _db.Guilds.Add(guild);
             await _db.SaveChangesAsync(cancellationToken);
