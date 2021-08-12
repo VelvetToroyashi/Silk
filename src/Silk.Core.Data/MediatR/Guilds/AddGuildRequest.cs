@@ -26,10 +26,17 @@ namespace Silk.Core.Data.MediatR.Guilds
 
         public async Task<Guild> Handle(AddGuildRequest request, CancellationToken cancellationToken)
         {
-            var guild = new Guild {Id = request.GuildId, Configuration = new() { GuildId = request.GuildId }, ModConfig = new() { GuildId = request.GuildId }, Prefix = request.Prefix};
+            Guild guild = new()
+            {
+                Id = request.GuildId,
+                Prefix = request.Prefix,
+                Configuration = new() { GuildId = request.GuildId },
+                ModConfig = new() { GuildId = request.GuildId },
+            };
+            
             _db.Guilds.Add(guild);
-
             await _db.SaveChangesAsync(cancellationToken);
+            
             return guild;
         }
     }
