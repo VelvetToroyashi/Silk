@@ -79,7 +79,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfig config, string invite)
 		{
 			if (config is null) return false;
-			if (!config.ScanInvites) return true;
+			if (!config.ScanInvites) return config.AllowedInvites.All(inv => inv.VanityURL != invite);
 
 			var blacklisted = true;
 			try
