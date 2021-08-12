@@ -89,7 +89,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 				if (apiInvite.Guild.Id != message.Channel.GuildId)
 				{
-					blacklisted = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.GuildId);
+					blacklisted = config.AllowedInvites.All(inv => apiInvite.Guild.Id != inv.InviteGuildId);
 				}
 				else
 				{
