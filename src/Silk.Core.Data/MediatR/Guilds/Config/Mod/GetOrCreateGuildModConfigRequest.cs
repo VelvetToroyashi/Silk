@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Guilds.Config.Mod
@@ -10,6 +9,7 @@ namespace Silk.Core.Data.MediatR.Guilds.Config.Mod
     /// Request for retrieving or creating a <see cref="GuildModConfig" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
+    /// <param name="Prefix">The prefix of the Guild</param>
     public record GetOrCreateGuildModConfigRequest(ulong GuildId, string Prefix) : IRequest<GuildModConfig>;
 
     /// <summary>
@@ -17,21 +17,13 @@ namespace Silk.Core.Data.MediatR.Guilds.Config.Mod
     /// </summary>
     public class GetOrCreateGuildModConfigHandler : IRequestHandler<GetOrCreateGuildModConfigRequest, GuildModConfig>
     {
-        private readonly GuildContext _db;
         private readonly IMediator _mediator;
-
-        public GetOrCreateGuildModConfigHandler(GuildContext db, IMediator mediator)
-        {
-            _db = db;
-            _mediator = mediator;
-        }
+        public GetOrCreateGuildModConfigHandler(IMediator mediator) => _mediator = mediator;
 
         public async Task<GuildModConfig> Handle(GetOrCreateGuildModConfigRequest configRequest, CancellationToken cancellationToken)
         {
-            GuildModConfig? guildModConfig = await _db.GuildModConfigs
-                .Include(g => g.AllowedInvites)
-                .Include(g => g.InfractionSteps)
-                .FirstOrDefaultAsync(g => g.GuildId == configRequest.GuildId, cancellationToken);
+            var guildModConfigRequest = new GetGuildModConfigRequest(configRequest.GuildId);
+            GuildModConfig guildModConfig = await _mediator.Send(guildModConfigRequest, cancellationToken);
 
             if (guildModConfig is not null)
                 return guildModConfig;
