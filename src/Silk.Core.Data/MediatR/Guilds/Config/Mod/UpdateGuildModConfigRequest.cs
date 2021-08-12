@@ -8,76 +8,76 @@ using Silk.Core.Data.Models;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
-	public record UpdateGuildModConfigRequest : IRequest
-	{
-		public UpdateGuildModConfigRequest(ulong guildId) => GuildId = guildId;
-		public ulong GuildId { get; init; }
-		
-		public bool? EscalateInfractions { get; init; }
-		public bool? ScanInvites { get; init; }
-		public bool? BlacklistWords { get; init; }
-		public bool? BlacklistInvites { get; init; }
-		public bool? LogMembersJoining { get; init; }
-		public bool? LogMembersLeaving { get; init; }
-		public bool? UseAggressiveRegex { get; init; }
-		public bool? WarnOnMatchedInvite { get; init; }
-		public bool? DeleteOnMatchedInvite { get; init; }
-		public int? MaxUserMentions { get; init; }
-		public int? MaxRoleMentions { get; init; }
-		public List<Invite>? AllowedInvites { get; init; }
-		public List<InfractionStep>? InfractionSteps { get; init; }
-		public ulong? MuteRoleId { get; init; }
-		public ulong? LoggingChannel { get; init; }
-		public bool? LogMessageChanges { get; init; }
-		
-		public Dictionary<string, InfractionStep>? AutoModActions { get; init; }
-	}
-	
-	public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest>
-	{
-		private readonly GuildContext _db;
-		public UpdateGuildModConfigHandler(GuildContext db) => _db = db;
+    public record UpdateGuildModConfigRequest : IRequest<GuildModConfig?>
+    {
+        public UpdateGuildModConfigRequest(ulong guildId) => GuildId = guildId;
+        public ulong GuildId { get; init; }
 
-		public async Task<Unit> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
-		{
-			var config = await _db.GuildModConfigs
-				.AsNoTracking()
-				.Include(c => c.InfractionSteps)
-				.Include(c => c.AllowedInvites)
-				.FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
-			
-			config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
-			config.AutoEscalateInfractions = request.EscalateInfractions ?? config.AutoEscalateInfractions;
-			config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
-			config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
-			config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
-			config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
-			config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
-			config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
-			config.BlacklistInvites = request.BlacklistInvites ?? config.BlacklistInvites;
-			config.LogMemberJoins = request.LogMembersJoining ?? config.LogMemberJoins;
-			config.LogMemberLeaves = request.LogMembersLeaving ?? config.LogMemberLeaves;
-			config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
-			config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
-			config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
-			config.NamedInfractionSteps = request.AutoModActions ?? config.NamedInfractionSteps;
+        public bool? EscalateInfractions { get; init; }
+        public bool? ScanInvites { get; init; }
+        public bool? BlacklistWords { get; init; }
+        public bool? BlacklistInvites { get; init; }
+        public bool? LogMembersJoining { get; init; }
+        public bool? LogMembersLeaving { get; init; }
+        public bool? UseAggressiveRegex { get; init; }
+        public bool? WarnOnMatchedInvite { get; init; }
+        public bool? DeleteOnMatchedInvite { get; init; }
+        public int? MaxUserMentions { get; init; }
+        public int? MaxRoleMentions { get; init; }
+        public List<Invite>? AllowedInvites { get; init; }
+        public List<InfractionStep>? InfractionSteps { get; init; }
+        public ulong? MuteRoleId { get; init; }
+        public ulong? LoggingChannel { get; init; }
+        public bool? LogMessageChanges { get; init; }
 
-			if (request.InfractionSteps?.Any() ?? false)
-			{
-				_db.RemoveRange(config.InfractionSteps.Except(request.InfractionSteps!));
-				config.InfractionSteps = request.InfractionSteps!;
-			}
+        public Dictionary<string, InfractionStep>? AutoModActions { get; init; }
+    }
 
-			if (request.AllowedInvites?.Any() ?? false)
-			{
-				_db.RemoveRange(config.AllowedInvites.Except(request.AllowedInvites!));
-				config.AllowedInvites = request.AllowedInvites!;
-			}
-			
-			_db.GuildModConfigs.Update(config);
-			await _db.SaveChangesAsync(cancellationToken);
-			
-			return Unit.Value;
-		}
-	}
+    public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfig?>
+    {
+        private readonly GuildContext _db;
+        public UpdateGuildModConfigHandler(GuildContext db) => _db = db;
+
+        public async Task<GuildModConfig?> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
+        {
+            var config = await _db.GuildModConfigs
+                .AsNoTracking()
+                .Include(c => c.InfractionSteps)
+                .Include(c => c.AllowedInvites)
+                .FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
+
+            config.MuteRoleId = request.MuteRoleId ?? config.MuteRoleId;
+            config.AutoEscalateInfractions = request.EscalateInfractions ?? config.AutoEscalateInfractions;
+            config.LogMessageChanges = request.LogMessageChanges ?? config.LogMessageChanges;
+            config.MaxUserMentions = request.MaxUserMentions ?? config.MaxUserMentions;
+            config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
+            config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
+            config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
+            config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
+            config.BlacklistInvites = request.BlacklistInvites ?? config.BlacklistInvites;
+            config.LogMemberJoins = request.LogMembersJoining ?? config.LogMemberJoins;
+            config.LogMemberLeaves = request.LogMembersLeaving ?? config.LogMemberLeaves;
+            config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
+            config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
+            config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
+            config.NamedInfractionSteps = request.AutoModActions ?? config.NamedInfractionSteps;
+
+            if (request.InfractionSteps?.Any() ?? false)
+            {
+                _db.RemoveRange(config.InfractionSteps.Except(request.InfractionSteps!));
+                config.InfractionSteps = request.InfractionSteps!;
+            }
+
+            if (request.AllowedInvites?.Any() ?? false)
+            {
+                _db.RemoveRange(config.AllowedInvites.Except(request.AllowedInvites!));
+                config.AllowedInvites = request.AllowedInvites!;
+            }
+
+            var updatedEntry = _db.GuildModConfigs.Update(config);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return updatedEntry.Entity;
+        }
+    }
 }
