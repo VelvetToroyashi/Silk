@@ -469,6 +469,35 @@ namespace Silk.Core.Commands
 					}
 
 					[Command]
+					public async Task Add(CommandContext ctx, [RemainingText] params string[] invites)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+						
+						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						
+						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						
+						foreach (var inviteCode in invites)
+						{
+							DiscordInvite inviteObj;
+							try
+							{
+								inviteObj = await ctx.Client.GetInviteByCodeAsync(inviteCode.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Last());
+							}
+							catch { continue; }
+							
+							if (inviteObj.Guild.Id == ctx.Guild.Id)	
+								continue;
+							
+							config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+						}
+						
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+					}
+					
+					[Command]
 					public async Task Remove(CommandContext ctx, string invite)
 					{
 						DiscordInvite inviteObj;
