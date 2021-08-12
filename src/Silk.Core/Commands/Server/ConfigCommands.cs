@@ -463,7 +463,7 @@ namespace Silk.Core.Commands
 						if (!res) return;
 
 						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
 
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
 					}
