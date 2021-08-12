@@ -1,10 +1,12 @@
 ﻿using System.IO;
-using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Core.Utilities.HttpClient;
 using SkiaSharp;
 using Svg.Skia;
 
@@ -13,6 +15,9 @@ namespace Silk.Core.Commands.General
 	[Category(Categories.General)]
 	public class EnlargeCommand : BaseCommandModule
 	{
+		private readonly IHttpClientFactory _httpClientFactory;
+		public EnlargeCommand(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+
 		[Command("enlarge")] [Aliases("enbiggen", "emoji", "emote")]
 		[Description("Displays a larger version of the provided emoji or custom emote.")]
 		public async Task Enlarge(CommandContext ctx, DiscordEmoji emoji)
@@ -32,10 +37,10 @@ namespace Silk.Core.Commands.General
 			{
 				await ctx.TriggerTypingAsync();
 
-				embed.WithFooter(emoji.GetDiscordName().Replace(":", ""));
+				embed.WithFooter(Regex.Replace(emoji.GetDiscordName(), "(?<emote>:[A-z_-0-9])", "(?<emote>)"));
 				embed.WithImageUrl("attachment://emote.jpeg");
 
-				Stream? image = RenderEmoji(emoji.Name);
+				Stream? image = await RenderEmojiAsync(emoji.Name);
 
 				DiscordMessageBuilder? message = new DiscordMessageBuilder()
 					.WithEmbed(embed)
@@ -46,15 +51,14 @@ namespace Silk.Core.Commands.General
 			}
 		}
 
-		private Stream RenderEmoji(string unicodeEmoji)
+		private async Task<Stream> RenderEmojiAsync(string unicodeEmoji)
 		{
-
 			Stream svgStream,
 				imageStream = new MemoryStream();
 
 			var emojiHex = char.ConvertToUtf32(unicodeEmoji, 0).ToString("X4");
 			var url = $"https://twemoji.maxcdn.com/2/svg/{emojiHex.ToLower()}.svg";
-			svgStream = new WebClient().OpenRead(url);
+			svgStream = await _httpClientFactory.CreateSilkClient().GetStreamAsync(url);
 
 			var svg = new SKSvg();
 			svg.Load(svgStream);
