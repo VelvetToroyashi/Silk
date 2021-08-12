@@ -50,6 +50,7 @@ namespace Silk.Core.Commands
 			ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
 		
 		[Group("view")]
+		[RequireFlag(UserFlag.Staff)]
 		[Description("View the current config, or specify a sub-command to see detailed information.")]
 		public sealed class ViewConfigModule : BaseCommandModule
 		{
@@ -59,6 +60,7 @@ namespace Silk.Core.Commands
 			private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
 			
 			[GroupCommand]
+			[RequireFlag(UserFlag.Staff)]
 			[Description("View the current config.")]
 			public async Task View(CommandContext ctx)
 			{
@@ -245,6 +247,7 @@ namespace Silk.Core.Commands
 		}
 
 		[Group("edit")]
+		[RequireFlag(UserFlag.Staff)]
 		[Description("Edit various settings through these commands:")]
 		public sealed class EditConfigModule : BaseCommandModule
 		{
@@ -264,6 +267,7 @@ namespace Silk.Core.Commands
 			
 			
 			[Command]
+			[RequireFlag(UserFlag.Staff)]
 			[Description("Edit the mute role to give to members when muting. If this isn't configured, one will be generated as necessary.")]
 			public async Task Mute(CommandContext ctx, DiscordRole role)
 			{
@@ -408,6 +412,7 @@ namespace Silk.Core.Commands
 
 			[Group("invite")]
 			[Aliases("invites", "inv")]
+			[RequireFlag(UserFlag.Staff)]
 			[Description("Invite related settings.")]
 			public sealed class EditInviteModule : BaseCommandModule
 			{
@@ -415,6 +420,7 @@ namespace Silk.Core.Commands
 				public EditInviteModule(IMediator mediator) => _mediator = mediator;
 
 				[Group("whitelist")]
+				[RequireFlag(UserFlag.Staff)]
 				[Description("Invite whitelist related settings.")]
 				public sealed class EditInviteWhitelistModule : BaseCommandModule
 				{
@@ -595,6 +601,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Group("log")]
+			[RequireFlag(UserFlag.Staff)]
 			[Description("Logging related settings.")]
 			public sealed class EditLogModule : BaseCommandModule
 			{
@@ -664,6 +671,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Group("infractions")]
+			[RequireFlag(UserFlag.Staff)]
 			[Aliases("infraction", "inf")]
 			[Description("Infraction related settings.")]
 			public sealed class EditInfractionModule : BaseCommandModule
