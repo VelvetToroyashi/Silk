@@ -785,7 +785,7 @@ namespace Silk.Core.Commands
 
 				[Command]
 				[Description("Adds or overwrites an action for automod. \nTo see available options, use `config view automod-options`" +
-				             "Available options: Ignore, Kick, Ban, SoftBan, Mute, Strike\n\n" +
+				             "Available punishments: Ignore, Kick, Ban, SoftBan, Mute, Strike\n\n" +
 				             "**A note about AutoMod**: If `Ignore` is chosen, AutoMod will add a note to the user. Notes do not notify the user.")]
 				public async Task Add(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
 				{
