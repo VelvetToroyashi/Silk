@@ -20,20 +20,13 @@ namespace Silk.Core.Data.MediatR.Guilds
     public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, Guild>
     {
         private readonly GuildContext _db;
-
-
-        public GetOrCreateGuildHandler(GuildContext db)
-        {
-            _db = db;
-
-        }
+        public GetOrCreateGuildHandler(GuildContext db) => _db = db;
 
         public async Task<Guild> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
         {
             Guild? guild = await _db.Guilds
                 .Include(g => g.Users)
                 .Include(g => g.Infractions)
-                .Include(g => g.Configuration)
                 .AsSplitQuery()
                 .OrderBy(g => g.Id)
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);

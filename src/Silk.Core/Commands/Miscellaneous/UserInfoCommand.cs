@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -13,7 +11,6 @@ using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
-using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -45,22 +42,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				.AddField("Mentionable:", role.IsMentionable.ToString())
 				.AddField("Permissions:", role.Permissions.ToPermissionString())
 				.WithColor(role.Color);
-			await using Stream? str = GetRoleColorStream();
-			await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("roleColor.png", str));
-
-			Stream GetRoleColorStream()
-			{
-				var str = new MemoryStream();
-				using var bmp = new Bitmap(1280, 256);
-				using Graphics? gfx = Graphics.FromImage(bmp);
-
-				DiscordColor r = role.Color;
-				gfx.Clear(Color.FromArgb(r.R, r.G, r.B));
-
-				bmp.Save(str, ImageFormat.Png);
-				str.Position = 0;
-				return str;
-			}
+			await ctx.RespondAsync(m => m.WithEmbed(embed));
 		}
 
 		[Command("info")]
