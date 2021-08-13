@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,27 +35,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		private readonly List<Assembly> _pluginAssemblies = new();
 		private readonly List<FileInfo> _pluginFiles = new();
 
-
-		public PluginLoader LoadPluginFiles(IServiceCollection services)
+		/// <summary>
+		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
+		/// </summary>
+		public PluginLoader LoadPluginFiles()
 		{
-			var pluginFiles = Directory.GetFiles("./plugins", "*.Plugin.dll");
+			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
 			
 			_pluginFiles.AddRange(pluginFiles.Select(f => new FileInfo(f)));
 			_pluginAssemblies.AddRange(_pluginFiles.Select(f => Assembly.LoadFile(f.FullName)));
 
-			
 			return this;
 		}
 		
+		/// <summary>
+		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFiles"/>.
+		/// </summary>
+		/// <param name="services">The service container to add services to.</param>
 		public PluginLoader InstantiatePluginServices(IServiceCollection services)
 		{
 			foreach (var plugin in _pluginAssemblies)
 				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(InjectionRegistry))))
-					services.AddSingleton(typeof(InjectionRegistry), t);
+					(Activator.CreateInstance(t) as InjectionRegistry)!.ConfigureServices(services);
 
 			return this;
 		}
 
+		/// <summary>
+		/// Adds the <see cref="Plugin"/>s to the container.
+		/// </summary>
+		/// <param name="services">The service container to add plugins to.</param>
 		public PluginLoader AddPlugins(IServiceCollection services)
 		{
 			foreach (var asm in _pluginAssemblies)

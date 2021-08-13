@@ -61,7 +61,8 @@ namespace Silk.Core
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
 
 			var plugins = builtBuilder.Services.GetServices<Plugin>();
-
+				
+			
 			foreach (var plugin in plugins)
 				await plugin.LoadPlugin();
 			
@@ -228,7 +229,7 @@ namespace Silk.Core
 				services.AddSingleton(_ => pluginLoader);
 
 				pluginLoader
-					.LoadPluginFiles(services)
+					.LoadPluginFiles()
 					.InstantiatePluginServices(services)
 					.AddPlugins(services);
 				
