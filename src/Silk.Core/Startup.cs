@@ -37,11 +37,14 @@ using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
+using Unity;
+using YumeChan.PluginBase;
 
 namespace Silk.Core
 {
 	public sealed class Startup
 	{
+		private static IUnityContainer _container = new UnityContainer();
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -56,6 +59,12 @@ namespace Silk.Core
 
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
+
+			var plugins = builtBuilder.Services.GetServices<Plugin>();
+
+			foreach (var plugin in plugins)
+				await plugin.LoadPlugin();
+			
 			await builtBuilder.RunAsync().ConfigureAwait(false);
 		}
 
@@ -147,6 +156,7 @@ namespace Silk.Core
 
 				services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
+				
 				services.AddHttpClient(StringConstants.HttpClientName,
 					client => client.DefaultRequestHeaders.UserAgent.ParseAdd(
 						$"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
@@ -213,6 +223,15 @@ namespace Silk.Core
 
 				services.AddSingleton<UptimeService>();
 				//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
+
+				var pluginLoader = new PluginLoader();
+				services.AddSingleton(_ => pluginLoader);
+
+				pluginLoader
+					.LoadPluginFiles(services)
+					.InstantiatePluginServices(services)
+					.AddPlugins(services);
+				
 			});
 		}
 
