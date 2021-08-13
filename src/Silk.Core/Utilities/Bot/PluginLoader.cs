@@ -30,8 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	
 	public sealed class PluginLoader
 	{
-		public IReadOnlyList<Plugin> Plugins => _plugins;
-		private readonly List<Plugin> _plugins = new();
 		private readonly List<Assembly> _pluginAssemblies = new();
 		private readonly List<FileInfo> _pluginFiles = new();
 
@@ -40,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// </summary>
 		public PluginLoader LoadPluginFiles()
 		{
-			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
+			var pluginFiles = Directory.GetFiles("./plugins", $"*Plugin{(OperatingSystem.IsWindows() ? "*.dll" : "*")}");
 			
 			_pluginFiles.AddRange(pluginFiles.Select(f => new FileInfo(f)));
 			_pluginAssemblies.AddRange(_pluginFiles.Select(f => Assembly.LoadFile(f.FullName)));
@@ -70,7 +68,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			foreach (var asm in _pluginAssemblies)
 				foreach (var t in asm.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
 					services.AddSingleton(typeof(Plugin), t);
-
+				
 			return this;
 		}
 	}

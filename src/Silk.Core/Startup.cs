@@ -38,7 +38,6 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Unity;
-using YumeChan.PluginBase;
 
 namespace Silk.Core
 {
@@ -60,12 +59,6 @@ namespace Silk.Core
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
 
-			var plugins = builtBuilder.Services.GetServices<Plugin>();
-				
-			
-			foreach (var plugin in plugins)
-				await plugin.LoadPlugin();
-			
 			await builtBuilder.RunAsync().ConfigureAwait(false);
 		}
 
@@ -226,6 +219,7 @@ namespace Silk.Core
 				//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 
 				var pluginLoader = new PluginLoader();
+				services.AddSingleton<PluginLoaderService>();
 				services.AddSingleton(_ => pluginLoader);
 
 				pluginLoader

@@ -12,6 +12,7 @@ using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.EventHandlers.Messages;
+using Silk.Core.Services.Bot;
 using Silk.Core.SlashCommands;
 using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
@@ -24,6 +25,7 @@ namespace Silk.Core
 	public sealed class Main : IHostedService
 	{
 		private readonly ILogger<Main> _logger;
+		private readonly PluginLoaderService _plugins;
 		private readonly DiscordShardedClient _shardClient;
 		private readonly BotExceptionHandler _handler;
 		private readonly CommandHandler _commandHandler;
@@ -35,13 +37,15 @@ namespace Silk.Core
 			EventHelper e,
 			BotExceptionHandler handler,
 			CommandHandler commandHandler,
-			SlashCommandExceptionHandler slashExceptionHandler) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+			SlashCommandExceptionHandler slashExceptionHandler, 
+			PluginLoaderService plugins) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
 		{
 			// And that's all it needs, since it subs to events in it's ctor.
 			_logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
 			_handler = handler;
 			_commandHandler = commandHandler;
 			_slashExceptionHandler = slashExceptionHandler;
+			_plugins = plugins;
 			_shardClient = shardClient;
 			_ = e;
 		}
@@ -54,11 +58,14 @@ namespace Silk.Core
 			await InitializeClientExtensions();
 			_logger.LogInformation("Initialized Client");
 
+			await _plugins.LoadPluginsAsync();
+			
 			await InitializeCommandsNextAsync();
 			await InitializeSlashCommandsAsync();
 
+			
 			await _handler.SubscribeToEventsAsync();
-
+			
 			_logger.LogDebug("Connecting to Discord Gateway");
 			await _shardClient.StartAsync();
 			_logger.LogInformation("Connected to Discord Gateway as {Username}#{Discriminator}", _shardClient.CurrentUser.Username, _shardClient.CurrentUser.Discriminator);
@@ -115,7 +122,9 @@ namespace Silk.Core
 			t.Stop();
 			int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
-			_logger.LogDebug("Registered {Commands} Commands for {Shards} Shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
+			_logger.LogDebug("Registered {Commands} core commands for {Shards} shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
+
+			await _plugins.RegisterPluginCommands();
 			_logger.LogInformation("Initialized Command Framework");
 		}
 	}
