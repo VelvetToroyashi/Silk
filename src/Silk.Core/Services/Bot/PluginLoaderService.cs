@@ -97,7 +97,7 @@ namespace Silk.Core.Services.Bot
 			var afterCount = cnext[0].RegisteredCommands.Count;
 
 			if (afterCount > beforeCount)
-				_logger.LogInformation("Registered {TotalCommands} from {Plugins} plugins. Execution time: {Time} ms", afterCount - beforeCount, _plugins.Count(), sw.ElapsedMilliseconds);
+				_logger.LogInformation("Registered {TotalCommands} total commands from {Plugins} plugins. Execution time: {Time} ms", afterCount - beforeCount, _plugins.Count(), sw.ElapsedMilliseconds);
 		}
 	}
 }
