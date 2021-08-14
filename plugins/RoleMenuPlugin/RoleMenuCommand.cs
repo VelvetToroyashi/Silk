@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -27,8 +29,9 @@ namespace RoleMenuPlugin
 			}
 			
 			var interactivity = ctx.Client.GetInteractivity();
-			
-			
+
+			var roles = new List<DiscordRole>();
+			var emoji = new List<DiscordComponentEmoji>();
 
 			var addRoleButton = new DiscordButtonComponent(ButtonStyle.Primary, "add role", "Add a role");
 			var addEmojiButton = new DiscordButtonComponent(ButtonStyle.Primary, "add emoji", "Add an emoji");
@@ -39,7 +42,6 @@ namespace RoleMenuPlugin
 				.SendMessageAsync(m => m.WithContent("Role menu setup: What would you like to do?")
 					.AddComponents(addEmojiButton, addRoleButton)
 					.AddComponents(completeButton, exitButton));
-			
 			
 			while (true)
 			{
@@ -60,6 +62,7 @@ namespace RoleMenuPlugin
 				if (res.Result.Id == addEmojiButton.CustomId)
 				{
 					addRoleButton.Disable();
+					addEmojiButton.Disable();
 					
 					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
 						.WithContent(res.Result.Message.Content)
@@ -67,20 +70,74 @@ namespace RoleMenuPlugin
 						.AddComponents(completeButton, exitButton));
 
 					var emojiInput = await GetEmojiInputAsync(ctx.Client, message, ctx.User, interactivity);
+
+					if (emojiInput is null)
+						continue;
 					
-					
-					
+					emoji.Add(emojiInput);
+					addRoleButton.Enable();
 				}
 				else
 				{
+					addRoleButton.Disable();
 					addEmojiButton.Disable();
+					
 					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
 						.WithContent(res.Result.Message.Content)
 						.AddComponents(addEmojiButton, addRoleButton)
 						.AddComponents(completeButton, exitButton));
+
+					var roleInput = await GetRoleInputAsync(ctx, message, ctx.User, interactivity);
+					
+					addRoleButton.Enable();
+					addEmojiButton.Enable();
 				}
 			}
 		}
+		
+		private async Task<DiscordRole> GetRoleInputAsync(CommandContext ctx, DiscordMessage message, DiscordUser user, InteractivityExtension interactivity)
+		{
+			var contentRestore = message.Content;
+			var componentRestore = message.Components;
+			await message.ModifyAsync("What role would you like to add? Type cancel to cancel.");
+			
+			var result = await interactivity.WaitForMessageAsync(m => m.Author == user);
+
+			if (string.Equals(result.Result.Content, "cancel", StringComparison.OrdinalIgnoreCase))
+			{
+				await RevertAsync();
+				return null;
+			}
+			else
+			{
+				DiscordRole role = null;
+				var roleParser = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
+				var res = await roleParser.ConvertAsync(result.Result.Content, ctx);
+
+				if (!res.HasValue)
+				{
+					await RevertAsync();
+					return null;
+				}
+
+				if (res.Value.Position >= ctx.Guild.CurrentMember.Roles.Last().Position)
+				{
+					await message.ModifyAsync("That role is too high! I can't give it out.");
+					await Task.Delay(3000);
+					await RevertAsync();
+					return null;
+				}
+
+				return res.Value;
+			}
+
+			Task RevertAsync() => message.ModifyAsync(m => m
+				.WithContent(contentRestore)
+				.AddComponents(componentRestore.First().Components)
+				.AddComponents(componentRestore.Last().Components));
+		}
+		
+		
 		private async Task<DiscordComponentEmoji> GetEmojiInputAsync(DiscordClient client, DiscordMessage message, DiscordUser user, InteractivityExtension interactivity)
 		{
 			var contentRestore = message.Content;
