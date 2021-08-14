@@ -75,22 +75,17 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
 			foreach (DiscordMember member in MemberQueue)
 			{
-				GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id))!;
-
-				if (config.GreetingOption is GreetingOption.GreetOnJoin)
-				{
-					await GreetMemberAsync(member, config);
-					MemberQueue.Remove(member);
-					continue;
-				}
-
+				GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id));
+				
 				if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true)
 					continue;
 
 				if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole))
 					continue;
-				await GreetMemberAsync(member, config);
+				
 				MemberQueue.Remove(member);
+				await GreetMemberAsync(member, config);
+				
 			}
 		}
 
