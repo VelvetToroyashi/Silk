@@ -16,10 +16,10 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
 {
-	public sealed class RemindCommands : SlashCommandModule
+	public sealed class RemindCommands : ApplicationCommandModule
 	{
 		[SlashCommandGroup("remind", "Reminder related commands!")]
-		public sealed class ReminderCommands : SlashCommandModule
+		public sealed class ReminderCommands : ApplicationCommandModule
 		{
 			private readonly ReminderService _reminders;
 			private readonly DiscordShardedClient _client;

@@ -18,10 +18,10 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.SlashCommands.Commands
 {
-	public class TagCommands : SlashCommandModule
+	public class TagCommands : ApplicationCommandModule
 	{
 		[SlashCommandGroup("tag", "Tag related commands!")]
-		public class TagCommandGroup : SlashCommandModule
+		public class TagCommandGroup : ApplicationCommandModule
 		{
 			private readonly string[] _reservedWords =
 			{

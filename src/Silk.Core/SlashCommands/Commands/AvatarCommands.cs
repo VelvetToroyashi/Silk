@@ -13,7 +13,7 @@ namespace Silk.Core.SlashCommands.Commands
 		User
 	}
 
-	public class AvatarCommands : SlashCommandModule
+	public class AvatarCommands : ApplicationCommandModule
 	{
 		[SlashCommand("avatar", "View someone's avatar!")]
 		public async Task Avatar(

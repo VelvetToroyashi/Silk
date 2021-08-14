@@ -44,7 +44,7 @@
         <PackageReference Include="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00962" />
         <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002" />
         <PackageReference Include="Humanizer" Version="2.10.1" />
-        <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.7.6" />
+        <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.0" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
         <PackageReference Include="MediatR" Version="9.0.0" />

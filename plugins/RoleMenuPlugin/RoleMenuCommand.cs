@@ -1,9 +1,13 @@
-﻿using System.Threading;
+﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 
 namespace RoleMenuPlugin
@@ -23,19 +27,21 @@ namespace RoleMenuPlugin
 			}
 			
 			var interactivity = ctx.Client.GetInteractivity();
+			
+			
 
 			var addRoleButton = new DiscordButtonComponent(ButtonStyle.Primary, "add role", "Add a role");
 			var addEmojiButton = new DiscordButtonComponent(ButtonStyle.Primary, "add emoji", "Add an emoji");
-			var completeButton = new DiscordButtonComponent(ButtonStyle.Success, "complete", "Finish", false, new("✔"));
+			var completeButton = new DiscordButtonComponent(ButtonStyle.Success, "complete", "Finish", true, new("✔"));
 			var exitButton = new DiscordButtonComponent(ButtonStyle.Danger, "quit", "Quit", false, new("❌"));
 			
 			var message = await ctx.Channel
 				.SendMessageAsync(m => m.WithContent("Role menu setup: What would you like to do?")
 					.AddComponents(addEmojiButton, addRoleButton)
 					.AddComponents(completeButton, exitButton));
-
 			
-			while (false)
+			
+			while (true)
 			{
 				var res = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
 				if (res.Result.Id == exitButton.CustomId)
@@ -44,8 +50,88 @@ namespace RoleMenuPlugin
 					await res.Result.Interaction.DeleteOriginalResponseAsync();
 					return;
 				}
-				
+
+				if (res.Result.Id == completeButton.CustomId)
+				{
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+					break;
+				}
+
+				if (res.Result.Id == addEmojiButton.CustomId)
+				{
+					addRoleButton.Disable();
+					
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+						.WithContent(res.Result.Message.Content)
+						.AddComponents(addEmojiButton, addRoleButton)
+						.AddComponents(completeButton, exitButton));
+
+					var emojiInput = await GetEmojiInputAsync(ctx.Client, message, ctx.User, interactivity);
+					
+					
+					
+				}
+				else
+				{
+					addEmojiButton.Disable();
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+						.WithContent(res.Result.Message.Content)
+						.AddComponents(addEmojiButton, addRoleButton)
+						.AddComponents(completeButton, exitButton));
+				}
 			}
 		}
+		private async Task<DiscordComponentEmoji> GetEmojiInputAsync(DiscordClient client, DiscordMessage message, DiscordUser user, InteractivityExtension interactivity)
+		{
+			var contentRestore = message.Content;
+			var componentRestore = message.Components;
+			await message.ModifyAsync("What emoji would you like to add? Type cancel to cancel.");
+
+			var result = await interactivity.WaitForMessageAsync(m => m.Author == user);
+
+			if (string.Equals(result.Result.Content, "cancel", StringComparison.OrdinalIgnoreCase))
+			{
+				await message.ModifyAsync(m => m
+					.WithContent(contentRestore)
+					.AddComponents(componentRestore.First().Components)
+					.AddComponents(componentRestore.Last().Components));
+				return null;
+			}
+			else
+			{
+				DiscordComponentEmoji emoji = null;
+				
+				if (DiscordEmoji.TryFromName(client, result.Result.Content, true, out var emj))
+					emoji = new(emj);
+				
+				if (Regex.Match(result.Result.Content, @"^\<a?:\S:(\d+)\>") is { Success: true } match) 
+					emoji = new(ulong.Parse(match.Value));
+				
+				var yesButton = new DiscordButtonComponent(ButtonStyle.Success, "y", "Yes");
+				var noButton = new DiscordButtonComponent(ButtonStyle.Danger, "n", "No");
+
+				await message.ModifyAsync(m => m.WithContent("Are you sure?").AddComponents(yesButton, noButton));
+
+				var buttonResult = await message.WaitForButtonAsync(CancellationToken.None);
+				await buttonResult.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				
+				
+				if (buttonResult.Result.Id == yesButton.CustomId)
+				{
+					return emoji;
+				}
+				else
+				{
+					await message.ModifyAsync(m => m
+						.WithContent(contentRestore)
+						.AddComponents(componentRestore.First().Components)
+						.AddComponents(componentRestore.Last().Components));
+					return null;
+				}
+			}
+		}
+
+
+
 	}
 }
