@@ -45,7 +45,6 @@ namespace Silk.Core
 {
 	public sealed class Startup
 	{
-		private static IUnityContainer _container = new UnityContainer();
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -57,7 +56,7 @@ namespace Silk.Core
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
 			DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
-
+			
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
 
@@ -225,10 +224,7 @@ namespace Silk.Core
 					services.AddSingleton<PluginLoaderService>();
 					services.AddSingleton(_ => pluginLoader);
 
-					pluginLoader
-						.LoadPluginFiles()
-						.InstantiatePluginServices(services)
-						.AddPlugins(services);
+					
 					
 					container.AddExtension(new LoggingExtension());
 					services.AddLogging(l =>
@@ -236,6 +232,8 @@ namespace Silk.Core
 						l.AddSerilog();
 						AddLogging(context);
 					});
+
+					container.AddExtension(new Diagnostic());
 					
 					container.AddServices(services); 
 				});

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Unity;
+using Unity.Microsoft.DependencyInjection;
 using YumeChan.PluginBase;
 
 namespace Silk.Core.Utilities.Bot
@@ -30,11 +33,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	/// <summary>
 	/// A helper class that loads and instantiates plugins from assemblies located in the plugins folder.
 	/// </summary>
-	public sealed class PluginLoader
+	public sealed class PluginLoader : IEnumerable<Plugin>
 	{
 		// Plugin instances are held in PluginLoaderService.cs //
 		private readonly List<Assembly> _pluginAssemblies = new();
 		private readonly List<FileInfo> _pluginFiles = new();
+
+		public IReadOnlyList<Plugin> Plugins => _plugins;
+		private readonly List<Plugin> _plugins = new();
 
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
@@ -52,27 +58,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// <summary>
 		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFiles"/>.
 		/// </summary>
-		/// <param name="services">The service container to add services to.</param>
-		public PluginLoader InstantiatePluginServices(IServiceCollection services)
+		/// <param name="container">The service container to add services to.</param>
+		public PluginLoader InstantiatePluginServices(IUnityContainer container)
 		{
 			foreach (var plugin in _pluginAssemblies)
 				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(InjectionRegistry))))
-					(Activator.CreateInstance(t) as InjectionRegistry)!.ConfigureServices(services);
+				{
+					var services = (container.Resolve(t) as InjectionRegistry)!.ConfigureServices(new ServiceCollection());
+					
+					if (services is not null)
+						container.AddServices(services);
+				}
 
 			return this;
 		}
 
 		/// <summary>
-		/// Adds the <see cref="Plugin"/>s to the container.
+		/// Instantiates plugins, but does not start them.
 		/// </summary>
-		/// <param name="services">The service container to add plugins to.</param>
-		public PluginLoader AddPlugins(IServiceCollection services)
+		/// <param name="container">The service container to add plugins to.</param>
+		public PluginLoader AddPlugins(IUnityContainer container)
 		{
 			foreach (var asm in _pluginAssemblies)
 				foreach (var t in asm.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
-					services.AddSingleton(typeof(Plugin), t);
+				{
+					var plugin = container.Resolve(t) as Plugin;
+					container.RegisterInstance(typeof(Plugin), plugin);
+				
+					_plugins.Add(plugin!);
+				}
 				
 			return this;
 		}
+		
+		public IEnumerator<Plugin> GetEnumerator() => _plugins.GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 }

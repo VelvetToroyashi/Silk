@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Utilities.Bot;
+using Unity;
 using YumeChan.PluginBase;
 
 namespace Silk.Core.Services.Bot
@@ -17,13 +19,15 @@ namespace Silk.Core.Services.Bot
 	{
 		private readonly ILogger<PluginLoaderService> _logger;
 		private readonly DiscordShardedClient _client;
-		private readonly IEnumerable<Plugin> _plugins;
+		private readonly PluginLoader _plugins;
+		private readonly IUnityContainer _container;
 
-		public PluginLoaderService(ILogger<PluginLoaderService> logger, IEnumerable<Plugin> plugins, DiscordShardedClient client)
+		public PluginLoaderService(ILogger<PluginLoaderService> logger, PluginLoader plugins, DiscordShardedClient client, IUnityContainer container)
 		{
 			_logger = logger;
 			_plugins = plugins;
 			_client = client;
+			_container = container;
 		}
 		
 		/// <summary>
@@ -34,6 +38,11 @@ namespace Silk.Core.Services.Bot
 		/// <returns>A collection of plugins that failed to load (or unload, if they failed to load.)</returns>
 		public async Task<IEnumerable<(Plugin plugin, Exception exception)>> LoadPluginsAsync()
 		{
+			_plugins
+				.LoadPluginFiles()
+				.InstantiatePluginServices(_container)
+				.AddPlugins(_container);
+			
 			var failedPlugins = new List<(Plugin, Exception)>();
 			foreach (var plugin in _plugins)
 			{
