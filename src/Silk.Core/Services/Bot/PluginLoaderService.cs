@@ -24,7 +24,6 @@ namespace Silk.Core.Services.Bot
 			_logger = logger;
 			_plugins = plugins;
 			_client = client;
-
 		}
 		
 		/// <summary>
@@ -41,6 +40,7 @@ namespace Silk.Core.Services.Bot
 				try
 				{
 					await plugin.LoadPlugin();
+					_logger.LogInformation("Loaded {Plugin} v{Version}", plugin.PluginDisplayName, plugin.PluginVersion);
 				}
 				catch (Exception e)
 				{
