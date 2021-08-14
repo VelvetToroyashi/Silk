@@ -52,7 +52,7 @@
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0"/>
         <PackageReference Include="DSharpPlus.VoiceNext" Version="4.1.0-nightly-00863"/>
         <PackageReference Include="FluentAssertions" Version="6.0.0-alpha0002"/>
-        <PackageReference Include="Humanizer" Version="2.10.1"/>
+        <PackageReference Include="Humanizer" Version="2.11.10"/>
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2"/>
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2"/>
         <PackageReference Include="MediatR" Version="9.0.0"/>
