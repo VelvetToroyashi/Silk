@@ -38,6 +38,8 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Unity;
+using Unity.Microsoft.DependencyInjection;
+using Unity.Microsoft.Logging;
 
 namespace Silk.Core
 {
@@ -49,8 +51,8 @@ namespace Silk.Core
 			// Make Generic Host here. //
 			IHostBuilder builder = CreateBuilder();
 
-			AddLogging(builder);
 			ConfigureServices(builder);
+
 
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
@@ -104,130 +106,139 @@ namespace Silk.Core
 			return builder;
 		}
 
-		private static void AddLogging(IHostBuilder host)
+		private static void AddLogging(HostBuilderContext host)
 		{
-			host.ConfigureLogging((builder, _) =>
-				{
-					LoggerConfiguration? logger = new LoggerConfiguration()
-						.WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
-						.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
-						.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-						.MinimumLevel.Override("DSharpPlus", LogEventLevel.Error);
+			LoggerConfiguration? logger = new LoggerConfiguration()
+				.WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
+				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
+				.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Error);
 
-					SilkConfigurationOptions? configOptions = builder.Configuration.GetSilkConfigurationOptionsFromSection();
-					Log.Logger = configOptions.LogLevel switch
-					{
-						"All" => logger.MinimumLevel.Verbose().CreateLogger(),
-						"Info" => logger.MinimumLevel.Information().CreateLogger(),
-						"Debug" => logger.MinimumLevel.Debug().CreateLogger(),
-						"Warning" => logger.MinimumLevel.Warning().CreateLogger(),
-						"Error" => logger.MinimumLevel.Error().CreateLogger(),
-						"Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
-						_ => logger.MinimumLevel.Verbose().CreateLogger()
-					};
-					Log.Logger.ForContext(typeof(Startup)).Information("Logging Initialized!");
-				})
-				.UseSerilog();
+			SilkConfigurationOptions? configOptions = host.Configuration.GetSilkConfigurationOptionsFromSection();
+			Log.Logger = configOptions.LogLevel switch
+			{
+				"All" => logger.MinimumLevel.Verbose().CreateLogger(),
+				"Info" => logger.MinimumLevel.Information().CreateLogger(),
+				"Debug" => logger.MinimumLevel.Debug().CreateLogger(),
+				"Warning" => logger.MinimumLevel.Warning().CreateLogger(),
+				"Error" => logger.MinimumLevel.Error().CreateLogger(),
+				"Panic" => logger.MinimumLevel.Fatal().CreateLogger(),
+				_ => logger.MinimumLevel.Verbose().CreateLogger()
+			};
+			Log.Logger.ForContext(typeof(Startup)).Information("Logging Initialized!");
 		}
 
 		private static IHostBuilder ConfigureServices(IHostBuilder builder, bool addServices = true)
 		{
-			return builder.ConfigureServices((context, services) =>
-			{
-				SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+			return builder
+				.UseSerilog()
+				.UseUnityServiceProvider()
+				.ConfigureLogging(l => l.ClearProviders())
+				.ConfigureContainer<IUnityContainer>((context, container) =>
+				{
+					var services = new ServiceCollection();
+					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
-				AddSilkConfigurationOptions(services, context.Configuration);
-				AddDatabases(services, silkConfig.Persistence);
+					AddSilkConfigurationOptions(services, context.Configuration);
+					AddDatabases(services, silkConfig.Persistence);
 
-				if (!addServices) return;
+					if (!addServices) return;
 
-				if (silkConfig.Emojis?.EmojiIds is not null)
-					silkConfig.Emojis.PopulateEmojiConstants();
+					if (silkConfig.Emojis?.EmojiIds is not null)
+						silkConfig.Emojis.PopulateEmojiConstants();
 
-				services.AddScoped(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
+					services.AddTransient(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
-				services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
+					services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
 
-				services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
+					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
-				
-				services.AddHttpClient(StringConstants.HttpClientName,
-					client => client.DefaultRequestHeaders.UserAgent.ParseAdd(
-						$"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
+					
+					services.AddHttpClient(StringConstants.HttpClientName,
+						client => client.DefaultRequestHeaders.UserAgent.ParseAdd(
+							$"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
 
-				services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
+					services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
 
-				services.AddSingleton<GuildEventHandler>();
+					services.AddSingleton<GuildEventHandler>();
 
-				#region Services
+					#region Services
 
-				services.AddSingleton<ConfigService>();
-				services.AddSingleton<MemberGreetingService>();
+					services.AddSingleton<ConfigService>();
+					services.AddSingleton<MemberGreetingService>();
 
-				#endregion
+					#endregion
 
-				#region AutoMod
+					#region AutoMod
 
-				services.AddSingleton<AutoModMuteApplier>();
-				services.AddSingleton<AntiInviteHelper>();
+					services.AddSingleton<AutoModMuteApplier>();
+					services.AddSingleton<AntiInviteHelper>();
 
-				#endregion
-				
-				services.AddSingleton<RoleAddedHandler>();
+					#endregion
+					
+					services.AddSingleton<RoleAddedHandler>();
 
-				services.AddSingleton<MemberRemovedHandler>();
-				services.AddSingleton<RoleRemovedHandler>();
-				services.AddSingleton<BotExceptionHandler>();
-				services.AddSingleton<SlashCommandExceptionHandler>();
-				services.AddSingleton<SerilogLoggerFactory>();
-				services.AddSingleton<MessageRemovedHandler>();
+					services.AddSingleton<MemberRemovedHandler>();
+					services.AddSingleton<RoleRemovedHandler>();
+					services.AddSingleton<BotExceptionHandler>();
+					services.AddSingleton<SlashCommandExceptionHandler>();
+					services.AddSingleton<SerilogLoggerFactory>();
+					services.AddSingleton<MessageRemovedHandler>();
 
 
-				services.AddSingleton<CommandHandler>();
-				services.AddSingleton<MessageAddAntiInvite>();
+					services.AddSingleton<CommandHandler>();
+					services.AddSingleton<MessageAddAntiInvite>();
 
-				services.AddSingleton<EventHelper>();
+					services.AddSingleton<EventHelper>();
 
-				services.AddScoped<IInputService, InputService>();
-				services.AddScoped<IPrefixCacheService, PrefixCacheService>();
-				services.AddSingleton<IInfractionService, InfractionService>();
+					services.AddScoped<IInputService, InputService>();
+					services.AddScoped<IPrefixCacheService, PrefixCacheService>();
+					services.AddSingleton<IInfractionService, InfractionService>();
 
-				services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
+					services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
-				services.AddSingleton<TagService>();
+					services.AddSingleton<TagService>();
 
-				services.AddSingleton<Main>();
-				services.AddHostedService(s => s.GetRequiredService<Main>());
+					services.AddSingleton<Main>();
+					services.AddHostedService(s => s.GetRequiredService<Main>());
 
-				services.AddSingleton<IInfractionService, InfractionService>();
-				services.AddHostedService(s => s.Get<IInfractionService>() as InfractionService);
+					services.AddSingleton<IInfractionService, InfractionService>();
+					services.AddHostedService(s => s.Get<IInfractionService>() as InfractionService);
 
-				// Couldn't figure out how to get the service since AddHostedService adds it as //
-				// IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
-				services.AddSingleton<ReminderService>();
-				services.AddHostedService(b => b.GetRequiredService<ReminderService>());
+					// Couldn't figure out how to get the service since AddHostedService adds it as //
+					// IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
+					services.AddSingleton<ReminderService>();
+					services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 
-				services.AddHostedService<StatusService>();
+					services.AddHostedService<StatusService>();
 
-				services.AddMediatR(typeof(Main));
-				services.AddMediatR(typeof(GuildContext));
+					services.AddMediatR(typeof(Main));
+					services.AddMediatR(typeof(GuildContext));
 
-				services.AddSingleton<GuildEventHandlerService>();
-				services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
+					services.AddSingleton<GuildEventHandlerService>();
+					services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
 
-				services.AddSingleton<UptimeService>();
-				//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
+					services.AddSingleton<UptimeService>();
+					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 
-				var pluginLoader = new PluginLoader();
-				services.AddSingleton<PluginLoaderService>();
-				services.AddSingleton(_ => pluginLoader);
+					var pluginLoader = new PluginLoader();
+					services.AddSingleton<PluginLoaderService>();
+					services.AddSingleton(_ => pluginLoader);
 
-				pluginLoader
-					.LoadPluginFiles()
-					.InstantiatePluginServices(services)
-					.AddPlugins(services);
-				
-			});
+					pluginLoader
+						.LoadPluginFiles()
+						.InstantiatePluginServices(services)
+						.AddPlugins(services);
+					
+					container.AddExtension(new LoggingExtension());
+					services.AddLogging(l =>
+					{
+						l.AddSerilog();
+						AddLogging(context);
+					});
+					
+					container.AddServices(services); 
+				});
 		}
 
 
