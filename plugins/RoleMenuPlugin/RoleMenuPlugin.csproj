@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00962" />
+      <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00962" />
+      <PackageReference Include="MediatR" Version="9.0.0" />
+      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
+      <PackageReference Include="YumeChan.PluginBase" Version="2.3.0" />
+    </ItemGroup>
+
+</Project>
