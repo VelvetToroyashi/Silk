@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// </summary>
 		public PluginLoader LoadPluginFiles()
 		{
+			Directory.CreateDirectory("./plugins");
 			var pluginFiles = Directory.GetFiles("./plugins", $"*Plugin{(OperatingSystem.IsWindows() ? "*.dll" : "*")}");
 			
 			_pluginFiles.AddRange(pluginFiles.Select(f => new FileInfo(f)));
