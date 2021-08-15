@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Unity;
 using Unity.Microsoft.DependencyInjection;
 using YumeChan.PluginBase;
@@ -38,9 +39,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// Plugin instances are held in PluginLoaderService.cs //
 		private readonly List<Assembly> _pluginAssemblies = new();
 		private readonly List<FileInfo> _pluginFiles = new();
-
+		private readonly ILogger<PluginLoader> _logger;
 		public IReadOnlyList<Plugin> Plugins => _plugins;
 		private readonly List<Plugin> _plugins = new();
+		
+		public PluginLoader(ILogger<PluginLoader> logger) => _logger = logger;
 
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
@@ -83,10 +86,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			foreach (var asm in _pluginAssemblies)
 				foreach (var t in asm.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
 				{
-					var plugin = container.Resolve(t) as Plugin;
-					container.RegisterInstance(typeof(Plugin), plugin);
-				
-					_plugins.Add(plugin!);
+					try
+					{
+						var plugin = container.Resolve(t) as Plugin;
+						container.RegisterInstance(typeof(Plugin), plugin);
+
+						_plugins.Add(plugin!);
+					}
+					catch (ResolutionFailedException resex)
+					{
+						_logger.LogError("{Plugin} v{Version} defined as {Assembly} failed to register its services. {Type} was not provided in the container", 
+							t.Name, t.Assembly.GetName().Version!.ToString(3), t.Assembly.Location, resex.TypeRequested);
+					}
 				}
 				
 			return this;
