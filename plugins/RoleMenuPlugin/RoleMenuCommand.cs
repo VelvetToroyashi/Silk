@@ -114,12 +114,12 @@ namespace RoleMenuPlugin
 
 			var initiateButton = new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles!");
 			
-			await channel.SendMessageAsync(m => m
-				.WithContent($"**Role Menu**\nAvailble roles: {string.Join('\n', roles.Select(r => r.Mention))}")
+			message = await channel.SendMessageAsync(m => m
+				.WithContent($"**Role Menu**\nAvailble roles: \n{string.Join('\n', roles.Select(r => r.Mention))}")
 				.WithAllowedMentions(Mentions.None)
 				.AddComponents(initiateButton));
 
-			await FlushAndSaveChangesAsync(null, roles, emoji);
+			await FlushAndSaveChangesAsync(message, roles, emoji);
 		}
 		
 		private async Task FlushAndSaveChangesAsync(DiscordMessage message, List<DiscordRole> roles, List<DiscordComponentEmoji> emoji)
