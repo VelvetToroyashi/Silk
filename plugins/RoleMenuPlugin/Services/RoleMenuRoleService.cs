@@ -50,7 +50,7 @@ namespace RoleMenuPlugin
 				
 				var options = menu.Options
 					.Select(o =>
-						new DiscordSelectComponentOption($"{eventArgs.Guild.Roles[o.RoleId].Name} role", o.RoleId.ToString(CultureInfo.InvariantCulture),
+						new DiscordSelectComponentOption($"{eventArgs.Guild.Roles[o.RoleId].Name}", o.RoleId.ToString(CultureInfo.InvariantCulture),
 							null, roles.Contains(o.RoleId)))
 					.ToArray();
 				
