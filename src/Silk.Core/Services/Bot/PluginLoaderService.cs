@@ -45,11 +45,11 @@ namespace Silk.Core.Services.Bot
 			var fInfo = new FileInfo(pluginName);
 			var pluginAssembly = Assembly.LoadFile(fInfo.FullName);
 
-			var depenencyHandlers = pluginAssembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(InjectionRegistry)));
+			var depenencyHandlers = pluginAssembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler)));
 			var pluginManifests = pluginAssembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin)));
 
 			foreach (var handler in depenencyHandlers)
-				_container.AddServices((_container.Resolve(handler) as InjectionRegistry)!.ConfigureServices(new ServiceCollection()));
+				_container.AddServices((_container.Resolve(handler) as DependencyInjectionHandler)!.ConfigureServices(new ServiceCollection()));
 
 			var plugins = pluginManifests.Select(p => (Plugin)_container.Resolve(p));
 			var failed = await LoadPluginsInternalAsync(plugins).ToListAsync();
@@ -58,7 +58,7 @@ namespace Silk.Core.Services.Bot
 			{
 				foreach (var fail in failed)
 				{
-					_logger.LogError(fail.exception, "A plugin failed to load: {Plugin} v{PluginVersion}, defined in {PluginAsm}", fail.plugin.PluginDisplayName, fail.plugin.PluginVersion, fail.plugin.PluginAssemblyName);
+					_logger.LogError(fail.exception, "A plugin failed to load: {Plugin} v{PluginVersion}, defined in {PluginAsm}", fail.plugin.DisplayName, fail.plugin.Version, fail.plugin.AssemblyName);
 				}
 			}
 		}
@@ -93,7 +93,7 @@ namespace Silk.Core.Services.Bot
 			
 			var beforeCount = cnext[0].RegisteredCommands.Count;
 			
-			foreach (var plugin in _plugins.Where(p => p.PluginLoaded))
+			foreach (var plugin in _plugins.Where(p => p.Loaded))
 			{
 				var pluginAssembly = plugin.GetType().Assembly;
 				var before = cnext[0].RegisteredCommands.Count;
@@ -106,7 +106,7 @@ namespace Silk.Core.Services.Bot
 				if (before == after)
 					_logger.LogInformation("Plugin assembly contained no commands. Skipping.");
 				else 
-					_logger.LogInformation("Loaded {Commands} commands from {PluginName}", after - before, plugin.PluginAssemblyName);
+					_logger.LogInformation("Loaded {Commands} commands from {PluginName}", after - before, plugin.AssemblyName);
 			}
 			
 			sw.Stop();
@@ -124,22 +124,22 @@ namespace Silk.Core.Services.Bot
 				Exception? returnException = null;
 				try
 				{
-					await plugin.LoadPlugin();
-					_logger.LogInformation("Loaded {Plugin} v{Version}", plugin.PluginDisplayName, plugin.PluginVersion);
+					await plugin.LoadAsync();
+					_logger.LogInformation("Loaded {Plugin} v{Version}", plugin.DisplayName, plugin.Version);
 				}
 				catch (Exception loadException)
 				{
-					_logger.LogWarning(loadException, "{PluginName} failed to load due to an exception. Attempting to unload.", plugin.PluginDisplayName);
+					_logger.LogWarning(loadException, "{PluginName} failed to load due to an exception. Attempting to unload.", plugin.DisplayName);
 					try
 					{
-						await plugin.UnloadPlugin();
+						await plugin.UnloadAsync();
 						returnException = loadException;
 						_logger.LogDebug("Plugin gracefully unloaded.");
 					}
 					catch (Exception unloadException)
 					{
 						returnException = new AggregateException(loadException, unloadException);
-						_logger.LogWarning(unloadException, "Unloading a plugin resulted in an exception, Plugin: {PluginName} | Exception:", plugin.PluginDisplayName);
+						_logger.LogWarning(unloadException, "Unloading a plugin resulted in an exception, Plugin: {PluginName} | Exception:", plugin.DisplayName);
 					}
 				}
 

@@ -5,8 +5,7 @@ namespace Silk.Core.Data
 {
     public class GuildContext : DbContext
     {
-
-        public GuildContext(DbContextOptions options) : base(options) { }
+        public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
         public DbSet<Guild> Guilds { get; set; } = null!;
 
         /// <summary>

@@ -10,7 +10,7 @@ namespace RoleMenuPlugin.Database.MediatR
 	/// Retrieves a <see cref="RoleMenuModel"/> from the database in the form of a <see cref="RoleMenuDto"/>
 	/// </summary>
 	/// <param name="MessageId">The Id of the message to grab.</param>
-	public record GetRoleMenuRequest(ulong MessageId) : IRequest<RoleMenuDto>;
+	public sealed record GetRoleMenuRequest(ulong MessageId) : IRequest<RoleMenuDto>;
 	
 	public sealed class GetRoleMenuHandler : IRequestHandler<GetRoleMenuRequest, RoleMenuDto>
 	{

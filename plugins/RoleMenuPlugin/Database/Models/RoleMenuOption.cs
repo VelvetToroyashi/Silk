@@ -1,8 +1,12 @@
-﻿namespace RoleMenuPlugin.Database
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RoleMenuPlugin.Database
 {
 	public sealed class RoleMenuOption
 	{
 		public ulong RoleId { get; set; }
+		
+		[Key]
 		public ulong MessageId { get; set; }
 		public string ComponentId { get; set; }
 		public string EmojiName { get; set; }

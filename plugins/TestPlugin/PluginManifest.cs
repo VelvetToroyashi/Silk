@@ -7,17 +7,16 @@ namespace TestPlugin
 	public class PluginManifest : Plugin
 	{
 		private readonly ILogger<PluginManifest> _logger;
-		public override string PluginDisplayName => "Silk! Test Plugin";
-		public override bool PluginStealth => false;
+		public override string DisplayName => "Silk! Test Plugin";
 
 		public PluginManifest(ILogger<PluginManifest> logger)
 		{
 			_logger = logger;
 		}
 
-		public override async Task LoadPlugin()
+		public override async Task LoadAsync()
 		{
-			await base.LoadPlugin();
+			await base.LoadAsync();
 			_logger.LogInformation("Loaded successfully!");
 		}
 	}

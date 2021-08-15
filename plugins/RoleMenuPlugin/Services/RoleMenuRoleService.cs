@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -43,6 +44,22 @@ namespace RoleMenuPlugin
 				 * TODO: Set role ids to be preselected
 				 * TODO: Send ephemeral message
 				 */
+				var menu = await _mediator.Send(new GetRoleMenuRequest(eventArgs.Message.Id));
+				var roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
+				
+				var options = menu.Options
+					.Select(o =>
+						new DiscordSelectComponentOption($"Get or keep the {eventArgs.Guild.Roles[o.RoleId].Name} role", o.RoleId.ToString(CultureInfo.InvariantCulture),
+							null, roles.Contains(o.RoleId)))
+					.ToArray();
+				
+				var dropdown = new DiscordSelectComponent(RoleMenuPrefix, null, options);	
+				
+				await eventArgs.Interaction.CreateFollowupMessageAsync(
+					new DiscordFollowupMessageBuilder()
+						.WithContent("Select the roles you would like.")
+						.AddComponents(dropdown)
+						.AsEphemeral(true));
 			}
 			else // Dropdown //
 			{

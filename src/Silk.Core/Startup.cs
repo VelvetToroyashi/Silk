@@ -40,6 +40,7 @@ using Silk.Shared.Constants;
 using Unity;
 using Unity.Microsoft.DependencyInjection;
 using Unity.Microsoft.Logging;
+using YumeChan.PluginBase.Tools.Data;
 
 namespace Silk.Core
 {
@@ -224,6 +225,7 @@ namespace Silk.Core
 					services.AddSingleton<PluginLoaderService>();
 					services.AddSingleton(_ => pluginLoader);
 					
+					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
 					
 					container.AddExtension(new LoggingExtension());
 					services.AddLogging(l =>
@@ -266,10 +268,10 @@ namespace Silk.Core
 				b.EnableDetailedErrors();
 				#endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
 			}
-
-			// services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
+			
+			services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
 			services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-			services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
+			//services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
 		}
 	}
 

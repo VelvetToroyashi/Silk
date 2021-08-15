@@ -11,7 +11,7 @@
         <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00962" />
         <PackageReference Include="DSharpPlus.Menus" Version="1.0.3.5" />
         <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.2.21154.6" />

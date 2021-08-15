@@ -9,8 +9,14 @@
       <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00962" />
       <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
-      <PackageReference Include="YumeChan.PluginBase" Version="2.3.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
+      <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
     </ItemGroup>
-
 </Project>

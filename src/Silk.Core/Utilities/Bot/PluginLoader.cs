@@ -63,9 +63,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		public PluginLoader InstantiatePluginServices(IUnityContainer container)
 		{
 			foreach (var plugin in _pluginAssemblies)
-				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(InjectionRegistry))))
+				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))))
 				{
-					var services = (container.Resolve(t) as InjectionRegistry)!.ConfigureServices(new ServiceCollection());
+					var services = (container.Resolve(t) as DependencyInjectionHandler)!.ConfigureServices(new ServiceCollection());
 					
 					if (services is not null)
 						container.AddServices(services);
