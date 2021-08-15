@@ -28,6 +28,7 @@ namespace RoleMenuPlugin
 			HandleInternal(client, eventArgs);
 			return Task.CompletedTask;
 		}
+		
 		private async void HandleInternal(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
 			await Task.Yield(); // Yield so we return from the event handler ASAP //
@@ -49,7 +50,7 @@ namespace RoleMenuPlugin
 				
 				var options = menu.Options
 					.Select(o =>
-						new DiscordSelectComponentOption($"Get or keep the {eventArgs.Guild.Roles[o.RoleId].Name} role", o.RoleId.ToString(CultureInfo.InvariantCulture),
+						new DiscordSelectComponentOption($"{eventArgs.Guild.Roles[o.RoleId].Name} role", o.RoleId.ToString(CultureInfo.InvariantCulture),
 							null, roles.Contains(o.RoleId)))
 					.ToArray();
 				
@@ -57,7 +58,7 @@ namespace RoleMenuPlugin
 				
 				await eventArgs.Interaction.CreateFollowupMessageAsync(
 					new DiscordFollowupMessageBuilder()
-						.WithContent("Select the roles you would like.")
+						.WithContent("Role picker. Pick one pick a hundred, er... Up to 25, actually.")
 						.AddComponents(dropdown)
 						.AsEphemeral(true));
 			}
