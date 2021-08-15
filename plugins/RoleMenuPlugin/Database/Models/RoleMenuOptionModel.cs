@@ -2,7 +2,7 @@
 
 namespace RoleMenuPlugin.Database
 {
-	public sealed class RoleMenuOption
+	public sealed class RoleMenuOptionModel
 	{
 		public ulong RoleId { get; set; }
 		

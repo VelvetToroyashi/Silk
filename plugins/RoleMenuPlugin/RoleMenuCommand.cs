@@ -14,6 +14,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using RoleMenuPlugin.Database;
+using RoleMenuPlugin.Database.MediatR;
 
 namespace RoleMenuPlugin
 {
@@ -138,7 +139,7 @@ namespace RoleMenuPlugin
 				Options = dtoOptions,
 			};
 
-			//await _mediator.Send(new CreateRoleMenuRequest(rmDTO));
+			await _mediator.Send(new CreateRoleMenuRequest(rmDTO));
 		}
 
 		private async Task<DiscordRole> GetRoleInputAsync(CommandContext ctx, DiscordMessage message, DiscordUser user, InteractivityExtension interactivity)

@@ -11,7 +11,7 @@ namespace RoleMenuPlugin.Database
 		[Key]
 		public ulong MessageId { get; set; }
 
-		public List<RoleMenuOption> Options { get; set; }
+		public List<RoleMenuOptionModel> Options { get; set; }
 	}
 
 	/// <summary>
