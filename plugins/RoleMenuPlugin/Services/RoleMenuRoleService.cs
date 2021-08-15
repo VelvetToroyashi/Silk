@@ -32,7 +32,7 @@ namespace RoleMenuPlugin
 		{
 			await Task.Yield(); // Yield so we return from the event handler ASAP //
 			
-			if (!string.Equals(RoleMenuPrefix, eventArgs.Id))
+			if (!string.Equals(RoleMenuPrefix, eventArgs.Id) && !ulong.TryParse(eventArgs.Id, out _))
 				return;
 
 			await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -53,7 +53,7 @@ namespace RoleMenuPlugin
 							null, roles.Contains(o.RoleId)))
 					.ToArray();
 				
-				var dropdown = new DiscordSelectComponent(RoleMenuPrefix, null, options);	
+				var dropdown = new DiscordSelectComponent(eventArgs.Message.Id.ToString(CultureInfo.InvariantCulture), null, options, false, 0, options.Length);	
 				
 				await eventArgs.Interaction.CreateFollowupMessageAsync(
 					new DiscordFollowupMessageBuilder()
@@ -80,7 +80,7 @@ namespace RoleMenuPlugin
 
 		private async Task HandleDropdownAsync(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
-			var config = await _mediator.Send(new GetRoleMenuRequest(eventArgs.Message.Id));
+			var config = await _mediator.Send(new GetRoleMenuRequest(ulong.Parse(eventArgs.Id)));
 
 			var member = (DiscordMember)eventArgs.User;
 			
