@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00962" />
-      <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00962" />
+      <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00963" />
       <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
