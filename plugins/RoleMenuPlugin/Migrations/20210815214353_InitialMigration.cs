@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace RoleMenuPlugin.Migrations
 {
@@ -18,11 +19,14 @@ namespace RoleMenuPlugin.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleMenuOption",
+                name: "RoleMenuOptionModel",
                 columns: table => new
                 {
-                    MessageId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleMenuId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     RoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    MessageId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     ComponentId = table.Column<string>(type: "text", nullable: true),
                     EmojiName = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
@@ -30,9 +34,9 @@ namespace RoleMenuPlugin.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleMenuOption", x => x.MessageId);
+                    table.PrimaryKey("PK_RoleMenuOptionModel", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RoleMenuOption_RoleMenus_RoleMenuModelMessageId",
+                        name: "FK_RoleMenuOptionModel_RoleMenus_RoleMenuModelMessageId",
                         column: x => x.RoleMenuModelMessageId,
                         principalTable: "RoleMenus",
                         principalColumn: "MessageId",
@@ -40,15 +44,15 @@ namespace RoleMenuPlugin.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleMenuOption_RoleMenuModelMessageId",
-                table: "RoleMenuOption",
+                name: "IX_RoleMenuOptionModel_RoleMenuModelMessageId",
+                table: "RoleMenuOptionModel",
                 column: "RoleMenuModelMessageId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RoleMenuOption");
+                name: "RoleMenuOptionModel");
 
             migrationBuilder.DropTable(
                 name: "RoleMenus");

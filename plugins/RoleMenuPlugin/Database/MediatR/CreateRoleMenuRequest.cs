@@ -19,7 +19,6 @@ namespace RoleMenuPlugin.Database.MediatR
 				MessageId = request.Menu.MessageId,
 				Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
 				{
-					MessageId = request.Menu.MessageId,
 					RoleId = o.RoleId,
 					Description = o.Description,
 					ComponentId = o.ComponentId,

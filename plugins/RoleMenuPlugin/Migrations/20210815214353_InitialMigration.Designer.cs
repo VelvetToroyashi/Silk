@@ -9,7 +9,7 @@ using RoleMenuPlugin.Database;
 namespace RoleMenuPlugin.Migrations
 {
     [DbContext(typeof(RolemenuContext))]
-    [Migration("20210815211809_InitialMigration")]
+    [Migration("20210815214353_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,11 +31,12 @@ namespace RoleMenuPlugin.Migrations
                     b.ToTable("RoleMenus");
                 });
 
-            modelBuilder.Entity("RoleMenuPlugin.Database.RoleMenuOption", b =>
+            modelBuilder.Entity("RoleMenuPlugin.Database.RoleMenuOptionModel", b =>
                 {
-                    b.Property<decimal>("MessageId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ComponentId")
                         .HasColumnType("text");
@@ -46,20 +47,26 @@ namespace RoleMenuPlugin.Migrations
                     b.Property<string>("EmojiName")
                         .HasColumnType("text");
 
+                    b.Property<decimal>("MessageId")
+                        .HasColumnType("numeric(20,0)");
+
                     b.Property<decimal>("RoleId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("RoleMenuId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("RoleMenuModelMessageId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleMenuModelMessageId");
 
-                    b.ToTable("RoleMenuOption");
+                    b.ToTable("RoleMenuOptionModel");
                 });
 
-            modelBuilder.Entity("RoleMenuPlugin.Database.RoleMenuOption", b =>
+            modelBuilder.Entity("RoleMenuPlugin.Database.RoleMenuOptionModel", b =>
                 {
                     b.HasOne("RoleMenuPlugin.Database.RoleMenuModel", null)
                         .WithMany("Options")
