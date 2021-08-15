@@ -6,7 +6,6 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
-using Serilog.Extensions.Logging;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Utilities
@@ -26,7 +25,7 @@ namespace Silk.Core.Utilities
 			MessageCacheSize = 2048,
 			LargeThreshold = 10000,
 			MinimumLogLevel = LogLevel.None,
-			LoggerFactory = new SerilogLoggerFactory()
+			//LoggerFactory = new SerilogLoggerFactory().AddSerilog()
 		};
 
         /// <summary>

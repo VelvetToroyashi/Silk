@@ -223,7 +223,6 @@ namespace Silk.Core
 					var pluginLoader = new PluginLoader();
 					services.AddSingleton<PluginLoaderService>();
 					services.AddSingleton(_ => pluginLoader);
-
 					
 					
 					container.AddExtension(new LoggingExtension());

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -11,6 +12,8 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
+using RoleMenuPlugin.Database;
 
 namespace RoleMenuPlugin
 {
@@ -19,6 +22,9 @@ namespace RoleMenuPlugin
 	/// </summary>
 	public sealed class RoleMenuCommand : BaseCommandModule
 	{
+		private readonly IMediator _mediator;
+		public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
+
 		[Command]
 		public async Task Create(CommandContext ctx, DiscordChannel channel)
 		{
@@ -45,6 +51,13 @@ namespace RoleMenuPlugin
 			
 			while (true)
 			{
+				if (roles.Count > 1)
+					completeButton.Enable();
+				
+				await message.ModifyAsync(m => m.WithContent("Role menu setup: What would you like to do?")
+					.AddComponents(addEmojiButton, addRoleButton)
+					.AddComponents(completeButton, exitButton));
+				
 				var res = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
 				if (res.Result.Id == exitButton.CustomId)
 				{
@@ -89,12 +102,45 @@ namespace RoleMenuPlugin
 
 					var roleInput = await GetRoleInputAsync(ctx, message, ctx.User, interactivity);
 					
+					roles.Add(roleInput);
+					
+					if (emoji.Count < roles.Count)
+						emoji.Add(null);
+					
 					addRoleButton.Enable();
 					addEmojiButton.Enable();
 				}
 			}
+
+			var initiateButton = new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles!");
+			
+			await channel.SendMessageAsync(m => m
+				.WithContent($"**Role Menu**\nAvailble roles: {string.Join('\n', roles.Select(r => r.Mention))}")
+				.WithAllowedMentions(Mentions.None)
+				.AddComponents(initiateButton));
+
+			await FlushAndSaveChangesAsync(null, roles, emoji);
 		}
 		
+		private async Task FlushAndSaveChangesAsync(DiscordMessage message, List<DiscordRole> roles, List<DiscordComponentEmoji> emoji)
+		{
+			var dtoOptions = roles.Select((opt, index) => new RoleMenuOptionDto()
+			{
+				RoleId = opt.Id,
+				MessageId = message.Id,
+				Description = $"Get or keep the {opt.Name} role",
+				EmojiName = roles[index] is {} emj ? emj.Id is 0 ? emj.Name : emj.Id.ToString(CultureInfo.InvariantCulture) : null
+			}).ToArray();
+
+			var rmDTO = new RoleMenuDto()
+			{
+				MessageId = message.Id,
+				Options = dtoOptions,
+			};
+
+			//await _mediator.Send(new CreateRoleMenuRequest(rmDTO));
+		}
+
 		private async Task<DiscordRole> GetRoleInputAsync(CommandContext ctx, DiscordMessage message, DiscordUser user, InteractivityExtension interactivity)
 		{
 			var contentRestore = message.Content;
@@ -110,7 +156,6 @@ namespace RoleMenuPlugin
 			}
 			else
 			{
-				DiscordRole role = null;
 				var roleParser = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
 				var res = await roleParser.ConvertAsync(result.Result.Content, ctx);
 
@@ -127,7 +172,7 @@ namespace RoleMenuPlugin
 					await RevertAsync();
 					return null;
 				}
-
+				await RevertAsync();
 				return res.Value;
 			}
 
@@ -187,8 +232,5 @@ namespace RoleMenuPlugin
 				}
 			}
 		}
-
-
-
 	}
 }
