@@ -6,13 +6,13 @@ namespace Silk.Core.Utilities.HelpFormatter
     ///     Marks this class as being part of a command category with a specific name
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class CategoryAttribute : Attribute
-    {
+	public class CategoryAttribute : Attribute
+	{
 
-        public CategoryAttribute(string name)
-        {
-            Name = name;
-        }
-        public string Name { get; }
-    }
+		public CategoryAttribute(string name)
+		{
+			Name = name;
+		}
+		public string Name { get; }
+	}
 }

@@ -12,16 +12,15 @@ namespace Silk.Core.SlashCommands.Commands
 		[ChoiceName("user-specific")]
 		User
 	}
-	
-	public class AvatarCommands : SlashCommandModule
+
+	public class AvatarCommands : ApplicationCommandModule
 	{
 		[SlashCommand("avatar", "View someone's avatar!")]
 		public async Task Avatar(
 			InteractionContext ctx,
 			[Option("user", "Who's avatar do you want to see")] DiscordUser? user = null,
 			[Option("type", "What avatar should I pull?")] AvatarOption avatarOption = AvatarOption.User,
-			[Option("visibility", "Do you want others to see this command?")] 
-			bool asEphemeral = true)
+			[Option("visibility", "Do you want others to see this command?")] bool asEphemeral = true)
 		{
 			await ctx.CreateThinkingResponseAsync(!asEphemeral);
 			user ??= ctx.Member ?? ctx.User;
@@ -29,7 +28,7 @@ namespace Silk.Core.SlashCommands.Commands
 			switch (avatarOption)
 			{
 				case AvatarOption.Guild when ctx.Interaction.GuildId is null:
-					await ctx.EditResponseAsync(new() {Content = "I can't get someone's guild-avatar from DMs, silly!"});
+					await ctx.EditResponseAsync(new() { Content = "I can't get someone's guild-avatar from DMs, silly!" });
 					return;
 				case AvatarOption.Guild when ctx.Guild is null:
 					await ctx.EditResponseAsync(new DiscordWebhookBuilder()
@@ -51,23 +50,36 @@ namespace Silk.Core.SlashCommands.Commands
 					break;
 			}
 
-			Task SendNoAvatarMessage() => ctx.EditResponseAsync(new() {Content = "Sorry, but that user doesn't exist on the server!"});
-			Task SendNonMemberMessage() => ctx.EditResponseAsync(new() {Content = "Sorry, but that user doesn't exist on the server!"});
+			Task SendNoAvatarMessage()
+			{
+				return ctx.EditResponseAsync(new() { Content = "Sorry, but that user doesn't exist on the server!" });
+			}
 
-			Task SendUserAvatar() => ctx.EditResponseAsync(new
-					DiscordWebhookBuilder()
-				.AddEmbed(new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.CornflowerBlue)
-					.WithTitle($"{user!.Username}'s Avatar:")
-					.WithImageUrl(user.AvatarUrl)));
+			Task SendNonMemberMessage()
+			{
+				return ctx.EditResponseAsync(new() { Content = "Sorry, but that user doesn't exist on the server!" });
+			}
 
-			Task SendGuildAvatar() => ctx.EditResponseAsync(new
-					DiscordWebhookBuilder()
-				.AddEmbed(new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.CornflowerBlue)
-					.WithTitle($"{user.Username}'s Guild-Specific Avatar:")
-					.WithAuthor(((DiscordMember) user).DisplayName, iconUrl: user.AvatarUrl)
-					.WithImageUrl(((DiscordMember) user).GuildAvatarUrl)));
+			Task SendUserAvatar()
+			{
+				return ctx.EditResponseAsync(new
+						DiscordWebhookBuilder()
+					.AddEmbed(new DiscordEmbedBuilder()
+						.WithColor(DiscordColor.CornflowerBlue)
+						.WithTitle($"{user!.Username}'s Avatar:")
+						.WithImageUrl(user.AvatarUrl)));
+			}
+
+			Task SendGuildAvatar()
+			{
+				return ctx.EditResponseAsync(new
+						DiscordWebhookBuilder()
+					.AddEmbed(new DiscordEmbedBuilder()
+						.WithColor(DiscordColor.CornflowerBlue)
+						.WithTitle($"{user.Username}'s Guild-Specific Avatar:")
+						.WithAuthor(((DiscordMember)user).DisplayName, iconUrl: user.AvatarUrl)
+						.WithImageUrl(((DiscordMember)user).GuildAvatarUrl)));
+			}
 		}
 	}
 }

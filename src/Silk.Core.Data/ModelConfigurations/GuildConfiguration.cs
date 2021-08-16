@@ -19,6 +19,11 @@ namespace Silk.Core.Data.ModelConfigurations
                 .WithOne(g => g.Guild)
                 .HasForeignKey<GuildConfig>(g => g.GuildId);
 
+            builder
+                .HasOne(g => g.ModConfig)
+                .WithOne(g => g.Guild)
+                .HasForeignKey<GuildModConfig>(g => g.GuildId);
+            
             builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
         }
     }

@@ -108,6 +108,37 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<decimal>("GreetingChannel")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("GreetingOption")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("GreetingText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("VerificationRole")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId")
+                        .IsUnique();
+
+                    b.ToTable("GuildConfigs");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
                     b.Property<bool>("AutoDehoist")
                         .HasColumnType("boolean");
 
@@ -123,28 +154,8 @@ namespace Silk.Core.Data.Migrations
                     b.Property<bool>("DeleteMessageOnMatchedInvite")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("GreetOnScreeningComplete")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("GreetOnVerificationRole")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("GreetingChannel")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int>("GreetingOption")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("GreetingText")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("InfractionFormat")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<bool>("LogMemberJoins")
                         .HasColumnType("boolean");
@@ -167,14 +178,15 @@ namespace Silk.Core.Data.Migrations
                     b.Property<decimal>("MuteRoleId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<string>("NamedInfractionSteps")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("ScanInvites")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("UseAggressiveRegex")
                         .HasColumnType("boolean");
-
-                    b.Property<decimal>("VerificationRole")
-                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("WarnOnMatchedInvite")
                         .HasColumnType("boolean");
@@ -184,7 +196,7 @@ namespace Silk.Core.Data.Migrations
                     b.HasIndex("GuildId")
                         .IsUnique();
 
-                    b.ToTable("GuildConfigs");
+                    b.ToTable("GuildModConfigs");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.Infraction", b =>
@@ -270,10 +282,13 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int?>("GuildConfigId")
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int?>("GuildModConfigId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal>("InviteGuildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("VanityURL")
@@ -282,7 +297,7 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildConfigId");
+                    b.HasIndex("GuildModConfigId");
 
                     b.ToTable("Invite");
                 });
@@ -333,109 +348,6 @@ namespace Silk.Core.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reminders");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("GuildConfigId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("MessageId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("RoleDictionary")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildConfigId");
-
-                    b.ToTable("RoleMenu");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuEmoji", b =>
-                {
-                    b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("Unicode")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RoleMenuEmoji");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("GuildConfigId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildConfigId");
-
-                    b.ToTable("RoleMenuMenu");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuOption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<decimal?>("EmojiId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<decimal>("RoleId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int?>("RoleMenuMenuId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmojiId");
-
-                    b.HasIndex("RoleMenuMenuId");
-
-                    b.ToTable("RoleMenuOption");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.SelfAssignableRole", b =>
-                {
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int?>("GuildConfigId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildConfigId");
-
-                    b.ToTable("SelfAssignableRole");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
@@ -559,6 +471,17 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
+                {
+                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                        .WithOne("ModConfig")
+                        .HasForeignKey("Silk.Core.Data.Models.GuildModConfig", "GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Silk.Core.Data.Models.Infraction", b =>
                 {
                     b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
@@ -580,7 +503,7 @@ namespace Silk.Core.Data.Migrations
 
             modelBuilder.Entity("Silk.Core.Data.Models.InfractionStep", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", "Config")
+                    b.HasOne("Silk.Core.Data.Models.GuildModConfig", "Config")
                         .WithMany("InfractionSteps")
                         .HasForeignKey("ConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -591,47 +514,9 @@ namespace Silk.Core.Data.Migrations
 
             modelBuilder.Entity("Silk.Core.Data.Models.Invite", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
+                    b.HasOne("Silk.Core.Data.Models.GuildModConfig", null)
                         .WithMany("AllowedInvites")
-                        .HasForeignKey("GuildConfigId");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenu", b =>
-                {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
-                        .WithMany("RoleMenus")
-                        .HasForeignKey("GuildConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
-                {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
-                        .WithMany("RoleMenuMenus")
-                        .HasForeignKey("GuildConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuOption", b =>
-                {
-                    b.HasOne("Silk.Core.Data.Models.RoleMenuEmoji", "Emoji")
-                        .WithMany()
-                        .HasForeignKey("EmojiId");
-
-                    b.HasOne("Silk.Core.Data.Models.RoleMenuMenu", null)
-                        .WithMany("Roles")
-                        .HasForeignKey("RoleMenuMenuId");
-
-                    b.Navigation("Emoji");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.SelfAssignableRole", b =>
-                {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
-                        .WithMany("SelfAssignableRoles")
-                        .HasForeignKey("GuildConfigId");
+                        .HasForeignKey("GuildModConfigId");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
@@ -678,6 +563,9 @@ namespace Silk.Core.Data.Migrations
 
                     b.Navigation("Infractions");
 
+                    b.Navigation("ModConfig")
+                        .IsRequired();
+
                     b.Navigation("Tags");
 
                     b.Navigation("Users");
@@ -685,22 +573,14 @@ namespace Silk.Core.Data.Migrations
 
             modelBuilder.Entity("Silk.Core.Data.Models.GuildConfig", b =>
                 {
-                    b.Navigation("AllowedInvites");
-
                     b.Navigation("DisabledCommands");
-
-                    b.Navigation("InfractionSteps");
-
-                    b.Navigation("RoleMenuMenus");
-
-                    b.Navigation("RoleMenus");
-
-                    b.Navigation("SelfAssignableRoles");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.RoleMenuMenu", b =>
+            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
                 {
-                    b.Navigation("Roles");
+                    b.Navigation("AllowedInvites");
+
+                    b.Navigation("InfractionSteps");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>

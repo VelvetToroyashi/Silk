@@ -11,18 +11,18 @@ using Silk.Core.Utilities.HttpClient;
 
 namespace Silk.Core.Commands.Furry.Types
 {
-    public abstract class eBooruBaseCommand : BaseCommandModule
-    {
+	public abstract class eBooruBaseCommand : BaseCommandModule
+	{
 
-        private readonly HttpClient _client;
-        private protected string? baseUrl;
-        // Needed for e621.net //
-        private protected string? username;
+		private readonly HttpClient _client;
+		private protected string? baseUrl;
+		// Needed for e621.net //
+		private protected string? username;
 
-        public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
-        {
-            _client = httpClientFactory.CreateSilkClient();
-        }
+		public eBooruBaseCommand(IHttpClientFactory httpClientFactory)
+		{
+			_client = httpClientFactory.CreateSilkClient();
+		}
 
         /// <summary>
         ///     Execute the query from the specified booru site.
@@ -38,19 +38,19 @@ namespace Silk.Core.Commands.Furry.Types
         /// <param name="query"></param>
         /// <returns></returns>
         private protected async Task<eBooruPostResult?> DoQueryAsync(string? query)
-        {
-            // Thanks to Spookdot on Discord for showing me this method existed. ~Velvet. //
-            //var posts = await _client.GetFromJsonAsync<eBooruPostResult>($"{baseUrl}{query?.Replace(' ', '+')}");
-            // It didn't work. :c //
-            string result = await _client.GetStringAsync($"{baseUrl}{query?.Replace(' ', '+')}");
-            var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
+		{
+			// Thanks to Spookdot on Discord for showing me this method existed. ~Velvet. //
+			//var posts = await _client.GetFromJsonAsync<eBooruPostResult>($"{baseUrl}{query?.Replace(' ', '+')}");
+			// It didn't work. :c //
+			string result = await _client.GetStringAsync($"{baseUrl}{query?.Replace(' ', '+')}");
+			var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
 
-            for (var i = 0; i < posts.Posts?.Count; i++)
-                if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
-                    posts.Posts.Remove(posts.Posts[i]);
+			for (var i = 0; i < posts.Posts?.Count; i++)
+				if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
+					posts.Posts.Remove(posts.Posts[i]);
 
-            return posts.Posts?.Count is 0 ? null : posts;
-        }
+			return posts.Posts?.Count is 0 ? null : posts;
+		}
 
         /// <summary>
         ///     Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
@@ -60,27 +60,27 @@ namespace Silk.Core.Commands.Furry.Types
         /// <param name="requireUsername">Add <see cref="username" /> to the HTTP header or not.</param>
         /// <returns></returns>
         private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
-        {
-            if (requireUsername)
-                _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
-            _ = apiKey ?? throw new ArgumentNullException($"{nameof(apiKey)} can't be null.");
+		{
+			if (requireUsername)
+				_ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");
+			_ = apiKey ?? throw new ArgumentNullException($"{nameof(apiKey)} can't be null.");
 
 
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
+			var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + query));
 
-            byte[]? cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
-            request.Headers.Add("Authorization", $"Basic {Convert.ToBase64String(cred)}");
-            // TODO: Log if API key is rejected.
-            string result = await _client.Send(request).Content.ReadAsStringAsync();
-            var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
+			byte[]? cred = Encoding.GetEncoding("ISO-8859-1").GetBytes($"{username}:{apiKey}");
+			request.Headers.Add("Authorization", $"Basic {Convert.ToBase64String(cred)}");
+			// TODO: Log if API key is rejected.
+			string result = await _client.Send(request).Content.ReadAsStringAsync();
+			var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
 
-            for (var i = 0; i < posts.Posts?.Count; i++)
-                if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
-                    posts.Posts.Remove(posts.Posts[i]);
-            // Still remove blank posts even after authenticating, in case they're blacklisted. //
+			for (var i = 0; i < posts.Posts?.Count; i++)
+				if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
+					posts.Posts.Remove(posts.Posts[i]);
+			// Still remove blank posts even after authenticating, in case they're blacklisted. //
 
-            return posts.Posts?.Count is 0 ? null : posts;
-        }
+			return posts.Posts?.Count is 0 ? null : posts;
+		}
 
         /// <summary>
         ///     Get a set number of posts randomly from the list of available posts.
@@ -90,31 +90,31 @@ namespace Silk.Core.Commands.Furry.Types
         /// <param name="seed">The seed for the <see cref="Random" /> used to pick posts, preferably being a casted message Id.</param>
         /// <returns>A list of mostly random posts from a given post result.</returns>
         private protected async Task<List<Post>> GetPostsAsync(eBooruPostResult? post, int amount, int seed = default)
-        {
-            var rand = new Random(seed);
-            var posts = new List<Post?>();
-            for (var i = 0; i < amount; i++)
-            {
-                if (post?.Posts?.Count is 0) break; // No results were returned. //
-                int r = rand.Next(post!.Posts?.Count ?? 0);
-                if (post.Posts?[r] is null) // That post doesn't exist. //
-                {
-                    i--;
-                    post.Posts?.RemoveAt(r);
-                    continue;
-                }
+		{
+			var rand = new Random(seed);
+			var posts = new List<Post?>();
+			for (var i = 0; i < amount; i++)
+			{
+				if (post?.Posts?.Count is 0) break; // No results were returned. //
+				int r = rand.Next(post!.Posts?.Count ?? 0);
+				if (post.Posts?[r] is null) // That post doesn't exist. //
+				{
+					i--;
+					post.Posts?.RemoveAt(r);
+					continue;
+				}
 
-                posts.Add(post.Posts[r]);
-                post.Posts.RemoveAt(r);
-            }
+				posts.Add(post.Posts[r]);
+				post.Posts.RemoveAt(r);
+			}
 
-            return posts!;
-        }
+			return posts!;
+		}
 
-        private protected string? GetSource(string? source)
-        {
-            if (source is null) return null;
-            return Regex.Match(source, @"[A-z]+\.[A-z]+\/").Value[..^1];
-        }
-    }
+		private protected string? GetSource(string? source)
+		{
+			if (source is null) return null;
+			return Regex.Match(source, @"[A-z]+\.[A-z]+\/").Value[..^1];
+		}
+	}
 }

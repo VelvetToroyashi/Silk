@@ -2,8 +2,8 @@
 
 namespace Silk.Core.Services.Interfaces
 {
-    public interface IConfiguredService
-    {
+	public interface IConfiguredService
+	{
         /// <summary>
         ///     True or false value set by <see cref="Configure" /> indicating if the service has been configued already.
         /// </summary>
@@ -13,5 +13,5 @@ namespace Silk.Core.Services.Interfaces
         ///     Method called during startup to configure the service asynchronously.
         /// </summary>
         public Task Configure();
-    }
+	}
 }

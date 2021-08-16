@@ -14,41 +14,42 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <Optimize>false</Optimize>
         <WarningLevel>2</WarningLevel>
+        <DebugType>full</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+      <DebugType>full</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
         <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
-    <!-- PackageReference's which don't have a "Version" metadata/attribute are defined in `Directory.Build.targets` -->
     <ItemGroup>
         <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-
+        <PackageReference Include="Config.Net" Version="4.15.0" />
+        <PackageReference Include="Config.Net.Json" Version="4.15.0" />
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
+        <PackageReference Include="DSharpPlus.Menus" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
-
+        <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="Humanizer" />
         <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" />
-
-        <PackageReference Include="Humanizer" Version="2.10.1" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
-        <PackageReference Include="FluentAssertions" />
-
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
-
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-1.final" />
-        
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
@@ -59,7 +60,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" />
-        
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="Microsoft.Extensions.Configuration" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
@@ -67,7 +67,8 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http" />
         <PackageReference Include="Microsoft.Extensions.Logging" />
-        
+        <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Serilog" Version="2.10.1-dev-01285" />
         <PackageReference Include="Serilog.Expressions" Version="2.0.0" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
@@ -80,6 +81,9 @@
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6" />
+        <PackageReference Include="Unity" Version="5.11.10" />
+        <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
+        <PackageReference Include="YumeChan.PluginBase" />
     </ItemGroup>
 
     <ItemGroup>

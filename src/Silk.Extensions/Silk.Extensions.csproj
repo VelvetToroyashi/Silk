@@ -9,11 +9,9 @@
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
-        
+        <PackageReference Include="DSharpPlus.Menus" />
         <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" />
-        
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
-        
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />

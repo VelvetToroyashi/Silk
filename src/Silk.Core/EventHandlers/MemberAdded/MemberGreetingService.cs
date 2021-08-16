@@ -14,89 +14,89 @@ using Silk.Core.Utilities;
 
 namespace Silk.Core.EventHandlers.MemberAdded
 {
-    public sealed class MemberGreetingService
-    {
-        private readonly ConfigService _configService;
+	public sealed class MemberGreetingService
+	{
+		private readonly ConfigService _configService;
 
-        private readonly AsyncTimer _timer;
-        public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
-        {
-            _configService = configService;
-            _timer = new(OnTick, TimeSpan.FromSeconds(1));
-            _timer.Start();
-        }
-        public List<DiscordMember> MemberQueue { get; } = new();
+		private readonly AsyncTimer _timer;
+		public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
+		{
+			_configService = configService;
+			_timer = new(OnTick, TimeSpan.FromSeconds(1));
+			_timer.Start();
+		}
+		public List<DiscordMember> MemberQueue { get; } = new();
 
-        public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
-        {
-            GuildConfig? config = await _configService.GetConfigAsync(e.Guild.Id);
-            if (config is null!) // Wasn't cached yet //
-                return;
-            // This should be done in a seperate service //
-            if (config.LogMemberJoins && config.LoggingChannel is not 0)
-                await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
+		public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
+		{
+			GuildConfig? config = await _configService.GetConfigAsync(e.Guild.Id);
+			GuildModConfig? modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
 
-            bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetingOption is GreetingOption.GreetOnScreening;
-            bool verifyMembers = config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is not 0;
+			if (config is null!) // Wasn't cached yet //
+				return;
+			// This should be done in a seperate service //
+			if (modConfig.LogMemberJoins && modConfig.LoggingChannel is not 0)
+				await e.Guild.GetChannel(modConfig.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
-            if (screenMembers || verifyMembers)
-                MemberQueue.Add(e.Member);
-            else await GreetMemberAsync(e.Member, config);
-        }
+			bool screenMembers = e.Guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") && config.GreetingOption is GreetingOption.GreetOnScreening;
+			bool verifyMembers = config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is not 0;
 
-        private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)
-        {
-            bool shouldGreet = config.GreetingOption is not GreetingOption.DoNotGreet;
-            bool hasValidGreetingChannel = config.GreetingChannel is not 0;
-            bool hasValidGreetingMessage = !string.IsNullOrWhiteSpace(config.GreetingText);
-            if (shouldGreet && hasValidGreetingChannel && hasValidGreetingMessage)
-            {
-                DiscordChannel channel = member.Guild.GetChannel(config.GreetingChannel);
-                string formattedMessage = config.GreetingText
-                    .Replace("{u}", member.Username)
-                    .Replace("{s}", member.Guild.Name)
-                    .Replace("{@u}", member.Mention)
-                    .Replace("\\n", "\n");
+			if (screenMembers || verifyMembers)
+				MemberQueue.Add(e.Member);
+			else await GreetMemberAsync(e.Member, config);
+		}
 
-                await channel.SendMessageAsync(formattedMessage);
-            }
-        }
+		private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)
+		{
+			bool shouldGreet = config.GreetingOption is not GreetingOption.DoNotGreet;
+			bool hasValidGreetingChannel = config.GreetingChannel is not 0;
+			bool hasValidGreetingMessage = !string.IsNullOrWhiteSpace(config.GreetingText);
+			if (shouldGreet && hasValidGreetingChannel && hasValidGreetingMessage)
+			{
+				DiscordChannel channel = member.Guild.GetChannel(config.GreetingChannel);
+				string formattedMessage = config.GreetingText
+					.Replace("{u}", member.Username)
+					.Replace("{s}", member.Guild.Name)
+					.Replace("{@u}", member.Mention)
+					.Replace("\\n", "\n");
 
-        private void OnTick(object _, ElapsedEventArgs __) => AsyncUtil.RunSync(async () => await OnTick());
-        private async Task OnTick()
-        {
-            if (MemberQueue.Count is 0) 
-                return;
-            
-            foreach (DiscordMember member in MemberQueue)
-            {
-                GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id))!;
+				await channel.SendMessageAsync(formattedMessage);
+			}
+		}
 
-            if (config.GreetingOption is GreetingOption.GreetOnJoin)
-            {
-                await GreetMemberAsync(member, config);
-                MemberQueue.Remove(member);
-                continue;
-            }
+		private void OnTick(object _, ElapsedEventArgs __)
+		{
+			AsyncUtil.RunSync(async () => await OnTick());
+		}
+		private async Task OnTick()
+		{
+			if (MemberQueue.Count is 0)
+				return;
 
-            if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true) 
-                continue;
+			for (var i = 0; i < MemberQueue.Count; i++)
+			{
+				DiscordMember member = MemberQueue[i];
+				GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id));
 
-            if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole)) 
-                continue;
-            await GreetMemberAsync(member, config);
-            MemberQueue.Remove(member);
-            }
-        }
+				if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true)
+					continue;
 
-        private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e)
-        {
-            return new DiscordEmbedBuilder()
-                .WithTitle("User joined:")
-                .WithDescription($"User: {e.Member.Mention}")
-                .AddField("User ID:", e.Member.Id.ToString(), true)
-                .WithThumbnail(e.Member.AvatarUrl)
-                .WithColor(DiscordColor.Green);
-        }
-    }
+				if (config.GreetingOption is GreetingOption.GreetOnRole && !member.Roles.Select(r => r.Id).Contains(config.VerificationRole))
+					continue;
+
+				MemberQueue.Remove(member);
+				await GreetMemberAsync(member, config);
+			}
+		}
+
+		private static DiscordEmbedBuilder GetJoinEmbed(GuildMemberAddEventArgs e)
+		{
+			return new DiscordEmbedBuilder()
+				.WithTitle("User joined:")
+				.WithDescription($"User: {e.Member.Mention}")
+				.AddField("User ID:", e.Member.Id.ToString(), true)
+				.WithThumbnail(e.Member.AvatarUrl)
+				.WithColor(DiscordColor.Green);
+		}
+	}
 }

@@ -2,7 +2,7 @@ version: 2
 updates:
 - package-ecosystem: nuget
   directory: "/"
-  target-branch: "development"
+  target-branch: "rewrite/core"
   schedule:
     interval: weekly
     day: "saturday"
