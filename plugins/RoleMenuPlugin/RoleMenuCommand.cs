@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
@@ -44,10 +47,7 @@ namespace RoleMenuPlugin
 			var interactivity = ctx.Client.GetInteractivity();
 			var rmoOptions = new List<RoleMenuOptionDto>();
 
-			var message = await ctx.Channel.SendMessageAsync(m => 
-				m.WithContent("Role menu setup:")
-					.AddComponents(addFullButton, addRoleOnlyButton, editButton)
-					.AddComponents(finishButton, quitButton));
+			var message = await ctx.Channel.SendMessageAsync("Role Menu Setup:");
 
 			while (true)
 			{
@@ -56,8 +56,13 @@ namespace RoleMenuPlugin
 					addFullButton.Disable();
 					addRoleOnlyButton.Disable();
 				}
+
+				await message.ModifyAsync(m =>
+					m.WithContent("Role menu setup:")
+						.AddComponents(addFullButton, addRoleOnlyButton, editButton)
+						.AddComponents(finishButton, quitButton));
 				
-				var selection = await message.WaitForButtonAsync(CancellationToken.None);
+				var selection = await message.WaitForButtonAsync(ctx.User, CancellationToken.None);
 				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 				
 				if (selection.Result.Id == "rm-quit")
@@ -79,6 +84,48 @@ namespace RoleMenuPlugin
 				async Task AddFull()
 				{
 					var option = new RoleMenuOptionDto();
+					
+					//Role
+					await message.ModifyAsync(m => m.WithContent("Role:"));
+					var role = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.MentionedRoles.Count > 0);
+					option = option with { RoleId = role.Result.MentionedRoles[0].Id };
+					await role.Result.DeleteAsync();
+					
+					//Emoji
+					await message.ModifyAsync(m => m.WithContent("Emoji (type skip to skip)"));
+					
+					GetEmoji:
+					var emoji = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
+					
+					var econ = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
+					var compEmoji = await econ.ConvertAsync(emoji.Result.Content, ctx);
+					
+					if (!string.Equals(emoji.Result.Content, "skip", StringComparison.OrdinalIgnoreCase) && !compEmoji.HasValue)
+						goto GetEmoji;
+
+					if (compEmoji.HasValue)
+						option = option with { EmojiName = compEmoji.Value.Id is 0 ? compEmoji.Value.Name : compEmoji.Value.Id.ToString(CultureInfo.InvariantCulture) };
+
+					await emoji.Result.DeleteAsync();
+					//Description
+					await message.ModifyAsync(m => m.WithContent("Role description (trunctated at 100 characters, type skip to skip)"));
+					
+					GetDescription:
+					var description = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
+
+					if (string.Equals(description.Result.Content, "skip", StringComparison.OrdinalIgnoreCase))
+						return;
+					
+					var confirm = new DiscordButtonComponent(ButtonStyle.Success, "rm-confirm", "Yes");
+					var decline =  new DiscordButtonComponent(ButtonStyle.Danger, "rm-decline", "No");
+
+					await message.ModifyAsync(m => m.WithContent("Are you sure?").AddComponents(confirm, decline));
+
+					var confirmation = await message.WaitForButtonAsync(ctx.User, CancellationToken.None);
+					await confirmation.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+					
+					if (confirmation.Result.Id == decline.CustomId)
+						goto GetDescription;
 				}
 
 				async Task AddRoleOnly()
