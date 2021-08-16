@@ -116,7 +116,7 @@ namespace RoleMenuPlugin
 			var initiateButton = new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles!");
 			
 			message = await channel.SendMessageAsync(m => m
-				.WithContent($"**Role Menu**\nAvailble roles: \n{string.Join('\n', roles.Select(r => r.Mention))}")
+				.WithContent($"**Role Menu**\nAvailable roles: \n{string.Join('\n', roles.Select(r => r.Mention))}")
 				.WithAllowedMentions(Mentions.None)
 				.AddComponents(initiateButton));
 
@@ -129,7 +129,6 @@ namespace RoleMenuPlugin
 			{
 				RoleId = opt.Id,
 				MessageId = message.Id,
-				Description = $"Get or keep the {opt.Name} role",
 				EmojiName = roles[index] is {} emj ? emj.Id is 0 ? emj.Name : emj.Id.ToString(CultureInfo.InvariantCulture) : null
 			}).ToArray();
 
