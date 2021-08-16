@@ -3,8 +3,8 @@ pull_request_rules:
     conditions:
       - or:
         - and:
-          - approved-reviews-by >= 2
-          - check-success=true
+            - approved-reviews-by >= 2
+            - check-success=true
         - and:
             - author=depandabot
             - label=dependencies
