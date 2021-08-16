@@ -62,7 +62,7 @@ namespace RoleMenuPlugin
 						.AddComponents(addFullButton, addRoleOnlyButton, editButton)
 						.AddComponents(finishButton, quitButton));
 				
-				var selection = await message.WaitForButtonAsync(ctx.User, CancellationToken.None);
+				var selection = await message.WaitForButtonAsync(m => m.User == ctx.User, CancellationToken.None);
 				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 				
 				if (selection.Result.Id == "rm-quit")
