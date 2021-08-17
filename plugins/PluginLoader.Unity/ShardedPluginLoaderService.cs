@@ -11,12 +11,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Utilities.Bot;
 using Unity;
 using Unity.Microsoft.DependencyInjection;
 using YumeChan.PluginBase;
 
-namespace Silk.Core.Services.Bot
+namespace PluginLoader.Unity
 {
 	/// <summary>
 	/// A service for loading plugins. Requires 

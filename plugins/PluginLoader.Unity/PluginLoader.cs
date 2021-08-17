@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using Unity;
 using Unity.Microsoft.DependencyInjection;
 using YumeChan.PluginBase;
 
-namespace Silk.Core.Utilities.Bot
+namespace PluginLoader.Unity
 { 
 /*
 This class is an inspired work from YumeChan's PluginLoader, which is licensed under GPL-3. 
@@ -35,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	/// </summary>
 	public sealed class PluginLoader : IEnumerable<Plugin>
 	{
+		public AppDomain PluginDomain { get; } = AppDomain.CreateDomain("Plugins");
+
 		// Plugin instances are held in PluginLoaderService.cs //
 		private readonly List<Assembly> _pluginAssemblies = new();
 		private readonly List<FileInfo> _pluginFiles = new();
@@ -54,7 +57,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			
 			_pluginFiles.AddRange(pluginFiles.Select(f => new FileInfo(f)));
 			_pluginAssemblies.AddRange(_pluginFiles.Select(f => Assembly.LoadFile(f.FullName)));
-
+			AppDomain.CreateDomain("Plugins");
+			
+			
 			return this;
 		}
 		

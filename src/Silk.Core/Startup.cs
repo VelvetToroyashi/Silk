@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PluginLoader.Unity;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -221,7 +222,7 @@ namespace Silk.Core
 					services.AddSingleton<UptimeService>();
 					services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 					services.AddSingleton<ShardedPluginLoaderService>();
-					services.AddSingleton<PluginLoader>();
+					services.AddSingleton<PluginLoader.Unity.PluginLoader>();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
 					
