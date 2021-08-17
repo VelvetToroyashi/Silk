@@ -31,11 +31,11 @@ namespace Silk.Core.Utilities
 
 		public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
 		{
-			if (help) return help;
 			if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
 			if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
-			IMediator mediator = ctx.Services.CreateScope().ServiceProvider.Get<IMediator>();
+			using var scope = ctx.Services.CreateScope();
+			IMediator mediator = scope.ServiceProvider.Get<IMediator>()!;
 			User? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 
 			if (member is null) return false;
