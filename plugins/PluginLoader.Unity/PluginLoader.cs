@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
 		/// </summary>
-		public PluginLoader LoadPluginFiles()
+		internal PluginLoader LoadPluginFiles()
 		{
 			Directory.CreateDirectory("./plugins");
 			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
