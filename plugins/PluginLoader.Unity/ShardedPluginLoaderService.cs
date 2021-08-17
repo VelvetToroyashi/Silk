@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dasync.Collections;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Utilities.Bot;
@@ -18,18 +19,18 @@ using YumeChan.PluginBase;
 namespace Silk.Core.Services.Bot
 {
 	/// <summary>
-	/// A service for loading plugins.
+	/// A service for loading plugins. Requires 
 	/// </summary>
-	public sealed class PluginLoaderService
+	public sealed class ShardedPluginLoaderService
 	{
-		private readonly ILogger<PluginLoaderService> _logger;
+		private readonly ILogger<ShardedPluginLoaderService> _logger;
 		private readonly DiscordShardedClient _client;
 		private readonly PluginLoader _plugins;
 		private readonly IUnityContainer _container;
 
 		private readonly FileSystemWatcher _pluginWatchdog = new("./plugins", OperatingSystem.IsWindows() ? "*Plugin*.dll" : "*Plugin*");
 
-		public PluginLoaderService(ILogger<PluginLoaderService> logger, PluginLoader plugins, DiscordShardedClient client, IUnityContainer container)
+		public ShardedPluginLoaderService(ILogger<ShardedPluginLoaderService> logger, PluginLoader plugins, DiscordShardedClient client, IUnityContainer container)
 		{
 			_logger = logger;
 			_plugins = plugins;
@@ -37,7 +38,7 @@ namespace Silk.Core.Services.Bot
 			_container = container;
 
 
-			_pluginWatchdog.Created += SignalPluginAdded;
+			//_pluginWatchdog.Created += SignalPluginAdded;
 		}
 		private void SignalPluginAdded(object _, FileSystemEventArgs args) => Task.Run(async () => await GetNewPluginsAsync(args.Name!));
 		private async Task GetNewPluginsAsync(string pluginName)
@@ -82,46 +83,57 @@ namespace Silk.Core.Services.Bot
 			var failedCount = failedPlugins.Count;
 			_logger.LogInformation("Loaded {Loaded} plugins out of {Total} total plugins, with {Failed} failing to load.", pluginCount - failedCount, pluginCount, failedCount);
 		}
-
-
-		public async Task RegisterPluginCommands()
+		
+		/// <summary>
+		/// Registers loaded plugins' applicable commadns 
+		/// </summary>
+		/// <returns></returns>
+		public Task RegisterPluginCommandsAsync() 
+			=> RegisterPluginCommandsAsync(_plugins);
+		
+		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
 		{
 			var cnext = await _client.GetCommandsNextAsync();
 			_logger.LogInformation("Initializing plugin commands");
 
 			var sw = Stopwatch.StartNew();
 			
-			var beforeCount = cnext[0].RegisteredCommands.Count;
-			
-			foreach (var plugin in _plugins.Where(p => p.Loaded))
+			foreach (var plugin in plugins.Where(p => p.Loaded))
 			{
 				var pluginAssembly = plugin.GetType().Assembly;
 				var before = cnext[0].RegisteredCommands.Count;
-				
-				foreach (var ext in cnext.Values) 
-					ext.RegisterCommands(pluginAssembly);
 
-				var after = cnext[0].RegisteredCommands.Count;
-				
-				if (before == after)
-					_logger.LogInformation("Plugin assembly contained no commands. Skipping.");
-				else 
-					_logger.LogInformation("Loaded {Commands} commands from {PluginName}", after - before, plugin.AssemblyName);
+				foreach (var ext in cnext.Values)
+				{
+					try
+					{
+						ext.RegisterCommands(pluginAssembly);
+						var after = before - cnext[0].RegisteredCommands.Count;
+
+						if (after is not 0)
+							_logger.LogInformation("Found and registered {After} commands in {PluginName} in {Time}", after, plugin.DisplayName, sw.ElapsedMilliseconds.ToString("N0"));
+					}
+					catch (DuplicateCommandException e)
+					{
+						_logger.LogWarning("Plugin ({Plugin}) in assembly {Assembly} failed to register commadns due to naming. Command: {Command}:", plugin.DisplayName, plugin.AssemblyName, e.CommandName);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError(e, "Registering commands from a plugin failed. Plugin: {Plugin} Exception:", plugin);
+					}
+					finally
+					{
+						sw.Restart();
+					}
+				}
 			}
-			
-			sw.Stop();
-
-			var afterCount = cnext[0].RegisteredCommands.Count;
-
-			if (afterCount > beforeCount)
-				_logger.LogInformation("Registered {TotalCommands} total commands from {Plugins} plugins. Execution time: {Time} ms", afterCount - beforeCount, _plugins.Count(), sw.ElapsedMilliseconds);
 		}
 
 		private async IAsyncEnumerable<(Plugin plugin, Exception exception)> LoadPluginsInternalAsync(IEnumerable<Plugin> plugins)
 		{
 			foreach (var plugin in plugins)
 			{
-				Exception? returnException = null;
+				Exception returnException = null;
 				try
 				{
 					await plugin.LoadAsync();

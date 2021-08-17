@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>PluginLoader</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+      <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-00963" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+      <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
+      <PackageReference Include="Unity" Version="5.11.10" />
+      <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
+    </ItemGroup>
+
+</Project>

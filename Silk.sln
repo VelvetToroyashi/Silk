@@ -35,7 +35,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoleMenuPlugin", "plugins\R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginMigrationHelper", "plugins\PluginMigrationHelper\PluginMigrationHelper.csproj", "{4433A4CF-96C8-4C44-9566-7E343BCD11E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader", "plugins\PluginLoader\PluginLoader.csproj", "{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader.Unity", "plugins\PluginLoader.Unity\PluginLoader.Unity.csproj", "{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader.MEDI", "plugins\PluginLoader.MEDI\PluginLoader.MEDI.csproj", "{10D1F50A-D54D-4383-8299-D5D3E1C18926}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +135,14 @@ Global
 		{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}.Release|x64.ActiveCfg = Release|Any CPU
 		{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}.Release|x64.Build.0 = Release|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Debug|x64.Build.0 = Debug|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Release|x64.ActiveCfg = Release|Any CPU
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,5 +162,6 @@ Global
 		{E783BF91-AAAD-47AA-90E2-0021CAAEEA02} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 		{4433A4CF-96C8-4C44-9566-7E343BCD11E2} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 		{478B4FE9-42F9-406E-913D-6EA27AD7C5BF} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
+		{10D1F50A-D54D-4383-8299-D5D3E1C18926} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 	EndGlobalSection
 EndGlobal

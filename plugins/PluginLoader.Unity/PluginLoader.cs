@@ -47,9 +47,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
 		/// </summary>
-		public PluginLoader LoadPluginFiles()
+		internal PluginLoader LoadPluginFiles()
 		{
-			
 			Directory.CreateDirectory("./plugins");
 			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
 			
@@ -63,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFiles"/>.
 		/// </summary>
 		/// <param name="container">The service container to add services to.</param>
-		public PluginLoader InstantiatePluginServices(IUnityContainer container)
+		internal PluginLoader InstantiatePluginServices(IUnityContainer container)
 		{
 			foreach (var plugin in _pluginAssemblies)
 				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))))
@@ -81,7 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// Instantiates plugins, but does not start them.
 		/// </summary>
 		/// <param name="container">The service container to add plugins to.</param>
-		public PluginLoader AddPlugins(IUnityContainer container)
+		internal PluginLoader AddPlugins(IUnityContainer container)
 		{
 			foreach (var asm in _pluginAssemblies)
 				foreach (var t in asm.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))

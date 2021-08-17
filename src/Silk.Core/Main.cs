@@ -25,7 +25,7 @@ namespace Silk.Core
 	public sealed class Main : IHostedService
 	{
 		private readonly ILogger<Main> _logger;
-		private readonly PluginLoaderService _plugins;
+		private readonly ShardedPluginLoaderService _shardedPlugins;
 		private readonly DiscordShardedClient _shardClient;
 		private readonly BotExceptionHandler _handler;
 		private readonly CommandHandler _commandHandler;
@@ -38,14 +38,14 @@ namespace Silk.Core
 			BotExceptionHandler handler,
 			CommandHandler commandHandler,
 			SlashCommandExceptionHandler slashExceptionHandler, 
-			PluginLoaderService plugins) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+			ShardedPluginLoaderService shardedPlugins) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
 		{
 			// And that's all it needs, since it subs to events in it's ctor.
 			_logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
 			_handler = handler;
 			_commandHandler = commandHandler;
 			_slashExceptionHandler = slashExceptionHandler;
-			_plugins = plugins;
+			_shardedPlugins = shardedPlugins;
 			_shardClient = shardClient;
 			_ = e;
 		}
@@ -58,7 +58,7 @@ namespace Silk.Core
 			await InitializeClientExtensions();
 			_logger.LogInformation("Initialized Client");
 
-			await _plugins.LoadPluginsAsync();
+			await _shardedPlugins.LoadPluginsAsync();
 			
 			await InitializeCommandsNextAsync();
 			await InitializeSlashCommandsAsync();
@@ -124,7 +124,7 @@ namespace Silk.Core
 
 			_logger.LogDebug("Registered {Commands} core commands for {Shards} shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
 
-			await _plugins.RegisterPluginCommands();
+			await _shardedPlugins.RegisterPluginCommandsAsync();
 			_logger.LogInformation("Initialized Command Framework");
 		}
 	}
