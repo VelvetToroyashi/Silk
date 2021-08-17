@@ -58,6 +58,9 @@ namespace RoleMenuPlugin
 					addFullButton.Disable();
 					addRoleOnlyButton.Disable();
 				}
+				
+				if (rmoOptions.Count > 1) 
+					finishButton.Enable();
 
 				message = await message.ModifyAsync(m =>
 					m.WithContent("Role menu setup:")
@@ -133,7 +136,9 @@ namespace RoleMenuPlugin
 					await confirmation.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 					
 					if (confirmation.Result.Id == decline.CustomId)
-						goto GetDescription;
+						return;
+					
+					rmoOptions.Add(option);
 				}
 
 				async Task AddRoleOnly()
