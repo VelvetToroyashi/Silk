@@ -12,6 +12,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using RoleMenuPlugin.Database;
+using RoleMenuPlugin.Database.MediatR;
 
 namespace RoleMenuPlugin
 {
@@ -21,6 +22,7 @@ namespace RoleMenuPlugin
 	[Group("rolemenu")]
 	[Aliases("role-menu", "rm")]
 	[Description("Role menu related commands.")]
+	[RequirePermissions(Permissions.ManageRoles)]
 	public sealed class RoleMenuCommand : BaseCommandModule
 	{
 		private readonly IMediator _mediator;
@@ -57,18 +59,24 @@ namespace RoleMenuPlugin
 					addRoleOnlyButton.Disable();
 				}
 
-				await message.ModifyAsync(m =>
+				message = await message.ModifyAsync(m =>
 					m.WithContent("Role menu setup:")
 						.AddComponents(addFullButton, addRoleOnlyButton, editButton)
 						.AddComponents(finishButton, quitButton));
 				
-				var selection = await message.WaitForButtonAsync(m => m.User == ctx.User, CancellationToken.None);
+				var selection = await interactivity.WaitForButtonAsync(message, ctx.User,  CancellationToken.None);
 				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-				
+
 				if (selection.Result.Id == "rm-quit")
 				{
 					await selection.Result.Interaction.DeleteOriginalResponseAsync();
 					return;
+				}
+
+				if (selection.Result.Id == "rm-finish")
+				{
+					await selection.Result.Interaction.DeleteOriginalResponseAsync();
+					break;
 				}
 
 				var task = selection.Result.Id switch
@@ -167,6 +175,12 @@ namespace RoleMenuPlugin
 					await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done.", IsEphemeral = true });
 				}
 			}
+
+			var msg = await channel.SendMessageAsync(new DiscordMessageBuilder()
+				.WithContent("**Role Menu**. Use the button below to get roles.")
+				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles")));
+
+			await _mediator.Send(new CreateRoleMenuRequest(new RoleMenuDto() { MessageId = msg.Id, Options = rmoOptions }));
 		}
 	}
 }
