@@ -78,24 +78,25 @@ namespace Silk.Core.EventHandlers.Guilds
 				.OrderBy(c => c.Position)
 				.FirstOrDefault(c => c.Type is ChannelType.Text && c.PermissionsFor(bot).HasPermission(Permissions.SendMessages | Permissions.EmbedLinks));
 
-			if (thankYouChannel is null)
-				return; // All channels are locked. //
+			if (thankYouChannel is not null)
+			{
+				DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
+					.WithTitle("Thank you for adding me!")
+					.WithColor(new("94f8ff"))
+					.WithDescription(OnGuildJoinThankYouMessage)
+					.WithThumbnail("https://files.velvetthepanda.dev/silk.png")
+					.WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
 
-			DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-				.WithTitle("Thank you for adding me!")
-				.WithColor(new("94f8ff"))
-				.WithDescription(OnGuildJoinThankYouMessage)
-				.WithThumbnail("https://files.velvetthepanda.dev/silk.png")
-				.WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
+				DiscordMessageBuilder? builder = new DiscordMessageBuilder()
+					.WithEmbed(embed)
+					.AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"),
+						new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"),
+						new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"),
+						new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source code!"));
 
-			DiscordMessageBuilder? builder = new DiscordMessageBuilder()
-				.WithEmbed(embed)
-				.AddComponents(new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi!"),
-					new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support server!"),
-					new DiscordLinkButtonComponent($"https://discord.com/api/oauth2/authorize?client_id={_client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite me!"),
-					new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source code!"));
-
-			await thankYouChannel.SendMessageAsync(builder);
+				await thankYouChannel.SendMessageAsync(builder);
+			}
+			
 			await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
 		}
 
