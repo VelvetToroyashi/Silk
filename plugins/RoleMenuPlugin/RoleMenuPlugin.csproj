@@ -3,23 +3,22 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <AssemblyVersion>1.1.0</AssemblyVersion>
-        <FileVersion></FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00963" />
-      <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00963" />
-      <PackageReference Include="MediatR" Version="9.0.0" />
-      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+      <PackageReference Include="DSharpPlus.CommandsNext" />
+      <PackageReference Include="DSharpPlus.Interactivity" />
+      <PackageReference Include="MediatR" />
+      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
-      <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+      <PackageReference Include="YumeChan.PluginBase" />
     </ItemGroup>
 
     <ItemGroup>
