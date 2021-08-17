@@ -18,7 +18,7 @@ using YumeChan.PluginBase;
 namespace PluginLoader.Unity
 {
 	/// <summary>
-	/// A service for loading plugins. Requires 
+	/// A service for loading plugins.
 	/// </summary>
 	public sealed class ShardedPluginLoaderService
 	{
@@ -71,10 +71,9 @@ namespace PluginLoader.Unity
 		/// <returns>A collection of plugins that failed to load (or unload, if they failed to load.)</returns>
 		public async Task LoadPluginsAsync()
 		{
-			_plugins
-				.LoadPluginFiles()
-				.InstantiatePluginServices(_container)
-				.AddPlugins(_container);
+			await _plugins.LoadPluginFilesAsync();
+			
+			_plugins.InstantiatePluginServices(_container).AddPlugins(_container);
 
 			var failedPlugins = await LoadPluginsInternalAsync(_plugins).ToListAsync();
 			

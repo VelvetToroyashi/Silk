@@ -5,9 +5,9 @@ using YumeChan.PluginBase;
 
 namespace PluginLoader.Unity
 {
-	public record PluginManifest
+	public sealed record PluginManifest
 	{
-		public Plugin Plugin { get; init; }
+		public Plugin Plugin { get; set; }
 		public Assembly Assembly { get; init; }
 		public FileInfo PluginInfo { get; init; }
 		public AppDomain AssociatedDomain { get; init; }

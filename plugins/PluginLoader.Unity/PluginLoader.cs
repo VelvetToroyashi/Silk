@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Unity;
@@ -36,41 +37,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	/// </summary>
 	public sealed class PluginLoader : IEnumerable<Plugin>
 	{
-		public AppDomain PluginDomain { get; } = AppDomain.CreateDomain("Plugins");
-
-		// Plugin instances are held in PluginLoaderService.cs //
-		private readonly List<Assembly> _pluginAssemblies = new();
-		private readonly List<FileInfo> _pluginFiles = new();
 		private readonly ILogger<PluginLoader> _logger;
-		public IReadOnlyList<Plugin> Plugins => _plugins;
-		private readonly List<Plugin> _plugins = new();
+		public IReadOnlyList<PluginManifest> Plugins => _plugins;
+		private readonly List<PluginManifest> _plugins = new();
 		
 		public PluginLoader(ILogger<PluginLoader> logger) => _logger = logger;
 
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
 		/// </summary>
-		internal PluginLoader LoadPluginFiles()
+		internal async Task<IEnumerable<Plugin>> LoadPluginFilesAsync()
 		{
 			Directory.CreateDirectory("./plugins");
 			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
-			
-			_pluginFiles.AddRange(pluginFiles.Select(f => new FileInfo(f)));
-			_pluginAssemblies.AddRange(_pluginFiles.Select(f => Assembly.LoadFile(f.FullName)));
-			AppDomain.CreateDomain("Plugins");
-			
+
+			foreach (var plugin in pluginFiles)
+			{
+				var asmStream = await File.ReadAllBytesAsync(plugin);
+				var asm = Assembly.Load(asmStream);
+
+				var fileInfo = new FileInfo(plugin);
+
+				var manifest = new PluginManifest() { Assembly = asm, PluginInfo = fileInfo, AssociatedDomain = AppDomain.CreateDomain(fileInfo.Name) };
+			}
 			
 			return this;
 		}
 		
 		/// <summary>
-		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFiles"/>.
+		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFilesAsync"/>.
 		/// </summary>
 		/// <param name="container">The service container to add services to.</param>
 		internal PluginLoader InstantiatePluginServices(IUnityContainer container)
 		{
-			foreach (var plugin in _pluginAssemblies)
-				foreach (var t in plugin.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))))
+			foreach (var plugin in _plugins)
+				foreach (var t in plugin.Assembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))))
 				{
 					var services = (container.Resolve(t) as DependencyInjectionHandler)!.ConfigureServices(new ServiceCollection());
 					
@@ -87,15 +88,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// <param name="container">The service container to add plugins to.</param>
 		internal PluginLoader AddPlugins(IUnityContainer container)
 		{
-			foreach (var asm in _pluginAssemblies)
-				foreach (var t in asm.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
+			foreach (var asm in _plugins)
+				foreach (var t in asm.Assembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
 				{
 					try
 					{
 						var plugin = container.Resolve(t) as Plugin;
 						container.RegisterInstance(typeof(Plugin), plugin);
-
-						_plugins.Add(plugin!);
 					}
 					catch (ResolutionFailedException resex)
 					{
@@ -107,7 +106,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			return this;
 		}
 		
-		public IEnumerator<Plugin> GetEnumerator() => _plugins.GetEnumerator();
+		public IEnumerator<Plugin> GetEnumerator() => _plugins.Select(p => p.Plugin).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 }
