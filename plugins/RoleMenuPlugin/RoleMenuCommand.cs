@@ -122,11 +122,13 @@ namespace RoleMenuPlugin
 					//Description
 					await message.ModifyAsync(m => m.WithContent("Role description (trunctated at 100 characters, type skip to skip)"));
 					
-					GetDescription:
 					var description = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
 
 					if (string.Equals(description.Result.Content, "skip", StringComparison.OrdinalIgnoreCase))
 						return;
+
+					var descriptionString = description.Result.Content;
+					option = option with { Description = descriptionString.Length > 100 ? descriptionString[..100] : descriptionString };
 					
 					var confirm = new DiscordButtonComponent(ButtonStyle.Success, "rm-confirm", "Yes");
 					var decline =  new DiscordButtonComponent(ButtonStyle.Danger, "rm-decline", "No");

@@ -51,7 +51,8 @@ namespace RoleMenuPlugin
 				var options = menu.Options
 					.Select(o =>
 						new DiscordSelectComponentOption($"{eventArgs.Guild.Roles[o.RoleId].Name}", o.RoleId.ToString(CultureInfo.InvariantCulture),
-							null, roles.Contains(o.RoleId)))
+							o.Description, roles.Contains(o.RoleId), 
+							string.IsNullOrEmpty(o.EmojiName) ? null : ulong.TryParse(o.EmojiName, out var emoji) ? new(emoji) : new(o.EmojiName)))
 					.ToArray();
 				
 				var dropdown = new DiscordSelectComponent(eventArgs.Message.Id.ToString(CultureInfo.InvariantCulture), null, options, false, 0, options.Length);	
@@ -157,7 +158,7 @@ namespace RoleMenuPlugin
 		private bool HasSelfPermissions(DiscordGuild eventArgsGuild) 
 			=> eventArgsGuild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles);
 
-		private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole? role)
+		private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role)
 		{
 			role = guild.GetRole(id);
 

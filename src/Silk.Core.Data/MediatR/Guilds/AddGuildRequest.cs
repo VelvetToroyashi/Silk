@@ -10,19 +10,15 @@ namespace Silk.Core.Data.MediatR.Guilds
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Prefix">The prefix for the Guild</param>
-    public record AddGuildRequest(ulong GuildId, string Prefix) : IRequest<Guild>;
+    public sealed record AddGuildRequest(ulong GuildId, string Prefix) : IRequest<Guild>;
 
     /// <summary>
     ///     The default handler for <see cref="AddGuildRequest" />.
     /// </summary>
-    public class AddGuildHandler : IRequestHandler<AddGuildRequest, Guild>
+    public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, Guild>
     {
         private readonly GuildContext _db;
-
-        public AddGuildHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public AddGuildHandler(GuildContext db) => _db = db;
 
         public async Task<Guild> Handle(AddGuildRequest request, CancellationToken cancellationToken)
         {
