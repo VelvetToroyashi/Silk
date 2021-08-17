@@ -28,12 +28,12 @@ namespace RoleMenuPlugin
 		private readonly IMediator _mediator;
 		public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
 		
-		private readonly DiscordButtonComponent quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
-		private readonly DiscordButtonComponent finishButton = new(ButtonStyle.Success, "rm-finish", "Finish", true);
+		private readonly DiscordButtonComponent _quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
+		private readonly DiscordButtonComponent _finishButton = new(ButtonStyle.Success, "rm-finish", "Finish", true);
 			
-		private readonly DiscordButtonComponent editButton = new(ButtonStyle.Primary, "rm-edit", "Edit an existing role-menu");
-		private readonly DiscordButtonComponent addFullButton = new(ButtonStyle.Primary, "rm-add-full", "Add option (full)");
-		private readonly DiscordButtonComponent addRoleOnlyButton = new(ButtonStyle.Secondary, "rm-add", "Add option (role only)");
+		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit an existing role-menu");
+		private readonly DiscordButtonComponent _addFullButton = new(ButtonStyle.Primary, "rm-add-full", "Add option (full)");
+		private readonly DiscordButtonComponent _addRoleOnlyButton = new(ButtonStyle.Secondary, "rm-add", "Add option (role only)");
 		
 
 		[Command]
@@ -50,22 +50,23 @@ namespace RoleMenuPlugin
 			var rmoOptions = new List<RoleMenuOptionDto>();
 
 			var message = await ctx.Channel.SendMessageAsync("Role Menu Setup:");
-
+			var quitButton = new DiscordButtonComponent(_quitButton);
+			
 			while (true)
 			{
 				if (rmoOptions.Count >= 25)
 				{
-					addFullButton.Disable();
-					addRoleOnlyButton.Disable();
+					_addFullButton.Disable();
+					_addRoleOnlyButton.Disable();
 				}
 				
 				if (rmoOptions.Count > 1) 
-					finishButton.Enable();
+					_finishButton.Enable();
 
 				message = await message.ModifyAsync(m =>
 					m.WithContent("Role menu setup:")
-						.AddComponents(addFullButton, addRoleOnlyButton, editButton)
-						.AddComponents(finishButton, quitButton));
+						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
+						.AddComponents(_finishButton, quitButton));
 				
 				var selection = await interactivity.WaitForButtonAsync(message, ctx.User,  CancellationToken.None);
 				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -145,7 +146,7 @@ namespace RoleMenuPlugin
 				{
 					var msg = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 						.WithContent("You can add multiple roles at once!")
-						.AddComponents(quitButton)
+						.AddComponents(_quitButton)
 						.AsEphemeral(true));
 					
 					var cancalInput = interactivity.WaitForButtonAsync(msg);
