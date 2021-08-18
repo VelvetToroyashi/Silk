@@ -11,15 +11,17 @@ namespace PluginLoader.Unity
 	{
 		private readonly FileSystemWatcher _fileWatcher = new("./plugins", "*Plugin.dll");
 		
+		private readonly IPluginLoaderService _loaderService;
 		private readonly ILogger<PluginWatchdog> _logger;
 		private readonly IUnityContainer _container;
 		private readonly PluginLoader _loader;
 		
-		public PluginWatchdog(ILogger<PluginWatchdog> logger, PluginLoader loader, IUnityContainer container)
+		public PluginWatchdog(ILogger<PluginWatchdog> logger, PluginLoader loader, IUnityContainer container, IPluginLoaderService loaderService)
 		{
 			_logger = logger;
 			_loader = loader;
 			_container = container;
+			_loaderService = loaderService;
 
 			_fileWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
 			_fileWatcher.EnableRaisingEvents = true;
@@ -33,7 +35,12 @@ namespace PluginLoader.Unity
 		private async void UnloadPlugin(object sender, FileSystemEventArgs e)
 		{
 			_logger.LogDebug("{File} has been removed from the plugins directory. Unloading...", e.Name);
+
+			var plugin = _loader.Plugins.SingleOrDefault(p => p.Assembly.Location == e.FullPath);
 			await _loader.UnloadPlugin(new FileInfo(e.FullPath));
+			
+			if (plugin is not null)
+				await _loaderService.UnloadPluginCommandsAsync(new[] { plugin });
 		}
 		private async void ReloadPlugin(object sender, FileSystemEventArgs e)
 		{
