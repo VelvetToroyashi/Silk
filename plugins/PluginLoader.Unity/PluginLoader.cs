@@ -50,7 +50,6 @@ namespace PluginLoader.Unity
 		internal async Task LoadPluginFilesAsync()
 		{
 			Directory.CreateDirectory("./plugins");
-			// Don't re-load loaded plugins. //
 			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll")
 				.Where(f => _plugins.All(m => !string.Equals(f, m.PluginInfo.Name)));
 
@@ -58,7 +57,10 @@ namespace PluginLoader.Unity
 			{
 				var fileInfo = new FileInfo(plugin);
 				var loadContext = new AssemblyLoadContext(fileInfo.Name, true);
-				var asm = loadContext.LoadFromAssemblyPath(fileInfo.FullName);
+				var asmStream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+
+				var asm = loadContext.LoadFromStream(asmStream);
+				asmStream.Close();
 				
 				var manifest = new PluginManifest()
 				{
@@ -97,10 +99,12 @@ namespace PluginLoader.Unity
 				_plugins.Remove(plugin);
 			}
 			
-			
 			var loadContext = new AssemblyLoadContext(info.Name, true);
-			var asm = loadContext.LoadFromAssemblyPath(info.FullName);
-				
+			var asmStream = File.Open(info.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+
+			var asm = loadContext.LoadFromStream(asmStream);
+			asmStream.Close();
+			
 			var manifest = new PluginManifest()
 			{
 				Assembly = asm,
