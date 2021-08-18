@@ -219,8 +219,8 @@ namespace Silk.Core
 					services.AddSingleton<GuildEventHandlerService>();
 					services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
 
-					services.AddSingleton<UptimeService>();
-					services.AddHostedService(b => b.GetRequiredService<UptimeService>());
+					//services.AddSingleton<UptimeService>();
+					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 					services.RegisterShardedPluginServices();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
