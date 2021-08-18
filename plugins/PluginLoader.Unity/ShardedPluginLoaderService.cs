@@ -90,7 +90,6 @@ namespace PluginLoader.Unity
 		
 		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
 		{
-			return;
 			var cnext = await _client.GetCommandsNextAsync();
 			_logger.LogInformation("Initializing plugin commands");
 
