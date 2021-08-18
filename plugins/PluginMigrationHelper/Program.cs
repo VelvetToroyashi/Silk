@@ -13,7 +13,7 @@ namespace PluginMigrationHelper
 			var ver = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
 			Console.WriteLine($"PluginMigrationHelper v{ver} \n\n" +
 			                  "USAGE: \n" +
-			                  "dotnet ef migrations add <migration> [-c <context>] -s PluginMigrationHelper -p <plugin> \n\n" +
+			                  "dotnet ef migrations add <migration> [-c <context>] -s PluginMigrationHelper -p <plugin> -- <postgres | sqlite> -- <connection_string> \n\n" +
 			                  "PLUGIN MUST BE REFERENCED BY THIS PROJECT!");
 		}
 
