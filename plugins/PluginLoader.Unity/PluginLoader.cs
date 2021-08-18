@@ -101,6 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 					{
 						var plugin = container.Resolve(t) as Plugin;
 						container.RegisterInstance(typeof(Plugin), plugin);
+						asm.Plugin = plugin;
 					}
 					catch (ResolutionFailedException resex)
 					{
