@@ -70,7 +70,11 @@ namespace PluginLoader.Unity
 				_plugins.Add(manifest);
 			}
 		}
-
+		
+		/// <summary>
+		/// Loads a new plugin, unloading the old plugin, if it exists.
+		/// </summary>
+		/// <param name="info">The info of the plugin file.</param>
 		internal async Task LoadNewPluginAsync(FileInfo info)
 		{
 			if (_plugins.Select(p => p.PluginInfo).SingleOrDefault(f => f.Name == info.Name) is {} fi)
