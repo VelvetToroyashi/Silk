@@ -105,10 +105,10 @@ namespace PluginLoader.Unity
 					try
 					{
 						ext.RegisterCommands(pluginAssembly);
-						var after = before - cnext[0].RegisteredCommands.Count;
+						var after = cnext[0].RegisteredCommands.Count - before;
 
 						if (after is not 0)
-							_logger.LogInformation("Found and registered {After} commands in {PluginName} in {Time}", after, plugin.DisplayName, sw.ElapsedMilliseconds.ToString("N0"));
+							_logger.LogInformation("Found and registered {After} commands in {PluginName} in {Time} ms", after, plugin.DisplayName, sw.ElapsedMilliseconds.ToString("N0"));
 					}
 					catch (DuplicateCommandException e)
 					{

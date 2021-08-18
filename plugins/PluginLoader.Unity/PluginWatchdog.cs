@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Unity;
@@ -36,12 +37,13 @@ namespace PluginLoader.Unity
 		{
 			_logger.LogDebug("{File} has been removed from the plugins directory. Unloading...", e.Name);
 
-			var plugin = _loader.Plugins.SingleOrDefault(p => p.Assembly.Location == e.FullPath);
+			var plugin = _loader.Plugins.SingleOrDefault(p => p.Assembly.GetCustomAttribute<AssemblyTitleAttribute>()!.Title == e.Name![..^4]);
 			await _loader.UnloadPlugin(new FileInfo(e.FullPath));
 			
 			if (plugin is not null)
 				await _loaderService.UnloadPluginCommandsAsync(new[] { plugin });
 		}
+		
 		private async void ReloadPlugin(object sender, FileSystemEventArgs e)
 		{
 			_logger.LogDebug("{File} has been updated. Reloading plugin...", e.Name);
@@ -73,6 +75,7 @@ namespace PluginLoader.Unity
 			try
 			{
 				await plugin.Plugin.LoadAsync();
+				await _loaderService.RegisterPluginCommandsAsync(new[] { plugin.Plugin });
 			}
 			catch (Exception ex)
 			{
