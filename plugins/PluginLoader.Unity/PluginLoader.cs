@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -84,19 +85,7 @@ namespace PluginLoader.Unity
 				if (info.LastWriteTime <= fi.CreationTime)
 					return; // ??? Not a new file. //
 
-				var plugin = _plugins.Single(p => p.PluginInfo == fi);
-
-				if (plugin.Plugin?.Loaded ?? false)
-				{
-					try
-					{
-						await plugin.Plugin.UnloadAsync();
-					}
-					catch { } //TODO: LOG
-				}
-				
-				plugin.LoadContext.Unload();
-				_plugins.Remove(plugin);
+				await UnloadPlugin(info);
 			}
 			
 			var loadContext = new AssemblyLoadContext(info.Name, true);
@@ -115,6 +104,31 @@ namespace PluginLoader.Unity
 			_plugins.Add(manifest);
 		}
 
+
+		/// <summary>
+		/// Unloads a plugin from memory.
+		/// </summary>
+		/// <param name="info"></param>
+		internal async Task UnloadPlugin(FileInfo info)
+		{
+			var plugin = _plugins.SingleOrDefault(p => p.PluginInfo.Name == info.Name);
+			
+			if (plugin is null) 
+				return;
+
+			try
+			{
+				await plugin.Plugin.UnloadAsync();
+			}
+			catch (Exception e)
+			{
+				_logger.LogWarning(e, "Unloading a plugin throw an exception. Plugin: {Plugin}, Exception:", plugin.Plugin);	
+			}
+
+			plugin.LoadContext.Unload();
+			_plugins.Remove(plugin);
+		}
+		
 		/// <summary>
 		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFilesAsync"/>.
 		/// </summary>
@@ -161,5 +175,6 @@ namespace PluginLoader.Unity
 		
 		public IEnumerator<Plugin> GetEnumerator() => _plugins.Select(p => p.Plugin).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		
 	}
 }

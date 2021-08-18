@@ -22,17 +22,16 @@ namespace PluginLoader.Unity
 			_fileWatcher.Changed += ReloadPlugin;
 			_fileWatcher.Deleted += UnloadPlugin;
 		}
-		
-		private void UnloadPlugin(object sender, FileSystemEventArgs e) { }
+
+		private async void UnloadPlugin(object sender, FileSystemEventArgs e)
+			=> await _loader.UnloadPlugin(new FileInfo(e.FullPath));
 		private async void ReloadPlugin(object sender, FileSystemEventArgs e)
-		{
-			await _loader.LoadNewPluginAsync(new FileInfo(e.FullPath));
-		}
+			=> await _loader.LoadNewPluginAsync(new FileInfo(e.FullPath));
+		
 
 		private async void LoadPlugin(object sender, FileSystemEventArgs e)
-		{
-			await _loader.LoadNewPluginAsync(new FileInfo(e.FullPath));
-		}
+			=> await _loader.LoadNewPluginAsync(new FileInfo(e.FullPath));
+		
 
 
 	}
