@@ -102,6 +102,8 @@ namespace PluginLoader.Unity
 			};
 
 			_plugins.Add(manifest);
+			
+			_logger.LogDebug("Hot-loaded plugin file {PluginFile}", info.Name);
 		}
 
 
@@ -118,7 +120,8 @@ namespace PluginLoader.Unity
 
 			try
 			{
-				await plugin.Plugin.UnloadAsync();
+				if (plugin.Plugin is not null)
+					await plugin.Plugin.UnloadAsync()!;
 			}
 			catch (Exception e)
 			{
@@ -127,6 +130,8 @@ namespace PluginLoader.Unity
 
 			plugin.LoadContext.Unload();
 			_plugins.Remove(plugin);
+			
+			_logger.LogDebug("Successfully unloaded {Plugin}.", plugin.PluginInfo.Name);
 		}
 		
 		/// <summary>

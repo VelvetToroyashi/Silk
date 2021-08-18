@@ -21,6 +21,7 @@ namespace PluginLoader.Unity
 			_fileWatcher.Created += LoadPlugin;
 			_fileWatcher.Changed += ReloadPlugin;
 			_fileWatcher.Deleted += UnloadPlugin;
+			_logger.LogInformation("Watchdog active.");
 		}
 
 		private async void UnloadPlugin(object sender, FileSystemEventArgs e)

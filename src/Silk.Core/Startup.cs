@@ -221,8 +221,7 @@ namespace Silk.Core
 
 					services.AddSingleton<UptimeService>();
 					services.AddHostedService(b => b.GetRequiredService<UptimeService>());
-					services.AddSingleton<ShardedPluginLoaderService>();
-					services.AddSingleton<PluginLoader.Unity.PluginLoader>();
+					services.RegisterShardedPluginServices();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
 					
