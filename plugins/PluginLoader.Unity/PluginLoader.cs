@@ -45,10 +45,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/// <summary>
 		/// Loads plugin manifests from Disk. Plugins must be placed in the plugins folder relative to the core binary.
 		/// </summary>
-		internal async Task<IEnumerable<Plugin>> LoadPluginFilesAsync()
+		internal async Task LoadPluginFilesAsync()
 		{
 			Directory.CreateDirectory("./plugins");
-			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll");
+			// Don't re-load loaded plugins. //
+			var pluginFiles = Directory.GetFiles("./plugins", "*Plugin.dll")
+				.Where(f => _plugins.All(m => !string.Equals(f, m.PluginInfo.Name)));
 
 			foreach (var plugin in pluginFiles)
 			{
@@ -65,8 +67,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 				_plugins.Add(manifest);
 			}
+		}
+
+		internal async Task LoadNewPluginAsync(FileInfo info)
+		{
+			if (_plugins.Select(p => p.PluginInfo).SingleOrDefault(f => f.Name == info.Name) is {} fi)
+			{
+				if (info.LastWriteTime <= fi.CreationTime)
+					return; // ??? Not a new file. //
+
+				var plugin = _plugins.Single(p => p.PluginInfo == fi);
+
+				if (plugin.Plugin?.Loaded ?? false)
+				{
+					try
+					{
+						await plugin.Plugin.UnloadAsync();
+					}
+					catch { } //TODO: LOG
+				}
+				
+				plugin.LoadContext.Unload();
+				_plugins.Remove(plugin);
+			}
 			
-			return this;
+			
+			var loadContext = new AssemblyLoadContext(info.Name, true);
+			var asm = loadContext.LoadFromAssemblyPath(info.FullName);
+				
+			var manifest = new PluginManifest()
+			{
+				Assembly = asm,
+				PluginInfo = info,
+				LoadContext = loadContext
+			};
+
+			_plugins.Add(manifest);
 		}
 
 		/// <summary>
