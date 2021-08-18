@@ -72,7 +72,6 @@ namespace PluginLoader.Unity
 		public async Task LoadPluginsAsync()
 		{
 			await _plugins.LoadPluginFilesAsync();
-			
 			_plugins.InstantiatePluginServices(_container).AddPlugins(_container);
 
 			var failedPlugins = await LoadPluginsInternalAsync(_plugins).ToListAsync();
@@ -91,6 +90,7 @@ namespace PluginLoader.Unity
 		
 		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
 		{
+			return;
 			var cnext = await _client.GetCommandsNextAsync();
 			_logger.LogInformation("Initializing plugin commands");
 

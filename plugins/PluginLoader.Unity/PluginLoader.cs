@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -53,24 +52,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 			foreach (var plugin in pluginFiles)
 			{
-				var asmStream = await File.ReadAllBytesAsync(plugin);
-				var asm = Assembly.Load(asmStream);
-
 				var fileInfo = new FileInfo(plugin);
+				var loadContext = new AssemblyLoadContext(fileInfo.Name, true);
+				var asm = loadContext.LoadFromAssemblyPath(fileInfo.FullName);
+				
+				var manifest = new PluginManifest()
+				{
+					Assembly = asm,
+					PluginInfo = fileInfo,
+					LoadContext = loadContext
+				};
 
-				var manifest = new PluginManifest() { Assembly = asm, PluginInfo = fileInfo, AssociatedDomain = AppDomain.CreateDomain(fileInfo.Name) };
+				_plugins.Add(manifest);
 			}
 			
 			return this;
 		}
-		
+
 		/// <summary>
 		/// Instantiates services for the plugin assemblies. This should be called AFTER calling <see cref="LoadPluginFilesAsync"/>.
 		/// </summary>
 		/// <param name="container">The service container to add services to.</param>
-		internal PluginLoader InstantiatePluginServices(IUnityContainer container)
+		/// <param name="manifests">Optional: Specify the plugin manifests to load</param>
+		internal PluginLoader InstantiatePluginServices(IUnityContainer container, IEnumerable<PluginManifest> manifests = null)
 		{
-			foreach (var plugin in _plugins)
+			foreach (var plugin in manifests ?? _plugins)
 				foreach (var t in plugin.Assembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))))
 				{
 					var services = (container.Resolve(t) as DependencyInjectionHandler)!.ConfigureServices(new ServiceCollection());
