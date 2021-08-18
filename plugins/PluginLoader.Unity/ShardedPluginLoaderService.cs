@@ -20,7 +20,7 @@ namespace PluginLoader.Unity
 	/// <summary>
 	/// A service for loading plugins.
 	/// </summary>
-	public sealed class ShardedPluginLoaderService
+	public sealed class ShardedPluginLoaderService : IPluginLoaderService
 	{
 		private readonly ILogger<ShardedPluginLoaderService> _logger;
 		private readonly DiscordShardedClient _client;
@@ -122,6 +122,25 @@ namespace PluginLoader.Unity
 					{
 						sw.Restart();
 					}
+				}
+			}
+		}
+
+		async Task IPluginLoaderService.UnloadPluginCommandsAsync(IEnumerable<PluginManifest> plugins)
+		{
+			var cnext = await _client.GetCommandsNextAsync();
+			
+			foreach (var plugin in plugins)
+			{
+				_logger.LogDebug("Unregistering commands for {Plugin}", plugin.Plugin.DisplayName);
+				foreach (var ext in cnext.Values)
+				{
+					var commands = ext.RegisteredCommands
+						.Where(c => c.Value.Module.ModuleType.Assembly == plugin.Assembly)
+						.Select(c => c.Value)
+						.ToArray();
+					
+					ext.UnregisterCommands(commands);
 				}
 			}
 		}
