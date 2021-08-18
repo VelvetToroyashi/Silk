@@ -78,7 +78,7 @@ namespace PluginLoader.Unity
 		/// Loads a new plugin, unloading the old plugin, if it exists.
 		/// </summary>
 		/// <param name="info">The info of the plugin file.</param>
-		internal async Task LoadNewPluginAsync(FileInfo info)
+		internal async Task LoadNewPluginManifestAsync(FileInfo info)
 		{
 			if (_plugins.Select(p => p.PluginInfo).SingleOrDefault(f => f.Name == info.Name) is {} fi)
 			{
@@ -114,23 +114,21 @@ namespace PluginLoader.Unity
 		internal async Task UnloadPlugin(FileInfo info)
 		{
 			var plugin = _plugins.SingleOrDefault(p => p.PluginInfo.Name == info.Name);
-			
-			if (plugin is null) 
+
+			if (plugin is null)
 				return;
 
 			try
 			{
-				if (plugin.Plugin is not null)
-					await plugin.Plugin.UnloadAsync()!;
+				await plugin.Plugin.UnloadAsync()!;
 			}
 			catch (Exception e)
 			{
-				_logger.LogWarning(e, "Unloading a plugin throw an exception. Plugin: {Plugin}, Exception:", plugin.Plugin);	
+				_logger.LogWarning(e, "Unloading a plugin throw an exception. Plugin: {Plugin}, Exception:", plugin.Plugin!.DisplayName);	
 			}
-
+			
 			plugin.LoadContext.Unload();
 			_plugins.Remove(plugin);
-			
 			_logger.LogDebug("Successfully unloaded {Plugin}.", plugin.PluginInfo.Name);
 		}
 		
@@ -159,7 +157,7 @@ namespace PluginLoader.Unity
 		/// <param name="container">The service container to add plugins to.</param>
 		internal PluginLoader AddPlugins(IUnityContainer container)
 		{
-			foreach (var asm in _plugins)
+			foreach (var asm in _plugins.Where(p => p.Plugin is null))
 				foreach (var t in asm.Assembly.ExportedTypes.Where(t => t.IsSubclassOf(typeof(Plugin))))
 				{
 					try
