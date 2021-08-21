@@ -9,9 +9,7 @@ namespace AnnoucementPlugin.Database
 		
 		public ulong GuildId { get; set; }
 		public ulong ChannelId { get; set; }
-		
-		public Role AnnouncementsRole { get; set; }
-		
+
 		[MaxLength(4000)]
 		public string AnnouncementMessage { get; set; }
 	}
