@@ -29,15 +29,14 @@ namespace AnnoucementPlugin.Services
 
 			if (!unlocked)
 				return new(false, MessageSendErrorType.CouldNotUnlockChannel);
+
+			var messageChannel = _client.GetShard(guild).Guilds[guild].Channels[channel];
 			
 			if (message.Length <= 2000)
 			{
 				try
 				{
-					await _client.GetShard(guild)
-						.Guilds[guild]
-						.Channels[channel]
-						.SendMessageAsync(message);
+					await messageChannel.SendMessageAsync(message);
 				}
 				catch
 				{
@@ -52,10 +51,7 @@ namespace AnnoucementPlugin.Services
 				
 				try
 				{
-					await _client.GetShard(guild)
-						.Guilds[guild]
-						.Channels[channel]
-						.SendMessageAsync(embed);
+					await messageChannel.SendMessageAsync(embed);
 				}
 				catch
 				{

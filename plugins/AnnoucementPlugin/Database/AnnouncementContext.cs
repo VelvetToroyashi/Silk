@@ -1,13 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace AnnoucementPlugin.Database
 {
-	public sealed class AnnouncementContext : IHostedService
+	public sealed class AnnouncementContext : DbContext
 	{
-		
-		public async Task StartAsync(CancellationToken cancellationToken) { }
-		public async Task StopAsync(CancellationToken cancellationToken) { }
+		public DbSet<AnnouncementModel> Announcements { get; set; }
 	}
 }
