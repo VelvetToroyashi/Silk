@@ -4,7 +4,11 @@ namespace AnnoucementPlugin.Database
 {
 	public sealed class AnnouncementModel
 	{
-		public int Id { get; set; }
+		[Key]
+		public int PK_Key { get; set; }
+		
+		public ulong GuildId { get; set; }
+		public ulong ChannelId { get; set; }
 		
 		public Role AnnouncementsRole { get; set; }
 		
