@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\AnnoucementPlugin\AnnoucementPlugin.csproj" />
       <ProjectReference Include="..\RoleMenuPlugin\RoleMenuPlugin.csproj" />
     </ItemGroup>
 

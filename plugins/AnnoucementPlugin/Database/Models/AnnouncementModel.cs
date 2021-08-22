@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace AnnoucementPlugin.Database
 {
@@ -12,5 +13,7 @@ namespace AnnoucementPlugin.Database
 
 		[MaxLength(4000)]
 		public string AnnouncementMessage { get; set; }
+		
+		public DateTime ScheduledFor { get; set; }
 	}
 }

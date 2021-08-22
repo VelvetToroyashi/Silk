@@ -37,7 +37,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginMigrationHelper", "pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader.Unity", "plugins\PluginLoader.Unity\PluginLoader.Unity.csproj", "{478B4FE9-42F9-406E-913D-6EA27AD7C5BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader.MEDI", "plugins\PluginLoader.MEDI\PluginLoader.MEDI.csproj", "{10D1F50A-D54D-4383-8299-D5D3E1C18926}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLoader.MicrosoftDI", "plugins\PluginLoader.MicrosoftDI\PluginLoader.MicrosoftDI.csproj", "{10D1F50A-D54D-4383-8299-D5D3E1C18926}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnnoucementPlugin", "plugins\AnnoucementPlugin\AnnoucementPlugin.csproj", "{F1669FB0-5345-4EB4-A7D1-9AFCF674BD1A}"
 EndProject

@@ -35,11 +35,9 @@ namespace PluginLoader.Unity
 			_plugins = plugins;
 			_client = client;
 			_container = container;
-
-
 			//_pluginWatchdog.Created += SignalPluginAdded;
 		}
-		private void SignalPluginAdded(object _, FileSystemEventArgs args) => Task.Run(async () => await GetNewPluginsAsync(args.Name!));
+		
 		private async Task GetNewPluginsAsync(string pluginName)
 		{
 			var fInfo = new FileInfo(pluginName);

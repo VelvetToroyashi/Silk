@@ -1,6 +1,9 @@
-﻿using AnnoucementPlugin.Services;
+﻿using AnnoucementPlugin.Database;
+using AnnoucementPlugin.Services;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using YumeChan.PluginBase;
+using YumeChan.PluginBase.Tools.Data;
 
 namespace AnnoucementPlugin
 {
@@ -8,7 +11,13 @@ namespace AnnoucementPlugin
 	{
 		public override IServiceCollection ConfigureServices(IServiceCollection services)
 			=> services
+				.AddMediatR(typeof(DependencyHandler))
 				.AddSingleton<AnnouncementService>()
+				.AddDbContext<AnnouncementContext>((p, b) =>
+				{
+					p.GetService<IDatabaseProvider<AnnouncementPlugin>>()!
+						.GetPostgresContextOptionsBuilder()(b);
+				})
 				.AddSingleton<IMessageDispatcher, MessageDispatcher>();
 	}
 }
