@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
-      <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-00963" />
+      <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-00968" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
       <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
       <PackageReference Include="Unity" Version="5.11.10" />
