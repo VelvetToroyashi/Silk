@@ -1,5 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Loader;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Unity;
+using Unity.Microsoft.DependencyInjection;
+using YumeChan.PluginBase;
 
 namespace PluginLoader.Unity
 { 
@@ -32,9 +41,97 @@ namespace PluginLoader.Unity
 		private readonly ILogger<PluginLoader> _logger;
 		public IReadOnlyList<PluginManifest> Plugins => _plugins;
 		private readonly List<PluginManifest> _plugins = new();
-		
-		public PluginLoader(ILogger<PluginLoader> logger) => _logger = logger;
 
+		private readonly IUnityContainer _container;
+		
+		public PluginLoader(ILogger<PluginLoader> logger, IUnityContainer container)
+		{
+			_logger = logger;
+			_container = container;
+		}
+
+		/// <summary>
+		/// Returns an array of all potential plugin files.
+		/// </summary>
+		/// <param name="directory">The directory to search for plugins in.</param>
+		/// <returns>An array of plugin canidate file infos.</returns>
+		internal FileInfo[] DiscoverPluginFiles(string directory)
+		{
+			if (!Directory.Exists(directory))
+				return Array.Empty<FileInfo>();
+
+			var files = Directory.GetFiles(directory, "*Plugin.dll");
+
+			return files.Select(f => new FileInfo(f)).ToArray();
+		}
+
+		internal PluginManifest LoadPluginFile(FileInfo file) // It's up to other things to keep track of plugin states. //
+		{
+			var alc = new AssemblyLoadContext(file.Name, true);
+			var asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+			var asm = alc.LoadFromStream(asmStream);
+			asmStream.Close();
+
+			var manifest = new PluginManifest
+			{
+				Assembly = asm,
+				LoadContext = alc,
+				PluginInfo = file
+			};
+			
+			_plugins.Add(manifest);
+			return manifest;
+		}
+
+		internal async Task<bool> UnloadPluginFileAsync(FileInfo info)
+		{
+			if (_plugins.SingleOrDefault(m => m.PluginInfo.FullName == info.FullName) is not {} manifest)
+				return false;
+
+			try { await manifest.Plugin?.UnloadAsync()!; }
+			catch (Exception e)
+			{
+				/* TODO: Log exception here or smth */
+			}
+			return _plugins.Remove(manifest);
+		}
+
+		internal async Task RegisterPluginAsync(PluginManifest manifest)
+		{
+			if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))) is not { } injectorType)
+			{
+				_logger.LogDebug("Dependency handler was not found in assembly {Asm}; assuming plugin is context-agnostic.", manifest.Assembly.FullName);
+			}
+			else
+			{
+				var injector = (DependencyInjectionHandler)_container.Resolve(injectorType);
+
+				var services = injector.ConfigureServices(new ServiceCollection());
+				_container.AddServices(services);
+			
+				_logger.LogDebug("Loaded services for {Plugin}", manifest.PluginInfo.Name);
+			}
+
+			if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(Plugin))) is not { } pluginType)
+			{
+				_logger.LogWarning("Plugin assembly {Asm} contains multiple plugin types. This is not supported.", manifest.Assembly.FullName);
+				_plugins.Remove(manifest);
+				return;
+			}
+
+			try
+			{
+				var plugin = (Plugin)_container.Resolve(pluginType);
+				_container.RegisterInstance(typeof(Plugin), plugin);
+
+				manifest.Plugin = plugin;
+			}
+			catch (Exception e)
+			{
+				_logger.LogError(e, "{Plugin} failed to load. Plugin version: {Version}. Exception:", pluginType.Name, manifest.Assembly.GetName().Version!.ToString(3));
+				_plugins.Remove(manifest);
+			}
+		}
 		
 		
 	}

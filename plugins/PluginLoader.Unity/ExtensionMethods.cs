@@ -16,7 +16,7 @@ namespace PluginLoader.Unity
 			=> services
 				.TryRegisterSingleton<PluginLoader>()
 				.TryRegisterSingleton<PluginWatchdog>()
-				;//.AddSingleton<IPluginLoaderService, ShardedPluginLoaderService>();
+				.AddSingleton<IPluginLoaderService, ShardedPluginLoaderService>();
 
 		private static IServiceCollection TryRegisterSingleton<T>(this IServiceCollection services) where T : class
 		{

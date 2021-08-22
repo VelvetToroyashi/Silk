@@ -224,7 +224,7 @@ namespace Silk.Core
 					services.RegisterShardedPluginServices();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
-					
+
 					container.AddExtension(new LoggingExtension());
 					services.AddLogging(l =>
 					{
