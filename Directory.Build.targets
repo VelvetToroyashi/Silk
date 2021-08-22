@@ -1,7 +1,7 @@
 ﻿<Project>
     <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00968"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00967"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00968"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-00968"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00967"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
