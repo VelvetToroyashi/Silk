@@ -44,7 +44,7 @@ namespace AnnoucementPlugin.Services
 
 		public async ValueTask ScheduleAnnouncementAsync(string content, ulong guild, ulong channel, TimeSpan expiration)
 		{
-			if (expiration > _minExpirationDatabaseThreshold)
+			if (expiration < _minExpirationDatabaseThreshold)
 			{
 				var nonCachedAnnouncement = new AnnouncementModel
 				{
