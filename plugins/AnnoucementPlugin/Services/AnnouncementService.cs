@@ -66,12 +66,14 @@ namespace AnnoucementPlugin.Services
 
 		private async Task OnTick()
 		{
-			foreach (var announcement in _announcements)
+			for (int i = _announcements.Count - 1; i >= 0; i--)
 			{
-				if (announcement.ScheduledFor <= DateTime.UtcNow) 
+				var announcement = _announcements[i];
+				if (announcement.ScheduledFor <= DateTime.UtcNow)
 				{
+					_announcements.Remove(announcement);
 					var res = await _dispatcher.DispatchMessage(announcement.GuildId, announcement.ChannelId, announcement.AnnouncementMessage);
-					
+
 					if (!res.Succeeded)
 					{
 						_logger.LogWarning("An announcement failed to send. Destination: {Channel} on {Guild} failed with response of {Response}",
@@ -82,7 +84,7 @@ namespace AnnoucementPlugin.Services
 						_logger.LogDebug("Successfully dispatched announcement.");
 						await _mediator.Send(new RemoveAnnouncementRequest(announcement));
 					}
-					
+
 					/*
 					 TODO: Handle errors
 					 TODO: add AddedFrom channel to announcement model 
