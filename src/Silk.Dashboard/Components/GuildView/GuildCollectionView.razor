@@ -10,6 +10,7 @@
                 <MudItem>
                     @if (GuildTemplate is not null)
                     {
+                        @* Todo: Change spacing on items (if surrounding `div` is removed, items have no spacing) *@
                         <div @key="@guild.Id">
                             @GuildTemplate(guild)
                         </div>

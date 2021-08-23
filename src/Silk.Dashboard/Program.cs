@@ -19,37 +19,36 @@ namespace Silk.Dashboard
             await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-				.ConfigureAppConfiguration((_, configuration) =>
-				{
-					// configuration.SetBasePath(Directory.GetCurrentDirectory());
-					configuration.AddJsonFile("appSettings.json", true, false);
-					configuration.AddUserSecrets<Startup>(true, false);
-				})
+                .ConfigureAppConfiguration((_, configuration) =>
+                {
+                    configuration.AddJsonFile("appSettings.json", true, false);
+                    configuration.AddUserSecrets<Startup>(true, false);
+                })
                 .ConfigureWebHostDefaults(webHostBuilder => { webHostBuilder.UseStartup<Startup>(); });
 
         private static async Task EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
-		{
-			try
-			{
-				using IServiceScope? serviceScope = builtBuilder.Services?.CreateScope();
-				if (serviceScope is not null)
-				{
-					await using GuildContext dbContext = serviceScope.ServiceProvider
-						.GetRequiredService<IDbContextFactory<GuildContext>>()
-						.CreateDbContext();
+        {
+            try
+            {
+                using IServiceScope? serviceScope = builtBuilder.Services?.CreateScope();
+                if (serviceScope is not null)
+                {
+                    await using GuildContext dbContext = serviceScope.ServiceProvider
+                        .GetRequiredService<IDbContextFactory<GuildContext>>()
+                        .CreateDbContext();
 
-					var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
 
-					if (pendingMigrations.Any())
-						await dbContext.Database.MigrateAsync();
-				}
-			}
-			catch (Exception)
-			{
-				/* Ignored. Todo: Probably should handle? */
-			}
-		}
+                    if (pendingMigrations.Any())
+                        await dbContext.Database.MigrateAsync();
+                }
+            }
+            catch (Exception)
+            {
+                /* Ignored. Todo: Probably should handle? */
+            }
+        }
     }
 }

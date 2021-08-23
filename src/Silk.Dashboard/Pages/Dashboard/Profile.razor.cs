@@ -8,9 +8,6 @@ using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Pages.Dashboard
 {
-    /* Todo: Create DashBotDiscordClient (extend DiscordRestClient using BotToken)  */
-    /* Todo: Move methods in DiscordRestClientService to DashDiscordRestClient (regular OAuth2) */
-    /* Todo: Inject DashDiscordRestClient into Profile page */
     public partial class Profile : ComponentBase
     {
         [Inject] public ISnackbar Snackbar { get; set; }

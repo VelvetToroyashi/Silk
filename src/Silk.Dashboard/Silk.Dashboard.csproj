@@ -6,17 +6,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Humanizer" Version="2.11.10" />
-        <PackageReference Include="BlazorComponentUtilities" Version="1.7.1" />
-        <PackageReference Include="MudBlazor" Version="5.1.0" />
-        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.10" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="MudBlazor" Version="5.1.1" />
         <PackageReference Include="DSharpPlus.Rest" Version="4.1.0" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="BlazorComponentUtilities" Version="1.7.1" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.10" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
     <ItemGroup>

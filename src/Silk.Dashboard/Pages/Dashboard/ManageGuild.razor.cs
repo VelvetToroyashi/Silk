@@ -57,21 +57,21 @@ namespace Silk.Dashboard.Pages.Dashboard
 
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
-            
             GetQueryStringValues();
             _ = FetchDiscordGuildFromRestAsync();
+            
+            await base.OnInitializedAsync();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await base.OnAfterRenderAsync(firstRender);
-
             if (firstRender)
             {
                 _ = SetTabsAsync();
                 NavManager.LocationChanged += HandleLocationChanged;
             }
+            
+            await base.OnAfterRenderAsync(firstRender);
         }
 
         private void GetQueryStringValues()
@@ -87,7 +87,7 @@ namespace Silk.Dashboard.Pages.Dashboard
 
         private async Task LoadAllConfigsAsync()
         {
-            var tasks = new Task[] { GetGuildConfigAsync(), GetGuildModConfigAsync(), Task.Delay(4500) };
+            Task[] tasks = { GetGuildConfigAsync(), GetGuildModConfigAsync() };
 
             _busy = true;
 

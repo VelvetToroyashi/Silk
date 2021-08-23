@@ -42,8 +42,10 @@ namespace Silk.Dashboard
 
             /* Todo: Consolidate Adding SilkConfigurationOptions to common location? */
             services.Configure<SilkConfigurationOptions>(Configuration.GetSection(SilkConfigurationOptions.SectionKey));
-            var silkConfig = Configuration.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
-            
+            var silkConfig = Configuration
+                .GetSection(SilkConfigurationOptions.SectionKey)
+                .Get<SilkConfigurationOptions>();
+
             services.AddDbContextFactory<GuildContext>(builder =>
             {
                 builder.UseNpgsql(silkConfig.Persistence.GetConnectionString());
@@ -56,9 +58,9 @@ namespace Silk.Dashboard
             services.TryAdd(new ServiceDescriptor(typeof(GuildContext),
                 p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(),
                 ServiceLifetime.Transient));
-            
+
             services.AddSingleton<ITokenService, TokenService>();
-            
+
             /* Regular DiscordRestClient */
             /* Todo: Handle AccessToken expiration and re-login (singleton won't get updated AccessToken from re-login) */
             services.AddSingleton(provider =>
@@ -75,7 +77,7 @@ namespace Silk.Dashboard
             });
 
             services.AddScoped<DiscordRestClientService>();
-            
+
             services.AddMediatR(typeof(GuildContext));
 
             services.AddAuthentication(opt =>
@@ -123,7 +125,7 @@ namespace Silk.Dashboard
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-            
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
