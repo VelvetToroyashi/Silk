@@ -2,8 +2,8 @@ version: 2
 updates:
 - package-ecosystem: nuget
   directory: "/"
-  target-branch: "development"
+  target-branch: "master"
   schedule:
-    interval: weekly
-    day: "saturday"
-  open-pull-requests-limit: 10
+    interval: monthly
+    day: "monday"
+  open-pull-requests-limit: 4

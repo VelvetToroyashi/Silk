@@ -1,3 +1,7 @@
+# **SILK! IS CURRENTLY UNDER A REWRITE**
+# Please see the `/rewrite/core` branch. Thank you.
+
+
 # Silk! 
 Silk is a simple, and, the fastest Discord bot written in C# until proven otherwise. Built on top of DSharpPlus for Discord API interactions. The goal of Silk! is be not only a great bot, but fill in the gaps that certain bots have. A bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk! is also made with large guilds in mind. Feel free to join the [Silk! server](https://discord.gg/HZfZb95) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands)
 

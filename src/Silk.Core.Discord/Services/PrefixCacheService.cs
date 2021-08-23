@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data;
 using Silk.Core.Data.Models;
 using Silk.Core.Discord.Services.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Discord.Services
 {
@@ -64,7 +65,7 @@ namespace Silk.Core.Discord.Services
             if (guild is null)
             {
                 _logger.LogCritical("Guild was not cached on join, and therefore does not exist in database");
-                return Main.DefaultCommandPrefix;
+                return StringConstants.DefaultCommandPrefix;
             }
             _memoryCache.Set(GetGuildString(guildId), guild.Prefix);
             return guild.Prefix;
