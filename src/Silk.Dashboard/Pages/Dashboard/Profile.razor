@@ -1,0 +1,45 @@
+﻿@page "/Dashboard/Profile"
+@attribute [Authorize]
+
+@inherits ComponentBase
+
+@if (_joinedGuilds is null)
+{
+    <LoadingView />
+}
+else
+{
+    <MudContainer>
+        <HeaderView ImageUrl="@CurrentUserAvatar" Text="@HeaderViewGreeting" />
+        
+        <MudDivider Class="my-6" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />
+
+        <MudContainer Class="my-6">
+            <MudText Class="shades-text text-white mb-4" Typo="Typo.h4" GutterBottom="true">
+                Servers You Manage
+            </MudText>
+
+            <GuildCollectionView Guilds="@_ownedGuilds" />
+
+            <MudButton Class="mt-10" Color="Color.Info" Variant="Variant.Filled"
+                       OnClick="ToggleJoinedGuildsVisibility">
+                @JoinedGuildsVisibilityText
+            </MudButton>
+        </MudContainer>
+
+        @if (_showJoinedGuilds)
+        {
+            <MudContainer Class="my-8">
+                <MudText Class="shades-text text-white" Typo="Typo.h4" GutterBottom="true">
+                    Servers You've Joined (not all)
+                </MudText>
+                
+                <GuildCollectionView Guilds="@_joinedGuilds">
+                    <GuildTemplate>
+                        <GuildView Guild="context" OnClick="() => HandleGuildNavigation(context)" />
+                    </GuildTemplate>
+                </GuildCollectionView>
+            </MudContainer>
+        }
+    </MudContainer>
+}

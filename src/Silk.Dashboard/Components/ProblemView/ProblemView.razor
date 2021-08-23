@@ -1,0 +1,23 @@
+﻿@namespace Silk.Dashboard.Components
+
+<MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100vh">
+    <img style="max-width: 256px;" src="@ImageUrl" alt="Issue Image" />
+    
+    <MudText Class="shades-text text-white my-3" Typo="Typo.h4">
+        @Message
+    </MudText>
+    
+    @Content
+</MudContainer>
+
+@code   
+{
+    [Parameter]
+    public string Message { get; set; } = "We don't know what went wrong, but lets pretend we do";
+
+    [Parameter]
+    public string ImageUrl { get; set; } = "imgs/rp_flop.png";
+
+    [Parameter]
+    public RenderFragment Content { get; set; }
+}

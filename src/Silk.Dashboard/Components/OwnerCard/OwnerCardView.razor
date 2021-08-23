@@ -1,0 +1,18 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using Silk.Dashboard.Models
+
+<MudCard>
+    <MudCardContent Class="d-flex flex-column align-center pa-2">
+        <img class="mb-2" src="@Owner.ImageUrl" style="max-width: 256px" alt="@Owner.Name's Avatar" />
+        <MudText Typo="Typo.h5">@Owner.Name</MudText>
+        <MudText Typo="Typo.subtitle1">@Owner.Description</MudText>
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public SilkOwner Owner { get; set; }
+
+}

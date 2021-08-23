@@ -1,0 +1,37 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using Silk.Dashboard.Extensions
+
+<MudMenu Icon="@Icons.Filled.Settings" Dense="true" Direction="Direction.Right" OffsetY="true">
+    @if (_authState.User.IsAuthenticated())
+    {
+        @* Todo: Check this doesn't look weird if other elements are added *@
+        <MudButtonGroup VerticalAlign="true" OverrideStyles="false">
+            <MudButton Variant="Variant.Text" Link="Dashboard/Profile">
+                @_authState.User.Identity?.Name
+            </MudButton>
+            <MudButton Variant="Variant.Text" Link="Api/Account/Logout">
+                Logout
+            </MudButton>
+        </MudButtonGroup>
+    }
+    else
+    {
+        <MudButton Variant="Variant.Text" Link="Api/Account/Login">
+            Login
+        </MudButton>
+    }
+</MudMenu>
+
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthTask { get; set; }
+    private AuthenticationState _authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _authState = await AuthTask;
+    }
+}
