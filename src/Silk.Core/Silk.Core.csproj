@@ -8,7 +8,7 @@
         <AssemblyVersion>1.5.2</AssemblyVersion>
         <OutputType>Exe</OutputType>
         <ServerGarbageCollection>true</ServerGarbageCollection>
-        <UserSecretsId>VelvetThePanda-SilkBot</UserSecretsId>
+        <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
