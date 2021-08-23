@@ -6,18 +6,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Abstractions"/>
-        <Folder Include="Types\Attributes"/>
-        <Folder Include="Types\DTO"/>
+        <PackageReference Include="DSharpPlus" />
+        <PackageReference Include="DSharpPlus.CommandsNext" />
+        <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00858"/>
-        <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00858"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
     </ItemGroup>
 
 </Project>

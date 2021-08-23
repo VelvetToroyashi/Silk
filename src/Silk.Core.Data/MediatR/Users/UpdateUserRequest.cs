@@ -18,10 +18,7 @@ namespace Silk.Core.Data.MediatR.Users
     {
         private readonly GuildContext _db;
 
-        public UpdateUserHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateUserHandler(GuildContext db) => _db = db;
 
         public async Task<User> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
         {

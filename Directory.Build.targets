@@ -1,0 +1,54 @@
+﻿<Project>
+    <ItemGroup Label="Common Solution Packages">
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00968"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00968"/>
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-00968"/>
+        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00968"/>
+        <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
+
+        <PackageReference Update="Humanizer" Version="2.10.1" />
+
+        <PackageReference Update="YumeChan.PluginBase" Version="2.4.2" />
+
+        <PackageReference Update="FluentAssertions" Version="6.1.0" />
+
+        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.1"/>
+
+        <PackageReference Update="MediatR" Version="9.0.0"/>
+        <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
+
+        <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
+        
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7"/>
+
+        <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1" />
+
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
+
+        <!--Todo: Downgrade versions to 5.0.0?-->
+        <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="5.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0-preview.6.21352.12" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.6.21352.12" />
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Hosting" Version="5.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.6.21352.12" />
+        <PackageReference Update="Microsoft.Extensions.Http" Version="5.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0"/>
+
+        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+        <PackageReference Update="Moq" Version="4.16.1" />
+        <PackageReference Update="NUnit" Version="3.13.2" />
+        <PackageReference Update="NUnit3TestAdapter" Version="4.0.0" />
+        <PackageReference Update="Respawn" Version="4.0.0" />
+
+    </ItemGroup>
+</Project>

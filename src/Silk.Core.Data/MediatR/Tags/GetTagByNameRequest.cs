@@ -11,21 +11,18 @@ namespace Silk.Core.Data.MediatR.Tags
     /// <summary>
     ///     Request for getting tags by name, or null, if none are found.
     /// </summary>
-    public record GetTagByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>?>;
+    public record GetTagByNameRequest(string Name, ulong GuildId) : IRequest<IEnumerable<Tag>>;
 
     /// <summary>
     ///     The default handler for <see cref="GetTagByNameRequest" />.
     /// </summary>
-    public class GetTagByNameHandler : IRequestHandler<GetTagByNameRequest, IEnumerable<Tag>?>
+    public class GetTagByNameHandler : IRequestHandler<GetTagByNameRequest, IEnumerable<Tag>>
     {
         private readonly GuildContext _db;
 
-        public GetTagByNameHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetTagByNameHandler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<Tag>?> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Tag>> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
                 .Tags
@@ -35,7 +32,7 @@ namespace Silk.Core.Data.MediatR.Tags
                 .Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
                 .ToArrayAsync(cancellationToken);
 
-            return tags.Any() ? tags : null;
+            return tags;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Silk.Benchmarks
         [Benchmark]
         public void ListForLoop()
         {
-            for (int i = 0; i < list.Count; i++)
+            for (var i = 0; i < list.Count; i++)
                 _ = list[i];
         }
         [Benchmark]

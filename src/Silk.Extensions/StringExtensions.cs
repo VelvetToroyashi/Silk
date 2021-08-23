@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Silk.Extensions
 {
@@ -32,23 +33,14 @@ namespace Silk.Extensions
             if (range.Start.Value >= text.Length || range.Start.Value < 0)
                 return text;
 
-            if (!range.End.IsFromEnd)
-            {
-                return text[range.Start..Math.Min(text.Length, range.End.Value)];
-            }
-            return text[range];
+            if (range.End.IsFromEnd) return text[range];
+            
+            return text[range.Start..Math.Min(text.Length, range.End.Value)];
         }
 
         public static Stream AsStream(this string s)
         {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-
-            writer.Write(s);
-            writer.Flush();
-
-            stream.Position = 0;
-            return stream;
+            return new MemoryStream(Encoding.UTF8.GetBytes(s));
         }
     }
 }

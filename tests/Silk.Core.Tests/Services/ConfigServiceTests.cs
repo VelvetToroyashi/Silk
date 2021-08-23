@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using NUnit.Framework;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Discord.Services;
-using Xunit;
+using Silk.Core.Services.Data;
 
 namespace Silk.Core.Tests.Services
 {
@@ -28,10 +28,10 @@ namespace Silk.Core.Tests.Services
                 .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                 .Verifiable("uHHHH");
 
-            _configService = new(_cache.Object, _mediator.Object, new ServiceCacheUpdaterService());
+            _configService = new(_cache.Object, _mediator.Object, new CacheUpdaterService());
         }
 
-        [Fact]
+        [Test]
         public async Task GetConfigAsync_WhenInvalidId_RetrievesFromDatabase()
         {
             //Act
@@ -42,7 +42,7 @@ namespace Silk.Core.Tests.Services
             _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Fact]
+        [Test]
         public async Task GetConfigAsync_WhenValidId_RetrievesFromCache()
         {
             object discard;

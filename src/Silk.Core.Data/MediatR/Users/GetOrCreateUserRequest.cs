@@ -29,18 +29,16 @@ namespace Silk.Core.Data.MediatR.Users
                 .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId,
                     cancellationToken);
 
-            if (user is null)
+            if (user is not null) return user;
+            //Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
+            user = new()
             {
-                //Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
-                user = new()
-                {
-                    GuildId = request.GuildId,
-                    Id = request.UserId,
-                    Flags = request.Flags ?? UserFlag.None
-                };
-                _db.Users.Add(user);
-                await _db.SaveChangesAsync(cancellationToken);
-            }
+                GuildId = request.GuildId,
+                Id = request.UserId,
+                Flags = request.Flags ?? UserFlag.None
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync(cancellationToken);
 
             return user;
         }

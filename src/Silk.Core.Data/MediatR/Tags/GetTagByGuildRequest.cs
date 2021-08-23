@@ -11,12 +11,12 @@ namespace Silk.Core.Data.MediatR.Tags
     /// <summary>
     ///     Request for getting tags for a specific guild, if any.
     /// </summary>
-    public record GetTagByGuildRequest(ulong GuildId) : IRequest<IEnumerable<Tag>?>;
+    public record GetTagByGuildRequest(ulong GuildId) : IRequest<IEnumerable<Tag>>;
 
     /// <summary>
     ///     The default handler for <see cref="GetTagByGuildRequest" />.
     /// </summary>
-    public class GetTagByGuildHandler : IRequestHandler<GetTagByGuildRequest, IEnumerable<Tag>?>
+    public class GetTagByGuildHandler : IRequestHandler<GetTagByGuildRequest, IEnumerable<Tag>>
     {
         private readonly GuildContext _db;
 
@@ -25,7 +25,7 @@ namespace Silk.Core.Data.MediatR.Tags
             _db = db;
         }
 
-        public async Task<IEnumerable<Tag>?> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Tag>> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
         {
             Tag[] tags = await _db
                 .Tags
@@ -34,7 +34,7 @@ namespace Silk.Core.Data.MediatR.Tags
                 .Where(t => t.GuildId == request.GuildId)
                 .ToArrayAsync(cancellationToken);
 
-            return tags.Any() ? tags : null;
+            return tags;
         }
     }
 }

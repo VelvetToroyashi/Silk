@@ -27,10 +27,10 @@ namespace Silk.Benchmarks
         [Benchmark]
         public string For()
         {
-            var s = LoremIpsum;
+            string s = LoremIpsum;
             var n = new Span<char>(s.ToCharArray());
             var f = 0;
-            for (int i = 0; i < s.Length; i++)
+            for (var i = 0; i < s.Length; i++)
                 if (s[i] is not ' ')
                 {
                     f++;
@@ -44,11 +44,11 @@ namespace Silk.Benchmarks
         [Benchmark]
         public string ForUnsafe()
         {
-            var s = LoremIpsum;
+            string s = LoremIpsum;
 
-            var n = s.AsSpan().AsSpan();
+            Span<char> n = s.AsSpan().AsSpan();
             var f = 0;
-            for (int i = 0; i < s.Length; i++)
+            for (var i = 0; i < s.Length; i++)
                 if (s[i] is not ' ')
                 {
                     f++;
@@ -61,10 +61,10 @@ namespace Silk.Benchmarks
         [Benchmark]
         public string OneSpanFor()
         {
-            var s = LoremIpsum.ToArray().AsSpan();
+            Span<char> s = LoremIpsum.ToArray().AsSpan();
 
             var f = 0;
-            for (int i = 1; i < s.Length; i++)
+            for (var i = 1; i < s.Length; i++)
                 if (s[i] is not ' ')
                 {
                     f++;
@@ -87,8 +87,8 @@ namespace Silk.Benchmarks
         {
             return string.Create(s.Length, (old, @new), static(buff, pair) =>
             {
-                var (old, @new) = pair;
-                foreach (ref var c in buff)
+                (char old, char @new) = pair;
+                foreach (ref char c in buff)
                 {
                     if (c == old) c = @new;
                 }
@@ -100,18 +100,18 @@ namespace Silk.Benchmarks
         }
         public static string Replace2n(this string haystack, char needle)
         {
-            var ol = haystack.Length;
-            var nl = haystack.Length;
-            for (var i = ol - 1; i >= 0; --i)
+            int ol = haystack.Length;
+            int nl = haystack.Length;
+            for (int i = ol - 1; i >= 0; --i)
                 if (haystack[i] == needle)
                     --nl;
 
             return string.Create(nl, (needle, haystack), static(buff, st) =>
             {
-                var (n, h) = st;
-                var sl = h.Length;
-                var sp = buff.Length - 1;
-                for (var i = sl - 1; i >= 0; --i)
+                (char n, string h) = st;
+                int sl = h.Length;
+                int sp = buff.Length - 1;
+                for (int i = sl - 1; i >= 0; --i)
                     if (h[i] != n)
                         buff[sp--] = h[i];
             });

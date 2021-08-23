@@ -6,10 +6,11 @@ namespace Silk.Core.Data.ModelConfigurations
 {
     public class InfractionConfiguration : IEntityTypeConfiguration<Infraction>
     {
-
         public void Configure(EntityTypeBuilder<Infraction> builder)
         {
-            builder.HasKey(i => i.Id);
+            builder.HasOne(inf => inf.User)
+                .WithMany(u => u.Infractions)
+                .HasForeignKey(inf => new { inf.UserId, inf.GuildId});
         }
     }
 }

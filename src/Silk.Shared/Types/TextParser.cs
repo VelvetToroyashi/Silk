@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Silk.Shared.Types
+﻿namespace Silk.Shared.Types
 {
     public abstract class TextParser
     {
@@ -38,7 +36,7 @@ namespace Silk.Shared.Types
 
         public bool ReadIf(char c)
         {
-            var next = PeekChar();
+            char next = PeekChar();
 
             if (next == c)
             {
@@ -51,7 +49,7 @@ namespace Silk.Shared.Types
 
         public int ReadNumber()
         {
-            if (!char.IsNumber(PeekChar())) throw new Exception($"Expected integer at position {_currentPosition}!");
+            if (!char.IsNumber(PeekChar())) throw new($"Expected integer at position {_currentPosition}!");
 
             int startPos = _currentPosition;
 

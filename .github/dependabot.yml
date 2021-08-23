@@ -2,8 +2,8 @@ version: 2
 updates:
 - package-ecosystem: nuget
   directory: "/"
-  target-branch: "master"
+  target-branch: "rewrite/core"
   schedule:
-    interval: monthly
-    day: "monday"
-  open-pull-requests-limit: 4
+    interval: weekly
+    day: "saturday"
+  open-pull-requests-limit: 10

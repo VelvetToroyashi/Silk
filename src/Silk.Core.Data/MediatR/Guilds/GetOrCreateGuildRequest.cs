@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +20,11 @@ namespace Silk.Core.Data.MediatR.Guilds
     public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, Guild>
     {
         private readonly GuildContext _db;
-
-
-        public GetOrCreateGuildHandler(GuildContext db)
+        private IMediator _mediator;
+        public GetOrCreateGuildHandler(GuildContext db, IMediator mediator)
         {
             _db = db;
-
+            _mediator = mediator;
         }
 
         public async Task<Guild> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
@@ -32,23 +32,15 @@ namespace Silk.Core.Data.MediatR.Guilds
             Guild? guild = await _db.Guilds
                 .Include(g => g.Users)
                 .Include(g => g.Infractions)
-                .Include(g => g.Configuration)
                 .AsSplitQuery()
+                .OrderBy(g => g.Id)
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
             if (guild is not null)
                 return guild;
 
-            guild = new()
-            {
-                Id = request.GuildId,
-                Users = new(),
-                Prefix = request.Prefix,
-                Configuration = new() {GuildId = request.GuildId}
-            };
-            _db.Guilds.Add(guild);
-            await _db.SaveChangesAsync(cancellationToken);
-
+            guild = await _mediator.Send(new AddGuildRequest(request.GuildId, request.Prefix), cancellationToken);
+            
             return guild;
         }
     }

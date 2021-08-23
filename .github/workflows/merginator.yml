@@ -1,0 +1,22 @@
+name: Auto Merge Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  merge:
+    if: github.actor == 'dependabot'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    
+    - uses: hmarr/auto-approve-action@v2.0.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Pull Request Merginator
+      uses: managedkaos/merge-pull-request@v1.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

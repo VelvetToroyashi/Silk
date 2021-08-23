@@ -14,7 +14,7 @@ namespace Silk.Core.Tests.Types
         {
             //Arrange
             int index = _loopedIntList.Count - 1;
-            int expected = 4;
+            var expected = 4;
             int result;
             //Act
             result = _loopedIntList[index];
@@ -27,7 +27,7 @@ namespace Silk.Core.Tests.Types
         {
             //Arrange
             int result;
-            int expected = 1;
+            var expected = 1;
             //Act
             result = _loopedIntList.Next();
             //Assert
@@ -39,7 +39,7 @@ namespace Silk.Core.Tests.Types
         {
             //Arrange
             int result;
-            int expected = 3;
+            var expected = 3;
 
             //Act
             result = _loopedIntList[6];
@@ -58,7 +58,7 @@ namespace Silk.Core.Tests.Types
         public void LoopedIntList_Setter_Sets_Index_Within_Bounds()
         {
             //Arrange
-            int expected = 2;
+            var expected = 2;
             int result;
             LoopedList<int> list = new() {1, 2, 3, 4};
             //Act
@@ -83,7 +83,7 @@ namespace Silk.Core.Tests.Types
         public void LoopedIntList_Setter_Throws_When_Empty()
         {
             //Arrange
-            int expected = 2;
+            var expected = 2;
             TestDelegate tDelegate;
             //Act
             tDelegate = () => _emptyIntList[0] = expected;
