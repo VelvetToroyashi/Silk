@@ -132,7 +132,5 @@ namespace PluginLoader.Unity
 				_plugins.Remove(manifest);
 			}
 		}
-		
-		
 	}
 }
