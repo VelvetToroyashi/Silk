@@ -1,11 +1,5 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #242729;
-}
-
-.btn-primary {
-    background-color: #008000 !important;
-    border-color: #008000 !important;
 }
 
 .content {
@@ -14,31 +8,7 @@ html, body {
 
 #guild-view-card:hover {
     box-shadow:0 1rem 3rem rgba(0,0,0,.175);
-    /*box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.2);*/
     transition: all .50s ease-in-out;
-}
-
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
-.invalid {
-    outline: 1px solid red;
-}
-
-.validation-message {
-    color: red;
-}
-
-input[type=number] {
-    color: #444;
-    -moz-appearance: textfield;
-}
-
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button {
-    color: #888;
-    -webkit-appearance: none;
 }
 
 #blazor-error-ui {

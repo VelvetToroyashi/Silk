@@ -15,9 +15,8 @@ namespace Silk.Dashboard.Services
 
         public DiscordRestClientService(DiscordRestClient restClient) => RestClient = restClient;
 
-        /* Todo: Remove named arg when library updates default limit (Discord limit updated to 200 guilds) */
         public async Task<IReadOnlyList<DiscordGuild>> GetAllGuildsAsync()
-            => await RestClient.GetCurrentUserGuildsAsync(limit: 200);
+            => await RestClient.GetCurrentUserGuildsAsync(100);
 
         public async Task<IReadOnlyList<DiscordGuild>> GetGuildsByPermissionAsync(Permissions perms)
             => FilterGuildsByPermission(await GetAllGuildsAsync(), perms);

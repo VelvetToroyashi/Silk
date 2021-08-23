@@ -1,16 +1,17 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<div class="d-flex align-content-center">
-    <div class="container text-center">
-        @if (HasImage)
-        {
-            <img class="img-fluid mb-2 rounded-circle" style="max-width: 256px;" src="@ImageUrl" alt="Avatar URL" />
-        }
-        <h2>@Text</h2>
-        @ChildContent
-        <hr style="height: 1px; background-color: #fff" />
-    </div>
-</div>
+<MudContainer Class="d-flex flex-column align-center justify-space-between">
+    @if (HasImage)
+    {
+        <img class="img-fluid mb-2 rounded-circle" style="max-width: 256px;" src="@ImageUrl" alt="Avatar URL" />
+    }
+
+    <MudText Class="shades-text text-white" Typo="Typo.h3">
+        @Text
+    </MudText>
+
+    @ChildContent
+</MudContainer>
 
 @code {
 

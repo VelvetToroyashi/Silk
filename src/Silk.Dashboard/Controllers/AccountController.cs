@@ -3,19 +3,26 @@ using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Controllers
 {
-    [Route("api/silk/[controller]")]
     [ApiController]
+    [Route("api/account")]
     public class AccountController : ControllerBase
     {
+        private readonly ITokenService _tokenService;
+        public AccountController(ITokenService tokenService)
+        {
+            _tokenService = tokenService;
+        }
+        
         [HttpGet("login")]
         [HttpPost("login")]
         public IActionResult Login(string returnUrl = "/")
         {
             var safeReturnUrl = EnsureLocalRedirectUrl(returnUrl);
-            var challenge = Challenge(new AuthenticationProperties { RedirectUri = safeReturnUrl }, DiscordAuthenticationDefaults.AuthenticationScheme);
+            var challenge = Challenge(new AuthenticationProperties {RedirectUri = safeReturnUrl}, DiscordAuthenticationDefaults.AuthenticationScheme);
             return challenge;
         }
 
@@ -25,6 +32,7 @@ namespace Silk.Dashboard.Controllers
         {
             // This removes the cookie assigned to the user login.
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            _tokenService.ClearToken();
             var safeReturnUrl = EnsureLocalRedirectUrl(returnUrl);
             return LocalRedirect(safeReturnUrl);
         }

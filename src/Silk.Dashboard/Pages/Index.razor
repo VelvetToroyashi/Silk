@@ -1,29 +1,34 @@
 ﻿@page "/"
+
 @using Silk.Dashboard.Models
 
-<div class="container p-4">
-    <HeaderView Text="Welcome to Silk!" ImageUrl="https://files.velvetthepanda.dev/silk.png">
-        <a class="btn btn-primary text-center"
-           href="https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands"
-           target="_blank">Invite Me!</a>
+@* Todo: Add License page for Open Source Libs used *@
+@* Todo: Add UI Testing framework (Playwright) *@
+@* Todo: Go through Pages and add `id` attributes to elements for UI test *@
+
+<MudContainer Class="my-15">
+    <HeaderView Text="Welcome to Silk!" ImageUrl="@IconLink">
+        <MudButton Class="my-5" Color="Color.Success" Variant="Variant.Filled" Link="@InviteLink" Target="_blank">
+            Invite Me
+        </MudButton>
+        <MudText Class="shades-text text-white" Typo="Typo.h4">
+            Meet My Creators!
+        </MudText>
     </HeaderView>
+    
+    <MudDivider Class="my-8" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />
 
-    <h3 class="text-center mb-3">Meet my Creators!</h3>
-
-    <OwnerCardCollectionView Owners="@_owners" />
-</div>
+    <OwnerCardCollectionView Owners="@Owners" />
+</MudContainer>
 
 @code {
-    private List<SilkOwner> _owners;
+    private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
+    private const string InviteLink = "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
 
-    protected override void OnInitialized()
+    private static List<SilkOwner> Owners { get; } = new()
     {
-        _owners = new List<SilkOwner>
-    {
-            new("VelvetThePanda", "Founder and Lead Developer of Silk", "https://github.com/VelvetThePanda.png"),
-            new("Nullfact0r", "Infrastructure Admin and Helper", "https://github.com/nullfact0r.png"),
-            new("CalebABG", "Dashboard Developer and Helper", "https://github.com/CalebABG.png"),
-        };
-    }
-
+        new("VelvetThePanda", "Founder and Lead Developer of Silk", "https://github.com/VelvetThePanda.png"),
+        new("Nullfact0r", "Infrastructure Admin and Helper", "https://github.com/nullfact0r.png"),
+        new("CalebABG", "Dashboard Developer and Helper", "https://github.com/CalebABG.png"),
+    };
 }

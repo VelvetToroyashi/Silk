@@ -2,6 +2,6 @@
 {
     public class AppState
     {
-        public DiscordOAuthToken Token { get; init; }
+        public DiscordOAuthTokenResponse TokenResponse { get; init; }
     }
 }

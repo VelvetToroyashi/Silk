@@ -1,0 +1,44 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using DSharpPlus.Entities
+@using BlazorComponentUtilities
+
+<MudCard Class="@ClassName" Style="@StyleName" @onclick="async () => await HandleOnClickAsync()">
+    <MudCardContent Class="d-flex flex-column align-center pa-2">
+        <MudText Typo="Typo.h5" GutterBottom="true">@Guild.Name</MudText>
+        <img src="@GuildIconUrl" style="max-width: 256px" alt="@Guild.Name Logo" />
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public DiscordGuild Guild { get; set; }
+
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<DiscordGuild> OnClick { get; set; }
+
+    private string ClassName =>
+        new CssBuilder()
+            .AddClass(Class)
+            .Build();
+
+    private string StyleName =>
+        new StyleBuilder()
+            .AddStyle("cursor", "pointer")
+            .AddStyle(Style)
+            .Build();
+
+    private bool HasIcon => !string.IsNullOrEmpty(Guild.IconUrl);
+    private string GuildIconUrl => HasIcon 
+        ? $"{Guild.IconUrl}?size=256" 
+        : "https://img.icons8.com/ios-filled/100/000000/no-image.png";
+
+    private async Task HandleOnClickAsync() => await OnClick.InvokeAsync(Guild);
+}

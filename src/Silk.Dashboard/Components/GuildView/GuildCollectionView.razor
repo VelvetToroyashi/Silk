@@ -1,0 +1,40 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using DSharpPlus.Entities
+
+<MudGrid>
+    <MudItem xs="12">
+        <MudGrid Spacing="4" Justify="Justify.Center">
+            @foreach (var guild in Guilds)
+            {
+                <MudItem>
+                    @if (GuildTemplate is not null)
+                    {
+                        <div @key="@guild.Id">
+                            @GuildTemplate(guild)
+                        </div>
+                    }
+                    else
+                    {
+                        <GuildView @key="@guild.Id" Guild="@guild" OnClick="() => NavigateToManageGuild(guild)" />
+                    }
+                </MudItem>
+            }
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    [Parameter]
+    public IEnumerable<DiscordGuild> Guilds { get; set; }
+
+    [Parameter]
+    public RenderFragment<DiscordGuild> GuildTemplate { get; set; }
+
+    private void NavigateToManageGuild(DiscordGuild guild) 
+        => NavigationManager.NavigateTo($"/Dashboard/ManageGuild/{guild.Id}");
+}

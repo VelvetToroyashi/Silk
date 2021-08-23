@@ -1,46 +1,17 @@
 ﻿@namespace Silk.Dashboard.Components
 
-@* Top Menu - Thanks to: https://github.com/robalexclark/BlazorTopMenu/tree/master/Blazor-Top-Menu/Shared *@
+<MudAppBar Color="Color.Dark" Fixed="false" Elevation="1" Dense="true">
+    <MudElement HtmlTag="a" Class="mx-4" href="/"
+                Style="font-size:1.2rem;font-weight:bold">
+        Silk Dashboard
+    </MudElement>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/">Silk Dashboard</a>
+    <MudElement HtmlTag="a" href="https://github.com/VelvetThePanda/Silk"
+                target="_blank" Style="font-size:1.0rem;">
+        GitHub
+    </MudElement>
 
-    <button class="navbar-toggler" @onclick="ToggleNavMenu" type="button" data-toggle="collapse"
-            data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-            aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+    <MudSpacer />
 
-    <div class="@NavMenuCssClass navbar-collapse" @onclick="CollapseNavMenu">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                    <span aria-hidden="true"></span> Home
-                </NavLink>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="https://github.com/VelvetThePanda/Silk" target="_blank">GitHub</a>
-            </li>
-        </ul>
-
-        <LoginToolBar />
-    </div>
-</nav>
-
-
-@code {
-    bool _collapseNavMenu = true;
-
-    string NavMenuCssClass => _collapseNavMenu ? "collapse" : string.Empty;
-
-    void ToggleNavMenu()
-    {
-        _collapseNavMenu = !_collapseNavMenu;
-    }
-
-    void CollapseNavMenu()
-    {
-        _collapseNavMenu = true;
-    }
-
-}
+    <LoginToolBar />
+</MudAppBar>

@@ -2,14 +2,18 @@
 
 @using Silk.Dashboard.Models
 
-<div class="container">
-    <div class="card-deck">
-        @foreach (var owner in Owners)
-        {
-            <OwnerCardView @key="@owner" Owner="@owner" />
-        }
-    </div>
-</div>
+<MudGrid>
+    <MudItem xs="12">
+        <MudGrid Spacing="4" Justify="Justify.Center">
+            @foreach (var owner in Owners)
+            {
+                <MudItem @key="@owner">
+                    <OwnerCardView Owner="@owner" />
+                </MudItem>
+            }
+        </MudGrid>
+    </MudItem>
+</MudGrid>
 
 @code {
 
