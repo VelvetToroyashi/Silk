@@ -10,7 +10,7 @@
 
         <PackageReference Update="YumeChan.PluginBase" Version="2.4.2" />
 
-        <PackageReference Update="FluentAssertions" Version="6.0.0-alpha0002" />
+        <PackageReference Update="FluentAssertions" Version="6.1.0" />
 
         <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.1"/>
 
@@ -34,13 +34,13 @@
 
         <!--Todo: Downgrade versions to 5.0.0?-->
         <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="5.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0-preview.2.21154.6"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0-preview.2.21154.6" />
-        <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0-preview.2.21154.6"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.2.21154.6" />
-        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.2.21154.6"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0-preview.6.21352.12" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.6.21352.12" />
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.6.21352.12"/>
         <PackageReference Update="Microsoft.Extensions.Hosting" Version="5.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.2.21154.6" />
+        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0-preview.6.21352.12" />
         <PackageReference Update="Microsoft.Extensions.Http" Version="5.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0"/>
 
