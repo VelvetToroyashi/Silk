@@ -1,0 +1,44 @@
+﻿@page "/Dashboard/Profile"
+@attribute [Authorize]
+
+@inherits ComponentBase
+
+@using DSharpPlus
+
+@if (_joinedGuilds is null)
+{
+    <div class="d-flex align-items-center justify-content-center vh-100">
+        <Circle Size="120px" Center="true" Color="#337AB7" />
+    </div>
+}
+else
+{
+    <div class="container p-4">
+        <HeaderView ImageUrl="@CurrentUserAvatar" Text="@HeaderViewGreeting" />
+
+        <div class="container">
+            <h3>Servers You Manage:</h3><br />
+
+            <GuildCollectionView Guilds="@_ownedGuilds" />
+
+            <button class="btn btn-primary my-4 shadow-lg" @onclick="ToggleJoinedGuildsVisibility">
+                @(_showJoinedGuilds ? "Hide" : "Show") Joined Servers
+            </button>
+        </div>
+
+        @if (_showJoinedGuilds)
+        {
+            <div class="container">
+                <h3>Servers You've Joined (not all):</h3><br />
+                <GuildCollectionView Guilds="@_joinedGuilds">
+                    <GuildTemplate>
+                        @{
+                            var hasPermissions = (context.Permissions & Permissions.ManageGuild) is not 0;
+                        }
+                        <GuildView Guild="context"OnClick="() => HandleGuildNavigation(context, hasPermissions)" />
+                    </GuildTemplate>
+                </GuildCollectionView>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,34 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using DSharpPlus.Entities
+
+@* Todo: >1180px card columns break to 2 cards per column, end w/ weird layout *@
+<div class="card-columns">
+    @foreach (var guild in Guilds)
+    {
+        if (GuildTemplate is not null)
+        {
+            <div @key="@guild.Id">
+                @GuildTemplate(guild)
+            </div>
+        }
+        else
+        {
+            <GuildView @key="@guild.Id" Guild="@guild" OnClick="() => NavigateToManageGuild(guild)" />
+        }
+    }
+</div>
+
+@code {
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    [Parameter]
+    public IEnumerable<DiscordGuild> Guilds { get; set; }
+
+    [Parameter]
+    public RenderFragment<DiscordGuild> GuildTemplate { get; set; }
+
+    private void NavigateToManageGuild(DiscordGuild guild) => NavigationManager.NavigateTo($"/Dashboard/ManageGuild/{guild.Id}");
+}

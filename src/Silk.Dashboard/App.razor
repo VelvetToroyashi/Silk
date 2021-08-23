@@ -1,0 +1,54 @@
+﻿@using Silk.Dashboard.Extensions
+@using Blazored.Toast.Configuration
+@using Silk.Dashboard.Models
+@using Silk.Dashboard.Services
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <div class="d-flex align-items-center justify-content-center min-vh-100">
+                        <div class="p-5 text-center">
+                            @if (!context.User.IsAuthenticated())
+                            {
+                                <h1 class="mb-3">Please Log In to Get Started with the Dashboard 😊!</h1>
+                            }
+                            else
+                            {
+                                <h1 class="mb-3">You are not authorized to access this resource 🛑✋</h1>
+                            }
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-times" />
+
+@code
+{
+    [Inject]
+    public IDashboardTokenStorageService TokenStorageService { get; set; }
+
+    [Parameter]
+    public AppState InitialState { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        TokenStorageService.SetToken(InitialState.Token);
+        return base.OnInitializedAsync();
+    }
+}

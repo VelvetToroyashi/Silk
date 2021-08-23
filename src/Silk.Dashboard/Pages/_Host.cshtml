@@ -1,0 +1,68 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authentication
+@using Silk.Dashboard.Models
+@namespace Silk.Dashboard.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- EMBED STUFF START -->
+    <meta property="og:title" content="Silk!">
+    <meta property="og:description" content="Silk! is the Discord bot for all your needs!" />
+    <meta property="og:url" content="https://silk.velvetthepanda.dev">
+    <meta property="og:image" content="https://files.velvetthepanda.dev/silk_stable.png">
+    <meta property="og:image:width" content="148">
+    <meta property="og:image:height" content="148">
+    <meta name="theme-color" content="#008000">
+    <!-- EMBED STUFF END -->
+
+    <title>Silk Dashboard</title>
+    <base href="~/" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet" />
+
+    <link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+
+    <link href="_content/BlazorPro.Spinkit/spinkit.min.css" rel="stylesheet" />
+
+    <link href="css/bootswatch/bootstrap.min.css" rel="stylesheet" />
+
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="Silk.Dashboard.styles.css" rel="stylesheet" />
+</head>
+<body>
+
+    @{
+        var tokenExpiration = DiscordOAuthToken.GetAccessTokenExpiration(await HttpContext.GetTokenAsync("expires_at"));
+        var appState = new AppState
+        {
+            Token = new(
+                await HttpContext.GetTokenAsync("access_token"),
+                await HttpContext.GetTokenAsync("refresh_token"),
+                tokenExpiration)
+        };
+    }
+
+    <component type="@typeof(App)" render-mode="Server" param-InitialState="@appState" />
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

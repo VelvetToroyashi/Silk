@@ -1,0 +1,22 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using Silk.Dashboard.Models
+
+<div class="card h-100 text-center" style="border-color: white;">
+    <img class="card-img-top" src="@Owner.ImageUrl" alt="Avatar of @Owner.Name">
+    <div class="card-body">
+        <h5 div="card-title">
+            @Owner.Name
+        </h5>
+        <p class="card-text">
+            @Owner.Description
+        </p>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public SilkOwner Owner { get; set; }
+
+}

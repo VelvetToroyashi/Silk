@@ -1,0 +1,102 @@
+﻿@page "/Dashboard/ManageGuild/{GuildId}"
+@attribute [Authorize]
+
+@inherits ComponentBase
+
+@using Silk.Core.Data.Models
+@using Humanizer
+
+@* TODO: 1. Make or add Tabs for Moderation section. 2. Style things/make it look better 😭 *@
+
+@if (_guildConfig is null && _requestFailed is false)
+{
+    <div class="d-flex align-items-center justify-content-center vh-100">
+        <Circle Size="120px" Center="true" Color="#337AB7" />
+    </div>
+}
+else if (_guildConfig is null && _requestFailed)
+{
+    <div class="d-flex align-items-center justify-content-center vh-100">
+        <div class="container text-center">
+            <h1>Uh Oh! 😓</h1>
+            <h3>
+                Looks like either the guild you requested isn't available or the request failed.
+                Please refresh the page to try again.
+            </h3>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container p-4">
+        <HeaderView ImageUrl="@_guild.IconUrl" Text="@_guild.Name" />
+
+        @* Todo: Add back EditForm is DataAnnotations on model are added *@
+        <div class="container">
+            <div class="form-group mb-3">
+                <label class="text-warning">Greet Members</label><br />
+
+                @* Todo: Stylize Select component *@
+                <select class="form-select" @bind="_guildConfig.GreetingOption">
+                    @foreach (var go in _greetingOptions)
+                    {
+                        <option value="@go">@go.Humanize(LetterCasing.Title)</option>
+                    }
+                </select>
+            </div>
+
+            @if (_guildConfig.GreetingOption is not GreetingOption.DoNotGreet)
+            {
+                <div class="form-group mb-3">
+                    <label class="text-warning mb-1" for="GreetingChannel">Greeting Channel Id</label><br />
+                    <input type="number"
+                           class="input-group-text bg-white"
+                           id="GreetingChannel"
+                           @bind-value="_guildConfig.GreetingChannel"
+                           @bind-value:event="oninput" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="text-warning mb-1" for="GreetingText">Greeting Text</label> <br />
+                    <ul>
+                        <li><span class="text-info">{u}</span> Gets replaced with the member's username</li>
+                        <li><span class="text-info">{s}</span> Gets replaced with the Guild's name</li>
+                        <li><span class="text-info">{@@u}</span> Gets replaced with the member's mention</li>
+                    </ul>
+
+                    <textarea id="GreetingText" class="form-control mb-1" rows="2"
+                                              placeholder="Welcome {@@u}! This is {s}, the best server around!"
+                                              @bind-value="_guildConfig.GreetingText"
+                                              maxlength="@MaxGreetingTextLength"
+                                              @bind-value:event="oninput"></textarea>
+
+                    <label class="@RemainingCharsClass">Characters Remaining: @RemainingChars</label>
+                </div>
+
+                @if (_guild.Features.Contains("MEMBER_VERIFICATION_GATE_ENABLED") &&
+                     _guildConfig.GreetingOption is GreetingOption.GreetOnScreening)
+                {
+                    <div class="form-group mb-2">
+                        <label>Greeting When Screening Complete is Enabled!</label>
+                    </div>
+                }
+
+                @if (_guildConfig.GreetingOption is GreetingOption.GreetOnRole)
+                {
+                    <div class="form-group mb-3">
+                        <label class="text-warning mb-1" for="VerificationRole">Verification Role Id</label> <br />
+                        <input type="number"
+                               class="input-group-text bg-white"
+                               id="VerificationRole"
+                               @bind-value="_guildConfig.VerificationRole"
+                               @bind-value:event="oninput" />
+                    </div>
+                }
+            }
+
+            <button class="btn btn-primary mt-2" @onclick="async () => await SaveChangesAsync()">
+                Save Changes
+            </button>
+        </div>
+    </div>
+}

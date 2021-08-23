@@ -1,0 +1,45 @@
+﻿@namespace Silk.Dashboard.Components
+
+@using DSharpPlus.Entities
+@using BlazorComponentUtilities
+
+<div @attributes="@CapturedAttributes" class="@ClassName" style="@StyleName" @onclick="async () => await HandleOnClickAsync()">
+    <div id="guild-view-card" class="card-body text-center">
+        <h4 class="card-title @HeaderClass">@Guild.Name</h4>
+        @if (HasIcon)
+        {
+            <img class="card-img-top" src="@Guild.IconUrl?size=1024" alt="@Guild.Name Logo" />
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public DiscordGuild Guild { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> CapturedAttributes { get; set; } = new();
+    
+    [Parameter] public string Class { get; set; } = string.Empty;
+    [Parameter] public string Style { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<DiscordGuild> OnClick { get; set; }
+    
+    private string ClassName =>
+        new CssBuilder("card border-info")
+            .AddClass(Class)
+            .Build();
+
+    private string StyleName =>
+        new StyleBuilder()
+            .AddStyle("cursor", "pointer")
+            .AddStyle(Style)
+            .Build();
+    
+    private bool HasIcon => !string.IsNullOrEmpty(Guild.IconUrl);
+    private string HeaderClass => HasIcon ? "mb-3" : string.Empty;
+    
+    private async Task HandleOnClickAsync() => await OnClick.InvokeAsync(Guild);
+}

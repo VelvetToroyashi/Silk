@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>Silk.Dashboard</RootNamespace>
+        <UserSecretsId>VelvetThePanda-SilkBot-Dashboard</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Humanizer" Version="2.10.1" />
+        <PackageReference Include="BlazorComponentUtilities" Version="1.7.0" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.8" />
+        <PackageReference Include="Blazored.Toast" Version="3.1.2" />
+        <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
+        <PackageReference Include="DSharpPlus.Rest" Version="4.0.1" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
+        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
+    </ItemGroup>
+</Project>
