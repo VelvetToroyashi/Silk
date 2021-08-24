@@ -10,7 +10,7 @@ namespace AnnoucementPlugin.Database
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.HasDefaultSchema("Announcement-Plugin");
+			modelBuilder.HasDefaultSchema("announcement_plugin");
 			base.OnModelCreating(modelBuilder);
 		}
 	}
