@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
 using Silk.Api.Data;
 using Silk.Api.Data.Models;
@@ -13,7 +14,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 		{
 			public ulong TargetUserId { get; set; }
 			public ulong EnforcerUserId { get; set; }
-			public ulong GuilldCreationId { get; set; }
+			public ulong GuildCreationId { get; set; }
 		
 			public DateTime Created { get; set; }
 			public DateTime? Expires { get; set; }
@@ -26,7 +27,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 			public Guid  Key { get; set; }
 			public ulong TargetUserId { get; set; }
 			public ulong EnforcerUserId { get; set; }
-			public ulong GuilldCreationId { get; set; }
+			public ulong GuildCreationId { get; set; }
 		
 			public DateTime Created { get; set; }
 			public DateTime? Expires { get; set; }
@@ -46,7 +47,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 					Key = Guid.NewGuid(),
 					TargetUserId = request.TargetUserId,
 					EnforcerUserId = request.EnforcerUserId,
-					GuilldCreationId = request.GuilldCreationId,
+					GuildCreationId = request.GuildCreationId,
 					Created = request.Created,
 					Expires = request.Expires,
 					Reason = request.Reason
@@ -65,11 +66,42 @@ namespace Silk.Api.Domain.Feature.Infractions
 					Key = entity.Key,
 					TargetUserId = entity.TargetUserId,
 					EnforcerUserId = entity.EnforcerUserId,
-					GuilldCreationId = entity.GuilldCreationId,
+					GuildCreationId = entity.GuildCreationId,
 					Created = entity.Created,
 					Expires = entity.Expires,
 					Reason = entity.Reason
 				};
+			}
+		}
+
+		public sealed class Validator : AbstractValidator<Request>
+		{
+			public Validator()
+			{
+				RuleFor(r => r.TargetUserId)
+					.NotEmpty()
+					.WithMessage("\"targetUserId\": must not be empty.");
+
+				RuleFor(r => r.EnforcerUserId)
+					.NotEmpty()
+					.WithMessage("\"enforcerUserId\": must not be empty.");
+
+				RuleFor(r => r.GuildCreationId)
+					.NotEmpty()
+					.WithMessage("\"guildCreationId\": must nto be empty.");
+
+				RuleFor(r => r.Created.ToUniversalTime())
+					.LessThan(DateTime.UtcNow)
+					.WithMessage("\"created\": appears to be in the future.");
+
+				RuleFor(r => r.Expires)
+					.LessThan(DateTime.UtcNow)
+					.Unless(r => r.Expires is null)
+					.WithMessage("\"expires\": appears to be in the future.");
+				
+				RuleFor(r => r.Reason)
+					.MaximumLength(4000)
+					.WithMessage("\"reason\": must not exceed 4000 characters.");
 			}
 		}
 	}

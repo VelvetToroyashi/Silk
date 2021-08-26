@@ -10,7 +10,7 @@ namespace Silk.Api.Data.Models
 		
 		public ulong TargetUserId { get; set; }
 		public ulong EnforcerUserId { get; set; }
-		public ulong GuilldCreationId { get; set; }
+		public ulong GuildCreationId { get; set; }
 		
 		public DateTime Created { get; set; }
 		public DateTime Updated { get; set; }
