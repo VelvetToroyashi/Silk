@@ -43,11 +43,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnnoucementPlugin", "plugin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{F36A4C66-2B07-4503-927A-2E41808D20D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api", "Silk.Api\Silk.Api.csproj", "{92B38F89-A812-453B-B0B6-7B2FF4695FEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api", "api\Silk.Api\Silk.Api.csproj", "{92B38F89-A812-453B-B0B6-7B2FF4695FEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api.Data", "Silk.Api.Data\Silk.Api.Data.csproj", "{BB0CC59E-EA47-46EA-8432-1CA3A13A937E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api.Data", "api\Silk.Api.Data\Silk.Api.Data.csproj", "{BB0CC59E-EA47-46EA-8432-1CA3A13A937E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api.Domain", "Silk.Api.Domain\Silk.Api.Domain.csproj", "{2010E56C-4A9C-4395-A249-87D48586EE0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Api.Domain", "api\Silk.Api.Domain\Silk.Api.Domain.csproj", "{2010E56C-4A9C-4395-A249-87D48586EE0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
