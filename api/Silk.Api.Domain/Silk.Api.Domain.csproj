@@ -5,11 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="MediatR\Validators" />
+      <PackageReference Include="MediatR" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="MediatR" Version="9.0.0" />
+      <ProjectReference Include="..\Silk.Api.Data\Silk.Api.Data.csproj" />
     </ItemGroup>
 
 </Project>
