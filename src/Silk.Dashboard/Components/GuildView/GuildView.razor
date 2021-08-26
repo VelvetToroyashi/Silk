@@ -1,5 +1,7 @@
 ﻿@namespace Silk.Dashboard.Components
 
+@inherits DashboardComponentBase
+
 @using DSharpPlus.Entities
 @using BlazorComponentUtilities
 
@@ -14,12 +16,6 @@
 
     [Parameter]
     public DiscordGuild Guild { get; set; }
-
-    [Parameter]
-    public string Class { get; set; } = string.Empty;
-
-    [Parameter]
-    public string Style { get; set; } = string.Empty;
 
     [Parameter]
     public EventCallback<DiscordGuild> OnClick { get; set; }

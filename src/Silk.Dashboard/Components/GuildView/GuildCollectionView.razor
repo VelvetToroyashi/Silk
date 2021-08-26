@@ -7,17 +7,15 @@
         <MudGrid Spacing="4" Justify="Justify.Center">
             @foreach (var guild in Guilds)
             {
-                <MudItem>
+                <MudItem @key="@guild.Id">
                     @if (GuildTemplate is not null)
                     {
                         @* Todo: Change spacing on items (if surrounding `div` is removed, items have no spacing) *@
-                        <div @key="@guild.Id">
-                            @GuildTemplate(guild)
-                        </div>
+                        @GuildTemplate(guild)
                     }
                     else
                     {
-                        <GuildView @key="@guild.Id" Guild="@guild" OnClick="() => NavigateToManageGuild(guild)" />
+                        <GuildView Guild="@guild" OnClick="NavigateToManageGuild" />
                     }
                 </MudItem>
             }
