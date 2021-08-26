@@ -2,7 +2,7 @@
 
 namespace Silk.Api.Domain.DTOs
 {
-	public class InfractionModel
+	public class InfractionDto
 	{
 		public Guid Key { get; set; }
 		public ulong TargetUserId { get; set; }

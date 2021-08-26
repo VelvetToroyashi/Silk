@@ -6,7 +6,7 @@ using Silk.Api.Domain.DTOs;
 
 namespace Silk.Api.Domain.MediatR
 {
-	public record AddInfractionRequest : IRequest<InfractionModel>
+	public record AddInfractionRequest : IRequest<InfractionDto>
 	{
 		public ulong TargetUserId { get; set; }
 		public ulong EnforcerUserId { get; set; }
@@ -19,9 +19,9 @@ namespace Silk.Api.Domain.MediatR
 		public bool IsPardoned { get; set; }
 	}
 
-	class AddInfractionRequestHandler : IRequestHandler<AddInfractionRequest, InfractionModel> {
+	class AddInfractionRequestHandler : IRequestHandler<AddInfractionRequest, InfractionDto> {
 
-		public async Task<InfractionModel> Handle(AddInfractionRequest request, CancellationToken cancellationToken)
+		public async Task<InfractionDto> Handle(AddInfractionRequest request, CancellationToken cancellationToken)
 		{
 			return null;
 		}
