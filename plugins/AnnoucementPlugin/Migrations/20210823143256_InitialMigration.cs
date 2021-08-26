@@ -8,8 +8,12 @@ namespace AnnoucementPlugin.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "announcement_plugin");
+
             migrationBuilder.CreateTable(
                 name: "Announcements",
+                schema: "announcement_plugin",
                 columns: table => new
                 {
                     PK_Key = table.Column<int>(type: "integer", nullable: false)
@@ -28,7 +32,8 @@ namespace AnnoucementPlugin.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Announcements");
+                name: "Announcements",
+                schema: "announcement_plugin");
         }
     }
 }

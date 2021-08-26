@@ -9,7 +9,7 @@ pull_request_rules:
   - name: Merge non-breaking dependencies automatically
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
-      - title~=Bump .+ from (?P<major>\d+).\d+.\d+.+ to (?P=major).\d+.\d+.+
+      - title~=Bump .+ from (?P<major>\d+).\d+.\d+.+ to (?P=major).\d+.\d+.*
     actions:
       merge:
         method: merge

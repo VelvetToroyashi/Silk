@@ -7,5 +7,11 @@ namespace AnnoucementPlugin.Database
 		public DbSet<AnnouncementModel> Announcements { get; set; }
 
 		public AnnouncementContext(DbContextOptions options) : base(options) { }
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.HasDefaultSchema("announcement_plugin");
+			base.OnModelCreating(modelBuilder);
+		}
 	}
 }

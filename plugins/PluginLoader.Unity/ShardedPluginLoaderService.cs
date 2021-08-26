@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
 using Microsoft.Extensions.Logging;
 using YumeChan.PluginBase;
 
@@ -12,11 +16,13 @@ namespace PluginLoader.Unity
 	public sealed class ShardedPluginLoaderService : IPluginLoaderService
 	{
 		private readonly PluginLoader _loader;
+		private readonly DiscordShardedClient _client;
 		private readonly ILogger<IPluginLoaderService> _logger;
-		public ShardedPluginLoaderService(PluginLoader loader, ILogger<IPluginLoaderService> logger)
+		public ShardedPluginLoaderService(PluginLoader loader, ILogger<IPluginLoaderService> logger, DiscordShardedClient client)
 		{
 			_loader = loader;
 			_logger = logger;
+			_client = client;
 		}
 
 
@@ -48,10 +54,30 @@ namespace PluginLoader.Unity
 		
 		public async Task RegisterPluginCommandsAsync()
 		{
-			_logger.LogTrace("Soon:tm:");
+			var cnextExtensions = (await _client.GetCommandsNextAsync()).Select(c => c.Value);
+
+			foreach (var plugin in _loader.Plugins)
+			{
+				foreach (var ext in cnextExtensions)
+				{
+					try
+					{
+						ext.RegisterCommands(plugin.Assembly);
+					}
+					catch (DuplicateCommandException e)
+					{
+						/* Todo: LOG */
+						break; // Next plugin. //
+					}
+				}
+			}
+			
 		}
-		
-		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins) { }
+
+		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
+		{
+			_logger.LogTrace("Soon");
+		}
 		public async Task UnloadPluginCommandsAsync(IEnumerable<PluginManifest> plugins) { }
 	}
 }

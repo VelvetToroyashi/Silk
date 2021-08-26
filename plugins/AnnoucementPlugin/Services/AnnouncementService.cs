@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AnnoucementPlugin.Database;
 using AnnoucementPlugin.Database.MediatR;
 using AnnoucementPlugin.Utilities;
+using ConcurrentCollections;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +18,7 @@ namespace AnnoucementPlugin.Services
 		private readonly IMessageDispatcher _dispatcher;
 		private readonly ILogger<AnnouncementService> _logger;
 		private readonly List<AnnouncementModel> _announcements = new();
+		private readonly ConcurrentHashSet<AnnouncementModel> _databaseAnnouncements = new();
 
 		/// <summary>
 		/// Minimum threshold time required for an announcement to be saved to the database. 
@@ -61,6 +63,7 @@ namespace AnnoucementPlugin.Services
 				var dbBackedAnnouncement = await _mediator.Send(new CreateAnnouncementRequest(content, guild, channel, DateTime.UtcNow + expiration));
 				
 				_announcements.Add(dbBackedAnnouncement);
+				_databaseAnnouncements.Add(dbBackedAnnouncement);
 			}
 		}
 
@@ -82,7 +85,9 @@ namespace AnnoucementPlugin.Services
 					else
 					{
 						_logger.LogDebug("Successfully dispatched announcement.");
-						await _mediator.Send(new RemoveAnnouncementRequest(announcement));
+						
+						if (_databaseAnnouncements.TryRemove(announcement))
+							await _mediator.Send(new RemoveAnnouncementRequest(announcement));
 					}
 
 					/*
