@@ -1,28 +1,28 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    ///     Request for adding a <see cref="Guild" /> to the database.
+    /// Request for adding a <see cref="GuildEntity" /> to the database.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Prefix">The prefix for the Guild</param>
-    public sealed record AddGuildRequest(ulong GuildId, string Prefix) : IRequest<Guild>;
+    public sealed record AddGuildRequest(ulong GuildId, string Prefix) : IRequest<GuildEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="AddGuildRequest" />.
+    /// The default handler for <see cref="AddGuildRequest" />.
     /// </summary>
-    public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, Guild>
+    public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, GuildEntity>
     {
         private readonly GuildContext _db;
         public AddGuildHandler(GuildContext db) => _db = db;
 
-        public async Task<Guild> Handle(AddGuildRequest request, CancellationToken cancellationToken)
+        public async Task<GuildEntity> Handle(AddGuildRequest request, CancellationToken cancellationToken)
         {
-            Guild guild = new()
+            GuildEntity guild = new()
             {
                 Id = request.GuildId,
                 Prefix = request.Prefix,

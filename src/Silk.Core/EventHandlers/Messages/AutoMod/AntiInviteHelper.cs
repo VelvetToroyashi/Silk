@@ -7,7 +7,7 @@ using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
@@ -50,7 +50,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <param name="config">The configuration of the guild the message was sent on.</param>
         /// <param name="invite">The invite that was matched, if any.</param>
         /// <returns>Whether further action should be taken</returns>
-        public bool CheckForInvite(DiscordMessage message, GuildModConfig config, out string invite)
+        public bool CheckForInvite(DiscordMessage message, GuildModConfigEntity config, out string invite)
 		{
 			invite = "";
 
@@ -76,7 +76,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
         /// <param name="invite">The invite to check.</param>
         /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
-        public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfig config, string invite)
+        public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfigEntity config, string invite)
 		{
 			if (config is null) return false;
 			if (!config.ScanInvites) return config.AllowedInvites.All(inv => inv.VanityURL != invite);
@@ -108,9 +108,9 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         ///     Attempts to infract a member for posting an invite.
         /// </summary>
         /// <param name="message"></param>
-        public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfig config)
+        public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfigEntity config)
 		{
-			User? user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
+			UserEntity? user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
 
 			if (user.Flags.HasFlag(UserFlag.InfractionExemption))
 				return;

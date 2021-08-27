@@ -4,19 +4,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
 {
     /// <summary>
-    ///     Request for getting tags for a specific guild, if any.
+    /// Request for getting tags for a specific guild, if any.
     /// </summary>
-    public record GetTagByGuildRequest(ulong GuildId) : IRequest<IEnumerable<Tag>>;
+    public record GetTagByGuildRequest(ulong GuildId) : IRequest<IEnumerable<TagEntity>>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetTagByGuildRequest" />.
+    /// The default handler for <see cref="GetTagByGuildRequest" />.
     /// </summary>
-    public class GetTagByGuildHandler : IRequestHandler<GetTagByGuildRequest, IEnumerable<Tag>>
+    public class GetTagByGuildHandler : IRequestHandler<GetTagByGuildRequest, IEnumerable<TagEntity>>
     {
         private readonly GuildContext _db;
 
@@ -25,9 +25,9 @@ namespace Silk.Core.Data.MediatR.Tags
             _db = db;
         }
 
-        public async Task<IEnumerable<Tag>> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<TagEntity>> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
         {
-            Tag[] tags = await _db
+            TagEntity[] tags = await _db
                 .Tags
                 .Include(t => t.OriginalTag)
                 .Include(t => t.Aliases)

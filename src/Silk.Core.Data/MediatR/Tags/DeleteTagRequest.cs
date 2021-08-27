@@ -3,17 +3,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
 {
     /// <summary>
-    ///     Request to delete a <see cref="Tag" />.
+    /// Request to delete a <see cref="TagEntity" />.
     /// </summary>
     public record DeleteTagRequest(string Name, ulong GuildId) : IRequest;
 
     /// <summary>
-    ///     The default handler for <see cref="DeleteTagRequest" />.
+    /// The default handler for <see cref="DeleteTagRequest" />.
     /// </summary>
     public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
     {
@@ -22,7 +22,7 @@ namespace Silk.Core.Data.MediatR.Tags
 
         public async Task<Unit> Handle(DeleteTagRequest request, CancellationToken cancellationToken)
         {
-            Tag tag = await _db
+            TagEntity tag = await _db
                 .Tags
                 .Include(t => t.OriginalTag)
                 .Include(t => t.Aliases)
@@ -31,7 +31,7 @@ namespace Silk.Core.Data.MediatR.Tags
                     t.Name.ToLower() == request.Name.ToLower() &&
                     t.GuildId == request.GuildId, cancellationToken);
 
-            Tag[] aliasedTags = await _db
+            TagEntity[] aliasedTags = await _db
                 .Tags
                 .Include(t => t.OriginalTag)
                 .Include(t => t.Aliases)

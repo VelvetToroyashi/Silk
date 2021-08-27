@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities
@@ -36,7 +36,7 @@ namespace Silk.Core.Utilities
 
 			using var scope = ctx.Services.CreateScope();
 			IMediator mediator = scope.ServiceProvider.Get<IMediator>()!;
-			User? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
+			UserEntity? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 
 			if (member is null) return false;
 			if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);

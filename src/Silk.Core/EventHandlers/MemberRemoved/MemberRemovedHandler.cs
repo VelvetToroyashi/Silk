@@ -2,7 +2,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 
 namespace Silk.Core.EventHandlers.MemberRemoved
@@ -17,7 +17,7 @@ namespace Silk.Core.EventHandlers.MemberRemoved
 
 		public async Task OnMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
 		{
-			GuildModConfig config = await _configService.GetModConfigAsync(e.Guild.Id);
+			GuildModConfigEntity config = await _configService.GetModConfigAsync(e.Guild.Id);
 			// This should be done in a seperate service //
 			if (config.LogMemberLeaves && config.LoggingChannel is not 0)
 				await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetLeaveEmbed(e));

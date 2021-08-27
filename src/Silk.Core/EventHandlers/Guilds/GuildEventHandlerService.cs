@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
@@ -148,7 +148,7 @@ namespace Silk.Core.EventHandlers.Guilds
 			{
 				UserFlag flag = member.HasPermission(Permissions.Administrator) || member.IsOwner ? UserFlag.EscalatedStaff : UserFlag.Staff;
 
-				User? user = await _mediator.Send(new GetUserRequest(member.Guild.Id, member.Id));
+				UserEntity? user = await _mediator.Send(new GetUserRequest(member.Guild.Id, member.Id));
 				if (user is not null)
 				{
 					if (!user.Flags.Has(flag))

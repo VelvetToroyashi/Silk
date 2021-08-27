@@ -3,21 +3,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    ///     Request for retrieving or creating a <see cref="Guild" />.
+    /// Request for retrieving or creating a <see cref="GuildEntity" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Prefix">The prefix of the Guild</param>
-    public record GetOrCreateGuildRequest(ulong GuildId, string Prefix) : IRequest<Guild>;
+    public record GetOrCreateGuildRequest(ulong GuildId, string Prefix) : IRequest<GuildEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetOrCreateGuildRequest" />.
+    /// The default handler for <see cref="GetOrCreateGuildRequest" />.
     /// </summary>
-    public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, Guild>
+    public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, GuildEntity>
     {
         private readonly GuildContext _db;
         private IMediator _mediator;
@@ -27,9 +27,9 @@ namespace Silk.Core.Data.MediatR.Guilds
             _mediator = mediator;
         }
 
-        public async Task<Guild> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
+        public async Task<GuildEntity> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
         {
-            Guild? guild = await _db.Guilds
+            GuildEntity? guild = await _db.Guilds
                 .Include(g => g.Users)
                 .Include(g => g.Infractions)
                 .AsSplitQuery()

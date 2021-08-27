@@ -4,11 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
-    public record UpdateGuildModConfigRequest : IRequest<GuildModConfig?>
+    public record UpdateGuildModConfigRequest : IRequest<GuildModConfigEntity?>
     {
         public UpdateGuildModConfigRequest(ulong guildId) => GuildId = guildId;
         public ulong GuildId { get; init; }
@@ -24,21 +24,21 @@ namespace Silk.Core.Data.MediatR.Guilds
         public bool? DeleteOnMatchedInvite { get; init; }
         public int? MaxUserMentions { get; init; }
         public int? MaxRoleMentions { get; init; }
-        public List<Invite>? AllowedInvites { get; init; }
-        public List<InfractionStep>? InfractionSteps { get; init; }
+        public List<InviteEntity>? AllowedInvites { get; init; }
+        public List<InfractionStepEntity>? InfractionSteps { get; init; }
         public ulong? MuteRoleId { get; init; }
         public ulong? LoggingChannel { get; init; }
         public bool? LogMessageChanges { get; init; }
 
-        public Dictionary<string, InfractionStep>? AutoModActions { get; init; }
+        public Dictionary<string, InfractionStepEntity>? AutoModActions { get; init; }
     }
 
-    public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfig?>
+    public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfigEntity?>
     {
         private readonly GuildContext _db;
         public UpdateGuildModConfigHandler(GuildContext db) => _db = db;
 
-        public async Task<GuildModConfig?> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
+        public async Task<GuildModConfigEntity?> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
         {
             var config = await _db.GuildModConfigs
                 .AsNoTracking()

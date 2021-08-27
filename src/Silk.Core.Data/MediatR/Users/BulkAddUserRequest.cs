@@ -4,28 +4,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users
 {
     /// <summary>
-    ///     Request for adding users to the database en masse.
+    /// Request for adding users to the database en masse.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         This is not intended to be used with multi-guild updates as
-    ///         upon failure, the first element of the user collection is picked, and that Guild Id
-    ///         is used to query the users that are already inserted into the database to refine insertion
-    ///         queries. Validation should be done outside to ensure no duplicate users exist, as a slow
-    ///         branch will be taken if bulk-inserting fails.
-    ///     </para>
+    /// <para>
+    /// This is not intended to be used with multi-guild updates as
+    /// upon failure, the first element of the user collection is picked, and that Guild Id
+    /// is used to query the users that are already inserted into the database to refine insertion
+    /// queries. Validation should be done outside to ensure no duplicate users exist, as a slow
+    /// branch will be taken if bulk-inserting fails.
+    /// </para>
     /// </remarks>
-    public record BulkAddUserRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
+    public record BulkAddUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
 
     /// <summary>
     ///     The default handler for <see cref="BulkAddUserRequest" />.
     /// </summary>
-    public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<User>>
+    public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<UserEntity>>
     {
         private readonly GuildContext _db;
 
@@ -34,7 +34,7 @@ namespace Silk.Core.Data.MediatR.Users
             _db = db;
         }
 
-        public async Task<IEnumerable<User>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserEntity>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace Silk.Core.Data.MediatR.Users
             {
                 _db.ChangeTracker.Clear();
 
-                List<User>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
+                List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
                 nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
 
                 _db.Users.AddRange(nonAddedUsers);
@@ -62,11 +62,11 @@ namespace Silk.Core.Data.MediatR.Users
         }
 
         /// <summary>
-        ///     Adds users individually to mitigate an entire query failing when adding in bulk.
-        ///     <para>This is considerably slower than <see cref="Handle" />.</para>
+        /// Adds users individually to mitigate an entire query failing when adding in bulk.
+        /// <para>This is considerably slower than <see cref="Handle" />.</para>
         /// </summary>
         /// <param name="users">The collection of users to add.</param>
-        private async Task AttemptAddUsersSlowAsync(IEnumerable<User> users)
+        private async Task AttemptAddUsersSlowAsync(IEnumerable<UserEntity> users)
         {
             foreach (var user in users)
             {

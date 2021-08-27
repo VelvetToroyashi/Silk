@@ -2,20 +2,20 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    ///     Request for getting the <see cref="GuildConfig" /> for the Guild.
+    /// Request for getting the <see cref="GuildConfigEntity" /> for the Guild.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
-    public record GetGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig>;
+    public record GetGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetGuildConfigRequest" />.
+    /// The default handler for <see cref="GetGuildConfigRequest" />.
     /// </summary>
-    public class GetGuildConfigHandler : IRequestHandler<GetGuildConfigRequest, GuildConfig>
+    public class GetGuildConfigHandler : IRequestHandler<GetGuildConfigRequest, GuildConfigEntity?>
     {
         private readonly GuildContext _db;
         public GetGuildConfigHandler(GuildContext db)
@@ -23,9 +23,9 @@ namespace Silk.Core.Data.MediatR.Guilds
             _db = db;
         }
 
-        public async Task<GuildConfig> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity?> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
         {
-            GuildConfig config = await _db.GuildConfigs
+            GuildConfigEntity? config = await _db.GuildConfigs
                     .Include(c => c.DisabledCommands)
                     //.Include(c => c.BlackListedWords)
                     .AsSplitQuery()

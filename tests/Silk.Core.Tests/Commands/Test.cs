@@ -11,7 +11,7 @@ using NUnit.Framework;
 using Silk.Core.Commands;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Tests.Commands
 {
@@ -23,8 +23,8 @@ namespace Silk.Core.Tests.Commands
 			// Arrange
 			var mediatr = new Mock<IMediator>();
 
-			mediatr.Setup(m => m.Send(It.IsAny<GetGuildConfigRequest>(), CancellationToken.None)).ReturnsAsync(new GuildConfig());
-			mediatr.Setup(m => m.Send(It.IsAny<GetGuildModConfigRequest>(), CancellationToken.None)).ReturnsAsync(new GuildModConfig());
+			mediatr.Setup(m => m.Send(It.IsAny<GetGuildConfigRequest>(), CancellationToken.None)).ReturnsAsync(new GuildConfigEntity());
+			mediatr.Setup(m => m.Send(It.IsAny<GetGuildModConfigRequest>(), CancellationToken.None)).ReturnsAsync(new GuildModConfigEntity());
 
 			var module = new Fake<ConfigModule.ViewConfigModule>(mediatr.Object);
 			var guild = typeof(DiscordGuild).GetTypeInfo().DeclaredConstructors.First().Invoke(null) as DiscordGuild;
