@@ -13,10 +13,14 @@ namespace Silk.Api.Controllers
 		public InfractionsController(IMediator mediator) => _mediator = mediator;
 
 		[HttpGet(Name = "GetInfraction")]
-		public async Task<IActionResult> GetInfraction()
+		public async Task<IActionResult> GetInfraction(GetInfraction.Request request)
 		{
+			var infraction = await _mediator.Send(request);
 
-			return NoContent();
+			if (infraction is null)
+				return NotFound();
+
+			else return Ok(infraction);
 		}
 		
 		[HttpPost]
