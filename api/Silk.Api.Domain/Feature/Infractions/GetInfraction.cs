@@ -14,6 +14,8 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 		public sealed record ApiModel
 		{
+			public InfractionType Type { get; init; }
+			
 			public ulong TargetUserId { get; init; }
 			public ulong EnforcerUserId { get; init; }
 			public ulong GuildCreationId { get; init; }
@@ -45,6 +47,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 		{
 			return new()
 			{
+				Type = entity.Type,
 				TargetUserId = entity.TargetUserId,
 				EnforcerUserId = entity.EnforcerUserId,
 				GuildCreationId = entity.GuildCreationId,

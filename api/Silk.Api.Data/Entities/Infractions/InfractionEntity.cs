@@ -8,6 +8,8 @@ namespace Silk.Api.Data.Models
 		
 		public Guid Key { get; set; }
 		
+		public InfractionType Type { get; set; }
+		
 		public ulong TargetUserId { get; set; }
 		public ulong EnforcerUserId { get; set; }
 		public ulong GuildCreationId { get; set; }

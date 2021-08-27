@@ -3,13 +3,13 @@
     public enum InfractionType
     {
         /// <summary>
-        ///     Used by Auto-Mod and the strike command. In the case of the former, the Infraction Handler
-        ///     swill take appropriate action dependent on the number of strikes the user has.
-        ///     When used by the warn command, after 5 strikes, Silk! will ask to elevate to the next appropriate action depending on the guild configuration.
+        /// Used by Auto-Mod and the strike command. In the case of the former, the Infraction Handler
+        /// swill take appropriate action dependent on the number of strikes the user has.
+        /// When used by the warn command, after 5 strikes, Silk! will ask to elevate to the next appropriate action depending on the guild configuration.
         /// </summary>
         Strike,
         /// <summary>
-        ///     Signifies the user was kicked when this infraction was added.
+        /// Signifies the user was kicked when this infraction was added.
         /// </summary>
         Kick,
         /// <summary>

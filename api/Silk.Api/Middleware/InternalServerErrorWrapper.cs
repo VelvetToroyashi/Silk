@@ -55,7 +55,6 @@ namespace Silk.Api
 				var json = JsonConvert.SerializeObject(response);
 
 				await context.Response.WriteAsync(json);
-				
 			}
 			else
 			{

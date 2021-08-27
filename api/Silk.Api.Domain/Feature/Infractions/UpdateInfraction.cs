@@ -5,6 +5,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Api.Data;
+using Silk.Api.Data.Models;
 
 namespace Silk.Api.Domain.Feature.Infractions
 {
@@ -13,6 +14,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 		public record Request : IRequest<ApiModel>
 		{
 			public Guid Key { get; init; }
+			public InfractionType? Type { get; init; }
 			public string? Reason { get; init; }
 			public bool? IsPardoned { get; init; }
 		}
@@ -26,7 +28,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 			
 			public async Task<ApiModel> Handle(Request request, CancellationToken cancellationToken)
 			{
-				if ((!request.IsPardoned ?? true) && request.Reason is null)
+				if ((!request.IsPardoned ?? true) && request.Reason is null && request.Type is null)
 					return new(false);
 
 				var entity = await _db.Infractions.FirstOrDefaultAsync(i => i.Key == request.Key, cancellationToken);
@@ -34,14 +36,18 @@ namespace Silk.Api.Domain.Feature.Infractions
 				if (entity is null)
 					return null;
 				
-				if (request.IsPardoned == entity.IsPardoned && entity.Reason == request.Reason)
-					return new(false); 
-
 				entity.Reason = request.Reason ?? entity.Reason;
 				entity.IsPardoned = request.IsPardoned ?? entity.IsPardoned;
+				entity.Type = request.Type ?? entity.Type;
 				
+				
+				var updated = await _db.SaveChangesAsync(cancellationToken);
+
+				if (updated is 0)
+					return new(false);
+
 				entity.Updated = DateTime.UtcNow;
-				
+
 				await _db.SaveChangesAsync(cancellationToken);
 				
 				return new(true);

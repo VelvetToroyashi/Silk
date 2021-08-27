@@ -12,27 +12,31 @@ namespace Silk.Api.Domain.Feature.Infractions
 	{
 		public sealed record Request : IRequest<ApiModel>
 		{
-			public ulong TargetUserId { get; set; }
-			public ulong EnforcerUserId { get; set; }
-			public ulong GuildCreationId { get; set; }
+			public ulong TargetUserId { get; init; }
+			public ulong EnforcerUserId { get; init; }
+			public ulong GuildCreationId { get; init; }
+			
+			public InfractionType Type { get; init; }
+			
+			public DateTime Created { get; init; }
+			public DateTime? Expires { get; init; }
 		
-			public DateTime Created { get; set; }
-			public DateTime? Expires { get; set; }
-		
-			public string Reason { get; set; }
+			public string Reason { get; init; }
 		}
 
 		public sealed record ApiModel
 		{
-			public Guid  Key { get; set; }
-			public ulong TargetUserId { get; set; }
-			public ulong EnforcerUserId { get; set; }
-			public ulong GuildCreationId { get; set; }
+			public Guid  Key { get; init; }
+
+			public InfractionType Type { get; init; }
+			public ulong TargetUserId { get; init; }
+			public ulong EnforcerUserId { get; init; }
+			public ulong GuildCreationId { get; init; }
 		
-			public DateTime Created { get; set; }
-			public DateTime? Expires { get; set; }
+			public DateTime Created { get; init; }
+			public DateTime? Expires { get; init; }
 		
-			public string Reason { get; set; }
+			public string Reason { get; init; }
 		}
 		
 		public sealed class Handler : IRequestHandler<Request, ApiModel>
@@ -45,6 +49,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				var entity = new Infraction()
 				{
 					Key = Guid.NewGuid(),
+					Type = request.Type,
 					TargetUserId = request.TargetUserId,
 					EnforcerUserId = request.EnforcerUserId,
 					GuildCreationId = request.GuildCreationId,
@@ -64,6 +69,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				return new()
 				{
 					Key = entity.Key,
+					Type = entity.Type,
 					TargetUserId = entity.TargetUserId,
 					EnforcerUserId = entity.EnforcerUserId,
 					GuildCreationId = entity.GuildCreationId,
