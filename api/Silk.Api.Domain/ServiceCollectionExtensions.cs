@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Silk.Api.Domain.Behaviors;
-using Silk.Api.Domain.Feature.Infractions;
 
 namespace Silk.Api.Domain
 {
@@ -10,7 +9,7 @@ namespace Silk.Api.Domain
 	{
 		public static IServiceCollection AddValidators(this IServiceCollection services)
 		{
-			services.AddTransient<IValidator<AddInfraction.Request>, AddInfraction.Validator>();
+			services.AddValidatorsFromAssemblyContaining(typeof(ServiceCollectionExtensions));
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 			
 			return services;

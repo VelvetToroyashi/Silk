@@ -31,8 +31,8 @@ namespace Silk.Api
 			services.AddMediatR(typeof(AddInfraction));
 
 			services.AddRouting(r => r.LowercaseUrls = true);
-			
-			
+
+
 			services.AddControllers();
 
 			services.AddSwaggerGen(c =>

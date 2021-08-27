@@ -63,10 +63,16 @@ namespace Silk.Api.Domain.Feature.Infractions
 					.WithMessage("New reason must be less than 4000 characters.");
 
 				RuleFor(r => r.IsPardoned)
-					.Must(r => r ?? false)
+					.Must(r => !r ?? false)
 					.Unless(r => !r.IsPardoned.HasValue)
 					.WithMessage("Infractions cannot be unpardoned.");
+
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Ban)
+					.Unless(r => r.Type is null)
+					.WithMessage("No.");
 				
+
 			}
 		}
 	}

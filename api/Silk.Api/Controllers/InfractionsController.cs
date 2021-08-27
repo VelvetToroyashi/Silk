@@ -35,7 +35,7 @@ namespace Silk.Api.Controllers
 		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
 		{
 			var res = await _mediator.Send(request);
-			
+
 			if (res is null)
 				return NotFound();
 			
