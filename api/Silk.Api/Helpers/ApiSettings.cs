@@ -9,5 +9,10 @@
 		/// Cryptographic secret for signing JWT tokens.
 		/// </summary>
 		public string JwtSecret { get; init; }
+	
+		/// <summary>
+		/// Cryptographic salt for hashing passwords.
+		/// </summary>
+		public string HashSalt { get; init; }
 	}
 }

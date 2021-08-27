@@ -11,9 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
 using Silk.Api.Domain;
-using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
-using Silk.Api.Services;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -36,9 +34,7 @@ namespace Silk.Api
 			
 			services.AddValidators();
 			services.AddMediatR(typeof(ServiceCollectionExtensions));
-
-			services.AddScoped<IUserService, UserService>();
-
+			
 			services.AddRouting(r => r.LowercaseUrls = true);
 
 

@@ -13,6 +13,7 @@
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="10.3.3" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
+        <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.10" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
           <PrivateAssets>all</PrivateAssets>
@@ -26,6 +27,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Silk.Api.Domain\Silk.Api.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services" />
     </ItemGroup>
 
 </Project>

@@ -3,11 +3,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Isopoh.Cryptography.Argon2;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Silk.Api.Data.Entities;
-using Silk.Api.Domain.Services;
+using Silk.Api.Domain.Feature.Users;
 using Silk.Api.Helpers;
 
 namespace Silk.Api
@@ -15,25 +17,27 @@ namespace Silk.Api
 	public sealed class JwtAuthMiddleware
 	{
 		private readonly RequestDelegate _next;
+		private readonly IMediator _mediator;
 		private readonly ApiSettings _appSettings;
 
-		public JwtAuthMiddleware(RequestDelegate next, IOptions<ApiSettings> settings)
+		public JwtAuthMiddleware(RequestDelegate next, IOptions<ApiSettings> settings, IMediator mediator)
 		{
 			_next = next;
+			_mediator = mediator;
 			_appSettings = settings.Value;
 		}
 
-		public async Task Invoke(HttpContext context, IUserService userService)
+		public async Task Invoke(HttpContext context)
 		{
 			var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
 			if (token != null)
-				await AttachUserToContext(context, userService, token);
+				await AttachUserToContext(context, token);
 
 			await _next(context);
 		}
 
-		private async Task AttachUserToContext(HttpContext context, IUserService userService, string token)
+		private async Task AttachUserToContext(HttpContext context, string token)
 		{
 			try
 			{
@@ -61,10 +65,10 @@ namespace Silk.Api
 
 				var parsedKey = Guid.Parse(userKey);
 
-				var user = await userService.GetUserByKey(parsedKey);
-
-				if (user.Key != parsedKey || user.Username != userName || user.Password != userPass)
-					return; // I WILL HASH AND SALT PASSWORDS LATER LEAVE ME ALONE //
+				var user = await _mediator.Send(new GetUser.Request(parsedKey));
+				
+				if (user.Key != parsedKey || user.Username != userName || !Argon2.Verify(user.Password, userPass, _appSettings.HashSalt))
+					return; 
 				
 				context.Items["user"] = user;
 			}
