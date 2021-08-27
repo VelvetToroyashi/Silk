@@ -23,6 +23,9 @@ namespace Silk.Api.Controllers
 			else return Ok(infraction);
 		}
 
+		/// <summary>
+		///	Gets all infractions on a specific guild.
+		/// </summary>
 		/// <response code="200">A guilds's infractions were successfully queried</response>
 		/// <response code="404">The guild was not registered with the API.</response>
 		[HttpGet("guild/{guild}")]
@@ -31,7 +34,10 @@ namespace Silk.Api.Controllers
 			return new StatusCodeResult(501);
 		}
 		
-		/// 
+		
+		/// <summary>
+		/// Gets a user's infractions for a specific guild. 
+		/// </summary>
 		/// <response code="200">A user's infractions were successfully queried</response>
 		[HttpGet("guild/{guild}/user/{user}")]
 		public async Task<IActionResult> GetUserInfractions(ulong guild, ulong user)
