@@ -31,14 +31,14 @@ namespace Silk.Api.Controllers
 			return new StatusCodeResult(501);
 		}
 		
-		/// <summary>
-		/// Test
-		/// </summary>
+		/// 
 		/// <response code="200">A user's infractions were successfully queried</response>
-		[HttpGet("user/{user}")]
-		public async Task<IActionResult> GetUserInfractions(ulong user)
+		[HttpGet("guild/{guild}/user/{user}")]
+		public async Task<IActionResult> GetUserInfractions(ulong guild, ulong user)
 		{
-			return new StatusCodeResult(501);
+			var req = new GetInfractionByUser.Request(user, guild);
+			var results = await _mediator.Send(req);
+			return Ok(results);
 		}
 		
 		[HttpPost]
