@@ -52,7 +52,7 @@ namespace Silk.Api
 				var jwtToken = (JwtSecurityToken)validatedToken;
 				var userKey = jwtToken.Claims.FirstOrDefault(c => c.Type == "key")?.Value;
 				var userName = jwtToken.Claims.First(c => string.Equals(nameof(User.Username), c.Type, StringComparison.OrdinalIgnoreCase)).Value;
-				var userPass = jwtToken.Claims.First(c => string.Equals(nameof(User.Username), c.Type, StringComparison.OrdinalIgnoreCase)).Value;
+				var userPass = jwtToken.Claims.First(c => string.Equals(nameof(User.Password), c.Type, StringComparison.OrdinalIgnoreCase)).Value;
 				
 				context.Items["user"] = null;
 				
