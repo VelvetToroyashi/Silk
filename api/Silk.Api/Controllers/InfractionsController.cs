@@ -22,6 +22,24 @@ namespace Silk.Api.Controllers
 
 			else return Ok(infraction);
 		}
+
+		/// <response code="200">A guilds's infractions were successfully queried</response>
+		/// <response code="404">The guild was not registered with the API.</response>
+		[HttpGet("guild/{guild}")]
+		public async Task<IActionResult> GetGuildInfractions(ulong guild)
+		{
+			return new StatusCodeResult(501);
+		}
+		
+		/// <summary>
+		/// Test
+		/// </summary>
+		/// <response code="200">A user's infractions were successfully queried</response>
+		[HttpGet("user/{user}")]
+		public async Task<IActionResult> GetUserInfractions(ulong user)
+		{
+			return new StatusCodeResult(501);
+		}
 		
 		[HttpPost]
 		public async Task<IActionResult> AddInfraction(AddInfraction.Request request)
