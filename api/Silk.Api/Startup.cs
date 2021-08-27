@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
+using Silk.Api.Domain;
 using Silk.Api.Domain.Feature.Infractions;
 
 namespace Silk.Api
@@ -26,7 +27,9 @@ namespace Silk.Api
 				//a.GetService<ApiContext>()!.Database.Migrate();
 			});
 
+			services.AddValidators();
 			services.AddMediatR(typeof(AddInfraction));
+			
 			
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
@@ -44,7 +47,8 @@ namespace Silk.Api
 				app.UseSwagger();
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Silk.Api v1"));
 			}
-
+			app.UseMiddleware<InternalServerErrorWrapper>();
+			
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
