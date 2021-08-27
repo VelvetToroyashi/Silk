@@ -10,7 +10,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 {
 	public static class GetInfraction
 	{
-		public record Request(Guid Key) : IRequest<ApiModel>;
+		public sealed record Request(Guid Key) : IRequest<ApiModel>;
 
 		public sealed record ApiModel
 		{
@@ -46,7 +46,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 		private static ApiModel ToModel(Infraction entity)
 		{
 			if (entity is null) return null;
-			
+				
 			return new()
 			{
 				Type = entity.Type,
