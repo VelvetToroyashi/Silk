@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
 using Silk.Api.Domain;
+using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
@@ -25,18 +26,18 @@ namespace Silk.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddDbContext<ApiContext>((a, d) =>
-			{
-				d.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api");
-			});
-			
+
 			services.Configure<ApiSettings>(Configuration.GetSection("Api"));
 			
-			services.AddValidators();
 			services.AddMediatR(typeof(ServiceCollectionExtensions));
+			services.AddValidators();
+			services.AddDbContext<ApiContext>(d => d
+				.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api"), ServiceLifetime.Transient, ServiceLifetime.Transient);
+
 			
 			services.AddRouting(r => r.LowercaseUrls = true);
 
+			services.AddTransient<CryptoHelper>();
 
 			services.AddControllers();
 
@@ -64,6 +65,7 @@ namespace Silk.Api
 			ctx.Database.Migrate();
 			
 			app.UseMiddleware<InternalServerErrorWrapper>();
+			app.UseMiddleware<JwtAuthMiddleware>();
 			
 			app.UseHttpsRedirection();
 

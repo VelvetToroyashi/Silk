@@ -11,5 +11,8 @@ namespace Silk.Api.Data.Entities
 		
 		[JsonIgnore]
 		public string Password { get; set; }
+		
+		[JsonIgnore]
+		public string PasswordSalt { get; set; }
 	}
 }

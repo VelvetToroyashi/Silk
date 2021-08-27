@@ -1,29 +1,39 @@
 ﻿using System;
+using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Isopoh.Cryptography.Argon2;
 using MediatR;
 using Silk.Api.Data;
 using Silk.Api.Data.Entities;
+using Silk.Api.Domain.Services;
 
 namespace Silk.Api.Domain.Feature.Users
 {
 	public static class AddUser
 	{
-		public sealed record Request(string UserName, string Password, string Salt) : IRequest<User>;
+		public sealed record Request(string UserName, string Password, [property: JsonIgnore] string Salt) : IRequest<User>;
 		
 		public sealed class Handler : IRequestHandler<Request, User>
 		{
 			private readonly ApiContext _db;
-			public Handler(ApiContext db) => _db = db;
+			private readonly CryptoHelper _crypto;
+			public Handler(ApiContext db, CryptoHelper crypto)
+			{
+				_db = db;
+				_crypto = crypto;
+			}
 
 			public async Task<User> Handle(Request request, CancellationToken cancellationToken)
 			{
+				var pass = _crypto.HashPassword(request.Password, Encoding.UTF8.GetBytes(request.Salt));
+				
 				var user = new User
 				{
 					Key = Guid.NewGuid(),
 					Username = request.UserName,
-					Password = Argon2.Hash(request.Password, request.Salt)
+					Password = Encoding.UTF8.GetString(pass),
+					PasswordSalt = request.Salt
 				};
 				
 				_db.Users.Add(user);

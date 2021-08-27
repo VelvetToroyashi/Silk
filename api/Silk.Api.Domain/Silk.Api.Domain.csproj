@@ -2,11 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
-      <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.10" />
+      <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
       <PackageReference Include="MediatR" Version="9.0.0" />
     </ItemGroup>
 
@@ -18,10 +19,6 @@
       <Reference Include="FluentValidation, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0">
         <HintPath>C:\Users\Cinnamon\.nuget\packages\fluentvalidation\10.3.3\lib\net5.0\FluentValidation.dll</HintPath>
       </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services" />
     </ItemGroup>
 
 </Project>
