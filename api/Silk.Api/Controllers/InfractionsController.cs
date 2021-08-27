@@ -30,5 +30,19 @@ namespace Silk.Api.Controllers
 			
 			return Created(nameof(GetInfraction), created);
 		}
+
+		[HttpPatch]
+		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
+		{
+			var res = await _mediator.Send(request);
+			
+			if (res is null)
+				return NotFound();
+			
+			if (res.Changed)
+				return Ok();
+			
+			return NoContent();
+		}
 	}
 }
