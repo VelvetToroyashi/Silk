@@ -30,16 +30,6 @@ namespace Silk.Api
 			{
 				await HandleException(context, ex);
 			}
-
-			if (!context.Response.HasStarted)
-			{
-				context.Response.ContentType = "application/json";
-
-				var response = new ApiResponseBase(context.Response.StatusCode);
-				var json = JsonConvert.SerializeObject(response);
-
-				await context.Response.WriteAsync(json);
-			}
 		}
 
 		private async Task HandleException(HttpContext context, Exception ex)
@@ -48,6 +38,7 @@ namespace Silk.Api
 			{
 				context.Response.ContentType = "application/json";
 				context.Response.StatusCode = 400;
+				_logger.LogInformation("Validation error");
 
 				var errors = ve.Errors.Select(x => x.ErrorMessage);
 
@@ -55,6 +46,7 @@ namespace Silk.Api
 				var json = JsonConvert.SerializeObject(response);
 
 				await context.Response.WriteAsync(json);
+				
 			}
 			else
 			{
