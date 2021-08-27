@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,8 @@ namespace Silk.Api
 				a.GetService<ApiContext>()!.Database.Migrate();
 			});
 
+			services.AddMediatR(typeof(Startup));
+			
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
 			{
