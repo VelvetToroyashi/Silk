@@ -15,7 +15,11 @@ namespace Silk.Api.Domain.Feature.Infractions
 		{
 			public Guid Key { get; init; }
 			public InfractionType? Type { get; init; }
+			
+#nullable enable
 			public string? Reason { get; init; }
+#nullable disable
+
 			public bool? IsPardoned { get; init; }
 		}
 

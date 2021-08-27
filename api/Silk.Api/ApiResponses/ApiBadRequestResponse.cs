@@ -18,7 +18,7 @@ namespace Silk.Api.ApiResponses
 				throw new ArgumentException("ModelState must be invalid", nameof(modelState));
 			}
 
-			Errors = modelState.SelectMany(x => x.Value.Errors)
+			Errors = modelState.SelectMany(x => x.Value!.Errors)
 				.Select(x => x.ErrorMessage).ToArray();
 		}
 
