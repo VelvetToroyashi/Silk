@@ -36,7 +36,6 @@ namespace Silk.Api
 		{
 			if (ex is ValidationException ve)
 			{
-				_logger.LogWarning("Validation error");
 				context.Response.ContentType = "application/json";
 				context.Response.StatusCode = 400;
 
