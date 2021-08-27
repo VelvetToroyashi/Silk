@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Domain.Feature.Infractions;
+using Silk.Api.Helpers;
 
 namespace Silk.Api.Controllers
 {
@@ -12,6 +13,7 @@ namespace Silk.Api.Controllers
 		private readonly IMediator _mediator;
 		public InfractionsController(IMediator mediator) => _mediator = mediator;
 
+		[Authorize]
 		[HttpGet(Name = "GetInfraction")]
 		public async Task<IActionResult> GetInfraction(GetInfraction.Request request)
 		{
