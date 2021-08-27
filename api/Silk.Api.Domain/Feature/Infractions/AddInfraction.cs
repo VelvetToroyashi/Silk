@@ -108,6 +108,14 @@ namespace Silk.Api.Domain.Feature.Infractions
 				RuleFor(r => r.Reason)
 					.MaximumLength(4000)
 					.WithMessage("Reason: must not exceed 4000 characters.");
+
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Ignore);
+
+				RuleFor(r => r.Expires)
+					.NotEmpty()
+					.Unless(r => r.Type is not InfractionType.SoftBan)
+					.WithMessage("Temporary bans require an expiration.");
 			}
 		}
 	}
