@@ -56,6 +56,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 		public class Validator : AbstractValidator<Request>
 		{
+			/* TODO: Add messages? */
 			public Validator()
 			{
 				RuleFor(r => r.Reason)
@@ -68,11 +69,32 @@ namespace Silk.Api.Domain.Feature.Infractions
 					.WithMessage("Infractions cannot be unpardoned.");
 
 				RuleFor(r => r.Type)
-					.NotEqual(InfractionType.Ban)
-					.Unless(r => r.Type is null)
-					.WithMessage("No.");
-				
+					.NotEqual(InfractionType.Strike)
+					.Unless(r => r.Type is null);
 
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.AutoModMute)
+					.Unless(r => r.Type is null);
+				
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Ignore)
+					.Unless(r => r.Type is null);
+				
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Unmute)
+					.Unless(r => r.Type is null);
+				
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Note)
+					.Unless(r => r.Type is null);
+				
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Pardon)
+					.Unless(r => r.Type is null);
+				
+				RuleFor(r => r.Type)
+					.NotEqual(InfractionType.Unban)
+					.Unless(r => r.Type is null);
 			}
 		}
 	}
