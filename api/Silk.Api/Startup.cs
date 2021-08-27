@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
+using Silk.Api.Domain.Feature.Infractions;
 
 namespace Silk.Api
 {
@@ -21,11 +22,11 @@ namespace Silk.Api
 		{
 			services.AddDbContext<ApiContext>((a, d) =>
 			{
-				d.UseNpgsql("Server=localhost; User=silk; Password=silk; Database=api");
-				a.GetService<ApiContext>()!.Database.Migrate();
+				d.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api");
+				//a.GetService<ApiContext>()!.Database.Migrate();
 			});
 
-			services.AddMediatR(typeof(Startup));
+			services.AddMediatR(typeof(AddInfraction));
 			
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
