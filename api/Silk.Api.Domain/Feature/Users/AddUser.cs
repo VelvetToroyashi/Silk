@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -12,7 +10,7 @@ namespace Silk.Api.Domain.Feature.Users
 {
 	public static class AddUser
 	{
-		public sealed record Request(string UserName, string Password, [property: JsonIgnore] string Salt) : IRequest<User>;
+		public sealed record Request(string UserName, string Password, string Salt, string ApiKey) : IRequest<User>;
 		
 		public sealed class Handler : IRequestHandler<Request, User>
 		{
@@ -26,11 +24,12 @@ namespace Silk.Api.Domain.Feature.Users
 
 			public async Task<User> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var pass = _crypto.HashPassword(request.Password, Encoding.UTF8.GetBytes(request.Salt));
-				
+				var passSalt = Encoding.UTF8.GetBytes(request.Salt);
+				var pass = _crypto.HashPassword(request.Password, passSalt);
+			
 				var user = new User
 				{
-					Key = Guid.NewGuid(),
+					Key = new ApiKey() {KeyHash = request.ApiKey},
 					Username = request.UserName,
 					Password = Encoding.UTF8.GetString(pass),
 					PasswordSalt = request.Salt
@@ -39,6 +38,8 @@ namespace Silk.Api.Domain.Feature.Users
 				_db.Users.Add(user);
 				await _db.SaveChangesAsync(cancellationToken);
 
+				
+				
 				return user;
 			}
 		}

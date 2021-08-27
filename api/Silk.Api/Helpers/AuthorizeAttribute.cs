@@ -12,7 +12,7 @@ namespace Silk.Api.Helpers
 		{
 			var user = (User)context.HttpContext.Items["User"];
 			
-			if (user is null)
+			if (user is null || user.Key.Revoked)
 				context.Result = new UnauthorizedResult();
 		}
 	}

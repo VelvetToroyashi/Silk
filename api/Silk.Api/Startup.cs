@@ -65,7 +65,7 @@ namespace Silk.Api
 			ctx.Database.Migrate();
 			
 			app.UseMiddleware<InternalServerErrorWrapper>();
-			app.UseMiddleware<JwtAuthMiddleware>();
+			app.UseMiddleware<AuthenticationMiddleware>();
 			
 			app.UseHttpsRedirection();
 

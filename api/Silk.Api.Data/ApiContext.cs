@@ -9,6 +9,7 @@ namespace Silk.Api.Data
 		public ApiContext(DbContextOptions options) : base(options) { }
 		
 		public DbSet<User> Users { get; set; }
+		public DbSet<ApiKey> Keys { get; set; }
 		public DbSet<Infraction> Infractions { get; set; }
 		
 	}

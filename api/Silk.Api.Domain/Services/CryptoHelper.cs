@@ -9,12 +9,22 @@ namespace Silk.Api.Domain.Services
 	{
 		public byte[] CreateSalt()
 		{
-			var buffer = new byte[16];
+			var buffer = new byte[42];
 			using var rng = new RNGCryptoServiceProvider();
-			rng.GetBytes(buffer, 0, 16);
+			rng.GetBytes(buffer, 0, 42);
 			return buffer;
 		}
 
+		public byte[] GetRandomBytes(int amount)
+		{
+			using var crypto = new RNGCryptoServiceProvider();
+			var buffer = new byte[amount];
+			
+			crypto.GetNonZeroBytes(buffer);
+
+			return buffer;
+		}
+		
 		public byte[] HashPassword(string password, byte[] salt)
 		{
 			var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password));
@@ -23,7 +33,7 @@ namespace Silk.Api.Domain.Services
 			argon2.DegreeOfParallelism = 8; // four cores
 			argon2.Iterations = 4;
 			argon2.MemorySize = 16 * 1024; // 16MB //
-			return argon2.GetBytes(16);
+			return argon2.GetBytes(42);
 		}
 		
 		public bool Verify(string password, byte[] salt, byte[] hash)

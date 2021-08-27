@@ -1,12 +1,12 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Silk.Api.Data.Entities
 {
 	public sealed class User
 	{
 		public int Id { get; set; }
-		public Guid Key { get; set; }
+
+		public ApiKey Key { get; set; }
 		public string Username { get; set; }
 		
 		[JsonIgnore]
