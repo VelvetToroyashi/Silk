@@ -80,28 +80,28 @@ namespace Silk.Api.Domain.Feature.Infractions
 			{
 				RuleFor(r => r.TargetUserId)
 					.NotEmpty()
-					.WithMessage("\"targetUserId\": must not be empty.");
+					.WithMessage("targetUserId: must not be empty.");
 
 				RuleFor(r => r.EnforcerUserId)
 					.NotEmpty()
-					.WithMessage("\"enforcerUserId\": must not be empty.");
+					.WithMessage("enforcerUserId: must not be empty.");
 
 				RuleFor(r => r.GuildCreationId)
 					.NotEmpty()
-					.WithMessage("\"guildCreationId\": must nto be empty.");
+					.WithMessage("guildCreationId: must nto be empty.");
 
 				RuleFor(r => r.Created.ToUniversalTime())
 					.LessThan(DateTime.UtcNow)
-					.WithMessage("\"created\": appears to be in the future.");
+					.WithMessage("created: appears to be in the future.");
 
 				RuleFor(r => r.Expires)
 					.LessThan(DateTime.UtcNow)
 					.Unless(r => r.Expires is null)
-					.WithMessage("\"expires\": appears to be in the future.");
+					.WithMessage("expires: appears to be in the past.");
 				
 				RuleFor(r => r.Reason)
 					.MaximumLength(4000)
-					.WithMessage("\"reason\": must not exceed 4000 characters.");
+					.WithMessage("Reason: must not exceed 4000 characters.");
 			}
 		}
 	}
