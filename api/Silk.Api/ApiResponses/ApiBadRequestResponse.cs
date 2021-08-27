@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Newtonsoft.Json;
 
 namespace Silk.Api.ApiResponses
 {
 	public class ApiBadRequestResponse : ApiResponseBase
 	{
+		[JsonProperty("errors")]
 		public IEnumerable<string> Errors { get; }
 
 		public ApiBadRequestResponse(ModelStateDictionary modelState) : base(400)
