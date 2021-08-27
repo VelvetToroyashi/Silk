@@ -38,13 +38,15 @@ namespace Silk.Api.Domain.Feature.Infractions
 				var infraction = await _db
 					.Infractions
 					.FirstOrDefaultAsync(inf => inf.Key == request.Key, cancellationToken);
-
+				
 				return ToModel(infraction);
 			}
 		}
 		
 		private static ApiModel ToModel(Infraction entity)
 		{
+			if (entity is null) return null;
+			
 			return new()
 			{
 				Type = entity.Type,
