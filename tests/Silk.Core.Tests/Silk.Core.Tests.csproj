@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoFake" Version="0.4.3.5" />
+        <PackageReference Include="AutoFake" Version="0.4.3.6" />
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="MediatR" />
