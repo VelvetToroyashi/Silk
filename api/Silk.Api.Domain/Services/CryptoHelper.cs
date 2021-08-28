@@ -15,16 +15,6 @@ namespace Silk.Api.Domain.Services
 			return buffer;
 		}
 
-		public byte[] GetRandomBytes(int amount)
-		{
-			using var crypto = new RNGCryptoServiceProvider();
-			var buffer = new byte[amount];
-			
-			crypto.GetNonZeroBytes(buffer);
-
-			return buffer;
-		}
-		
 		public byte[] HashPassword(string password, byte[] salt)
 		{
 			var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password));

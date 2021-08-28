@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -38,10 +39,11 @@ namespace Silk.Api
 		{
 			context.Items["user"] = null;
 
-			var user = await _mediator.Send(new GetUserByApiKey.Request(token));
+			var apiKey = Encoding.UTF8.GetString(_crypto.HashPassword(token, Encoding.UTF8.GetBytes(_appSettings.HashSalt)));
+			var user = await _mediator.Send(new GetUserByApiKey.Request(apiKey));
 
 			if (user is not null)
-				context.Items["user"] = user;
+				context.Items["User"] = user;
 		}
 	}
 }

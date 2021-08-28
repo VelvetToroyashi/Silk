@@ -30,13 +30,14 @@ namespace Silk.Api.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> Authenticate(AddUser.Request request)
 		{
-			var apiKeyBytes = _crypto.HashPassword(Guid.NewGuid().ToString(), Encoding.UTF8.GetBytes(_settings.HashSalt));
-			var apiKey = Encoding.UTF8.GetString(apiKeyBytes);
+			var apiKeyGUID = Guid.NewGuid().ToString();
+			var apiKeyBytes = _crypto.HashPassword(apiKeyGUID, Encoding.UTF8.GetBytes(_settings.HashSalt));
+			var apiKeyString = Encoding.UTF8.GetString(apiKeyBytes);
 			
-			request = new(request.UserName, request.Password, Encoding.UTF8.GetString(_crypto.CreateSalt()), apiKey);
+			request = new(request.UserName, request.Password, Encoding.UTF8.GetString(_crypto.CreateSalt()), apiKeyString);
 			var user = await _mediator.Send(request);
 			
-			return Ok(new { token = apiKey});
+			return Ok(new { token = apiKeyGUID});
 		}
 
 		[HttpDelete]

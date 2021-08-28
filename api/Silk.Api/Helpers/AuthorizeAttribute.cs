@@ -6,7 +6,7 @@ using Silk.Api.Data.Entities;
 namespace Silk.Api.Helpers
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-	public class AuthorizeAttribute : Attribute, IAuthorizationFilter
+	public sealed class AuthorizeAttribute : Attribute, IAuthorizationFilter
 	{
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
