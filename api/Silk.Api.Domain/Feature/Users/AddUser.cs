@@ -10,9 +10,9 @@ namespace Silk.Api.Domain.Feature.Users
 {
 	public static class AddUser
 	{
-		public sealed record Request(string UserName, string Password, string Salt, string ApiKey) : IRequest<User>;
+		public sealed record Request(string UserName, string Password, string Salt, string ApiKey) : IRequest<ApiUser>;
 		
-		public sealed class Handler : IRequestHandler<Request, User>
+		public sealed class Handler : IRequestHandler<Request, ApiUser>
 		{
 			private readonly ApiContext _db;
 			private readonly CryptoHelper _crypto;
@@ -22,16 +22,16 @@ namespace Silk.Api.Domain.Feature.Users
 				_crypto = crypto;
 			}
 
-			public async Task<User> Handle(Request request, CancellationToken cancellationToken)
+			public async Task<ApiUser> Handle(Request request, CancellationToken cancellationToken)
 			{
 				var passSalt = Encoding.UTF8.GetBytes(request.Salt);
 				var pass = _crypto.HashPassword(request.Password, passSalt);
 			
-				var user = new User
+				var user = new ApiUser
 				{
 					Key = new ApiKey() {KeyHash = request.ApiKey},
 					Username = request.UserName,
-					Password = Encoding.UTF8.GetString(pass),
+					PasswordHash = Encoding.UTF8.GetString(pass),
 					PasswordSalt = request.Salt
 				};
 				

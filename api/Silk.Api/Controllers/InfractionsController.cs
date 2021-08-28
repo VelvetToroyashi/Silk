@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Domain.Feature.Infractions;
@@ -13,10 +14,15 @@ namespace Silk.Api.Controllers
 		private readonly IMediator _mediator;
 		public InfractionsController(IMediator mediator) => _mediator = mediator;
 
+		/// <summary>
+		/// Gets an infraction by it's id.
+		/// </summary>
 		[Authorize]
-		[HttpGet(Name = "GetInfraction")]
-		public async Task<IActionResult> GetInfraction(GetInfraction.Request request)
+		[HttpGet("{key}", Name = "GetInfraction")]
+		public async Task<IActionResult> GetInfraction(Guid key)
 		{
+
+			var request = new GetInfraction.Request(key);
 			var infraction = await _mediator.Send(request);
 
 			if (infraction is null)

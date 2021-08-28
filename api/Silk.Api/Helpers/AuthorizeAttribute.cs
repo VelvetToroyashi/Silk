@@ -10,7 +10,7 @@ namespace Silk.Api.Helpers
 	{
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
-			var user = (User)context.HttpContext.Items["User"];
+			var user = (ApiUser)context.HttpContext.Items["User"];
 			
 			if (user is null || user.Key.Revoked)
 				context.Result = new UnauthorizedResult();

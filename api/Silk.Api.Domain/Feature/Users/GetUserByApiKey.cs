@@ -9,14 +9,14 @@ namespace Silk.Api.Domain.Feature.Users
 {
 	public static class GetUserByApiKey
 	{
-		public sealed record Request(string Key) : IRequest<User>;
+		public sealed record Request(string Key) : IRequest<ApiUser>;
 		
-		public sealed class Handler : IRequestHandler<Request, User>
+		public sealed class Handler : IRequestHandler<Request, ApiUser>
 		{
 			private readonly ApiContext _db;
 			public Handler(ApiContext db) => _db = db;
 			
-			public async Task<User> Handle(Request request, CancellationToken cancellationToken)
+			public async Task<ApiUser> Handle(Request request, CancellationToken cancellationToken)
 			{
 				var user = await _db.Users
 					.Include(u => u.Key)

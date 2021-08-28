@@ -10,9 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
+using Silk.Api.Data.Entities;
 using Silk.Api.Domain;
 using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
+using Silk.Api.Models;
+using Silk.Api.Services;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -34,6 +37,11 @@ namespace Silk.Api
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api"), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
+			services.AddScoped<AuthenticationService>();
+			
+			services.AddIdentityCore<ApiUser>()
+				.AddRoles<ApiUserRole>()
+				.AddEntityFrameworkStores<ApiContext>();
 			
 			services.AddRouting(r => r.LowercaseUrls = true);
 
@@ -54,7 +62,7 @@ namespace Silk.Api
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApiContext ctx)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApiContext ctx, IServiceProvider services)
 		{
 			if (env.IsDevelopment())
 			{
@@ -63,6 +71,8 @@ namespace Silk.Api
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Silk.Api v1"));
 			}
 			ctx.Database.Migrate();
+			services.GetService<AuthenticationService>();
+			Console.WriteLine("Pulled service???");
 			
 			app.UseMiddleware<InternalServerErrorWrapper>();
 			app.UseMiddleware<AuthenticationMiddleware>();
