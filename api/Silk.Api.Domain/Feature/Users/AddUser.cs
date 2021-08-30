@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -11,7 +10,7 @@ namespace Silk.Api.Domain.Feature.Users
 {
 	public static class AddUser
 	{
-		public sealed record Request(string UserName, string Password, string Salt, string ApiKey) : IRequest<ApiUser>;
+		public sealed record Request(string Id, string ApiKey) : IRequest<ApiUser>;
 		
 		public sealed class Handler : IRequestHandler<Request, ApiUser>
 		{
@@ -25,21 +24,20 @@ namespace Silk.Api.Domain.Feature.Users
 
 			public async Task<ApiUser> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var passSalt = Encoding.UTF8.GetBytes(request.Salt);
-				var pass = _crypto.HashPassword(request.Password, passSalt);
-			
 				var user = new ApiUser
 				{
+					ApiKey = new()
+					{
+						GeneratedAt = DateTime.Now,
+						DiscordUserId = request.Id
+					},
+					DiscordId = request.Id,
 					ApiKeyGenerationTimestamp = DateTime.Now,
-					Username = request.UserName,
-					PasswordHash = Encoding.UTF8.GetString(pass),
-					PasswordSalt = request.Salt
+					
 				};
 				
 				_db.Users.Add(user);
 				await _db.SaveChangesAsync(cancellationToken);
-
-				
 				
 				return user;
 			}

@@ -1,6 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,12 +12,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
 using Silk.Api.Domain;
 using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
-using AuthenticationService = Silk.Api.Services.AuthenticationService;
+using Silk.Api.Services;
+using AuthenticationService = Microsoft.AspNetCore.Authentication.AuthenticationService;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -37,9 +41,30 @@ namespace Silk.Api
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api"), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => Configuration.Bind("Jwt", options));
+			services.AddSingleton<JwtSecurityTokenHandler>();
+			services.AddScoped<DiscordOAuthService>();
 
+			services.AddHttpClient();
+
+			
+			
+			services.AddAuthentication(options =>
+				{
+					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+				})
+				.AddJwtBearer(options =>
+				{
+					options.SaveToken = true;
+					options.TokenValidationParameters = new()
+					{
+						ValidateLifetime = false, // We don't set exp on the token //
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Api")["JwtSecret"]))
+					};
+				});
+			
+			
 			services.AddRouting(r => r.LowercaseUrls = true);
 
 			services.AddTransient<CryptoHelper>();
@@ -69,8 +94,6 @@ namespace Silk.Api
 			}
 			ctx.Database.Migrate();
 			services.GetService<AuthenticationService>();
-			Console.WriteLine("Pulled service???");
-			
 			app.UseMiddleware<InternalServerErrorWrapper>();
 			app.UseMiddleware<AuthenticationMiddleware>();
 			
