@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,12 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
-using Silk.Api.Data.Entities;
 using Silk.Api.Domain;
 using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
-using Silk.Api.Models;
-using Silk.Api.Services;
+using AuthenticationService = Silk.Api.Services.AuthenticationService;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -37,12 +37,9 @@ namespace Silk.Api
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api"), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
-			services.AddScoped<AuthenticationService>();
-			
-			services.AddIdentityCore<ApiUser>()
-				.AddRoles<ApiUserRole>()
-				.AddEntityFrameworkStores<ApiContext>();
-			
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => Configuration.Bind("Jwt", options));
+
 			services.AddRouting(r => r.LowercaseUrls = true);
 
 			services.AddTransient<CryptoHelper>();
@@ -81,6 +78,7 @@ namespace Silk.Api
 
 			app.UseRouting();
 
+			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>

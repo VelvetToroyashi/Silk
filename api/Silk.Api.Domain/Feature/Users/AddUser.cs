@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -29,7 +30,7 @@ namespace Silk.Api.Domain.Feature.Users
 			
 				var user = new ApiUser
 				{
-					Key = new ApiKey() {KeyHash = request.ApiKey},
+					ApiKeyGenerationTimestamp = DateTime.Now,
 					Username = request.UserName,
 					PasswordHash = Encoding.UTF8.GetString(pass),
 					PasswordSalt = request.Salt

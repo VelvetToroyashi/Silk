@@ -10,7 +10,6 @@ namespace Silk.Api.Data.Entities
 	{
 		public int Id { get; set; }
 		public int UserId { get; set; }
-		public bool Revoked { get; set; }
 		public string KeyHash { get; set; }
 	}
 }

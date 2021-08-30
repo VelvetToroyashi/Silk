@@ -186,7 +186,6 @@ namespace Silk.Core
 					services.AddSingleton<SerilogLoggerFactory>();
 					services.AddSingleton<MessageRemovedHandler>();
 
-
 					services.AddSingleton<CommandHandler>();
 					services.AddSingleton<MessageAddAntiInvite>();
 

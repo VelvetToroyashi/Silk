@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Silk.Api.Data.Entities;
 using Silk.Api.Data.Models;
 
 namespace Silk.Api.Data
 {
-	public class ApiContext : IdentityDbContext
+	public class ApiContext : DbContext
 	{
 		public ApiContext(DbContextOptions options) : base(options) { }
 		

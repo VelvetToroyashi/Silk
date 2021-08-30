@@ -12,7 +12,6 @@ using Silk.Api.Helpers;
 namespace Silk.Api.Controllers
 {
 	[ApiController]
-	
 	[Route("api/v1/[controller]")]
 	public class AuthenticationController : ControllerBase
 	{
@@ -40,11 +39,10 @@ namespace Silk.Api.Controllers
 			return Ok(new { token = apiKeyGUID});
 		}
 
+		[Authorize]
 		[HttpDelete]
-		[Helpers.Authorize]
 		public async Task<IActionResult> RevokeAccount()
 		{
-
 
 			return NoContent();
 		}
