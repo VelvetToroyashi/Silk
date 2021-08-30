@@ -21,7 +21,6 @@ namespace Silk.Api.Controllers
 		[HttpGet("{key}", Name = "GetInfraction")]
 		public async Task<IActionResult> GetInfraction(Guid key)
 		{
-
 			var request = new GetInfraction.Request(key);
 			var infraction = await _mediator.Send(request);
 
