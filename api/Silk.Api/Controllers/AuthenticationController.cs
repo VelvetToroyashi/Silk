@@ -36,6 +36,11 @@ namespace Silk.Api.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> Authenticate([FromBody] ApplicationOAuthModel auth)
 		{
+			var user = await _mediator.Send(new GetUser.Request(auth.Id.ToString()));
+
+			if (user is not null)
+				return Conflict(new { message = "An application with that id was already registered." });
+			
 			var res = await _oauth.VerifyDiscordApplicationAsync(auth.Id.ToString(), auth.Secret);
 
 			if (!res.Authenticated)
@@ -48,12 +53,10 @@ namespace Silk.Api.Controllers
 					new("ist", res.Id.ToString(CultureInfo.InvariantCulture))
 				},
 				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret)), SecurityAlgorithms.HmacSha256));
-
-
+			
 			var apiToken = _handler.WriteToken(token);
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
 			await _mediator.Send(req);
-			
 			
 			return Created(nameof(Authenticate), new { token = apiToken});
 		}
