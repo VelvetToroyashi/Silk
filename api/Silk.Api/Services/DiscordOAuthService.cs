@@ -48,19 +48,20 @@ namespace Silk.Api.Services
 
 			var obj = JObject.Parse(await res.Content.ReadAsStringAsync());
 
-			req.Headers.Authorization = null;
+			req = new();
+			req.Headers.Authorization = new("Bearer", obj["access_token"]!.ToString());
+			req.RequestUri = new("https://discord.com/api/v9/oauth2/@me");
+			req.Method = HttpMethod.Get;
 
-			_client.DefaultRequestHeaders.Add("Authorization", $"Bearer {obj["access_token"]}");
-			//req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", obj["access_token"]!.ToString());
-
-			var ret = await _client.GetAsync("https://discord.com/api/v9/oauth2/@me");
-			_client.DefaultRequestHeaders.Remove("Authorization");
-			
+			var ret = await _client.SendAsync(req);
+		
 			var user = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync()!)["user"]!["id"];
 			
 			// Revoke the token; it's not needed anymore //
-			
+			req = new();
 			req.Content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", obj["access_token"]!.ToString()) });
+			req.Content.Headers.ContentType = new("application/x-www-form-urlencoded");
+
 			req.RequestUri = new("https://discord.com/api/v9/oauth2/token/revoke");
 
 			await _client.SendAsync(req);
