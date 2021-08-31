@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace Silk.Api.Controllers
 					new ("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
 					new("ist", res.Id.ToString(CultureInfo.InvariantCulture))
 				},
-				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSigner)), SecurityAlgorithms.HmacSha256));
+				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret)), SecurityAlgorithms.HmacSha256));
 
 
 			var apiToken = _handler.WriteToken(token);
@@ -61,8 +62,8 @@ namespace Silk.Api.Controllers
 		[HttpDelete]
 		public async Task<IActionResult> RevokeAccount()
 		{
-
-			return NoContent();
+			
+			return Ok(new { Identity = User.Claims.First()});
 		}
 	}
 }

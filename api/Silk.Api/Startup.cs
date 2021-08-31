@@ -61,7 +61,8 @@ namespace Silk.Api
 					{
 						ValidateAudience = false,
 						ValidateLifetime = false, // We don't set exp on the token //
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Api")["JwtSigner"]))
+						ValidIssuer = Configuration.GetSection("Api")["JwtSigner"],
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Api")["JwtSecret"]))
 					};
 				});
 			
