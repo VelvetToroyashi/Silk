@@ -24,12 +24,16 @@ namespace Silk.Api.Controllers
 		private readonly IMediator _mediator;
 		private readonly DiscordOAuthService _oauth;
 		private readonly ApiSettings _settings;
+		private static SigningCredentials _signingCreds;
+		
 		public AuthenticationController(IMediator mediator, IOptions<ApiSettings> settings, JwtSecurityTokenHandler handler, DiscordOAuthService oauth)
 		{
 			_mediator = mediator;
 			_handler = handler;
 			_oauth = oauth;
 			_settings = settings.Value;
+
+			_signingCreds ??= new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret)), SecurityAlgorithms.HmacSha256);
 		}
 
 		[HttpPost]
@@ -47,13 +51,12 @@ namespace Silk.Api.Controllers
 			if (user is not null)
 				return Conflict(new { message = "An application with that id was already registered." });
 			
-			var token = new JwtSecurityToken(_settings.JwtSigner, 
-				claims: new Claim[]
+			var token = new JwtSecurityToken(_settings.JwtSigner, claims:
+				new Claim[]
 				{
-					new ("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
-					new("ist", res.Id.ToString(CultureInfo.InvariantCulture))
-				},
-				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret)), SecurityAlgorithms.HmacSha256));
+					new("ist", res.Id.ToString(CultureInfo.InvariantCulture)),
+					new ("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture))
+				}, signingCredentials: _signingCreds);
 			
 			var apiToken = _handler.WriteToken(token);
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
