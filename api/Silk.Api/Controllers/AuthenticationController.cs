@@ -42,7 +42,7 @@ namespace Silk.Api.Controllers
 			if (!res.Authenticated)
 				return BadRequest(new { message = "An invalid id or client secret was provided, and a bearer token could not be generated." });
 
-			var user = await _mediator.Send(new GetUser.Request(auth.Id.ToString()));
+			var user = await _mediator.Send(new GetUser.Request(res.Id.ToString()));
 
 			if (user is not null)
 				return Conflict(new { message = "An application with that id was already registered." });
