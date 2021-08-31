@@ -40,7 +40,6 @@ namespace Silk.Api.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> Authenticate([FromBody] ApplicationOAuthModel auth)
 		{
-
 			var res = await _oauth.VerifyDiscordApplicationAsync(auth.Id.ToString(), auth.Secret);
 			
 			if (!res.Authenticated)
