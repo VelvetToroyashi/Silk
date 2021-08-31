@@ -6,6 +6,7 @@ using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,6 @@ using Silk.Api.Domain;
 using Silk.Api.Domain.Services;
 using Silk.Api.Helpers;
 using Silk.Api.Services;
-using AuthenticationService = Microsoft.AspNetCore.Authentication.AuthenticationService;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -42,8 +42,10 @@ namespace Silk.Api
 				.UseNpgsql("Server=localhost; Username=silk; Password=silk; Database=api"), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
 			services.AddSingleton<JwtSecurityTokenHandler>();
+			
 			services.AddScoped<DiscordOAuthService>();
-
+			services.AddScoped<IAuthorizationHandler, AuthService>();
+			
 			services.AddHttpClient();
 
 			
