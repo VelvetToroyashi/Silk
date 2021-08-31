@@ -56,7 +56,7 @@ namespace Silk.Api.Services
 			var ret = await _client.GetAsync("https://discord.com/api/v9/oauth2/@me");
 			_client.DefaultRequestHeaders.Remove("Authorization");
 			
-			var user = (ulong)JObject.Parse(ret.Content.ToString()!)["user"]!["id"];
+			var user = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync()!)["user"]!["id"];
 			
 			// Revoke the token; it's not needed anymore //
 			
