@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using Silk.Api.Helpers;
@@ -15,9 +16,11 @@ namespace Silk.Api.Services
 	{
 		private readonly HttpClient _client;
 		private readonly ApiSettings _settings;
-		public DiscordOAuthService(HttpClient client, IOptions<ApiSettings> settings)
+		private ILogger<DiscordOAuthService> _logger;
+		public DiscordOAuthService(HttpClient client, IOptions<ApiSettings> settings, ILogger<DiscordOAuthService> logger)
 		{
 			_client = client;
+			_logger = logger;
 			_settings = settings.Value;
 		}
 
@@ -25,14 +28,18 @@ namespace Silk.Api.Services
 		{
 			// Attempt to generate a bearer token to verify //
 			var req = new HttpRequestMessage(HttpMethod.Post, "https://discord.com/api/v9/oauth2/token");
-			req.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+			var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{id}:{secret}"));
+			req.Headers.Authorization = new AuthenticationHeaderValue("Basic", auth);
+
 			req.Content = new FormUrlEncodedContent(new Dictionary<string, string>()
 			{
-				["client_id"] = id,
-				["client_secret"] = secret,
 				["grant_type"] = "client_credentials",
+				["scope"] = "identify"
 			});
-
+			
+			req.Content.Headers.ContentType = new("application/x-www-form-urlencoded");
+			
 			var res = await _client.SendAsync(req);
 			
 			// Couldn't generate a bearer token //
@@ -41,12 +48,18 @@ namespace Silk.Api.Services
 
 			var obj = JObject.Parse(await res.Content.ReadAsStringAsync());
 
-			var auth = Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes($"{id}:{secret}"));
+			req.Headers.Authorization = null;
+
+			_client.DefaultRequestHeaders.Add("Authorization", $"Bearer {obj["access_token"]}");
+			//req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", obj["access_token"]!.ToString());
+
+			var ret = await _client.GetAsync("https://discord.com/api/v9/oauth2/@me");
+			_client.DefaultRequestHeaders.Remove("Authorization");
 			
-			var user = (ulong)JObject.Parse(await _client.GetStringAsync("https://discord.com/api/v9/oauth2/@me"))["user"]!["id"];
+			var user = (ulong)JObject.Parse(ret.Content.ToString()!)["user"]!["id"];
 			
 			// Revoke the token; it's not needed anymore //
-			req.Headers.Authorization = new AuthenticationHeaderValue("Basic", auth);
+			
 			req.Content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", obj["access_token"]!.ToString()) });
 			req.RequestUri = new("https://discord.com/api/v9/oauth2/token/revoke");
 
