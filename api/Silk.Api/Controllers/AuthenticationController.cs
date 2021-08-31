@@ -53,7 +53,7 @@ namespace Silk.Api.Controllers
 			var apiToken = _handler.WriteToken(token);
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
 			
-			return Ok(new { token = apiToken});
+			return Created(nameof(Authenticate), new { token = apiToken});
 		}
 		
 		
