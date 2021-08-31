@@ -52,6 +52,8 @@ namespace Silk.Api.Controllers
 
 			var apiToken = _handler.WriteToken(token);
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
+			await _mediator.Send(req);
+			
 			
 			return Created(nameof(Authenticate), new { token = apiToken});
 		}
