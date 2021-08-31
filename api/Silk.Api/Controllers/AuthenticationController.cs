@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,8 +61,9 @@ namespace Silk.Api.Controllers
 		[HttpDelete]
 		public async Task<IActionResult> RevokeAccount()
 		{
-			
-			return Ok(new { Identity = User.Claims.First()});
+			// TODO: Delete account here // 
+
+			return StatusCode(501, new { Message = "This endpoint has yet to be implemented. Try again later."});
 		}
 	}
 }

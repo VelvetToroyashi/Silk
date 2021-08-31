@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Silk.Api.Data;
 using Silk.Api.Data.Entities;
-using Silk.Api.Domain.Services;
 
 namespace Silk.Api.Domain.Feature.Users
 {
@@ -15,12 +14,7 @@ namespace Silk.Api.Domain.Feature.Users
 		public sealed class Handler : IRequestHandler<Request, ApiUser>
 		{
 			private readonly ApiContext _db;
-			private readonly CryptoHelper _crypto;
-			public Handler(ApiContext db, CryptoHelper crypto)
-			{
-				_db = db;
-				_crypto = crypto;
-			}
+			public Handler(ApiContext db) => _db = db;
 
 			public async Task<ApiUser> Handle(Request request, CancellationToken cancellationToken)
 			{
