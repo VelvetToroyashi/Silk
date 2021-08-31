@@ -47,7 +47,7 @@ namespace Silk.Api.Controllers
 					new ("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
 					new("ist", res.Id.ToString(CultureInfo.InvariantCulture))
 				},
-				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSecret)), SecurityAlgorithms.HmacSha256));
+				signingCredentials: new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtSigner)), SecurityAlgorithms.HmacSha256));
 
 
 			var apiToken = _handler.WriteToken(token);
