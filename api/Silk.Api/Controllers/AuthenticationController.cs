@@ -36,16 +36,17 @@ namespace Silk.Api.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> Authenticate([FromBody] ApplicationOAuthModel auth)
 		{
+
+			var res = await _oauth.VerifyDiscordApplicationAsync(auth.Id.ToString(), auth.Secret);
+			
+			if (!res.Authenticated)
+				return BadRequest(new { message = "An invalid id or client secret was provided, and a bearer token could not be generated." });
+
 			var user = await _mediator.Send(new GetUser.Request(auth.Id.ToString()));
 
 			if (user is not null)
 				return Conflict(new { message = "An application with that id was already registered." });
 			
-			var res = await _oauth.VerifyDiscordApplicationAsync(auth.Id.ToString(), auth.Secret);
-
-			if (!res.Authenticated)
-				return BadRequest(new { message = "An invalid id or client secret was provided, and a bearer token could not be generated." });
-
 			var token = new JwtSecurityToken(_settings.JwtSigner, 
 				claims: new Claim[]
 				{
