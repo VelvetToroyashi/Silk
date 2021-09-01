@@ -3,19 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.GlobalUsers
 {
     /// <summary>
-    ///     Request for getting a user who's data is stored globally, or creates it if it does not exist.
+    /// Request for getting a user who's data is stored globally, or creates it if it does not exist.
     /// </summary>
-    public record GetOrCreateGlobalUserRequest(ulong UserId) : IRequest<GlobalUser>;
+    public record GetOrCreateGlobalUserRequest(ulong UserId) : IRequest<GlobalUserEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetOrCreateGlobalUserRequest" />.
+    /// The default handler for <see cref="GetOrCreateGlobalUserRequest" />.
     /// </summary>
-    public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUser>
+    public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUserEntity>
     {
         private readonly GuildContext _db;
 
@@ -24,9 +24,9 @@ namespace Silk.Core.Data.MediatR.GlobalUsers
             _db = db;
         }
 
-        public async Task<GlobalUser> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
+        public async Task<GlobalUserEntity> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
         {
-            GlobalUser? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            GlobalUserEntity? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
             user ??= new()
             {
                 Id = request.UserId,

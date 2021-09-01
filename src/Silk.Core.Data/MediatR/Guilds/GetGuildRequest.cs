@@ -2,29 +2,28 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    ///     Request for retrieving a <see cref="Guild" />.
+    /// Request for retrieving a <see cref="GuildEntity" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
-    public record GetGuildRequest(ulong GuildId) : IRequest<Guild>;
+    public record GetGuildRequest(ulong GuildId) : IRequest<GuildEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetGuildRequest" />.
+    /// The default handler for <see cref="GetGuildRequest" />.
     /// </summary>
-    public class GetGuildHandler : IRequestHandler<GetGuildRequest, Guild>
+    public class GetGuildHandler : IRequestHandler<GetGuildRequest, GuildEntity>
     {
         private readonly GuildContext _db;
         public GetGuildHandler(GuildContext db) => _db = db;
 
         
-        public async Task<Guild> Handle(GetGuildRequest request, CancellationToken cancellationToken)
+        public async Task<GuildEntity> Handle(GetGuildRequest request, CancellationToken cancellationToken)
         {
-            Guild? guild =
-                await _db.Guilds
+            GuildEntity? guild = await _db.Guilds
                     .Include(g => g.Users)
                     .Include(g => g.Infractions)
                     .Include(g => g.Configuration)

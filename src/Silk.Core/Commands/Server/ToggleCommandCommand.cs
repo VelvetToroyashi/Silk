@@ -8,7 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Server
 		{
 			await HandleCommandToggleAsync(ctx, commands, (list, name) =>
 			{
-				DisabledCommand? c = list.SingleOrDefault(co => co.CommandName == name);
+				DisabledCommandEntity? c = list.SingleOrDefault(co => co.CommandName == name);
 				if (c is not null) list.Remove(c!);
 			});
 
@@ -46,13 +46,13 @@ namespace Silk.Core.Commands.Server
 		{
 			await HandleCommandToggleAsync(ctx, commands, (list, name) =>
 			{
-				var command = new DisabledCommand { CommandName = name, GuildId = ctx.Guild.Id };
+				var command = new DisabledCommandEntity { CommandName = name, GuildId = ctx.Guild.Id };
 				if (!list.Contains(command))
 					list.Add(command);
 			});
 		}
 
-		private async Task HandleCommandToggleAsync(CommandContext ctx, string? commands, Action<List<DisabledCommand>, string> action)
+		private async Task HandleCommandToggleAsync(CommandContext ctx, string? commands, Action<List<DisabledCommandEntity>, string> action)
 		{
 
 			if (string.IsNullOrEmpty(commands))
@@ -61,7 +61,7 @@ namespace Silk.Core.Commands.Server
 				return;
 			}
 
-			GuildConfig config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+			GuildConfigEntity config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
 			string[]? commandNames = commands.Split(' ');
 

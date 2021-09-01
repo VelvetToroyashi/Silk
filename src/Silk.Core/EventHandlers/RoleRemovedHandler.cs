@@ -5,7 +5,7 @@ using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers
@@ -27,7 +27,7 @@ namespace Silk.Core.EventHandlers
 			if (e.RolesAfter.Any(r => r.Permissions.HasPermission(RequisiteStaffPermissions))) return;
 			_ = Task.Run(async () =>
 			{
-				User? user = await _mediator.Send(new GetUserRequest(e.Member.Id, e.Guild.Id));
+				UserEntity? user = await _mediator.Send(new GetUserRequest(e.Member.Id, e.Guild.Id));
 				if (user is null) return;
 
 				UserFlag flag = user.Flags.HasFlag(UserFlag.EscalatedStaff) ? UserFlag.EscalatedStaff : UserFlag.Staff;

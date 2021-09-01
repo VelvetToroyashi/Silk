@@ -15,7 +15,7 @@ using MediatR;
 using NpgsqlTypes;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions;
@@ -544,7 +544,7 @@ namespace Silk.Core.Commands
 
 						if (!res) return;
 
-						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = Array.Empty<Invite>().ToList() });
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = Array.Empty<InviteEntity>().ToList() });
 					}
 
 					[Command]

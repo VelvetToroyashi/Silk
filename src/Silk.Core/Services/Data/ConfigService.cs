@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Services.Data
@@ -26,27 +26,27 @@ namespace Silk.Core.Services.Data
 			};
 		}
 
-		public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
+		public async ValueTask<GuildConfigEntity> GetConfigAsync(ulong guildId)
 		{
-			if (_cache.TryGetValue(guildId, out GuildConfig config)) return config;
+			if (_cache.TryGetValue(guildId, out GuildConfigEntity config)) return config;
 			return await GetConfigFromDatabaseAsync(guildId);
 		}
 
-		public async ValueTask<GuildModConfig> GetModConfigAsync(ulong guildId)
+		public async ValueTask<GuildModConfigEntity> GetModConfigAsync(ulong guildId)
 		{
-			if (_cache.TryGetValue($"{guildId}_mod", out GuildModConfig config)) return config;
+			if (_cache.TryGetValue($"{guildId}_mod", out GuildModConfigEntity config)) return config;
 			return await GetModConfigFromDatabaseAsync(guildId);
 		}
-		private async Task<GuildModConfig> GetModConfigFromDatabaseAsync(ulong guildId)
+		private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(ulong guildId)
 		{
-			GuildModConfig? configuration = await _mediator.Send(new GetGuildModConfigRequest(guildId), CancellationToken.None);
+			GuildModConfigEntity? configuration = await _mediator.Send(new GetGuildModConfigRequest(guildId), CancellationToken.None);
 			_cache.Set($"{guildId}_mod", configuration, TimeSpan.FromHours(1));
 			return configuration;
 		}
 
-		private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
+		private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(ulong guildId)
 		{
-			GuildConfig configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
+			GuildConfigEntity configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
 			_cache.Set(guildId, configuration, TimeSpan.FromHours(1));
 			return configuration;
 		}

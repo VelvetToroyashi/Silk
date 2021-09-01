@@ -8,7 +8,7 @@ using Npgsql;
 using NUnit.Framework;
 using Respawn;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.Tests.MediatR
 {
@@ -61,7 +61,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Add_Inserts_When_User_Does_Not_Exist()
         {
             // Arrange
-            User? result;
+            UserEntity? result;
 
             //Act
             await _mediator.Send(new AddUserRequest(GuildId, UserId));
@@ -88,7 +88,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Get_Returns_Null_When_User_Does_Not_Exist()
         {
             //Arrange
-            User? user;
+            UserEntity? user;
             //Act
             user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
             //Assert
@@ -99,7 +99,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Get_Returns_NonNull_When_User_Exists()
         {
             //Arrange
-            User? user;
+            UserEntity? user;
             await _mediator.Send(new AddUserRequest(GuildId, UserId));
             //Act
             user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
@@ -111,8 +111,8 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Update_Returns_Updated_User()
         {
             //Arrange
-            User before;
-            User after;
+            UserEntity before;
+            UserEntity after;
             before = await _mediator.Send(new AddUserRequest(GuildId, UserId));
             //Act
             after = await _mediator.Send(new UpdateUserRequest(GuildId, UserId, UserFlag.Staff));
@@ -135,7 +135,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_GetOrCreate_Creates_When_User_Does_Not_Exist()
         {
             //Arrange
-            User? user;
+            UserEntity? user;
             //Act
             await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));
             user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
@@ -147,7 +147,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_GetOrCreate_Returns_User_When_User_Exists()
         {
             //Arrange
-            User? user;
+            UserEntity? user;
             await _mediator.Send(new AddUserRequest(GuildId, UserId));
             //Act
             user = await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));

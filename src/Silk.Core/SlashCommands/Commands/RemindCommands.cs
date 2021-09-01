@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentAssertions.Common;
 using Humanizer;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.Bot;
@@ -34,7 +34,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				Reminder[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
+				ReminderEntity[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
 
 				if (!reminders.Any())
 				{
@@ -103,7 +103,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Reminder>? reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
+				IEnumerable<ReminderEntity>? reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
 
 				if (!reminder.Any() || reminder.All(r => r.Id != reminderId))
 				{

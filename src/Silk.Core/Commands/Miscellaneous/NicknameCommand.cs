@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 

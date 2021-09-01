@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.Reminders;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 
@@ -29,7 +29,7 @@ namespace Silk.Core.Services.Server
 		private readonly IMediator _mediator;
 		private readonly IServiceProvider _services;
 
-		private List<Reminder> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
+		private List<ReminderEntity> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
 
 		public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client, IMediator mediator)
 		{
@@ -48,20 +48,20 @@ namespace Silk.Core.Services.Server
 			ReminderType type = ReminderType.Once, ulong? replyId = null,
 			ulong? replyAuthorId = null, string? replyMessageContent = null)
 		{
-			Reminder reminder = await _mediator.Send(new CreateReminderRequest(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, type, replyId, replyAuthorId, replyMessageContent));
+			ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiration, ownerId, channelId, messageId, guildId, messageContent, wasReply, type, replyId, replyAuthorId, replyMessageContent));
 			_reminders.Add(reminder);
 		}
 
-		public async Task<IEnumerable<Reminder>> GetRemindersAsync(ulong userId)
+		public async Task<IEnumerable<ReminderEntity>> GetRemindersAsync(ulong userId)
 		{
-			IEnumerable<Reminder> reminders = _reminders.Where(r => r.OwnerId == userId);
-			Reminder[] reminderArr = reminders as Reminder[] ?? reminders.ToArray();
-			return reminderArr.Length is 0 ? Array.Empty<Reminder>() : reminderArr;
+			IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.OwnerId == userId);
+			ReminderEntity[] reminderArr = reminders as ReminderEntity[] ?? reminders.ToArray();
+			return reminderArr.Length is 0 ? Array.Empty<ReminderEntity>() : reminderArr;
 		}
 
 		public async Task RemoveReminderAsync(int id)
 		{
-			Reminder? reminder = _reminders.SingleOrDefault(r => r.Id == id);
+			ReminderEntity? reminder = _reminders.SingleOrDefault(r => r.Id == id);
 			if (reminder is null)
 			{
 				_logger.LogWarning("Reminder was not present in memory. Was it dispatched already?");
@@ -79,7 +79,7 @@ namespace Silk.Core.Services.Server
 			//             Collection gets modified.             //
 			for (var i = 0; i < _reminders.Count; i++)
 			{
-				Reminder r = _reminders[i];
+				ReminderEntity r = _reminders[i];
 				if (r.Expiration > DateTime.UtcNow) continue;
 
 				Task t = DispatchReminderAsync(r);
@@ -95,7 +95,7 @@ namespace Silk.Core.Services.Server
         ///     The main Dispatch method. Determines the dispatch route to take.
         /// </summary>
         /// <param name="reminder"></param>
-        private async Task DispatchReminderAsync(Reminder reminder)
+        private async Task DispatchReminderAsync(ReminderEntity reminder)
 		{
 			if (reminder.MessageId is 0)
 			{
@@ -142,7 +142,7 @@ namespace Silk.Core.Services.Server
         ///     If the user's DMs are closed, it will attempt to send to the guild it was created on.
         /// </summary>
         /// <param name="reminder"></param>
-        private async Task DispatchSlashCommandReminderAsync(Reminder reminder)
+        private async Task DispatchSlashCommandReminderAsync(ReminderEntity reminder)
 		{
 			var apiClient = (DiscordApiClient)typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
 			DiscordDmChannel? channel = await (Task<DiscordDmChannel>)typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] { reminder.OwnerId })!;
@@ -193,7 +193,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         /// <param name="reminder">The reminder to update.</param>
         /// <exception cref="ArgumentException">The repetition period is unsupported.</exception>
-        private async Task UpdateRecurringReminderAsync(Reminder reminder)
+        private async Task UpdateRecurringReminderAsync(ReminderEntity reminder)
 		{
 			DateTime time = reminder.Type switch
 			{
@@ -213,7 +213,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         /// <param name="reminder">The reminder to dispatch.</param>
         /// <param name="guild">The guild the reminder belongs to.</param>
-        private async Task SendGuildReminderAsync(Reminder reminder, DiscordGuild guild)
+        private async Task SendGuildReminderAsync(ReminderEntity reminder, DiscordGuild guild)
 		{
 			if (reminder.Type is ReminderType.Once)
 				_logger.LogTrace("Dequeing reminder");
@@ -227,7 +227,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         /// <param name="reminder">The reminder to update.</param>
         /// <param name="channel">The channel the reminder should be sent to.</param>
-        private async Task DispatchRecurringReminderAsync(Reminder reminder, DiscordChannel channel)
+        private async Task DispatchRecurringReminderAsync(ReminderEntity reminder, DiscordChannel channel)
 		{
 			DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
 			var message = $"Hey, <@{reminder.OwnerId}>! You wanted to reminded {reminder.Type.Humanize(LetterCasing.LowerCase)}: \n{reminder.MessageContent}";
@@ -242,7 +242,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         /// <param name="reminder">The reminder to dispatch.</param>
         /// <param name="channel">The channel the reminder was created in.</param>
-        private async Task DispatchReplyReminderAsync(Reminder reminder, DiscordChannel channel)
+        private async Task DispatchReplyReminderAsync(ReminderEntity reminder, DiscordChannel channel)
 		{
 			_logger.LogTrace("Preparing to send reminder");
 			DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
@@ -264,7 +264,7 @@ namespace Silk.Core.Services.Server
         /// <param name="channel">The channel the reminder was created in.</param>
         /// <param name="builder">The builder to tack a reply to.</param>
         /// <param name="message"></param>
-        private static async Task SendReminderAsync(Reminder reminder, DiscordChannel channel, DiscordMessageBuilder builder, string message)
+        private static async Task SendReminderAsync(ReminderEntity reminder, DiscordChannel channel, DiscordMessageBuilder builder, string message)
 		{
 			bool validMessage;
 
@@ -289,7 +289,7 @@ namespace Silk.Core.Services.Server
         /// <param name="channel"></param>
         /// <param name="builder"></param>
         /// <param name="message"></param>
-        private static async Task SendReplyReminderAsync(Reminder reminder, DiscordChannel channel, DiscordMessageBuilder builder, string message)
+        private static async Task SendReplyReminderAsync(ReminderEntity reminder, DiscordChannel channel, DiscordMessageBuilder builder, string message)
 		{
 			bool validReply;
 
@@ -317,7 +317,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         /// <param name="reminder">The reminder to send.</param>
         /// <param name="guild">The guild the reminder was initialy sent on.</param>
-        private async Task DispatchDmReminderMessageAsync(Reminder reminder, DiscordGuild guild)
+        private async Task DispatchDmReminderMessageAsync(ReminderEntity reminder, DiscordGuild guild)
 		{
 			_logger.LogWarning("Channel doesn't exist on guild! Attempting to DM user");
 

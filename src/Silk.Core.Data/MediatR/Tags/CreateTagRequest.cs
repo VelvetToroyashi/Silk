@@ -2,19 +2,19 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
 {
     /// <summary>
-    ///     Request for creating a <see cref="Tag" />.
+    /// Request for creating a <see cref="TagEntity" />.
     /// </summary>
-    public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, Tag? OriginalTag) : IRequest<Tag>;
+    public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, TagEntity? OriginalTag) : IRequest<TagEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="CreateTagRequest" />
+    /// The default handler for <see cref="CreateTagRequest" />
     /// </summary>
-    public class CreateTagHandler : IRequestHandler<CreateTagRequest, Tag>
+    public class CreateTagHandler : IRequestHandler<CreateTagRequest, TagEntity>
     {
         private readonly GuildContext _db;
 
@@ -23,9 +23,9 @@ namespace Silk.Core.Data.MediatR.Tags
             _db = db;
         }
 
-        public async Task<Tag> Handle(CreateTagRequest request, CancellationToken cancellationToken)
+        public async Task<TagEntity> Handle(CreateTagRequest request, CancellationToken cancellationToken)
         {
-            Tag tag = new()
+            TagEntity tag = new()
             {
                 OwnerId = request.OwnerId,
                 GuildId = request.GuildId,
