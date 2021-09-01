@@ -31,7 +31,7 @@ namespace Silk.Api.Controllers
 		/// <response code="400">The request contained invalid data.</response>
 		/// <response code="204">The infraction's information was unchanged.</response>
 		/// <response code="404">The specified infraction does not exist.</response>
-		[HttpPatch("{key}")]
+		[HttpPatch("{id}")]
 		public async Task<IActionResult> PatchInfraction(Guid key, [FromBody] UpdateInfraction.Request request)
 		{
 			request.Key = key;
