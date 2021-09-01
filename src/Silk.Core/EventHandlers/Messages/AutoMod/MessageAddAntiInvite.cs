@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
@@ -21,7 +21,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		{
 			if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
 			{
-				GuildModConfig? config = await _config.GetModConfigAsync(args.Guild.Id);
+				GuildModConfigEntity? config = await _config.GetModConfigAsync(args.Guild.Id);
 				
 				bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
 				

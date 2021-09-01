@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Silk.Core.Data;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -39,7 +39,7 @@ namespace Silk.Core.Commands.Bot
 				return;
 			}
 
-			Guild guild = _db.Guilds.First(g => g.Id == ctx.Guild.Id);
+			GuildEntity guild = _db.Guilds.First(g => g.Id == ctx.Guild.Id);
 			guild.Prefix = prefix;
 			_prefixCache.UpdatePrefix(ctx.Guild.Id, prefix);
 

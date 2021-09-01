@@ -8,7 +8,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Shared.Constants;
 
@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.General
 			DiscordEmbedBuilder? responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
 			DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
 
-			GuildModConfig guildConfig = await GetOrCreateGuildConfig(ctx);
+			GuildModConfigEntity guildConfig = await GetOrCreateGuildConfig(ctx);
 			DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
 
 			DiscordEmbedBuilder? clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
@@ -71,9 +71,9 @@ namespace Silk.Core.Commands.General
 				.WithColor(DiscordColor.Red);
 		}
 
-		private async Task<GuildModConfig> GetOrCreateGuildConfig(CommandContext ctx)
+		private async Task<GuildModConfigEntity> GetOrCreateGuildConfig(CommandContext ctx)
 		{
-			Guild guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
+			GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
 			return guild.ModConfig;
 		}
 	}

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 
 namespace Silk.Core.EventHandlers
@@ -23,7 +23,7 @@ namespace Silk.Core.EventHandlers
 			if (e.Channel.IsPrivate) return; // Goes without saying.                           //
 			_ = Task.Run(async () =>
 			{
-				GuildModConfig config = await _cache.GetModConfigAsync(e.Guild.Id);
+				GuildModConfigEntity config = await _cache.GetModConfigAsync(e.Guild.Id);
 
 				if (!config.LogMessageChanges) return;
 				if (config.LoggingChannel is 0) return;

@@ -3,25 +3,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Reminders
 {
     /// <summary>
-    ///     Request for creating a <see cref="Reminder" />.
+    /// Request for creating a <see cref="ReminderEntity" />.
     /// </summary>
     public record CreateReminderRequest(
         DateTime Expiration, ulong OwnerId,
         ulong ChannelId, ulong? MessageId, ulong? GuildId,
         string? MessageContent, bool WasReply,
         ReminderType Type, ulong? ReplyId = null,
-        ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<Reminder>;
+        ulong? ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<ReminderEntity>;
 
-    /// <inheritdoc />
     /// <summary>
-    ///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Reminders.CreateReminderRequest" />.
+    /// The default handler for <see cref="T:Silk.Core.Data.MediatR.Reminders.CreateReminderRequest" />.
     /// </summary>
-    public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, Reminder>
+    public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, ReminderEntity>
     {
         private readonly GuildContext _db;
         private readonly IMediator _mediator;
@@ -32,12 +31,12 @@ namespace Silk.Core.Data.MediatR.Reminders
             _db = db;
         }
 
-        public async Task<Reminder> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
+        public async Task<ReminderEntity> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
         {
             if (request.MessageId is not 0 or null)
                 await _mediator.Send(new GetOrCreateUserRequest(request.GuildId.Value, request.OwnerId), cancellationToken);
 
-            Reminder r = new()
+            ReminderEntity r = new()
             {
                 Expiration = request.Expiration,
                 CreationTime = DateTime.UtcNow,

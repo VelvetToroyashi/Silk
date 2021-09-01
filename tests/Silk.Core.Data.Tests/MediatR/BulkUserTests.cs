@@ -8,7 +8,7 @@ using Npgsql;
 using NUnit.Framework;
 using Respawn;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.Tests.MediatR
 {
@@ -60,7 +60,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
         {
             //Arrange
-            List<User> users = new()
+            List<UserEntity> users = new()
             {
                 new() {Id = 1, GuildId = GuildId},
                 new() {Id = 2, GuildId = GuildId}
@@ -79,7 +79,7 @@ namespace Silk.Core.Data.Tests.MediatR
         {
             //Arrange
             await _mediator.Send(new AddUserRequest(GuildId, 1));
-            List<User> users = new()
+            List<UserEntity> users = new()
             {
                 new() {Id = 1, GuildId = GuildId},
                 new() {Id = 2, GuildId = GuildId}
@@ -98,7 +98,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_BulkAdd_Takes_Slow_Route_When_Passed_Malformed_Collection()
         {
             //Arrange
-            List<User> users = new()
+            List<UserEntity> users = new()
             {
                 new() {Id = 1, GuildId = GuildId},
                 new() {Id = 2}
@@ -118,8 +118,8 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Bulk_Update_Updates_All_Users()
         {
             //Arrange
-            User[] updatedUsers = new User[2];
-            List<User> users = new()
+            UserEntity[] updatedUsers = new UserEntity[2];
+            List<UserEntity> users = new()
             {
                 new() {Id = 1, GuildId = GuildId},
                 new() {Id = 2, GuildId = GuildId}
@@ -128,7 +128,7 @@ namespace Silk.Core.Data.Tests.MediatR
             //Act
             users.CopyTo(updatedUsers);
 
-            foreach (User u in updatedUsers)
+            foreach (UserEntity u in updatedUsers)
                 u.Flags = UserFlag.Staff;
 
             await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
