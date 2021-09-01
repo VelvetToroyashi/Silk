@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -22,6 +23,9 @@ namespace Silk.Api.Domain.Feature.Infractions
 			public DateTime? Expires { get; init; }
 		
 			public string Reason { get; init; }
+			
+			[JsonIgnore]
+			public string AddedBy { get; init; }
 		}
 
 		public sealed record ApiModel
@@ -55,7 +59,8 @@ namespace Silk.Api.Domain.Feature.Infractions
 					GuildCreationId = request.GuildCreationId,
 					Created = request.Created,
 					Expires = request.Expires,
-					Reason = request.Reason
+					Reason = request.Reason,
+					AddedByFK = request.AddedBy
 				};
 
 				_db.Add(entity);
@@ -107,7 +112,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				
 				RuleFor(r => r.Reason)
 					.MaximumLength(4000)
-					.WithMessage("Reason: must not exceed 4000 characters.");
+					.WithMessage("reason: must not exceed 4000 characters.");
 
 				RuleFor(r => r.Type)
 					.NotEqual(InfractionType.Ignore);
@@ -115,7 +120,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				RuleFor(r => r.Expires)
 					.NotEmpty()
 					.Unless(r => r.Type is not InfractionType.SoftBan)
-					.WithMessage("Temporary bans require an expiration.");
+					.WithMessage("expires: temporary bans require an expiration.");
 			}
 		}
 	}

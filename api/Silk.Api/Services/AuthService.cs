@@ -19,7 +19,7 @@ namespace Silk.Api.Services
 		{
 			var id = context.User.Claims.FirstOrDefault(c => c.Type == "ist")?.Value;
 
-			if (id is null || !ulong.TryParse(id, out var parsedId)) 
+			if (id is null || !ulong.TryParse(id, out _)) 
 			{
 				context.Fail();
 				return;

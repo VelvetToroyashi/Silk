@@ -1,4 +1,5 @@
 ﻿using System;
+using Silk.Api.Data.Entities;
 
 namespace Silk.Api.Data.Models
 {
@@ -21,6 +22,7 @@ namespace Silk.Api.Data.Models
 		public string Reason { get; set; }
 		public bool IsPardoned { get; set; }
 		
-		
+		public ApiUser AddedBy { get; set; }
+		public string AddedByFK { get; set; }
 	}
 }

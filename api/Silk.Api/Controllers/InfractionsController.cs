@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,9 @@ namespace Silk.Api.Controllers
 		[HttpPost]
 		public async Task<IActionResult> AddInfraction(AddInfraction.Request request)
 		{
-			var created = await _mediator.Send(request);
+			var usr = User.Claims.First(c => c.Type == "ist").Value;
+			
+			var created = await _mediator.Send(request with {AddedBy = usr});
 			
 			return Created(nameof(GetInfraction), created);
 		}
@@ -64,13 +67,15 @@ namespace Silk.Api.Controllers
 		}
 
 		/// <summary>Gets all infractions on a specific guild.</summary>
-		/// <response code="501">This endpoint is not implemented yet.</response>
-		// /// <response code="200">A guilds's infractions were successfully queried</response>
-		// /// <response code="404">The guild was not registered with the API.</response>
+		/// <response code="200">A guilds's infractions were successfully queried</response>
+		/// <response code="404">The guild was not registered with the API.</response>
 		[HttpGet("guild/{guild}")]
 		public async Task<IActionResult> GetGuildInfractions(ulong guild)
 		{
-			return new StatusCodeResult(501);
+			var req = new GetInfractionByGuild.Request(guild, User.Claims.First(c => c.Type == "ist").Value);
+			var res = await _mediator.Send(req);
+			
+			return Ok(res);
 		}
 		
 		

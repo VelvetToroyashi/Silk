@@ -12,7 +12,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 {
 	public static class UpdateInfraction
 	{
-		public record Request : IRequest<ApiModel>
+		public sealed record Request : IRequest<InfractionUpdateResult>
 		{
 			[JsonIgnore]
 			public Guid Key { get; set; }
@@ -23,14 +23,14 @@ namespace Silk.Api.Domain.Feature.Infractions
 			public bool? IsPardoned { get; init; }
 		}
 
-		public record ApiModel(bool Changed);
+		public sealed record InfractionUpdateResult(bool Changed);
 
-		public class Handler : IRequestHandler<Request, ApiModel>
+		public sealed class Handler : IRequestHandler<Request, InfractionUpdateResult>
 		{
 			private readonly ApiContext _db;
 			public Handler(ApiContext db) => _db = db;
 			
-			public async Task<ApiModel> Handle(Request request, CancellationToken cancellationToken)
+			public async Task<InfractionUpdateResult> Handle(Request request, CancellationToken cancellationToken)
 			{
 				if ((!request.IsPardoned ?? true) && request.Reason is null && request.Type is null)
 					return new(false);
