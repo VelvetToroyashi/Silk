@@ -7,6 +7,7 @@ using Silk.Api.Domain.Feature.Infractions;
 
 namespace Silk.Api.Controllers
 {
+	[Authorize]
 	[ApiController]
 	[Route("api/v1/[controller]")]
 	public sealed class InfractionsController : ControllerBase
@@ -14,10 +15,40 @@ namespace Silk.Api.Controllers
 		private readonly IMediator _mediator;
 		public InfractionsController(IMediator mediator) => _mediator = mediator;
 
+		/// <summary> Creates an infraction for a specific user.</summary>
+		/// <response code="201">The infraction was successfully created.</response>
+		/// <response code="400">The provided data was invalid.</response>
+		[HttpPost]
+		public async Task<IActionResult> AddInfraction(AddInfraction.Request request)
+		{
+			var created = await _mediator.Send(request);
+			
+			return Created(nameof(GetInfraction), created);
+		}
+		
+		/// <summary>Updates an infraction.</summary>
+		/// <response code="200">The infraction was successfully created.</response>
+		/// <response code="400">The request contained invalid data.</response>
+		/// <response code="204">The infraction's information was unchanged.</response>
+		/// <response code="404">The specified infraction does not exist.</response>
+		[HttpPatch]
+		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
+		{
+			var res = await _mediator.Send(request);
+
+			if (res is null)
+				return NotFound();
+			
+			if (res.Changed)
+				return Ok();
+			
+			return NoContent();
+		}
+		
+		
 		/// <summary>
 		/// Gets an infraction by it's id.
 		/// </summary>
-		[Authorize]
 		[HttpGet("{key}", Name = "GetInfraction")]
 		public async Task<IActionResult> GetInfraction(Guid key)
 		{
@@ -49,36 +80,6 @@ namespace Silk.Api.Controllers
 			var req = new GetInfractionByUser.Request(user, guild);
 			var results = await _mediator.Send(req);
 			return Ok(results);
-		}
-		
-		/// <summary> Creates an infraction for a specific user.</summary>
-		/// <response code="201">The infraction was successfully created.</response>
-		/// <response code="400">The provided data was invalid.</response>
-		[HttpPost]
-		public async Task<IActionResult> AddInfraction(AddInfraction.Request request)
-		{
-			var created = await _mediator.Send(request);
-			
-			return Created(nameof(GetInfraction), created);
-		}
-		
-		/// <summary>Updates an infraction.</summary>
-		/// <response code="200">The infraction was successfully created.</response>
-		/// <response code="400">The request contained invalid data.</response>
-		/// <response code="204">The infraction's information was unchanged.</response>
-		/// <response code="404">The specified infraction does not exist.</response>
-		[HttpPatch]
-		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
-		{
-			var res = await _mediator.Send(request);
-
-			if (res is null)
-				return NotFound();
-			
-			if (res.Changed)
-				return Ok();
-			
-			return NoContent();
 		}
 	}
 }
