@@ -30,11 +30,10 @@ namespace Silk.Api.Controllers
 			else return Ok(infraction);
 		}
 
-		/// <summary>
-		///	Gets all infractions on a specific guild.
-		/// </summary>
-		/// <response code="200">A guilds's infractions were successfully queried</response>
-		/// <response code="404">The guild was not registered with the API.</response>
+		/// <summary>Gets all infractions on a specific guild.</summary>
+		// /// <response code="200">A guilds's infractions were successfully queried</response>
+		// /// <response code="404">The guild was not registered with the API.</response>
+		/// <response code="501">This endpoint is not implemented yet.</response>
 		[HttpGet("guild/{guild}")]
 		public async Task<IActionResult> GetGuildInfractions(ulong guild)
 		{
@@ -42,10 +41,8 @@ namespace Silk.Api.Controllers
 		}
 		
 		
-		/// <summary>
-		/// Gets a user's infractions for a specific guild. 
-		/// </summary>
-		/// <response code="200">A user's infractions were successfully queried</response>
+		/// <summary>Gets a user's infractions for a specific guild.</summary>
+		/// <response code="200">A user's infractions were successfully queried.</response>
 		[HttpGet("guild/{guild}/user/{user}")]
 		public async Task<IActionResult> GetUserInfractions(ulong guild, ulong user)
 		{
@@ -54,6 +51,9 @@ namespace Silk.Api.Controllers
 			return Ok(results);
 		}
 		
+		/// <summary> Creates an infraction for a specific user.</summary>
+		/// <response code="201">The infraction was successfully created.</response>
+		/// <response code="400">The provided data was invalid.</response>
 		[HttpPost]
 		public async Task<IActionResult> AddInfraction(AddInfraction.Request request)
 		{
@@ -61,7 +61,12 @@ namespace Silk.Api.Controllers
 			
 			return Created(nameof(GetInfraction), created);
 		}
-
+		
+		/// <summary>Updates an infraction.</summary>
+		/// <response code="200">The infraction was successfully created.</response>
+		/// <response code="400">The request contained invalid data.</response>
+		/// <response code="204">The infraction's information was unchanged.</response>
+		/// <response code="404">The specified infraction does not exist.</response>
 		[HttpPatch]
 		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
 		{
