@@ -152,7 +152,7 @@ namespace Silk.Core.Services.Server
 			_logger.LogTrace("Preparring to send reminder");
 			try
 			{
-				await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {Formatter.Timestamp(DateTime.UtcNow - reminder.CreationTime)}! \nReminder: {reminder.MessageContent}");
+				await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {Formatter.Timestamp(reminder.CreationTime)}! \nReminder: {reminder.MessageContent}");
 				_logger.LogTrace("Successfully dispatched reminder.");
 			}
 			catch (UnauthorizedException)
@@ -182,7 +182,7 @@ namespace Silk.Core.Services.Server
 					return;
 				}
 
-				await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something {Formatter.Timestamp(DateTime.UtcNow - reminder.CreationTime)}! \nReminder: {reminder.MessageContent}");
+				await guildChannel!.SendMessageAsync($"Hey! You wanted me to remind you of something {Formatter.Timestamp(reminder.CreationTime)}! \nReminder: {reminder.MessageContent}");
 				_logger.LogTrace("Successfully dispatched reminder.");
 			}
 		}
@@ -246,7 +246,7 @@ namespace Silk.Core.Services.Server
 			_logger.LogTrace("Preparing to send reminder");
 			DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithAllowedMention(new UserMention(reminder.OwnerId));
 			string? mention = reminder.WasReply ? $" <@{reminder.OwnerId}>," : null;
-			var message = $"Hey, {mention}! {Formatter.Timestamp(DateTime.UtcNow - reminder.CreationTime)}:\n{reminder.MessageContent}";
+			var message = $"Hey, {mention}! {Formatter.Timestamp(reminder.CreationTime)}:\n{reminder.MessageContent}";
 
 			// These are misleading names (They don't actually dispatch a message) I know but w/e. //
 			if (reminder.WasReply) { await SendReplyReminderAsync(reminder, channel, builder, message); }
@@ -272,7 +272,7 @@ namespace Silk.Core.Services.Server
 			if (validMessage)
 			{
 				builder.WithReply(reminder.MessageId, true);
-				builder.WithContent($"You wanted me to remind you of this {Formatter.Timestamp(DateTime.UtcNow - reminder.CreationTime)}!");
+				builder.WithContent($"You wanted me to remind you of this {Formatter.Timestamp(reminder.CreationTime)}!");
 			}
 			else
 			{
@@ -323,7 +323,7 @@ namespace Silk.Core.Services.Server
 			try
 			{
 				DiscordMember member = await guild.GetMemberAsync(reminder.OwnerId);
-				await member.SendMessageAsync(MissingChannel + $"{Formatter.Timestamp(DateTime.UtcNow - reminder.CreationTime)}: \n{reminder.MessageContent}");
+				await member.SendMessageAsync(MissingChannel + $"{Formatter.Timestamp(reminder.CreationTime)}: \n{reminder.MessageContent}");
 			}
 			catch (UnauthorizedException) { _logger.LogWarning("Failed to message user, skipping "); }
 			catch (NotFoundException) { _logger.LogWarning("Member left guild, skipping"); }
