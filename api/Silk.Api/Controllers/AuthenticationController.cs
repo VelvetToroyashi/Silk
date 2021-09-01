@@ -68,7 +68,7 @@ namespace Silk.Api.Controllers
 		}
 
 
-		/// <summary> <b>NOT CURRENTLY IMPLEMENTED</b> Deletes a registed application. </summary>
+		/// <summary> (NOT CURRENTLY IMPLEMENTED) Deletes a registed application. </summary>
 		/// <response code="501">Told you.</response>
 		[Authorize]
 		[HttpDelete]
