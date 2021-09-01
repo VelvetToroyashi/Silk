@@ -109,7 +109,7 @@ namespace Silk.Api.Services
 			
 			var ret = await _client.SendAsync(req);
 
-			var app = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync()!)["id"];
+			var app = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync())["application"]!["id"];
 			return app;
 		}
 	}
