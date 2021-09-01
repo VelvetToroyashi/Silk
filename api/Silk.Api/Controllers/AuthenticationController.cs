@@ -73,5 +73,30 @@ namespace Silk.Api.Controllers
 
 			return StatusCode(501, new { Message = "This endpoint has yet to be implemented. Try again later."});
 		}
+
+		[HttpPatch]
+		[AllowAnonymous]
+		[Route("token")]
+		public async Task<IActionResult> RevokeToken([FromBody] ApplicationOAuthModel auth)
+		{
+			var res = await _oauth.VerifyDiscordApplicationAsync(auth.Id.ToString(), auth.Secret);
+			
+			if (!res.Authenticated)
+				return BadRequest(new { message = "An invalid id or client secret was provided, and a bearer token could not be generated." });
+
+			var token = new JwtSecurityToken(_settings.JwtSigner, claims:
+				new Claim[]
+				{
+					new("ist", res.Id.ToString(CultureInfo.InvariantCulture)),
+					new ("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture))
+				}, signingCredentials: _signingCreds);
+			
+			var apiToken = _handler.WriteToken(token);
+			
+			var req = new EditUser.Request(res.Id.ToString());
+			await _mediator.Send(req);
+
+			return Ok(new {token = apiToken});
+		}
 	}
 }
