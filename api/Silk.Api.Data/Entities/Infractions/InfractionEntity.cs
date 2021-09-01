@@ -2,7 +2,7 @@
 
 namespace Silk.Api.Data.Models
 {
-	public class Infraction
+	public class InfractionEntity
 	{
 		public int Id { get; set; }
 		
@@ -20,5 +20,7 @@ namespace Silk.Api.Data.Models
 		
 		public string Reason { get; set; }
 		public bool IsPardoned { get; set; }
+		
+		
 	}
 }

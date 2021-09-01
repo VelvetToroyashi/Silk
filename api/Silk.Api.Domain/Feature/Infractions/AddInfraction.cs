@@ -46,7 +46,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 			public async Task<ApiModel> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var entity = new Infraction()
+				var entity = new InfractionEntity()
 				{
 					Key = Guid.NewGuid(),
 					Type = request.Type,
@@ -64,7 +64,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				return ToModel(entity);
 			}
 
-			private static ApiModel ToModel(Infraction entity)
+			private static ApiModel ToModel(InfractionEntity entity)
 			{
 				return new()
 				{

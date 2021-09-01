@@ -10,7 +10,7 @@ namespace Silk.Api.Data
 		
 		public DbSet<ApiUser> Users { get; set; }
 		public DbSet<ApiKey> Keys { get; set; }
-		public DbSet<Infraction> Infractions { get; set; }
+		public DbSet<InfractionEntity> Infractions { get; set; }
 		
 	}
 }

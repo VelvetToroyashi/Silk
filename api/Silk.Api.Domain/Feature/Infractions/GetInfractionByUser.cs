@@ -45,7 +45,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 				return infractions?.Select(ToModel) ?? Array.Empty<ApiModel>();
 			}
 
-			public static ApiModel ToModel(Infraction entity)
+			public static ApiModel ToModel(InfractionEntity entity)
 			{
 				if (entity is null) return null;
 				

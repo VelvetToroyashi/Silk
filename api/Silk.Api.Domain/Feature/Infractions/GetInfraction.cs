@@ -43,7 +43,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 			}
 		}
 		
-		private static ApiModel ToModel(Infraction entity)
+		private static ApiModel ToModel(InfractionEntity entity)
 		{
 			if (entity is null) return null;
 				

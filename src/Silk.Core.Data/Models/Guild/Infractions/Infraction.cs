@@ -44,12 +44,7 @@ namespace Silk.Core.Data.Models
         ///     The Id of the user that gave this infraction; Auto-Mod infractions will default to the bot.
         /// </summary>
         public ulong Enforcer { get; set; } //Who gave this infraction
-
-        ///// <summary>
-        ///// The user object this infraction belongs to, to form the Foreign Key (FK).
-        ///// </summary>
-        //public User User { get; set; } //Who's this affecting
-
+        
         /// <summary>
         ///     The time this infraction was added.
         /// </summary>
