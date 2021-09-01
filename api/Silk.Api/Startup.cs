@@ -47,8 +47,6 @@ namespace Silk.Api
 			services.AddScoped<IAuthorizationHandler, AuthService>();
 			
 			services.AddHttpClient();
-
-			
 			
 			services.AddAuthentication(options =>
 				{
@@ -67,8 +65,7 @@ namespace Silk.Api
 						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Api")["JwtSecret"]))
 					};
 				});
-			
-			
+
 			services.AddRouting(r => r.LowercaseUrls = true);
 
 			services.AddTransient<CryptoHelper>();
