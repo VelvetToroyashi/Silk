@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -13,6 +14,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 	{
 		public record Request : IRequest<ApiModel>
 		{
+			[JsonIgnore]
 			public Guid Key { get; init; }
 			public InfractionType? Type { get; init; }
 			

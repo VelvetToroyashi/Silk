@@ -31,8 +31,8 @@ namespace Silk.Api.Controllers
 		/// <response code="400">The request contained invalid data.</response>
 		/// <response code="204">The infraction's information was unchanged.</response>
 		/// <response code="404">The specified infraction does not exist.</response>
-		[HttpPatch]
-		public async Task<IActionResult> PatchInfraction(UpdateInfraction.Request request)
+		[HttpPatch("{key}")]
+		public async Task<IActionResult> PatchInfraction(Guid key, [FromBody] UpdateInfraction.Request request)
 		{
 			var res = await _mediator.Send(request);
 
@@ -49,10 +49,10 @@ namespace Silk.Api.Controllers
 		/// <summary>
 		/// Gets an infraction by it's id.
 		/// </summary>
-		[HttpGet("{key}", Name = "GetInfraction")]
-		public async Task<IActionResult> GetInfraction(Guid key)
+		[HttpGet("{id}", Name = "GetInfraction")]
+		public async Task<IActionResult> GetInfraction(Guid id)
 		{
-			var request = new GetInfraction.Request(key);
+			var request = new GetInfraction.Request(id);
 			var infraction = await _mediator.Send(request);
 
 			if (infraction is null)
@@ -62,9 +62,9 @@ namespace Silk.Api.Controllers
 		}
 
 		/// <summary>Gets all infractions on a specific guild.</summary>
+		/// <response code="501">This endpoint is not implemented yet.</response>
 		// /// <response code="200">A guilds's infractions were successfully queried</response>
 		// /// <response code="404">The guild was not registered with the API.</response>
-		/// <response code="501">This endpoint is not implemented yet.</response>
 		[HttpGet("guild/{guild}")]
 		public async Task<IActionResult> GetGuildInfractions(ulong guild)
 		{
