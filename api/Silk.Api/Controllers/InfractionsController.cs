@@ -34,6 +34,8 @@ namespace Silk.Api.Controllers
 		[HttpPatch("{key}")]
 		public async Task<IActionResult> PatchInfraction(Guid key, [FromBody] UpdateInfraction.Request request)
 		{
+			request.Key = key;
+			
 			var res = await _mediator.Send(request);
 
 			if (res is null)

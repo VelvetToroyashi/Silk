@@ -15,7 +15,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 		public record Request : IRequest<ApiModel>
 		{
 			[JsonIgnore]
-			public Guid Key { get; init; }
+			public Guid Key { get; set; }
 			public InfractionType? Type { get; init; }
 			
 			public string Reason { get; init; }
