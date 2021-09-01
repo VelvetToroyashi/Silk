@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,6 +17,13 @@ namespace Silk.Api.Services
 		private readonly HttpClient _client;
 		private readonly ApiSettings _settings;
 		private ILogger<DiscordOAuthService> _logger;
+		
+		private static readonly Dictionary<string, string> _credentialsDict = new()
+		{
+			["scope"] = "identify",
+			["grant_type"] = "client_credentials"
+		};
+		
 		public DiscordOAuthService(HttpClient client, IOptions<ApiSettings> settings, ILogger<DiscordOAuthService> logger)
 		{
 			_client = client;
@@ -27,46 +34,83 @@ namespace Silk.Api.Services
 		public async Task<(bool Authenticated, ulong Id)> VerifyDiscordApplicationAsync(string id, string secret)
 		{
 			// Attempt to generate a bearer token to verify //
-			var req = new HttpRequestMessage(HttpMethod.Post, "https://discord.com/api/v9/oauth2/token");
+			HttpResponseMessage res = CreateBearerToken(id, secret, out string token);
 
-			var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{id}:{secret}"));
-			req.Headers.Authorization = new AuthenticationHeaderValue("Basic", auth);
-
-			req.Content = new FormUrlEncodedContent(new Dictionary<string, string>()
-			{
-				["grant_type"] = "client_credentials",
-				["scope"] = "identify"
-			});
-			
-			req.Content.Headers.ContentType = new("application/x-www-form-urlencoded");
-			
-			var res = await _client.SendAsync(req);
-			
 			// Couldn't generate a bearer token //
 			if (res.StatusCode is not HttpStatusCode.OK)
 				return (false, 0);
 
-			var obj = JObject.Parse(await res.Content.ReadAsStringAsync());
+			ulong app = await GetApplicationInfoAsync(token);
 
-			req = new();
-			req.Headers.Authorization = new("Bearer", obj["access_token"]!.ToString());
-			req.RequestUri = new("https://discord.com/api/v9/oauth2/@me");
-			req.Method = HttpMethod.Get;
-
-			var ret = await _client.SendAsync(req);
-		
-			var user = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync()!)["user"]!["id"];
-			
 			// Revoke the token; it's not needed anymore //
-			req = new();
-			req.Content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", obj["access_token"]!.ToString()) });
-			req.Content.Headers.ContentType = new("application/x-www-form-urlencoded");
+			await RevokeBearerTokenAsync(token);
 
-			req.RequestUri = new("https://discord.com/api/v9/oauth2/token/revoke");
+			return (true, app);
+		}
+		
+		private HttpResponseMessage CreateBearerToken(string id, string secret, out string token)
+		{
+			var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{id}:{secret}"));
 
-			await _client.SendAsync(req);
+			var req = new HttpRequestMessage(HttpMethod.Post, "https://discord.com/api/v9/oauth2/token")
+			{
+				Headers = { Authorization = new("Basic", auth) },
+				Content = new FormUrlEncodedContent(_credentialsDict)
+				{
+					Headers =
+					{
+						ContentType = new("application/x-www-form-urlencoded")
+					}
+				}
+			};
+
+			var res = _client.Send(req);
+
+			using var sr = new StreamReader(res.Content.ReadAsStream(), Encoding.UTF8);
+
+			var response = sr.ReadToEnd();
 			
-			return (true, user);
+			token = JObject.Parse(response)["access_token"]!.ToString();
+			return res;
+		}
+
+		private async Task RevokeBearerTokenAsync(string accessToken)
+		{
+			var content = new KeyValuePair<string, string>("token", accessToken);
+			
+			var req = new HttpRequestMessage(HttpMethod.Post, "https://discord.com/api/v9/oauth2/token/revoke")
+			{
+				Headers =
+				{
+					Authorization = new("Bearer", accessToken)
+				},
+
+				Content = new FormUrlEncodedContent(new[] {content})
+				{
+					Headers =
+					{
+						ContentType = new("application/x-www-form-urlencoded")
+					}
+				}
+			};
+			
+			await _client.SendAsync(req);
+		}
+
+		private async Task<ulong> GetApplicationInfoAsync(string accessToken)
+		{
+			var req = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v9/oauth2/@me")
+			{
+				Headers =
+				{
+					Authorization = new("Bearer", accessToken)
+				}
+			};
+			
+			var ret = await _client.SendAsync(req);
+
+			var app = (ulong)JObject.Parse(await ret.Content.ReadAsStringAsync()!)["id"];
+			return app;
 		}
 	}
 }
