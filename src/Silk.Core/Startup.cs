@@ -91,7 +91,14 @@ namespace Silk.Core
 		[SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
-			return ConfigureServices(CreateBuilder(), false);
+			var builder = CreateBuilder();
+			builder.ConfigureServices((context, container) =>
+			{
+				SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+				AddDatabases(container, silkConfig.Persistence);
+			});
+			
+			return builder;
 		}
 
 		private static IHostBuilder CreateBuilder()

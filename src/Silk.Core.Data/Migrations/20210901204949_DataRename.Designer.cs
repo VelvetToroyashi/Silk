@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Core.Data;
@@ -10,9 +11,10 @@ using Silk.Core.Data;
 namespace Silk.Core.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210901204949_DataRename")]
+    partial class DataRename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
