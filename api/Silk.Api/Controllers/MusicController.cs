@@ -18,7 +18,7 @@ namespace Silk.Api.Controllers
 		}
 		
 		[HttpGet]
-		[Route("videos/search")]
+		[Route("search/videos")]
 		public async Task<IActionResult> SearchVideosAsync([FromQuery] string search)
 		{
 			return this.NotImplemented();
@@ -32,7 +32,7 @@ namespace Silk.Api.Controllers
 		}
 
 		[HttpGet]
-		[Route("playlists/search")]
+		[Route("search/playlists")]
 		public async Task<IActionResult> SearchAsync([FromQuery] string search)
 		{
 			return this.NotImplemented();
