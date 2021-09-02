@@ -99,7 +99,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 				RuleFor(r => r.GuildCreationId)
 					.NotEmpty()
-					.WithMessage("guildCreationId: must nto be empty.");
+					.WithMessage("guildCreationId: must not be empty.");
 
 				RuleFor(r => r.Created.ToUniversalTime())
 					.LessThan(DateTime.UtcNow)
