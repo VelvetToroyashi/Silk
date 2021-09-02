@@ -7,8 +7,5 @@ namespace Silk.Api.Services
 		private readonly YoutubeClient _client;
 		public YouTubeService(YoutubeClient client) => _client = client;
 
-		
-		
-
 	}
 }
