@@ -24,7 +24,7 @@ namespace Silk.Core.Utilities
 			LogTimestampFormat = "h:mm:ss ff tt",
 			MessageCacheSize = 2048,
 			LargeThreshold = 10000,
-			MinimumLogLevel = LogLevel.None,
+			MinimumLogLevel = LogLevel.Debug,
 			//LoggerFactory = new SerilogLoggerFactory().AddSerilog()
 		};
 

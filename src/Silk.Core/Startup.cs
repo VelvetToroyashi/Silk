@@ -47,6 +47,8 @@ namespace Silk.Core
 {
 	public sealed class Startup
 	{
+		private static IUnityContainer _container;
+		
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -58,7 +60,7 @@ namespace Silk.Core
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
 			DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
-			
+
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
 
@@ -120,7 +122,7 @@ namespace Silk.Core
 				.WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
 				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Error);
+				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
 
 			SilkConfigurationOptions? configOptions = host.Configuration.GetSilkConfigurationOptionsFromSection();
 			Log.Logger = configOptions.LogLevel switch
@@ -139,11 +141,13 @@ namespace Silk.Core
 		private static IHostBuilder ConfigureServices(IHostBuilder builder, bool addServices = true)
 		{
 			return builder
-				.UseSerilog()
 				.UseUnityServiceProvider()
 				.ConfigureLogging(l => l.ClearProviders())
+				.UseSerilog()
 				.ConfigureContainer<IUnityContainer>((context, container) =>
 				{
+
+					_container = container;
 					var services = new ServiceCollection();
 					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
@@ -154,10 +158,13 @@ namespace Silk.Core
 
 					if (silkConfig.Emojis?.EmojiIds is not null)
 						silkConfig.Emojis.PopulateEmojiConstants();
-
+					
 					services.AddTransient(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
-					services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
+					//services.AddSingleton(_ => new DiscordShardedClient(DiscordConfigurations.Discord));
+					
+					 container.RegisterFactory<DiscordShardedClient>(con =>
+					 	new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
 
 					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
@@ -232,12 +239,15 @@ namespace Silk.Core
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
 
-					container.AddExtension(new LoggingExtension());
-					services.AddLogging(l =>
+					container.AddExtension(new LoggingExtension(new SerilogLoggerFactory()));
+					container.AddServices(new ServiceCollection()
+						.AddLogging(l =>
 					{
 						l.AddSerilog();
 						AddLogging(context);
-					});
+					}));
+
+
 
 					container.AddExtension(new Diagnostic());
 					
