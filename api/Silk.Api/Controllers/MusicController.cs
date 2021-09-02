@@ -41,6 +41,10 @@ namespace Silk.Api.Controllers
 		[Route("search/videos")]
 		public async Task<IActionResult> SearchVideosAsync([FromQuery] string search)
 		{
+			var videos = await _youtube.SearchVideosAsync(search);
+
+			return Ok(videos);
+			
 			return this.NotImplemented();
 		}
 		

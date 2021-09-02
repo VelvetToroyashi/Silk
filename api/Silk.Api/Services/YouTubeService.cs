@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Silk.Api.Models;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
@@ -38,17 +37,16 @@ namespace Silk.Api.Services
 			}
 		}
 
-		public async Task<IEnumerable<ApiMusicModel>> SearchVideosAsync(string query, ulong requester)
+		public async Task<IEnumerable<ApiMusicModel>> SearchVideosAsync(string query)
 		{
-			var videos = await _client.Search.GetResultsAsync(query);
+			var videos = await _client.Search.GetVideosAsync(query).CollectAsync(15);
+			
 			return videos
-				.Where(sr => sr is not ChannelSearchResult)
 				.Select(sr => new ApiMusicModel
 				{
 					Url = sr.Url,
-					Title = sr.Url,
-					Requester = requester,
-					Duration = (sr as VideoSearchResult)?.Duration ?? TimeSpan.Zero,
+					Title = sr.Title,
+					Duration = sr.Duration ?? TimeSpan.Zero,
 				});
 		}
 	}
