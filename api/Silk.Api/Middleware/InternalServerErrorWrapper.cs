@@ -9,7 +9,7 @@ using Silk.Api.ApiResponses;
 
 namespace Silk.Api
 {
-	public class InternalServerErrorWrapper 
+	public sealed class InternalServerErrorWrapper 
 	{
 		private readonly RequestDelegate _next;
 		private readonly ILogger<InternalServerErrorWrapper> _logger;
@@ -51,9 +51,9 @@ namespace Silk.Api
 				_logger.LogError(500, ex, ex.Message);
 
 				context.Response.ContentType = "application/json";
-				var response = new ApiResponseBase(context.Response.StatusCode);
-				var json = JsonConvert.SerializeObject(response);
-				await context.Response.WriteAsync(json);
+				context.Response.StatusCode = 500;
+
+				await context.Response.StartAsync();
 			}
 		}
 		
