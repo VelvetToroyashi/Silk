@@ -9,10 +9,7 @@ namespace Silk.Api.ApiResponses.Spotify
         
         [JsonProperty("href")]
         public string TrackUrl { get; set; }
-
-        [JsonProperty("is_playable")]
-        public bool IsPlayable { get; set; }
-
+        
         [JsonProperty("name")]
         public string Name { get; set; }
     }

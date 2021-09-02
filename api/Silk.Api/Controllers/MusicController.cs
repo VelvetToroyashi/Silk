@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Helpers;
+using Silk.Api.Models;
 using Silk.Api.Services;
 using YoutubeExplode.Videos;
 
@@ -55,7 +56,7 @@ namespace Silk.Api.Controllers
 
 		[HttpGet]
 		[Route("{guild}/queue")]
-		public async Task<IActionResult> GetGuildQueueAsync(ulong guildId)
+		public async Task<IActionResult> GetGuildQueueAsync(ulong guildId, ApiMusicModel track)
 		{
 			return this.NotImplemented();
 		}

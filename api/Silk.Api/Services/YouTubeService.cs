@@ -49,7 +49,5 @@ namespace Silk.Api.Services
 					Duration = sr.Duration ?? TimeSpan.Zero,
 				});
 		}
-		
-		
 	}
 }

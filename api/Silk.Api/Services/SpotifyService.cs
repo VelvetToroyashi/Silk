@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Silk.Api.ApiResponses.Spotify;
+using Silk.Api.Models;
 
 namespace Silk.Api.Services
 {
@@ -94,7 +96,7 @@ namespace Silk.Api.Services
             }
         }
         
-        public async Task<ApiResponse<SpotifyPagingModel<SpotifyTrackModel>>> GetTrackAsync(string search)
+        public async Task<IEnumerable<ApiMusicModel>> GetTracksAsync(string search)
         {
             await CheckAndRefreshTokensAsync();
             
@@ -106,36 +108,16 @@ namespace Silk.Api.Services
             if (!result.IsSuccessStatusCode) return null;
 
             string raw = await result.Content.ReadAsStringAsync();
-            Dictionary<string, SpotifyPagingModel<SpotifyTrackModel>> page = JsonConvert.DeserializeObject<Dictionary<string, SpotifyPagingModel<SpotifyTrackModel>>>(raw);
+            var page = JsonConvert.DeserializeObject<Dictionary<string, SpotifyPagingModel<SpotifyTrackModel>>>(raw);
+            var pages = page!["tracks"];
 
-            return new ApiResponse<SpotifyPagingModel<SpotifyTrackModel>>
+            return pages.Items.Select(t => new ApiMusicModel()
             {
-                StatusCode = result.StatusCode,
-                Raw = raw,
-                Response = page!["tracks"]
-            };
-        }
+                Url = t.TrackUrl,
+                Title = t.Name,
+                Duration = TimeSpan.FromMilliseconds(t.DurationMilliseconds),
 
-        public async Task<ApiResponse<SpotifyArtistModel>> GetArtistAsync(string artistId)
-        {
-            await CheckAndRefreshTokensAsync();
-            
-            _spotifyHttpClient.DefaultRequestHeaders.Clear();
-            _spotifyHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-
-            HttpResponseMessage result = await _spotifyHttpClient.GetAsync($"{ArtistLookupUrl}/{WebUtility.UrlEncode(artistId)}");
-
-            if (!result.IsSuccessStatusCode) return null;
-
-            string raw = await result.Content.ReadAsStringAsync();
-            SpotifyArtistModel page = JsonConvert.DeserializeObject<SpotifyArtistModel>(raw);
-
-            return new ApiResponse<SpotifyArtistModel>
-            {
-                StatusCode = result.StatusCode,
-                Raw = raw,
-                Response = page
-            };
+            });
         }
     }
 }
