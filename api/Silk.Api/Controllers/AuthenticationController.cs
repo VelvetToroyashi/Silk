@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,15 +69,18 @@ namespace Silk.Api.Controllers
 		}
 
 
-		/// <summary> (NOT CURRENTLY IMPLEMENTED) Deletes a registered application. </summary>
-		/// <response code="501">Told you.</response>
+		/// <summary>
+		/// Permanently deletes the current account. 
+		/// </summary>
+		/// <response code="204">The application was successfully wiped.</response>
+		/// <response code="404">The application was not found.</response>
 		[Authorize]
 		[HttpDelete]
 		public async Task<IActionResult> RevokeAccount()
 		{
-			// TODO: Delete account here // 
+			var deleted = await _mediator.Send(new RemoveUser.Request(User.Claims.Single(u => u.Type == "ist").Value));
 
-			return StatusCode(501, new { Message = "This endpoint has yet to be implemented. Try again later." });
+			return deleted ? NoContent() : NotFound();
 		}
 
 		/// <summary>Regenerates a token for the specified application.</summary>
