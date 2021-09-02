@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,10 +30,10 @@ namespace Silk.Api.Services
             _clientId = clientId;
             _clientSecret = clientSecret;
             
-            CheckAndRefreshTokens().GetAwaiter().GetResult();
+            CheckAndRefreshTokensAsync().GetAwaiter().GetResult();
         }
         
-        public async Task CheckAndRefreshTokens()
+        public async Task CheckAndRefreshTokensAsync()
         {
             if (_tokenExpiry == null || _tokenExpiry.Value <= (DateTime.Now - TimeSpan.FromMinutes(5)))
             {
@@ -93,12 +94,12 @@ namespace Silk.Api.Services
             }
         }
         
-        public async Task<ApiResponse<SpotifyPagingModel<SpotifyTrackModel>>> GetTrack(string search)
+        public async Task<ApiResponse<SpotifyPagingModel<SpotifyTrackModel>>> GetTrackAsync(string search)
         {
-            await CheckAndRefreshTokens();
+            await CheckAndRefreshTokensAsync();
             
             _spotifyHttpClient.DefaultRequestHeaders.Clear();
-            _spotifyHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accessToken}");
+            _spotifyHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
                 
             HttpResponseMessage result = await _spotifyHttpClient.GetAsync($"{TrackLookupUrl}?q={WebUtility.UrlEncode(search)}&type=track");
 
@@ -115,13 +116,13 @@ namespace Silk.Api.Services
             };
         }
 
-        public async Task<ApiResponse<SpotifyArtistModel>> GetArtist(string artistId)
+        public async Task<ApiResponse<SpotifyArtistModel>> GetArtistAsync(string artistId)
         {
-            await CheckAndRefreshTokens();
+            await CheckAndRefreshTokensAsync();
             
             _spotifyHttpClient.DefaultRequestHeaders.Clear();
-            _spotifyHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accessToken}");
-            
+            _spotifyHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+
             HttpResponseMessage result = await _spotifyHttpClient.GetAsync($"{ArtistLookupUrl}/{WebUtility.UrlEncode(artistId)}");
 
             if (!result.IsSuccessStatusCode) return null;
