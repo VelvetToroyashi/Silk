@@ -53,7 +53,7 @@ namespace Silk.Api.Controllers
 		}
 
 		[HttpPost]
-		[Route("{guild}/queue")]
+		[Route("{guild}/queue/bulk")]
 		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId) /* TODO: IEnumerable<MusicResult> ? */
 		{
 			return this.NotImplemented();
