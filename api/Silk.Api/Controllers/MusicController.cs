@@ -39,16 +39,16 @@ namespace Silk.Api.Controllers
 
 		[HttpGet]
 		[Route("search/youtube")]
-		public async Task<IActionResult> SearchYouTubeAsync([FromQuery] string search)
+		public async Task<IActionResult> SearchYouTubeAsync([FromQuery] string youtubeSearch)
 		{
-			var videos = await _youtube.SearchVideosAsync(search);
+			var videos = await _youtube.SearchVideosAsync(youtubeSearch);
 
 			return Ok(videos);
-			
 		}
 
+		[HttpGet]
 		[Route("search/spotify")]
-		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string search)
+		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string spotifySearch)
 		{
 			return this.NotImplemented();
 		}
