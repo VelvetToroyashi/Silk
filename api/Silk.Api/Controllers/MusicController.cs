@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Helpers;
+using Silk.Api.Services;
+using YoutubeExplode.Videos;
 
 namespace Silk.Api.Controllers
 {
@@ -10,16 +12,27 @@ namespace Silk.Api.Controllers
 	[Route("api/v1/[controller]")]
 	public class MusicController : Controller
 	{
+		private readonly YouTubeService _youtube;
+		public MusicController(YouTubeService youtube) => _youtube = youtube;
+		
 		[HttpGet]
 		[Route("videos")]
-		public async Task<IActionResult> GetVideoAsync([FromQuery] string video)
+		public async Task<IActionResult> GetVideoAsync([FromQuery] string video, [FromQuery] ulong requester)
 		{
-			return this.NotImplemented();
+			if (VideoId.TryParse(video) is null)
+				return BadRequest(new { message = "The provided video id was not valid."});
+
+			var music = await _youtube.GetVideoAsync(video, requester);
+
+			if (music is null) 
+				return NotFound();
+			
+			return Ok(music);
 		}
 		
 		[HttpGet]
 		[Route("playlists")]
-		public async Task<IActionResult> GetPlaylistAsync([FromQuery] string playlist)
+		public async Task<IActionResult> GetPlaylistAsync([FromQuery] string playlist, [FromQuery] ulong requester)
 		{
 			return this.NotImplemented();
 		}

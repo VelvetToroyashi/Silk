@@ -35,7 +35,7 @@ namespace Silk.Api.Services
         
         public async Task CheckAndRefreshTokensAsync()
         {
-            if (_tokenExpiry == null || _tokenExpiry.Value <= (DateTime.Now - TimeSpan.FromMinutes(5)))
+            if (_tokenExpiry == null || _tokenExpiry <= (DateTime.Now - TimeSpan.FromMinutes(5)))
             {
                 //Initial authentication - if tokens are not available or about to expire within 5 minutes
                 
