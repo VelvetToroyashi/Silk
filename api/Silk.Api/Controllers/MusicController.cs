@@ -47,14 +47,21 @@ namespace Silk.Api.Controllers
 
 		[HttpPost]
 		[Route("{guild}/queue")]
-		public async Task<IActionResult> AddToGuildQueueAsync(ulong guildId) /* TODO: MusicResult? */
+		public async Task<IActionResult> AddToGuildQueueAsync(ulong guildId) /* TODO: MusicResult ? */
+		{
+			return this.NotImplemented();
+		}
+
+		[HttpPost]
+		[Route("{guild}/queue")]
+		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId) /* TODO: IEnumerable<MusicResult> ? */
 		{
 			return this.NotImplemented();
 		}
 		
 		[HttpGet]
 		[Route("{guild}/queue/next")]
-		public async Task<IActionResult> PeekNextInGuildQueueAsync(ulong guildId) /* TODO: MusicResult? */
+		public async Task<IActionResult> PeekNextInGuildQueueAsync(ulong guildId)
 		{
 			return this.NotImplemented();
 		}
