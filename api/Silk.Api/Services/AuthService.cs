@@ -14,7 +14,7 @@ namespace Silk.Api.Services
 
 		public async Task HandleAsync(AuthorizationHandlerContext context)
 		{
-			var id = context.User.Claims.FirstOrDefault(c => c.Type == "ist")?.Value;
+			var id = context.User.FindFirst("ist")?.Value;
 
 			if (id is null || !ulong.TryParse(id, out _)) 
 			{
@@ -40,7 +40,6 @@ namespace Silk.Api.Services
 			
 			if (generatedAt < user.ApiKeyGenerationTimestamp) // TODO: Validate generation timestamp isn't in the future, either. //
 				context.Fail();
-			
 		}
 	}
 }

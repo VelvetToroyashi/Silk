@@ -89,7 +89,7 @@ namespace Silk.Api.Controllers
 
 		[HttpPost]
 		[Route("{guildId}/queue")]
-		public IActionResult AddToGuildQueueAsync(ulong guildId, [FromBody] ApiMusicModel? track = null) /* TODO: MusicResult ? */
+		public IActionResult AddToGuildQueueAsync(ulong guildId, [FromBody] ApiMusicModel track)
 		{
 			var user = User.FindFirst("ist")!.Value;
 
