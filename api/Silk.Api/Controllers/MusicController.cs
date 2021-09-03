@@ -115,12 +115,20 @@ namespace Silk.Api.Controllers
 		
 		[HttpPost]
 		[Route("{guildId}/queue/next")]
-		public async Task<IActionResult> RequestNextInGuildQueueAsync(ulong guildId) 
+		public async Task<IActionResult> RequestNextInGuildQueueAsync(ulong guildId)
 		{
-			return this.NotImplemented();
-		}
+			var user = User.FindFirst("ist").Value;
 
-		[HttpPost]
+			if (!_queue.GetGuildQueue(user, guildId, out _))
+				return NotFound();
+
+			if (!_queue.GetNextTrack(user, guildId, out var nowPlaying))
+				return NoContent();
+
+			return Ok(nowPlaying);
+		}
+		
+		[HttpPatch]
 		[Route("{guildId}/queue/shuffle")]
 		public async Task<IActionResult> SetGuildQueueShuffleAsync(ulong guildId, [FromBody] bool shuffle)
 		{

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using Silk.Api.Models;
 
@@ -9,7 +10,6 @@ namespace Silk.Api.Services
 	public class GuildMusicQueueService
 	{
 		private readonly Dictionary<string, Dictionary<ulong, GuildMusicQueue>> _queues = new();
-
 		public bool GetGuildQueue(string user, ulong guild, out GuildMusicQueue queue)
 		{
 			queue = null;
@@ -27,6 +27,32 @@ namespace Silk.Api.Services
 
 			_queues[user] = new();
 			_queues[user][guild] = new(0, false, new());
+
+			return true;
+		}
+
+		public bool GetNextTrack(string user, ulong guild, out ApiMusicModel audio)
+		{
+			audio = null;
+			
+			if (!GetGuildQueue(user, guild, out var queue))
+				return false;
+
+			if (queue.CurrentTrackIndex + 1 == queue.Tracks.Count)
+			{
+				if (!queue.Repeat)
+				{
+					return false;
+				}
+				else
+				{
+					var tracks = new List<ApiMusicModel>(queue.Tracks.Select(t => t with { Played = false }));
+					queue = queue with { CurrentTrackIndex = 0, Tracks = tracks };
+				}
+			}
+			else queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
+
+			audio = queue.Tracks[queue.CurrentTrackIndex];
 
 			return true;
 		}
