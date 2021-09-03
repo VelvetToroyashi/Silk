@@ -39,8 +39,9 @@ namespace Silk.Api
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql(Configuration.GetConnectionString("Database")), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
-			services.AddSingleton<YouTubeService>(); // Must be singleton -- handles queue //
-			services.AddSingleton<YoutubeClient>(); // Must be singleton OR transient -- consumed by singleton //
+			services.AddSingleton<GuildMusicQueueService>(); // Must be singleton -- stateful queue service //
+			services.AddScoped<YouTubeService>(); 
+			services.AddScoped<YoutubeClient>();
 			
 			services.AddSingleton<JwtSecurityTokenHandler>();
 			
@@ -69,7 +70,10 @@ namespace Silk.Api
 
 			services.AddRouting(r => r.LowercaseUrls = true);
 			
-			services.AddControllers();
+			services.AddControllers(options =>
+			{
+				options.AllowEmptyInputInBodyModelBinding = true;
+			});
 
 			services.AddSwaggerGen(c =>
 			{

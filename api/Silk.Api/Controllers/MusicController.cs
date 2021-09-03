@@ -14,8 +14,13 @@ namespace Silk.Api.Controllers
 	public class MusicController : Controller
 	{
 		private readonly YouTubeService _youtube;
-		public MusicController(YouTubeService youtube) => _youtube = youtube;
-		
+		private readonly GuildMusicQueueService _queue;
+		public MusicController(YouTubeService youtube, GuildMusicQueueService queue)
+		{
+			_youtube = youtube;
+			_queue = queue;
+		}
+
 		[HttpGet]
 		[Route("youtube/videos")]
 		public async Task<IActionResult> GetVideoAsync([FromQuery] string video, [FromQuery] ulong requester)
@@ -61,68 +66,89 @@ namespace Silk.Api.Controllers
 			return this.NotImplemented();
 		}
 		
-		
 		[HttpGet]
 		[Route("spotify/search")]
 		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string search)
 		{
 			return this.NotImplemented();
 		}
-
+		
 		[HttpGet]
-		[Route("{guild}/queue")]
-		public async Task<IActionResult> GetGuildQueueAsync(ulong guildId, ApiMusicModel track)
+		[Route("{guildId}/queue")]
+		public async Task<IActionResult> GetGuildQueueAsync(ulong guildId)
+		{
+			return this.NotImplemented();
+		}
+		
+		[HttpGet]
+		[Route("{guildId}/queue/current")]
+		public async Task<IActionResult> GetCurrentGuildTrackAsync(ulong guildId)
 		{
 			return this.NotImplemented();
 		}
 
 		[HttpPost]
-		[Route("{guild}/queue")]
-		public async Task<IActionResult> AddToGuildQueueAsync(ulong guildId) /* TODO: MusicResult ? */
+		[Route("{guildId}/queue")]
+		public async Task<IActionResult> AddToGuildQueueAsync(ulong guildId, [FromBody] ApiMusicModel? track = null) /* TODO: MusicResult ? */
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist")!.Value;
+
+			if (!_queue.CreateGuildQueueAsync(user, guildId))
+				return Conflict(new { message = "there is already a queue for this guild."});
+
+		return Created(nameof(GetGuildQueueAsync), null);
 		}
 
 		[HttpPost]
-		[Route("{guild}/queue/bulk")]
+		[Route("{guildId}/queue/bulk")]
 		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId) /* TODO: IEnumerable<MusicResult> ? */
 		{
 			return this.NotImplemented();
 		}
 		
 		[HttpGet]
-		[Route("{guild}/queue/next")]
+		[Route("{guildId}/queue/next")]
 		public async Task<IActionResult> PeekNextInGuildQueueAsync(ulong guildId)
 		{
 			return this.NotImplemented();
 		}
 		
 		[HttpPost]
-		[Route("{guild}/queue/next")]
-		public async Task<IActionResult> RequestNextInGuildQueueAsync(ulong guildId) /* TODO: MusicResult? */
+		[Route("{guildId}/queue/next")]
+		public async Task<IActionResult> RequestNextInGuildQueueAsync(ulong guildId) 
 		{
 			return this.NotImplemented();
 		}
 
 		[HttpPost]
-		[Route("{guild}/queue/shuffle")]
+		[Route("{guildId}/queue/shuffle")]
 		public async Task<IActionResult> SetGuildQueueShuffleAsync(ulong guildId, [FromBody] bool shuffle)
 		{
 			return this.NotImplemented();
 		}
 
 		[HttpDelete]
-		[Route("{guild}/queue")]
+		[Route("{guildId}/queue")]
 		public async Task<IActionResult> RemoveGuildQueueAsync(ulong guildId)
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist")!.Value;
+			
+			if (!_queue.RemoveQueueForGuild(user, guildId))
+				return NotFound();
+
+			return NoContent(); 
 		}
 
 		[HttpPut]
-		[Route("{guild}/queue")]
-		public async Task<IActionResult> OverwriteGuildQueueAsync(ulong guildId) /* TODO: IEnumerable<MusicResult> ? */
+		[Route("{guildId}/queue")]
+		public async Task<IActionResult> OverwriteGuildQueueAsync(ulong guildId)
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist")!.Value;
+			
+			if (!_queue.ClearQueueForGuild(  user, guildId))
+				return NotFound();
+
+			return NoContent();
 		}
 	}
 }

@@ -10,15 +10,27 @@ namespace Silk.Api.Services
 	{
 		private readonly Dictionary<string, Dictionary<ulong, GuildMusicQueue>> _queues = new();
 
-		public void GetGuildQueue(string user, ulong guild, out GuildMusicQueue queue)
+		public bool GetGuildQueue(string user, ulong guild, out GuildMusicQueue queue)
 		{
 			queue = null;
 
 			if (!_queues.TryGetValue(user, out var queues))
-				return;
+				return false;
 
-			queues.TryGetValue(guild, out queue);
+			return queues.TryGetValue(guild, out queue);
 		}
+
+		public bool CreateGuildQueueAsync(string user, ulong guild)
+		{
+			if (GetGuildQueue(user, guild, out _))
+				return false;
+
+			_queues[user] = new();
+			_queues[user][guild] = new(0, false, new());
+
+			return true;
+		}
+		
 		
 		public bool ClearQueueForGuild(string user, ulong guild)
 		{
