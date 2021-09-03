@@ -79,7 +79,7 @@ namespace Silk.Api.Controllers
 		{
 			return this.NotImplemented();
 		}
-		
+
 		[HttpGet]
 		[Route("{guildId}/queue/current")]
 		public async Task<IActionResult> GetCurrentGuildTrackAsync(ulong guildId)
@@ -96,7 +96,7 @@ namespace Silk.Api.Controllers
 			if (!_queue.CreateGuildQueueAsync(user, guildId))
 				return Conflict(new { message = "there is already a queue for this guild."});
 
-			return Created(nameof(GetGuildQueueAsync), null);
+			return CreatedAtAction("GetGuildQueue", new { guildId }, null);
 		}
 
 		[HttpPost]
@@ -137,14 +137,20 @@ namespace Silk.Api.Controllers
 
 		[HttpDelete]
 		[Route("{guildId}/queue")]
-		public async Task<IActionResult> RemoveGuildQueueAsync(ulong guildId)
+		public async Task<IActionResult> RemoveGuildQueueAsync(ulong guildId, [FromQuery] bool clear = false)
 		{
 			var user = User.FindFirst("ist")!.Value;
-			
-			if (!_queue.RemoveQueueForGuild(user, guildId))
+
+			if (!_queue.GetGuildQueue(user, guildId, out _))
 				return NotFound();
 
-			return NoContent(); 
+			if (clear)
+				_queue.ClearQueueForGuild(user, guildId);
+			else 
+				_queue.RemoveQueueForGuild(user, guildId);
+			
+			
+			return clear ? NoContent() : new StatusCodeResult(410); // 410 Gone //
 		}
 
 		[HttpPut]

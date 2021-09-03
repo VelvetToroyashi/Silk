@@ -38,6 +38,9 @@ namespace Silk.Api.Services
 			if (!GetGuildQueue(user, guild, out var queue))
 				return false;
 
+			if (queue.Tracks.Count is 0)
+				return false;
+			
 			if (queue.CurrentTrackIndex + 1 == queue.Tracks.Count)
 			{
 				if (!queue.Repeat)
