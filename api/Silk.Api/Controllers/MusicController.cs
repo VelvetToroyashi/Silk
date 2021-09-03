@@ -17,7 +17,7 @@ namespace Silk.Api.Controllers
 		public MusicController(YouTubeService youtube) => _youtube = youtube;
 		
 		[HttpGet]
-		[Route("videos")]
+		[Route("youtube/videos")]
 		public async Task<IActionResult> GetVideoAsync([FromQuery] string video, [FromQuery] ulong requester)
 		{
 			if (VideoId.TryParse(video) is null)
@@ -32,14 +32,14 @@ namespace Silk.Api.Controllers
 		}
 		
 		[HttpGet]
-		[Route("playlists")]
-		public async Task<IActionResult> GetPlaylistAsync([FromQuery] string playlist, [FromQuery] ulong requester)
+		[Route("youtube/playlists")]
+		public async Task<IActionResult> GetYouTubePlaylistAsync([FromQuery] string playlist, [FromQuery] ulong requester)
 		{
 			return this.NotImplemented();
 		}
 
 		[HttpGet]
-		[Route("search/youtube")]
+		[Route("youtube/search")]
 		public async Task<IActionResult> SearchYouTubeAsync([FromQuery] string search)
 		{
 			var videos = await _youtube.SearchVideosAsync(search);
@@ -48,7 +48,22 @@ namespace Silk.Api.Controllers
 		}
 
 		[HttpGet]
-		[Route("search/spotify")]
+		[Route("spotify/track")]
+		public async Task<IActionResult> GetSpotifyTrackAsync(string trackUrl)
+		{
+			return this.NotImplemented();
+		}
+
+		[HttpGet]
+		[Route("spotify/playlists")]
+		public async Task<IActionResult> GetSpotifyPlaylistAsync(string playlistUrl)
+		{
+			return this.NotImplemented();
+		}
+		
+		
+		[HttpGet]
+		[Route("spotify/search")]
 		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string search)
 		{
 			return this.NotImplemented();
