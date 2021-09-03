@@ -20,7 +20,7 @@ namespace Silk.Api.Controllers
 			_youtube = youtube;
 			_queue = queue;
 		}
-
+		
 		[HttpGet]
 		[Route("youtube/videos")]
 		public async Task<IActionResult> GetVideoAsync([FromQuery] string video, [FromQuery] ulong requester)
@@ -89,14 +89,14 @@ namespace Silk.Api.Controllers
 
 		[HttpPost]
 		[Route("{guildId}/queue")]
-		public async Task<IActionResult> AddToGuildQueueAsync(ulong guildId, [FromBody] ApiMusicModel? track = null) /* TODO: MusicResult ? */
+		public IActionResult AddToGuildQueueAsync(ulong guildId, [FromBody] ApiMusicModel? track = null) /* TODO: MusicResult ? */
 		{
 			var user = User.FindFirst("ist")!.Value;
 
 			if (!_queue.CreateGuildQueueAsync(user, guildId))
 				return Conflict(new { message = "there is already a queue for this guild."});
 
-		return Created(nameof(GetGuildQueueAsync), null);
+			return Created(nameof(GetGuildQueueAsync), null);
 		}
 
 		[HttpPost]

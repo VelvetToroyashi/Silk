@@ -10,11 +10,8 @@ namespace Silk.Api.Services
 	public sealed class AuthService : IAuthorizationHandler
 	{
 		private readonly IMediator _mediator;
-		public AuthService(IMediator mediator)
-		{
-			_mediator = mediator;
-		}
-		
+		public AuthService(IMediator mediator) => _mediator = mediator;
+
 		public async Task HandleAsync(AuthorizationHandlerContext context)
 		{
 			var id = context.User.Claims.FirstOrDefault(c => c.Type == "ist")?.Value;

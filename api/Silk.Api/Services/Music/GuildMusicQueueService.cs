@@ -31,7 +31,6 @@ namespace Silk.Api.Services
 			return true;
 		}
 		
-		
 		public bool ClearQueueForGuild(string user, ulong guild)
 		{
 			if (!_queues.TryGetValue(user, out var queues))
