@@ -31,6 +31,21 @@ namespace Silk.Api.Services
 			return true;
 		}
 
+		public bool GetCurrentTrack(string user, ulong guild, out ApiMusicModel audio)
+		{
+			audio = null;
+			
+			if (!GetGuildQueue(user, guild, out var queue))
+				return false;
+
+			if (queue.Tracks.Count is 0)
+				return false;
+
+			audio = queue.Tracks[queue.CurrentTrackIndex];
+
+			return true;
+		}
+		
 		public bool PeekNextTrack(string user, ulong guild, out ApiMusicModel audio)
 		{
 			audio = null;
