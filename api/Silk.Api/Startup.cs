@@ -35,6 +35,8 @@ namespace Silk.Api
 			services.Configure<ApiSettings>(Configuration.GetSection("Api"));
 			
 			services.AddMediatR(typeof(ServiceCollectionExtensions));
+			
+			
 			services.AddValidators();
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql(Configuration.GetConnectionString("Database")), ServiceLifetime.Transient, ServiceLifetime.Transient);
@@ -73,6 +75,10 @@ namespace Silk.Api
 			services.AddControllers(options =>
 			{
 				options.AllowEmptyInputInBodyModelBinding = true;
+			})
+			.AddJsonOptions(options =>
+			{
+				options.JsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
 			});
 
 			services.AddSwaggerGen(c =>

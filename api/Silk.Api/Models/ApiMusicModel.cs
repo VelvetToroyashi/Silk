@@ -9,15 +9,12 @@ namespace Silk.Api.Models
 		public string Title { get; init; }
 		public ulong Requester { get; init; }
 		
-		public string Timestamp => Duration.ToString();
-		
 		[JsonIgnore]
 		public bool Played { get; init; }
 		
 		[JsonIgnore]
 		public int Index { get; init; }
 		
-		[JsonIgnore]
 		public TimeSpan Duration { get; init; }
 	}
 }
