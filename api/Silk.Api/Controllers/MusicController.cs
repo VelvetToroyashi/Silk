@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Helpers;
@@ -112,9 +114,17 @@ namespace Silk.Api.Controllers
 
 		[HttpPost]
 		[Route("{guildId}/queue/bulk")]
-		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId) /* TODO: IEnumerable<MusicResult> ? */
+		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId, IEnumerable<ApiMusicModel> tracks) /* TODO: IEnumerable<MusicResult> ? */
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist").Value;
+			if (!_queue.GetGuildQueue(user, guildId, out var queue))
+				return NotFound();
+			
+			tracks = tracks.Where(t => t is not null); /* TODO: Fluent validation */
+			
+			queue.Tracks.AddRange(tracks);
+			
+			return Ok();
 		}
 		
 		[HttpGet]
