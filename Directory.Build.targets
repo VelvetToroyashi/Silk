@@ -11,7 +11,7 @@
         <PackageReference Update="Humanizer" Version="2.11.10" />
         <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
 
-        <PackageReference Update="YumeChan.PluginBase" Version="2.4.2" />
+        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
 
         <PackageReference Update="FluentAssertions" Version="6.1.0" />
 
