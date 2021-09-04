@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -36,8 +37,9 @@ namespace Silk.Api
 			
 			services.AddMediatR(typeof(ServiceCollectionExtensions));
 			
+			services.AddValidators()
+				.AddValidatorsFromAssemblyContaining(typeof(Startup));
 			
-			services.AddValidators();
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql(Configuration.GetConnectionString("Database")), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
