@@ -77,7 +77,12 @@ namespace Silk.Api.Controllers
 		[Route("{guildId}/queue")]
 		public async Task<IActionResult> GetGuildQueueAsync(ulong guildId)
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist").Value;
+
+			if (!_queue.GetGuildQueue(user, guildId, out var queue))
+				return NotFound();
+
+			return Ok(queue.Tracks);
 		}
 
 		[HttpGet]
@@ -96,6 +101,12 @@ namespace Silk.Api.Controllers
 			if (!_queue.CreateGuildQueueAsync(user, guildId))
 				return Conflict(new { message = "there is already a queue for this guild."});
 
+			if (track is not null)
+			{
+				_queue.GetGuildQueue(user, guildId, out var queue);
+				queue.Tracks.Add(track);
+			}
+			
 			return CreatedAtAction("GetGuildQueue", new { guildId }, null);
 		}
 
