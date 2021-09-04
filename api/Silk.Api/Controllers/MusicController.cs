@@ -114,7 +114,7 @@ namespace Silk.Api.Controllers
 
 		[HttpPost]
 		[Route("{guildId}/queue/bulk")]
-		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId, IEnumerable<ApiMusicModel> tracks) /* TODO: IEnumerable<MusicResult> ? */
+		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId, IEnumerable<ApiMusicModel> tracks)
 		{
 			var user = User.FindFirst("ist").Value;
 			if (!_queue.GetGuildQueue(user, guildId, out var queue))
