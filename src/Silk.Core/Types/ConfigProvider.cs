@@ -4,11 +4,11 @@ using YumeChan.PluginBase.Tools;
 
 namespace Silk.Core.Types
 {
-	public class ConfigProvider<T> : IConfigProvider<T> where T : class
+	public sealed class ConfigProvider<T> : IConfigProvider<T> where T : class
 	{
 		public T InitConfig(string filename)
 		{
-			ConfigFile = new FileInfo($"./{filename}.json");
+			ConfigFile = new FileInfo($"./config/{filename}.json");
 
 			return Configuration = new ConfigurationBuilder<T>().UseJsonFile(ConfigFile.ToString()).Build();
 		}
