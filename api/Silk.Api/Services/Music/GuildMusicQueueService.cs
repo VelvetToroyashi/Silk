@@ -31,6 +31,25 @@ namespace Silk.Api.Services
 			return true;
 		}
 
+		public bool PeekNextTrack(string user, ulong guild, out ApiMusicModel audio)
+		{
+			audio = null;
+			
+			if (!GetGuildQueue(user, guild, out var queue))
+				return false;
+
+			if (queue.Tracks.Count is 0)
+				return false;
+			
+			if (queue.CurrentTrackIndex + 1 == queue.Tracks.Count)
+				if (!queue.Repeat)
+					return false;
+
+			audio = queue.Tracks[(queue.CurrentTrackIndex + 1) % queue.Tracks.Count]; // Easy way to return the first element in case of an overflow, I think. //
+
+			return true;
+		}
+		
 		public bool GetNextTrack(string user, ulong guild, out ApiMusicModel audio)
 		{
 			audio = null;

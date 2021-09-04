@@ -131,7 +131,15 @@ namespace Silk.Api.Controllers
 		[Route("{guildId}/queue/next")]
 		public async Task<IActionResult> PeekNextInGuildQueueAsync(ulong guildId)
 		{
-			return this.NotImplemented();
+			var user = User.FindFirst("ist").Value;
+
+			if (!_queue.GetGuildQueue(user, guildId, out _)) // Wasteful, but Dictionaries are generally O(1) //
+				return NotFound();
+
+			if (!_queue.PeekNextTrack(user, guildId, out var next))
+				return NoContent();
+
+			return Ok(next);
 		}
 		
 		[HttpPost]
