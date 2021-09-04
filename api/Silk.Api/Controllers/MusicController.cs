@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Silk.Api.Helpers;
 using Silk.Api.Models;
 using Silk.Api.Services;
+using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 
 namespace Silk.Api.Controllers
@@ -42,35 +43,40 @@ namespace Silk.Api.Controllers
 		[Route("youtube/playlists")]
 		public async Task<IActionResult> GetYouTubePlaylistAsync([FromQuery] string playlist, [FromQuery] ulong requester)
 		{
-			return this.NotImplemented();
+			if (PlaylistId.TryParse(playlist) is null)
+				return BadRequest(new { message = "The provided playlist id is not valid." });
+			
+			var music = await _youtube.GetPlaylistAsync(playlist, requester);
+			
+			return Ok(music);
 		}
 
 		[HttpGet]
 		[Route("youtube/search")]
-		public async Task<IActionResult> SearchYouTubeAsync([FromQuery] string search)
+		public async Task<IActionResult> SearchYouTubeAsync([FromQuery] string search, [FromQuery] ulong requester)
 		{
-			var videos = await _youtube.SearchVideosAsync(search);
+			var videos = await _youtube.SearchVideosAsync(search, requester);
 
 			return Ok(videos);
 		}
 
 		[HttpGet]
 		[Route("spotify/track")]
-		public async Task<IActionResult> GetSpotifyTrackAsync(string trackUrl)
+		public async Task<IActionResult> GetSpotifyTrackAsync([FromQuery] string trackUrl, [FromQuery] ulong requester)
 		{
 			return this.NotImplemented();
 		}
 
 		[HttpGet]
 		[Route("spotify/playlists")]
-		public async Task<IActionResult> GetSpotifyPlaylistAsync(string playlistUrl)
+		public async Task<IActionResult> GetSpotifyPlaylistAsync([FromQuery] string playlistUrl, [FromQuery] ulong requester)
 		{
 			return this.NotImplemented();
 		}
 		
 		[HttpGet]
 		[Route("spotify/search")]
-		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string search)
+		public async Task<IActionResult> SearchSpotifyAsync([FromQuery] string search, [FromQuery] ulong requester)
 		{
 			return this.NotImplemented();
 		}
