@@ -93,12 +93,7 @@ namespace Silk.Api.Controllers
 			return Ok(queue.Tracks);
 		}
 
-		[HttpGet]
-		[Route("{guildId}/queue/current")]
-		public async Task<IActionResult> GetCurrentGuildTrackAsync(ulong guildId)
-		{
-			return this.NotImplemented();
-		}
+
 
 		[HttpPost]
 		[Route("{guildId}/queue")]
@@ -130,7 +125,7 @@ namespace Silk.Api.Controllers
 			
 			queue.Tracks.AddRange(tracks);
 			
-			return Ok();
+			return CreatedAtAction("GetGuildQueue", new {guildId}, null);
 		}
 		
 		[HttpGet]
@@ -186,6 +181,21 @@ namespace Silk.Api.Controllers
 			
 			
 			return clear ? NoContent() : new StatusCodeResult(410); // 410 Gone //
+		}
+		
+		[HttpGet]
+		[Route("{guildId}/queue/current")]
+		public async Task<IActionResult> GetCurrentGuildTrackAsync(ulong guildId)
+		{
+			var user = User.FindFirst("ist").Value;
+
+			if (!_queue.GetGuildQueue(user, guildId, out _))
+				return NotFound();
+
+			if (!_queue.GetCurrentTrack(user, guildId, out var current))
+				return NoContent();
+			
+			return Ok(current);
 		}
 	}
 }
