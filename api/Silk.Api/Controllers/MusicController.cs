@@ -118,8 +118,8 @@ namespace Silk.Api.Controllers
 			return CreatedAtAction("GetGuildQueue", new { guildId }, null);
 		}
 
-		[HttpPost]
-		[Route("{guildId}/queue/bulk")]
+		[HttpPut]
+		[Route("{guildId}/queue")]
 		public async Task<IActionResult> AddPlaylistToGuildQueueAsync(ulong guildId, IEnumerable<ApiMusicModel> tracks)
 		{
 			var user = User.FindFirst("ist").Value;
@@ -186,18 +186,6 @@ namespace Silk.Api.Controllers
 			
 			
 			return clear ? NoContent() : new StatusCodeResult(410); // 410 Gone //
-		}
-
-		[HttpPut]
-		[Route("{guildId}/queue")]
-		public async Task<IActionResult> OverwriteGuildQueueAsync(ulong guildId)
-		{
-			var user = User.FindFirst("ist")!.Value;
-			
-			if (!_queue.ClearQueueForGuild(  user, guildId))
-				return NotFound();
-
-			return NoContent();
 		}
 	}
 }
