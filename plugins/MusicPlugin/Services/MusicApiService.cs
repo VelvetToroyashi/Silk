@@ -59,7 +59,7 @@ namespace MusicPlugin.Services
 		
 		public async Task<MusicResponseModel> GetYouTubeVideoAsync(string url, DiscordUser requester)
 		{
-			var req = PrepareResponse(HttpMethod.Get, _YouTubeVideo + url + _requesterQuery + requester.Id.ToString());
+			var req = PrepareRequest(HttpMethod.Get, _YouTubeVideo + url + _requesterQuery + requester.Id.ToString());
 
 			var res = await _client.SendAsync(req);
 
@@ -75,12 +75,16 @@ namespace MusicPlugin.Services
 
 		public async Task<MusicResponseModel[]> GetYouTubePlaylistAsync(string url, DiscordUser requester)
 		{
-			/* TODO: Implement api/v1/music/youtube/playlists */
+			var req = PrepareRequest(HttpMethod.Get, _YouTubePlaylist + _playlistQuery + url + _requesterQuery + requester);
+
+			var res = await _client.SendAsync(req);
+
+			var ret = JsonConvert.DeserializeObject<MusicResponseModel[]>(await res.Content.ReadAsStringAsync());
 			
-			return null;
+			return ret;
 		}
 
-		private HttpRequestMessage PrepareResponse(HttpMethod method, string endpoint, ulong? guild = null)
+		private HttpRequestMessage PrepareRequest(HttpMethod method, string endpoint, ulong? guild = null)
 		{
 			var escaped = new Uri(Uri.EscapeUriString(_baseUrl + (guild.HasValue ? $"/{guild.Value}" : null) + endpoint));
 			return new(method, escaped)
