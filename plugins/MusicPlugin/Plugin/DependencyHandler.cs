@@ -10,7 +10,7 @@ namespace MusicPlugin
 		{
 			return services
 				.AddSingleton<MusicApiService>()
-				.AddSingleton<MusicWatchDogService>();
+				;//.AddSingleton<MusicWatchDogService>();
 		}
 	}
 }
