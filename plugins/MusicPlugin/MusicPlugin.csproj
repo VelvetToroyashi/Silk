@@ -5,7 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
+        <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
+        <PackageReference Include="DSharpPlus" />
+        <PackageReference Include="DSharpPlus.CommandsNext" />
+        <PackageReference Include="DSharpPlus.Interactivity" />
     </ItemGroup>
 
     <ItemGroup>
