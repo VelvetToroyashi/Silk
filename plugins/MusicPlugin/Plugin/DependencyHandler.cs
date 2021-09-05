@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using MusicPlugin.Services;
 using YumeChan.PluginBase;
 
 namespace MusicPlugin
@@ -7,7 +8,9 @@ namespace MusicPlugin
 	{
 		public override IServiceCollection ConfigureServices(IServiceCollection services)
 		{
-			return services;
+			return services
+				.AddSingleton<MusicApiService>()
+				.AddSingleton<MusicWatchDogService>();
 		}
 	}
 }
