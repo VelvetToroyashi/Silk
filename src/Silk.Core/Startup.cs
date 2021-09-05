@@ -165,8 +165,10 @@ namespace Silk.Core
 					//services.AddSingleton(_ => new DiscordShardedClient(DiscordConfigurations.Discord));
 					
 					 container.RegisterFactory<DiscordShardedClient>(con =>
-					 	new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
-
+						new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
+					 
+					 container.RegisterFactory<DiscordClient>(container => container.Resolve<DiscordShardedClient>().ShardClients[0]);
+					 
 					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
 					
