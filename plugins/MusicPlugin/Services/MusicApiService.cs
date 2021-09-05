@@ -26,6 +26,7 @@ namespace MusicPlugin.Services
 			_videos = "/videos",
 			_tracks = "/tracks",
 			_playlists = "/playlists",
+			_clearQuery = "?clear=",
 			_videoQuery = "?video=",
 			_trackQuery = "?track=",
 			_playlistQuery = "?playlist=",
@@ -59,9 +60,9 @@ namespace MusicPlugin.Services
 		
 		public async Task<MusicResponseModel> GetYouTubeVideoAsync(string url, DiscordUser requester)
 		{
-			var req = PrepareRequest(HttpMethod.Get, _YouTubeVideo + url + _requesterQuery + requester.Id.ToString());
+			using var req = PrepareRequest(HttpMethod.Get, _YouTubeVideo + url + _requesterQuery + requester.Id.ToString());
 
-			var res = await _client.SendAsync(req);
+			using var res = await _client.SendAsync(req);
 
 			if (res.StatusCode is HttpStatusCode.NotFound)
 				return null;
@@ -75,12 +76,25 @@ namespace MusicPlugin.Services
 
 		public async Task<MusicResponseModel[]> GetYouTubePlaylistAsync(string url, DiscordUser requester)
 		{
-			var req = PrepareRequest(HttpMethod.Get, _YouTubePlaylist + _playlistQuery + url + _requesterQuery + requester);
+			using var req = PrepareRequest(HttpMethod.Get, _YouTubePlaylist + _playlistQuery + url + _requesterQuery + requester);
 
-			var res = await _client.SendAsync(req);
+			using var res = await _client.SendAsync(req);
 
 			var ret = JsonConvert.DeserializeObject<MusicResponseModel[]>(await res.Content.ReadAsStringAsync());
 			
+			return ret;
+		}
+
+		public async Task<bool> ClearGuildQueueAsync(ulong guildId, bool remove = true)
+		{
+			using var req = PrepareRequest(HttpMethod.Delete, _clearQuery + remove, guildId);
+
+			using var res = await _client.SendAsync(req);
+
+			var ret = remove ? // 404 = return false // 
+				res.StatusCode is HttpStatusCode.Gone :
+				res.StatusCode is HttpStatusCode.NoContent;
+
 			return ret;
 		}
 
