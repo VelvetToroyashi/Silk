@@ -13,6 +13,7 @@ using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Extensions;
+using YumeChan.PluginBase.Infrastructure;
 
 namespace Silk.Core.Utilities.Bot
 {
@@ -64,6 +65,7 @@ namespace Silk.Core.Utilities.Bot
 					RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
 					RequireDirectMessageAttribute => "Psst. You need to be in DMs to run this!",
 					RequireGuildAttribute => "As it would turn out, you can't run this in DMs!",
+					PluginCheckBaseAttribute pc => pc.ErrorMessage ?? $"A plugin command could not be executed, but I do not know why. The check is named `{pc.GetType().Name}`.",
 					_ => null
 				};
 

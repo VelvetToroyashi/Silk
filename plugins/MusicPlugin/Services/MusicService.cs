@@ -1,57 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
+using MusicPlugin.Models;
+using Newtonsoft.Json;
+using YumeChan.PluginBase.Tools;
 
 namespace MusicPlugin.Services
 {
 	public sealed class MusicService
 	{
-		private sealed class MusicState
-		{
-			public DiscordChannel Voice { get; set; }
-			public DiscordChannel Commands { get; set; }
-			
-			public VoiceNextConnection VNext { get; set; }
-		}
 
-		public enum ChannelJoinResult
-		{
-			AlreadyInChannel,
-			CannotJoinChannel,
-			ConnectedToChannel,
-			CannotUnsupressInStage,
-			DisconnectedFromCurrentVC,
-			DisconnectedFromVCAlready,
-			
-		}
 
 		private readonly Dictionary<ChannelJoinResult, string> _joinResultMessages = new()
 		{
 			[ChannelJoinResult.AlreadyInChannel] = "I'm already in that channel!",
 			[ChannelJoinResult.CannotJoinChannel] = "I don't have permission to join that channel!",
-			[ChannelJoinResult.ConnectedToChannel] = "Now connected to {Voice} and bound to {Commands}",
+			[ChannelJoinResult.ConnectedToChannel] = "Now connected to {Voice} and bound to {Commands}!",
 			[ChannelJoinResult.CannotUnsupressInStage] = "I managed to connect, but I can't unsupress myself!",
 			[ChannelJoinResult.DisconnectedFromCurrentVC] = "Alright! Ready to serve if need be, always!",
 			[ChannelJoinResult.DisconnectedFromVCAlready] = "Hmm, I don't seem to be in a VC at the moment. Did you mean to ask me to join?", 
 		};
+
+		private readonly MusicPluginConfig _config;
 
 		private readonly HttpClient _http;
 		private readonly DiscordClient _discord;
 		private readonly ILogger<MusicService> _logger;
 
 		private readonly Dictionary<ulong, MusicState> _activeGuilds = new();
-		public MusicService(HttpClient http, DiscordClient discord, ILogger<MusicService> logger)
+		public MusicService(HttpClient http, DiscordClient discord, ILogger<MusicService> logger, IConfigProvider<MusicPluginConfig> configProvider)
 		{
 			_http = http;
 			_discord = discord;
 			_logger = logger;
+
+			_config = configProvider.Configuration;
 		}
 
+		#region Misc
+
+		public string GetFriendlyResultName(ChannelJoinResult result, DiscordChannel voice = null, DiscordChannel commands = null)
+			=> _joinResultMessages[result].Replace("{Voice}", voice?.Mention).Replace("{Commands}", commands?.Mention);
+
+		#endregion
+		
 		#region Voice
 
 		public bool ConnectedToChannelInGuild(DiscordGuild guild) => _activeGuilds.TryGetValue(guild.Id, out _);
@@ -101,7 +99,7 @@ namespace MusicPlugin.Services
 
 		public async Task<ChannelJoinResult> LeaveAsync(DiscordGuild guild)
 		{
-			if (!_activeGuilds.TryGetValue(guild.Id, out var state))
+			if (!_activeGuilds.Remove(guild.Id, out var state))
 				return ChannelJoinResult.DisconnectedFromVCAlready;
 
 			await state.VNext.GetTransmitSink().FlushAsync();
@@ -111,9 +109,83 @@ namespace MusicPlugin.Services
 		}
 		
 		#endregion
-
+		
 		#region Music API
+		
+		private const string
+			_url = "api/v1/music",
+			// Endpoints //
+			_queue = "/queue",
+			_queueBulk = _queue + "/bulk",
+			_queueNext = _queue + "/next",
+			_queueShuffle = _queue + "/shuffle",
+			_queueCurrent = _queue + "/current",
+			
+			// Helper consts //
+			_search = "/search",
+			_videos = "/videos",
+			_tracks = "/tracks",
+			_playlists = "/playlists",
+			_clearQuery = "?clear=",
+			_videoQuery = "?video=",
+			_trackQuery = "?track=",
+			_playlistQuery = "?playlist=",
+			_searchQuery = "?search=",
+			_requesterQuery = "&requester=",
+			
+			// YouTube (Don't C&D me plz) //
+			_YouTube = "/YouTube",
+			_YouTubeVideo = _YouTube + _videos ,
+			_YouTubeSearch = _YouTube + _search + _searchQuery,
+			_YouTubePlaylist = _YouTube + _playlists,
+			
+			// Spotify //
+			_Spotify = "/Spotify",
+			_SpotifyTrack = _Spotify + _tracks,
+			_SpotifySearch = _Spotify + _search + _searchQuery,
+			_SpotifyPlaylist = _Spotify + _playlists;
 
+		public async Task<MusicResponseModel> GetYouTubeVideoAsync(DiscordUser requester, string url)
+		{
+			using var req = PrepareRequest(HttpMethod.Get, _YouTubeVideo + url + _requesterQuery + requester.Id.ToString());
+
+			using var res = await _http.SendAsync(req);
+
+			if (res.StatusCode is HttpStatusCode.NotFound)
+				return null;
+
+			res.EnsureSuccessStatusCode();
+
+			var ret = JsonConvert.DeserializeObject<MusicResponseModel>(await res.Content.ReadAsStringAsync());
+			
+			return ret;
+		}
+		
+		public async Task<MusicResponseModel[]> GetYouTubePlaylistAsync(string url, DiscordUser requester)
+		{
+			using var req = PrepareRequest(HttpMethod.Get, _YouTubePlaylist + _playlistQuery + url + _requesterQuery + requester);
+
+			using var res = await _http.SendAsync(req);
+
+			var ret = JsonConvert.DeserializeObject<MusicResponseModel[]>(await res.Content.ReadAsStringAsync());
+			
+			return ret;
+		}
+		
+		private HttpRequestMessage PrepareRequest(HttpMethod method, string endpoint, ulong? guild = null)
+		{
+			var escaped = new Uri(Uri.EscapeUriString(_config.MusicApiUrl + _url + (guild.HasValue ? $"/{guild.Value}" : null) + endpoint));
+			return new(method, escaped)
+			{
+				Headers =
+				{
+					Authorization = new("Bearer", _config.ApiKey)
+				}
+			};
+		}
+		
 		#endregion
+		
+		
 	}
 }
