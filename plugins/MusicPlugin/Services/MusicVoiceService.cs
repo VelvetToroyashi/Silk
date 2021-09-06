@@ -20,18 +20,17 @@ namespace MusicPlugin.Services
 
 		public async Task<bool> JoinAsync(DiscordChannel voice, DiscordChannel commands)
 		{
-			_queue.SetCommandChannelForGuild(commands);
-
 			try
 			{
 				var connection = await voice.ConnectAsync();
 
 				if (voice.Type is ChannelType.Stage)
 					try { await voice.UpdateCurrentUserVoiceStateAsync(false, DateTimeOffset.Now); }
-					catch { } // This shouldn't throw. //
+					catch { /* This shouldn't throw. */ } 
 
 				_queue.ConnectedTo(connection, voice);
-
+				_queue.SetCommandChannelForGuild(commands);
+				
 				return true;
 			}
 			catch
