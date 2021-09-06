@@ -15,7 +15,5 @@
     <ItemGroup>
       <Folder Include="Commands" />
       <Folder Include="Models" />
-      <Folder Include="Plugin" />
-      <Folder Include="Services" />
     </ItemGroup>
 </Project>
