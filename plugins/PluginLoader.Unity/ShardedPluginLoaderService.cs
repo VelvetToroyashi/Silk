@@ -36,8 +36,7 @@ namespace PluginLoader.Unity
 
 			foreach (var manifest in manifests)
 				await _loader.RegisterPluginAsync(manifest);
-
-
+			
 			foreach (var plugin in manifests)
 			{
 				try
