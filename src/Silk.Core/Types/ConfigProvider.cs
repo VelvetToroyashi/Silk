@@ -13,7 +13,10 @@ namespace Silk.Core.Types
 			return Configuration = new ConfigurationBuilder<T>().UseJsonFile(ConfigFile.ToString()).Build();
 		}
 		
-		public T Configuration { get; set; }
+		public T Configuration { get => _configuration ?? InitConfig(typeof(T).Assembly.FullName!); set => _configuration = value; }
+
+		private T? _configuration;
+		
 		public FileInfo ConfigFile { get; private set; }
 	}
 }

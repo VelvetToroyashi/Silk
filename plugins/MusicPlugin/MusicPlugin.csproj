@@ -11,9 +11,4 @@
         <PackageReference Include="DSharpPlus.Interactivity" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Commands" />
-      <Folder Include="Models" />
-    </ItemGroup>
 </Project>

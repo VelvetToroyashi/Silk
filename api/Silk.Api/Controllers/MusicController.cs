@@ -101,7 +101,7 @@ namespace Silk.Api.Controllers
 		{
 			var user = User.FindFirst("ist")!.Value;
 
-			if (!_queue.CreateGuildQueueAsync(user, guildId))
+			if (!_queue.CreateGuildQueueAsync(user, guildId) && track is null)
 				return Conflict(new { message = "there is already a queue for this guild."});
 
 			if (track is not null)

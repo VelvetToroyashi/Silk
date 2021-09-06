@@ -106,6 +106,7 @@ namespace Silk.Api
 			}
 			ctx.Database.Migrate();
 			services.GetService<AuthenticationService>();
+			app.UseMiddleware<RequestLoggerMiddleware>();
 			app.UseMiddleware<InternalServerErrorWrapper>();
 			app.UseMiddleware<AuthenticationMiddleware>();
 			
