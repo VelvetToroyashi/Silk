@@ -35,6 +35,14 @@ namespace MusicPlugin.Plugin
             _segmentSize = segmentSize;
         }
 
+        public LazyLoadHttpStream(LazyLoadHttpStream other)
+        {
+            _url = other._url;
+            _httpClient = other._httpClient;
+            _segmentSize = other._segmentSize;
+            _segmentStream = other._segmentStream;
+        }
+
         private void ResetSegmentStream()
         {
             _segmentStream?.Dispose();

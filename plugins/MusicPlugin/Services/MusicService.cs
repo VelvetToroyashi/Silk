@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
@@ -8,6 +9,7 @@ namespace MusicPlugin.Services
 	public sealed class MusicService
 	{
 		private readonly Dictionary<ulong, MusicPlayer> _players = new();
+		private readonly Dictionary<ulong, Task> _playerPreloading = new();
 
 		private readonly MusicConfig _config;
 		private readonly DiscordClient _client;
@@ -25,7 +27,20 @@ namespace MusicPlugin.Services
 				throw new InvalidOperationException("A player already exists for the specified guild");
 
 
-			return _players[guild] = new(_config, _client, ((DiscordMember)initiatorMessage.Author).VoiceState.Channel, initiatorMessage.Channel); ;
+			var player =  _players[guild] = new(_config, _client, ((DiscordMember)initiatorMessage.Author).VoiceState.Channel, initiatorMessage.Channel); ;
+
+			player.TrackEnding += g => _playerPreloading[g] = player.GetNextTrackAsync();
+
+			player.TrackEnded += g =>
+			{
+				if (!_playerPreloading.Remove(g, out var t))
+					return t.ContinueWith(_ => player.PlayAsync(player.NowPlaying));
+				
+				// I don't know when this would be the case? //
+				return player.GetNextTrackAsync().ContinueWith(_ => player.PlayAsync(player.NowPlaying));
+			};
+
+			return player;
 		}
 
 		public MusicPlayer GetMusicPlayer(DiscordGuild guild) => _players.TryGetValue(guild.Id, out var player) ? player : null;

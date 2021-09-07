@@ -29,5 +29,21 @@ namespace MusicPlugin.Commands
 			
 			await player.StartAsync();
 		}
+
+		[Command]
+		public async Task Pause(CommandContext ctx)
+		{
+			var player = _music.GetMusicPlayer(ctx.Guild);
+			
+			player.Pause();
+		}
+
+		[Command]
+		public async Task Resume(CommandContext ctx)
+		{
+			var player = _music.GetMusicPlayer(ctx.Guild);
+			
+			player.Resume();
+		}
 	}
 }

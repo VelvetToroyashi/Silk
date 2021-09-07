@@ -87,7 +87,7 @@ namespace Silk.Api.Services
 					queue = queue with { CurrentTrackIndex = 0, Tracks = tracks };
 				}
 			}
-			else queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
+			else _queues[user][guild] = queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
 
 			audio = queue.Tracks[queue.CurrentTrackIndex];
 
