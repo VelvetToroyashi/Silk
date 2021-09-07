@@ -4,4 +4,11 @@
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00979" />
+      <PackageReference Include="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00975" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="YumeChan.PluginBase" Version="2.4.2" />
+    </ItemGroup>
+
 </Project>
