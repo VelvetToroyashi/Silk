@@ -63,14 +63,28 @@ namespace MusicPlugin
 			}, CancellationToken.None);
 		}
 
+		private async void AutoPlayLoopAsync()
+		{
+			while (true)
+			{
+				await Task.Delay(1000);
+				await _pause.WaitAsync();
+
+				if (_current.Position == _current.Length)
+				{
+					_current = null;
+					await PlayAsync();
+					return;
+				}
+			}
+		}
+		
 		public void Pause()
 		{
 			_pause.Reset();
 			
 			_cts.Cancel();
 			_cts = new();
-			
-			
 		}
 
 	}

@@ -1,19 +1,25 @@
 ﻿using System.IO;
-using Config.Net;
+using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
 using YumeChan.PluginBase.Tools;
 
+[assembly: InternalsVisibleTo ("DynamicProxyGenAssembly2")]
 namespace Silk.Core.Types
 {
 	public sealed class ConfigProvider<T> : IConfigProvider<T> where T : class
 	{
 		public T InitConfig(string filename)
 		{
-			ConfigFile = new FileInfo($"./config/{filename}.json");
+			ConfigFile = new($"./config/{filename}.json");
+			if (!File.Exists(ConfigFile.ToString()))
+				return default(T);
 
-			return Configuration = new ConfigurationBuilder<T>().UseJsonFile(ConfigFile.ToString()).Build();
+			var file = File.ReadAllText(ConfigFile.ToString());
+			
+			return JsonConvert.DeserializeObject<T>(file);
 		}
 		
-		public T Configuration { get => _configuration ?? InitConfig(typeof(T).Assembly.FullName!); set => _configuration = value; }
+		public T Configuration { get => _configuration ?? InitConfig(typeof(T).Assembly.GetName().Name!); set => _configuration = value; }
 
 		private T? _configuration;
 		
