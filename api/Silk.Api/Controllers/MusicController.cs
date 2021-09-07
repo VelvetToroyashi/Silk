@@ -90,7 +90,7 @@ namespace Silk.Api.Controllers
 			if (!_queue.GetGuildQueue(user, guildId, out var queue))
 				return NotFound();
 
-			return Ok(queue.Tracks);
+			return Ok(queue.Tracks.Where(t => !t.Played));
 		}
 
 
