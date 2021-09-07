@@ -5,9 +5,9 @@ using Silk.Api.Models;
 
 namespace Silk.Api.Services
 {
-	public record GuildMusicQueue(int CurrentTrackIndex, [property: JsonIgnore] bool Repeat, List<ApiMusicModel> Tracks);
+	public sealed record GuildMusicQueue(int CurrentTrackIndex, [property: JsonIgnore] bool Repeat, List<ApiMusicModel> Tracks);
 	
-	public class GuildMusicQueueService
+	public sealed class GuildMusicQueueService
 	{
 		private readonly Dictionary<string, Dictionary<ulong, GuildMusicQueue>> _queues = new();
 		public bool GetGuildQueue(string user, ulong guild, out GuildMusicQueue queue)
@@ -56,7 +56,7 @@ namespace Silk.Api.Services
 			if (queue.Tracks.Count is 0)
 				return false;
 			
-			if (queue.CurrentTrackIndex + 1 == queue.Tracks.Count)
+			if (queue.CurrentTrackIndex + 1 >= queue.Tracks.Count)
 				if (!queue.Repeat)
 					return false;
 
@@ -75,7 +75,9 @@ namespace Silk.Api.Services
 			if (queue.Tracks.Count is 0)
 				return false;
 			
-			if (queue.CurrentTrackIndex + 1 == queue.Tracks.Count)
+			_queues[user][guild] = queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
+			
+			if (queue.CurrentTrackIndex + 1 >= queue.Tracks.Count)
 			{
 				if (!queue.Repeat)
 				{
@@ -84,10 +86,9 @@ namespace Silk.Api.Services
 				else
 				{
 					var tracks = new List<ApiMusicModel>(queue.Tracks.Select(t => t with { Played = false }));
-					queue = queue with { CurrentTrackIndex = 0, Tracks = tracks };
+					_queues[user][guild] = queue = queue with { CurrentTrackIndex = 0, Tracks = tracks };
 				}
 			}
-			else _queues[user][guild] = queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
 
 			audio = queue.Tracks[queue.CurrentTrackIndex];
 
