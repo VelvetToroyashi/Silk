@@ -7,7 +7,7 @@ namespace MusicPlugin
 {
 	public class Command : BaseCommandModule
 	{
-		private MusicService _music;
+		private GuildMusicService _music;
 		
 		[Command]
 		public async Task Play(CommandContext ctx, string url)

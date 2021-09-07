@@ -12,6 +12,9 @@ namespace MusicPlugin
 {
 	public sealed class GuildMusicService
 	{
+		public bool Paused => !_pause.IsSet;
+		
+		
 		private Stream _current;
 		private int _elapsedSeconds;
 		private TimeSpan _duration;
@@ -49,33 +52,25 @@ namespace MusicPlugin
 			var sink = _conn.GetTransmitSink();
 
 			await _pause.SetAsync();
+
+			var resuming = true;
 			
 			if (_current is null)
 			{
-				var current = await _api.PeekNextTrackAsync(_commandChannel.Guild.Id) ?? await _api.GetCurrentTrackAsync(_commandChannel.Guild.Id);
-
-				if (current is null)
-				{
-					Console.WriteLine("Current and next returned null");
-					return; // Empty queue //
-				}
-				
-				_current = new HttpStream(_api, current.Url, await _api.GetContentLength(current.Url), null);
-				_duration = current.Duration;
-
-				await _api.GetNextTrackAsync(_commandChannel.Guild.Id);
+				resuming = false;
+				if (!await GetQueuedSongAsync()) return;
 			}
 
 			_ = Task.Run(async () =>
 			{
-				var s = _current.CopyToAsync(_ffmpeg.StandardInput.BaseStream, _token);
-				var v = _ffmpeg.StandardOutput.BaseStream.CopyToAsync(sink, cancellationToken: _token);
+				var httpStreamTask = _current.CopyToAsync(_ffmpeg.StandardInput.BaseStream, _token);
+				var vnextTask = _ffmpeg.StandardOutput.BaseStream.CopyToAsync(sink, cancellationToken: _token);
 				
-				if (_current is null)
+				if (!resuming)
 					AutoPlayLoopAsync(); // Start the timer //
 				
-				try { await Task.WhenAll(s, v); }
-				catch { }
+				try { await Task.WhenAll(httpStreamTask, vnextTask); }
+				catch { /* The above will throw; it just means we paused/skipped. */ }
 			}, CancellationToken.None);
 		}
 
@@ -121,6 +116,20 @@ namespace MusicPlugin
 			_ffmpeg?.Dispose();
 			_ffmpeg = null;
 		}
-		
+
+
+		private async Task<bool> GetQueuedSongAsync()
+		{
+			var current = await _api.PeekNextTrackAsync(_commandChannel.Guild.Id) ?? await _api.GetCurrentTrackAsync(_commandChannel.Guild.Id);
+				
+			if (current is null) return false; // Empty queue //
+				
+			_current = new HttpStream(_api, current.Url, await _api.GetContentLength(current.Url), null);
+			_duration = current.Duration;
+
+			await _api.GetNextTrackAsync(_commandChannel.Guild.Id);
+
+			return true;
+		}
 	}
 }
