@@ -38,7 +38,7 @@ namespace Silk.Api.Services
 			if (!GetGuildQueue(user, guild, out var queue))
 				return false;
 
-			if (queue.Tracks.Count is 0)
+			if (queue.Tracks.Count is 0 || queue.CurrentTrackIndex >= queue.Tracks.Count)
 				return false;
 
 			audio = queue.Tracks[queue.CurrentTrackIndex];
