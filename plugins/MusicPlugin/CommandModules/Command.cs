@@ -24,23 +24,26 @@ namespace MusicPlugin
 	
 		[Command]
 		[RequireVC]
-		[RequireSameVC(true)]
 		public async Task PlayAsync(CommandContext ctx)
 		{
+			if (ctx.Guild.CurrentMember.VoiceState?.Channel is null)
+			{
+				await ctx.RespondAsync("I need to be in a VC for that..");
+				return;
+			}
+			
 			var player = _music.GetPlayer(ctx.Guild);
 
-			if (player.CommandChannel != ctx.Channel)
+			if (player?.CommandChannel != ctx.Channel)
 				return;
 			
-			if (!player.Paused)
+			if (!player?.Paused ?? true)
 				return;
 
 			await player.PlayAsync();
 
-			if (player.Paused)
-			{
+			if (player.Paused) 
 				await ctx.RespondAsync("There's nothing to play.");
-			}
 		}
 
 		[Command]
