@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
 using MusicPlugin.Models;
 using YumeChan.PluginBase.Tools;
@@ -20,34 +21,44 @@ namespace MusicPlugin
 		{
 			_client = client;
 			_config = config.Configuration;
+			_client.VoiceStateUpdated += HandleVStateUpdated;
+			_client.GuildDeleted += HandleGDeleted;
+		}
+		
+		private async Task HandleGDeleted(DiscordClient sender, GuildDeleteEventArgs e)
+		{
 		}
 
+		private async Task HandleVStateUpdated(DiscordClient sender, VoiceStateUpdateEventArgs e)
+		{
+			var guildId = e.Guild.Id;
 
+			if (!_players.TryGetValue(guildId, out var player))
+			{
+				if (e.User == _client.CurrentUser && e.After is null)
+				{
+					player.Dispose();
+					_players.Remove(guildId);
+				}
+			}
+		}
+		
 		public async Task<VoiceJoinState> ConnectToGuildAsync(DiscordChannel voiceChannel, DiscordChannel commandChannel)
 		{
-			VoiceNextConnection conn = null;
-
 			try
 			{
-				if (!_players.TryGetValue(commandChannel.Guild.Id, out var player))
-				{
-					conn = await voiceChannel.ConnectAsync();
-					_players[commandChannel.Guild.Id] = new(conn, commandChannel, new(_config));
-				}
-				else
-				{
-					if (commandChannel != player.CommandChannel)
-						conn.Disconnect();
+				if (_players.Remove(commandChannel.Guild.Id, out var player))
+					player.Dispose();
 
-					conn = await voiceChannel.ConnectAsync();
-				}
+				VoiceNextConnection conn = await voiceChannel.ConnectAsync();
+
+				_players[commandChannel.Guild.Id] = new(conn, commandChannel, new(_config));
 			}
 			catch
 			{
 				return VoiceJoinState.CannotJoinChannel;
 			}
 			
-
 			if (voiceChannel.Type is ChannelType.Stage)
 			{
 				try
@@ -66,7 +77,5 @@ namespace MusicPlugin
 
 			return VoiceJoinState.Joined;
 		}
-		
-
 	}
 }
