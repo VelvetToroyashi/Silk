@@ -4,12 +4,12 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /Silk
-
-COPY ["./api/Silk.Api/Silk.Api.csproj", "Silk.Api/"]
-RUN dotnet restore "Silk.Api.csproj"
+WORKDIR /api
+COPY ["Silk.Api/Silk.Api.csproj", "Silk.Api/"]
+RUN dotnet restore "api/Silk.Api/Silk.Api.csproj"
 COPY . .
-WORKDIR "./api/Silk.Api"
+WORKDIR "/api/Silk.Api"
+RUN dotnet build "Silk.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "Silk.Api.csproj" -c Release -o /app/publish
