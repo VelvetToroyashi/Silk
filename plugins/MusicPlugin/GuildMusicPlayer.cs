@@ -24,7 +24,7 @@ namespace MusicPlugin
 		private readonly VoiceNextConnection _conn;
 		
 		
-		private readonly AsyncManualResetEvent _pause = new(true);
+		private readonly AsyncManualResetEvent _pause = new(false);
 		
 		private CancellationTokenSource _cts = new();
 		private CancellationToken _token => _cts.Token;
@@ -47,8 +47,10 @@ namespace MusicPlugin
 			_api = api;
 		}
 
-		public async Task PlayAsync()
+		public async ValueTask PlayAsync()
 		{
+			if (!Paused) return;
+			
 			_ffmpeg ??= Process.Start(_ffmpegInfo);
 			var sink = _conn.GetTransmitSink();
 
@@ -59,7 +61,12 @@ namespace MusicPlugin
 			if (_current is null)
 			{
 				resuming = false;
-				if (!await GetQueuedSongAsync()) return;
+				
+				if (!await GetQueuedSongAsync())
+				{
+					Stop();
+					return;
+				}
 			}
 
 			_ = Task.Run(async () =>

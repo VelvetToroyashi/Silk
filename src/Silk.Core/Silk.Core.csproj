@@ -83,6 +83,7 @@
         <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="Unity" Version="5.11.10" />
         <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
+        <PackageReference Include="YoutubeExplode" Version="6.0.5" />
         <PackageReference Include="YumeChan.PluginBase" />
     </ItemGroup>
 

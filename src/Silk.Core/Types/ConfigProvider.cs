@@ -4,6 +4,7 @@ using Config.Net;
 using YumeChan.PluginBase.Tools;
 
 [assembly: InternalsVisibleTo ("DynamicProxyGenAssembly2")]
+
 namespace Silk.Core.Types
 {
 	public sealed class ConfigProvider<T> : IConfigProvider<T> where T : class

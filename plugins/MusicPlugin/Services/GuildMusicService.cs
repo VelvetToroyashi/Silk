@@ -77,5 +77,8 @@ namespace MusicPlugin
 
 			return VoiceJoinState.Joined;
 		}
+
+		public GuildMusicPlayer GetPlayer(DiscordGuild guild) => _players.TryGetValue(guild.Id, out var player) ? player : null;
+		
 	}
 }
