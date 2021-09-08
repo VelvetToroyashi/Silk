@@ -13,6 +13,7 @@ namespace MusicPlugin
 	public sealed class GuildMusicPlayer : IDisposable
 	{
 		public bool Paused => !_pause.IsSet;
+		public MusicApiResponse NowPlaying { get; private set; }
 		
 		public DiscordChannel CommandChannel { get; private init; }
 
@@ -115,7 +116,7 @@ namespace MusicPlugin
 		private void Stop()
 		{
 			Pause();
-
+			NowPlaying = null;
 			_elapsedSeconds = 0;
 			_ffmpeg?.Kill();
 			_ffmpeg?.Dispose();
@@ -128,7 +129,8 @@ namespace MusicPlugin
 			var current = await _api.PeekNextTrackAsync(CommandChannel.Guild.Id) ?? await _api.GetCurrentTrackAsync(CommandChannel.Guild.Id);
 				
 			if (current is null) return false; // Empty queue //
-				
+
+			NowPlaying = current;
 			_current = new HttpStream(_api, current.Url, await _api.GetContentLength(current.Url), null);
 			_duration = current.Duration;
 

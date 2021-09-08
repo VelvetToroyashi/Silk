@@ -69,9 +69,7 @@ namespace MusicPlugin
 
 			await _api.AddToGuildQueueAsync(ctx.Guild.Id, ret);
 
-			if (await _api.PeekNextTrackAsync(ctx.Guild.Id) is null)
-				await ctx.RespondAsync($"Now playing {ret.Title}");
-			else await ctx.RespondAsync("Queued 1 track");
+			await ctx.RespondAsync(player.NowPlaying is null ? $"Now playing {ret.Title}" : "Queued 1 track");
 
 			await player.PlayAsync();
 		}
