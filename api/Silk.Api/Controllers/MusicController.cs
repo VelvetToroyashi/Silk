@@ -92,8 +92,7 @@ namespace Silk.Api.Controllers
 
 			return Ok(queue.Tracks.Where(t => !t.Played));
 		}
-
-
+		
 
 		[HttpPost]
 		[Route("{guildId}/queue")]

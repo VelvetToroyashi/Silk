@@ -57,12 +57,21 @@ namespace Silk.Api.Services
 				return false;
 			
 			if (queue.CurrentTrackIndex + 1 >= queue.Tracks.Count)
+			{
 				if (!queue.Repeat)
 					return false;
 
-			audio = queue.Tracks[(queue.CurrentTrackIndex + 1) % queue.Tracks.Count]; // Easy way to return the first element in case of an overflow, I think. //
+				// Easy way to return the first element in case of an overflow, I think. //
+				audio = queue.Tracks[(queue.CurrentTrackIndex + 1) % queue.Tracks.Count];
+				
+				return true;
+			}
+			else 
+			{
+				audio = queue.Tracks[queue.CurrentTrackIndex + 1]; 
 
-			return true;
+				return true;
+			}
 		}
 		
 		public bool GetNextTrack(string user, ulong guild, out ApiMusicModel audio)
@@ -80,9 +89,7 @@ namespace Silk.Api.Services
 			var current = queue.Tracks[queue.CurrentTrackIndex];
 
 			queue.Tracks[queue.CurrentTrackIndex] = current with { Played = true };
-			
-			_queues[user][guild] = queue = queue with { CurrentTrackIndex = index };
-			
+
 			if (queue.CurrentTrackIndex + 1 >= queue.Tracks.Count)
 			{
 				if (!queue.Repeat)
@@ -95,7 +102,8 @@ namespace Silk.Api.Services
 					_queues[user][guild] = queue = queue with { CurrentTrackIndex = 0, Tracks = tracks };
 				}
 			}
-
+			
+			_queues[user][guild] = queue = queue with { CurrentTrackIndex = index };
 			audio = queue.Tracks[queue.CurrentTrackIndex];
 
 			return true;
