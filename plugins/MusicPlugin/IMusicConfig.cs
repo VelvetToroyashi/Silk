@@ -1,6 +1,6 @@
 ﻿namespace MusicPlugin
 {
-	public class MusicConfig
+	public interface IMusicConfig
 	{
 		public string MusicApiUrl { get; set; }
 		public string ApiKey { get; set; }

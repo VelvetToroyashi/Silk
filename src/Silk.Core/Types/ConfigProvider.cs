@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
+using Config.Net;
 using YumeChan.PluginBase.Tools;
 
 [assembly: InternalsVisibleTo ("DynamicProxyGenAssembly2")]
@@ -10,13 +10,11 @@ namespace Silk.Core.Types
 	{
 		public T InitConfig(string filename)
 		{
-			ConfigFile = new($"./config/{filename}.json");
+			ConfigFile = new($"./plugins/config/{filename}.json");
 			if (!File.Exists(ConfigFile.ToString()))
 				return default(T);
 
-			var file = File.ReadAllText(ConfigFile.ToString());
-			
-			return JsonConvert.DeserializeObject<T>(file);
+			return Configuration = new ConfigurationBuilder<T>().UseJsonFile(ConfigFile.FullName).Build();
 		}
 		
 		public T Configuration { get => _configuration ?? InitConfig(typeof(T).Assembly.GetName().Name!); set => _configuration = value; }

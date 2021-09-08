@@ -10,11 +10,10 @@ using MusicPlugin.Plugin;
 
 namespace MusicPlugin
 {
-	public sealed class GuildMusicService
+	public sealed class GuildMusicPlayer
 	{
 		public bool Paused => !_pause.IsSet;
-		
-		
+
 		private Stream _current;
 		private int _elapsedSeconds;
 		private TimeSpan _duration;
@@ -39,7 +38,7 @@ namespace MusicPlugin
 			UseShellExecute = false,
 		};
 		
-		public GuildMusicService(VoiceNextConnection conn, DiscordChannel commandChannel, SilkApiClient api)
+		public GuildMusicPlayer(VoiceNextConnection conn, DiscordChannel commandChannel, SilkApiClient api)
 		{
 			_conn = conn;
 			_commandChannel = commandChannel;
@@ -85,12 +84,9 @@ namespace MusicPlugin
 				
 				await Task.Delay(1000);
 				await _pause.WaitAsync();
-
-				Console.WriteLine($"{_elapsedSeconds} out of {_duration.TotalSeconds} seconds");
 				
 				if (_elapsedSeconds++ >= _duration.TotalSeconds)
 				{
-					Console.WriteLine("Getting next track");
 					_current = null;
 					Stop();
 					await PlayAsync();

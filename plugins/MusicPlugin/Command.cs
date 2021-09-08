@@ -1,14 +1,23 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.VoiceNext;
+using YumeChan.PluginBase.Tools;
 
 namespace MusicPlugin
 {
 	public class Command : BaseCommandModule
 	{
-		private GuildMusicService _music;
-		
+		private GuildMusicPlayer _music;
+		private readonly IMusicConfig _config;
+		public Command(IConfigProvider<IMusicConfig> config)
+		{
+			_config = config.Configuration;
+			Console.WriteLine($"Api url: {_config?.MusicApiUrl} | Api key: {_config?.ApiKey[..20]}");
+			Console.WriteLine(config.ConfigFile);
+		}
+
 		[Command]
 		public async Task Play(CommandContext ctx, string url)
 		{
@@ -21,8 +30,7 @@ namespace MusicPlugin
 				return;
 			}
 			
-			
-			var client = new SilkApiClient(null);
+			var client = new SilkApiClient(_config);
 			var conn = await ctx.Member.VoiceState.Channel.ConnectAsync();
 
 			_music = new(conn, ctx.Channel, client);

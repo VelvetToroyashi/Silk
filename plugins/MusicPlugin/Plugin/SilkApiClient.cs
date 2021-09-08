@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace MusicPlugin
 {
-	public class SilkApiClient : HttpClient
+	public sealed class SilkApiClient : HttpClient
 	{
-		private readonly MusicConfig _config;
-		public SilkApiClient(MusicConfig config)
+		private readonly IMusicConfig _config;
+		public SilkApiClient(IMusicConfig config)
 		{
 			_config = config;
 			this.BaseAddress = new(_config?.MusicApiUrl ?? "https://localhost:5001/api/v1");
@@ -81,7 +80,7 @@ namespace MusicPlugin
 			req.Content = new StringContent(JsonConvert.SerializeObject(song));
 			req.Content.Headers.ContentType = new("application/json");
 			
-			Console.WriteLine($"Client: {BaseAddress} | Request: {req.RequestUri}");
+
 			using var res = await this.SendAsync(req);
 			
 			res.EnsureSuccessStatusCode();
@@ -168,7 +167,7 @@ namespace MusicPlugin
 			{
 				Headers =
 				{
-					Authorization = new("Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3QiOiI3NDUzMjUyNjg2NDU3MDc5MTYiLCJpYXQiOiIwOS8wMi8yMDIxIDE5OjQzOjAwIiwiaXNzIjoiaHR0cHM6Ly9hcGkudmVsdmV0dGhlcGFuZGEuZGV2In0.iwbXXtydZv1pp3E49KdtIgD5lpYPGtOQn8MYjkk3yWY"),
+					Authorization = new("Bearer", _config.ApiKey),
 				}
 				
 			};
