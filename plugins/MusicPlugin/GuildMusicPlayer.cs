@@ -10,18 +10,20 @@ using MusicPlugin.Plugin;
 
 namespace MusicPlugin
 {
-	public sealed class GuildMusicPlayer
+	public sealed class GuildMusicPlayer : IDisposable
 	{
 		public bool Paused => !_pause.IsSet;
+		
+		public DiscordChannel CommandChannel { get; private init; }
 
 		private Stream _current;
-		private int _elapsedSeconds;
 		private TimeSpan _duration;
+		private int _elapsedSeconds;
 		
-		private readonly VoiceNextConnection _conn;
-		private readonly DiscordChannel _commandChannel;
 		private readonly SilkApiClient _api;
-
+		private readonly VoiceNextConnection _conn;
+		
+		
 		private readonly AsyncManualResetEvent _pause = new(true);
 		
 		private CancellationTokenSource _cts = new();
@@ -30,7 +32,7 @@ namespace MusicPlugin
 		private Process _ffmpeg;
 		private readonly ProcessStartInfo _ffmpegInfo = new()
 		{
-			Arguments = "-hide_banner -loglevel quiet -i - -map 0:a -ac 2 -f s16le -ar 48k pipe:1 ",
+			Arguments = "-hide_banner -loglevel quiet -i - -map 0:a -ac 2 -f s16le -ar 48k pipe:1",
 			RedirectStandardInput = true,
 			RedirectStandardOutput = true,
 			FileName = "./ffmpeg",
@@ -41,7 +43,7 @@ namespace MusicPlugin
 		public GuildMusicPlayer(VoiceNextConnection conn, DiscordChannel commandChannel, SilkApiClient api)
 		{
 			_conn = conn;
-			_commandChannel = commandChannel;
+			CommandChannel = commandChannel;
 			_api = api;
 		}
 
@@ -116,16 +118,30 @@ namespace MusicPlugin
 
 		private async Task<bool> GetQueuedSongAsync()
 		{
-			var current = await _api.PeekNextTrackAsync(_commandChannel.Guild.Id) ?? await _api.GetCurrentTrackAsync(_commandChannel.Guild.Id);
+			var current = await _api.PeekNextTrackAsync(CommandChannel.Guild.Id) ?? await _api.GetCurrentTrackAsync(CommandChannel.Guild.Id);
 				
 			if (current is null) return false; // Empty queue //
 				
 			_current = new HttpStream(_api, current.Url, await _api.GetContentLength(current.Url), null);
 			_duration = current.Duration;
 
-			await _api.GetNextTrackAsync(_commandChannel.Guild.Id);
+			await _api.GetNextTrackAsync(CommandChannel.Guild.Id);
 
 			return true;
+		}
+		
+		public void Dispose()
+		{
+			_pause.Reset();
+			_cts.Cancel();
+			_ffmpeg?.Kill();
+			
+			
+			_current?.Dispose();
+			_api?.Dispose();
+			_conn?.Dispose();
+			_cts?.Dispose();
+			_ffmpeg?.Dispose();
 		}
 	}
 }
