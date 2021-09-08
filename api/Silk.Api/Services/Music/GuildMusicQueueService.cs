@@ -74,8 +74,14 @@ namespace Silk.Api.Services
 
 			if (queue.Tracks.Count is 0)
 				return false;
+
+			var index = queue.CurrentTrackIndex + 1;
+
+			var current = queue.Tracks[queue.CurrentTrackIndex];
+
+			queue.Tracks[queue.CurrentTrackIndex] = current with { Played = true };
 			
-			_queues[user][guild] = queue = queue with { CurrentTrackIndex = queue.CurrentTrackIndex + 1 };
+			_queues[user][guild] = queue = queue with { CurrentTrackIndex = index };
 			
 			if (queue.CurrentTrackIndex + 1 >= queue.Tracks.Count)
 			{
