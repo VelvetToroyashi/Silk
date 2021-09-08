@@ -54,8 +54,11 @@ namespace MusicPlugin
 				return;
 
 			if (player is null)
+			{
 				await _music.ConnectToGuildAsync(ctx.Member.VoiceState.Channel, ctx.Channel);
-			
+				player = _music.GetPlayer(ctx.Guild);
+			}
+				
 			var ret = await _api.GetYouTubeVideoAsync(video, ctx.User.Id);
 
 			if (ret is null)
@@ -72,6 +75,5 @@ namespace MusicPlugin
 
 			await player.PlayAsync();
 		}
-		
 	}
 }
