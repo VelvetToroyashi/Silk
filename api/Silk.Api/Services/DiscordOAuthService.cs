@@ -50,6 +50,8 @@ namespace Silk.Api.Services
 		
 		private HttpResponseMessage CreateBearerToken(string id, string secret, out string token)
 		{
+			token = null;
+			
 			var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{id}:{secret}"));
 
 			var req = new HttpRequestMessage(HttpMethod.Post, "https://discord.com/api/v9/oauth2/token")
@@ -66,6 +68,9 @@ namespace Silk.Api.Services
 
 			var res = _client.Send(req);
 
+			if (!res.IsSuccessStatusCode)
+				return res;
+				
 			using var sr = new StreamReader(res.Content.ReadAsStream(), Encoding.UTF8);
 
 			var response = sr.ReadToEnd();

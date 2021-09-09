@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -76,6 +77,7 @@ namespace Silk.Api
 			.AddJsonOptions(options =>
 			{
 				options.JsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
+				options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 			});
 
 			services.AddSwaggerGen(c =>
@@ -117,6 +119,7 @@ namespace Silk.Api
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.Map("/", async c => c.Response.Redirect("/swagger/index.html"));
 			});
 		}
 	}
