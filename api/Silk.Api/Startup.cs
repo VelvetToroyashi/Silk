@@ -19,7 +19,6 @@ using Silk.Api.Data;
 using Silk.Api.Domain;
 using Silk.Api.Helpers;
 using Silk.Api.Services;
-using YoutubeExplode;
 using ServiceCollectionExtensions = Silk.Api.Domain.ServiceCollectionExtensions;
 
 namespace Silk.Api
@@ -43,10 +42,6 @@ namespace Silk.Api
 			services.AddDbContext<ApiContext>(d => d
 				.UseNpgsql(Configuration.GetConnectionString("Database")), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
-			services.AddSingleton<GuildMusicQueueService>(); // Must be singleton -- stateful queue service //
-			services.AddScoped<YouTubeService>(); 
-			services.AddScoped<YoutubeClient>();
-			
 			services.AddSingleton<JwtSecurityTokenHandler>();
 			
 			services.AddScoped<DiscordOAuthService>();
