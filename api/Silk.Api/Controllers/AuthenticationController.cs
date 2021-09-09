@@ -71,6 +71,7 @@ namespace Silk.Api.Controllers
 		/// <summary>
 		/// Returns information about the current user based on the supplied token.
 		/// </summary>
+		[HttpGet]
 		[Authorize]
 		[Route("whoami")]
 		public IActionResult WhoAmI()
