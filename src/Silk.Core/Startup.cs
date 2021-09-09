@@ -146,7 +146,6 @@ namespace Silk.Core
 				.UseSerilog()
 				.ConfigureContainer<IUnityContainer>((context, container) =>
 				{
-
 					_container = container;
 					var services = new ServiceCollection();
 					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
@@ -164,8 +163,10 @@ namespace Silk.Core
 					//services.AddSingleton(_ => new DiscordShardedClient(DiscordConfigurations.Discord));
 					
 					 container.RegisterFactory<DiscordShardedClient>(con =>
-					 	new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
-
+						new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
+					 
+					 container.RegisterFactory<DiscordClient>(container => container.Resolve<DiscordShardedClient>().ShardClients[0]);
+					 
 					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
 					
@@ -199,7 +200,6 @@ namespace Silk.Core
 					services.AddSingleton<SlashCommandExceptionHandler>();
 					services.AddSingleton<SerilogLoggerFactory>();
 					services.AddSingleton<MessageRemovedHandler>();
-
 
 					services.AddSingleton<CommandHandler>();
 					services.AddSingleton<MessageAddAntiInvite>();
@@ -238,7 +238,6 @@ namespace Silk.Core
 					services.RegisterShardedPluginServices();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
-
 					container.AddExtension(new LoggingExtension(new SerilogLoggerFactory()));
 					container.AddServices(new ServiceCollection()
 						.AddLogging(l =>

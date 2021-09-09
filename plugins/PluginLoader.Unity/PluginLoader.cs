@@ -67,7 +67,7 @@ namespace PluginLoader.Unity
 
 		internal PluginManifest LoadPluginFile(FileInfo file) // It's up to other things to keep track of plugin states. //
 		{
-			var alc = new AssemblyLoadContext(file.Name, true);
+			var alc = new AssemblyLoadContext(file.Name);
 			var asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 			var asm = alc.LoadFromStream(asmStream);
 			asmStream.Close();
