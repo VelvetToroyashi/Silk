@@ -18,7 +18,7 @@ namespace Silk.Api.Domain.Feature.Users
 			
 			public async Task<bool> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var user = await _db.Users.SingleOrDefaultAsync(u => u.DiscordId == request.DiscordId, cancellationToken);
+				var user = await _db.Users.Include(u => u.ApiKey).SingleOrDefaultAsync(u => u.DiscordId == request.DiscordId, cancellationToken);
 
 				if (user is null)
 					return false;
