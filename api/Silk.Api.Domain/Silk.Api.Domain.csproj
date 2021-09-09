@@ -11,16 +11,11 @@
       <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
       <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.9" />
+      <PackageReference Include="FluentValidation" Version="10.3.3"/>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Silk.Api.Data\Silk.Api.Data.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="FluentValidation, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0">
-        <HintPath>C:\Users\Cinnamon\.nuget\packages\fluentvalidation\10.3.3\lib\net5.0\FluentValidation.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
     <ItemGroup>

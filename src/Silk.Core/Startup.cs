@@ -31,10 +31,9 @@ using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands;
-using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
-using Silk.Core.Utilities.HttpClient;\
+using Silk.Core.Utilities.HttpClient;
 using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
