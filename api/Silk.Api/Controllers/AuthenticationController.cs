@@ -68,10 +68,8 @@ namespace Silk.Api.Controllers
 			return CreatedAtAction("", new { token = apiToken });
 		}
 		
-		/// <summary>
-		/// Returns information about the current user based on the supplied token.
-		/// </summary>
-		/// <response code="200">Successful deserialization of token; response returned in body.<resposne/>
+		/// <summary> Returns information about the current user based on the supplied token.</summary>
+		/// <response code="200">Successful deserialization of token; response returned in body.</response>
 		[HttpGet]
 		[Authorize]
 		[Route("whoami")]
