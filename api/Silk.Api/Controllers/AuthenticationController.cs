@@ -65,7 +65,7 @@ namespace Silk.Api.Controllers
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
 			await _mediator.Send(req);
 
-			return CreatedAtAction("", new { token = apiToken });
+			return CreatedAtAction("WhoAmI", new { token = apiToken });
 		}
 		
 		/// <summary> Returns information about the current user based on the supplied token.</summary>
