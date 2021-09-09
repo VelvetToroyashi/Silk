@@ -54,7 +54,9 @@ namespace Silk.Api.Controllers
 		/// <summary>
 		/// Gets an infraction by it's id.
 		/// </summary>
-		[HttpGet("{id}", Name = "GetInfraction")]
+		/// <response code="300">The provided infraction exists, and was returned.</response>
+		/// <response code="404">The provided infraction id points to a non-existent record.</response>
+		[HttpGet("{id}")]
 		public async Task<IActionResult> GetInfraction(Guid id)
 		{
 			var request = new GetInfraction.Request(id);

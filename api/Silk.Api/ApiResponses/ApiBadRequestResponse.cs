@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 
 namespace Silk.Api.ApiResponses
 {
-	public class ApiBadRequestResponse : ApiResponseBase
+	public sealed class ApiBadRequestResponse 
 	{
 		[JsonProperty("errors")]
 		public IEnumerable<string> Errors { get; }
 
-		public ApiBadRequestResponse(ModelStateDictionary modelState) : base(400)
+		public ApiBadRequestResponse(ModelStateDictionary modelState)
 		{
 			if (modelState.IsValid)
 			{
@@ -22,9 +22,10 @@ namespace Silk.Api.ApiResponses
 				.Select(x => x.ErrorMessage).ToArray();
 		}
 
-		public ApiBadRequestResponse(IEnumerable<string> errors) : base(400)
+		public ApiBadRequestResponse(IEnumerable<string> errors) 
 		{
 			Errors = errors;
+			
 		}
 	}
 }

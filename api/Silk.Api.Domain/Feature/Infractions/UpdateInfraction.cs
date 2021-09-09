@@ -16,10 +16,16 @@ namespace Silk.Api.Domain.Feature.Infractions
 		{
 			[JsonIgnore]
 			public Guid Key { get; set; }
+			[JsonPropertyName("type")]
 			public InfractionType? Type { get; init; }
 			
+			[JsonPropertyName("reason")]
 			public string Reason { get; init; }
+			
+			[JsonPropertyName("expiration")]
+			public DateTime? Expires { get; init; }
 
+			[JsonPropertyName("pardoned")]
 			public bool? IsPardoned { get; init; }
 		}
 
