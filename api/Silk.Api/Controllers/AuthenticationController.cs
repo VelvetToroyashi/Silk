@@ -115,6 +115,7 @@ namespace Silk.Api.Controllers
 			var token = new JwtSecurityToken(_settings.JwtSigner, claims:
 				new Claim[]
 				{
+					new("iss", _settings.JwtSigner),
 					new("ist", res.Id.ToString(CultureInfo.InvariantCulture)),
 					new("iat", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture))
 				}, signingCredentials: _signingCreds);

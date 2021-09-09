@@ -43,7 +43,9 @@ namespace Silk.Api.Services
 			ulong app = await GetApplicationInfoAsync(token);
 
 			// Revoke the token; it's not needed anymore //
-			await RevokeBearerTokenAsync(token);
+			var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{id}:{secret}"));
+			
+			await RevokeBearerTokenAsync(token, auth);
 
 			return (true, app);
 		}
@@ -79,7 +81,7 @@ namespace Silk.Api.Services
 			return res;
 		}
 
-		private async Task RevokeBearerTokenAsync(string accessToken)
+		private async Task RevokeBearerTokenAsync(string accessToken, string bearer)
 		{
 			var content = new KeyValuePair<string, string>("token", accessToken);
 			
@@ -87,10 +89,13 @@ namespace Silk.Api.Services
 			{
 				Headers =
 				{
-					Authorization = new("Bearer", accessToken)
+					Authorization = new("Basic", bearer)
 				},
 
-				Content = new FormUrlEncodedContent(new[] {content})
+				Content = new FormUrlEncodedContent(new[]
+				{
+					content
+				})
 				{
 					Headers =
 					{
