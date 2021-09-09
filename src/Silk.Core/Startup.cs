@@ -34,7 +34,7 @@ using Silk.Core.SlashCommands;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
-using Silk.Core.Utilities.HttpClient;
+using Silk.Core.Utilities.HttpClient;\
 using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
@@ -42,7 +42,6 @@ using Silk.Shared.Constants;
 using Unity;
 using Unity.Microsoft.DependencyInjection;
 using Unity.Microsoft.Logging;
-using YumeChan.PluginBase.Tools;
 using YumeChan.PluginBase.Tools.Data;
 
 namespace Silk.Core
@@ -240,8 +239,6 @@ namespace Silk.Core
 					services.RegisterShardedPluginServices();
 					
 					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
-					services.AddSingleton(typeof(IConfigProvider<>), typeof(ConfigProvider<>));
-					
 					container.AddExtension(new LoggingExtension(new SerilogLoggerFactory()));
 					container.AddServices(new ServiceCollection()
 						.AddLogging(l =>
