@@ -1,4 +1,6 @@
-﻿namespace Silk.Api.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Silk.Api.Models
 {
-	public sealed record ApplicationOAuthModel(ulong Id, string Secret);
+	public sealed record ApplicationOAuthModel(ulong Id, [property: NotNull] string Secret);
 }

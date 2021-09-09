@@ -65,10 +65,26 @@ namespace Silk.Api.Controllers
 			var req = new AddUser.Request(res.Id.ToString(), apiToken);
 			await _mediator.Send(req);
 
-			return Created(nameof(Authenticate), new { token = apiToken });
+			return CreatedAtAction("", new { token = apiToken });
 		}
-
-
+		
+		/// <summary>
+		/// Returns information about the current user based on the supplied token.
+		/// </summary>
+		[Authorize]
+		[Route("whoami")]
+		public IActionResult WhoAmI()
+		{
+			var claims = User.Claims.ToDictionary(c => c.Type, c => c.Value);
+			
+			return Ok(new
+			{
+				IssuedTo = claims["ist"], 
+				IssuedOn = claims["iat"],
+				IssuedFrom = claims["iss"]
+			});
+		}
+		
 		/// <summary>
 		/// Permanently deletes the current account. 
 		/// </summary>
@@ -80,11 +96,12 @@ namespace Silk.Api.Controllers
 		{
 			var deleted = await _mediator.Send(new RemoveUser.Request(User.Claims.Single(u => u.Type == "ist").Value));
 
-			return deleted ? NoContent() : NotFound();
+			return deleted ? StatusCode(410) : NotFound();
 		}
 
 		/// <summary>Regenerates a token for the specified application.</summary>
 		/// <response code="200">The token was successfully regenerated.</response>
+		/// <response code="400">The supplied credentials were incorrect, and an OAuth token could not be generated.</response>
 		[HttpPatch]
 		[AllowAnonymous]
 		[Route("token")]
@@ -105,9 +122,9 @@ namespace Silk.Api.Controllers
 			var apiToken = _handler.WriteToken(token);
 
 			var req = new EditUser.Request(res.Id.ToString());
-			await _mediator.Send(req);
-
-			return Ok(new { token = apiToken });
+			var exists = await _mediator.Send(req);
+			
+			return exists ? Ok(new { token = apiToken }) : NotFound();
 		}
 	}
 }
