@@ -19,12 +19,5 @@
 		/// Cryptographic salt for hashing passwords.
 		/// </summary>
 		public string HashSalt { get; init; }
-		
-		
-		public ulong ClientId { get; init; }
-		
-		public string ClientSecret { get; init; }
-		
-		public string Redirect { get; init; }
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -14,17 +15,31 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 		public sealed record ApiModel
 		{
+			[JsonPropertyName("key")]
+			public Guid Key { get; init; }
+
+			[JsonPropertyName("type")]
 			public InfractionType Type { get; init; }
 			
+			[JsonPropertyName("target")]
 			public ulong TargetUserId { get; init; }
+			
+			[JsonPropertyName("enforcer")]
 			public ulong EnforcerUserId { get; init; }
+			
+			[JsonPropertyName("guild")]
 			public ulong GuildCreationId { get; init; }
 		
+			[JsonPropertyName("created")]
 			public DateTime Created { get; init; }
+			
+			[JsonPropertyName("expiration")]
 			public DateTime? Expires { get; init; }
 			
+			[JsonPropertyName("pardoned")]
 			public bool IsPardoned { get; init; }
-		
+			
+			[JsonPropertyName("reason")]
 			public string Reason { get; init; }
 		}
 

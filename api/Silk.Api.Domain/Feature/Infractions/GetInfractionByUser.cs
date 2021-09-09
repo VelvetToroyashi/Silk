@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -17,17 +18,29 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 		public sealed record ApiModel
 		{
+			[JsonPropertyName("key")]
 			public Guid Key { get; init; }
+
+			[JsonPropertyName("type")]
 			public InfractionType Type { get; init; }
 			
+			[JsonPropertyName("target")]
 			public ulong TargetUserId { get; init; }
+			
+			[JsonPropertyName("enforcer")]
 			public ulong EnforcerUserId { get; init; }
-
+			
+			[JsonPropertyName("guild")]
+			public ulong GuildCreationId { get; init; }
+		
+			[JsonPropertyName("created")]
 			public DateTime Created { get; init; }
+			
+			[JsonPropertyName("expiration")]
 			public DateTime? Expires { get; init; }
 			
-			public bool IsPardoned { get; init; }
-		
+			
+			[JsonPropertyName("reason")]
 			public string Reason { get; init; }
 		}
 		
@@ -55,6 +68,7 @@ namespace Silk.Api.Domain.Feature.Infractions
 					Type = entity.Type,
 					TargetUserId = entity.TargetUserId,
 					EnforcerUserId = entity.EnforcerUserId,
+					GuildCreationId = entity.GuildCreationId,
 					Created = entity.Created,
 					Expires = entity.Expires,
 					Reason = entity.Reason

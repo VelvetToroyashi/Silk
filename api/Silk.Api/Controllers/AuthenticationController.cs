@@ -71,6 +71,7 @@ namespace Silk.Api.Controllers
 		/// <summary>
 		/// Returns information about the current user based on the supplied token.
 		/// </summary>
+		/// <response code="200">Successful deserialization of token; response returned in body.<resposne/>
 		[HttpGet]
 		[Authorize]
 		[Route("whoami")]
@@ -89,8 +90,8 @@ namespace Silk.Api.Controllers
 		/// <summary>
 		/// Permanently deletes the current account. 
 		/// </summary>
-		/// <response code="204">The application was successfully wiped.</response>
 		/// <response code="404">The application was not found.</response>
+		/// <response code="410">The application was successfully wiped.</response>
 		[Authorize]
 		[HttpDelete]
 		public async Task<IActionResult> RevokeAccount()

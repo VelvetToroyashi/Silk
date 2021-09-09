@@ -13,15 +13,25 @@ namespace Silk.Api.Domain.Feature.Infractions
 	{
 		public sealed record Request : IRequest<ApiModel>
 		{
+			[JsonPropertyName("target")]
 			public ulong TargetUserId { get; init; }
+			
+			[JsonPropertyName("enforcer")]
 			public ulong EnforcerUserId { get; init; }
+			
+			[JsonPropertyName("guild")]
 			public ulong GuildCreationId { get; init; }
 			
+			[JsonPropertyName("type")]
 			public InfractionType Type { get; init; }
 			
+			[JsonPropertyName("created")]
 			public DateTime Created { get; init; }
+			
+			[JsonPropertyName("expiration")]
 			public DateTime? Expires { get; init; }
 		
+			[JsonPropertyName("reason")]
 			public string Reason { get; init; }
 			
 			[JsonIgnore]
@@ -30,16 +40,29 @@ namespace Silk.Api.Domain.Feature.Infractions
 
 		public sealed record ApiModel
 		{
-			public Guid  Key { get; init; }
+			[JsonPropertyName("key")]
+			public Guid Key { get; init; }
 
+			[JsonPropertyName("type")]
 			public InfractionType Type { get; init; }
+			
+			[JsonPropertyName("target")]
 			public ulong TargetUserId { get; init; }
+			
+			[JsonPropertyName("enforcer")]
 			public ulong EnforcerUserId { get; init; }
+			
+			[JsonPropertyName("guild")]
 			public ulong GuildCreationId { get; init; }
 		
+			[JsonPropertyName("created")]
 			public DateTime Created { get; init; }
+			
+			[JsonPropertyName("expiration")]
 			public DateTime? Expires { get; init; }
-		
+			
+			
+			[JsonPropertyName("reason")]
 			public string Reason { get; init; }
 		}
 		
