@@ -67,6 +67,15 @@ namespace Silk.Api.Controllers
 
 			return CreatedAtAction("WhoAmI", new { token = apiToken });
 		}
+
+
+		/// <summary>Determine the latency between a client and the API. Does not require authentication.</summary>
+		/// <response code="204">The API is functional.</response>
+		[HttpHead]
+		[Route("ping")]
+		[ProducesResponseType(200)]
+		public IActionResult Ping() => NoContent();
+		
 		
 		/// <summary> Returns information about the current user based on the supplied token.</summary>
 		/// <response code="200">Successful deserialization of token; response returned in body.</response>
