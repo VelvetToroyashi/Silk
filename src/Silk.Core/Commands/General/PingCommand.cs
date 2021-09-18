@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
+using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -14,11 +14,13 @@ namespace Silk.Core.Commands.General
 	[Category(Categories.Misc)]
 	public class PingCommand : BaseCommandModule
 	{
-		private readonly IDbContextFactory<GuildContext> _dbFactory;
+		private readonly GuildContext _dbFactory;
+		private readonly HttpClient _client;
 
-		public PingCommand(IDbContextFactory<GuildContext> dbFactory)
+		public PingCommand(GuildContext dbFactory, HttpClient client)
 		{
 			_dbFactory = dbFactory;
+			_client = client;
 		}
 
 		[Command("ping")]
@@ -37,19 +39,22 @@ namespace Silk.Core.Commands.General
 				.AddField("→ Discord API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true);
 
 			DiscordMessage message = await ctx.RespondAsync(embed);
-
-
+			
 			DateTime now = DateTime.UtcNow;
 			await ctx.Channel.TriggerTypingAsync();
 
 			var apiLat = (DateTime.UtcNow - now).TotalMilliseconds.ToString("N0");
 			await Task.Delay(200);
-			PingReply silkApiResponse = await new Ping().SendPingAsync("velvetthepanda.dev", 50);
+
+			var sw = Stopwatch.StartNew();
+			await _client.SendAsync(new(HttpMethod.Head, "https://api.velvetthepanda.dev/v1/authentication/ping"), HttpCompletionOption.ResponseHeadersRead);
+			sw.Stop();
+
 			embed
 				.ClearFields()
 				.AddField("→ Message Latency ←", "```cs\n" + $"{(message.CreationTimestamp - ctx.Message.CreationTimestamp).Milliseconds} ms".PadLeft(10, '⠀') + "```", true)
 				.AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
-				.AddField("→ Silk! API Latency ←", "```cs\n" + $"{silkApiResponse.RoundtripTime} ms".PadLeft(10, '⠀') + "```", true)
+				.AddField("→ Silk! API Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀') + "```", true)
 				// Make the databse latency centered. //
 				.AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
 				.AddField("​", "​", true)
@@ -61,9 +66,9 @@ namespace Silk.Core.Commands.General
 
 		private int GetDbLatency()
 		{
-			GuildContext db = _dbFactory.CreateDbContext();
+			GuildContext db = _dbFactory;
 			//_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
-			db.Database.BeginTransaction();
+			//db.Database.BeginTransaction();
 			var sw = Stopwatch.StartNew();
 			db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"Guilds\"");
 			sw.Stop();
