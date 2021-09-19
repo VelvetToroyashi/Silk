@@ -2,20 +2,20 @@
     <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
-        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00991"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00991"/>
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00995"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00995"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-00995"/>
-        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00991"/>
+        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00995"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
 
         <PackageReference Update="Humanizer" Version="2.11.10" />
         <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
 
-        <PackageReference Update="YumeChan.PluginBase" Version="2.4.2" />
+        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
 
         <PackageReference Update="FluentAssertions" Version="6.1.0" />
 
-        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.1"/>
+        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.3"/>
 
         <PackageReference Update="MediatR" Version="9.0.0"/>
         <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
@@ -31,7 +31,7 @@
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.10" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
