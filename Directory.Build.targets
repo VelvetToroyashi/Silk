@@ -29,7 +29,7 @@
 
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.10"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.10" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.9"/>
