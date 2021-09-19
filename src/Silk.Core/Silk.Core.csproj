@@ -36,7 +36,7 @@
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
         <PackageReference Include="Config.Net" Version="4.15.0" />
-        <PackageReference Include="Config.Net.Json" Version="4.15.0" />
+        <PackageReference Include="Config.Net.Json" Version="4.17.0" />
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
