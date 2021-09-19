@@ -23,7 +23,7 @@
         <PackageReference Update="Unity" Version="5.11.10" />
         <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
         
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7"/>
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10"/>
 
         <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1" />
 
