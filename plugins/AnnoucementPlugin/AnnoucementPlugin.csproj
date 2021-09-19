@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ConcurrentHashSet" Version="1.1.0" />
+      <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
       <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00995" />
       <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-00995" />
       <PackageReference Include="MediatR" />
