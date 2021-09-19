@@ -77,6 +77,8 @@
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
         <PackageReference Include="SharpYaml" Version="1.6.6" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
         <PackageReference Include="Svg.Skia" Version="0.5.7.1" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />

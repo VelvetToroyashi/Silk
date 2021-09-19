@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -11,6 +12,10 @@ using DSharpPlus.Entities;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -28,11 +33,20 @@ namespace Silk.Core.Commands.Miscellaneous
 				members.Take(members.Count() > 5 ? 5 :
 						members.Count())
 					.Select(m => m.Mention)
-					.Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : null)}";
+					.Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (...plus {members.Count() - 5} others)" : null)}";
 
+			var colorImage = new Image<Rgba32>(600, 200);
 
+			colorImage.Mutate(m => m.Fill(Color.FromRgb(role.Color.R, role.Color.G, role.Color.B)));
+
+			await using var ms = new MemoryStream();
+			
+			await colorImage.SaveAsPngAsync(ms);
+			ms.Position = 0;
+			
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithTitle($"Info for {role.Name} ({role.Id}):")
+				.WithImageUrl("attachment://color.png")
 				.AddField("Color:", role.Color.ToString())
 				.AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow)})")
 				.AddField("Hoisted:", role.IsHoisted.ToString())
@@ -42,7 +56,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				.AddField("Mentionable:", role.IsMentionable.ToString())
 				.AddField("Permissions:", role.Permissions.ToPermissionString())
 				.WithColor(role.Color);
-			await ctx.RespondAsync(m => m.WithEmbed(embed));
+			await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("color.png", ms));
 		}
 
 		[Command("info")]
