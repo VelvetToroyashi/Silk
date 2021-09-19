@@ -8,6 +8,7 @@
     <ItemGroup>
       <PackageReference Include="AsyncEnumerator" />
       <PackageReference Include="DSharpPlus" />
+      <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00995" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
       <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
       <PackageReference Include="Unity" />
