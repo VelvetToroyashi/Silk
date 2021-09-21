@@ -11,10 +11,7 @@ namespace Silk.Core.EventHandlers
 	public sealed class MessageRemovedHandler
 	{
 		private readonly ConfigService _cache;
-		public MessageRemovedHandler(ConfigService cache)
-		{
-			_cache = cache;
-		}
+		public MessageRemovedHandler(ConfigService cache) => _cache = cache;
 
 		public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
 		{
@@ -28,26 +25,28 @@ namespace Silk.Core.EventHandlers
 				if (!config.LogMessageChanges) return;
 				if (config.LoggingChannel is 0) return;
 
-				DiscordEmbed embed = GetEditEmbed(e, DateTime.Now);
+				DiscordEmbed embed = GetEditEmbed(e);
 				DiscordChannel channel = await c.GetChannelAsync(config.LoggingChannel);
 				await channel.SendMessageAsync(embed).ConfigureAwait(false);
 			});
 
 		}
 
-		private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e, DateTime now)
+		private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e)
 		{
 			return new DiscordEmbedBuilder()
-				.WithTitle("Message Deleted:")
+				.WithTitle("A message was deleted:")
 				.WithDescription(
-					$"User: {e.Message.Author.Mention}\n" +
-					$"Channel: {e.Channel.Mention}\n" +
-					$"Message Contents: ```\n{e.Message.Content}```")
+					$"Content: ```\n{e.Message.Content}```")
+				.AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
+				.AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
+				.AddField("\u200b", "\u200b", true)
+				.AddField("Deleted at:",  Formatter.Timestamp(DateTime.Now), true)
+				.AddField("Sent at:", Formatter.Timestamp(e.Message.Timestamp), true)
+				.AddField("\u200b", "\u200b", true)
 				.AddField("Message ID:", e.Message.Id.ToString(), true)
-				.AddField("User ID:", e.Message.Author.Id.ToString(), true)
-				.WithThumbnail(e.Message.Author.AvatarUrl)
-				.WithFooter("Message deleted at (UTC)")
-				.WithTimestamp(now.ToUniversalTime())
+				.AddField("User ID:", e.Message.Author?.Id.ToString() ?? "I wasn't around at the time. Sorry!", true)
+				.WithThumbnail(e.Message.Author?.AvatarUrl ?? string.Empty)
 				.WithColor(DiscordColor.Red);
 		}
 	}
