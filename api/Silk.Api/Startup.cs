@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Silk.Api.Data;
 using Silk.Api.Domain;
 using Silk.Api.Helpers;
@@ -82,6 +84,31 @@ namespace Silk.Api
 
 			services.AddSwaggerGen(c =>
 			{
+				
+				c.AddSecurityDefinition("Bearer", new()
+				{
+					Name = "Authorization",
+					Description = "Silk! API Access Token",
+					In = ParameterLocation.Header,
+					Type = SecuritySchemeType.Http,
+					BearerFormat = "API token",
+					Scheme = JwtBearerDefaults.AuthenticationScheme
+				});
+                
+				c.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new OpenApiSecurityScheme
+						{
+							Reference = new()
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = JwtBearerDefaults.AuthenticationScheme
+							}
+						}, new List<string>()
+					}
+				});
+				
 				c.SwaggerDoc("v1", new() { Title = "Silk.Api", Version = "v1" });
 				c.CustomSchemaIds(t => t.ToString());
 				
