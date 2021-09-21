@@ -2,10 +2,10 @@
     <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
-        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00995"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00995"/>
-        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-00995"/>
-        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00995"/>
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01003"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01003"/>
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01003"/>
+        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01003"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
 
         <PackageReference Update="Humanizer" Version="2.11.10" />
@@ -15,7 +15,7 @@
 
         <PackageReference Update="FluentAssertions" Version="6.1.0" />
 
-        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.3"/>
+        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.4"/>
 
         <PackageReference Update="MediatR" Version="9.0.0"/>
         <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
