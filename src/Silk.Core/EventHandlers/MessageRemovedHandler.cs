@@ -16,7 +16,7 @@ namespace Silk.Core.EventHandlers
 		public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
 		{
 			if (e.Message?.Author is null || e.Message is null) return; // Message isn't cached. //
-			if (e.Message.Author.IsCurrent) return; // Self-evident.                  //
+			if (e.Message.Author.IsCurrent) return; // Self-evident.                            //
 			if (e.Channel.IsPrivate) return; // Goes without saying.                           //
 			_ = Task.Run(async () =>
 			{

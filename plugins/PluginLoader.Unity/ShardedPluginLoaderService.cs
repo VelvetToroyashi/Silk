@@ -65,7 +65,7 @@ namespace PluginLoader.Unity
 					}
 					catch (DuplicateCommandException e)
 					{
-						/* Todo: LOG */
+						_logger.LogWarning("A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.Plugin.DisplayName, e.CommandName);
 						break; // Next plugin. //
 					}
 				}
@@ -75,7 +75,20 @@ namespace PluginLoader.Unity
 
 		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
 		{
-			_logger.LogTrace("Soon");
+			var cnext = await _client.GetCommandsNextAsync();
+			
+			foreach (var plugin in plugins)
+			{
+				foreach (var ext in cnext.Values)
+				{
+					try { ext.RegisterCommands(plugin.GetType().Assembly); }
+					catch (DuplicateCommandException e)
+					{
+						_logger.LogWarning("A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.DisplayName, e.CommandName);
+						break; // Load the next plugin. //
+					}
+				}
+			}
 		}
 		public async Task UnloadPluginCommandsAsync(IEnumerable<PluginManifest> plugins) { }
 	}
