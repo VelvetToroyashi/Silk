@@ -2,7 +2,7 @@
     <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
-        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01003"/>
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01004"/>
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01004"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01003"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01004"/>
