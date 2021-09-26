@@ -13,9 +13,7 @@ using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -35,10 +33,8 @@ namespace Silk.Core.Commands.Miscellaneous
 					.Select(m => m.Mention)
 					.Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (...plus {members.Count() - 5} others)" : null)}";
 
-			var colorImage = new Image<Rgba32>(600, 200);
-
-			colorImage.Mutate(m => m.Fill(Color.FromRgb(role.Color.R, role.Color.G, role.Color.B)));
-
+			var colorImage = new Image<Rgba32>(600, 200, Rgba32.ParseHex(role.Color.ToString()));
+			
 			await using var ms = new MemoryStream();
 			
 			await colorImage.SaveAsPngAsync(ms);
