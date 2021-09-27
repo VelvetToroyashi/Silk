@@ -41,6 +41,7 @@
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
         <PackageReference Include="DSharpPlus.Menus" />
+        <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01008" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Humanizer" />
