@@ -17,9 +17,11 @@ namespace RoleMenuPlugin.Database.MediatR
 			var rm = new RoleMenuModel()
 			{
 				MessageId = request.Menu.MessageId,
+				GuildId = request.Menu.GuildId,
 				Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
 				{
 					RoleId = o.RoleId,
+					GuildId = o.GuildId,
 					Description = o.Description,
 					ComponentId = o.ComponentId,
 					EmojiName = o.EmojiName

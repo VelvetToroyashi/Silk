@@ -188,7 +188,7 @@ namespace RoleMenuPlugin
 				.WithContent("**Role Menu**. Use the button below to get roles.")
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles")));
 
-			await _mediator.Send(new CreateRoleMenuRequest(new RoleMenuDto() { MessageId = msg.Id, Options = rmoOptions }));
+			await _mediator.Send(new CreateRoleMenuRequest(new RoleMenuDto() { GuildId = ctx.Guild.Id, MessageId = msg.Id, Options = rmoOptions }));
 		}
-	}
+		}
 }
