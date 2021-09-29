@@ -47,8 +47,6 @@ namespace Silk.Core
 {
 	public sealed class Startup
 	{
-		private static IUnityContainer _container;
-		
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -146,7 +144,6 @@ namespace Silk.Core
 				.UseSerilog()
 				.ConfigureContainer<IUnityContainer>((context, container) =>
 				{
-					_container = container;
 					var services = new ServiceCollection();
 					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
@@ -205,8 +202,7 @@ namespace Silk.Core
 					services.AddSingleton<MessageAddAntiInvite>();
 
 					services.AddSingleton<EventHelper>();
-
-					services.AddScoped<IInputService, InputService>();
+					
 					services.AddScoped<IPrefixCacheService, PrefixCacheService>();
 					services.AddSingleton<IInfractionService, InfractionService>();
 
