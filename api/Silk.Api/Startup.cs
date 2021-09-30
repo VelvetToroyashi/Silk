@@ -134,7 +134,6 @@ namespace Silk.Api
 			services.GetService<AuthenticationService>();
 			app.UseMiddleware<RequestLoggerMiddleware>();
 			app.UseMiddleware<InternalServerErrorWrapper>();
-			app.UseMiddleware<AuthenticationMiddleware>();
 			
 			app.UseHttpsRedirection();
 
