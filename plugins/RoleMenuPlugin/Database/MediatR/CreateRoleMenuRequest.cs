@@ -5,33 +5,36 @@ using MediatR;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-	public sealed record CreateRoleMenuRequest(RoleMenuDto Menu) : IRequest;
-	
-	public sealed class CreateRoleMenuHandler : IRequestHandler<CreateRoleMenuRequest>
+	public static class CreateRoleMenu
 	{
-		private readonly RolemenuContext _db;
-		public CreateRoleMenuHandler(RolemenuContext db) => _db = db;
-
-		public async Task<Unit> Handle(CreateRoleMenuRequest request, CancellationToken cancellationToken)
+		public sealed record Request(RoleMenuDto Menu) : IRequest;
+	
+		public sealed class Handler : IRequestHandler<Request>
 		{
-			var rm = new RoleMenuModel()
-			{
-				MessageId = request.Menu.MessageId,
-				GuildId = request.Menu.GuildId,
-				Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
-				{
-					RoleId = o.RoleId,
-					GuildId = o.GuildId,
-					Description = o.Description,
-					ComponentId = o.ComponentId,
-					EmojiName = o.EmojiName
-				}).ToList()
-			};
+			private readonly RolemenuContext _db;
+			public Handler(RolemenuContext db) => _db = db;
 
-			_db.RoleMenus.Add(rm);
-			await _db.SaveChangesAsync(cancellationToken);
+			public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
+			{
+				var rm = new RoleMenuModel()
+				{
+					MessageId = request.Menu.MessageId,
+					GuildId = request.Menu.GuildId,
+					Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
+					{
+						RoleId = o.RoleId,
+						GuildId = o.GuildId,
+						Description = o.Description,
+						ComponentId = o.ComponentId,
+						EmojiName = o.EmojiName
+					}).ToList()
+				};
+
+				_db.RoleMenus.Add(rm);
+				await _db.SaveChangesAsync(cancellationToken);
 			
-			return Unit.Value;
+				return Unit.Value;
+			}
 		}
 	}
 }

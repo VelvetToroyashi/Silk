@@ -45,7 +45,7 @@ namespace RoleMenuPlugin
 				 * TODO: Set role ids to be preselected
 				 * TODO: Send ephemeral message
 				 */
-				var menu = await _mediator.Send(new GetRoleMenuRequest(eventArgs.Message.Id));
+				var menu = await _mediator.Send(new GetRoleMenu.Request(eventArgs.Message.Id));
 				var roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
 				
 				var options = menu.Options
@@ -80,9 +80,9 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private async Task HandleDropdownAsync(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
+		private async Task HandleDropdownAsync(DiscordClient _, ComponentInteractionCreateEventArgs eventArgs)
 		{
-			var config = await _mediator.Send(new GetRoleMenuRequest(ulong.Parse(eventArgs.Id)));
+			var config = await _mediator.Send(new GetRoleMenu.Request(ulong.Parse(eventArgs.Id)));
 
 			var member = (DiscordMember)eventArgs.User;
 			
@@ -159,10 +159,6 @@ namespace RoleMenuPlugin
 			=> eventArgsGuild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles);
 
 		private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role)
-		{
-			role = guild.GetRole(id);
-
-			return role is not null;
-		}
+			=> (role = guild.GetRole(id)) is not null;
 	}
 }

@@ -31,6 +31,7 @@ namespace RoleMenuPlugin.Database
 
 	public sealed record RoleMenuOptionDto
 	{
+		public string RoleName { get; init; }
 		public ulong RoleId { get; init; }
 		public ulong GuildId { get; init; }
 		public ulong MessageId { get; init; }

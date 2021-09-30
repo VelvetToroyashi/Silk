@@ -31,7 +31,7 @@ namespace RoleMenuPlugin
 		private readonly DiscordButtonComponent _quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
 		private readonly DiscordButtonComponent _finishButton = new(ButtonStyle.Success, "rm-finish", "Finish", true);
 			
-		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit an existing role-menu");
+		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit the current options");
 		private readonly DiscordButtonComponent _addFullButton = new(ButtonStyle.Primary, "rm-add-full", "Add option (full)");
 		private readonly DiscordButtonComponent _addRoleOnlyButton = new(ButtonStyle.Secondary, "rm-add", "Add option (role only)");
 		
@@ -87,11 +87,66 @@ namespace RoleMenuPlugin
 				{
 					"rm-add-full" => AddFull(),
 					"rm-add" => AddRoleOnly(),
-					"rm-edit" => selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Coming soon:tm:", IsEphemeral = true}),
+					"rm-edit" => Edit(),
 					_ => Task.CompletedTask,
 				};
 
 				await task;
+
+				async Task Edit()
+				{
+					if (!rmoOptions.Any())
+					{
+						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "You don't have any options yet!" });
+						return;
+					}
+
+					var options = new List<DiscordSelectComponentOption>();
+
+					for (var i = 0; i < rmoOptions.Count; i++)
+					{
+						var opt = rmoOptions[i];
+						options.Add(new(opt.RoleName, i.ToString(), opt.Description));
+					}
+
+					var dropdown = new DiscordSelectComponent("rm-edit", null, options);
+					
+					message = await selection.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+						.WithContent("Please select the role you'd like to edit.")
+						.AddComponents(dropdown));
+
+					selection = await interactivity.WaitForSelectAsync(message, c => c.Id == "rm-edit" && c.User == ctx.User, CancellationToken.None);
+
+					var index = int.Parse(selection.Result.Values[0]);
+					var option = rmoOptions[index];
+					
+					var removeButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-remove-option", "Remove this role");
+					
+					var descriptionButton = new DiscordButtonComponent(
+						style: option.Description is null ? ButtonStyle.Primary : ButtonStyle.Success,
+						customId: "rm-edit-option-description",
+						label: option.Description is null ? "Add a description" : "Change the description");
+
+					var emojiButton = new DiscordButtonComponent(
+						style: option.EmojiName is null ? ButtonStyle.Primary : ButtonStyle.Success,
+						customId: "rm-edit-option-emoji",
+						label: option.EmojiName is null ? "Add an emoji" : "Change the emoji on this option");
+					
+					var roleButton = new DiscordButtonComponent(ButtonStyle.Primary, "rm-edit-option-role", "Swap this role");
+
+					var cancelButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-cancel", "Cancel");
+
+
+					await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+						.WithContent("What would you like to do?")
+						.AddComponents(removeButton, descriptionButton, emojiButton, roleButton, cancelButton));
+
+					message = await selection.Result.Interaction.GetOriginalResponseAsync();
+
+					selection = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
+					
+					
+				}
 
 				async Task AddFull()
 				{
@@ -100,7 +155,7 @@ namespace RoleMenuPlugin
 					//Role
 					await message.ModifyAsync(m => m.WithContent("Role:"));
 					var role = await interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.MentionedRoles.Count > 0);
-					option = option with { RoleId = role.Result.MentionedRoles[0].Id };
+					option = option with { RoleName = role.Result.MentionedRoles[0].Name, RoleId = role.Result.MentionedRoles[0].Id };
 					await role.Result.DeleteAsync();
 					
 					//Emoji
@@ -178,7 +233,7 @@ namespace RoleMenuPlugin
 						roles = roles.Except(roles.TakeLast(totalCount - 25));
 					}
 					
-					rmoOptions.AddRange(roles.Select(r => new RoleMenuOptionDto() { RoleId = r.Id }));
+					rmoOptions.AddRange(roles.Select(r => new RoleMenuOptionDto() { RoleName = r.Name, RoleId = r.Id }));
 
 					await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done.", IsEphemeral = true });
 				}
@@ -188,7 +243,7 @@ namespace RoleMenuPlugin
 				.WithContent("**Role Menu**. Use the button below to get roles.")
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles")));
 
-			await _mediator.Send(new CreateRoleMenuRequest(new RoleMenuDto() { GuildId = ctx.Guild.Id, MessageId = msg.Id, Options = rmoOptions }));
+			await _mediator.Send(new CreateRoleMenu.Request(new RoleMenuDto() { GuildId = ctx.Guild.Id, MessageId = msg.Id, Options = rmoOptions }));
 		}
-		}
+	}
 }
