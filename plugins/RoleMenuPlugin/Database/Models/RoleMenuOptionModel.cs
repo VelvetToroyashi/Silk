@@ -10,7 +10,7 @@ namespace RoleMenuPlugin.Database
 		[Column("RMO_FK")]
 		public ulong RoleMenuId { get; set; }
 		
-		[Column("RMO_MessageId")]
+		[Column("RMO_GuildId")]
 		public ulong GuildId { get; set; }
 		
 		[Column("RMO_RoleId")]
