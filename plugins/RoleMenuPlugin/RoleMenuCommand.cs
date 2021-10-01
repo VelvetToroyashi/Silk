@@ -182,7 +182,7 @@ namespace RoleMenuPlugin
 
 						await Task.WhenAny(msgInput, btnInput);
 
-						if (btnInput.IsCompleted)
+						if (!btnInput.IsCompleted)
 						{
 							cts.Cancel();
 
