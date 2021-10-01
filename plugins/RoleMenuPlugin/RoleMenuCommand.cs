@@ -136,7 +136,6 @@ namespace RoleMenuPlugin
 
 					var cancelButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-cancel", "Cancel");
 
-
 					await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
 						.WithContent("What would you like to do?")
 						.AddComponents(removeButton, descriptionButton, emojiButton, roleButton, cancelButton));
@@ -144,8 +143,101 @@ namespace RoleMenuPlugin
 					message = await selection.Result.Interaction.GetOriginalResponseAsync();
 
 					selection = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
+
+					if (selection.Result.Values[0] == "rm-cancel")
+						return;
+
+					var task = selection.Result.Values[0] switch
+					{
+						"rm-remove-option" => RemoveRoleMenuOptionAsync(),
+						"rm-edit-option-description" => AskForDescriptionAsync(),
+						"rm-edit-option-emoji" => AskForEmojiAsync(),
+						"rm-edit-option-role" => AskForRoleAsync(),
+						_ => Task.CompletedTask
+					};
+
+					await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 					
+					await task;
+
+
+					async Task RemoveRoleMenuOptionAsync()
+					{
+						rmoOptions.Remove(option);
+
+						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Success.", IsEphemeral = true });
+					}
+
+					async Task AskForDescriptionAsync()
+					{
+						var descInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+							.WithContent("What's the description of this role? (Cut off at 100 characters!)")
+							.AsEphemeral(true)
+							.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
+
+						using var cts = new CancellationTokenSource();
+						
+						var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
+						var btnInput = interactivity.WaitForButtonAsync(descInput, ctx.User, cts.Token);
+
+						await Task.WhenAny(msgInput, btnInput);
+
+						if (!btnInput.IsCompleted)
+						{
+							cts.Cancel();
+
+							var description = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
+
+							if (description.Length > 100)
+								description = description[..100].TrimEnd();
+							option = option with { Description = description };
+
+
+							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done!", IsEphemeral = true });
+						}
+					}
+
+				async Task AskForEmojiAsync()
+				{
+					var emojiInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+						.WithContent("What emoji will go with this option? It can be any emoji. \n" +
+						             "Please provide a custom or unicode emoji.\n" +
+						             "Example: \\<\\:catdrool\\:786419793811996673\\>, :smile:\n" +
+						             "To avoid copying the *message* Id, you may want to put a backslash (\\\\) in front of the emoji, if it's a custom emoji.")
+						.AsEphemeral(true)
+						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
+
+					using var cts = new CancellationTokenSource();
 					
+					Wait:
+					var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
+					var btnInput = interactivity.WaitForButtonAsync(emojiInput, ctx.User, cts.Token);
+
+					await Task.WhenAny(msgInput, btnInput);
+
+					if (!btnInput.IsCompleted)
+					{
+						cts.Cancel();
+
+						var emoji = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
+
+						var parser = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
+
+						var parseResult = await parser.ConvertAsync(emoji, ctx);
+
+						if (!parseResult.HasValue)
+						{
+							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "That doesn't appear to be an emoji! Try again!", IsEphemeral = true });
+							goto Wait;
+						}
+
+						option = option with { EmojiName = parseResult.Value.ToString() };
+
+						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done!", IsEphemeral = true });
+					}
+				}
+					
+					async Task AskForRoleAsync() {}
 				}
 
 				async Task AddFull()
@@ -233,7 +325,8 @@ namespace RoleMenuPlugin
 						roles = roles.Except(roles.TakeLast(totalCount - 25));
 					}
 					
-					rmoOptions.AddRange(roles.Select(r => new RoleMenuOptionDto() { RoleName = r.Name, RoleId = r.Id }));
+					rmoOptions.AddRange(roles.Select(r => new RoleMenuOptionDto
+						{ RoleName = r.Name, RoleId = r.Id }));
 
 					await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done.", IsEphemeral = true });
 				}
@@ -243,7 +336,8 @@ namespace RoleMenuPlugin
 				.WithContent("**Role Menu**. Use the button below to get roles.")
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get roles")));
 
-			await _mediator.Send(new CreateRoleMenu.Request(new RoleMenuDto() { GuildId = ctx.Guild.Id, MessageId = msg.Id, Options = rmoOptions }));
+			await _mediator.Send(new CreateRoleMenu.Request(new RoleMenuDto
+				{ GuildId = ctx.Guild.Id, MessageId = msg.Id, Options = rmoOptions }));
 		}
 	}
 }
