@@ -9,8 +9,8 @@ using RoleMenuPlugin.Database;
 namespace RoleMenuPlugin.Migrations
 {
     [DbContext(typeof(RolemenuContext))]
-    [Migration("20210929170023_GuildColumns")]
-    partial class GuildColumns
+    [Migration("20211001133437_GuildIdColumns")]
+    partial class GuildIdColumns
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,12 +24,10 @@ namespace RoleMenuPlugin.Migrations
                 {
                     b.Property<decimal>("MessageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RM_MessageId");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RM_GuildId");
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("MessageId");
 
@@ -41,38 +39,28 @@ namespace RoleMenuPlugin.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("RMO_Id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ComponentId")
-                        .HasColumnType("text")
-                        .HasColumnName("RMO_ComponentId");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("RMO_Description");
+                        .HasColumnType("text");
 
                     b.Property<string>("EmojiName")
-                        .HasColumnType("text")
-                        .HasColumnName("RMO_Emoji");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("GuildId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RMO_GuildId");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("MessageId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RMO_MessageId");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("RoleId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RMO_RoleId");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("RoleMenuId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RMO_FK");
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("RoleMenuModelMessageId")
                         .HasColumnType("numeric(20,0)");

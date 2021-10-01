@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoleMenuPlugin.Database
 {
@@ -10,10 +9,7 @@ namespace RoleMenuPlugin.Database
 	public sealed class RoleMenuModel
 	{
 		[Key]
-		[Column("RM_MessageId")]
 		public ulong MessageId { get; set; }
-		
-		[Column("RM_GuildId")]
 		public ulong GuildId { get; set; }
 		
 		public List<RoleMenuOptionModel> Options { get; set; }
