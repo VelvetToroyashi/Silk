@@ -147,7 +147,7 @@ namespace RoleMenuPlugin
 					if (selection.Result.Id == "rm-cancel")
 						return;
 
-					var task = selection.Result.Values[0] switch
+					var task = selection.Result.Id switch
 					{
 						"rm-remove-option" => RemoveRoleMenuOptionAsync(),
 						"rm-edit-option-description" => AskForDescriptionAsync(),
