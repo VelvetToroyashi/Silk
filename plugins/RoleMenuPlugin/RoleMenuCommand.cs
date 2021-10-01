@@ -144,7 +144,7 @@ namespace RoleMenuPlugin
 
 					selection = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
 
-					if (selection.Result.Values[0] == "rm-cancel")
+					if (selection.Result.Id == "rm-cancel")
 						return;
 
 					var task = selection.Result.Values[0] switch
