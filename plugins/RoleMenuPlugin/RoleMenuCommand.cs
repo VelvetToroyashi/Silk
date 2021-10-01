@@ -177,12 +177,12 @@ namespace RoleMenuPlugin
 
 						using var cts = new CancellationTokenSource();
 						
-						var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
+						var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User, TimeSpan.FromMinutes(2));
 						var btnInput = interactivity.WaitForButtonAsync(descInput, ctx.User, cts.Token);
 
 						await Task.WhenAny(msgInput, btnInput);
 
-						if (!btnInput.IsCompleted)
+						if (btnInput.IsCompleted)
 						{
 							cts.Cancel();
 
