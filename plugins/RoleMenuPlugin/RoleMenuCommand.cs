@@ -202,14 +202,13 @@ namespace RoleMenuPlugin
 					var emojiInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 						.WithContent("What emoji will go with this option? It can be any emoji. \n" +
 						             "Please provide a custom or unicode emoji.\n" +
-						             "Example: \\<\\:catdrool\\:786419793811996673\\>, :smile:\n" +
-						             "To avoid copying the *message* Id, you may want to put a backslash (\\\\) in front of the emoji, if it's a custom emoji.")
+						             "Example: <:catdrool:786419793811996673> OR :smile:")
 						.AsEphemeral(true)
 						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
 
-					using var cts = new CancellationTokenSource();
-					
 					Wait:
+					var cts = new CancellationTokenSource();
+					
 					var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
 					var btnInput = interactivity.WaitForButtonAsync(emojiInput, ctx.User, cts.Token);
 
@@ -236,8 +235,9 @@ namespace RoleMenuPlugin
 						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done!", IsEphemeral = true });
 					}
 				}
-					
-					async Task AskForRoleAsync() {}
+				
+				async Task AskForRoleAsync() {} 
+				
 				}
 
 				async Task AddFull()
