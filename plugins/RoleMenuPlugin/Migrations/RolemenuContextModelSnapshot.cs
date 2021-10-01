@@ -57,7 +57,7 @@ namespace RoleMenuPlugin.Migrations
                     b.Property<decimal>("GuildId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("numeric(20,0)")
-                        .HasColumnName("RMO_MessageId");
+                        .HasColumnName("RMO_GuildId");
 
                     b.Property<decimal>("MessageId")
                         .ValueGeneratedOnUpdateSometimes()
