@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+        <PackageReference Include="AsyncEnumerator" />
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
         <PackageReference Include="Config.Net" Version="4.17.0" />
@@ -41,11 +41,10 @@
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
         <PackageReference Include="DSharpPlus.Menus" />
-        <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01008" />
+        <PackageReference Include="DSharpPlus.SlashCommands" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Humanizer" />
-        <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
         <PackageReference Include="MediatR" />
