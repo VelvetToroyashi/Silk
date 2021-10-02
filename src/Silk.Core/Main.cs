@@ -19,6 +19,7 @@ using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions.DSharpPlus;
+using Silk.Shared.Constants;
 
 namespace Silk.Core
 {
@@ -54,36 +55,36 @@ namespace Silk.Core
 
 		public async Task StartAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Starting Service");
+			_logger.LogInformation(EventIds.Core, "Starting Service");
 
 			await InitializeClientExtensions();
-			_logger.LogInformation("Initialized Client");
+			_logger.LogInformation(EventIds.Core, "Initialized Client");
 
 			await _plugins.LoadPluginsAsync();
 			
 			await InitializeCommandsNextAsync();
 			await InitializeSlashCommandsAsync();
 
-			
 			await _handler.SubscribeToEventsAsync();
 			
-			_logger.LogDebug("Connecting to Discord Gateway");
+			_logger.LogDebug(EventIds.Core, "Connecting to Discord Gateway");
 			await _shardClient.StartAsync();
-			_logger.LogInformation("Connected to Discord Gateway as {Username}#{Discriminator}", _shardClient.CurrentUser.Username, _shardClient.CurrentUser.Discriminator);
-
+			_logger.LogInformation(EventIds.Core, "Connected to Discord Gateway as {User}", _shardClient.CurrentUser.ToDiscordName());
+			
+			
 		}
 
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Stopping Service");
-			_logger.LogDebug("Disconnecting from Discord Gateway");
+			_logger.LogInformation(EventIds.Core, "Stopping Service");
+			_logger.LogDebug(EventIds.Core, "Disconnecting from Discord Gateway");
 			await _shardClient.StopAsync();
-			_logger.LogInformation("Disconnected from Discord Gateway");
+			_logger.LogInformation(EventIds.Core, "Disconnected from Discord Gateway");
 		}
 
 		private async Task InitializeClientExtensions()
 		{
-			_logger.LogDebug("Initializing Client");
+			_logger.LogDebug(EventIds.Core, "Initializing Client");
 
 			await _shardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
 			await _shardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
@@ -93,7 +94,7 @@ namespace Silk.Core
 
 		private Task InitializeSlashCommandsAsync()
 		{
-			_logger.LogInformation("Initializing Slash-Commands");
+			_logger.LogInformation(EventIds.Core, "Initializing Slash-Commands");
 			SlashCommandsExtension? sc = _shardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
 			sc.SlashCommandErrored += _slashExceptionHandler.Handle;
 			sc.RegisterCommands<RemindCommands>();
@@ -105,7 +106,7 @@ namespace Silk.Core
 
 		private async Task InitializeCommandsNextAsync()
 		{
-			_logger.LogInformation("Initializing Command Framework");
+			_logger.LogInformation(EventIds.Core, "Initializing Command Framework");
 
 			var t = Stopwatch.StartNew();
 			var asm = Assembly.GetEntryAssembly();
@@ -123,10 +124,10 @@ namespace Silk.Core
 			t.Stop();
 			int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
 
-			_logger.LogDebug("Registered {Commands} core commands for {Shards} shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
+			_logger.LogDebug(EventIds.Core, "Registered {Commands} core commands for {Shards} shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
 
 			await _plugins.RegisterPluginCommandsAsync();
-			_logger.LogInformation("Initialized Command Framework");
+			_logger.LogInformation(EventIds.Core, "Initialized Command Framework");
 		}
 	}
 }

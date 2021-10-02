@@ -42,11 +42,11 @@ namespace PluginLoader.Unity
 				try
 				{
 					await plugin.Plugin.LoadAsync();
-					_logger.LogInformation("Loaded {Plugin} v{Version}", plugin.Plugin.DisplayName, plugin.Plugin.Version);
+					_logger.LogInformation(Events.Plugin, "Loaded {Plugin} v{Version}", plugin.Plugin.DisplayName, plugin.Plugin.Version);
 				}
 				catch (Exception e)
 				{
-					_logger.LogWarning(e, "Plugin {Plugin} v{Version} failed to load.", plugin.Plugin.DisplayName, plugin.Plugin.Version);
+					_logger.LogWarning(Events.Plugin, e, "Plugin {Plugin} v{Version} failed to load.", plugin.Plugin.DisplayName, plugin.Plugin.Version);
 				}
 			}
 		}
@@ -65,7 +65,7 @@ namespace PluginLoader.Unity
 					}
 					catch (DuplicateCommandException e)
 					{
-						_logger.LogWarning("A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.Plugin.DisplayName, e.CommandName);
+						_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.Plugin.DisplayName, e.CommandName);
 						break; // Next plugin. //
 					}
 				}
@@ -84,7 +84,7 @@ namespace PluginLoader.Unity
 					try { ext.RegisterCommands(plugin.GetType().Assembly); }
 					catch (DuplicateCommandException e)
 					{
-						_logger.LogWarning("A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.DisplayName, e.CommandName);
+						_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.DisplayName, e.CommandName);
 						break; // Load the next plugin. //
 					}
 				}

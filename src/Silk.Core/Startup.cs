@@ -18,6 +18,7 @@ using PluginLoader.Unity;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Serilog.Templates;
 using Silk.Core.AutoMod;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
@@ -117,7 +118,8 @@ namespace Silk.Core
 		private static void AddLogging(HostBuilderContext host)
 		{
 			LoggerConfiguration? logger = new LoggerConfiguration()
-				.WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
+				.Enrich.FromLogContext()
+				.WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
 				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
 				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);

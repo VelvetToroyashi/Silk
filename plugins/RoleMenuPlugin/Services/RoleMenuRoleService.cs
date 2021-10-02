@@ -25,11 +25,11 @@ namespace RoleMenuPlugin
 
 		public Task Handle(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
-			HandleInternal(client, eventArgs);
+			_ = HandleInternal(client, eventArgs);
 			return Task.CompletedTask;
 		}
 		
-		private async void HandleInternal(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
+		private async Task HandleInternal(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
 			await Task.Yield(); // Yield so we return from the event handler ASAP //
 			
