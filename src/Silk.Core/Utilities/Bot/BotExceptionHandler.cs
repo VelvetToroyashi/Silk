@@ -13,6 +13,7 @@ using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Extensions;
+using Silk.Shared.Constants;
 using YumeChan.PluginBase.Infrastructure;
 
 namespace Silk.Core.Utilities.Bot
@@ -79,14 +80,14 @@ namespace Silk.Core.Utilities.Bot
 		private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
 		{
 			if (e.Exception.Message.Contains("event"))
-				_logger.LogWarning("[{Event}] Timed out!", e.EventName);
+				_logger.LogWarning(EventIds.EventHandler, "[{Event}] Timed out!", e.EventName);
 			else
-				_logger.LogWarning(e.Exception, "Client threw an exception!");
+				_logger.LogWarning(EventIds.EventHandler, e.Exception, "Client threw an exception!");
 		}
 		private async Task OnSocketErrored(DiscordClient c, SocketCloseEventArgs e)
 		{
 			if (e.CloseCode is 4014)
-				_logger.LogCritical("Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
+				_logger.LogCritical(EventIds.Core, "Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
 		}
 
 		private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
@@ -98,14 +99,14 @@ namespace Silk.Core.Utilities.Bot
 		}
 		public async Task SubscribeToEventsAsync()
 		{
-			_logger.LogInformation("Hooking task and command exception events");
-			TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
+			_logger.LogInformation(EventIds.EventHandler, "Hooking task and command exception events");
+			TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError(EventIds.EventHandler, "Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
 
 			IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
 
 			foreach (CommandsNextExtension? c in commandsNext)
 				c!.CommandErrored += OnCommandErrored;
-			_logger.LogDebug("Registered command exception-handler for {Shards} shard(s)", commandsNext.Count());
+			_logger.LogDebug(EventIds.EventHandler, "Registered command exception-handler for {Shards} shard(s)", commandsNext.Count());
 		}
 	}
 }

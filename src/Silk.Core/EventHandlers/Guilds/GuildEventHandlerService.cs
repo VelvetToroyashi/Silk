@@ -10,9 +10,9 @@ using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Entities;
 using Silk.Core.Utilities;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
@@ -69,7 +69,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		internal async Task JoinedGuild(GuildCreateEventArgs args)
 		{
-			_logger.LogInformation("Joined new guild! {GuildName} | {GuildMemberCount} members", args.Guild.Name, args.Guild.MemberCount);
+			_logger.LogInformation(EventIds.Service, "Joined new guild! {GuildName} | {GuildMemberCount} members", args.Guild.Name, args.Guild.MemberCount);
 
 			DiscordMember? bot = args.Guild.CurrentMember;
 
@@ -106,14 +106,14 @@ namespace Silk.Core.EventHandlers.Guilds
 			if (members is 0)
 			{
 				message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]";
-				_logger.LogDebug(message, shardId + 1,
+				_logger.LogDebug(EventIds.Service, message, shardId + 1,
 					_client.ShardClients.Count,
 					_guilds[shardId], _client.ShardClients[shardId].Guilds.Count);
 			}
 			else
 			{
 				message = "Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
-				_logger.LogDebug(message, shardId + 1,
+				_logger.LogDebug(EventIds.Service, message, shardId + 1,
 					_client.ShardClients.Count,
 					_guilds[shardId], _client.ShardClients[shardId].Guilds.Count,
 					members, totalMembers);
@@ -132,7 +132,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 			if (_cachedAllInitialGuilds && !_logged)
 			{
-				_logger.LogInformation("Finished caching {Guilds} guilds for {Shards} shards in {Time:N1} ms!",
+				_logger.LogInformation(EventIds.Service, "Finished caching {Guilds} guilds for {Shards} shards in {Time:N1} ms!",
 					_client.ShardClients.Values.SelectMany(s => s.Guilds).Count(),
 					_client.ShardClients.Count, (DateTime.Now - _startTime).Value.TotalMilliseconds);
 				_logged = true;

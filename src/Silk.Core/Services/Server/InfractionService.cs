@@ -12,14 +12,15 @@ using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Infractions;
-using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Server
 {
@@ -715,11 +716,11 @@ namespace Silk.Core.Services.Server
 		}
 		public async Task StartAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Started!");
+			_logger.LogInformation(EventIds.Service, "Started!");
 			DateTime now = DateTime.UtcNow;
 			await Task.Yield();
 
-			_logger.LogInformation("Loading infractions");
+			_logger.LogInformation(EventIds.Service, "Loading infractions");
 			Task<IEnumerable<InfractionDTO>>? infractionsTask = _mediator.Send(new GetCurrentInfractionsRequest(), cancellationToken);
 			Task? delayTask = Task.Delay(200, cancellationToken);
 
@@ -729,7 +730,7 @@ namespace Silk.Core.Services.Server
 			}
 			else
 			{
-				_logger.LogWarning("Slow load for infractions. Offloading to ThreadPool.");
+				_logger.LogWarning(EventIds.Service, "Slow load for infractions. Offloading to ThreadPool.");
 				_ = Task.Run(async () => await LoadAndCacheInfractionsAsync(), cancellationToken);
 			}
 
@@ -743,7 +744,7 @@ namespace Silk.Core.Services.Server
 					_infractions.Add(infraction);
 				}
 				TimeSpan tsNow = DateTime.UtcNow - now;
-				_logger.LogInformation("Loaded {Infractions} infractions in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
+				_logger.LogInformation(EventIds.Service, "Loaded {Infractions} infractions in {Time} ms", allInfractions.Count(), tsNow.TotalMilliseconds.ToString("N0"));
 				_timer.Start();
 			}
 		}

@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.CommandInvocations;
 using Silk.Core.Services.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Messages
 {
@@ -50,7 +51,7 @@ namespace Silk.Core.EventHandlers.Messages
 
 			if (command is null)
 			{
-				_logger.LogWarning("Could not find command. Message: {Message}", args.Message.Content);
+				_logger.LogWarning(EventIds.Service, "Could not find command. Message: {Message}", args.Message.Content);
 				return;
 			}
 

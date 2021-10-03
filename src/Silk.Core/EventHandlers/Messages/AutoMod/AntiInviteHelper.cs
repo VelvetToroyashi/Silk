@@ -6,8 +6,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Services.Interfaces;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
@@ -94,12 +94,12 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 				else
 				{
 					blacklisted = false;
-					_logger.LogTrace("Matched invite points to current guild; skipping");
+					_logger.LogTrace(EventIds.AutoMod, "Matched invite points to current guild; skipping");
 				}
 			}
 			catch (NotFoundException) // Discord throws 404 if you ask for an invalid invite. i.e. Garbage behind a legit code. //
 			{
-				_logger.LogTrace("Matched invalid or corrupt invite");
+				_logger.LogTrace(EventIds.AutoMod, "Matched invalid or corrupt invite");
 			}
 			return blacklisted;
 		}

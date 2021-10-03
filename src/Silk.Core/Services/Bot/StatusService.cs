@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Shared.Constants;
 using Silk.Shared.Types.Collections;
 
 namespace Silk.Core.Services.Bot
@@ -51,7 +52,7 @@ namespace Silk.Core.Services.Bot
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			_logger.LogInformation("Started!");
+			_logger.LogInformation(EventIds.Service, "Started!");
 
 			try
 			{
@@ -67,7 +68,7 @@ namespace Silk.Core.Services.Bot
 			catch (TaskCanceledException) { }
 			finally
 			{
-				_logger.LogDebug("Cancelation requested. Stopping service.");
+				_logger.LogDebug(EventIds.Service, "Cancelation requested. Stopping service.");
 			}
 		}
 	}
