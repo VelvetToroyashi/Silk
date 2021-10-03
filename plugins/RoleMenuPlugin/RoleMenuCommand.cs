@@ -93,72 +93,72 @@ namespace RoleMenuPlugin
 
 				await task;
 
-				async Task Edit()
+			async Task Edit()
+			{
+				if (!rmoOptions.Any())
 				{
-					if (!rmoOptions.Any())
-					{
-						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "You don't have any options yet!" });
-						return;
-					}
+					await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "You don't have any options yet!" });
+					return;
+				}
 
-					var options = new List<DiscordSelectComponentOption>();
+				var options = new List<DiscordSelectComponentOption>();
 
-					for (var i = 0; i < rmoOptions.Count; i++)
-					{
-						var opt = rmoOptions[i];
-						options.Add(new(opt.RoleName, i.ToString(), opt.Description));
-					}
+				for (var i = 0; i < rmoOptions.Count; i++)
+				{
+					var opt = rmoOptions[i];
+					options.Add(new(opt.RoleName, i.ToString(), opt.Description));
+				}
 
-					var dropdown = new DiscordSelectComponent("rm-edit", null, options);
-					
-					message = await selection.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-						.WithContent("Please select the role you'd like to edit.")
-						.AddComponents(dropdown));
+				var dropdown = new DiscordSelectComponent("rm-edit", null, options);
+				
+				message = await selection.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+					.WithContent("Please select the role you'd like to edit.")
+					.AddComponents(dropdown));
 
-					selection = await interactivity.WaitForSelectAsync(message, c => c.Id == "rm-edit" && c.User == ctx.User, CancellationToken.None);
+				selection = await interactivity.WaitForSelectAsync(message, c => c.Id == "rm-edit" && c.User == ctx.User, CancellationToken.None);
 
-					var index = int.Parse(selection.Result.Values[0]);
-					var option = rmoOptions[index];
-					
-					var removeButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-remove-option", "Remove this role");
-					
-					var descriptionButton = new DiscordButtonComponent(
-						style: option.Description is null ? ButtonStyle.Primary : ButtonStyle.Success,
-						customId: "rm-edit-option-description",
-						label: option.Description is null ? "Add a description" : "Change the description");
+				var index = int.Parse(selection.Result.Values[0]);
+				var option = rmoOptions[index];
+				
+				var removeButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-remove-option", "Remove this role");
+				
+				var descriptionButton = new DiscordButtonComponent(
+					style: option.Description is null ? ButtonStyle.Primary : ButtonStyle.Success,
+					customId: "rm-edit-option-description",
+					label: option.Description is null ? "Add a description" : "Change the description");
 
-					var emojiButton = new DiscordButtonComponent(
-						style: option.EmojiName is null ? ButtonStyle.Primary : ButtonStyle.Success,
-						customId: "rm-edit-option-emoji",
-						label: option.EmojiName is null ? "Add an emoji" : "Change the emoji on this option");
-					
-					var roleButton = new DiscordButtonComponent(ButtonStyle.Primary, "rm-edit-option-role", "Swap this role");
+				var emojiButton = new DiscordButtonComponent(
+					style: option.EmojiName is null ? ButtonStyle.Primary : ButtonStyle.Success,
+					customId: "rm-edit-option-emoji",
+					label: option.EmojiName is null ? "Add an emoji" : "Change the emoji on this option");
+				
+				var roleButton = new DiscordButtonComponent(ButtonStyle.Primary, "rm-edit-option-role", "Swap this role");
 
-					var cancelButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-cancel", "Cancel");
+				var cancelButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-cancel", "Cancel");
 
-					await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-						.WithContent("What would you like to do?")
-						.AddComponents(removeButton, descriptionButton, emojiButton, roleButton, cancelButton));
+				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+					.WithContent("What would you like to do?")
+					.AddComponents(removeButton, descriptionButton, emojiButton, roleButton, cancelButton));
 
-					message = await selection.Result.Interaction.GetOriginalResponseAsync();
+				message = await selection.Result.Interaction.GetOriginalResponseAsync();
 
-					selection = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
+				selection = await interactivity.WaitForButtonAsync(message, ctx.User, CancellationToken.None);
 
-					if (selection.Result.Id == "rm-cancel")
-						return;
+				if (selection.Result.Id == "rm-cancel")
+					return;
 
-					var task = selection.Result.Id switch
-					{
-						"rm-remove-option" => RemoveRoleMenuOptionAsync(),
-						"rm-edit-option-description" => AskForDescriptionAsync(),
-						"rm-edit-option-emoji" => AskForEmojiAsync(),
-						"rm-edit-option-role" => AskForRoleAsync(),
-						_ => Task.CompletedTask
-					};
+				var task = selection.Result.Id switch
+				{
+					"rm-remove-option" => RemoveRoleMenuOptionAsync(),
+					"rm-edit-option-description" => AskForDescriptionAsync(),
+					"rm-edit-option-emoji" => AskForEmojiAsync(),
+					"rm-edit-option-role" => AskForRoleAsync(),
+					_ => Task.CompletedTask
+				};
 
-					await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-					
-					await task;
+				await selection.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				
+				await task;
 
 
 					async Task RemoveRoleMenuOptionAsync()
@@ -175,25 +175,39 @@ namespace RoleMenuPlugin
 							.AsEphemeral(true)
 							.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
 
-						using var cts = new CancellationTokenSource();
+						using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(14));
 						
-						var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User, TimeSpan.FromMinutes(2));
+						Wait:
+						var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User, TimeSpan.FromMinutes(5));
 						var btnInput = interactivity.WaitForButtonAsync(descInput, ctx.User, cts.Token);
 
 						await Task.WhenAny(msgInput, btnInput);
 
-						if (!btnInput.IsCompleted)
+						if (!btnInput.IsCompleted && msgInput.IsCompleted)
 						{
-							cts.Cancel();
+							var confirmation = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+								.WithContent("Are you sure?")
+								.AsEphemeral(true)
+								.AddComponents(new DiscordButtonComponent(ButtonStyle.Success, "rm-agree", "Yes"), new DiscordButtonComponent(ButtonStyle.Danger, "rm-decline", "No")));
 
+							var confirmed = await interactivity.WaitForButtonAsync(confirmation, ctx.User, cts.Token);
+
+							if (confirmed.TimedOut)
+								return;
+							
+							if (confirmed.Result.Id == "rm-decline")
+								goto Wait;
+
+							cts.Cancel();
 							var description = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
 
 							if (description.Length > 100)
 								description = description[..100].TrimEnd();
 							option = option with { Description = description };
 
+							rmoOptions[index] = option;
 
-							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done!", IsEphemeral = true });
+							await selection.Result.Interaction.EditFollowupMessageAsync(descInput.Id, new() { Content = "Success!" });
 						}
 					}
 
@@ -205,10 +219,10 @@ namespace RoleMenuPlugin
 						             "Example: <:catdrool:786419793811996673> OR :smile:")
 						.AsEphemeral(true)
 						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
-
-					Wait:
-					var cts = new CancellationTokenSource();
 					
+					var cts = new CancellationTokenSource(TimeSpan.FromMinutes(14)); // Cut it short to account for elapsed time. //
+					
+					Wait:
 					var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User);
 					var btnInput = interactivity.WaitForButtonAsync(emojiInput, ctx.User, cts.Token);
 
@@ -216,8 +230,6 @@ namespace RoleMenuPlugin
 
 					if (!btnInput.IsCompleted)
 					{
-						cts.Cancel();
-
 						var emoji = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
 
 						var parser = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
@@ -229,16 +241,50 @@ namespace RoleMenuPlugin
 							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "That doesn't appear to be an emoji! Try again!", IsEphemeral = true });
 							goto Wait;
 						}
-
+						
+						cts.Cancel();
 						option = option with { EmojiName = parseResult.Value.ToString() };
 
-						await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "Done!", IsEphemeral = true });
+						rmoOptions[index] = option;
+
+						await selection.Result.Interaction.EditFollowupMessageAsync(emojiInput.Id, new() { Content = "Success!" });
 					}
 				}
-				
-				async Task AskForRoleAsync() {} 
-				
+
+				async Task AskForRoleAsync()
+				{
+					var roleInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+						.WithContent("What role would you like to add?")
+						.AsEphemeral(true)
+						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Quit")));
+					
+					var cts = new CancellationTokenSource(TimeSpan.FromMinutes(14)); // Cut it short to account for elapsed time. //
+					
+					Wait:
+					var msgInput = interactivity.WaitForMessageAsync(m => m.Author == ctx.User && m.MentionedRoles.Any());
+					var btnInput = interactivity.WaitForButtonAsync(roleInput, ctx.User, cts.Token);
+
+					await Task.WhenAny(msgInput, btnInput);
+
+					if (!btnInput.IsCompleted)
+					{
+						var role = msgInput.Result.Result.MentionedRoles[0];
+
+						if (role.Id == option.RoleId)
+						{
+							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "That's the same role! You have to use a different one.", IsEphemeral = true });
+							goto Wait;
+						}
+						
+						cts.Cancel();
+						option = option with { RoleId = role.Id, RoleName = role.Name };
+
+						rmoOptions[index] = option;
+
+						await selection.Result.Interaction.EditFollowupMessageAsync(roleInput.Id, new() { Content = "Success!" });
+					}
 				}
+			}
 
 				async Task AddFull()
 				{
