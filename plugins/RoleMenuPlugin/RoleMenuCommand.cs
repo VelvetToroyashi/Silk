@@ -183,8 +183,15 @@ namespace RoleMenuPlugin
 
 						await Task.WhenAny(msgInput, btnInput);
 
-						if (!btnInput.IsCompleted && msgInput.IsCompleted)
+						if (btnInput.IsCompleted)
 						{
+							await btnInput.Result.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new() { Content = "Canceled!" });
+						}
+						else
+						{
+							if (!msgInput.IsCompleted)
+								return;
+
 							var confirmation = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 								.WithContent("Are you sure?")
 								.AsEphemeral(true)
@@ -194,7 +201,7 @@ namespace RoleMenuPlugin
 
 							if (confirmed.TimedOut)
 								return;
-							
+
 							if (confirmed.Result.Id == "rm-decline")
 								goto Wait;
 
@@ -228,7 +235,11 @@ namespace RoleMenuPlugin
 
 					await Task.WhenAny(msgInput, btnInput);
 
-					if (!btnInput.IsCompleted)
+					if (btnInput.IsCompleted)
+					{
+						await btnInput.Result.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new() { Content = "Canceled!" });
+					}
+					else
 					{
 						var emoji = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
 
@@ -241,7 +252,7 @@ namespace RoleMenuPlugin
 							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "That doesn't appear to be an emoji! Try again!", IsEphemeral = true });
 							goto Wait;
 						}
-						
+
 						cts.Cancel();
 						option = option with { EmojiName = parseResult.Value.ToString() };
 
@@ -266,7 +277,11 @@ namespace RoleMenuPlugin
 
 					await Task.WhenAny(msgInput, btnInput);
 
-					if (!btnInput.IsCompleted)
+					if (btnInput.IsCompleted)
+					{
+						await btnInput.Result.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new() { Content = "Canceled!" });
+					}
+					else
 					{
 						var role = msgInput.Result.Result.MentionedRoles[0];
 
@@ -275,7 +290,7 @@ namespace RoleMenuPlugin
 							await selection.Result.Interaction.CreateFollowupMessageAsync(new() { Content = "That's the same role! You have to use a different one.", IsEphemeral = true });
 							goto Wait;
 						}
-						
+
 						cts.Cancel();
 						option = option with { RoleId = role.Id, RoleName = role.Name };
 
