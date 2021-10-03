@@ -33,8 +33,6 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		private readonly IMediator _mediator;
 		private bool _cachedAllInitialGuilds;
-		private int _currentShardsCompleted; // How many shards have fired GUILD_DOWNLOAD_COMPLETE. //
-
 		private Dictionary<int, int> _guilds;
 
 		private bool _logged;
@@ -48,13 +46,7 @@ namespace Silk.Core.EventHandlers.Guilds
 			_logger = logger;
 		}
 		public ConcurrentQueue<Func<Task>> CacheQueue { get; } = new();
-
-		internal void MarkCompleted(int shardId)
-		{
-			_currentShardsCompleted++;
-		}
-
-
+		
 		internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
 		{
 			_startTime ??= DateTime.Now;
@@ -178,7 +170,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				while (!_cachedAllInitialGuilds && _currentShardsCompleted != _shardCount)
+				while (!_cachedAllInitialGuilds)
 					await Task.Delay(200, stoppingToken);
 
 				if (!CacheQueue.IsEmpty)

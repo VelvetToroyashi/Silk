@@ -36,7 +36,6 @@ namespace Silk.Core.Utilities
 
 			client.GuildCreated += guildHandler.OnGuildJoin;
 			client.GuildAvailable += guildHandler.OnGuildAvailable;
-			client.GuildDownloadCompleted += guildHandler.OnGuildDownload;
 		}
 	}
 }

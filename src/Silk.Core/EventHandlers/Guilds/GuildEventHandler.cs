@@ -21,10 +21,5 @@ namespace Silk.Core.EventHandlers.Guilds
 		{
 			_guildHandler.CacheQueue.Enqueue(() => _guildHandler.CacheGuildAsync(args.Guild, client.ShardId));
 		}
-
-		public async Task OnGuildDownload(DiscordClient client, GuildDownloadCompletedEventArgs _)
-		{
-			_guildHandler.MarkCompleted(client.ShardId);
-		}
 	}
 }
