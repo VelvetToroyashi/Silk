@@ -6,8 +6,8 @@ namespace Silk.Core.EventHandlers.Guilds
 {
 	public sealed class GuildEventHandler
 	{
-		private readonly GuildEventHandlerService _guildHandler;
-		public GuildEventHandler(GuildEventHandlerService guildHandler)
+		private readonly GuildCacher _guildHandler;
+		public GuildEventHandler(GuildCacher guildHandler)
 		{
 			_guildHandler = guildHandler;
 		}

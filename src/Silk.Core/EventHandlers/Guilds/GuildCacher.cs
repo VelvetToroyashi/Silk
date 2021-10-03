@@ -20,7 +20,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Guilds
 {
-	public sealed class GuildEventHandlerService : BackgroundService
+	public sealed class GuildCacher : BackgroundService
 	{
 
 		private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
@@ -29,7 +29,7 @@ namespace Silk.Core.EventHandlers.Guilds
 		                                                  "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
 		                                                  "\nDonations via Ko-Fi *greatly* aid in this endevour. <3";
 		private readonly DiscordShardedClient _client;
-		private readonly ILogger<GuildEventHandlerService> _logger;
+		private readonly ILogger<GuildCacher> _logger;
 
 		private readonly IMediator _mediator;
 		private bool _cachedAllInitialGuilds;
@@ -41,7 +41,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		private int _shardCount; // How many shards to wait for. //
 		private DateTime? _startTime;
-		public GuildEventHandlerService(IMediator mediator, DiscordShardedClient client, ILogger<GuildEventHandlerService> logger)
+		public GuildCacher(IMediator mediator, DiscordShardedClient client, ILogger<GuildCacher> logger)
 		{
 			_mediator = mediator;
 			_client = client;

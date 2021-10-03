@@ -228,8 +228,8 @@ namespace Silk.Core
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
 
-					services.AddSingleton<GuildEventHandlerService>();
-					services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
+					services.AddSingleton<GuildCacher>();
+					services.AddHostedService(b => b.GetRequiredService<GuildCacher>());
 
 					//services.AddSingleton<UptimeService>();
 					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
