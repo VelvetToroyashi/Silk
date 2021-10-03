@@ -256,7 +256,7 @@ namespace RoleMenuPlugin
 					var roleInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 						.WithContent("What role would you like to add?")
 						.AsEphemeral(true)
-						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Quit")));
+						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
 					
 					var cts = new CancellationTokenSource(TimeSpan.FromMinutes(14)); // Cut it short to account for elapsed time. //
 					
