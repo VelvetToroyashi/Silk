@@ -254,7 +254,7 @@ namespace RoleMenuPlugin
 				async Task AskForRoleAsync()
 				{
 					var roleInput = await selection.Result.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-						.WithContent("What role would you like to add?")
+						.WithContent("What role would you like to use instead?")
 						.AsEphemeral(true)
 						.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Cancel")));
 					
