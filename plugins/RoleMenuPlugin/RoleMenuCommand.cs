@@ -241,6 +241,9 @@ namespace RoleMenuPlugin
 					}
 					else
 					{
+						if (!msgInput.IsCompleted)
+							return;
+						
 						var emoji = msgInput.Result.Result.Content; // Task.WhenAny() guaruntees the task is completed. //
 
 						var parser = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
@@ -283,6 +286,9 @@ namespace RoleMenuPlugin
 					}
 					else
 					{
+						if (!msgInput.IsCompleted)
+							return;
+						
 						var role = msgInput.Result.Result.MentionedRoles[0];
 
 						if (role.Id == option.RoleId)
