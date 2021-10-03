@@ -13,9 +13,9 @@ using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using MediatR;
 using NpgsqlTypes;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Utilities;
 using Silk.Extensions;
@@ -733,9 +733,9 @@ namespace Silk.Core.Commands
 					public InfractionStepsModule(IMediator mediator) => _mediator = mediator;
 					
 					[Command]
-					[Description("Adds a new infraction step. This action will be used when the user has n infractions.\n\n" +
-					             "If the infraction step count (see `config view`) is 2, when a user has one strikes\n" +
-					             "(or strikes that were escalated), and the second infraction step is set to a 10 minute mute,\n" +
+					[Description("Adds a new infraction step. This action will be used when the user has **`n`** infractions.\n\n" +
+					             "If the infraction step count (see `config view`) is 2, when a user has one strike\n" +
+					             "(or strike that were escalated), and the second infraction step is set to a 10 minute mute," +
 					             "they will be muted for 10 minutes the next time they are striked.\n\n" +
 					             "Duration is only applicable to Mute and SoftBan.\n\n" +
 					             "Availble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
