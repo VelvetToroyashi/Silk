@@ -46,7 +46,7 @@ namespace PluginLoader.Unity
 				}
 				catch (Exception e)
 				{
-					_logger.LogWarning(Events.Plugin, e, "Plugin {Plugin} v{Version} failed to load.", plugin.Plugin.DisplayName, plugin.Plugin.Version);
+					_logger.LogWarning(Events.Plugin, e, "Plugin {Plugin} v{Version} failed to load.", plugin.Plugin?.DisplayName ?? plugin.Assembly.FullName, plugin.Plugin?.Version ?? plugin.Assembly.GetName().Version?.ToString());
 				}
 			}
 		}
