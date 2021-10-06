@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -11,7 +14,12 @@ namespace Silk.Core.EventHandlers
 	public sealed class MessageRemovedHandler
 	{
 		private readonly ConfigService _cache;
-		public MessageRemovedHandler(ConfigService cache) => _cache = cache;
+		private readonly HttpClient _client;
+		public MessageRemovedHandler(ConfigService cache, HttpClient client)
+		{
+			_cache = cache;
+			_client = client;
+		}
 
 		public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
 		{
@@ -25,19 +33,56 @@ namespace Silk.Core.EventHandlers
 				if (!config.LogMessageChanges) return;
 				if (config.LoggingChannel is 0) return;
 
-				DiscordEmbed embed = GetEditEmbed(e);
+				DiscordEmbedBuilder editEmbed = GetEditEmbed(e);
 				DiscordChannel channel = await c.GetChannelAsync(config.LoggingChannel);
-				await channel.SendMessageAsync(embed).ConfigureAwait(false);
+				
+				if (e.Message.Attachments.Count is 1)
+				{
+					var attachment = e.Message.Attachments.First();
+				
+					var stream = await GetSingleAttatchmentAsync(e.Message);
+
+					if (stream is null)
+					{
+						await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
+						return;
+					}
+					
+					var builder = new DiscordMessageBuilder();
+
+					builder.WithFile(attachment.FileName, stream);
+
+					var attachmentEmbed = new DiscordEmbedBuilder()
+						.WithColor(DiscordColor.Red)
+						.WithTitle($"Attachment 1 for {e.Message.Id}:")
+						.AddField("File Name:", attachment.FileName, true)
+						.AddField("File Size:", $"{attachment.FileSize / 1024} kb", true)
+						.WithImageUrl($"attachment://{attachment.FileName}");
+
+					builder.AddEmbeds(new DiscordEmbed[] { editEmbed, attachmentEmbed });
+						
+					await channel.SendMessageAsync(builder);
+				}
 			});
 
 		}
 
+		private async Task<Stream?> GetSingleAttatchmentAsync(DiscordMessage message)
+		{
+			var ret = await _client.GetAsync(message.Attachments.First().Url);
+
+			if (!ret.IsSuccessStatusCode)
+				return null;
+
+			return await ret.Content.ReadAsStreamAsync();
+		}
+		
 		private DiscordEmbedBuilder GetEditEmbed(MessageDeleteEventArgs e)
 		{
 			return new DiscordEmbedBuilder()
 				.WithTitle("A message was deleted:")
 				.WithDescription(
-					$"Content: ```\n{e.Message.Content}```")
+					$"Content: {(string.IsNullOrEmpty(e.Message.Content) ? "Message did not contain content." : $"```\n{e.Message.Content}```")}")
 				.AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
 				.AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
 				.AddField("\u200b", "\u200b", true)
