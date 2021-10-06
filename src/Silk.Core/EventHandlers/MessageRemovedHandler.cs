@@ -64,9 +64,47 @@ namespace Silk.Core.EventHandlers
 					await channel.SendMessageAsync(builder);
 					return;
 				}
+
+				if (e.Message.Embeds.Any())
+				{
+					var builder = new DiscordMessageBuilder();
+					var theirEmbeds = e.Message.Embeds.Select(e => new DiscordEmbedBuilder(e));
+
+					foreach (var embed in theirEmbeds)
+					{
+						if (embed.ImageUrl is not null)
+						{
+							var split = embed.ImageUrl.Split('.');
+							var name = split[^2] + "." + split[^1];
+
+							await GetImageAsync(embed.ImageUrl, name, builder);
+						}
+					}
+					
+					builder.AddEmbeds(theirEmbeds.Select(embed => embed.Build()));
+
+					await channel.SendMessageAsync(editEmbed);
+
+					await channel.SendMessageAsync(builder);
+					
+					return;
+				}
+				
 				
 				await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
 			});
+		}
+
+		public async Task GetImageAsync(string url, string name, DiscordMessageBuilder builder)
+		{
+			var ret = await _client.GetAsync(url);
+
+			if (!ret.IsSuccessStatusCode)
+				return;
+
+			var str = await ret.Content.ReadAsStreamAsync();
+
+			builder.WithFile(name, str);
 		}
 
 		private async Task<Stream?> GetSingleAttatchmentAsync(DiscordMessage message)
