@@ -9,9 +9,9 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
@@ -57,7 +57,11 @@ namespace Silk.Core.Commands.Server
 			}
 			else
 			{
-				await ctx.RespondAsync(dbTag.Content);
+				if (ctx.Message.ReferencedMessage is DiscordMessage reply)
+					await reply.RespondAsync(dbTag.Content);
+				else
+					await ctx.RespondAsync(dbTag.Content);
+				
 				await _mediator.Send(new UpdateTagRequest(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
 			}
 		}
