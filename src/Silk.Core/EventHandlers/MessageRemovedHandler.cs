@@ -62,9 +62,11 @@ namespace Silk.Core.EventHandlers
 					builder.AddEmbeds(new DiscordEmbed[] { editEmbed, attachmentEmbed });
 						
 					await channel.SendMessageAsync(builder);
+					return;
 				}
+				
+				await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
 			});
-
 		}
 
 		private async Task<Stream?> GetSingleAttatchmentAsync(DiscordMessage message)
