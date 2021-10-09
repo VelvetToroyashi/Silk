@@ -48,6 +48,8 @@ namespace Silk.Core
 {
 	public sealed class Startup
 	{
+		public static IUnityContainer Container { get; private set; }
+		
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -62,6 +64,8 @@ namespace Silk.Core
 
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
+
+			Container = builtBuilder.Services.Get<IUnityContainer>()!;
 
 			await builtBuilder.RunAsync().ConfigureAwait(false);
 		}
@@ -249,8 +253,8 @@ namespace Silk.Core
 
 		private static void ConfigureDiscordClient(IServiceProvider services)
 		{
-			DiscordConfiguration client = DiscordConfigurations.Discord;
-			SilkConfigurationOptions? config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
+			var client = DiscordConfigurations.Discord;
+			var config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
 
 			client.ShardCount = config!.Discord.Shards;
 			client.Token = config.Discord.BotToken;

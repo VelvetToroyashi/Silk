@@ -44,6 +44,7 @@
         <PackageReference Include="DSharpPlus.SlashCommands" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
