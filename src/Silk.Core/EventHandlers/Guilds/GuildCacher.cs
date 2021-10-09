@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -11,7 +12,6 @@ using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Extensions;
-using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Guilds
@@ -29,6 +29,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		private readonly IMediator _mediator;
 		private readonly HashSet<ulong> _guilds = new();
+		private long _guildCount;
 		
 		private DateTime? _startTime;
 		public GuildCacher(IMediator mediator, DiscordClient client, ILogger<GuildCacher> logger)
@@ -38,7 +39,7 @@ namespace Silk.Core.EventHandlers.Guilds
 			_logger = logger;
 		}
 
-		internal async Task CacheGuildAsync(DiscordGuild guild, int shardId)
+		internal async Task CacheGuildAsync(DiscordGuild guild)
 		{
 			_startTime ??= DateTime.Now;
 			await _mediator.Send(new GetOrCreateGuildRequest(guild.Id, StringConstants.DefaultCommandPrefix));
@@ -47,7 +48,9 @@ namespace Silk.Core.EventHandlers.Guilds
 
 			if (_guilds.Add(guild.Id))
 			{
-				LogMembers(members, guild.Members.Count, shardId);
+				var current = Interlocked.Increment(ref _guildCount);
+				
+				LogMembers(members, guild.Members.Count, current);
 			}
 		}
 
@@ -81,17 +84,18 @@ namespace Silk.Core.EventHandlers.Guilds
 				await thankYouChannel.SendMessageAsync(builder);
 			}
 			
-			await CacheGuildAsync(args.Guild, args.Guild.GetClient().ShardId);
+			await CacheGuildAsync(args.Guild);
 		}
-
-		private void LogMembers(int members, int totalMembers, int shardId)
+		
+		private void LogMembers(int members, int totalMembers, long currentGuilds)
 		{
 			string message;
 			message = members is 0 ?
-				"Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}]" :
-				"Guild cached! Shard [{shard}/{shards}] → Guild [{currentGuild}/{guilds}] → Staff [{members}/{allMembers}]";
+				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}]" :
+				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}] → Staff [{Members}/{AllMembers}]";
 			
-			_logger.LogDebug(EventIds.EventHandler, message, shardId + 1, _client.ShardCount, _guilds.Count, _client.Guilds.Count, members, totalMembers);
+			
+			_logger.LogDebug(EventIds.EventHandler, message, _client.ShardId + 1, _client.ShardCount, currentGuilds, _client.Guilds.Count, members, totalMembers);
 		}
 
 		private async Task<int> CacheMembersAsync(IEnumerable<DiscordMember> members)

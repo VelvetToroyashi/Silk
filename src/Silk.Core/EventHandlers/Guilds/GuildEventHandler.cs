@@ -11,12 +11,12 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		public async Task OnGuildJoin(DiscordClient client, GuildCreateEventArgs args)
 		{
-			_ = _guildHandler.JoinedGuild(args);
+			_ =  _guildHandler.JoinedGuild(args);
 		}
 
 		public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs args)
 		{
-			_ = _guildHandler.CacheGuildAsync(args.Guild, client.ShardId);
+			_ = _guildHandler.CacheGuildAsync(args.Guild);
 		}
 	}
 }
