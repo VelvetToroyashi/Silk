@@ -92,9 +92,9 @@ namespace Silk.Core
 			_logger.LogInformation(EventIds.Core, "Initializing Slash-Commands");
 			SlashCommandsExtension? sc = _client.UseSlashCommands(DiscordConfigurations.SlashCommands);
 			sc.SlashCommandErrored += _slashExceptionHandler.Handle;
-			sc.RegisterCommands<RemindCommands>(721518523704410202);
-			sc.RegisterCommands<TagCommands>(721518523704410202);
-			sc.RegisterCommands<AvatarCommands>(721518523704410202);
+			sc.RegisterCommands<RemindCommands>();
+			sc.RegisterCommands<TagCommands>();
+			sc.RegisterCommands<AvatarCommands>();
 
 			return Task.CompletedTask;
 		}
