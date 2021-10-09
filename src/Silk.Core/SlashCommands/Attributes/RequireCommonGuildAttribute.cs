@@ -11,7 +11,7 @@ namespace Silk.Core.SlashCommands.Attributes
 		public async override Task<bool> ExecuteChecksAsync(InteractionContext ctx)
 		{
 			return ctx.Services
-				.Get<DiscordShardedClient>()!
+				.Get<DiscordClient>()!
 				.GetMember(m => m == ctx.User) is not null;
 		}
 	}

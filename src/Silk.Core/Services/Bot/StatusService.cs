@@ -14,7 +14,7 @@ namespace Silk.Core.Services.Bot
 {
 	public sealed class StatusService : BackgroundService
 	{
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<StatusService> _logger;
 		private readonly AsyncManualResetEvent _tcs = new(false);
 		private readonly LoopedList<string> _statuses = new()
@@ -29,7 +29,7 @@ namespace Silk.Core.Services.Bot
 			"for donations! (ko-fi/patreon: VelvetThePanda)"
 		};
 
-		public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
+		public StatusService(DiscordClient client, ILogger<StatusService> logger)
 		{
 			_client = client;
 			_logger = logger;

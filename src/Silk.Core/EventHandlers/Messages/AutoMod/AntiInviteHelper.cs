@@ -22,9 +22,9 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		private readonly ILogger<AntiInviteHelper> _logger;
 		private readonly IMediator _mediator;
 		private readonly IInfractionService _infractions;
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 
-		public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordShardedClient client)
+		public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordClient client)
 		{
 			_logger = logger;
 			_mediator = mediator;
@@ -84,8 +84,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			var blacklisted = true;
 			try
 			{
-				DiscordClient? client = _client.GetShard(message.Channel.Guild);
-				DiscordInvite apiInvite = await client.GetInviteByCodeAsync(invite);
+				DiscordInvite apiInvite = await _client.GetInviteByCodeAsync(invite);
 
 				if (apiInvite.Guild.Id != message.Channel.GuildId)
 				{

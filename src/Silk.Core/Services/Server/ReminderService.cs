@@ -24,14 +24,14 @@ namespace Silk.Core.Services.Server
 	public sealed class ReminderService : BackgroundService
 	{
 		private const string MissingChannel = "Hey!, you wanted me to remind you of something, but the channel was deleted, or is otherwise inaccessible to me now.\n";
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<ReminderService> _logger;
 		private readonly IMediator _mediator;
 		private readonly IServiceProvider _services;
 
 		private List<ReminderEntity> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
 
-		public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordShardedClient client, IMediator mediator)
+		public ReminderService(ILogger<ReminderService> logger, IServiceProvider services, DiscordClient client, IMediator mediator)
 		{
 			_logger = logger;
 			_services = services;
@@ -102,8 +102,9 @@ namespace Silk.Core.Services.Server
 				await DispatchSlashCommandReminderAsync(reminder); // Was executed with a slash command. Don't send the reminder in the server. //
 				return;
 			}
-			IEnumerable<KeyValuePair<ulong, DiscordGuild>> guilds = _client.ShardClients.SelectMany(s => s.Value.Guilds);
-			if (guilds.FirstOrDefault(g => g.Key == reminder.GuildId).Value is not { } guild)
+			
+			var guilds = _client.Guilds;
+			if (!guilds.TryGetValue(reminder.GuildId ?? 0, out var guild))
 			{
 				_logger.LogWarning(EventIds.Service, "{GuildId} is not present on the client. Was the guild removed?", reminder.GuildId);
 				_logger.LogTrace(EventIds.Service, "Removing all reminders from memory pointing to {GuildId}", reminder.GuildId);
@@ -144,7 +145,7 @@ namespace Silk.Core.Services.Server
         /// <param name="reminder"></param>
         private async Task DispatchSlashCommandReminderAsync(ReminderEntity reminder)
 		{
-			var apiClient = (DiscordApiClient)typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client.ShardClients[0])!;
+			var apiClient = (DiscordApiClient)typeof(DiscordClient).GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client)!;
 			DiscordDmChannel? channel = await (Task<DiscordDmChannel>)typeof(DiscordApiClient).GetMethod("CreateDmAsync", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(apiClient, new object[] { reminder.OwnerId })!;
 
 			await RemoveReminderAsync(reminder.Id);
@@ -166,8 +167,8 @@ namespace Silk.Core.Services.Server
 					return;
 				}
 
-				DiscordClient? shard = _client.GetShard(reminder.GuildId.Value);
-				bool foundGuild = shard.Guilds.TryGetValue(reminder.GuildId.Value, out var guild);
+				
+				bool foundGuild = _client.Guilds.TryGetValue(reminder.GuildId.Value, out var guild);
 
 				if (!foundGuild)
 				{

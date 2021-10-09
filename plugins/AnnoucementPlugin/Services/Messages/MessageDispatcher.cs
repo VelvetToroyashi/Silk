@@ -9,10 +9,10 @@ namespace AnnoucementPlugin.Services
 {
 	public sealed class MessageDispatcher : IMessageDispatcher
 	{
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<MessageDispatcher> _logger;
 		
-		public MessageDispatcher(ILogger<MessageDispatcher> logger, DiscordShardedClient client)
+		public MessageDispatcher(ILogger<MessageDispatcher> logger, DiscordClient client)
 		{
 			_logger = logger;
 			_client = client;
@@ -30,7 +30,7 @@ namespace AnnoucementPlugin.Services
 			if (!unlocked)
 				return new(false, MessageSendErrorType.CouldNotUnlockChannel);
 
-			var messageChannel = _client.GetShard(guild).Guilds[guild].Channels[channel];
+			var messageChannel = _client.Guilds[guild].Channels[channel];
 			
 			if (message.Length <= 2000)
 			{
@@ -65,7 +65,7 @@ namespace AnnoucementPlugin.Services
 		
 		private async Task<bool> UnlockChannelAsync(ulong guildId, ulong channelId)
 		{
-			var guild = _client.GetShard(guildId).Guilds[guildId];
+			var guild = _client.Guilds[guildId];
 			var channel = guild.GetChannel(channelId);
 
 
@@ -93,7 +93,7 @@ namespace AnnoucementPlugin.Services
 		
 		private bool AnnouncementChannelExists(ulong guild, ulong channel)
 		{
-			var guildObj = _client.GetShard(guild).Guilds[guild];
+			var guildObj = _client.Guilds[guild];
 
 			return guildObj.Channels.TryGetValue(channel, out _);
 		}

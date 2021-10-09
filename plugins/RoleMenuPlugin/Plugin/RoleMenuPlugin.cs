@@ -11,10 +11,10 @@ namespace RoleMenuPlugin
 		public override string DisplayName => "Role-Menu Plugin";
 
 		private readonly RoleMenuRoleService _roleMenu;
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly RolemenuContext _db;
 
-		public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordShardedClient client, RolemenuContext db)
+		public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordClient client, RolemenuContext db)
 		{
 			_roleMenu = roleMenu;
 			_client = client;

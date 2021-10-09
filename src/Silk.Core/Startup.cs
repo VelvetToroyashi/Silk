@@ -158,13 +158,8 @@ namespace Silk.Core
 						silkConfig.Emojis.PopulateEmojiConstants();
 					
 					services.AddTransient(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
-
-					//services.AddSingleton(_ => new DiscordShardedClient(DiscordConfigurations.Discord));
 					
-					 container.RegisterFactory<DiscordShardedClient>(con =>
-						new DiscordShardedClient(new(DiscordConfigurations.Discord) { LoggerFactory = con.Resolve<ILoggerFactory>()}), FactoryLifetime.Singleton);
-					 
-					 container.RegisterFactory<DiscordClient>(container => container.Resolve<DiscordShardedClient>().ShardClients[0]);
+					services.AddSingleton<DiscordClient>(s => new(new(DiscordConfigurations.Discord) { LoggerFactory = s.GetService<ILoggerFactory>() }));
 					 
 					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
@@ -229,7 +224,6 @@ namespace Silk.Core
 					services.AddMediatR(typeof(GuildContext));
 
 					services.AddSingleton<GuildCacher>();
-					services.AddHostedService(b => b.GetRequiredService<GuildCacher>());
 
 					//services.AddSingleton<UptimeService>();
 					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());

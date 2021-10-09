@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,10 +19,10 @@ namespace Silk.Core.Utilities.Bot
 {
 	public class BotExceptionHandler
 	{
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<BotExceptionHandler> _logger;
 
-		public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client)
+		public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordClient client)
 		{
 			_logger = logger;
 			_client = client;
@@ -101,12 +100,8 @@ namespace Silk.Core.Utilities.Bot
 		{
 			_logger.LogInformation(EventIds.EventHandler, "Hooking task and command exception events");
 			TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError(EventIds.EventHandler, "Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
-
-			IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
-
-			foreach (CommandsNextExtension? c in commandsNext)
-				c!.CommandErrored += OnCommandErrored;
-			_logger.LogDebug(EventIds.EventHandler, "Registered command exception-handler for {Shards} shard(s)", commandsNext.Count());
+			_client.GetCommandsNext().CommandErrored += OnCommandErrored;
+			_logger.LogDebug(EventIds.EventHandler, "Registered command exception-handler");
 		}
 	}
 }

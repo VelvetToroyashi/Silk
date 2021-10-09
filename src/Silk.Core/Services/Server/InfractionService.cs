@@ -28,7 +28,7 @@ namespace Silk.Core.Services.Server
 	{
 		private readonly ILogger<IInfractionService> _logger;
 		private readonly IMediator _mediator;
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 
 		private readonly ConfigService _config;
 		private readonly ICacheUpdaterService _updater;
@@ -44,7 +44,7 @@ namespace Silk.Core.Services.Server
 		// Fast lookup for mutes. Populated on startup. //
 		private readonly HashSet<(ulong user, ulong guild)> _mutes = new();
 
-		public InfractionService(IMediator mediator, DiscordShardedClient client, ConfigService config, ICacheUpdaterService updater, ILogger<IInfractionService> logger)
+		public InfractionService(IMediator mediator, DiscordClient client, ConfigService config, ICacheUpdaterService updater, ILogger<IInfractionService> logger)
 		{
 			_mediator = mediator;
 			_client = client;
@@ -58,7 +58,7 @@ namespace Silk.Core.Services.Server
 		 Also did I mention how much I *love* Multi-line to-do statements */
 		public async Task<InfractionResult> KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason)
 		{
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 			DiscordMember? member = guild.Members[userId];
 			DiscordMember? enforcer = guild.Members[enforcerId];
 			DiscordEmbedBuilder? embed = CreateUserInfractionEmbed(enforcer, guild.Name, InfractionType.Kick, reason);
@@ -86,7 +86,7 @@ namespace Silk.Core.Services.Server
 
 		public async Task<InfractionResult> BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration = null)
 		{
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 			DiscordMember? enforcer = guild.Members[enforcerId];
 			bool userExists = guild.Members.TryGetValue(userId, out var member);
 			DiscordEmbedBuilder? embed = CreateUserInfractionEmbed(enforcer, guild.Name, expiration is null ? InfractionType.Ban : InfractionType.SoftBan, reason, expiration);
@@ -131,7 +131,7 @@ namespace Silk.Core.Services.Server
 
 		public async Task<InfractionResult> UnBanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.")
 		{
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 
 			if (!guild.CurrentMember.HasPermission(Permissions.BanMembers))
 				return InfractionResult.FailedSelfPermissions;
@@ -160,7 +160,7 @@ namespace Silk.Core.Services.Server
 
 		public async Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, bool autoEscalate = false)
 		{
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 			DiscordMember? enforcer = guild.Members[enforcerId];
 			bool exists = guild.Members.TryGetValue(userId, out var victim);
 
@@ -242,7 +242,7 @@ namespace Silk.Core.Services.Server
 
 		public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration, bool updateExpiration = true)
 		{
-			DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild guild = _client.Guilds[guildId];
 			GuildModConfigEntity conf = await _config.GetModConfigAsync(guildId);
 			DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 
@@ -335,7 +335,7 @@ namespace Silk.Core.Services.Server
 			await _mediator.Send(new UpdateInfractionRequest(infraction.Id, infraction.Expiration, infraction.Reason, true)); // Only set it to say it's handled. //
 			InfractionDTO? unmute = await GenerateInfractionAsync(userId, guildId, enforcerId, InfractionType.Unmute, reason, null);
 
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 			if (guild.Members.TryGetValue(userId, out var member))
 			{
 				GuildModConfigEntity? conf = await _config.GetModConfigAsync(guildId);
@@ -394,13 +394,13 @@ namespace Silk.Core.Services.Server
 			InfractionDTO? infractionNote = await GenerateInfractionAsync(userId, guildId, noterId, InfractionType.Note, note, null);
 
 			var mainNoteEmbed = new DiscordEmbedBuilder();
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 
 			DiscordUser? user;
 			_ = guild.Members.TryGetValue(noterId, out var enforcer);
 			_ = guild.Members.TryGetValue(userId, out var tmem);
 			user = tmem;
-			user ??= await _client.ShardClients[0].GetUserAsync(userId);
+			user ??= await _client.GetUserAsync(userId);
 
 			mainNoteEmbed
 				.WithAuthor($"{user.Username}#{user.Discriminator}", user.GetUrl(), user.AvatarUrl)
@@ -454,12 +454,12 @@ namespace Silk.Core.Services.Server
 			await EnsureModLogChannelExistsAsync(guildId);
 			await LogInfractionAsync(infraction);
 
-			DiscordGuild? guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild? guild = _client.Guilds[guildId];
 
 			if (!guild.Members.TryGetValue(userId, out var member))
 				return InfractionResult.SucceededDoesNotNotify;
 
-			DiscordUser? user = await _client.ShardClients[0].GetUserAsync(enforcerId);
+			DiscordUser? user = await _client.GetUserAsync(enforcerId);
 			try
 			{
 				await member.SendMessageAsync(CreateUserInfractionEmbed(user, guild.Name, InfractionType.Pardon, reason));
@@ -528,7 +528,7 @@ namespace Silk.Core.Services.Server
 			GuildModConfigEntity? conf = await _config.GetModConfigAsync(infNew.GuildId);
 
 			ulong modLog = conf.LoggingChannel;
-			DiscordGuild? guild = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId];
+			DiscordGuild? guild = _client.Guilds[infNew.GuildId];
 
 			if (modLog is 0)
 				return InfractionResult.FailedNotConfigured;
@@ -536,8 +536,8 @@ namespace Silk.Core.Services.Server
 			if (!guild.Channels.TryGetValue(modLog, out var chn))
 				return InfractionResult.FailedResourceDeleted;
 
-			DiscordUser? user = await _client.ShardClients[0].GetUserAsync(infOld.UserId); /* User may not exist on the server anymore. */
-			DiscordMember? enforcer = _client.GetShard(infNew.GuildId).Guilds[infNew.GuildId].Members[infNew.EnforcerId];
+			DiscordUser? user = await _client.GetUserAsync(infOld.UserId); /* User may not exist on the server anymore. */
+			DiscordMember? enforcer = _client.Guilds[infNew.GuildId].Members[infNew.EnforcerId];
 
 			IEnumerable<DiscordEmbed>? infractionEmbeds = GenerateUpdateEmbed(user, enforcer, infOld, infNew);
 
@@ -605,13 +605,13 @@ namespace Silk.Core.Services.Server
 			await EnsureModLogChannelExistsAsync(inf.GuildId);
 
 			GuildModConfigEntity? config = await _config.GetModConfigAsync(inf.GuildId);
-			DiscordGuild? guild = _client.GetShard(inf.GuildId).Guilds[inf.GuildId];
+			DiscordGuild? guild = _client.Guilds[inf.GuildId];
 
 			if (config.LoggingChannel is 0)
 				return InfractionResult.FailedNotConfigured; /* It couldn't create a mute channel :(*/
 
-			DiscordUser? user = await _client.ShardClients[0].GetUserAsync(inf.UserId); /* User may not exist on the server anymore. */
-			DiscordMember? enforcer = _client.GetShard(inf.GuildId).Guilds[inf.GuildId].Members[inf.EnforcerId];
+			DiscordUser? user = await _client.GetUserAsync(inf.UserId); /* User may not exist on the server anymore. */
+			DiscordMember? enforcer = _client.Guilds[inf.GuildId].Members[inf.EnforcerId];
 
 			var builder = new DiscordEmbedBuilder();
 
@@ -688,7 +688,7 @@ namespace Silk.Core.Services.Server
 		private async Task EnsureModLogChannelExistsAsync(ulong guildId)
 		{
 			GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
-			DiscordGuild guild = _client.GetShard(guildId).Guilds[guildId];
+			DiscordGuild guild = _client.Guilds[guildId];
 
 			if (config.LoggingChannel is not 0)
 				return;

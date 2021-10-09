@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,13 +25,13 @@ namespace Silk.Core
 	{
 		private readonly ILogger<Main> _logger;
 		private readonly IPluginLoaderService _plugins;
-		private readonly DiscordShardedClient _shardClient;
+		private readonly DiscordClient _client;
 		private readonly BotExceptionHandler _handler;
 		private readonly CommandHandler _commandHandler;
 		private readonly SlashCommandExceptionHandler _slashExceptionHandler;
 
 		public Main(
-			DiscordShardedClient shardClient,
+			DiscordClient client,
 			ILogger<Main> logger,
 			EventHelper e,
 			BotExceptionHandler handler,
@@ -47,7 +45,7 @@ namespace Silk.Core
 			_commandHandler = commandHandler;
 			_slashExceptionHandler = slashExceptionHandler;
 			_plugins = plugins;
-			_shardClient = shardClient;
+			_client = client;
 			_ = e;
 			_ = wd;
 		}
@@ -60,7 +58,7 @@ namespace Silk.Core
 			await InitializeClientExtensions();
 			_logger.LogInformation(EventIds.Core, "Initialized Client");
 
-			await _plugins.LoadPluginsAsync();
+			
 			
 			await InitializeCommandsNextAsync();
 			await InitializeSlashCommandsAsync();
@@ -68,17 +66,17 @@ namespace Silk.Core
 			await _handler.SubscribeToEventsAsync();
 			
 			_logger.LogDebug(EventIds.Core, "Connecting to Discord Gateway");
-			await _shardClient.StartAsync();
-			_logger.LogInformation(EventIds.Core, "Connected to Discord Gateway as {User}", _shardClient.CurrentUser.ToDiscordName());
+			await _client.ConnectAsync();
+			_logger.LogInformation(EventIds.Core, "Connected to Discord Gateway as {User}", _client.CurrentUser.ToDiscordName());
 			
-			
+			await _plugins.LoadPluginsAsync();
 		}
 
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation(EventIds.Core, "Stopping Service");
 			_logger.LogDebug(EventIds.Core, "Disconnecting from Discord Gateway");
-			await _shardClient.StopAsync();
+			await _client.DisconnectAsync();
 			_logger.LogInformation(EventIds.Core, "Disconnected from Discord Gateway");
 		}
 
@@ -86,16 +84,15 @@ namespace Silk.Core
 		{
 			_logger.LogDebug(EventIds.Core, "Initializing Client");
 
-			await _shardClient.UseCommandsNextAsync(DiscordConfigurations.CommandsNext);
-			await _shardClient.UseInteractivityAsync(DiscordConfigurations.Interactivity);
-			await _shardClient.UseVoiceNextAsync(DiscordConfigurations.VoiceNext);
-			await _shardClient.UseMenusAsync();
+			_client.UseCommandsNext(DiscordConfigurations.CommandsNext);
+			_client.UseInteractivity(DiscordConfigurations.Interactivity);
+			_client.UseVoiceNext(DiscordConfigurations.VoiceNext);
 		}
 
 		private Task InitializeSlashCommandsAsync()
 		{
 			_logger.LogInformation(EventIds.Core, "Initializing Slash-Commands");
-			SlashCommandsExtension? sc = _shardClient.ShardClients[0].UseSlashCommands(DiscordConfigurations.SlashCommands);
+			SlashCommandsExtension? sc = _client.UseSlashCommands(DiscordConfigurations.SlashCommands);
 			sc.SlashCommandErrored += _slashExceptionHandler.Handle;
 			sc.RegisterCommands<RemindCommands>();
 			sc.RegisterCommands<TagCommands>();
@@ -110,23 +107,20 @@ namespace Silk.Core
 
 			var t = Stopwatch.StartNew();
 			var asm = Assembly.GetEntryAssembly();
-			IReadOnlyDictionary<int, CommandsNextExtension>? cnext = await _shardClient.GetCommandsNextAsync();
+			var cnext = _client.GetCommandsNext();
 
-			foreach (var cnextExt in cnext.Values)
-			{
-				cnextExt.RegisterCommands(asm);
-				cnextExt.SetHelpFormatter<HelpFormatter>();
-				cnextExt.RegisterConverter(new MemberConverter());
-				cnextExt.RegisterConverter(new InfractionTypeConverter());
-				cnextExt.CommandExecuted += _commandHandler.AddCommandInvocation;
-			}
+			cnext.RegisterCommands(asm);
+			cnext.SetHelpFormatter<HelpFormatter>();
+			cnext.RegisterConverter(new MemberConverter());
+			cnext.RegisterConverter(new InfractionTypeConverter());
+			cnext.CommandExecuted += _commandHandler.AddCommandInvocation;
 
 			t.Stop();
-			int registeredCommands = cnext.Values.Sum(r => r.RegisteredCommands.Count);
+			int registeredCommands = cnext.RegisteredCommands.Count;
 
-			_logger.LogDebug(EventIds.Core, "Registered {Commands} core commands for {Shards} shards in {Time} ms", registeredCommands, _shardClient.ShardClients.Count, t.ElapsedMilliseconds);
+			_logger.LogDebug(EventIds.Core, "Registered {Commands} core commands in {Time} ms", registeredCommands, t.ElapsedMilliseconds);
 
-			await _plugins.RegisterPluginCommandsAsync();
+			//await _plugins.RegisterPluginCommandsAsync();
 			_logger.LogInformation(EventIds.Core, "Initialized Command Framework");
 		}
 	}

@@ -15,7 +15,7 @@ namespace Silk.Core.Utilities
     public sealed class EventHelper
 	{
 		public EventHelper(
-			DiscordShardedClient client,
+			DiscordClient client,
 			CommandHandler commandHandler,
 			MessageAddAntiInvite antiInvite,
 			MessageRemovedHandler removeHandler,
