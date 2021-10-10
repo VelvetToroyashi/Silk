@@ -43,6 +43,11 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		{
 			if (message.Channel.Guild is null)
 				return;
+
+			var config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
+
+			if (!config.DetectPhishingLinks)
+				return;
 			
 			var match = LinkRegex.Match(message.Content);
 
