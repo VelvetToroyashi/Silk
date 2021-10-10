@@ -84,6 +84,11 @@ namespace Silk.Core.Data.Entities
         public bool AutoDehoist { get; set; }
         
         /// <summary>
+        /// Whether or not to even scan for phishing links on a server.
+        /// </summary>
+        public bool DetectPhishingLinks { get; set; }
+        
+        /// <summary>
         /// Whether or not phishing links should be deleted.
         /// </summary>
         public bool DeletePhishingLinks { get; set; }
