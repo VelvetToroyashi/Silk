@@ -466,6 +466,7 @@ namespace Silk.Core.Commands
 				}
 
 				[Command]
+				[Description("The action to take when a phishing link is detected.\nOptions: Kick, Ban, Note, None.\nNone will still log links, but they will not be attached to the user.")]
 				public async Task Action(CommandContext ctx, string action)
 				{
 					InfractionType type = InfractionType.Pardon;
