@@ -103,7 +103,12 @@ namespace Silk.Core.Commands
 					.AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
 					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
-					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}");
+					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
+					.AppendLine()
+					.AppendLine("__Anti-Phishing__ **(Beta)**:")
+					.AppendLine($"> Anti-Phishing enabled: <:_:{(modConfig.DetectPhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Delete Phishing Links: <:_:{(modConfig.DeletePhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Phishing detection action: {(modConfig.NamedInfractionSteps!.TryGetValue(AutoModConstants.PhishingLinkDetected, out var action) ? action.Type : "Not configured")}");
 
 				embed
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
@@ -409,6 +414,94 @@ namespace Silk.Core.Commands
 
 				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingText = message });
 			}
+			
+			
+			[Group("phishing")]
+			[Aliases("phish", "psh")]
+			[RequireFlag(UserFlag.Staff)]
+			[Description("Phishing-related settings.")]
+			public sealed class EditPhishingModule : BaseCommandModule
+			{
+				private readonly IMediator _mediator;
+				public EditPhishingModule(IMediator mediator) => _mediator = mediator;
+
+				[Command]
+				[Description("Enables scanning for phishing links.")]
+				public async Task Enable(CommandContext ctx)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+					
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DetectPhishingLinks = true });
+				}
+				
+				[Command]
+				[Description("Disables scanning for phishing links.")]
+				public async Task Disable(CommandContext ctx)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+					
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DetectPhishingLinks = false });
+				}
+				
+				[Command]
+				[Aliases("delete_links", "delete-links", "dl")]
+				[Description("Whether messages will be deleted when a phishing link is detected.")]
+				public async Task DeleteLinks(CommandContext ctx, bool delete)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+					
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DeletePhishingLinks = delete });
+				}
+
+				[Command]
+				public async Task Action(CommandContext ctx, string action)
+				{
+					InfractionType type = InfractionType.Pardon;
+					if (!string.Equals("none", action, StringComparison.OrdinalIgnoreCase))
+					{
+						if (!Enum.TryParse(action, true, out type))
+						{
+							await ctx.RespondAsync("I can't tell what you're trying to set.");
+							return;
+						}
+
+						if (type is not (InfractionType.Ban or InfractionType.Kick or InfractionType.Note))
+						{
+							await ctx.RespondAsync("Action must be of type Kick, Ban, Note, or None.");
+						}
+					}
+					
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+					
+					config.NamedInfractionSteps.Remove(AutoModConstants.PhishingLinkDetected);
+					
+					
+					if (type is not InfractionType.Pardon) 
+						config.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = type};
+
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
+				}
+			}
+			
 
 			[Group("invite")]
 			[Aliases("invites", "inv")]

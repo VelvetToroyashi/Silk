@@ -80,27 +80,28 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 				await task;
 			}
-
-			var guild = message.Channel.Guild;
-
-			if (!guild.Channels.TryGetValue(config.LoggingChannel, out var chn))
-			{
-				_logger.LogWarning("Cannot log phishing in {Guild}. No configured action or log channel.", message.Channel.Guild.Id);
-			}
 			else
 			{
-				var embed = new DiscordEmbedBuilder();
+				var guild = message.Channel.Guild;
 
-				embed.WithTitle("Phishing link detected!")
-					.WithColor(DiscordColor.Rose)
-					.WithAuthor(message.Author.Username, null, message.Author.AvatarUrl)
-					.AddField("Link:", link, true)
-					.AddField("User Id:", message.Author.Id.ToString(), true)
-					.AddField("Channel:", message.Channel.Mention, true);
+				if (!guild.Channels.TryGetValue(config.LoggingChannel, out var chn))
+				{
+					_logger.LogWarning("Cannot log phishing in {Guild}. No configured action or log channel.", message.Channel.Guild.Id);
+				}
+				else
+				{
+					var embed = new DiscordEmbedBuilder();
 
-				await chn.SendMessageAsync(embed);
+					embed.WithTitle("Phishing link detected!")
+						.WithColor(DiscordColor.Rose)
+						.WithAuthor(message.Author.Username, null, message.Author.AvatarUrl)
+						.AddField("Link:", link, true)
+						.AddField("User Id:", message.Author.Id.ToString(), true)
+						.AddField("Channel:", message.Channel.Mention, true);
+
+					await chn.SendMessageAsync(embed);
+				}
 			}
-
 		}
 	}
 }
