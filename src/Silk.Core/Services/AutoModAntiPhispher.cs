@@ -35,21 +35,11 @@ namespace Silk.Core.Services
 			_ws.Options.SetRequestHeader(HeaderName, StringConstants.ProjectIdentifier); // requisite for gimme-domains
 		}
 
+		public bool IsBlacklisted(string link) => _domains.Contains(link);
+		
 		private async Task ReceiveLoopAsync()
 		{
 			var stoppingToken = _cts.Token;
-			
-			try
-			{
-				await _ws.ConnectAsync(new(WebsocetUrl), CancellationToken.None);
-			}
-			catch (WebSocketException)
-			{
-				_logger.LogCritical(EventIds.Service, "Failed to establish a websocket connection. API - Unavailable");
-				return;
-			}
-
-			_logger.LogInformation(EventIds.Service, "Opened websocket to phishing API.");
 
 			var buffer = ArrayPool<byte>.Shared.Rent(32 * 1024 * 1024); // 32MB cache; should be more than sufficient for the forseeable future.
 
