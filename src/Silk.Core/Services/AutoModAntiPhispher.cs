@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.WebSockets;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silk.Shared.Constants;
@@ -40,25 +41,72 @@ namespace Silk.Core.Services
 		private async Task ReceiveLoopAsync()
 		{
 			var stoppingToken = _cts.Token;
+			
+			const int bufferSize = 16 * 1024;
+			
+			// 16KB cache; should be more than sufficient for the forseeable future. //
+			using var buffer = new ArrayPoolBufferWriter<byte>(bufferSize);
 
-			var buffer = ArrayPool<byte>.Shared.Rent(32 * 1024 * 1024); // 32MB cache; should be more than sufficient for the forseeable future.
-
-			while (!stoppingToken.IsCancellationRequested)
+			try
 			{
-				await _ws.ReceiveAsync(buffer, CancellationToken.None);
-				var json = Encoding.UTF8.GetString(buffer);
+				while (!stoppingToken.IsCancellationRequested)
+				{
+					// See https://github.com/discord-net/Discord.Net/commit/ac389f5f6823e3a720aedd81b7805adbdd78b66d 
+					// for explanation on the cancellation token
+					// TL;DR passing cancellation token to websocket kills the socket //
 
-				var payload = JObject.Parse(json);
+					ValueWebSocketReceiveResult result;
+					do
+					{
+						var mem = buffer.GetMemory(bufferSize);
+						result = await _ws.ReceiveAsync(mem, CancellationToken.None);
 
-				var command = payload["type"]!.ToString(); // "add" or "delete"
-				var domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
+						if (result.MessageType is WebSocketMessageType.Close)
+							break; // Damn it, CloudFlare. //
 
-				HandleWebsocketCommand(command, domains);
+						buffer.Advance(result.Count);
+					} while (!result.EndOfMessage);
+
+
+					if (result.MessageType is WebSocketMessageType.Close)
+					{
+						if (await RestartWebsocketAsync())
+							continue;
+						
+						return;
+					}
+					
+					var json = Encoding.UTF8.GetString(buffer.WrittenSpan);
+
+					var payload = JObject.Parse(json);
+
+					var command = payload["type"]!.ToString(); // "add" or "delete"
+					var domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
+
+					HandleWebsocketCommand(command, domains);
+				}
+			}
+			catch (Exception e)
+			{
+				_logger.LogWarning(EventIds.Service, e, "Websocket threw an exception. API - Unavailable");
 			}
 			
-			ArrayPool<byte>.Shared.Return(buffer);
-
 			await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Silk is ready to shut down now. Bye bye...", CancellationToken.None);
+		}
+
+		private async Task<bool> RestartWebsocketAsync()
+		{
+			await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested. I'll be back soon.", CancellationToken.None);
+			try
+			{
+				await _ws.ConnectAsync(new(WebsocetUrl), CancellationToken.None);
+				return true;
+			}
+			catch
+			{
+				_logger.LogWarning("Could not connect to phishing. API - Unavailable");
+				return false;
+			}
 		}
 
 		private async Task<bool> GetDomainsAsync()

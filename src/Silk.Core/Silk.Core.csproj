@@ -68,6 +68,7 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http" />
         <PackageReference Include="Microsoft.Extensions.Logging" />
+        <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.0" />
         <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Serilog" Version="2.10.1-dev-01366" />
