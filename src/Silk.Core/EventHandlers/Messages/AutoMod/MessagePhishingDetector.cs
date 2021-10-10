@@ -15,7 +15,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
 	public sealed class MessagePhishingDetector
 	{
-		private static readonly Regex LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*))");
+		private static readonly Regex LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
 		private const string Phishing = "Message contained a phishing link.";
 
@@ -57,7 +57,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 				
 				if (_phishing.IsBlacklisted(link))
 				{
-					_logger.LogInformation(EventIds.AutoMod, "Caught link {Link}, Message info: Sent by {Author} in {Guild} in {Channel} (Thread: {IsThread})", link, message.Author, message.Channel.Guild.Name, message.Channel.Name, message.Channel.IsThread);
+					_logger.LogInformation(EventIds.AutoMod, "Caught link {Link}, Message info: Sent by {Author} in {Guild} in {Channel}", link, message.Author.Id, message.Channel.Guild.Name, message.Channel.Name);
 					await HandleLinkAsync(link, message);
 				}
 			}
