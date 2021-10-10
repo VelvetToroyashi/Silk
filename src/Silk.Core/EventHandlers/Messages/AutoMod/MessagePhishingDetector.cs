@@ -80,11 +80,15 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 			if (config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var inf))
 			{
+				var authorId = message.Author.Id;
+				var guildId = message.Channel.Guild.Id;
+				var memberId = message.Channel.Guild.CurrentMember.Id;
+				
 				var task = inf.Type switch
 				{
-					InfractionType.Ban => _infractions.BanAsync(message.Author.Id, message.Channel.Guild.Id, message.Channel.Guild.CurrentMember.Id, $"Sent phishing link: `{link}`."),
-					InfractionType.Kick => _infractions.KickAsync(message.Author.Id, message.Channel.Guild.Id, message.Channel.Guild.CurrentMember.Id, $"Sent phishing link: `{link}`."),
-					InfractionType.Note => _infractions.AddNoteAsync(message.Author.Id, message.Channel.Guild.Id, message.Channel.Guild.CurrentMember.Id, $"Sent phishing link: `{link}`."),
+					InfractionType.Ban => _infractions.BanAsync(authorId, guildId, memberId, $"Sent phishing link: `{link}`."),
+					InfractionType.Kick => _infractions.KickAsync(authorId, guildId, memberId, $"Sent phishing link: `{link}`."),
+					InfractionType.Note => _infractions.AddNoteAsync(authorId, guildId, memberId, $"Sent phishing link: `{link}`."),
 					_ => Task.FromResult(InfractionResult.FailedGenericRequirementsNotFulfilled)
 				};
 
