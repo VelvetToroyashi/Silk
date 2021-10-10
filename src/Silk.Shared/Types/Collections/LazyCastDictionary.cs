@@ -6,34 +6,34 @@ using System.Linq;
 namespace Silk.Shared.Types.Collections
 {
     /// <summary>
-    ///     A dictionary that hides the underlying type that it holds, and casts on-demand.
-    ///     <remarks>
-    ///         Type and cast safety are
-    ///         <b>
-    ///             <i>not</i>
-    ///         </b>
-    ///         guaranteed by this class. Caution should be taken to ensure that values can be casted, by operator or inheritence.
-    ///         <see cref="Add(System.Collections.Generic.KeyValuePair{TKey,TValueTo})" /> Is not cast-safe, and will throw.
-    ///         <see cref="Contains" /> will return false if
-    ///         <b>
-    ///             <typeparamref name="TValueTo" />
-    ///         </b>
-    ///         is not castable to
-    ///         <b>
-    ///             <typeparamref name="TValueFrom" />
-    ///         </b>
-    ///         , however.
-    ///     </remarks>
-    /// </summary>
-    /// <exception cref="System.InvalidCastException">
+    /// A dictionary that hides the underlying type that it holds, and casts on-demand.
+    /// <remarks>
+    ///     Type and cast safety are
     ///     <b>
-    ///         <typeparamref name="TValueFrom" />
+    ///         <i>not</i>
     ///     </b>
-    ///     is not castable to
+    ///     guaranteed by this class. Caution should be taken to ensure that values can be casted, by operator or inheritence.
+    ///     <see cref="Add(System.Collections.Generic.KeyValuePair{TKey,TValueTo})" /> Is not cast-safe, and will throw.
+    ///     <see cref="Contains" /> will return false if
     ///     <b>
     ///         <typeparamref name="TValueTo" />
     ///     </b>
-    ///     .
+    ///     is not castable to
+    ///     <b>
+    ///         <typeparamref name="TValueFrom" />
+    ///     </b>
+    ///     , however.
+    /// </remarks>
+    /// </summary>
+    /// <exception cref="System.InvalidCastException">
+    /// <b>
+    ///     <typeparamref name="TValueFrom" />
+    /// </b>
+    /// is not castable to
+    /// <b>
+    ///     <typeparamref name="TValueTo" />
+    /// </b>
+    /// .
     /// </exception>
     /// <typeparam name="TKey">The type to store as the key.</typeparam>
     /// <typeparam name="TValueFrom">The underlying type to store.</typeparam>

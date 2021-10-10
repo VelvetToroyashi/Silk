@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Silk.Core.Utilities
 {
     /// <summary>
-    ///     Helper class to run async methods within a sync process.
+    /// Helper class to run async methods within a sync process.
     /// </summary>
     public static class AsyncUtil
 	{
@@ -15,8 +15,8 @@ namespace Silk.Core.Utilities
 			TaskScheduler.Default);
 
         /// <summary>
-        ///     Executes an async Task method which has a void return value synchronously
-        ///     USAGE: AsyncUtil.RunSync(() => AsyncMethod());
+        /// Executes an async Task method which has a void return value synchronously
+        /// USAGE: AsyncUtil.RunSync(() => AsyncMethod());
         /// </summary>
         /// <param name="task">Task method to execute</param>
         public static void RunSync(Func<Task> task)
@@ -29,10 +29,10 @@ namespace Silk.Core.Utilities
 		}
 
         /// <summary>
-        ///     Executes an async Task
-        ///     <T>
-        ///         method which has a T return type synchronously
-        ///         USAGE: T result = AsyncUtil.RunSync(() => AsyncMethod<T>());
+        /// Executes an async Task
+        /// <T>
+        ///     method which has a T return type synchronously
+        ///     USAGE: T result = AsyncUtil.RunSync(() => AsyncMethod<T>());
         /// </summary>
         /// <typeparam name="TResult">Return Type</typeparam>
         /// <param name="task">Task<T> method to execute</param>

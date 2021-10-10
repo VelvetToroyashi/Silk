@@ -9,7 +9,7 @@ using Silk.Shared.Constants;
 namespace Silk.Core.AutoMod
 {
 	/// <summary>
-	///     An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
+	/// An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
 	/// </summary>
 	public sealed class AutoModMuteApplier
 	{

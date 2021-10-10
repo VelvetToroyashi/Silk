@@ -289,7 +289,7 @@ namespace Silk.Core
 	public static class IConfigurationExtensions
 	{
         /// <summary>
-        ///     An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
+        /// An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
         /// </summary>
         /// <param name="config">the configuration</param>
         /// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>

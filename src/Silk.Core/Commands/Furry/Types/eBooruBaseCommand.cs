@@ -25,7 +25,7 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
         /// <summary>
-        ///     Execute the query from the specified booru site.
+        /// Execute the query from the specified booru site.
         /// </summary>
         /// <param name="ctx">The command context to execute this command in.</param>
         /// <param name="amount">Amount of images to return.</param>
@@ -33,7 +33,7 @@ namespace Silk.Core.Commands.Furry.Types
         public abstract Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null);
 
         /// <summary>
-        ///     Make a GET request to the booru site (e6/e9), and return the result.
+        /// Make a GET request to the booru site (e6/e9), and return the result.
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
         /// <summary>
-        ///     Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
+        /// Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
         /// </summary>
         /// <param name="query">search query to put in the GET request.</param>
         /// <param name="apiKey">The API key.</param>
@@ -83,7 +83,7 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
         /// <summary>
-        ///     Get a set number of posts randomly from the list of available posts.
+        /// Get a set number of posts randomly from the list of available posts.
         /// </summary>
         /// <param name="post">e6/e9 post result.</param>
         /// <param name="amount">The amount of posts to return.</param>

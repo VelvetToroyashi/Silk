@@ -17,12 +17,12 @@ namespace Silk.Shared.Configuration
     /// Ex. Below, the "Persistence" key correlates to the Persistence property in this class with the same name
     /// <code>
     /// {
-    ///     /* Root */
-    ///     "Silk":
-    ///     {
-    ///         /* Sub-Key property name */
-    ///         "Persistence": {...}
-    ///     }
+    /// /* Root */
+    /// "Silk":
+    /// {
+    ///     /* Sub-Key property name */
+    ///     "Persistence": {...}
+    /// }
     /// }
     /// </code>
     /// </summary>

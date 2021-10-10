@@ -473,7 +473,7 @@ namespace Silk.Core.Services.Server
 
 
 		/// <summary>
-		///     Creates a formatted embed to be sent to a user.
+		/// Creates a formatted embed to be sent to a user.
 		/// </summary>
 		/// <param name="enforcer">The user that created this infraction.</param>
 		/// <param name="guildName">The name of the guild the infraction occured on.</param>
@@ -520,7 +520,7 @@ namespace Silk.Core.Services.Server
 
 
 		/// <summary>
-		///     Sends a message to the appropriate log channel that an infraction (note, reason, or duration) was updated.
+		/// Sends a message to the appropriate log channel that an infraction (note, reason, or duration) was updated.
 		/// </summary>
 		private async Task<InfractionResult> LogUpdatedInfractionAsync(InfractionDTO infOld, InfractionDTO infNew)
 		{
@@ -597,7 +597,7 @@ namespace Silk.Core.Services.Server
 		}
 
 		/// <summary>
-		///     Logs to the designated mod-log channel, if any.
+		/// Logs to the designated mod-log channel, if any.
 		/// </summary>
 		/// <param name="inf">The infraction to log.</param>
 		private async Task<InfractionResult> LogInfractionAsync(InfractionDTO inf)
@@ -683,7 +683,7 @@ namespace Silk.Core.Services.Server
 		}
 
 		/// <summary>
-		///     Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
+		/// Ensures a moderation channel exists. If it doesn't one will be created, and hidden.
 		/// </summary>
 		private async Task EnsureModLogChannelExistsAsync(ulong guildId)
 		{

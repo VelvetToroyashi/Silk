@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
-using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Types;
 
 namespace Silk.Core.Services.Server
@@ -22,7 +22,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Creates a tag that points to another tag.
+        /// Creates a tag that points to another tag.
         /// </summary>
         /// <param name="tagName">The name of the tag to alias to.</param>
         /// <param name="aliasName">The name of the alias.</param>
@@ -46,7 +46,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Updates the content of a tag, and corresponding aliases.
+        /// Updates the content of a tag, and corresponding aliases.
         /// </summary>
         /// <param name="tagName">The name of the tag to update (case insensitive).</param>
         /// <param name="content">The content of which to update the tag.</param>
@@ -79,7 +79,7 @@ namespace Silk.Core.Services.Server
 
 
         /// <summary>
-        ///     Claims a tag or alias, changing its owner.
+        /// Claims a tag or alias, changing its owner.
         /// </summary>
         /// <param name="tag">The tag to update.</param>
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
@@ -90,7 +90,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Creates a tag with a given name.
+        /// Creates a tag with a given name.
         /// </summary>
         /// <param name="tagName">The name of the tag to create (case-insensitive).</param>
         /// <param name="content">The content of the tag to create.</param>
@@ -106,7 +106,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Removes a specific tag. If the tag has aliases, they will be removed as well.
+        /// Removes a specific tag. If the tag has aliases, they will be removed as well.
         /// </summary>
         /// <param name="tagName">The name of the tag to remove.</param>
         /// <param name="guildId">The Id of the guild the tag belongs to.</param>
@@ -121,7 +121,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Gets a collection of tags a given user owns.
+        /// Gets a collection of tags a given user owns.
         /// </summary>
         /// <param name="ownerId">The Id of the tag owner.</param>
         /// <param name="guildId">The Id of the guild the tag owner is from.</param>
@@ -132,7 +132,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Gets a collection of tags in a guild.
+        /// Gets a collection of tags in a guild.
         /// </summary>
         /// <param name="guildId">The Id of the guild.</param>
         /// <returns>A collection of tags in the guild, or null if there are none.</returns>

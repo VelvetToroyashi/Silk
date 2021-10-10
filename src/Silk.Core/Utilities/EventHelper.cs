@@ -10,7 +10,7 @@ using Silk.Core.EventHandlers.Messages.AutoMod;
 namespace Silk.Core.Utilities
 {
     /// <summary>
-    ///     Helper class for subscribing events to <see cref="DiscordShardedClient" />
+    /// Helper class for subscribing events to <see cref="DiscordShardedClient" />
     /// </summary>
     public sealed class EventHelper
 	{

@@ -92,7 +92,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     The main Dispatch method. Determines the dispatch route to take.
+        /// The main Dispatch method. Determines the dispatch route to take.
         /// </summary>
         /// <param name="reminder"></param>
         private async Task DispatchReminderAsync(ReminderEntity reminder)
@@ -139,8 +139,8 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Dispatches a reminder created via slash command to the user's DMs.
-        ///     If the user's DMs are closed, it will attempt to send to the guild it was created on.
+        /// Dispatches a reminder created via slash command to the user's DMs.
+        /// If the user's DMs are closed, it will attempt to send to the guild it was created on.
         /// </summary>
         /// <param name="reminder"></param>
         private async Task DispatchSlashCommandReminderAsync(ReminderEntity reminder)
@@ -190,7 +190,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Updates the expiration of a recurring reminder.
+        /// Updates the expiration of a recurring reminder.
         /// </summary>
         /// <param name="reminder">The reminder to update.</param>
         /// <exception cref="ArgumentException">The repetition period is unsupported.</exception>
@@ -210,7 +210,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Sends a regular, non-recurring reminder to the server.
+        /// Sends a regular, non-recurring reminder to the server.
         /// </summary>
         /// <param name="reminder">The reminder to dispatch.</param>
         /// <param name="guild">The guild the reminder belongs to.</param>
@@ -224,7 +224,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Dispatches a reminder that is set to be recurring, updating it's expiration as necessary.
+        /// Dispatches a reminder that is set to be recurring, updating it's expiration as necessary.
         /// </summary>
         /// <param name="reminder">The reminder to update.</param>
         /// <param name="channel">The channel the reminder should be sent to.</param>
@@ -239,7 +239,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Dispatches a reminder that was created with a reply to another message.
+        /// Dispatches a reminder that was created with a reply to another message.
         /// </summary>
         /// <param name="reminder">The reminder to dispatch.</param>
         /// <param name="channel">The channel the reminder was created in.</param>
@@ -259,7 +259,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Sends a reminder replying to the referenced message in the reply.
+        /// Sends a reminder replying to the referenced message in the reply.
         /// </summary>
         /// <param name="reminder">The reminder to send.</param>
         /// <param name="channel">The channel the reminder was created in.</param>
@@ -284,7 +284,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        ///     Sends a reminder that intiially replied to another message.
+        /// Sends a reminder that intiially replied to another message.
         /// </summary>
         /// <param name="reminder"></param>
         /// <param name="channel"></param>
@@ -313,8 +313,8 @@ namespace Silk.Core.Services.Server
 
 
         /// <summary>
-        ///     Sends a reminder to the creator of said reminder as a fallback in case the channel the reminder was created in is
-        ///     deleted or otherwise no longer accessible.
+        /// Sends a reminder to the creator of said reminder as a fallback in case the channel the reminder was created in is
+        /// deleted or otherwise no longer accessible.
         /// </summary>
         /// <param name="reminder">The reminder to send.</param>
         /// <param name="guild">The guild the reminder was initialy sent on.</param>

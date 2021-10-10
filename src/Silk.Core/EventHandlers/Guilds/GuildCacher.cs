@@ -94,7 +94,6 @@ namespace Silk.Core.EventHandlers.Guilds
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}]" :
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}] → Staff [{Members}/{AllMembers}]";
 			
-			
 			_logger.LogDebug(EventIds.EventHandler, message, _client.ShardId + 1, _client.ShardCount, currentGuilds, _client.Guilds.Count, members, totalMembers);
 		}
 

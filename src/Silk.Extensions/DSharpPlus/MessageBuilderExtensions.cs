@@ -9,7 +9,7 @@ namespace Silk.Extensions.DSharpPlus
     public static class MessageBuilderExtensions
     {
         /// <summary>
-        ///     Remove all mentions from a message. They will still be rendered by Discord but affected mentions will not ping anyone.
+        /// Remove all mentions from a message. They will still be rendered by Discord but affected mentions will not ping anyone.
         /// </summary>
         /// <param name="builder">The builder to remove mentions from.</param>
         /// <returns>The builder to allow more calls to be chained.</returns>
@@ -21,7 +21,7 @@ namespace Silk.Extensions.DSharpPlus
 
 
         /// <summary>
-        ///     Clears the components of a <see cref="DiscordMessageBuilder" />.
+        /// Clears the components of a <see cref="DiscordMessageBuilder" />.
         /// </summary>
         /// <param name="builder">The builder to clear.</param>
         /// <returns>The updated builder to chain calls with.</returns>
@@ -33,7 +33,7 @@ namespace Silk.Extensions.DSharpPlus
         }
 
         /// <summary>
-        ///     Remove a single user mention from a message without having to form <see cref="IMention" /> for every mention and remove it manually.
+        /// Remove a single user mention from a message without having to form <see cref="IMention" /> for every mention and remove it manually.
         /// </summary>
         /// <param name="builder">The builder to remove a mention from.</param>
         /// <param name="mention">The Id of the user to remove from the mentions.</param>
@@ -49,7 +49,7 @@ namespace Silk.Extensions.DSharpPlus
             return builder;
         }
         /// <summary>
-        ///     Add role mentions to a message.
+        /// Add role mentions to a message.
         /// </summary>
         /// <param name="builder">The builder to add role mentions to.</param>
         /// <param name="mentions">The mentions to add to the message.</param>
@@ -62,7 +62,7 @@ namespace Silk.Extensions.DSharpPlus
             return builder;
         }
         /// <summary>
-        ///     Add user mentions to a message.
+        /// Add user mentions to a message.
         /// </summary>
         /// <param name="builder">The builder to add user mentions to.</param>
         /// <param name="mentions">The mentions to add to the message.</param>

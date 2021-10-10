@@ -23,7 +23,7 @@ namespace Silk.Core.Data.MediatR.Users
     public record BulkAddUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
 
     /// <summary>
-    ///     The default handler for <see cref="BulkAddUserRequest" />.
+    /// The default handler for <see cref="BulkAddUserRequest" />.
     /// </summary>
     public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<UserEntity>>
     {

@@ -14,22 +14,22 @@ namespace AnnoucementPlugin.Utilities
 
 
   /// <summary>
-  ///     An asynchonrous timer that can yield to tasks if necessary.
+  /// An asynchonrous timer that can yield to tasks if necessary.
   /// </summary>
   public sealed class AsyncTimer : IDisposable
 	{
     /// <summary>
-    ///     Whether this timer has been started.
+    /// Whether this timer has been started.
     /// </summary>
     public bool Started { get; private set; }
 
     /// <summary>
-    ///     Whether the timer yields when executing the callback.
+    /// Whether the timer yields when executing the callback.
     /// </summary>
     public bool YieldsWhenRunning { get; }
 
     /// <summary>
-    ///     An event fired when the callback throws an exception.
+    /// An event fired when the callback throws an exception.
     /// </summary>
     public event EventHandler<Exception> Errored;
 
@@ -43,13 +43,13 @@ namespace AnnoucementPlugin.Utilities
 
 
     /// <summary>
-    ///     Constructs an instance of an AsyncTimer.
+    /// Constructs an instance of an AsyncTimer.
     /// </summary>
     /// <param name="method">The method to invoke.</param>
     /// <param name="interval">How often the timer should fire.</param>
     /// <param name="yieldToTask">
-    ///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    ///     if the callback's execution time is greater than the interval.
+    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+    /// if the callback's execution time is greater than the interval.
     /// </param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
@@ -73,14 +73,14 @@ namespace AnnoucementPlugin.Utilities
 		}
 
     /// <summary>
-    ///     Constructs an instance of an AsyncTimer.
+    /// Constructs an instance of an AsyncTimer.
     /// </summary>
     /// <param name="method">The method to invoke.</param>
     /// <param name="parameter">A state parameter to pass to <paramref name="method" /> to avoid a closure.</param>
     /// <param name="interval">How often the timer should fire.</param>
     /// <param name="yieldToTask">
-    ///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    ///     if the callback's execution time is greater than the interval.
+    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+    /// if the callback's execution time is greater than the interval.
     /// </param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
@@ -105,14 +105,14 @@ namespace AnnoucementPlugin.Utilities
 		}
 
     /// <summary>
-    ///     Constructs an instance of an AsyncTimer.
+    /// Constructs an instance of an AsyncTimer.
     /// </summary>
     /// <param name="method">The method to invoke.</param>
     /// <param name="parameters">A collection of objects to pass to <paramref name="method" /> to avoid a closure.</param>
     /// <param name="interval">How often the timer should fire.</param>
     /// <param name="yieldToTask">
-    ///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    ///     if the callback's execution time is greater than the interval.
+    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+    /// if the callback's execution time is greater than the interval.
     /// </param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
@@ -137,7 +137,7 @@ namespace AnnoucementPlugin.Utilities
 		}
 
     /// <summary>
-    ///     Starts the timer. The callback is executed immediately on the first call.
+    /// Starts the timer. The callback is executed immediately on the first call.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the timer is already started.</exception>
     public void Start()
