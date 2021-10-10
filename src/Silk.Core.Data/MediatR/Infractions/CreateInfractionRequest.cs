@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.DTOs;
-using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Users;
 
 namespace Silk.Core.Data.MediatR.Infractions
 {
@@ -29,7 +29,6 @@ namespace Silk.Core.Data.MediatR.Infractions
         public async Task<InfractionDTO> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
         {
             var guildInfractionCount = await _db.Infractions
-                .Where(inf => inf.InfractionType != InfractionType.Note)
                 .Where(inf => inf.GuildId == request.Guild)
                 .CountAsync(cancellationToken) + 1;
 
