@@ -17,7 +17,7 @@ namespace Silk.Core.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.9")
+                .HasAnnotation("ProductVersion", "5.0.10")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("Silk.Core.Data.Entities.CommandInvocationEntity", b =>
@@ -152,6 +152,12 @@ namespace Silk.Core.Data.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("DeleteMessageOnMatchedInvite")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("DeletePhishingLinks")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("DetectPhishingLinks")
                         .HasColumnType("boolean");
 
                     b.Property<decimal>("GuildId")
