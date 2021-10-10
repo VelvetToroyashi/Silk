@@ -45,6 +45,12 @@ namespace Silk.Shared.Configuration
         public string LogLevel { get; set; } = "Info";
 
         /// <summary>
+        /// Property for determining whether to use global or guild specific slash commands.
+        /// Leave null for global slash commands.
+        /// </summary>
+        public ulong? SlashCommandsGuildId { get; set; } = null;
+
+        /// <summary>
         /// Property for holding Persistence options (property name matching sub-key property in configuration file)
         /// </summary>
         public SilkPersistenceOptions Persistence { get; set; }

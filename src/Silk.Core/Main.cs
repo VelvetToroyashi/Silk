@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PluginLoader.Unity;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.SlashCommands;
@@ -17,6 +18,7 @@ using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions.DSharpPlus;
+using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 
 namespace Silk.Core
@@ -29,6 +31,7 @@ namespace Silk.Core
 		private readonly BotExceptionHandler _handler;
 		private readonly CommandHandler _commandHandler;
 		private readonly SlashCommandExceptionHandler _slashExceptionHandler;
+		private readonly SilkConfigurationOptions _configOptions;
 
 		public Main(
 			DiscordClient client,
@@ -37,6 +40,7 @@ namespace Silk.Core
 			BotExceptionHandler handler,
 			CommandHandler commandHandler,
 			SlashCommandExceptionHandler slashExceptionHandler, 
+			IOptions<SilkConfigurationOptions> configOptions,
 			IPluginLoaderService plugins, PluginWatchdog wd) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
 		{
 			// And that's all it needs, since it subs to events in it's ctor.
@@ -44,6 +48,7 @@ namespace Silk.Core
 			_handler = handler;
 			_commandHandler = commandHandler;
 			_slashExceptionHandler = slashExceptionHandler;
+			_configOptions = configOptions.Value;
 			_plugins = plugins;
 			_client = client;
 			_ = e;
@@ -92,9 +97,11 @@ namespace Silk.Core
 			_logger.LogInformation(EventIds.Core, "Initializing Slash-Commands");
 			SlashCommandsExtension? sc = _client.UseSlashCommands(DiscordConfigurations.SlashCommands);
 			sc.SlashCommandErrored += _slashExceptionHandler.Handle;
-			sc.RegisterCommands<RemindCommands>();
-			sc.RegisterCommands<TagCommands>();
-			sc.RegisterCommands<AvatarCommands>();
+
+			var slashCommandsGuildId = _configOptions.SlashCommandsGuildId;
+			sc.RegisterCommands<RemindCommands>(slashCommandsGuildId);
+			sc.RegisterCommands<TagCommands>(slashCommandsGuildId);
+			sc.RegisterCommands<AvatarCommands>(slashCommandsGuildId);
 
 			return Task.CompletedTask;
 		}
