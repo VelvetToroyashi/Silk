@@ -22,8 +22,13 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		private readonly ConfigService _config;
 		private readonly IInfractionService _infractions;
 		private readonly ILogger<MessagePhishingDetector> _logger;
-		private readonly AutoModAntiPhispher _phishing;
-		public MessagePhishingDetector(DiscordClient client, ILogger<MessagePhishingDetector> logger, AutoModAntiPhispher phishing, ConfigService config, IInfractionService infractions)
+		private readonly AutoModAntiPhisher _phishing;
+		public MessagePhishingDetector(
+			DiscordClient client, 
+			ILogger<MessagePhishingDetector> logger, 
+			AutoModAntiPhisher phishing, 
+			ConfigService config, 
+			IInfractionService infractions)
 		{
 			_logger = logger;
 			_phishing = phishing;

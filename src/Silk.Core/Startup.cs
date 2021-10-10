@@ -187,7 +187,7 @@ namespace Silk.Core
 
 					services.AddSingleton<AutoModMuteApplier>();
 					services.AddSingleton<AntiInviteHelper>();
-					services.AddSingleton<AutoModAntiPhispher>();
+					services.AddSingleton<AutoModAntiPhisher>();
 					
 
 					#endregion
@@ -211,7 +211,7 @@ namespace Silk.Core
 
 					services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
-					services.AddHostedService(b => b.GetRequiredService<AutoModAntiPhispher>());
+					services.AddHostedService(b => b.GetRequiredService<AutoModAntiPhisher>());
 					
 					services.AddSingleton<TagService>();
 

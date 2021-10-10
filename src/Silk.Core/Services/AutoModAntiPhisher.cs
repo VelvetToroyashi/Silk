@@ -14,22 +14,23 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Services
 {
-	public sealed class AutoModAntiPhispher : IHostedService
+	public sealed class AutoModAntiPhisher : IHostedService
 	{
 		private const string HeaderName = "X-Identity";
-		private const string WebsocetUrl = "wss://phish.sinking.yachts/feed";
-		private const string APIUrl = "https://phish.sinking.yachts/v2/all";
+		private const string WebSocketUrl = "wss://phish.sinking.yachts/feed";
+		private const string ApiUrl = "https://phish.sinking.yachts/v2/all";
+		private const int WebSocketBufferSize = 16 * 1024;
 		
 		private readonly HashSet<string> _domains = new();
 
-		private readonly ILogger<AutoModAntiPhispher> _logger;
+		private readonly ILogger<AutoModAntiPhisher> _logger;
 
 		private readonly HttpClient _client;
 		private readonly ClientWebSocket _ws = new();
 
 		private readonly CancellationTokenSource _cts = new();
 
-		public AutoModAntiPhispher(ILogger<AutoModAntiPhispher> logger, HttpClient client)
+		public AutoModAntiPhisher(ILogger<AutoModAntiPhisher> logger, HttpClient client)
 		{
 			_logger = logger;
 			_client = client;
@@ -40,15 +41,13 @@ namespace Silk.Core.Services
 		
 		private async Task ReceiveLoopAsync()
 		{
-			var stoppingToken = _cts.Token;
-			
-			const int bufferSize = 16 * 1024;
-			
-			// 16KB cache; should be more than sufficient for the forseeable future. //
-			using var buffer = new ArrayPoolBufferWriter<byte>(bufferSize);
-
 			try
 			{
+				var stoppingToken = _cts.Token;
+
+				// 16KB cache; should be more than sufficient for the foreseeable future. //
+				using var buffer = new ArrayPoolBufferWriter<byte>(WebSocketBufferSize);
+
 				while (!stoppingToken.IsCancellationRequested)
 				{
 					// See https://github.com/discord-net/Discord.Net/commit/ac389f5f6823e3a720aedd81b7805adbdd78b66d 
@@ -58,7 +57,7 @@ namespace Silk.Core.Services
 					ValueWebSocketReceiveResult result;
 					do
 					{
-						var mem = buffer.GetMemory(bufferSize);
+						var mem = buffer.GetMemory(WebSocketBufferSize);
 						result = await _ws.ReceiveAsync(mem, CancellationToken.None);
 
 						if (result.MessageType is WebSocketMessageType.Close)
@@ -72,10 +71,10 @@ namespace Silk.Core.Services
 					{
 						if (await RestartWebsocketAsync())
 							continue;
-						
+
 						return;
 					}
-					
+
 					var json = Encoding.UTF8.GetString(buffer.WrittenSpan);
 
 					var payload = JObject.Parse(json);
@@ -90,8 +89,10 @@ namespace Silk.Core.Services
 			{
 				_logger.LogWarning(EventIds.Service, e, "Websocket threw an exception. API - Unavailable");
 			}
-			
-			await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Silk is ready to shut down now. Bye bye...", CancellationToken.None);
+			finally
+			{
+				await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Silk is ready to shut down now. Bye bye...", CancellationToken.None);
+			}
 		}
 
 		private async Task<bool> RestartWebsocketAsync()
@@ -99,7 +100,7 @@ namespace Silk.Core.Services
 			await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested. I'll be back soon.", CancellationToken.None);
 			try
 			{
-				await _ws.ConnectAsync(new(WebsocetUrl), CancellationToken.None);
+				await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
 				return true;
 			}
 			catch
@@ -112,7 +113,7 @@ namespace Silk.Core.Services
 		private async Task<bool> GetDomainsAsync()
 		{
 			_logger.LogTrace(EventIds.Service, "Getting domains...");
-			using var req = new HttpRequestMessage(HttpMethod.Get, APIUrl)
+			using var req = new HttpRequestMessage(HttpMethod.Get, ApiUrl)
 			{
 				Headers = { { HeaderName, StringConstants.ProjectIdentifier } } // X-Identifier MUST be set or we get 403'd //
 			};
@@ -169,7 +170,7 @@ namespace Silk.Core.Services
 			
 			try
 			{
-				await _ws.ConnectAsync(new(WebsocetUrl), CancellationToken.None);
+				await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
 			}
 			catch (WebSocketException)
 			{
@@ -178,8 +179,7 @@ namespace Silk.Core.Services
 			}
 
 			_logger.LogInformation(EventIds.Service, "Opened websocket to phishing API.");
-
-
+			
 			_ = Task.Run(ReceiveLoopAsync);
 		}
 
