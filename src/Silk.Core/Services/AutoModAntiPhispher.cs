@@ -138,7 +138,7 @@ namespace Silk.Core.Services
 
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogInformation(EventIds.Service, "Cancellation requested, stopping service.");
+			_logger.LogInformation(EventIds.Service, "Cancellation requested. Stopping service.");
 			
 			_cts.Cancel();
 		}
