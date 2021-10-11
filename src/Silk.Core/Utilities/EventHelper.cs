@@ -23,7 +23,8 @@ namespace Silk.Core.Utilities
 			RoleAddedHandler staffCheck,
 			GuildEventHandler guildHandler,
 			MemberRemovedHandler memberRemovedHandler,
-			AutoModMuteApplier _)
+			AutoModMuteApplier _,
+			MessagePhishingDetector __)
 		{
 
 			client.MessageCreated += commandHandler.Handle;

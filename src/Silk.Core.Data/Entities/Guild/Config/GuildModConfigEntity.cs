@@ -82,6 +82,16 @@ namespace Silk.Core.Data.Entities
         /// Whether to automatically de-hoist members.
         /// </summary>
         public bool AutoDehoist { get; set; }
+        
+        /// <summary>
+        /// Whether or not to even scan for phishing links on a server.
+        /// </summary>
+        public bool DetectPhishingLinks { get; set; }
+        
+        /// <summary>
+        /// Whether or not phishing links should be deleted.
+        /// </summary>
+        public bool DeletePhishingLinks { get; set; }
 
         /// <summary>
         /// Whether to scan matched invites. Server must be premium and blacklist invites.

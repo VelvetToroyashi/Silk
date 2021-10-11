@@ -21,6 +21,11 @@ namespace Silk.Core.Data.MediatR.Guilds
         public bool? LogMembersLeaving { get; init; }
         public bool? UseAggressiveRegex { get; init; }
         public bool? WarnOnMatchedInvite { get; init; }
+        
+        public bool? DetectPhishingLinks { get; init; }
+        
+        public bool? DeletePhishingLinks { get; init; }
+        
         public bool? DeleteOnMatchedInvite { get; init; }
         public int? MaxUserMentions { get; init; }
         public int? MaxRoleMentions { get; init; }
@@ -53,6 +58,8 @@ namespace Silk.Core.Data.MediatR.Guilds
             config.MaxRoleMentions = request.MaxRoleMentions ?? config.MaxRoleMentions;
             config.LoggingChannel = request.LoggingChannel ?? config.LoggingChannel;
             config.ScanInvites = request.ScanInvites ?? config.ScanInvites;
+            config.DetectPhishingLinks = request.DetectPhishingLinks ?? config.DetectPhishingLinks;
+            config.DeletePhishingLinks = request.DeletePhishingLinks ?? config.DeletePhishingLinks;
             config.BlacklistWords = request.BlacklistWords ?? config.BlacklistWords;
             config.BlacklistInvites = request.BlacklistInvites ?? config.BlacklistInvites;
             config.LogMemberJoins = request.LogMembersJoining ?? config.LogMemberJoins;

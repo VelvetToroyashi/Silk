@@ -27,6 +27,7 @@ using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
+using Silk.Core.Services;
 using Silk.Core.Services.Bot;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -126,7 +127,8 @@ namespace Silk.Core
 				.WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
 				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning);
+				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
+				.MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
 			SilkConfigurationOptions? configOptions = host.Configuration.GetSilkConfigurationOptionsFromSection();
 			Log.Logger = configOptions.LogLevel switch
@@ -173,9 +175,7 @@ namespace Silk.Core
 							$"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
 
 					services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
-
-					services.AddSingleton<GuildEventHandler>();
-
+					
 					#region Services
 
 					services.AddSingleton<ConfigService>();
@@ -187,6 +187,8 @@ namespace Silk.Core
 
 					services.AddSingleton<AutoModMuteApplier>();
 					services.AddSingleton<AntiInviteHelper>();
+					services.AddSingleton<AutoModAntiPhisher>();
+					
 
 					#endregion
 					
@@ -209,6 +211,8 @@ namespace Silk.Core
 
 					services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
 
+					services.AddHostedService(b => b.GetRequiredService<AutoModAntiPhisher>());
+					
 					services.AddSingleton<TagService>();
 
 					services.AddSingleton<Main>();
@@ -216,6 +220,8 @@ namespace Silk.Core
 
 					services.AddSingleton<IInfractionService, InfractionService>();
 					services.AddHostedService(s => s.Get<IInfractionService>() as InfractionService);
+					
+					
 
 					// Couldn't figure out how to get the service since AddHostedService adds it as //
 					// IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
@@ -223,12 +229,15 @@ namespace Silk.Core
 					services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 
 					services.AddHostedService<StatusService>();
-
+					
+					
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
-
+					
+					
+					
 					services.AddSingleton<GuildCacher>();
-
+					services.AddSingleton<GuildEventHandler>();
 					//services.AddSingleton<UptimeService>();
 					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 					services.RegisterShardedPluginServices();

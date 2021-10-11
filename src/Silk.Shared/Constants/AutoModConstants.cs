@@ -19,6 +19,8 @@ namespace Silk.Shared.Constants
 		/// The maximum amount of unique role mentions a message can contain.
 		/// </summary>
 		public const string MaxRoleMentions = "max_role_mentions";
+
+		public const string PhishingLinkDetected = "phishing_link";
 		
 		//TODO: More automod strings
 
