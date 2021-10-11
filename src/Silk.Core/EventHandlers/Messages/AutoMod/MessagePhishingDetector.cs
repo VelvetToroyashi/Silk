@@ -20,15 +20,14 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		private const string Phishing = "Message contained a phishing link.";
 
 		private readonly ConfigService _config;
+		private readonly AutoModAntiPhisher _phishing;
 		private readonly IInfractionService _infractions;
 		private readonly ILogger<MessagePhishingDetector> _logger;
-		private readonly AutoModAntiPhisher _phishing;
+		
 		public MessagePhishingDetector(
-			DiscordClient client, 
-			ILogger<MessagePhishingDetector> logger, 
-			AutoModAntiPhisher phishing, 
-			ConfigService config, 
-			IInfractionService infractions)
+			ConfigService config, DiscordClient client,
+			AutoModAntiPhisher phishing, IInfractionService infractions,
+			ILogger<MessagePhishingDetector> logger)
 		{
 			_logger = logger;
 			_phishing = phishing;
@@ -46,6 +45,8 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 		private async Task HandleCreatedAsync(DiscordMessage message)
 		{
+			
+			
 			if (message.Channel.Guild is null)
 				return;
 
