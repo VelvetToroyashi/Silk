@@ -60,10 +60,10 @@ namespace Silk.Core
 		{
 			_logger.LogInformation(EventIds.Core, "Starting Service");
 
+			await _plugins.LoadPluginsAsync();
+			
 			await InitializeClientExtensions();
 			_logger.LogInformation(EventIds.Core, "Initialized Client");
-			
-			await _plugins.LoadPluginsAsync();
 			
 			await InitializeCommandsNextAsync();
 			await InitializeSlashCommandsAsync();
@@ -73,8 +73,6 @@ namespace Silk.Core
 			_logger.LogDebug(EventIds.Core, "Connecting to Discord Gateway");
 			await _client.ConnectAsync();
 			_logger.LogInformation(EventIds.Core, "Connected to Discord Gateway as {User}", _client.CurrentUser.ToDiscordName());
-			
-			
 		}
 
 		public async Task StopAsync(CancellationToken cancellationToken)

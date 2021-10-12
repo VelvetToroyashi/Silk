@@ -64,7 +64,6 @@ namespace PluginLoader.Unity
 				catch (DuplicateCommandException e)
 				{
 					_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.Plugin.DisplayName, e.CommandName);
-					break; // Next plugin. //
 				}
 			}
 			
