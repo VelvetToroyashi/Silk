@@ -17,6 +17,7 @@ namespace Silk.Core.Data.MediatR.Guilds.Config
 			=> _db.GuildModConfigs
 				.Include(c => c.AllowedInvites)
 				.Include(c => c.InfractionSteps)
+				.Include(c => c.Exemptions)
 				.FirstOrDefaultAsync(c => c.GuildId == request.guildId, cancellationToken);
 	}
 }
