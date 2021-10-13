@@ -29,7 +29,10 @@ namespace Silk.Core.Data.MediatR.Guilds
         public bool? DeleteOnMatchedInvite { get; init; }
         public int? MaxUserMentions { get; init; }
         public int? MaxRoleMentions { get; init; }
+        
         public List<InviteEntity>? AllowedInvites { get; init; }
+        
+        public List<ExemptionEntity>? Exemptions { get; init; }
         public List<InfractionStepEntity>? InfractionSteps { get; init; }
         public ulong? MuteRoleId { get; init; }
         public ulong? LoggingChannel { get; init; }
@@ -67,6 +70,7 @@ namespace Silk.Core.Data.MediatR.Guilds
             config.UseAggressiveRegex = request.UseAggressiveRegex ?? config.UseAggressiveRegex;
             config.WarnOnMatchedInvite = request.WarnOnMatchedInvite ?? config.WarnOnMatchedInvite;
             config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
+            config.Exemptions = request.Exemptions ?? config.Exemptions;
             config.NamedInfractionSteps = request.AutoModActions ?? config.NamedInfractionSteps;
 
             if (request.InfractionSteps?.Any() ?? false)
