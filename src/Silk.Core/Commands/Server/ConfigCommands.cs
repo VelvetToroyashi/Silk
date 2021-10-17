@@ -391,7 +391,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
-			[Aliases("greeting-role", "welcomerole", "gr", "welcomerole", "wr")]
+			[Aliases("greeting-role", "welcomerole", "gr", "welcome-role", "wr")]
 			[Description("What role to check for before greeting members. Cannot be @everyone.")]
 			public async Task GreetingRole(CommandContext ctx, DiscordRole role)
 			{
