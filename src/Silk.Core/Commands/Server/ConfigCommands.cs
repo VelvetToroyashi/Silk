@@ -391,7 +391,28 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
-			[Aliases("greeting-channel","welcomemessage", "wm", "gm")]
+			[Aliases("greeting-role", "welcomerole", "gr", "welcomerole", "wr")]
+			[Description("What role to check for before greeting members. Cannot be @everyone.")]
+			public async Task GreetingRole(CommandContext ctx, DiscordRole role)
+			{
+				if (role == ctx.Guild.EveryoneRole)
+				{
+					await ctx.RespondAsync("No, you cannot use the everyone role for that.");
+					return;
+				}
+				
+				EnsureCancellationTokenCancellation(ctx.User.Id);
+
+				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				if (!res) return;
+
+				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { VerificationRoleId = role.Id });
+			}
+
+			[Command]
+			[Aliases("greeting-message","welcomemessage", "wm", "gm")]
+			[Description("What should I greet members with? Substitutions: \n`{u}` - Username \n`{@u}` - User ping \n`{s}` - Server name")]
 			public async Task GreetingMessage(CommandContext ctx, [RemainingText] string message)
 			{
 				if (message.Length > 2000)
