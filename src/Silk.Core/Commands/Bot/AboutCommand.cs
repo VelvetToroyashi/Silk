@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.Bot
 				.AddField("Bot version", StringConstants.Version, true)
 				.AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
 
-      var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands";
+      var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=972418070&scope=bot%20applications.commands";
       var builder = new DiscordMessageBuilder()
           .WithEmbed(embed)
           .AddComponents(
