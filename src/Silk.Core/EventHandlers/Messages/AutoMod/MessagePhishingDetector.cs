@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -38,15 +39,23 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		
 		private Task CreatedSignal(DiscordClient sender, MessageCreateEventArgs e)
 		{
-			Task.Run(() => HandleCreatedAsync(e.Message));
+			Task.Run(async () =>
+			{
+				try
+				{
+					await HandleCreatedAsync(e.Message);
+				}
+				catch(Exception ex)
+				{
+					_logger.LogCritical(ex, "An exception was thrown while handling phishing {GuildId}, {ChannelId}, {MessageId}, {UserId}", e.Guild?.Id, e.Channel?.Id, e.Message?.Id, e.Author?.Id);
+				}
+			});
 			return Task.CompletedTask;
 		}
 
 
 		private async Task HandleCreatedAsync(DiscordMessage message)
 		{
-			
-			
 			if (message.Channel.Guild is null)
 				return;
 

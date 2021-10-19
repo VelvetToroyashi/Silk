@@ -102,6 +102,21 @@ namespace Silk.Core.Data.Entities
         /// Whether to scan matched invites. Server must be premium and blacklist invites.
         /// </summary>
         public bool ScanInvites { get; set; }
+        
+        /// <summary>
+        /// Whether to use webhooks to log infractions.
+        /// </summary>
+        public bool UseWebhookLogging { get; set; }
+        
+        /// <summary>
+        /// The id of the webhook to log with.
+        /// </summary>
+        public ulong WebhookLoggingId { get; set; }
+        
+        /// <summary>
+        /// The url of the webhook to log with, if applicable.
+        /// </summary>
+        public string? LoggingWebhookUrl { get; set; }
 
         /// <summary>
         /// A list of steps depending on the number of infractions a <see cref="UserEntity" /> has.
