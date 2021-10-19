@@ -431,10 +431,14 @@ namespace Silk.Core.Services.Server
 
 			try
 			{
-				await channel.SendMessageAsync(buil => buil.AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
+				if (conf.UseWebhookLogging && _webhookClient.GetRegisteredWebhook(conf.WebhookLoggingId) is DiscordWebhook wh)
+					await wh.ExecuteAsync(new DiscordWebhookBuilder().AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
+				else 
+					await channel.SendMessageAsync(buil => buil.AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
 			}
 			catch
 			{
+				
 				/* ??? */
 			}
 
@@ -750,7 +754,8 @@ namespace Silk.Core.Services.Server
 				DiscordChannel? chn = await guild.CreateChannelAsync("mod-log", ChannelType.Text, guild.Channels.Values.OfType(ChannelType.Category).Last(), overwrites: overwrites);
 				await chn.SendMessageAsync("A logging channel was not available when this infraction was created, so one has been generated.");
 
-				DiscordWebhook wh = null!;
+				DiscordWebhook? wh = null;
+				
 				if (guild.CurrentMember.Permissions.HasPermission(Permissions.ManageWebhooks))
 				{
 					wh = await chn.CreateWebhookAsync("Silk! Logging");
