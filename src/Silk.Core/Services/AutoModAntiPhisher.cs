@@ -53,7 +53,7 @@ namespace Silk.Core.Services
 					// See https://github.com/discord-net/Discord.Net/commit/ac389f5f6823e3a720aedd81b7805adbdd78b66d 
 					// for explanation on the cancellation token
 					// TL;DR passing cancellation token to websocket kills the socket //
-
+					
 					ValueWebSocketReceiveResult result;
 					do
 					{
@@ -83,6 +83,8 @@ namespace Silk.Core.Services
 					var domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
 
 					HandleWebsocketCommand(command, domains);
+					
+					buffer.Clear(); // Clear, or you'll get JSON exceptions //
 				}
 			}
 			catch (Exception e)
