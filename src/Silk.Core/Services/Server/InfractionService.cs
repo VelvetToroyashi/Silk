@@ -432,7 +432,7 @@ namespace Silk.Core.Services.Server
 			try
 			{
 				if (conf.UseWebhookLogging && _webhookClient.GetRegisteredWebhook(conf.WebhookLoggingId) is DiscordWebhook wh)
-					await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(guild.CurrentMember.GuildAvatarUrl).AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
+					await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(guild.CurrentMember.AvatarUrl).AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
 				else 
 					await channel.SendMessageAsync(buil => buil.AddEmbeds(new DiscordEmbed[] { mainNoteEmbed, noteReasonEmbed }));
 			}
