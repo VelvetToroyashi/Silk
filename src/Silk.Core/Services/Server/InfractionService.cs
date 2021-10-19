@@ -14,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Data.MediatR.Guilds.Config;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -794,9 +793,7 @@ namespace Silk.Core.Services.Server
 				_logger.LogWarning(EventIds.Service, "Slow load for infractions. Offloading to ThreadPool.");
 				_ = Task.Run(async () => await LoadAndCacheInfractionsAsync(), cancellationToken);
 			}
-
-			_ = EnsureWebhooksExistAsync();
-
+			
 			async Task LoadAndCacheInfractionsAsync()
 			{
 				IEnumerable<InfractionDTO>? allInfractions = await infractionsTask;
@@ -811,30 +808,6 @@ namespace Silk.Core.Services.Server
 				_timer.Start();
 			}
 		}
-
-		private async Task EnsureWebhooksExistAsync()
-		{
-			await Task.Delay(15000);
-			
-			foreach (var g in _client.Guilds.Keys)
-			{
-				var conf = await _mediator.Send(new GetGuildModConfigRequest(g));
-
-				if (!conf.UseWebhookLogging || conf.LoggingChannel is 0)
-					continue;
-
-				try
-				{
-					if (conf.LoggingWebhookUrl is not null)
-						await _webhookClient.AddWebhookAsync(new(conf.LoggingWebhookUrl!));
-				}
-				catch (NotFoundException)
-				{
-					_logger.LogWarning(EventIds.Service, "Webhook logger for {GuildId} has disappeared since last boot.", g);
-				}
-			}
-		}
-		
 		
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
