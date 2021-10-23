@@ -15,7 +15,7 @@
         <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
 
         <PackageReference Update="FluentAssertions" Version="6.1.0" />
-        <PackageReference Update="FluentValidation" Version="10.3.3" />
+        <PackageReference Update="FluentValidation" Version="10.3.4" />
         <PackageReference Update="FluentValidation.AspNetCore" Version="10.3.3" />
         <PackageReference Update="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
         
