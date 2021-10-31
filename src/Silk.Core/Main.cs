@@ -17,6 +17,7 @@ using Silk.Core.SlashCommands.Commands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Economy.Core;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -115,6 +116,7 @@ namespace Silk.Core
 			var cnext = _client.GetCommandsNext();
 
 			cnext.RegisterCommands(asm);
+			cnext.RegisterCommands(typeof(IAssemblyMarker).Assembly);
 			cnext.SetHelpFormatter<HelpFormatter>();
 			cnext.RegisterConverter(new MemberConverter());
 			cnext.RegisterConverter(new InfractionTypeConverter());
