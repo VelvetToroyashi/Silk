@@ -9,9 +9,6 @@ namespace Silk.Economy.Data.Models
 		public ulong FromId { get; init; }
 		public ulong ToId { get; init; }
 		
-		public EconomyUser From { get; init; }
-		public EconomyUser To { get; init; }
-		
 		public uint Amount { get; init; }
 		public string Reason { get; init; }
 		public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;

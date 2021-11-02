@@ -9,5 +9,11 @@ namespace Silk.Economy.Data
 		public DbSet<EconomyTransaction> EconomyTransactions { get; set; }
 		
 		public EconomyContext(DbContextOptions<EconomyContext> options) : base(options) { }
+		
+		protected override void OnModelCreating(ModelBuilder builder)
+		{
+			builder.ApplyConfigurationsFromAssembly(typeof(EconomyContext).Assembly);
+			base.OnModelCreating(builder);
+		}
 	}
 }

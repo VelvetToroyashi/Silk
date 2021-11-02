@@ -36,6 +36,8 @@ using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HttpClient;
+using Silk.Economy.Core;
+using Silk.Economy.Data;
 using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Configuration;
@@ -57,8 +59,7 @@ namespace Silk.Core
 			IHostBuilder builder = CreateBuilder();
 
 			ConfigureServices(builder);
-
-
+			
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
 			DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
@@ -78,19 +79,24 @@ namespace Silk.Core
 				using IServiceScope? serviceScope = builtBuilder.Services?.CreateScope();
 				if (serviceScope is not null)
 				{
-					await using GuildContext? dbContext = serviceScope.ServiceProvider
-						.GetRequiredService<IDbContextFactory<GuildContext>>()
-						.CreateDbContext();
-
-					IEnumerable<string>? pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-
-					if (pendingMigrations.Any())
-						await dbContext.Database.MigrateAsync();
+					await TryMigrateAsync<GuildContext>(serviceScope);
+					await TryMigrateAsync<EconomyContext>(serviceScope);
 				}
 			}
 			catch (Exception)
 			{
 				/* Ignored. Todo: Probably should handle? */
+			}
+
+			async Task TryMigrateAsync<T>(IServiceScope? serviceScope) where T : DbContext
+			{
+				await using T? dbContext = serviceScope.ServiceProvider
+					.GetRequiredService<T>();
+
+				IEnumerable<string>? pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+
+				if (pendingMigrations.Any())
+					await dbContext.Database.MigrateAsync();
 			}
 		}
 
@@ -101,7 +107,8 @@ namespace Silk.Core
 			builder.ConfigureServices((context, container) =>
 			{
 				SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
-				AddDatabases(container, silkConfig.Persistence);
+				AddDatabases<GuildContext>(container, silkConfig.Persistence);
+				AddDatabases<EconomyContext>(container, silkConfig.Persistence, "Economy");
 			});
 			
 			return builder;
@@ -156,7 +163,7 @@ namespace Silk.Core
 					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
 					AddSilkConfigurationOptions(services, context.Configuration);
-					AddDatabases(services, silkConfig.Persistence);
+					
 
 					if (!addServices) return;
 
@@ -189,7 +196,6 @@ namespace Silk.Core
 					services.AddSingleton<AntiInviteHelper>();
 					services.AddSingleton<AutoModAntiPhisher>();
 					
-
 					#endregion
 					
 					services.AddSingleton<RoleAddedHandler>();
@@ -233,6 +239,7 @@ namespace Silk.Core
 					
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
+					services.AddMediatR(typeof(IAssemblyMarker));
 					
 					
 					
@@ -277,19 +284,19 @@ namespace Silk.Core
 			services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
 		}
 
-		private static void AddDatabases(IServiceCollection services, SilkPersistenceOptions persistenceOptions)
+		private static void AddDatabases<T>(IServiceCollection services, SilkPersistenceOptions persistenceOptions, string? dbOverride = null) where T : DbContext
 		{
 			void Builder(DbContextOptionsBuilder b)
 			{
-				b.UseNpgsql(persistenceOptions.GetConnectionString());
+				b.UseNpgsql(persistenceOptions.GetConnectionString(dbOverride));
 				#if DEBUG
 				b.EnableSensitiveDataLogging();
 				b.EnableDetailedErrors();
 				#endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
 			}
 			
-			services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
-			services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
+			services.AddDbContext<T>(Builder, ServiceLifetime.Transient);
+			services.AddDbContextFactory<T>(Builder, ServiceLifetime.Transient);
 			//services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
 		}
 	}

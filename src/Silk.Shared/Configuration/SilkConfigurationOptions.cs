@@ -91,11 +91,11 @@ namespace Silk.Shared.Configuration
         /// <see cref="SilkPersistenceOptions"/>
         /// </summary>
         /// <returns>The full connection string given the options, or invalid/incomplete connection string if pieces of configuration file are left blank</returns>
-        public string GetConnectionString()
+        public string GetConnectionString(string? database = null)
         {
             return $"Server={Host};" +
                    $"Port={Port};" +
-                   $"Database={Database};" +
+                   $"Database={database ?? Database};" +
                    $"Username={Username};" +
                    $"Password={Password};" +
                    "Include Error Detail = true";
