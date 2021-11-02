@@ -11,7 +11,5 @@ namespace Silk.Economy.Data.Models.Configurations
 			
 			builder.HasMany(u => u.Transactions);
 		}
-		
-		
 	}
 }
