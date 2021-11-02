@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01034" />
+      <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
     </ItemGroup>

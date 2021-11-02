@@ -53,6 +53,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "economy", "economy", "{2A8F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Economy.Core", "src\Silk.Economy.Core\Silk.Economy.Core.csproj", "{DE5F9EDE-06D8-4775-9054-3D6BFC7CE8DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Economy.Data", "src\Silk.Economy.Data\Silk.Economy.Data.csproj", "{7B9CF763-0A8C-43B4-B73E-E884352198E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +199,14 @@ Global
 		{DE5F9EDE-06D8-4775-9054-3D6BFC7CE8DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE5F9EDE-06D8-4775-9054-3D6BFC7CE8DD}.Release|x64.ActiveCfg = Release|Any CPU
 		{DE5F9EDE-06D8-4775-9054-3D6BFC7CE8DD}.Release|x64.Build.0 = Release|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -223,5 +233,6 @@ Global
 		{2010E56C-4A9C-4395-A249-87D48586EE0C} = {F36A4C66-2B07-4503-927A-2E41808D20D8}
 		{2A8F6473-97C7-49C3-9502-4154730388C4} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 		{DE5F9EDE-06D8-4775-9054-3D6BFC7CE8DD} = {2A8F6473-97C7-49C3-9502-4154730388C4}
+		{7B9CF763-0A8C-43B4-B73E-E884352198E9} = {2A8F6473-97C7-49C3-9502-4154730388C4}
 	EndGlobalSection
 EndGlobal

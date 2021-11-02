@@ -15,6 +15,8 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Silk.Economy.Core.Commands
 {
+	
+
 	public class ProfileCommand : BaseCommandModule
 	{
 		private readonly HttpClient _client;
@@ -49,7 +51,7 @@ namespace Silk.Economy.Core.Commands
 				return; 
 			
 			var fc = new FontCollection();
-			fc.Install("./Momcake.ttf");
+			fc.Install("./MomCakeFont.ttf");
 			var font = fc.Families.First();
 
 			_fontBig = font.CreateFont(60f);
@@ -77,6 +79,7 @@ namespace Silk.Economy.Core.Commands
 			var baseImage = new Image<Rgba32>(1000, 600, Rgba32.ParseHex("9188c2"));
 			baseImage.Mutate(x => x.ApplyRoundedCorners(25f));
 			baseImage.Mutate(m => m.DrawImage(av, new Point(50, 50), 1f));
+			
 			
 			//TODO: Limit input to 170 characters for motto
 			baseImage.Mutate(m => m
