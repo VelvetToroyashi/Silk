@@ -8,6 +8,7 @@ namespace Silk.Economy.Data.Models
 		public string Motto { get; set; }
 		public int Reputation { get; set; }
 		public int Balance { get; set; }
+		public EconomyUserFlag Flags { get; set; }
 		
 		public List<EconomyTransaction> Transactions { get; set; } = new();
 	}
