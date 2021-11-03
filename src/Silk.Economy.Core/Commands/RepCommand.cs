@@ -10,11 +10,8 @@ namespace Silk.Economy.Core.Commands
 	{
 		private readonly IMediator _mediator;
 		
-		public RepCommand(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-		
+		public RepCommand(IMediator mediator) => _mediator = mediator;
+
 		[Command]
 		[Description("Give reputation to a user")]
 		public async Task GiveRep(CommandContext ctx, [Description("The user to give reputation to")] DiscordMember member, [Description("The amount of reputation to give")] int amount)

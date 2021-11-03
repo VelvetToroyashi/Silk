@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -21,6 +22,15 @@ namespace Silk.Extensions
         public static string Join<T>(this IEnumerable<T> values, string separator = "")
         {
             return string.Join(separator, values);
+        }
+        
+        public static List<List<T>> ChunkBy<T>(this List<T> source, int chunkSize) 
+        {
+            return source
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / chunkSize)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
         }
     }
 }

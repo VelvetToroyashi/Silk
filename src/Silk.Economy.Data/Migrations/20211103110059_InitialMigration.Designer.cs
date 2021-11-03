@@ -10,7 +10,7 @@ using Silk.Economy.Data;
 namespace Silk.Economy.Data.Migrations
 {
     [DbContext(typeof(EconomyContext))]
-    [Migration("20211102205803_InitialMigration")]
+    [Migration("20211103110059_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,12 @@ namespace Silk.Economy.Data.Migrations
 
                     b.Property<decimal>("FromId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVoided")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Reason")
                         .HasColumnType("text");

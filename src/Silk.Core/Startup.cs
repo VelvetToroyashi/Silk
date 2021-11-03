@@ -36,7 +36,7 @@ using Silk.Core.SlashCommands;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.Bot;
 using Silk.Core.Utilities.HttpClient;
-using Silk.Economy.Core;
+using Silk.Economy.Core.Services;
 using Silk.Economy.Data;
 using Silk.Extensions;
 using Silk.Shared;
@@ -91,7 +91,7 @@ namespace Silk.Core
 			async Task TryMigrateAsync<T>(IServiceScope? serviceScope) where T : DbContext
 			{
 				await using T? dbContext = serviceScope.ServiceProvider
-					.GetRequiredService<T>();
+					.GetRequiredService<IDbContextFactory<T>>().CreateDbContext();
 
 				IEnumerable<string>? pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
 
@@ -164,6 +164,8 @@ namespace Silk.Core
 
 					AddSilkConfigurationOptions(services, context.Configuration);
 					
+					AddDatabases<GuildContext>(services, silkConfig.Persistence);
+					AddDatabases<EconomyContext>(services, silkConfig.Persistence, "Economy");
 
 					if (!addServices) return;
 
@@ -235,11 +237,12 @@ namespace Silk.Core
 					services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 
 					services.AddHostedService<StatusService>();
-					
+
+					services.AddTransient<TransactionHelper>();
 					
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
-					services.AddMediatR(typeof(IAssemblyMarker));
+					services.AddMediatR(typeof(EconomyContext));
 					
 					
 					

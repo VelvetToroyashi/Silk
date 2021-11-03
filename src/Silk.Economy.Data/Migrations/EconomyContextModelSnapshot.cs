@@ -35,6 +35,12 @@ namespace Silk.Economy.Data.Migrations
                     b.Property<decimal>("FromId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVoided")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Reason")
                         .HasColumnType("text");
 

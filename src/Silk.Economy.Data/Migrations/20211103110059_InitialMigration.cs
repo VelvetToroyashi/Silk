@@ -34,6 +34,8 @@ namespace Silk.Economy.Data.Migrations
                     ToId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Amount = table.Column<long>(type: "bigint", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: true),
+                    IsVoided = table.Column<bool>(type: "boolean", nullable: false),
+                    IsValid = table.Column<bool>(type: "boolean", nullable: false),
                     Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     EconomyUserUserId = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
                 },

@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -9,6 +11,11 @@
       <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Silk.Economy.Data\Silk.Economy.Data.csproj" />
+      <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
     </ItemGroup>
 
 </Project>
