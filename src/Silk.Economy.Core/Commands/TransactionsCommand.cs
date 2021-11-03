@@ -51,6 +51,6 @@ namespace Silk.Economy.Core.Commands
 
 		private string GetTransactionString(EconomyTransaction t, ulong id)
 			=> $"${t.Amount} on {Formatter.Timestamp(t.Timestamp, TimestampFormat.ShortDate)}: " +
-			   $"\n {(t.FromId == id ? "You" : t.FromId is 0 ? "**SYSTEM**" : $"<@{t.FromId}")} → {(t.FromId == id ? "You" : t.FromId is 0 ? "**SYSTEM**" : $"<@{t.FromId}")}";
+			   $"\n {(t.FromId == id ? "You" : t.FromId is 0 ? "**SYSTEM**" : $"<@{t.FromId}")} → {(t.ToId == id ? "You" : t.ToId is 0 ? "**SYSTEM**" : $"<@{t.ToId}")}";
 	}
 }
