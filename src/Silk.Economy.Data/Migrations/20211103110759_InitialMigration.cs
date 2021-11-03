@@ -29,7 +29,7 @@ namespace Silk.Economy.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TransactionId = table.Column<string>(type: "text", nullable: true),
                     FromId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     ToId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Amount = table.Column<long>(type: "bigint", nullable: false),

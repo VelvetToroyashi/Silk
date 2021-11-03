@@ -9,7 +9,7 @@ namespace Silk.Economy.Data
 {
 	public static class UpdateTransaction
 	{
-		public sealed record Request(Guid Id, bool IsVoided) : IRequest<EconomyTransaction>;
+		public sealed record Request(string Id, bool IsVoided) : IRequest<EconomyTransaction>;
 		
 		public sealed class Handler : IRequestHandler<Request, EconomyTransaction>
 		{

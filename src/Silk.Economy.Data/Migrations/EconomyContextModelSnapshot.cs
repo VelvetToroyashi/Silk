@@ -50,8 +50,8 @@ namespace Silk.Economy.Data.Migrations
                     b.Property<decimal>("ToId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

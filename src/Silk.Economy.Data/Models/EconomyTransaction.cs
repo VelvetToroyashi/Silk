@@ -15,7 +15,7 @@ namespace Silk.Economy.Data.Models
 		/// <summary>
 		/// A unique identifier for the transaction.
 		/// </summary>
-		public Guid TransactionId { get; init; } = Guid.NewGuid();
+		public string TransactionId { get; init; } = Guid.NewGuid().ToString();
 		
 		/// <summary>
 		/// The user who made the transaction. Transactions with SYSTEM will always have an Id of 0.
