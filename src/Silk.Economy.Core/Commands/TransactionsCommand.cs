@@ -32,9 +32,11 @@ namespace Silk.Economy.Core.Commands
 		    }
 
 			var embed = new DiscordEmbedBuilder()
-				.WithTitle("Transactions")
+				.WithTitle("Your history of transactions!")
 				.WithColor(DiscordColor.Green);
 
+			transactions.Reverse(); // Reverse the list so the most recent transactions are first.
+			
 			var transList = transactions
 				.ChunkBy(5)
 				.Select(trans => 
@@ -47,8 +49,7 @@ namespace Silk.Economy.Core.Commands
 			
 			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages, PaginationBehaviour.WrapAround, ButtonPaginationBehavior.Disable);
 		}
-
-
+		
 		private string GetTransactionString(EconomyTransaction t, ulong id)
 			=> $"${t.Amount} on {Formatter.Timestamp(t.Timestamp, TimestampFormat.ShortDate)}: " +
 			   $"\n {(t.FromId == id ? "You" : t.FromId is 0 ? "**SYSTEM**" : $"<@{t.FromId}")} → {(t.ToId == id ? "You" : t.ToId is 0 ? "**SYSTEM**" : $"<@{t.ToId}")}";
