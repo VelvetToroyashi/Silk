@@ -28,7 +28,7 @@
 		public ulong GuildId { get; init; }
 		public ulong MessageId { get; init; }
 		public string ComponentId { get; init; }
-		public string EmojiName { get; init; }
-		public string Description { get; init; }
+		public string? EmojiName { get; init; }
+		public string? Description { get; init; }
 	}
 }

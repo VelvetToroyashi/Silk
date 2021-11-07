@@ -3,11 +3,13 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <AssemblyVersion>1.2.0</AssemblyVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     
     <ItemGroup>
       <PackageReference Include="DSharpPlus.CommandsNext" />
       <PackageReference Include="DSharpPlus.Interactivity" />
+      <PackageReference Include="FuzzySharp" Version="2.0.2" />
       <PackageReference Include="MediatR" />
       <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" />
@@ -42,8 +44,7 @@
 
         <Message Text="Copying Plugin DLL ($(Configuration))" Importance="High" />
 
-        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;"
-              DestinationFolder="$(PluginOutputDir)" />
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;" DestinationFolder="$(PluginOutputDir)" />
 
         <Message Text="Copied Plugin DLL to $(PluginOutputDir)" Importance="High" />
     </Target>
