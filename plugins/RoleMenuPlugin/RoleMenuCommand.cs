@@ -141,6 +141,7 @@ namespace RoleMenuPlugin
 				
 					role ??= result.Value;
 
+					await input.Value.DeleteAsync();
 					break;
 				}
 			}
@@ -172,22 +173,29 @@ namespace RoleMenuPlugin
                 }
 				
 				emoji = result.Value;
+
+				await input.Value.DeleteAsync();
+				
 				break;
 			}
 
 			while (true)
             {
 	            await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Enter a description for this role.\n" +
-                                                                                                               "Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
-
-                Result<DiscordMessage> input = await GetInputAsync();
+																													"Descriptions will be truncated at 100 characters.\n" +
+																													"Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
+	            
+	            Result<DiscordMessage> input = await GetInputAsync();
 
                 if (input.Cancelled)
                     return null;
                 
-                description = input.Value?.Content;
-                
-                break;
+                description = input.Value?.Content?.Length > 100 ? input.Value.Content[..100] : input.Value?.Content;
+
+                if (input.Value is not null)
+					await input.Value.DeleteAsync();
+
+	            break;
             }
 			
 			bool confirm = await GetConfirmationAsync();
