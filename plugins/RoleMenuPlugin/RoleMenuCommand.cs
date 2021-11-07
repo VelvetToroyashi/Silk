@@ -177,6 +177,9 @@ namespace RoleMenuPlugin
 
 			while (true)
             {
+	            await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Enter a description for this role.\n" +
+                                                                                                               "Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
+
                 Result<DiscordMessage> input = await GetInputAsync();
 
                 if (input.Cancelled)
@@ -187,6 +190,11 @@ namespace RoleMenuPlugin
                 break;
             }
 			
+			bool confirm = await GetConfirmationAsync();
+			
+			if (!confirm)
+                return null;
+
 			return new()
 			{
                 RoleId = role.Id,
@@ -195,6 +203,28 @@ namespace RoleMenuPlugin
                 Description = description,
                 GuildId = ctx.Guild.Id,
             };
+
+			async Task<bool> GetConfirmationAsync()
+			{
+				var confirmMessage = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+					.WithContent("Are you sure you want to add this role to the menu?\n" +
+					             $"Role: {role.Name}\n" +
+					             $"Emoji: {emoji}\n" +
+					             $"Description: {description ?? "None"}")
+					.AddComponents(
+						new DiscordButtonComponent(ButtonStyle.Success, "Yes", "y"),
+						new DiscordButtonComponent(ButtonStyle.Danger, "No (cancel)", "n")
+						));
+
+				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
+
+				return res.Result?.Id switch
+                {
+                    "y" => true,
+                    "n" => false,
+                    _ => false
+                };
+			}
 
 			async Task<Result<DiscordMessage>> GetInputAsync()
 			{
@@ -239,6 +269,8 @@ namespace RoleMenuPlugin
 				.AddComponents(_finishButton, _quitButton, _htuButton))
 				.GetAwaiter().GetResult();
 		}
+		
+		
 		
 		private record Result<T>(bool Cancelled, T? Value);
         
