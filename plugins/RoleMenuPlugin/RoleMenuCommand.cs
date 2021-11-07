@@ -112,22 +112,35 @@ namespace RoleMenuPlugin
 				if (input.Cancelled)
 					return null;
 
-				if (input.Value!.MentionedRoles.Count is 0)
+				if (input.Value!.MentionedRoles.Count is not 0)
+				{
+					var r = input.Value.MentionedRoles[0];
+					
+					// Ensure the role is not above the user's highest role
+					var valid = await ValidateRoleHeirarchyAsync(r);
+
+					if (!valid)
+						continue;
+					
+					role = r;
+				}
+				else
 				{
 					// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
 					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high dropoff threshold
-				
+
 					//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
 					var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
-				
+
 					//Try to convert the input to a role
 					var result = await roleConverter.ConvertAsync(current, ctx);
 
 					if (!result.HasValue)
 					{
 						var fuzzyRes = Process.ExtractSorted((current, default(ulong)),
-							ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
-							r => r.Item1, cutoff: 90).FirstOrDefault();
+								ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
+								r => r.Item1, cutoff: 90)
+							.FirstOrDefault();
 
 						if (fuzzyRes?.Value is null)
 						{
@@ -138,11 +151,54 @@ namespace RoleMenuPlugin
 
 						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
 					}
-				
+
+					var valid = await ValidateRoleHeirarchyAsync(role);
+					
+					if (!valid)
+                        continue;
+					
 					role ??= result.Value;
 
 					await input.Value.DeleteAsync();
 					break;
+				}
+
+				async Task<bool> ValidateRoleHeirarchyAsync(DiscordRole? r)
+				{
+					if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
+					{
+						await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+							.WithContent("You can't add roles that are above your highest role."));
+						return false;
+					}
+
+					if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
+					{
+						await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+							.WithContent("I cannot assign that role as it's above my highest role"));
+
+						await Task.Delay(2200);
+					}
+
+					if (r == ctx.Guild.EveryoneRole)
+					{
+						await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+							.WithContent("I cannot assign the everyone role as it's special and cannot be assigned."));
+
+						await Task.Delay(2200);
+						return false;
+					}
+
+					if (r.IsManaged)
+					{
+						await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+							.WithContent("I cannot assign that role as it's managed and cannot be assigned."));
+
+						await Task.Delay(2200);
+						return false;
+					}
+
+					return true;
 				}
 			}
 
