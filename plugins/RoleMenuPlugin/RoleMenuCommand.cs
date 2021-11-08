@@ -130,15 +130,15 @@ namespace RoleMenuPlugin
 			.AppendLine()
 			.AppendLine("`Edit option`:")
 			.Append("\u200b\t")
-			.AppendLine("This one is somewhat self-explanatory, but it allows you to edit options you've added to the current rolemenu.")
+			.AppendLine("This one is somewhat self-explanatory, but it allows you to edit options you've added to the current role menu.")
 			.AppendLine()
 			.AppendLine("`Finish`:")
 			.Append("\u200b\t")
-			.AppendLine("This is the final button. It will send the rolemenu to the channel you specified.")
+			.AppendLine("This is the final button. It will send the role menu to the channel you specified.")
 			.AppendLine()
 			.AppendLine("`Quit`:")
 			.Append("\u200b\t")
-			.AppendLine("This will cancel the rolemenu and delete the message you started it with.")
+			.AppendLine("This will cancel the role menu and delete the message you started it with.")
 			.AppendLine()
 			.AppendLine("**Note**:")
 			.Append("\u200b\t")
@@ -236,7 +236,7 @@ namespace RoleMenuPlugin
 					if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
 					{
 						await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-							.WithContent("I cannot assign that role as it's above my highest role"));
+							.WithContent("I cannot assign that role as it's above my highest role."));
 
 						await Task.Delay(2200);
 					}
