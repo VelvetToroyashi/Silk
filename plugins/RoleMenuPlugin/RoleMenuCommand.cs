@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -72,7 +73,7 @@ namespace RoleMenuPlugin
                     "rm-edit" => Edit(ctx, channel),
 					"rm-add-full" => AddFull(ctx, selection.Interaction, initialMenuMessage, interactivity),
                     //"rm-add" => AddRoleOnly(ctx, channel),
-                    //"rm-htu" => HelpText(ctx, channel),
+                    "rm-htu" => ShowHelpAsync(selection.Interaction),
                     _ => Task.CompletedTask
                 };
 
@@ -85,7 +86,63 @@ namespace RoleMenuPlugin
 			if (selectionId == "rm-quit")
                 return;
 			
-			//TODO: Completion logic here?
+			//TODO: Completion logic here? 
+		}
+		
+		private async Task ShowHelpAsync(DiscordInteraction interaction)
+		{
+			await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+			//write the help text using a string builder
+			var sb = new StringBuilder();
+			sb
+			.AppendLine("**How to use this thing**")
+			.AppendLine("There are a bombardment of options, and you may be curious as to what they do.")
+			.AppendLine()
+			.AppendLine("From left to right, I will explain what all the buttons are for.")
+			.AppendLine("`Add option(full)`:")
+			.Append("\u200b\t")
+			.AppendLine("This option is the interactive way of adding roles, but can be a tad slow.")
+			.Append("\u200b\t")
+			.AppendLine("Using this button will prompt you for the role, an emoji to go with it, and the description.")
+			.Append("\u200b\t")
+			.AppendLine("For the role, it must not be `@everyone`, nor above either of our top roles. I can't assign those!")
+			.Append("\u200b\t")
+			.AppendLine("For the emoji, you can use any emoji, but they must be typed out properly.")
+			.Append("\u200b\t")
+			.AppendLine("(e.g. <a:catgiggle:853806288190439436> or 👋 and not catgiggle or \\:wave\\:)")
+			.Append("\u200b\t")
+			.AppendLine("Descriptions are also easy. They can be whatever you want, but they will limited to 100 characters.")
+			.AppendLine()
+			.AppendLine("`Add option(role only)`:")
+			.Append("\u200b\t")
+			.AppendLine("This is a faster, but more restricted way of adding roles.")
+			.Append("\u200b\t")
+			.AppendLine("You can only add the role, but you can add them in batches.")
+			.Append("\u200b\t")
+			.AppendLine("If you'd like to retro-active add an emoji or description, you can use the edit button.")
+			.Append("\u200b\t")
+			.AppendLine("You can't add the `@everyone` role, nor above either of our top roles.")
+			.AppendLine()
+			.AppendLine("`Edit option`:")
+			.Append("\u200b\t")
+			.AppendLine("This one is somewhat self-explanatory, but it allows you to edit options you've added to the current rolemenu.")
+			.AppendLine()
+			.AppendLine("`Finish`:")
+			.Append("\u200b\t")
+			.AppendLine("This is the final button. It will send the rolemenu to the channel you specified.")
+			.AppendLine()
+			.AppendLine("`Quit`:")
+			.Append("\u200b\t")
+			.AppendLine("This will cancel the rolemenu and delete the message you started it with.")
+			.AppendLine()
+			.AppendLine("**Note**:")
+			.Append("\u200b\t")
+			.AppendLine("If you're not sure what to do, try the `Add option(full)` button first. It's a bit slower, but it's the easiest.")
+			.Append("\u200b\t")
+			.AppendLine("Also, this is considered beta software, so please report any bugs you find to the developer.");
+			
+			await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(sb.ToString()).AsEphemeral(true));
 		}
 
 
@@ -276,12 +333,16 @@ namespace RoleMenuPlugin
 					             $"Emoji: {emoji}\n" +
 					             $"Description: {description ?? "None"}")
 					.AddComponents(
-						new DiscordButtonComponent(ButtonStyle.Success, "Yes", "y"),
-						new DiscordButtonComponent(ButtonStyle.Danger, "No (cancel)", "n")
-						));
+						new DiscordButtonComponent(ButtonStyle.Success, "y", "Yes"),
+						new DiscordButtonComponent(ButtonStyle.Danger, "n", "No (Cancel)")
+						)
+					.AsEphemeral(true));
 
 				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
 
+				if (!res.TimedOut)
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				
 				return res.Result?.Id switch
                 {
                     "y" => true,
