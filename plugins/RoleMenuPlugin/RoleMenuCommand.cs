@@ -239,6 +239,7 @@ namespace RoleMenuPlugin
 							.WithContent("I cannot assign that role as it's above my highest role."));
 
 						await Task.Delay(2200);
+						return false;
 					}
 
 					if (r == ctx.Guild.EveryoneRole)
