@@ -34,7 +34,7 @@ namespace RoleMenuPlugin
 		private static readonly DiscordButtonComponent _quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
 		private readonly DiscordButtonComponent _finishButton = new(ButtonStyle.Success, "rm-finish", "Finish", true);
 			
-		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit the current options");
+		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit the current options", true);
 		private readonly DiscordButtonComponent _addFullButton = new(ButtonStyle.Primary, "rm-add-full", "Add option (full)");
 		private readonly DiscordButtonComponent _addRoleOnlyButton = new(ButtonStyle.Secondary, "rm-add", "Add option (role only)");
 		
@@ -57,6 +57,8 @@ namespace RoleMenuPlugin
             }
 
 			DiscordMessage initialMenuMessage = await ctx.RespondAsync("Warming up...");
+
+			await Task.Delay(600);
 			
 			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
@@ -83,9 +85,27 @@ namespace RoleMenuPlugin
 
 				if (t.IsCompleted)
 					break;
+
+				_addFullButton.Disable();
+				_addRoleOnlyButton.Disable();
+				_editButton.Disable();
+				_finishButton.Disable();
+				_quitButton.Disable();
+				_htuButton.Disable();
+
+				await selection
+					.Interaction
+					.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+						.WithContent(initialMenuMessage.Content)
+						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
+						.AddComponents(_finishButton, _quitButton, _htuButton));
 				
 				await t;
-
+				
+				_editButton.Enable();
+				_quitButton.Enable();
+				_htuButton.Enable();
+				
 				if (t is Task<RoleMenuOptionDto> t2)
 					options.Add(t2.Result);
 
@@ -101,8 +121,6 @@ namespace RoleMenuPlugin
                     _addFullButton.Enable();
                     _addRoleOnlyButton.Enable();
                 }
-
-				
 				
 			}
 
@@ -193,8 +211,7 @@ namespace RoleMenuPlugin
 			DiscordRole role = null!;
 			DiscordEmoji? emoji = null;
 			string? description;
-
-			await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+			
 			
 			DiscordMessage tipMessage = await interaction.CreateFollowupMessageAsync(new() { Content = "\u200b", IsEphemeral = true});
 			
@@ -411,12 +428,11 @@ namespace RoleMenuPlugin
 
 		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, DiscordMessage initialMenuMessage, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
 		{
-			await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-
 			var sopts = options.Select((x, i) =>
 				new DiscordSelectComponentOption(x.RoleName, i.ToString(), x.Description));
 
 			var selectionMessage = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AsEphemeral(true)
+				.WithContent("\u200b")
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
