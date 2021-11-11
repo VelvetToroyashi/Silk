@@ -321,8 +321,6 @@ namespace RoleMenuPlugin
 				await input.Value.DeleteAsync();
 				
 				emoji = result.Value;
-
-				
 				
 				break;
 			}
@@ -625,7 +623,7 @@ namespace RoleMenuPlugin
 
 				await input.Result.DeleteAsync();
 
-				return new(true, null);
+				return new(false, null);
 			}
 				
 		
