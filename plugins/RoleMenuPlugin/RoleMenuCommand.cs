@@ -247,6 +247,7 @@ namespace RoleMenuPlugin
 						continue;
 					
 					role = r;
+					break;
 				}
 				else
 				{
