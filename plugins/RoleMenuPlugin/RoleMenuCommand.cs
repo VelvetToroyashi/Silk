@@ -333,7 +333,7 @@ namespace RoleMenuPlugin
 																													"Descriptions will be truncated at 100 characters.\n" +
 																													"Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
 	            
-	            Result<DiscordMessage> input = await GetInputWithContentAsync();
+	            Result<DiscordMessage?> input = await GetInputWithContentAsync();
 
                 if (input.Cancelled)
                     return null;
