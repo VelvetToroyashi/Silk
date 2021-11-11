@@ -300,7 +300,7 @@ namespace RoleMenuPlugin
                                  "If you don't see the emoji in the list, you may need to type it in the exact format it appears in the server (e.g. `:emoji:`).\n" +
                                  "Type `cancel` to cancel adding this role. Type `skip` to skip adding an emoji."));
 				
-				Result<DiscordMessage> input = await GetInputWithContentAsync();
+				Result<DiscordMessage?> input = await GetInputWithContentAsync();
 
 				if (input.Cancelled)
 					return null;
