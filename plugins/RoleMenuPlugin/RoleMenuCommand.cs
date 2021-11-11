@@ -109,7 +109,16 @@ namespace RoleMenuPlugin
 				if (t is Task<RoleMenuOptionDto> t2)
 					options.Add(t2.Result);
 
-				_ = options.Count > 1 ? _finishButton.Enable() : _finishButton.Disable();
+				if (options.Count > 1)
+				{
+					 _finishButton.Enable();
+					 _editButton.Enable();
+				}
+				else
+				{
+					_finishButton.Disable();
+					_editButton.Disable();
+				}
 
 				if (options.Count >= 25)
 				{
