@@ -164,6 +164,11 @@ namespace Silk.Core.Services
 		
 		public async Task StartAsync(CancellationToken cancellationToken)
 		{
+			#if DEBUG
+			_logger.LogInformation("Phishing API is not contacted in debug mode.");
+			return;
+			#endif
+			
 			if (!await GetDomainsAsync())
 			{
 				_logger.LogCritical("Failed to retrieve domains. API - Unavailable");
