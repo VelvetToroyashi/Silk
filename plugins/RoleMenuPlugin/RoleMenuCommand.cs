@@ -374,7 +374,9 @@ namespace RoleMenuPlugin
 				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
 
 				if (!res.TimedOut)
-					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, 
+						new DiscordInteractionResponseBuilder()
+							.WithContent(confirmMessage.Content));
 				
 				return res.Result?.Id switch
                 {
@@ -444,6 +446,7 @@ namespace RoleMenuPlugin
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
+			
 			var res = await interactivity
 				.WaitForEventArgsAsync<ComponentInteractionCreateEventArgs>(c => c.Message == selectionMessage, TimeSpan.FromMinutes(5));
 
@@ -462,43 +465,49 @@ namespace RoleMenuPlugin
 			
 			var addEmojiButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-emoji", "Add Emoji");
 			var addDescriptionButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-description", "Add Description");
-			
-			await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-				.WithContent($"Editing option {res.Result.Values[0]}")
-				.AddEmbed(new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.Wheat)
-					.WithTitle("Current menu option:")
-					.AddField("Role", option.RoleName, true)
-					.AddField("Emoji", option.EmojiName is null ? "Not set." : ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
-					.AddField("Description", option.Description ?? "None"))
-				.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, _quitButton));
 
-			selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
-			//TODO: Make this a loop.
-			//TODO: Add buttons to make an option mutually exclusive.
-
-			res = await interactivity.WaitForButtonAsync(selectionMessage);
-			
-			if (res.TimedOut || res.Result.Id == "rm-quit")
-            {
-                await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
-                return;
-            }
-
-			var t = res.Result.Id switch
+			do
 			{
-				"rm-change-role" => ChangeRoleAsync(),
-				"rm-change-emoji" => ChangeEmojiAsync(),
-				"rm-change-description" => ChangeDescriptionAsync(),
-				"rm-delete" => DeleteAsync(),
-				"rm-add-emoji" => AddEmojiAsync(),
-				"rm-add-description" => AddDescriptionAsync(),
-				_ => throw new ArgumentException("Invalid button id.")
-			};
+				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+					.WithContent($"Editing option {res.Result.Values[0]}")
+					.AddEmbed(new DiscordEmbedBuilder()
+						.WithColor(DiscordColor.Wheat)
+						.WithTitle("Current menu option:")
+						.AddField("Role", option.RoleName, true)
+						.AddField("Emoji", option.EmojiName is null ? "Not set." : ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
+						.AddField("Description", option.Description ?? "None"))
+					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, _quitButton));
 
-			await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
+				//TODO: Make this a loop.
+				//TODO: Add buttons to make an option mutually exclusive.
+
+				res = await interactivity.WaitForButtonAsync(selectionMessage);
 			
-			await t;
+				if (res.TimedOut || res.Result.Id == "rm-quit")
+				{
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
+					return;
+				}
+
+				var t = res.Result.Id switch
+				{
+					"rm-change-role" => ChangeRoleAsync(),
+					"rm-change-emoji" => ChangeEmojiAsync(),
+					"rm-change-description" => ChangeDescriptionAsync(),
+					"rm-delete" => DeleteAsync(),
+					"rm-add-emoji" => AddEmojiAsync(),
+					"rm-add-description" => AddDescriptionAsync(),
+					"rm-quit" => Task.CompletedTask,
+					_ => throw new ArgumentException("Invalid button id.")
+				};
+
+				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+			
+				await t;
+			}
+			while (res.Result.Id != "rm-quit");
+			
 
 			async Task ChangeRoleAsync()
 			{
@@ -573,9 +582,37 @@ namespace RoleMenuPlugin
 			}
 			
 			async Task ChangeEmojiAsync()
-            {
-                
-            }
+			{
+				while (true)
+				{
+					Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
+					
+					if (input.Cancelled)
+						return;
+
+					if (input.Value is null)
+						break;
+				
+					var converter = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
+				
+					var result = await converter.ConvertAsync(input.Value.Content, ctx);
+				
+					if (!result.HasValue)
+					{
+						await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that emoji. Try again."));
+						await Task.Delay(2200);
+						continue;
+					}
+					await input.Value.DeleteAsync();
+
+					option = option with
+					{
+						EmojiName = result.Value
+					};
+				
+					break;
+				}
+			}
 			
 			async Task ChangeDescriptionAsync()
             {
