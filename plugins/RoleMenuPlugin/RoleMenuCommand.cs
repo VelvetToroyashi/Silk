@@ -67,7 +67,7 @@ namespace RoleMenuPlugin
 			var options = new List<RoleMenuOptionDto>();
 			
 			while (true)
-			{ 
+			{
 				ResetToMenu(ref initialMenuMessage);
 				var selection = (await interactivity.WaitForButtonAsync(initialMenuMessage, ctx.User, CancellationToken.None)).Result;
 				selectionId = selection.Id;
@@ -82,10 +82,7 @@ namespace RoleMenuPlugin
                     "rm-htu" => ShowHelpAsync(selection.Interaction),
                     _ => Task.CompletedTask
                 };
-
-				if (t.IsCompleted)
-					break;
-
+				
 				_addFullButton.Disable();
 				_addRoleOnlyButton.Disable();
 				_editButton.Disable();
@@ -101,6 +98,22 @@ namespace RoleMenuPlugin
 						.AddComponents(_finishButton, _quitButton, _htuButton));
 				
 				await t;
+				
+				if (selectionId == "rm-quit")
+				{
+					await initialMenuMessage.DeleteAsync();
+				
+					try
+					{
+						await ctx.Message.DeleteAsync();
+					}
+					catch
+					{
+						// ignored
+					}
+				
+					return;
+				}
 				
 				_editButton.Enable();
 				_quitButton.Enable();
@@ -130,23 +143,6 @@ namespace RoleMenuPlugin
                     _addFullButton.Enable();
                     _addRoleOnlyButton.Enable();
                 }
-				
-			}
-
-			if (selectionId == "rm-quit")
-			{
-				try
-				{
-					await ctx.Message.DeleteAsync();
-				}
-				catch
-				{
-					// ignored
-				}
-
-				await initialMenuMessage.DeleteAsync();
-				
-				return;
 			}
 			
 			//TODO: Completion logic here? 
