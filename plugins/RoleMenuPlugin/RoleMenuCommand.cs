@@ -374,7 +374,7 @@ namespace RoleMenuPlugin
 
 			async Task<bool> GetConfirmationAsync()
 			{
-				var confirmMessage = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+				var confirmMessage = await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
 					.WithContent("Are you sure you want to add this role to the menu?\n" +
 					             $"Role: {role.Name}\n" +
 					             $"Emoji: {emoji}\n" +
@@ -382,8 +382,7 @@ namespace RoleMenuPlugin
 					.AddComponents(
 						new DiscordButtonComponent(ButtonStyle.Success, "y", "Yes"),
 						new DiscordButtonComponent(ButtonStyle.Danger, "n", "No (Cancel)")
-						)
-					.AsEphemeral(true));
+						));
 
 				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
 
