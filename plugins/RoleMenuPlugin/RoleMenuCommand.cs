@@ -689,9 +689,6 @@ namespace RoleMenuPlugin
 				.GetAwaiter().GetResult();
 		}
 		
-		
-		
 		private record Result<T>(bool Cancelled, T? Value);
-        
 	}
 }
