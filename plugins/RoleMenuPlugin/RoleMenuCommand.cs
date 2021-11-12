@@ -65,10 +65,17 @@ namespace RoleMenuPlugin
 			string selectionId;
 
 			var options = new List<RoleMenuOptionDto>();
+
+			var reset = true;
 			
 			while (true)
 			{
-				ResetToMenu(ref initialMenuMessage);
+				if (reset)
+				{
+					ResetToMenu(ref initialMenuMessage);
+					reset = false;
+				}
+				
 				var selection = (await interactivity.WaitForButtonAsync(initialMenuMessage, ctx.User, CancellationToken.None)).Result;
 				selectionId = selection.Id;
 
@@ -77,7 +84,7 @@ namespace RoleMenuPlugin
                     "rm-quit" => Task.CompletedTask,
                     "rm-finish" => Task.CompletedTask,
                     "rm-edit" => Edit(ctx, selection.Interaction, initialMenuMessage, interactivity, options),
-					"rm-add-full" => AddFull(ctx, selection.Interaction, initialMenuMessage, interactivity),
+					"rm-add-full" => AddFull(ctx, selection.Interaction, options, interactivity),
                     //"rm-add" => AddRoleOnly(ctx, channel),
                     "rm-htu" => ShowHelpAsync(selection.Interaction),
                     _ => Task.CompletedTask
@@ -119,10 +126,7 @@ namespace RoleMenuPlugin
 				_quitButton.Enable();
 				_htuButton.Enable();
 				
-				if (t is Task<RoleMenuOptionDto> t2)
-					options.Add(t2.Result);
-
-				if (options.Count > 1)
+				if (options.Count >= 1)
 				{
 					 _finishButton.Enable();
 					 _editButton.Enable();
@@ -143,6 +147,21 @@ namespace RoleMenuPlugin
                     _addFullButton.Enable();
                     _addRoleOnlyButton.Enable();
                 }
+
+				try
+				{
+					await selection.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+						.WithContent($"Silk! Role Menu Creator v2.0")
+						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
+						.AddComponents(_finishButton, _quitButton, _htuButton));
+					
+					reset = false;
+				}
+				catch
+				{
+					// Interaction timed out
+					reset = true;
+				}
 			}
 			
 			//TODO: Completion logic here? 
@@ -210,7 +229,7 @@ namespace RoleMenuPlugin
 		}
 
 
-		private static async Task<RoleMenuOptionDto?> AddFull(CommandContext ctx, DiscordInteraction interaction, DiscordMessage menuMessage, InteractivityExtension interactivity)
+		private static async Task AddFull(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
 		{
 			string current = "";
 			DiscordRole role = null!;
@@ -230,7 +249,7 @@ namespace RoleMenuPlugin
 				var input = await GetInputWithContentAsync();
 
 				if (input.Cancelled)
-					return null;
+					return;
 
 				if (input.Value!.MentionedRoles.Count is not 0)
 				{
@@ -299,7 +318,7 @@ namespace RoleMenuPlugin
 				Result<DiscordMessage?> input = await GetInputWithContentAsync();
 
 				if (input.Cancelled)
-					return null;
+					return;
 
 				if (input.Value is null)
 					break;
@@ -330,7 +349,7 @@ namespace RoleMenuPlugin
 	            Result<DiscordMessage?> input = await GetInputWithContentAsync();
 
                 if (input.Cancelled)
-                    return null;
+                    return ;
                 
                 description = input.Value?.Content?.Length > 100 ? input.Value.Content[..100] : input.Value?.Content;
 
@@ -343,16 +362,15 @@ namespace RoleMenuPlugin
 			bool confirm = await GetConfirmationAsync();
 			
 			if (!confirm)
-                return null;
-
-			return new()
+                return ;
+			options.Add(new()
 			{
                 RoleId = role.Id,
                 RoleName = role.Name,
                 EmojiName = emoji?.Name,
                 Description = description,
                 GuildId = ctx.Guild.Id,
-            };
+            });
 
 			async Task<bool> GetConfirmationAsync()
 			{
