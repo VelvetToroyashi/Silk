@@ -675,8 +675,7 @@ namespace RoleMenuPlugin
 
 				return new(false, null);
 			}
-				
-		
+			
 			return new(false, input.Result);
 		}
 		
