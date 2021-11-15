@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -39,6 +40,9 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		
 		private Task CreatedSignal(DiscordClient sender, MessageCreateEventArgs e)
 		{
+			if (string.IsNullOrEmpty(e.Message.Content))
+				return Task.CompletedTask; // No content, no need to check.
+			
 			Task.Run(async () =>
 			{
 				try
@@ -54,19 +58,20 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		}
 
 
+		[SuppressMessage("ReSharper", "ConstantConditionalAccessQualifier", Justification = "BCL APIs are a lie")]
 		private async Task HandleCreatedAsync(DiscordMessage message)
 		{
-			if (message.Channel.Guild is null)
+			if (message.Channel?.Guild is null)
 				return;
 
 			var config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
 
-			if (!config.DetectPhishingLinks)
+			if (!config?.DetectPhishingLinks ?? false) // This could be an issue if it's null.
 				return;
 			
-			var match = LinkRegex.Match(message.Content);
+			var match = LinkRegex.Match(message.Content); // Run (what this method invokes) returns Match? but Match returns Match. Absolute scam.
 
-			if (match.Success)
+			if (match?.Success ?? false)
 			{
 				var link = match.Groups["link"].Value;
 				
@@ -84,8 +89,14 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 			if (config.DeletePhishingLinks)
 			{
-				try { await message.DeleteAsync(Phishing); }
-				catch { }
+				try
+				{
+					await message.DeleteAsync(Phishing);
+				}
+				catch
+				{
+					// ignored
+				}
 			}
 
 			if (config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var inf))
