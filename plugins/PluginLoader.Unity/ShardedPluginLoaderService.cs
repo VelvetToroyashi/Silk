@@ -15,6 +15,8 @@ namespace PluginLoader.Unity
 	/// </summary>
 	public sealed class ShardedPluginLoaderService : IPluginLoaderService
 	{
+		private const string DefaultPluginsDirectory = "./plugins";
+
 		private readonly PluginLoader _loader;
 		private readonly DiscordShardedClient _client;
 		private readonly ILogger<IPluginLoaderService> _logger;
@@ -28,7 +30,7 @@ namespace PluginLoader.Unity
 
 		public async Task LoadPluginsAsync()
 		{
-			var files = _loader.DiscoverPluginFiles("./plugins");
+			var files = _loader.DiscoverPluginFiles(DefaultPluginsDirectory);
 			var manifests = new List<PluginManifest>();
 			
 			foreach (var file in files)
@@ -50,7 +52,7 @@ namespace PluginLoader.Unity
 				}
 			}
 		}
-		
+
 		public async Task RegisterPluginCommandsAsync()
 		{
 			var cnextExtensions = (await _client.GetCommandsNextAsync()).Select(c => c.Value);
@@ -65,8 +67,8 @@ namespace PluginLoader.Unity
 					}
 					catch (DuplicateCommandException e)
 					{
+						// Next plugin. //
 						_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.Plugin.DisplayName, e.CommandName);
-						break; // Next plugin. //
 					}
 				}
 			}
@@ -84,8 +86,8 @@ namespace PluginLoader.Unity
 					try { ext.RegisterCommands(plugin.GetType().Assembly); }
 					catch (DuplicateCommandException e)
 					{
+						// Load the next plugin. //
 						_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin.DisplayName, e.CommandName);
-						break; // Load the next plugin. //
 					}
 				}
 			}

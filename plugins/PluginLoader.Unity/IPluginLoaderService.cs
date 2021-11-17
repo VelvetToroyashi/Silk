@@ -15,7 +15,7 @@ namespace PluginLoader.Unity
 		/// <returns>A collection of plugins that failed to load (or unload, if they failed to load.)</returns>
 		Task LoadPluginsAsync();
 		/// <summary>
-		/// Registers loaded plugins' applicable commadns 
+		/// Registers loaded plugins' applicable commands 
 		/// </summary>
 		/// <returns></returns>
 		Task RegisterPluginCommandsAsync();
