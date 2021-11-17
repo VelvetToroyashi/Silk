@@ -18,7 +18,7 @@ namespace Silk.Core.Utilities
 			DiscordClient client,
 			CommandHandler commandHandler,
 			MessageAddAntiInvite antiInvite,
-			MessageRemovedHandler removeHandler,
+			MessageUpdateHandler removeHandler,
 			MemberGreetingService memberGreetingService,
 			RoleAddedHandler staffCheck,
 			GuildEventHandler guildHandler,
@@ -29,7 +29,6 @@ namespace Silk.Core.Utilities
 
 			client.MessageCreated += commandHandler.Handle;
 			client.MessageCreated += antiInvite.CheckForInvite;
-			client.MessageDeleted += removeHandler.MessageRemoved;
 
 			client.GuildMemberAdded += memberGreetingService.OnMemberAdded;
 			client.GuildMemberRemoved += memberRemovedHandler.OnMemberRemoved;

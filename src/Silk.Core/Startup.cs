@@ -199,7 +199,7 @@ namespace Silk.Core
 					services.AddSingleton<BotExceptionHandler>();
 					services.AddSingleton<SlashCommandExceptionHandler>();
 					services.AddSingleton<SerilogLoggerFactory>();
-					services.AddSingleton<MessageRemovedHandler>();
+					services.AddSingleton<MessageUpdateHandler>();
 
 					services.AddSingleton<CommandHandler>();
 					services.AddSingleton<MessageAddAntiInvite>();
