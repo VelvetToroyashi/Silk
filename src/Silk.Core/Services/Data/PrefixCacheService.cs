@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Services.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Data
 {
@@ -49,7 +50,7 @@ namespace Silk.Core.Services.Data
 
 		private async Task<string> GetDatabasePrefixAsync(ulong guildId)
 		{
-			GuildEntity guild = await _mediator.Send(new GetGuildRequest(guildId));
+			GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(guildId, StringConstants.DefaultCommandPrefix));
 			_memoryCache.Set(GetGuildString(guildId), guild.Prefix);
 			return guild.Prefix;
 		}
