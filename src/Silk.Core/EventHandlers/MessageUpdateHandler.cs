@@ -80,7 +80,6 @@ namespace Silk.Core.EventHandlers
 				            var wh = _whClient.GetRegisteredWebhook(config.WebhookLoggingId) ?? await _whClient.AddWebhookAsync(new(config.LoggingWebhookUrl!));
 				            await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(c.CurrentUser.AvatarUrl).AddEmbed(embed).AddEmbed(contentBefore).AddEmbed(contentAfter));
 			            }
-
 			            //TODO: Metrics
 			        }
 			    }
