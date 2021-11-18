@@ -93,7 +93,7 @@ namespace AnnoucementPlugin.Services
 					/*
 					 TODO: Handle errors
 					 TODO: add AddedFrom channel to announcement model 
-					 TODO: I forgot
+					 TODO: I forgor
 					 */
 				}
 			}

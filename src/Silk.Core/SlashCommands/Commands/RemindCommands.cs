@@ -164,7 +164,7 @@ namespace Silk.Core.SlashCommands.Commands
 				};
 
 				await _reminders.CreateReminder(time, ctx.User.Id, ctx.Interaction.ChannelId, 0, ctx.Interaction.GuildId, reminder, false, type);
-				await ctx.FollowUpAsync(new() { Content = $"Alright! I'll remind you {type.Humanize(LetterCasing.LowerCase)}: {reminder}", IsEphemeral = true });
+				await ctx.FollowUpAsync(new() { Content = $"Alrighty! I'll remind you {type.Humanize(LetterCasing.LowerCase)}: {reminder}", IsEphemeral = true });
 			}
 		}
 	}

@@ -263,7 +263,7 @@ namespace Silk.Core.Commands
 			private static readonly DiscordButtonComponent _yesButtonDisabled = new DiscordButtonComponent(_yesButton).Disable();
 			private static readonly DiscordButtonComponent _noButtonDisabled = new DiscordButtonComponent(_noButton).Disable();
 
-			private static readonly DiscordInteractionResponseBuilder _confirmBuilder = new DiscordInteractionResponseBuilder().WithContent("Alright!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
+			private static readonly DiscordInteractionResponseBuilder _confirmBuilder = new DiscordInteractionResponseBuilder().WithContent("Alrighty!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
 			private static readonly DiscordInteractionResponseBuilder _declineBuilder = new DiscordInteractionResponseBuilder().WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
 
 			private readonly IMediator _mediator;
