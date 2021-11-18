@@ -18,7 +18,7 @@ namespace Silk.Shared.Types.Collections
     ///     <b>
     ///         <typeparamref name="TValueTo" />
     ///     </b>
-    ///     is not castable to
+    ///     is not cast-able to
     ///     <b>
     ///         <typeparamref name="TValueFrom" />
     ///     </b>
@@ -29,7 +29,7 @@ namespace Silk.Shared.Types.Collections
     /// <b>
     ///     <typeparamref name="TValueFrom" />
     /// </b>
-    /// is not castable to
+    /// is not cast-able to
     /// <b>
     ///     <typeparamref name="TValueTo" />
     /// </b>

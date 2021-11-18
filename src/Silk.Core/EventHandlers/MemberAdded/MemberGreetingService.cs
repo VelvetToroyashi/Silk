@@ -32,9 +32,10 @@ namespace Silk.Core.EventHandlers.MemberAdded
 			GuildConfigEntity? config = await _configService.GetConfigAsync(e.Guild.Id);
 			GuildModConfigEntity? modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
 
-			if (config is null!) // Wasn't cached yet //
+			if (config is null) // Wasn't cached yet //
 				return;
-			// This should be done in a seperate service //
+
+			// This should be done in a separate service //
 			if (modConfig.LogMemberJoins && modConfig.LoggingChannel is not 0)
 				await e.Guild.GetChannel(modConfig.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 

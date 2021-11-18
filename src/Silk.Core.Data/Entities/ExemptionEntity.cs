@@ -17,7 +17,7 @@ namespace Silk.Core.Data.Entities
 		public int Id { get; set; }
 		
 		/// <summary>
-		/// What this exemtpion covers.
+		/// What this exemption covers.
 		/// </summary>
 		[Column("exempt_from")]
 		public string Exemption { get; set; }

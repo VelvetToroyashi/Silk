@@ -71,7 +71,6 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         /// <summary>
         /// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
         /// </summary>
-        /// <param name="client">A client object to make API calls with.</param>
         /// <param name="message">The message to check.</param>
         /// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
         /// <param name="invite">The invite to check.</param>
@@ -104,7 +103,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		}
 
         /// <summary>
-        /// Attempts to infract a member for posting an invite.
+        /// Attempts to warn (creates an infraction) a member for posting an invite.
         /// </summary>
         /// <param name="message"></param>
         public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfigEntity config)

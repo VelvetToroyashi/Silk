@@ -142,7 +142,7 @@ namespace Silk.Core.SlashCommands.Commands
 
 				TagCreationResult result = await _tags.AliasTagAsync(tagname, aliasName, ctx.Interaction.GuildId.Value, ctx.User.Id);
 
-				await ctx.EditResponseAsync(new() { Content = result.Reason ?? $"Successfuly aliased tag {Formatter.Bold(aliasName)} to {Formatter.Bold(tagname)}" });
+				await ctx.EditResponseAsync(new() { Content = result.Reason ?? $"Successfully aliased tag {Formatter.Bold(aliasName)} to {Formatter.Bold(tagname)}" });
 			}
 
 			[RequireGuild]

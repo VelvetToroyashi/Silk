@@ -10,7 +10,7 @@
 		/// </summary>
 		FailedNotConfigured,
 		/// <summary>
-		/// Heirarchy [of roles] prevented an operation from being performed.
+		/// Hierarchy [of roles] prevented an operation from being performed.
 		/// </summary>
 		FailedGuildHeirarchy,
 		/// <summary>

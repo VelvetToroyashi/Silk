@@ -23,13 +23,13 @@ namespace Silk.Core.Services.Interfaces
 		public Task<InfractionResult> KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
 
 		/// <summary>
-		/// Bans a memebr from the specified guild, eithe rpermanently or temporarily.
+		/// Bans a member from the specified guild, either permanently or temporarily.
 		/// </summary>
 		/// <param name="userId">The id of the user to ban.</param>
 		/// <param name="guildId">The id of the guild to ban the user on.</param>
 		/// <param name="enforcerId">The id fo the member that is banning the specified user</param>
 		/// <param name="reason">The reason the user is being banned.</param>
-		/// <param name="expiration">If the user is beined temp-banned, the date the user should be unbanned.</param>
+		/// <param name="expiration">If the user is being temp-banned, the date the user should be unbanned.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
 		public Task<InfractionResult> BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", DateTime? expiration = null);
 
@@ -46,10 +46,10 @@ namespace Silk.Core.Services.Interfaces
 		/// <summary>
 		/// Warns/"strikes" a user on the specified guild.
 		/// </summary>
-		/// <param name="userId">The id of the user being striked.</param>
-		/// <param name="guildId">The id of the guild the user is being striked on.</param>
+		/// <param name="userId">The id of the user being struck.</param>
+		/// <param name="guildId">The id of the guild the user is being struck on.</param>
 		/// <param name="enforcerId">The id of the member that is striking the user.</param>
-		/// <param name="reason">The reason the user is being striked.</param>
+		/// <param name="reason">The reason the user is being struck.</param>
 		/// <param name="autoEscalate">Whether or not the strike should be automatically escalated.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
 		public Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", bool autoEscalate = false);
@@ -57,8 +57,8 @@ namespace Silk.Core.Services.Interfaces
 		/// <summary>
 		/// Gets whether a user has an active mute on the specified guild.
 		/// <remarks>
-		///     This method's signature is <see cref="ValueTask{TResult}" /> in contrast to the rest being <see cref="Task{TResult}" />
-		///     because in typical use-case it is expected that infractions are cached, and can provide a sync path via in-memory lookup.
+		/// This method's signature is <see cref="ValueTask{TResult}" /> in contrast to the rest being <see cref="Task{TResult}" />
+		/// because in typical use-case it is expected that infractions are cached, and can provide a sync path via in-memory lookup.
 		/// </remarks>
 		/// </summary>
 		/// <param name="userId">The id of the user to check.</param>
@@ -72,7 +72,7 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="userId">The id of the user to mute.</param>
 		/// <param name="guildId">The id of the guild to mute the user on.</param>
 		/// <param name="enforcerId">The member that's muting the user.</param>
-		/// <param name="reason">The reason the user is beign muted.</param>
+		/// <param name="reason">The reason the user is being muted.</param>
 		/// <param name="expiration">If temporarily muting, when this mute is set to expire.</param>
 		/// <param name="updateExpiration">Whether or not the expiration of the mute should be updated.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
@@ -83,8 +83,8 @@ namespace Silk.Core.Services.Interfaces
 		/// </summary>
 		/// <param name="userId">The id of the user to unmute.</param>
 		/// <param name="guildId">The id of the guild to unmute the user on.</param>
-		/// <param name="enforcerId">The member that's unmuting the user.</param>
-		/// <param name="reason">The reason teh member was unmuted.</param>
+		/// <param name="enforcerId">The member that's un-muting the user.</param>
+		/// <param name="reason">The reason teh member was un-muted.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
 		public Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
 
@@ -99,9 +99,9 @@ namespace Silk.Core.Services.Interfaces
 		/// <summary>
 		/// Generates an infraction for the specified user.
 		/// <remarks>
-		///     This method is utilized in interal APIs and is not meant for direct use.
-		///     <br />
-		///     This method is subject to change and should not be used outside of API wrappers.
+		/// This method is utilized in internal APIs and is not meant for direct use.
+		/// <br />
+		/// This method is subject to change and should not be used outside of API wrappers.
 		/// </remarks>
 		/// </summary>
 		/// <param name="userId">The id of the user to generate an infraction for.</param>

@@ -13,7 +13,7 @@
         /// </summary>
         Kick,
         /// <summary>
-        /// A mute. Indefintite or temporary. 
+        /// A mute. Indefinite or temporary. 
         /// </summary>
         Mute,
         /// <summary>
@@ -25,7 +25,7 @@
         /// </summary>
         SoftBan,
         /// <summary>
-        /// An permenant ban.
+        /// An permanent ban.
         /// </summary>
         Ban,
         /// <summary>
@@ -33,7 +33,7 @@
         /// </summary>
         Ignore,
         /// <summary>
-        /// The user was unmuted.
+        /// The user was un-muted.
         /// </summary>
         Unmute,
         /// <summary>

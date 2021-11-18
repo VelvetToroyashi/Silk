@@ -61,7 +61,7 @@ namespace Silk.Core.Commands.Server
 				return;
 			}
 
-			GuildConfigEntity config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+			GuildConfigEntity? config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
 			string[]? commandNames = commands.Split(' ');
 

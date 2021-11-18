@@ -45,7 +45,7 @@ namespace Silk.Core.Commands.Moderation
 			{
 				InfractionResult.SucceededWithNotification => $"Banned **{user.ToDiscordName()}** (User notified with Direct Message)",
 				InfractionResult.SucceededWithoutNotification => $"Banned **{user.ToDiscordName()}**! (Failed to DM.)",
-				InfractionResult.FailedGuildHeirarchy => "I can't ban that person due to heirarchy.",
+				InfractionResult.FailedGuildHeirarchy => "I can't ban that person due to hierarchy.",
 				InfractionResult.FailedSelfPermissions => "I don't know how you managed to do this, but I don't have permission to ban that person!"
 			};
 
@@ -78,7 +78,7 @@ namespace Silk.Core.Commands.Moderation
 			{
 				InfractionResult.SucceededWithNotification => $"Banned **{user.ToDiscordName()}** (User notified with Direct Message)",
 				InfractionResult.SucceededWithoutNotification => $"Banned **{user.ToDiscordName()}**! (Failed to DM.)",
-				InfractionResult.FailedGuildHeirarchy => "I can't ban that person due to heirarchy.",
+				InfractionResult.FailedGuildHeirarchy => "I can't ban that person due to hierarchy.",
 				InfractionResult.FailedSelfPermissions => "I don't know how you managed to do this, but I don't have permission to ban that person!"
 			};
 

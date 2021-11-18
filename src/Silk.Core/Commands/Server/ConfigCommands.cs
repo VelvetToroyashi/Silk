@@ -75,7 +75,7 @@ namespace Silk.Core.Commands
 					.AppendLine("**General Config:**")
 					.AppendLine("__Greeting:__")
 					.AppendLine($"> Option: {config.GreetingOption.Humanize()}")
-					.AppendLine($"> Greetting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
+					.AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
 					.AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"[See {ctx.Prefix}config view greeting]")}")
 					.AppendLine()
 					.AppendLine()
@@ -92,16 +92,16 @@ namespace Silk.Core.Commands
 					.AppendLine()
 					.AppendLine("__Invites:__")
 					.AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($"> Infract on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Warn on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($@"> Use agressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
 					.AppendLine("Aggressive pattern matching regex:")
 					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
 					.AppendLine()
 					.AppendLine("__Infractions:__")
 					.AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
-					.AppendLine($"> Auto-escalate automod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
 					.AppendLine()
@@ -118,7 +118,7 @@ namespace Silk.Core.Commands
 				await ctx.RespondAsync(embed);
 			}
 			
-			// Justification for ommiting a Log command in the View group:			//
+			// Justification for omitting a Log command in the View group:			//
 			// The commands below exist because they house complex information		//
 			// that would otherwise bloat the main embed to > 4096 characters,		//
 			// which is the limit for embed descriptions. Log however only houses	//
@@ -154,7 +154,7 @@ namespace Silk.Core.Commands
 					.Clear()
 					.AppendLine("__**Greeting option:**__")
 					.AppendLine($"> Option: {config.GreetingOption.Humanize()}")
-					.AppendLine($"> Greetting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
+					.AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
 					.AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"\n\n{config.GreetingText}")}")
 					.AppendLine($"> Greeting role: {(config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is var role and not 0 ? $"<@&{role}>" : "N/A")}");
 
@@ -192,9 +192,9 @@ namespace Silk.Core.Commands
 					.Clear()
 					.AppendLine("__Invites:__")
 					.AppendLine($"> Scan invite: <:_:{(config.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($"> Infract on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($"> Warn on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-					.AppendLine($@"> Use agressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+					.AppendLine($@"> Use aggressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
 					.AppendLine()
 					.AppendLine($"> Allowed invites: {(config.AllowedInvites.Count is 0 ? "There are no whitelisted invites!" : $"{config.AllowedInvites.Count} allowed invites:")}")
 					.AppendLine($"> {config.AllowedInvites.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
@@ -215,7 +215,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
-			[Description("View in-depth infraction-ralated config.")]
+			[Description("View in-depth infraction-related config.")]
 			public async Task Infractions(CommandContext ctx)
 			{
 				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
@@ -224,7 +224,7 @@ namespace Silk.Core.Commands
 					.AppendLine("__Infractions:__")
 					.AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
 					.AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
-					.AppendLine($"> Auto-escalate automod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
+					.AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
 
 				if (config.InfractionSteps.Any())
 				{
@@ -703,7 +703,7 @@ namespace Silk.Core.Commands
 
 				[Command]
 				[Aliases("warn", "wom")]
-				[Description("Whether members should be warned for sending non-whitelisted invites. \nIf `auto-esclate-infractions` is set to true, the configured auto-mod setting will be used, else it will fallback to the configured infraction step depending on the user's current infraction count.")]
+				[Description("Whether members should be warned for sending non-whitelisted invites. \nIf `auto-escalate-infractions` is set to true, the configured auto-mod setting will be used, else it will fallback to the configured infraction step depending on the user's current infraction count.")]
 				public async Task WarnOnMatch(CommandContext ctx, bool warn)
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
@@ -824,9 +824,9 @@ namespace Silk.Core.Commands
 				public EditInfractionModule(IMediator mediator) => _mediator = mediator;
 				
 				[Command]
-				[Aliases("esclate", "esc")]
+				[Aliases("escalate", "esc")]
 				[Description("Whether strikes should be automatically escalated. " +
-				             "\n\n In the case of automod, if a category does not have a defined action, strikes are used instead.\n" +
+				             "\n\n In the case of auto-mod, if a category does not have a defined action, strikes are used instead.\n" +
 				             "If this is set to true, AutoMod will attempt to use the configured action depending on how many infractions the user currently has.\n\n" +
 				             "For manual strikes, if this is enabled, when a user has >= 5 strikes, moderators will be prompted if they want to escalate, which will follow the same procedure.")]
 				public async Task AutoEscalate(CommandContext ctx, bool escalate)
@@ -851,10 +851,10 @@ namespace Silk.Core.Commands
 					[Description("Adds a new infraction step. This action will be used when the user has **`n`** infractions.\n\n" +
 					             "If the infraction step count (see `config view`) is 2, when a user has one strike\n" +
 					             "(or strike that were escalated), and the second infraction step is set to a 10 minute mute," +
-					             "they will be muted for 10 minutes the next time they are striked.\n\n" +
+					             "they will be muted for 10 minutes the next time they are struck.\n\n" +
 					             "Duration is only applicable to Mute and SoftBan.\n\n" +
-					             "Availble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
-					             "A note on `Ignore`: If the step is set to ignore, AutoMod will add a note to the user. The strike comand will esclate to ban if the current step is ignore.")]
+					             "Available option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
+					             "A note on `Ignore`: If the step is set to ignore, AutoMod will add a note to the user. The strike command will escalate to ban if the current step is ignore.")]
 					public async Task Add(CommandContext ctx, InfractionType type, [RemainingText] TimeSpan? duration = null)
 					{
 						EnsureCancellationTokenCancellation(ctx.User.Id);
@@ -869,7 +869,7 @@ namespace Silk.Core.Commands
 					}
 
 					[Command]
-					[Description("Edits an infraction step. `index` is the number of infractions. If you want to edit the third step (3 infractions), simply pass 3. \nAvailble option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
+					[Description("Edits an infraction step. `index` is the number of infractions. If you want to edit the third step (3 infractions), simply pass 3. \nAvailable option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
 					public async Task Edit(CommandContext ctx, uint index, InfractionType type, TimeSpan? duration = null)
 					{
 						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
@@ -928,7 +928,7 @@ namespace Silk.Core.Commands
 				}
 
 				[Command]
-				[Description("Adds or overwrites an action for automod. \nTo see available options, use `config view automod-options`" +
+				[Description("Adds or overwrites an action for auto-mod. \nTo see available options, use `config view auto-mod-options`" +
 				             "Available punishments: Ignore, Kick, Ban, SoftBan, Mute, Strike\n\n" +
 				             "**A note about AutoMod**: If `Ignore` is chosen, AutoMod will add a note to the user. Notes do not notify the user.")]
 				public async Task Add(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
@@ -967,7 +967,7 @@ namespace Silk.Core.Commands
 
 				
 				[Command]
-				[Description("Removes a defined AutoMod action. See `config view automod-actions` for a full list.")]
+				[Description("Removes a defined AutoMod action. See `config view auto-mod-actions` for a full list.")]
 				public async Task Remove(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
 				{
 					if (!AutoModConstants.ActionStrings.ContainsKey(option))

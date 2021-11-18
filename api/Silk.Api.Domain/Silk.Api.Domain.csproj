@@ -18,8 +18,4 @@
         <ProjectReference Include="..\Silk.Api.Data\Silk.Api.Data.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Services" />
-    </ItemGroup>
-
 </Project>

@@ -61,7 +61,7 @@ namespace Silk.Core.Data.Entities
         public InfractionType InfractionType { get; set; } //What happened
         
         /// <summary>
-        /// Whether this was initially intented to be a strike.
+        /// Whether this was initially intended to be a strike.
         /// </summary>
         public bool EscalatedFromStrike { get; set; }
 
