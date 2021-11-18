@@ -19,7 +19,7 @@ namespace Silk.Core.EventHandlers.Guilds
 	public sealed class GuildCacher
 	{
 
-		private readonly string _onGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
+		private static readonly string _onGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
 		                                                  $"\n\nI respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`" +
 		                                                  "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
 		                                                  "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
