@@ -9,7 +9,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using FuzzySharp;
@@ -230,7 +229,6 @@ namespace RoleMenuPlugin
 			await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(sb.ToString()).AsEphemeral(true));
 		}
 
-
 		private static async Task AddFull(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
 		{
 			DiscordRole? role;
@@ -311,9 +309,10 @@ namespace RoleMenuPlugin
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
+			var t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(5));
+			var t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(5));
 
-			var res = await interactivity
-				.WaitForEventArgsAsync<ComponentInteractionCreateEventArgs>(c => c.Message == selectionMessage, TimeSpan.FromMinutes(5));
+			var res = (await Task.WhenAny(t1, t2)).Result;
 
 			if (res.TimedOut || res.Result.Id == "rm-quit")
 			{
@@ -331,6 +330,8 @@ namespace RoleMenuPlugin
 			var addEmojiButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-emoji", "Add Emoji");
 			var addDescriptionButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-description", "Add Description");
 
+			var quitButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Quit");
+
 			do
 			{
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
@@ -342,7 +343,7 @@ namespace RoleMenuPlugin
 						.AddField("Emoji", option.EmojiName is null ? "Not set." :
 							ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
 						.AddField("Description", option.Description ?? "None"))
-					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, _quitButton));
+					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 
 				selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
 				//TODO: Add buttons to make an option mutually exclusive.
