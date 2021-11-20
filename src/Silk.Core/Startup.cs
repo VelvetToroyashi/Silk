@@ -47,9 +47,11 @@ using YumeChan.PluginBase.Tools.Data;
 
 namespace Silk.Core
 {
-	public sealed class Startup
+	public static class Startup
 	{
 		public static IUnityContainer Container { get; private set; }
+		
+		private static readonly List<Type> _startupTypes = new();
 		
 		public static async Task Main()
 		{
@@ -57,7 +59,6 @@ namespace Silk.Core
 			IHostBuilder builder = CreateBuilder();
 
 			ConfigureServices(builder);
-
 
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
@@ -67,6 +68,9 @@ namespace Silk.Core
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
 
 			Container = builtBuilder.Services.Get<IUnityContainer>()!;
+			
+			foreach (var service in _startupTypes)
+				_ = Container.Resolve(service);
 
 			await builtBuilder.RunAsync().ConfigureAwait(false);
 		}
@@ -179,33 +183,37 @@ namespace Silk.Core
 					#region Services
 
 					services.AddSingleton<ConfigService>();
-					services.AddSingleton<MemberGreetingService>();
+					
 
 					#endregion
-
+					
 					#region AutoMod
-
-					services.AddSingleton<AutoModMuteApplier>();
+					
 					services.AddSingleton<AntiInviteHelper>();
 					services.AddSingleton<AutoModAntiPhisher>();
 					
-
 					#endregion
 					
-					services.AddSingleton<RoleAddedHandler>();
-
-					services.AddSingleton<MemberRemovedHandler>();
-					services.AddSingleton<RoleRemovedHandler>();
 					services.AddSingleton<BotExceptionHandler>();
 					services.AddSingleton<SlashCommandExceptionHandler>();
 					services.AddSingleton<SerilogLoggerFactory>();
-					services.AddSingleton<MessageUpdateHandler>();
-
-					services.AddSingleton<CommandHandler>();
-					services.AddSingleton<MessageAddAntiInvite>();
-
-					services.AddSingleton<EventHelper>();
 					
+					#region Unmonitored Services
+					
+					services.AddUnmonitoredService<MessageAddAntiInvite>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<RoleAddedHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<RoleRemovedHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<GuildEventHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MemberGreetingService>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessageUpdateHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<CommandHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessageAddAntiInvite>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessagePhishingDetector>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<AutoModMuteApplier>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MemberRemovedHandler>(ServiceLifetime.Singleton);
+					
+					#endregion
+
 					services.AddScoped<IPrefixCacheService, PrefixCacheService>();
 					services.AddSingleton<IInfractionService, InfractionService>();
 
@@ -221,23 +229,18 @@ namespace Silk.Core
 					services.AddSingleton<IInfractionService, InfractionService>();
 					services.AddHostedService(s => s.Get<IInfractionService>() as InfractionService);
 					
-					
-
 					// Couldn't figure out how to get the service since AddHostedService adds it as //
 					// IHostedService. Google failed me, but https://stackoverflow.com/a/65552373 helped a lot. //
 					services.AddSingleton<ReminderService>();
 					services.AddHostedService(b => b.GetRequiredService<ReminderService>());
 
 					services.AddHostedService<StatusService>();
-					
-					
+
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
-					
-					
-					
+
 					services.AddSingleton<GuildCacher>();
-					services.AddSingleton<GuildEventHandler>();
+					
 					//services.AddSingleton<UptimeService>();
 					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 					services.RegisterShardedPluginServices();
@@ -250,15 +253,24 @@ namespace Silk.Core
 						l.AddSerilog();
 						AddLogging(context);
 					}));
-
-
-
+					
 					container.AddExtension(new Diagnostic());
 					
-					container.AddServices(services); 
+					container.AddServices(services);
 				});
 		}
 
+		private static IServiceCollection AddUnmonitoredService<T>(this IServiceCollection services, ServiceLifetime lifetime)
+			=> services.AddUnmonitoredService<T, T>(lifetime);
+		
+		private static IServiceCollection AddUnmonitoredService<TRegister, TImplemenation>(this IServiceCollection services, ServiceLifetime lifetime)
+		{
+			services.Add(new (typeof(TRegister), typeof(TImplemenation), lifetime));
+			
+			_startupTypes.Add(typeof(TRegister));
+			
+			return services;
+		} 
 
 		private static void ConfigureDiscordClient(IServiceProvider services)
 		{

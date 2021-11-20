@@ -36,12 +36,11 @@ namespace Silk.Core
 		public Main(
 			DiscordClient client,
 			ILogger<Main> logger,
-			EventHelper e,
 			BotExceptionHandler handler,
 			CommandHandler commandHandler,
 			SlashCommandExceptionHandler slashExceptionHandler, 
 			IOptions<SilkConfigurationOptions> configOptions,
-			IPluginLoaderService plugins, PluginWatchdog wd) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
+			IPluginLoaderService plugins) // About the EventHelper: Consuming it in the ctor causes it to be constructed,
 		{
 			// And that's all it needs, since it subs to events in it's ctor.
 			_logger = logger; // Not ideal, but I'll figure out a better way. Eventually. //
@@ -51,8 +50,6 @@ namespace Silk.Core
 			_configOptions = configOptions.Value;
 			_plugins = plugins;
 			_client = client;
-			_ = e;
-			_ = wd;
 		}
 
 

@@ -11,8 +11,9 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		private readonly ConfigService _config;
 		private readonly AntiInviteHelper _inviteHelper;
 
-		public MessageAddAntiInvite(ConfigService config, AntiInviteHelper inviteHelper)
+		public MessageAddAntiInvite(DiscordClient client, ConfigService config, AntiInviteHelper inviteHelper)
 		{
+			client.MessageCreated += CheckForInvite;
 			_config = config;
 			_inviteHelper = inviteHelper;
 		}

@@ -19,8 +19,10 @@ namespace Silk.Core.EventHandlers.MemberAdded
 		private readonly ConfigService _configService;
 
 		private readonly AsyncTimer _timer;
-		public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
+		public MemberGreetingService(DiscordClient client, ConfigService configService, ILogger<MemberGreetingService> logger)
 		{
+			client.GuildMemberAdded += OnMemberAdded;
+			
 			_configService = configService;
 			_timer = new(OnTick, TimeSpan.FromSeconds(1));
 			_timer.Start();

@@ -10,8 +10,9 @@ namespace Silk.Core.EventHandlers.MemberRemoved
 	public sealed class MemberRemovedHandler
 	{
 		private readonly ConfigService _configService;
-		public MemberRemovedHandler(ConfigService configService)
+		public MemberRemovedHandler(DiscordClient client, ConfigService configService)
 		{
+			client.GuildMemberRemoved += OnMemberRemoved;
 			_configService = configService;
 		}
 

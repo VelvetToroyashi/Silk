@@ -13,8 +13,10 @@ namespace Silk.Core.EventHandlers
 	public class RoleAddedHandler
 	{
 		private readonly IMediator _mediator;
-		public RoleAddedHandler(IMediator mediator)
+		public RoleAddedHandler(DiscordClient client, IMediator mediator)
 		{
+			client.GuildMemberUpdated += CheckStaffRole;
+			
 			_mediator = mediator;
 		}
 
