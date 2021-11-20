@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Moderation
 			InfractionResult res = await _infractionHelper.AddNoteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, note);
 			string response = res switch
 			{
-				InfractionResult.SucceededDoesNotNotify => "Succesfully added note!",
+				InfractionResult.SucceededDoesNotNotify => "Successfully added note!",
 				_ => $"An unexpected response was returned, but the note was added. This is probably safe to ignore! {res.Humanize(LetterCasing.Title)}"
 			};
 

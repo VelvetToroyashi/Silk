@@ -124,7 +124,7 @@ namespace Silk.Core.Data.Entities
         public List<InfractionStepEntity> InfractionSteps { get; set; } = new();
 
         /// <summary>
-        /// A dictionary contianing "named" infraction steps, where the key to the dictionary represents a discriminated action,
+        /// A dictionary containing "named" infraction steps, where the key to the dictionary represents a discriminated action,
         /// which may have different consequences than another. In the event a key is not found in this dictionary, it should be assumed the action would result to <see cref="InfractionType.Strike"/>.
         /// </summary>
         public Dictionary<string, InfractionStepEntity> NamedInfractionSteps { get; set; } = new();

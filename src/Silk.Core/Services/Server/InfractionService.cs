@@ -40,7 +40,7 @@ namespace Silk.Core.Services.Server
 
 		private readonly InfractionStepEntity _ignoreStep = new() { Type = InfractionType.Ignore };
 
-		// Holds all temporary infractions. This could be a seperate hashset like the mutes, but I digress ~Velvet //
+		// Holds all temporary infractions. This could be a separate hashset like the mutes, but I digress ~Velvet //
 		private readonly List<InfractionDTO> _infractions = new();
 
 		// Fast lookup for mutes. Populated on startup. //
@@ -251,7 +251,7 @@ namespace Silk.Core.Services.Server
 			if (await IsMutedAsync(userId, guildId))
 			{
 				InfractionDTO? memInfraction = _infractions.Find(inf => inf.UserId == userId && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
-				/* Repplying mute */
+				/* Replying mute */
 
 				if (updateExpiration && expiration != memInfraction!.Expiration)
 				{
@@ -262,7 +262,7 @@ namespace Silk.Core.Services.Server
 				}
 
 				muteRole ??= await GenerateMuteRoleAsync(guild, guild.Members[userId]);
-				/* It *should* be almost impossible for someone to leave a server this fast without selfbotting */
+				/* It *should* be almost impossible for someone to leave a server this fast without self-botting */
 				try
 				{
 					DiscordMember? mem = guild.Members[userId];
@@ -313,7 +313,7 @@ namespace Silk.Core.Services.Server
 				}
 				catch
 				{
-					/* This could only be unauth'd exception. */
+					/* This could only be un-authed exception. */
 				}
 			}
 
@@ -413,7 +413,7 @@ namespace Silk.Core.Services.Server
 				.AddField("Created:", Formatter.Timestamp(infractionNote.CreatedAt, TimestampFormat.LongDateTime), true)
 				.AddField("Case Id:", $"#{infractionNote.CaseNumber}", true)
 				.AddField("User:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
-				.AddField("Noted by:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
+				.AddField("Noted by:", user == _client.CurrentUser ? "[AUTO-MOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
 
 			DiscordEmbedBuilder? noteReasonEmbed = new DiscordEmbedBuilder()
 				.WithDescription(note)
@@ -486,19 +486,19 @@ namespace Silk.Core.Services.Server
 		/// <param name="type">The type of infraction.</param>
 		/// <param name="reason">Why the infraction was created.</param>
 		/// <param name="expiration">When the infraction expires.</param>
-		/// <returns>A <see cref="DiscordEmbed" /> populated with relevant inforamtion.</returns>
+		/// <returns>A <see cref="DiscordEmbed" /> populated with relevant information.</returns>
 		/// <exception cref="ArgumentException">An unknown infraction type was passed.</exception>
 		private static DiscordEmbedBuilder CreateUserInfractionEmbed(DiscordUser enforcer, string guildName, InfractionType type, string reason, DateTime? expiration = default)
 		{
 			string? action = type switch
 			{
 				InfractionType.Kick => $"You've been kicked from {guildName}!",
-				InfractionType.Ban => $"You've been permenantly banned from {guildName}!",
+				InfractionType.Ban => $"You've been permanently banned from {guildName}!",
 				InfractionType.SoftBan => $"You've been temporarily banned from {guildName}!",
 				InfractionType.Mute => $"You've been muted on {guildName}!",
 				InfractionType.AutoModMute => $"You've been automatically muted on {guildName}!",
 				InfractionType.Strike => $"You've been warned on {guildName}!",
-				InfractionType.Unmute => $"You've been unmuted on {guildName}!",
+				InfractionType.Unmute => $"You've been un-muted on {guildName}!",
 				InfractionType.Pardon => $"You've been pardoned from one (1) infraction on {guildName}!",
 				InfractionType.Ignore or InfractionType.Note => null,
 				_ => throw new ArgumentException($"Unexpected enum value: {type}")
@@ -569,7 +569,7 @@ namespace Silk.Core.Services.Server
 					.AddField("Created:", Formatter.Timestamp(infractionOLD.CreatedAt, TimestampFormat.LongDateTime), true)
 					.AddField("Case Id:", $"#{infractionOLD.CaseNumber}", true)
 					.AddField("Offender:", $"**{victim.ToDiscordName()}**\n(`{victim.Id}`)", true)
-					.AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
+					.AddField("Enforcer:", enforcer == _client.CurrentUser ? "[AUTO-MOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true);
 
 
 				if (infractionOLD.Duration.HasValue || infractionNEW.Duration.HasValue)
@@ -625,7 +625,7 @@ namespace Silk.Core.Services.Server
 				.AddField("Created:", Formatter.Timestamp(inf.CreatedAt, TimestampFormat.LongDateTime), true)
 				.AddField("Case Id:", $"#{inf.CaseNumber}", true)
 				.AddField("Offender:", $"**{user.ToDiscordName()}**\n(`{user.Id}`)", true)
-				.AddField("Enforcer:", user == _client.CurrentUser ? "[AUTOMOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
+				.AddField("Enforcer:", user == _client.CurrentUser ? "[AUTO-MOD]" : $"**{enforcer.ToDiscordName()}**\n(`{enforcer.Id}`)", true)
 				.AddField("Reason:", inf.Reason);
 
 			if (inf.Duration is TimeSpan ts)
@@ -774,7 +774,7 @@ namespace Silk.Core.Services.Server
 			}
 			catch
 			{
-				/* Igonre. We can't do anything about it :( */
+				/* Ignore. We can't do anything about it :( */
 			}
 		}
 		

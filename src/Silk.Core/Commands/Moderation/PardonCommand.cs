@@ -22,12 +22,12 @@ namespace Silk.Core.Commands.Moderation
 
 		[Command("pardon")]
 		[RequireFlag(UserFlag.Staff)]
-		[Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction automod, or escalated strike.\nThis will not undo mutes or bans.")]
+		[Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction auto-mod, or escalated strike.\nThis will not undo mutes or bans.")]
 		public async Task PardonAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			if (ctx.User == user)
 			{
-				await ctx.RespondAsync("As much as I'd love to, I cna't let you pardon yourself! Good manners though *:)*");
+				await ctx.RespondAsync("As much as I'd love to, I can't let you pardon yourself! Good manners though *:)*");
 				return;
 			}
 			InfractionResult res = await _infractions.PardonAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);

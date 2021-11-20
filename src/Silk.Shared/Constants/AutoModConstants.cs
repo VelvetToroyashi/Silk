@@ -22,12 +22,12 @@ namespace Silk.Shared.Constants
 
 		public const string PhishingLinkDetected = "phishing_link";
 		
-		//TODO: More automod strings
+		//TODO: More auto-mod strings
 
 		public static ConcurrentDictionary<string, string> ActionStrings { get; } = new()
 		{
-			[MaxUserMentions] = "Maxiumim unique user pings",
-			[MaxRoleMentions] = "Maxiumim unique role pings",
+			[MaxUserMentions] = "Maximum unique user pings",
+			[MaxRoleMentions] = "Maximum unique role pings",
 		};
 	}
 }

@@ -19,11 +19,11 @@ namespace Silk.Core.EventHandlers.Guilds
 	public sealed class GuildCacher
 	{
 
-		private const string OnGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
-		                                                  "\n\nI respond to mentions and `s!` by default, but you can change that with `s!prefix`" +
+		private static readonly string _onGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
+		                                                  $"\n\nI respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`" +
 		                                                  "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
 		                                                  "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
-		                                                  "\nDonations via Ko-Fi *greatly* aid in this endevour. <3";
+		                                                  "\nDonations via Ko-Fi *greatly* aid in this endeavour. <3";
 		private readonly DiscordClient _client;
 		private readonly ILogger<GuildCacher> _logger;
 
@@ -70,7 +70,7 @@ namespace Silk.Core.EventHandlers.Guilds
 				DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 					.WithTitle("Thank you for adding me!")
 					.WithColor(new("94f8ff"))
-					.WithDescription(OnGuildJoinThankYouMessage)
+					.WithDescription(_onGuildJoinThankYouMessage)
 					.WithThumbnail("https://files.velvetthepanda.dev/silk.png")
 					.WithFooter("Silk! | Made by Velvet & Contributors w/ <3");
 

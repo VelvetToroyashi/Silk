@@ -37,9 +37,8 @@ namespace Silk.Core.Commands.Moderation
 			if (user.IsAbove(bot))
 			{
 				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
-				string message;
 
-				message = roleDiff is not 0 ?
+				var message = roleDiff is not 0 ?
 					$"I can't do that! They're {roleDiff} role(s) above me!" :
 					"We have the same top role! I can't add roles to this person.";
 
@@ -50,9 +49,8 @@ namespace Silk.Core.Commands.Moderation
 			if (user.IsAbove(ctx.Member))
 			{
 				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
-				string message;
 
-				message = roleDiff is not 0 ?
+				var message = roleDiff is not 0 ?
 					$"I can't do that! They're {roleDiff} role(s) above you!" :
 					"You two see eye to eye! c: I can't mute someone with the same role as you.";
 
@@ -81,9 +79,8 @@ namespace Silk.Core.Commands.Moderation
 			if (user.IsAbove(bot))
 			{
 				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
-				string message;
 
-				message = roleDiff is not 0 ?
+				var message = roleDiff is not 0 ?
 					$"I can't do that! They're {roleDiff} role(s) above me!" :
 					"We have the same top role! I can't add roles to this person.";
 
@@ -94,9 +91,8 @@ namespace Silk.Core.Commands.Moderation
 			if (user.IsAbove(ctx.Member))
 			{
 				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
-				string message;
 
-				message = roleDiff is not 0 ?
+				var message = roleDiff is not 0 ?
 					$"I can't do that! They're {roleDiff} role(s) above you!" :
 					"You two see eye to eye! c: I can't mute someone with the same role as you.";
 

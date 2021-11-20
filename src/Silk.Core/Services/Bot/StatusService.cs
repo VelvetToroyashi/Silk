@@ -19,7 +19,7 @@ namespace Silk.Core.Services.Bot
 		private readonly AsyncManualResetEvent _tcs = new(false);
 		private readonly LoopedList<string> _statuses = new()
 		{
-			"for s!help",
+			$"for {StringConstants.DefaultCommandPrefix}help",
 			"for @Silk help",
 			"you!",
 			"cute red pandas",
@@ -68,7 +68,7 @@ namespace Silk.Core.Services.Bot
 			catch (TaskCanceledException) { }
 			finally
 			{
-				_logger.LogDebug(EventIds.Service, "Cancelation requested. Stopping service.");
+				_logger.LogDebug(EventIds.Service, "Cancellation requested. Stopping service.");
 			}
 		}
 	}

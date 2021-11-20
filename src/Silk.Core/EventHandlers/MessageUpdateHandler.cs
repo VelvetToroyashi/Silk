@@ -50,7 +50,7 @@ namespace Silk.Core.EventHandlers
 			    {
 			        var embed = AddLoggingFields(new ())
 			            .WithTitle("A message was edited:")
-			            .WithDescription("The message was too big, and have been added to a seperate embed.")
+			            .WithDescription("The message was too big, and have been added to a separate embed.")
 			            .WithColor(DiscordColor.Orange);
 
 			        var contentBefore = new DiscordEmbedBuilder()
@@ -162,7 +162,7 @@ namespace Silk.Core.EventHandlers
 				{
 					var attachment = e.Message.Attachments.First();
 				
-					var stream = await GetSingleAttatchmentAsync(e.Message);
+					var stream = await GetSingleAttachmentAsync(e.Message);
 
 					if (stream is null)
 					{
@@ -229,7 +229,7 @@ namespace Silk.Core.EventHandlers
 			builder.WithFile(name, str);
 		}
 
-		private async Task<Stream?> GetSingleAttatchmentAsync(DiscordMessage message)
+		private async Task<Stream?> GetSingleAttachmentAsync(DiscordMessage message)
 		{
 			var ret = await _client.GetAsync(message.Attachments.First().Url);
 
