@@ -84,7 +84,7 @@ namespace RoleMenuPlugin
 				{
 					"rm-quit" => Task.CompletedTask,
 					"rm-finish" => Task.CompletedTask,
-					"rm-edit" => Edit(ctx, selection.Interaction, initialMenuMessage, interactivity, options),
+					"rm-edit" => Edit(ctx, selection.Interaction, interactivity, options),
 					"rm-add-full" => AddFull(ctx, selection.Interaction, options, interactivity),
 					//"rm-add" => AddRoleOnly(ctx, channel),
 					"rm-htu" => ShowHelpAsync(selection.Interaction),
@@ -299,7 +299,7 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, DiscordMessage initialMenuMessage, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
+		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
 		{
 			var sopts = options.Select((x, i) =>
 				new DiscordSelectComponentOption(x.RoleName, i.ToString(), x.Description));
@@ -314,13 +314,18 @@ namespace RoleMenuPlugin
 
 			var res = (await Task.WhenAny(t1, t2)).Result;
 
-			if (res.TimedOut || res.Result.Id == "rm-quit")
+			if (!res.TimedOut && res.Result.Id != "rm-quit")
+			{
+				await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+			}
+			else
 			{
 				await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
 				return;
 			}
 
-			var option = options[int.Parse(res.Result.Values[0])]; // Default min value is 1, so there's always an index.
+			var index = int.Parse(res.Result.Values[0]);
+			var option = options[index]; // Default min value is 1, so there's always an index.
 
 			var changeRoleButton = new DiscordButtonComponent(ButtonStyle.Primary, "rm-change-role", "Change Role");
 			var changeEmojiButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-change-emoji", "Change Emoji");
@@ -332,25 +337,26 @@ namespace RoleMenuPlugin
 
 			var quitButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Quit");
 
-			do
-			{
-				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-					.WithContent($"Editing option {res.Result.Values[0]}")
-					.AddEmbed(new DiscordEmbedBuilder()
-						.WithColor(DiscordColor.Wheat)
-						.WithTitle("Current menu option:")
-						.AddField("Role", option.RoleName, true)
-						.AddField("Emoji", option.EmojiName is null ? "Not set." :
-							ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
-						.AddField("Description", option.Description ?? "None"))
-					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
+			selectionMessage = await res.Result.Interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
+				.WithContent($"Editing option {index + 1}")
+				.AddEmbed(new DiscordEmbedBuilder()
+					.WithColor(DiscordColor.Wheat)
+					.WithTitle("Current menu option:")
+					.AddField("Role", option.RoleName, true)
+					.AddField("Emoji", option.EmojiName is null ? "Not set." :
+						ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
+					.AddField("Description", option.Description ?? "None"))
+				.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 
-				selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
+			selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
+
+			while (true)
+			{
 				//TODO: Add buttons to make an option mutually exclusive.
 
 				res = await interactivity.WaitForButtonAsync(selectionMessage);
 
-				if (res.TimedOut || res.Result.Id == "rm-quit")
+				if (res.TimedOut || res.Result.Id == "rm-quit" || res.Result.Id == "rm-delete")
 				{
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
 					return;
@@ -371,7 +377,7 @@ namespace RoleMenuPlugin
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
 				await t;
-			} while (res.Result.Id != "rm-quit");
+			}
 
 
 			async Task ChangeRoleAsync()
@@ -414,6 +420,7 @@ namespace RoleMenuPlugin
 			Task DeleteAsync()
 			{
 				options.Remove(option);
+				//options.RemoveAt();
 				return Task.CompletedTask;
 			}
 
