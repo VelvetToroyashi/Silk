@@ -165,7 +165,7 @@ namespace Silk.Core.Commands.Miscellaneous
 		private static string GetRoleMemberCount(CommandContext ctx, DiscordRole role, IEnumerable<DiscordMember> members)
 		{
 			if (role == ctx.Guild.EveryoneRole)
-				return "Everyone has the @everyoone role!";
+				return "Everyone has the @everyone role!";
 
 			var memberCount = members.Count();
 			

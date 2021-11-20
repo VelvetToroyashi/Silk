@@ -197,7 +197,7 @@ namespace Silk.Core.Commands.General
 			}
 			else
 			{
-				await ctx.RespondAsync("I couldn’t find that reminder!");
+				await ctx.RespondAsync("I couldn't find that reminder!");
 			}
 		}
 	}

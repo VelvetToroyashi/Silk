@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnnoucementPlugin.Services
 {
-	// We can't use IHostedService/BackgroundService (which implements IHostedService) because there's no gaurantee that this is not hot-plugged. //
+	// We can't use IHostedService/BackgroundService (which implements IHostedService) because there's no guarantee that this is not hot-plugged. //
 	public sealed class AnnouncementService
 	{
 		private readonly IMediator _mediator;

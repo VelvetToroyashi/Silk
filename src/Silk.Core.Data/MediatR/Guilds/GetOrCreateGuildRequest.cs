@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,8 @@ namespace Silk.Core.Data.MediatR.Guilds
     public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, GuildEntity>
     {
         private readonly GuildContext _db;
-        private IMediator _mediator;
+        private readonly IMediator _mediator;
+
         public GetOrCreateGuildHandler(GuildContext db, IMediator mediator)
         {
             _db = db;
@@ -33,7 +33,6 @@ namespace Silk.Core.Data.MediatR.Guilds
                 .Include(g => g.Users)
                 .Include(g => g.Infractions)
                 .AsSplitQuery()
-                .OrderBy(g => g.Id)
                 .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
             if (guild is not null)

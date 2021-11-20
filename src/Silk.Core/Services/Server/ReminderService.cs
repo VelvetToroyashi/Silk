@@ -151,7 +151,7 @@ namespace Silk.Core.Services.Server
 			await RemoveReminderAsync(reminder.Id);
 			_logger.LogTrace(EventIds.Service, "Removed reminder from queue");
 
-			_logger.LogTrace(EventIds.Service, "Preparring to send reminder");
+			_logger.LogTrace(EventIds.Service, "Preparing to send reminder");
 			try
 			{
 				await channel.SendMessageAsync($"Hey! You wanted me to remind you of something {Formatter.Timestamp(reminder.CreationTime)}! \nReminder: {reminder.MessageContent}");
@@ -217,7 +217,7 @@ namespace Silk.Core.Services.Server
         private async Task SendGuildReminderAsync(ReminderEntity reminder, DiscordGuild guild)
 		{
 			if (reminder.Type is ReminderType.Once)
-				_logger.LogTrace(EventIds.Service, "Dequeing reminder");
+				_logger.LogTrace(EventIds.Service, "De-queueing reminder");
 
 			if (!guild.Channels.TryGetValue(reminder.ChannelId, out var channel)) { await DispatchDmReminderMessageAsync(reminder, guild); }
 			else { await DispatchReplyReminderAsync(reminder, channel); }
@@ -255,7 +255,7 @@ namespace Silk.Core.Services.Server
 			else { await SendReminderAsync(reminder, channel, builder, message); }
 
 			await builder.SendAsync(channel);
-			_logger.LogTrace(EventIds.Service, "Sent reminder succesfully");
+			_logger.LogTrace(EventIds.Service, "Sent reminder successfully");
 		}
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace Silk.Core.Services.Server
 		}
 
         /// <summary>
-        /// Sends a reminder that intiially replied to another message.
+        /// Sends a reminder that initially replied to another message.
         /// </summary>
         /// <param name="reminder"></param>
         /// <param name="channel"></param>
@@ -317,7 +317,7 @@ namespace Silk.Core.Services.Server
         /// deleted or otherwise no longer accessible.
         /// </summary>
         /// <param name="reminder">The reminder to send.</param>
-        /// <param name="guild">The guild the reminder was initialy sent on.</param>
+        /// <param name="guild">The guild the reminder was initially sent on.</param>
         private async Task DispatchDmReminderMessageAsync(ReminderEntity reminder, DiscordGuild guild)
 		{
 			_logger.LogWarning(EventIds.Service, "Channel doesn't exist on guild! Attempting to DM user");
@@ -348,7 +348,7 @@ namespace Silk.Core.Services.Server
 			catch (TaskCanceledException) { }
 			finally
 			{
-				_logger.LogDebug(EventIds.Service, "Cancelation requested. Stopping service. ");
+				_logger.LogDebug(EventIds.Service, "Cancellation requested. Stopping service. ");
 				await timer.DisposeAsync();
 				// It's safe to clear the list as it's all saved to the database prior when they're added. //
 				_reminders.Clear();

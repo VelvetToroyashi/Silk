@@ -18,7 +18,6 @@ namespace AnnoucementPlugin
 					p.GetService<IDatabaseProvider<AnnouncementPlugin>>()!
 						.GetPostgresContextOptionsBuilder()(b);
 				})
-				.AddSingleton<IMessageDispatcher, MessageDispatcher>()
-				.AddSingleton<IMessageDispatcher>();
+				.AddSingleton<IMessageDispatcher, MessageDispatcher>();
 	}
 }

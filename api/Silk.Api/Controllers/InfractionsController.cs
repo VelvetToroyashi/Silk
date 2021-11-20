@@ -69,7 +69,7 @@ namespace Silk.Api.Controllers
 		}
 
 		/// <summary>Gets all infractions on a specific guild.</summary>
-		/// <response code="200">A guilds's infractions were successfully queried</response>
+		/// <response code="200">A guild's infractions were successfully queried</response>
 		/// <response code="404">The guild was not registered with the API.</response>
 		[HttpGet("guild/{guild}")]
 		public async Task<IActionResult> GetGuildInfractions(ulong guild)

@@ -19,7 +19,7 @@ namespace Silk.Core.EventHandlers.MemberRemoved
 		public async Task OnMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
 		{
 			GuildModConfigEntity config = await _configService.GetModConfigAsync(e.Guild.Id);
-			// This should be done in a seperate service //
+			// This should be done in a separate service //
 			if (config.LogMemberLeaves && config.LoggingChannel is not 0)
 				await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetLeaveEmbed(e));
 		}

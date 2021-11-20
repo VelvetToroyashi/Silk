@@ -267,7 +267,7 @@ namespace RoleMenuPlugin
 				else
 				{
 					// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
-					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high dropoff threshold
+					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
 
 					//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
 					var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
@@ -551,7 +551,7 @@ namespace RoleMenuPlugin
 					else
 					{
 						// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
-						// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high dropoff threshold
+						// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
 
 						//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
 						var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();

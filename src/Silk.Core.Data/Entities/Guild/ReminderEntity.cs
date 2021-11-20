@@ -37,7 +37,7 @@ namespace Silk.Core.Data.Entities
         public ulong MessageId { get; set; }
 
         /// <summary>
-        /// The type of reminder, be it recurring or non-reccuring.
+        /// The type of reminder, be it recurring or non-recurring.
         /// </summary>
         public ReminderType Type { get; set; }
 

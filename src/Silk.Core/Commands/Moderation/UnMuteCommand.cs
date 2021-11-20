@@ -23,7 +23,7 @@ namespace Silk.Core.Commands.Moderation
 
 		[Command]
 		[RequireFlag(UserFlag.Staff)]
-		[Description("Unmutes a member.")]
+		[Description("Un-mutes a member.")]
 		public async Task UnmuteAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
 			if (user == ctx.User)
@@ -37,7 +37,7 @@ namespace Silk.Core.Commands.Moderation
 			string? message = res switch
 			{
 				InfractionResult.FailedGenericRequirementsNotFulfilled => "That person isn't muted!",
-				InfractionResult.SucceededWithNotification => $"Unmuted **{user.ToDiscordName()}**! (User notified with Direct Message).",
+				InfractionResult.SucceededWithNotification => $"Un-muted **{user.ToDiscordName()}**! (User notified with Direct Message).",
 				_ => throw new ArgumentOutOfRangeException()
 			};
 

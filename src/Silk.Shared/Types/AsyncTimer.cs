@@ -14,7 +14,7 @@ namespace Silk.Core.Types
 
 
   /// <summary>
-  /// An asynchonrous timer that can yield to tasks if necessary.
+  /// An asynchronous timer that can yield to tasks if necessary.
   /// </summary>
   public sealed class AsyncTimer : IDisposable
 	{
@@ -170,7 +170,7 @@ namespace Silk.Core.Types
 					try { await task; }
 					catch
 					{
-						/* Handled in continutation */
+						/* Handled in continuation */
 					}
 				}
 				/* Else we just let it run in the background. */

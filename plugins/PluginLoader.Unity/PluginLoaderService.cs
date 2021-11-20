@@ -78,8 +78,8 @@ namespace PluginLoader.Unity
 				try { cnext.RegisterCommands(plugin.GetType().Assembly); }
 				catch (DuplicateCommandException e)
 				{
+					// Load the next plugin. //
 					_logger.LogWarning(Events.Plugin, "A plugin defined as {Plugin} attempted to register a command that already existed, defined as {Command}", plugin?.DisplayName, e.CommandName);
-					break; // Load the next plugin. //
 				}
 			}
 		}

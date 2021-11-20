@@ -32,7 +32,7 @@ namespace Silk.Core.SlashCommands.Commands
 					return;
 				case AvatarOption.Guild when ctx.Guild is null:
 					await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-						.WithContent("Sorry, but I need to be auth'd with the bot scope to retrieve guild-specific avatars!")
+						.WithContent("Sorry, but I need to be authed with the bot scope to retrieve guild-specific avatars!")
 						.AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
 					return;
 				case AvatarOption.Guild when ctx.Guild.Members.ContainsKey(user.Id):

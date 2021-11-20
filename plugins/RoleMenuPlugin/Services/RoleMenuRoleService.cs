@@ -106,7 +106,7 @@ namespace RoleMenuPlugin
 					continue;
 				}
 
-				if (FailedHeirarchy(eventArgs.Guild, role))
+				if (FailedHierarchy(eventArgs.Guild, role))
 				{
 					await NotifyOfHeiarchyFailureAsync(role);
 					continue;
@@ -148,11 +148,11 @@ namespace RoleMenuPlugin
 					Content = $"Sorry, but I can't assign {role.Mention} because it is above my highest role! Please notify a staff member about this.",
 				});
 				
-				_logger.LogWarning("A role was defined in a role-menu, but guild heirarchy has changed. Role-menus may no longer work for {Guild}", eventArgs.Guild.Id);
+				_logger.LogWarning("A role was defined in a role-menu, but guild hierarchy has changed. Role-menus may no longer work for {Guild}", eventArgs.Guild.Id);
 			}
 		}
 		
-		private bool FailedHeirarchy(DiscordGuild eventArgsGuild, DiscordRole role)
+		private bool FailedHierarchy(DiscordGuild eventArgsGuild, DiscordRole role)
 			=> eventArgsGuild.CurrentMember.Roles.Last().Position <= role.Position;
 		
 		private bool HasSelfPermissions(DiscordGuild eventArgsGuild) 

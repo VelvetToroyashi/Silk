@@ -54,7 +54,7 @@ namespace PluginLoader.Unity
 		/// Returns an array of all potential plugin files.
 		/// </summary>
 		/// <param name="directory">The directory to search for plugins in.</param>
-		/// <returns>An array of plugin canidate file infos.</returns>
+		/// <returns>An array of plugin candidate file infos.</returns>
 		internal FileInfo[] DiscoverPluginFiles(string directory)
 		{
 			if (!Directory.Exists(directory))
