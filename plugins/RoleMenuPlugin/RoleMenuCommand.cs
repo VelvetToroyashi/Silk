@@ -86,7 +86,7 @@ namespace RoleMenuPlugin
 					"rm-finish" => Task.CompletedTask,
 					"rm-edit" => Edit(ctx, selection.Interaction, interactivity, options),
 					"rm-add-full" => AddFull(ctx, selection.Interaction, options, interactivity),
-					//"rm-add" => AddRoleOnly(ctx, channel),
+					"rm-add" => NotImplementedAsync(),
 					"rm-htu" => ShowHelpAsync(selection.Interaction),
 					_ => Task.CompletedTask
 				};
@@ -104,6 +104,13 @@ namespace RoleMenuPlugin
 						.WithContent(initialMenuMessage.Content)
 						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
 						.AddComponents(_finishButton, _quitButton, _htuButton));
+
+				Task NotImplementedAsync()
+					=> selection
+						.Interaction
+						.CreateFollowupMessageAsync(
+							new DiscordFollowupMessageBuilder()
+								.WithContent("This feature is not yet implemented."));
 
 				await t;
 
@@ -166,6 +173,7 @@ namespace RoleMenuPlugin
 			}
 
 			//TODO: Completion logic here? 
+
 		}
 
 
@@ -314,9 +322,11 @@ namespace RoleMenuPlugin
 
 			var res = (await Task.WhenAny(t1, t2)).Result;
 
+
 			if (!res.TimedOut && res.Result.Id != "rm-quit")
 			{
-				await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+				Console.WriteLine("Deffered first interaction");
 			}
 			else
 			{
@@ -348,7 +358,7 @@ namespace RoleMenuPlugin
 					.AddField("Description", option.Description ?? "None"))
 				.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 
-			selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
+			Console.WriteLine("Edited message with buttons");
 
 			while (true)
 			{
@@ -375,6 +385,8 @@ namespace RoleMenuPlugin
 				};
 
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+				Console.WriteLine("Deferred second interaction");
 
 				await t;
 			}
