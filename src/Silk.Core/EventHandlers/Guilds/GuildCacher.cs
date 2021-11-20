@@ -89,18 +89,17 @@ namespace Silk.Core.EventHandlers.Guilds
 		
 		private void LogMembers(int members, int totalMembers, long currentGuilds)
 		{
-			string message;
-			message = members is 0 ?
+			var message = members is 0 ?
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}]" :
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}] → Staff [{Members}/{AllMembers}]";
-			
+
 			_logger.LogDebug(EventIds.EventHandler, message, _client.ShardId + 1, _client.ShardCount, currentGuilds, _client.Guilds.Count, members, totalMembers);
 		}
 
 		private async Task<int> CacheMembersAsync(IEnumerable<DiscordMember> members)
 		{
 			var staffCount = 0;
-			List<DiscordMember> staff = members.Where(m => !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag)).ToList();
+			List<DiscordMember> staff = members.Where(MemberIsStaff).ToList();
 
 			foreach (var member in staff)
 			{
@@ -122,7 +121,10 @@ namespace Silk.Core.EventHandlers.Guilds
 					staffCount++;
 				}
 			}
-			return Math.Max(staffCount, 0);
+			return staffCount;
 		}
+
+		private static bool MemberIsStaff(DiscordMember m) 
+			=> !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag);
 	}
 }
