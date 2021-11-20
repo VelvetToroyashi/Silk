@@ -366,11 +366,7 @@ namespace RoleMenuPlugin
 
 				res = await interactivity.WaitForButtonAsync(selectionMessage);
 
-				if (res.TimedOut || res.Result.Id == "rm-quit" || res.Result.Id == "rm-delete")
-				{
-					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
-					return;
-				}
+
 
 				var t = res.Result.Id switch
 				{
@@ -389,8 +385,18 @@ namespace RoleMenuPlugin
 				Console.WriteLine("Deferred second interaction");
 
 				await t;
-			}
 
+				if (res.Result.Id == "rm-delete")
+				{
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Done. That option is no longer a part of the menu. \nThis action cannot be undone."));
+					return;
+				}
+
+				if (res.TimedOut || res.Result.Id == "rm-quit")
+				{
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
+				}
+			}
 
 			async Task ChangeRoleAsync()
 			{
