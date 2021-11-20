@@ -240,7 +240,7 @@ namespace RoleMenuPlugin
 
 			DiscordMessage tipMessage = await interaction.CreateFollowupMessageAsync(new() { Content = "\u200b", IsEphemeral = true });
 
-			role = await GetRoleAsync(ctx, interaction, interactivity, tipMessage);
+			role = await GetRoleAsync(ctx, interaction, interactivity, tipMessage, options);
 
 			if (role is null)
 				return;
@@ -282,17 +282,22 @@ namespace RoleMenuPlugin
 
 				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
 
-				if (!res.TimedOut)
-					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
-						new DiscordInteractionResponseBuilder()
-							.WithContent(confirmMessage.Content));
-
-				return res.Result?.Id switch
+				var ret = res.Result?.Id switch
 				{
 					"y" => true,
 					"n" => false,
 					_ => false
 				};
+
+				if (!res.TimedOut)
+				{
+					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+						new DiscordInteractionResponseBuilder()
+							.WithContent(ret ? "Added role to menu." : "Cancelled."));
+
+				}
+
+				return ret;
 			}
 		}
 
@@ -370,7 +375,7 @@ namespace RoleMenuPlugin
 
 			async Task ChangeRoleAsync()
 			{
-				var ret = await GetRoleAsync(ctx, interaction, interactivity, selectionMessage);
+				var ret = await GetRoleAsync(ctx, interaction, interactivity, selectionMessage, options);
 
 				if (ret is not null)
 				{
@@ -476,7 +481,7 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private static async Task<DiscordRole?> GetRoleAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage selectionMessage)
+		private static async Task<DiscordRole?> GetRoleAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage selectionMessage, List<RoleMenuOptionDto> options)
 		{
 			DiscordRole? role = null;
 
@@ -497,9 +502,7 @@ namespace RoleMenuPlugin
 					var r = input.Value.MentionedRoles[0];
 
 					// Ensure the role is not above the user's highest role
-					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage);
-
-					if (!valid)
+					if (!await EnsureNonDuplicatedRoleAsync(r) || !await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage))
 						continue;
 
 					return r;
@@ -523,7 +526,7 @@ namespace RoleMenuPlugin
 					{
 						var fuzzyRes = Process.ExtractSorted((input.Value.Content, default(ulong)),
 								ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
-								r => r.Item1, cutoff: 90)
+								r => r.Item1, cutoff: 80)
 							.FirstOrDefault();
 
 						if (fuzzyRes?.Value is null)
@@ -536,16 +539,24 @@ namespace RoleMenuPlugin
 						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
 					}
 
-					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage);
-
-					if (!valid)
+					if (!await EnsureNonDuplicatedRoleAsync(role) || !await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage))
 						continue;
-
-					role ??= result.Value;
 
 					await input.Value.DeleteAsync();
 					return role;
 				}
+			}
+
+			async Task<bool> EnsureNonDuplicatedRoleAsync(DiscordRole role)
+			{
+				if (options.Any(r => r.RoleId == role.Id))
+				{
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("You can't have the same role twice. Try again."));
+					await Task.Delay(MessageReadDelayMs);
+					return false;
+				}
+
+				return true;
 			}
 		}
 
