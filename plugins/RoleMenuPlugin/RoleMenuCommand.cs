@@ -345,7 +345,7 @@ namespace RoleMenuPlugin
 			var addEmojiButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-emoji", "Add Emoji");
 			var addDescriptionButton = new DiscordButtonComponent(ButtonStyle.Success, "rm-add-description", "Add Description");
 
-			var quitButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Quit");
+			var quitButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Exit");
 
 			selectionMessage = await res.Result.Interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
 				.WithContent($"Editing option {index + 1}")
