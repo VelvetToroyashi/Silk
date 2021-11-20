@@ -233,138 +233,32 @@ namespace RoleMenuPlugin
 
 		private static async Task AddFull(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
 		{
-			string current = "";
-			DiscordRole role = null!;
-			DiscordEmoji? emoji = null;
+			DiscordRole? role;
+			DiscordEmoji? emoji;
 			string? description;
 
 
 			DiscordMessage tipMessage = await interaction.CreateFollowupMessageAsync(new() { Content = "\u200b", IsEphemeral = true });
 
-			while (true)
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("Enter the name of the role you want to add to the menu.\n" +
-					             "If you don't see the role in the list, you may need to type it in the exact format it appears in the server (e.g. `@Role`).\n" +
-					             "Type `cancel` to cancel adding roles."));
+			role = await GetRoleAsync(ctx, interaction, interactivity, tipMessage);
 
-				var input = await GetInputWithContentAsync();
+			if (role is null)
+				return;
 
-				if (input.Cancelled)
-					return;
+			var emojiRes = await GetEmojiAsync(ctx, interaction, interactivity, tipMessage);
 
-				if (input.Value!.MentionedRoles.Count is not 0)
-				{
-					var r = input.Value.MentionedRoles[0];
+			if (emojiRes.Cancelled)
+				return;
 
-					// Ensure the role is not above the user's highest role
-					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, r, tipMessage);
+			emoji = emojiRes.Value;
 
-					if (!valid)
-						continue;
-
-					role = r;
-					break;
-				}
-				else
-				{
-					// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
-					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
-
-					//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
-					var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
-
-					//Try to convert the input to a role
-					var result = await roleConverter.ConvertAsync(current, ctx);
-
-					if (result.HasValue)
-					{
-						role = result.Value;
-					}
-					else
-					{
-						var fuzzyRes = Process.ExtractSorted((current, default(ulong)),
-								ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
-								r => r.Item1, cutoff: 90)
-							.FirstOrDefault();
-
-						if (fuzzyRes?.Value is null)
-						{
-							await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that role. Try again."));
-							await Task.Delay(MessageReadDelayMs);
-							continue;
-						}
-
-						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
-					}
-
-					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, role, tipMessage);
-
-					if (!valid)
-						continue;
-
-					role ??= result.Value;
-
-					await input.Value.DeleteAsync();
-					break;
-				}
-			}
-
-			while (true)
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("Enter the emoji you want to use to represent this role.\n" +
-					             "If you don't see the emoji in the list, you may need to type it in the exact format it appears in the server (e.g. `:emoji:`).\n" +
-					             "Type `cancel` to cancel adding this role. Type `skip` to skip adding an emoji."));
-
-				Result<DiscordMessage?> input = await GetInputWithContentAsync();
-
-				if (input.Cancelled)
-					return;
-
-				if (input.Value is null)
-					break;
-
-				var converter = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
-
-				var result = await converter.ConvertAsync(input.Value.Content, ctx);
-
-				if (!result.HasValue)
-				{
-					await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that emoji. Try again."));
-					await Task.Delay(MessageReadDelayMs);
-					continue;
-				}
-				await input.Value.DeleteAsync();
-
-				emoji = result.Value;
-
-				break;
-			}
-
-			while (true)
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Enter a description for this role.\n" +
-				                                                                                                  "Descriptions will be truncated at 100 characters.\n" +
-				                                                                                                  "Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
-
-				Result<DiscordMessage?> input = await GetInputWithContentAsync();
-
-				if (input.Cancelled)
-					return;
-
-				description = input.Value?.Content?.Length > 100 ? input.Value.Content[..100] : input.Value?.Content;
-
-				if (input.Value is not null)
-					await input.Value.DeleteAsync();
-
-				break;
-			}
+			description = await GetDescriptionAsync(interaction, interactivity, tipMessage);
 
 			bool confirm = await GetConfirmationAsync();
 
 			if (!confirm)
 				return;
+
 			options.Add(new()
 			{
 				RoleId = role.Id,
@@ -400,55 +294,6 @@ namespace RoleMenuPlugin
 					_ => false
 				};
 			}
-
-			async Task<Result<DiscordMessage?>> GetInputWithContentAsync()
-			{
-				var inp = await GetInputAsync(interactivity, interaction, tipMessage.Id);
-
-				if (inp.Value is not null)
-					current = inp.Value.Content;
-
-				return inp;
-			}
-		}
-
-		private static async Task<bool> ValidateRoleHeirarchyAsync(CommandContext ctx, DiscordInteraction interaction, DiscordRole r, DiscordMessage tipMessage)
-		{
-			if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("You can't add roles that are above your highest role."));
-				return false;
-			}
-
-			if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("I cannot assign that role as it's above my highest role."));
-
-				await Task.Delay(MessageReadDelayMs);
-				return false;
-			}
-
-			if (r == ctx.Guild.EveryoneRole)
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("I cannot assign the everyone role as it's special and cannot be assigned."));
-
-				await Task.Delay(MessageReadDelayMs);
-				return false;
-			}
-
-			if (r.IsManaged)
-			{
-				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
-					.WithContent("I cannot assign that role as it's managed and cannot be assigned."));
-
-				await Task.Delay(MessageReadDelayMs);
-				return false;
-			}
-
-			return true;
 		}
 
 		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, DiscordMessage initialMenuMessage, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
@@ -495,7 +340,6 @@ namespace RoleMenuPlugin
 					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, _quitButton));
 
 				selectionMessage = await res.Result.Interaction.GetOriginalResponseAsync();
-				//TODO: Make this a loop.
 				//TODO: Add buttons to make an option mutually exclusive.
 
 				res = await interactivity.WaitForButtonAsync(selectionMessage);
@@ -526,110 +370,40 @@ namespace RoleMenuPlugin
 
 			async Task ChangeRoleAsync()
 			{
-				while (true)
+				var ret = await GetRoleAsync(ctx, interaction, interactivity, selectionMessage);
+
+				if (ret is not null)
 				{
-					var input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
-
-					if (input.Cancelled)
-						return;
-
-					DiscordRole r;
-					if (input.Value!.MentionedRoles.Count is not 0)
+					option = option with
 					{
-						r = input.Value.MentionedRoles[0];
-
-						// Ensure the role is not above the user's highest role
-						var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage);
-
-						if (!valid)
-							continue;
-
-						option = option with
-						{
-							RoleId = r.Id,
-							RoleName = r.Name
-						};
-					}
-					else
-					{
-						// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
-						// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
-
-						//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
-						var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
-
-						//Try to convert the input to a role
-						var result = await roleConverter.ConvertAsync(input.Value.Content, ctx);
-
-						if (result.HasValue)
-						{
-							r = result.Value;
-						}
-						else
-						{
-							var fuzzyRes = Process.ExtractSorted((input.Value.Content, default(ulong)),
-									ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
-									r => r.Item1, cutoff: 90)
-								.FirstOrDefault();
-
-							if (fuzzyRes?.Value is null)
-							{
-								await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that role. Try again."));
-								await Task.Delay(MessageReadDelayMs);
-								continue;
-							}
-
-							r = ctx.Guild.Roles[fuzzyRes.Value.Item2];
-						}
-
-						var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage);
-
-						if (!valid)
-							continue;
-
-						option = option with
-						{
-							RoleId = r.Id,
-							RoleName = r.Name
-						};
-					}
+						RoleId = ret.Id,
+						RoleName = ret.Name
+					};
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Role changed successfully!"));
 				}
 			}
 
 			async Task ChangeEmojiAsync()
 			{
-				while (true)
+				var ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
+
+				if (ret.Value is not null)
 				{
-					Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
-
-					if (input.Cancelled)
-						return;
-
-					if (input.Value is null)
-						break;
-
-					var converter = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
-
-					var result = await converter.ConvertAsync(input.Value.Content, ctx);
-
-					if (!result.HasValue)
-					{
-						await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that emoji. Try again."));
-						await Task.Delay(MessageReadDelayMs);
-						continue;
-					}
-					await input.Value.DeleteAsync();
-
-					option = option with
-					{
-						EmojiName = result.Value
-					};
-
-					break;
+					option = option with { EmojiName = ret.Value };
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Emoji changed successfully!"));
 				}
 			}
 
-			async Task ChangeDescriptionAsync() { }
+			async Task ChangeDescriptionAsync()
+			{
+				var ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
+
+				if (ret is not null)
+				{
+					option = option with { Description = ret };
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Description changed successfully!"));
+				}
+			}
 
 			Task DeleteAsync()
 			{
@@ -641,6 +415,177 @@ namespace RoleMenuPlugin
 
 			async Task AddDescriptionAsync() { }
 
+		}
+
+		private static async Task<string?> GetDescriptionAsync(DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage tipMessage)
+		{
+			string? description = null;
+			while (true)
+			{
+				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder().WithContent("Enter a description for this role.\n" +
+				                                                                                                  "Descriptions will be truncated at 100 characters.\n" +
+				                                                                                                  "Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
+
+				Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, tipMessage.Id);
+
+				if (input.Cancelled)
+					return description;
+
+				description = input.Value?.Content?.Length > 100 ? input.Value.Content[..100] : input.Value?.Content;
+
+				if (input.Value is not null)
+					await input.Value.DeleteAsync();
+
+				return description;
+			}
+		}
+
+		private static async Task<Result<DiscordEmoji?>> GetEmojiAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage interactionMessage)
+		{
+			DiscordEmoji? emoji = null;
+			while (true)
+			{
+				await interaction.EditFollowupMessageAsync(interactionMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("Enter the emoji you want to use to represent this role.\n" +
+					             "If you don't see the emoji in the list, you may need to type it in the exact format it appears in the server (e.g. `:emoji:`).\n" +
+					             "Type `cancel` to cancel adding this role. Type `skip` to skip adding an emoji."));
+
+				Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, interactionMessage.Id);
+
+				if (input.Cancelled)
+					return new Result<DiscordEmoji?>(true, null);
+
+				if (input.Value is null)
+					return new(false, null);
+
+				var converter = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
+
+				var result = await converter.ConvertAsync(input.Value.Content, ctx);
+
+				if (!result.HasValue)
+				{
+					await interaction.EditFollowupMessageAsync(interactionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that emoji. Try again."));
+					await Task.Delay(MessageReadDelayMs);
+					continue;
+				}
+				await input.Value.DeleteAsync();
+
+				emoji = result.Value;
+
+				return new(false, emoji);
+			}
+		}
+
+		private static async Task<DiscordRole?> GetRoleAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage selectionMessage)
+		{
+			DiscordRole? role = null;
+
+			while (true)
+			{
+				await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("Enter the name of the role you want to use for this option.\n" +
+					             "If you don't see the role in the list, you may need to type it in the exact format it appears in the server (e.g. `@Role`).\n" +
+					             "Type `cancel` to cancel adding roles."));
+
+				var input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
+
+				if (input.Cancelled)
+					return role;
+
+				if (input.Value!.MentionedRoles.Count is not 0)
+				{
+					var r = input.Value.MentionedRoles[0];
+
+					// Ensure the role is not above the user's highest role
+					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage);
+
+					if (!valid)
+						continue;
+
+					return r;
+				}
+				else
+				{
+					// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
+					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
+
+					//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
+					var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
+
+					//Try to convert the input to a role
+					var result = await roleConverter.ConvertAsync(input.Value.Content, ctx);
+
+					if (result.HasValue)
+					{
+						role = result.Value;
+					}
+					else
+					{
+						var fuzzyRes = Process.ExtractSorted((input.Value.Content, default(ulong)),
+								ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
+								r => r.Item1, cutoff: 90)
+							.FirstOrDefault();
+
+						if (fuzzyRes?.Value is null)
+						{
+							await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that role. Try again."));
+							await Task.Delay(MessageReadDelayMs);
+							continue;
+						}
+
+						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
+					}
+
+					var valid = await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage);
+
+					if (!valid)
+						continue;
+
+					role ??= result.Value;
+
+					await input.Value.DeleteAsync();
+					return role;
+				}
+			}
+		}
+
+		private static async Task<bool> ValidateRoleHeirarchyAsync(CommandContext ctx, DiscordInteraction interaction, DiscordRole r, DiscordMessage tipMessage)
+		{
+			if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
+			{
+				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("You can't add roles that are above your highest role."));
+				return false;
+			}
+
+			if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
+			{
+				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("I cannot assign that role as it's above my highest role."));
+
+				await Task.Delay(MessageReadDelayMs);
+				return false;
+			}
+
+			if (r == ctx.Guild.EveryoneRole)
+			{
+				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("I cannot assign the everyone role as it's special and cannot be assigned."));
+
+				await Task.Delay(MessageReadDelayMs);
+				return false;
+			}
+
+			if (r.IsManaged)
+			{
+				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+					.WithContent("I cannot assign that role as it's managed and cannot be assigned."));
+
+				await Task.Delay(MessageReadDelayMs);
+				return false;
+			}
+
+			return true;
 		}
 
 		private static async Task<Result<DiscordMessage?>> GetInputAsync(InteractivityExtension it, DiscordInteraction interaction, ulong message)
