@@ -87,14 +87,29 @@
         <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="Unity" Version="5.11.10" />
         <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
-        <PackageReference Include="YumeChan.PluginBase" />
+        <PackageReference Include="YumeChan.PluginBase"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj" />
-        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
-        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
+        <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj"/>
+        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj"/>
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
+        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="trans.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="bi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="demi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="enby.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

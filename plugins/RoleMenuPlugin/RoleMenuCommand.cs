@@ -86,7 +86,7 @@ namespace RoleMenuPlugin
 					"rm-finish" => Task.CompletedTask,
 					"rm-edit" => Edit(ctx, selection.Interaction, interactivity, options),
 					"rm-add-full" => AddFull(ctx, selection.Interaction, options, interactivity),
-					"rm-add" => NotImplementedAsync(),
+					"rm-add" => AddRoleOnly(ctx, selection.Interaction, options, interactivity),
 					"rm-htu" => ShowHelpAsync(selection.Interaction),
 					_ => Task.CompletedTask
 				};
@@ -104,13 +104,6 @@ namespace RoleMenuPlugin
 						.WithContent(initialMenuMessage.Content)
 						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
 						.AddComponents(_finishButton, _quitButton, _htuButton));
-
-				Task NotImplementedAsync()
-					=> selection
-						.Interaction
-						.CreateFollowupMessageAsync(
-							new DiscordFollowupMessageBuilder()
-								.WithContent("This feature is not yet implemented."));
 
 				await t;
 
@@ -306,6 +299,24 @@ namespace RoleMenuPlugin
 				return ret;
 			}
 		}
+
+		private static async Task AddRoleOnly(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
+		{
+			var message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+				.WithContent("Please mention the roles you'd like to add to the menu.")
+				.AsEphemeral(true));
+
+			var roles = new List<DiscordRole>();
+
+			while (true)
+			{
+				var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(10));
+
+
+
+			}
+		}
+
 
 		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
 		{
