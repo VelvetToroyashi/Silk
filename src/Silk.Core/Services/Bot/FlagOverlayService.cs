@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Silk.Shared.Constants;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -24,7 +26,8 @@ namespace Silk.Core.Services.Bot
 		Transgender,
 		Demisexual,
 		NonBinary,
-		Bisexual
+		Bisexual,
+		Pansexual
 	}
 
 	public sealed class FlagOverlayService
@@ -35,11 +38,17 @@ namespace Silk.Core.Services.Bot
 		private static readonly Image _transImage = Image.Load(File.ReadAllBytes("./trans.png"));
 		private static readonly Image _demiImage = Image.Load(File.ReadAllBytes("./demi.png"));
 		private static readonly Image _enbyImage = Image.Load(File.ReadAllBytes("./enby.png"));
+		private static readonly Image _panImage = Image.Load(File.ReadAllBytes("./pan.png"));
 		private static readonly Image _biImage = Image.Load(File.ReadAllBytes("./bi.png"));
 
 		private readonly HttpClient _httpClient;
+		private readonly ILogger<FlagOverlayService> _logger;
 
-		public FlagOverlayService(HttpClient httpClient) => _httpClient = httpClient;
+		public FlagOverlayService(HttpClient httpClient, ILogger<FlagOverlayService> logger)
+		{
+			_httpClient = httpClient;
+			_logger = logger;
+		}
 
 		/// <summary>
 		/// Generates a flag image from the given url.
@@ -63,6 +72,10 @@ namespace Silk.Core.Services.Bot
 			}
 			catch { return new FlagResult(false, FlagResultType.FileNotFound, null); }
 
+			_logger.LogDebug(EventIds.Service, "Processing overlay: {OverlayType}", overlay);
+
+			var before = DateTime.UtcNow;
+
 			MemoryStream imageStream = await GetImageAsync(imageUri!);
 
 			var image = await Image.LoadAsync(imageStream);
@@ -71,6 +84,10 @@ namespace Silk.Core.Services.Bot
 				return new FlagResult(false, FlagResultType.FileDimentionsTooLarge, null);
 
 			var overlayImage = await GetOverlayAsync(image, overlay, intensity);
+
+			var after = DateTime.UtcNow;
+
+			_logger.LogDebug(EventIds.Service, "Processed overlay in {Time:N1}ms", (after - before).TotalMilliseconds);
 
 			return new FlagResult(true, FlagResultType.Succeeded, overlayImage);
 		}
@@ -83,6 +100,7 @@ namespace Silk.Core.Services.Bot
 				FlagOverlay.Demisexual => _demiImage,
 				FlagOverlay.NonBinary => _enbyImage,
 				FlagOverlay.Transgender => _transImage,
+				FlagOverlay.Pansexual => _panImage,
 
 				_ => throw new ArgumentOutOfRangeException(nameof(overlay), overlay, null)
 			};
@@ -106,19 +124,15 @@ namespace Silk.Core.Services.Bot
 
 			if (preflight.IsSuccessStatusCode) // False if the host doesn't support HEAD requests
 			{
-				if (preflight.Content.Headers.ContentLength is > TwoMegaBytes)
-					return false;
-				else return true;
+				return preflight.Content.Headers.ContentLength < TwoMegaBytes;
 			}
 			else
 			{
+				_logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
 				preflight = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
 
 				if (preflight.IsSuccessStatusCode)
-					if (preflight.Content.Headers.ContentLength > TwoMegaBytes)
-						return false;
-					else
-						return true;
+					return preflight.Content.Headers.ContentLength < TwoMegaBytes;
 
 				preflight.EnsureSuccessStatusCode();
 				return false; // This is unreachable, but the compiler doesn't know that
