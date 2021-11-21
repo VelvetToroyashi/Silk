@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Silk.Shared.Constants;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -49,6 +50,8 @@ namespace Silk.Core.Services.Bot
 			_httpClient = httpClient;
 			_logger = logger;
 		}
+
+		public FlagOverlayService(HttpClient client) : this(client, NullLogger<FlagOverlayService>.Instance) { }
 
 		/// <summary>
 		/// Generates a flag image from the given url.
