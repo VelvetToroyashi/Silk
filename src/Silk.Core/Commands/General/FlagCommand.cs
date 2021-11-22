@@ -56,7 +56,7 @@ namespace Silk.Core.Commands.General
 					{
 						FlagResultType.FileNotFound => "It seems that image has gone missing. Try a different link?",
 						FlagResultType.FileNotImage => "It...Appears that isn't an image. Sorry!",
-						FlagResultType.FileDimentionsTooLarge => "That file is huge! I can only handle image 2000px x 2000px and smaller.",
+						FlagResultType.FileDimensionsTooLarge => "That file is huge! I can only handle image 2000px x 2000px and smaller.",
 						FlagResultType.FileSizeTooLarge => "That file appears to be too large. Max file size is 2MB.",
 						_ => $"Unknown error `{result.Reason}`"
 					};

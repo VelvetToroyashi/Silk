@@ -15,7 +15,7 @@ namespace Silk.Core.Services.Bot
 
 	public enum FlagResultType
 	{
-		FileDimentionsTooLarge,
+		FileDimensionsTooLarge,
 		FileSizeTooLarge,
 		FileNotImage,
 		FileNotFound,
@@ -84,7 +84,7 @@ namespace Silk.Core.Services.Bot
 			var image = await Image.LoadAsync(imageStream);
 
 			if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
-				return new FlagResult(false, FlagResultType.FileDimentionsTooLarge, null);
+				return new FlagResult(false, FlagResultType.FileDimensionsTooLarge, null);
 
 			var overlayImage = await GetOverlayAsync(image, overlay, intensity);
 
@@ -110,12 +110,10 @@ namespace Silk.Core.Services.Bot
 
 			using var resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
 
-			using var result = image.CloneAs<Rgba32>();
-
-			result.Mutate(x => x.DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
+			image.Mutate(x => x.DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
 
 			var stream = new MemoryStream();
-			await result.SaveAsPngAsync(stream);
+			await image.SaveAsPngAsync(stream);
 			stream.Position = 0;
 			return stream;
 		}
