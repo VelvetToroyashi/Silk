@@ -98,19 +98,22 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="trans.png">
+        <None Update="flags\trans.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="bi.png">
+        <None Update="flags\pan.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="demi.png">
+        <None Update="flags\mlm.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="enby.png">
+        <None Update="flags\enby.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="pan.png">
+        <None Update="flags\demi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\bi.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

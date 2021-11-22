@@ -24,6 +24,7 @@ namespace Silk.Core.Services.Bot
 
 	public enum FlagOverlay
 	{
+		MaleLovingMale,
 		Transgender,
 		Demisexual,
 		NonBinary,
@@ -36,11 +37,12 @@ namespace Silk.Core.Services.Bot
 
 		private const int TwoMegaBytes = 1000 * 1000 * 2;
 		private const int MaxImageDimension = 3000;
-		private static readonly Image _transImage = Image.Load(File.ReadAllBytes("./trans.png"));
-		private static readonly Image _demiImage = Image.Load(File.ReadAllBytes("./demi.png"));
-		private static readonly Image _enbyImage = Image.Load(File.ReadAllBytes("./enby.png"));
-		private static readonly Image _panImage = Image.Load(File.ReadAllBytes("./pan.png"));
-		private static readonly Image _biImage = Image.Load(File.ReadAllBytes("./bi.png"));
+		private static readonly Image _transImage = Image.Load(File.ReadAllBytes("./flags/trans.png"));
+		private static readonly Image _demiImage = Image.Load(File.ReadAllBytes("./flags/demi.png"));
+		private static readonly Image _enbyImage = Image.Load(File.ReadAllBytes("./flags/enby.png"));
+		private static readonly Image _panImage = Image.Load(File.ReadAllBytes("./flags/pan.png"));
+		private static readonly Image _mlmImage = Image.Load(File.ReadAllBytes("./flags/mlm.png"));
+		private static readonly Image _biImage = Image.Load(File.ReadAllBytes("./flags/bi.png"));
 
 		private readonly HttpClient _httpClient;
 		private readonly ILogger<FlagOverlayService> _logger;
@@ -99,6 +101,7 @@ namespace Silk.Core.Services.Bot
 		{
 			var overlaySelection = overlay switch
 			{
+				FlagOverlay.MaleLovingMale => _mlmImage,
 				FlagOverlay.Bisexual => _biImage,
 				FlagOverlay.Demisexual => _demiImage,
 				FlagOverlay.NonBinary => _enbyImage,

@@ -14,7 +14,15 @@ namespace Silk.Core.Commands.General
 		[Command]
 		[Priority(0)]
 		[Cooldown(15, 15, CooldownBucketType.User)]
-		[Description("Add a flag overlay to an image! Upload an image, emoji, or URL.\nOptions are: `bi[sexual]`, `trans[gender]`, `enby` or `nb`, and `demi[sexual]`, and `pan[sexual]`\nIntensity can be specified as an extra parameter, between 50 and 100. Defaults to 100.")]
+		[Description("Add a flag overlay to an image! Upload an image, emoji, or URL.\n\n" +
+		             "Options are: \n" +
+		             "`bi[sexual]`\n" +
+		             "`trans[gender]`\n" +
+		             "`enby` or `nb`, \n" +
+		             "`demi[sexual]`, \n" +
+		             "`mlm` \n" +
+		             "`pan[sexual]`\n" +
+		             "Intensity can be specified as an extra parameter, between 50 and 100. Defaults to 100.")]
 		public async Task Flagify(CommandContext ctx, string type, string image, float intensity = 100)
 		{
 			if (intensity is < 50 or > 100)
@@ -34,6 +42,7 @@ namespace Silk.Core.Commands.General
 				"nb" or "enby" => FlagOverlay.NonBinary,
 				"demi" or "demisexual" => FlagOverlay.Demisexual,
 				"pan" or "pansexual" => FlagOverlay.Pansexual,
+				"mlm" => FlagOverlay.MaleLovingMale,
 				_ => null
 			};
 
