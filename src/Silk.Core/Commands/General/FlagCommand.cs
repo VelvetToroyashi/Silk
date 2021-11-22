@@ -19,6 +19,7 @@ namespace Silk.Core.Commands.General
 		             "`bi[sexual]`\n" +
 		             "`trans[gender]`\n" +
 		             "`enby` or `nb`, \n" +
+		             "`ace` or `asexual` \n" +
 		             "`demi[sexual]`, \n" +
 		             "`mlm` \n" +
 		             "`pan[sexual]`\n" +
@@ -42,6 +43,7 @@ namespace Silk.Core.Commands.General
 				"nb" or "enby" => FlagOverlay.NonBinary,
 				"demi" or "demisexual" => FlagOverlay.Demisexual,
 				"pan" or "pansexual" => FlagOverlay.Pansexual,
+				"ace" or "asexual" => FlagOverlay.Asexual,
 				"mlm" => FlagOverlay.MaleLovingMale,
 				_ => null
 			};

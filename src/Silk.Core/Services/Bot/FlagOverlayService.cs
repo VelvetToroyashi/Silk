@@ -29,6 +29,7 @@ namespace Silk.Core.Services.Bot
 		Demisexual,
 		NonBinary,
 		Bisexual,
+		Asexual,
 		Pansexual
 	}
 
@@ -41,6 +42,7 @@ namespace Silk.Core.Services.Bot
 		private static readonly Image _demiImage = Image.Load(File.ReadAllBytes("./flags/demi.png"));
 		private static readonly Image _enbyImage = Image.Load(File.ReadAllBytes("./flags/enby.png"));
 		private static readonly Image _panImage = Image.Load(File.ReadAllBytes("./flags/pan.png"));
+		private static readonly Image _aceImage = Image.Load(File.ReadAllBytes("./flags/ace.png"));
 		private static readonly Image _mlmImage = Image.Load(File.ReadAllBytes("./flags/mlm.png"));
 		private static readonly Image _biImage = Image.Load(File.ReadAllBytes("./flags/bi.png"));
 
@@ -107,6 +109,7 @@ namespace Silk.Core.Services.Bot
 				FlagOverlay.NonBinary => _enbyImage,
 				FlagOverlay.Transgender => _transImage,
 				FlagOverlay.Pansexual => _panImage,
+				FlagOverlay.Asexual => _aceImage,
 
 				_ => throw new ArgumentOutOfRangeException(nameof(overlay), overlay, null)
 			};
