@@ -17,15 +17,7 @@ namespace Silk.Core.Tests.Services
 {
 	public class FlagHelperTests
 	{
-
-		private readonly Image _enby =
-			Image
-				.Load(File.ReadAllBytes("./enby.png"))
-				.Clone(m => m.Resize(3000, 3000)
-					.DrawImage(new Image<Rgba32>(3000, 3000)
-						.Clone(m => m.Fill(Color.White)), PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, 1f));
-
-		private readonly byte[] _enbyImage = File.ReadAllBytes("./enby.png");
+		private readonly byte[] _enbyImage = File.ReadAllBytes("./flags/enby.png");
 
 		private readonly HttpClient _httpClient;
 
@@ -55,9 +47,6 @@ namespace Silk.Core.Tests.Services
 			imageThatExceedsMaxSize.SaveAsPng(stream2);
 			stream2.Position = 0;
 			_imageThatExceedsMaxSize = stream2.ToArray();
-
-			using var stream3 = new MemoryStream();
-			_enby.SaveAsPng(stream3);
 		}
 
 		[Test]
