@@ -15,16 +15,19 @@ namespace Silk.Core.Commands.General
 		[Priority(0)]
 		[Cooldown(15, 15, CooldownBucketType.User)]
 		[Description("Add a flag overlay to an image! Upload an image, emoji, or URL.\n\n" +
-		             "Options are: \n" +
+		             "Valid flags are: \n" +
 		             "`bi[sexual]`\n" +
 		             "`trans[gender]`\n" +
 		             "`enby` or `nb`, \n" +
 		             "`ace` or `asexual` \n" +
 		             "`demi[sexual]`, \n" +
 		             "`mlm` \n" +
-		             "`pan[sexual]`\n" +
-		             "Intensity can be specified as an extra parameter, between 50 and 100. Defaults to 100.")]
-		public async Task Flagify(CommandContext ctx, string type, string image, float intensity = 100)
+		             "`pan[sexual]`\n\n" +
+		             "Intensity can be specified as an extra parameter, between 50 and 100. \n" +
+		             "Defaults to 100.\n\n" +
+		             "Grayscale can be used if an image doesn't seem to turn out too well.\n" +
+		             "Larger number = grayer background. Max 100, defaults to 0.")]
+		public async Task Flagify(CommandContext ctx, string type, string image, float intensity = 100, float grayscale = 0)
 		{
 			if (intensity is < 50 or > 100)
 			{
@@ -32,7 +35,14 @@ namespace Silk.Core.Commands.General
 				return;
 			}
 
+			if (grayscale is < 0 or > 100)
+			{
+				await ctx.RespondAsync("Grayscale must be between 0 and 100");
+				return;
+			}
+
 			intensity /= 100;
+			grayscale /= 100;
 
 			FlagOverlay? overlay;
 
@@ -55,11 +65,13 @@ namespace Silk.Core.Commands.General
 			}
 			try
 			{
-				var result = await _flags.GetFlagAsync(image, overlay.Value, intensity);
+				var result = await _flags.GetFlagAsync(image, overlay.Value, intensity, grayscale);
 
 				if (result.Succeeded)
 				{
 					await ctx.RespondAsync(m => m.WithContent("Here you go!").WithFile("output.png", result.Image));
+
+					await result.Image!.DisposeAsync();
 				}
 				else
 				{
@@ -82,7 +94,7 @@ namespace Silk.Core.Commands.General
 
 		[Command]
 		[Priority(2)]
-		public async Task Flagify(CommandContext ctx, string flag, DiscordEmoji emoji, float intensity = 100)
+		public async Task Flagify(CommandContext ctx, string flag, DiscordEmoji emoji, float intensity = 100, float grayscale = 0)
 		{
 			// unicode emojis have an id of 0, and do not have a link, so we can't use them
 			if (emoji.Id is 0)
@@ -91,17 +103,17 @@ namespace Silk.Core.Commands.General
 				return;
 			}
 
-			await Flagify(ctx, flag, (emoji.Url + "?size=1024"), intensity);
+			await Flagify(ctx, flag, (emoji.Url + "?size=1024"), intensity, grayscale);
 		}
 
 		[Command]
 		[Priority(1)]
-		public async Task Flagify(CommandContext ctx, string flag, float intensity = 100)
+		public async Task Flagify(CommandContext ctx, string flag, float intensity = 100, float grayscale = 0)
 		{
 			if (ctx.Message.Attachments.Count is 0)
 				await ctx.RespondAsync("Please upload an image to use this command.");
 			else
-				await Flagify(ctx, flag, ctx.Message.Attachments[0].Url, intensity);
+				await Flagify(ctx, flag, ctx.Message.Attachments[0].Url, intensity, grayscale);
 		}
 	}
 }

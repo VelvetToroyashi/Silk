@@ -63,8 +63,9 @@ namespace Silk.Core.Services.Bot
 		/// <param name="imageUrl">The url of the image to overlay</param>
 		/// <param name="overlay">The overlay to apply</param>
 		/// <param name="intensity">The intensity of the overlay to apply with.</param>
+		/// <param name="grayscale">The amount of grayscale to apply to the image</param>
 		/// <returns>A result type that defines whether the operation succeeded, why it did not succeed, and a stream containing the content of the generated image.</returns>
-		public async Task<FlagResult> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity)
+		public async Task<FlagResult> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
 		{
 			OverlayGaurd.ValidIntensity(intensity);
 
@@ -85,12 +86,12 @@ namespace Silk.Core.Services.Bot
 
 			MemoryStream imageStream = await GetImageAsync(imageUri!);
 
-			var image = await Image.LoadAsync(imageStream);
+			using var image = await Image.LoadAsync(imageStream);
 
 			if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
 				return new FlagResult(false, FlagResultType.FileDimensionsTooLarge, null);
 
-			var overlayImage = await GetOverlayAsync(image, overlay, intensity);
+			var overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
 
 			var after = DateTime.UtcNow;
 
@@ -99,7 +100,7 @@ namespace Silk.Core.Services.Bot
 			return new FlagResult(true, FlagResultType.Succeeded, overlayImage);
 		}
 
-		private async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity)
+		private async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
 		{
 			var overlaySelection = overlay switch
 			{
@@ -116,7 +117,7 @@ namespace Silk.Core.Services.Bot
 
 			using var resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
 
-			image.Mutate(x => x.DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
+			image.Mutate(x => x.Grayscale(grayscale).DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
 
 			var stream = new MemoryStream();
 			await image.SaveAsPngAsync(stream);
@@ -127,7 +128,7 @@ namespace Silk.Core.Services.Bot
 		private async Task<bool> ValidateImageSizeAsync(string imageUrl)
 		{
 			// Typically a 'preflight' request is OPTIONS, not HEAD, but we're concerned about the size of the image, so we're using HEAD
-			var preflight = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, imageUrl));
+			using var preflight = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, imageUrl));
 
 			if (preflight.IsSuccessStatusCode) // False if the host doesn't support HEAD requests
 			{
@@ -136,7 +137,7 @@ namespace Silk.Core.Services.Bot
 			else
 			{
 				_logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
-				preflight = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
+				using var secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
 
 				if (preflight.IsSuccessStatusCode)
 					return preflight.Content.Headers.ContentLength < TwoMegaBytes;
