@@ -139,11 +139,9 @@ namespace Silk.Core.Services.Bot
 				_logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
 				using var secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
 
-				if (preflight.IsSuccessStatusCode)
-					return preflight.Content.Headers.ContentLength < TwoMegaBytes;
+				secondarySizeRequest.EnsureSuccessStatusCode();
 
-				preflight.EnsureSuccessStatusCode();
-				return false; // This is unreachable, but the compiler doesn't know that
+				return secondarySizeRequest.Content.Headers.ContentLength < TwoMegaBytes;
 			}
 		}
 
