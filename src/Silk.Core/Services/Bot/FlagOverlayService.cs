@@ -84,7 +84,7 @@ namespace Silk.Core.Services.Bot
 
 			var before = DateTime.UtcNow;
 
-			MemoryStream imageStream = await GetImageAsync(imageUri!);
+			await using MemoryStream imageStream = await GetImageAsync(imageUri!);
 
 			using var image = await Image.LoadAsync(imageStream);
 

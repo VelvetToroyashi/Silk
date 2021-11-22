@@ -260,10 +260,13 @@ namespace Silk.Core.Tests.Services
 
 			var flagHelper = new FlagOverlayService(httpClient);
 
+			Func<HttpResponseMessage> response = () => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(_imageThatExceedsMaxSize) { Headers = { ContentLength = _imageThatExceedsMaxSize.Length } } };
+
 			mockHttpMessageHandler
 				.Protected()
-				.Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(_imageThatExceedsMaxSize) { Headers = { ContentLength = _imageThatExceedsMaxSize.Length } } });
+				.SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+				.ReturnsAsync(response) // We perform a preflight request to get the content length, and then we perform the actual request
+				.ReturnsAsync(response); // Since the request gets disposed, we need to re-create it
 
 			// Act
 			FlagResult? result = null;
@@ -288,7 +291,8 @@ namespace Silk.Core.Tests.Services
 
 			mockHttpMessageHandler
 				.Protected()
-				.Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+				.SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = _mockArray.Length } } })
 				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new MemoryStream(_mockArray)) { Headers = { ContentLength = _mockArray.Length } } });
 
 			// Act
