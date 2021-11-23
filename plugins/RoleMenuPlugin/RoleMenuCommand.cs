@@ -274,11 +274,19 @@ namespace RoleMenuPlugin
 				.AppendLine()
 				.AppendLine("`Edit option`:")
 				.Append("\u200b\t")
-				.AppendLine("This one is somewhat self-explanatory, but it allows you to edit options you've added to the current role menu.")
+				.AppendLine("This button allows you to edit options for the current role menu being setup.")
+				.AppendLine("After selecting the option you want to edit, you will be prompted with several buttons.")
+				.AppendLine("You can change the role of the option, the emoji, or the description.")
+				.AppendLine("If the emoji or description aren't set, you'll be prompted to add them instead.")
+				.AppendLine("You can also remove an option, if it was added by mistake.")
+				.AppendLine("The exit button will return you back to the main menu.")
 				.AppendLine()
 				.AppendLine("`Finish`:")
 				.Append("\u200b\t")
 				.AppendLine("This is the final button. It will send the role menu to the channel you specified.")
+				.AppendLine("First, you must confirm that you want to finish the creation of this role menu.")
+				.AppendLine("You will be presented with a dropdown of all the options you've added.")
+				.AppendLine("Clicking confirm will send the role menu to the channel you specified.")
 				.AppendLine()
 				.AppendLine("`Quit`:")
 				.Append("\u200b\t")
@@ -438,11 +446,9 @@ namespace RoleMenuPlugin
 
 			var res = (await Task.WhenAny(t1, t2)).Result;
 
-
 			if (!res.TimedOut && res.Result.Id != "rm-quit")
 			{
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-				Console.WriteLine("Deffered first interaction");
 			}
 			else
 			{
@@ -474,15 +480,17 @@ namespace RoleMenuPlugin
 					.AddField("Description", option.Description ?? "None"))
 				.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 
-			Console.WriteLine("Edited message with buttons");
-
 			while (true)
 			{
 				//TODO: Add buttons to make an option mutually exclusive.
 
-				res = await interactivity.WaitForButtonAsync(selectionMessage);
+				res = await interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(5));
 
-
+				if (res.TimedOut)
+				{
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
+					return;
+				}
 
 				var t = res.Result.Id switch
 				{
@@ -497,8 +505,6 @@ namespace RoleMenuPlugin
 				};
 
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-
-				Console.WriteLine("Deferred second interaction");
 
 				await t;
 
