@@ -14,6 +14,7 @@ using DSharpPlus.Interactivity.Extensions;
 using FuzzySharp;
 using MediatR;
 using RoleMenuPlugin.Database;
+using RoleMenuPlugin.Database.MediatR;
 
 namespace RoleMenuPlugin
 {
@@ -122,6 +123,27 @@ namespace RoleMenuPlugin
 
 					return;
 				}
+				else if (selectionId == "rm-finish")
+				{
+					if (await ConfirmFinishedAsync(selection.Interaction, interactivity, options))
+					{
+						await selection.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+						{
+							Content = "Thank you for choosing Silk! Your role menu has been deployed to the specified channel."
+						});
+
+						try
+						{
+							await ctx.Message.DeleteAsync();
+						}
+						catch
+						{
+							//Ignored
+						}
+
+						break;
+					}
+				}
 
 				_editButton.Enable();
 				_quitButton.Enable();
@@ -165,8 +187,52 @@ namespace RoleMenuPlugin
 				}
 			}
 
-			//TODO: Completion logic here? 
+			// if we're here, we're done
+			var outputMessageBuilder = new StringBuilder()
+				.AppendLine(Formatter.Bold("Role Menu:"))
+				.AppendLine("Click the button below to view the role menu.")
+				.AppendLine("Available roles are:")
+				.AppendLine()
+				.AppendLine(string.Join("\n", options.Select(x => $"<@&{x.RoleId}>")));
 
+			var rmMessage = await channel.SendMessageAsync(m => m
+				.WithContent(outputMessageBuilder.ToString())
+				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get Roles")));
+
+			var roleMenu = new RoleMenuDto
+			{
+				MessageId = rmMessage.Id,
+				ChannelId = channel.Id,
+				GuildId = ctx.Guild.Id,
+				Options = options
+			};
+
+			await _mediator.Send(new CreateRoleMenu.Request(roleMenu));
+		}
+
+		private async Task<bool> ConfirmFinishedAsync(DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
+		{
+			var select = options
+				.Select(x => new DiscordSelectComponentOption(x.RoleName, x.RoleId.ToString(), x.Description, false, x.EmojiName is null ? null :
+					ulong.TryParse(x.EmojiName, out var id) ? new(id) : new(x.EmojiName)));
+
+			var message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+				.WithContent("Please confirm you want to finish the creation of this role menu by verifying the options below.\n" +
+				             "This is the same dropdown users will see when they select their roles!")
+				.AddComponents(new DiscordSelectComponent(interaction.Id.ToString(), "Select your roles!", select, false, 0, options.Count))
+				.AddComponents(new DiscordButtonComponent(ButtonStyle.Success, "rm-confirm", "Confirm"),
+					new DiscordButtonComponent(ButtonStyle.Danger, "rm-cancel", "Cancel"))
+				.AsEphemeral(true));
+
+			var res = await interactivity.WaitForButtonAsync(message, interaction.User, TimeSpan.FromMinutes(14));
+
+			if (!res.TimedOut)
+				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+			if (res.TimedOut || res.Result.Id == "rm-cancel")
+				return false;
+
+			return true;
 		}
 
 		private async Task ShowHelpAsync(DiscordInteraction interaction)
