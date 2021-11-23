@@ -710,7 +710,7 @@ namespace RoleMenuPlugin
 
 		private static async Task<bool> ValidateRoleHeirarchyAsync(CommandContext ctx, DiscordInteraction interaction, DiscordRole r, DiscordMessage tipMessage)
 		{
-			if (r.Position >= ctx.Guild.CurrentMember.Roles.Max(x => x.Position))
+			if (r.Position >= ctx.Member.Roles.Max(x => x.Position))
 			{
 				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
 					.WithContent("You can't add roles that are above your highest role."));
