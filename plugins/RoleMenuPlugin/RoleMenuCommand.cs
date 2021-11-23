@@ -169,11 +169,8 @@ namespace RoleMenuPlugin
 
 		}
 
-
 		private async Task ShowHelpAsync(DiscordInteraction interaction)
 		{
-			await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-
 			//write the help text using a string builder
 			var sb = new StringBuilder();
 			sb
@@ -306,15 +303,57 @@ namespace RoleMenuPlugin
 				.WithContent("Please mention the roles you'd like to add to the menu.")
 				.AsEphemeral(true));
 
-			var roles = new List<DiscordRole>();
+			var erroredResponsesBuilder = new StringBuilder();
 
-			while (true)
+			var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(10));
+
+			var roles = res.Result.MentionedRoles;
+			var availableSlots = 25 - roles.Count;
+			var added = 0;
+
+			foreach (DiscordRole role in roles)
 			{
-				var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(10));
+				if (added >= availableSlots)
+					break;
 
+				if (role == ctx.Guild.EveryoneRole)
+				{
+					erroredResponsesBuilder.AppendLine($"You can't add the everyone role to the menu.");
+					continue;
+				}
 
+				if (role.IsManaged)
+				{
+					erroredResponsesBuilder.AppendLine($"{role.Mention} is managed by a bot/integration, and I can't add it, sorry!");
+					continue;
+				}
 
+				if (role.Position >= ctx.Guild.CurrentMember.Roles.Max(r => r.Position))
+				{
+					erroredResponsesBuilder.AppendLine($"{role.Mention} is above my highest role, and I can't add it, sorry!");
+					continue;
+				}
+
+				if (role.Position >= (interaction.User as DiscordMember)!.Roles.Max(r => r.Position))
+				{
+					erroredResponsesBuilder.AppendLine($"{role.Mention} is above your highest role, and I can't add it, sorry!");
+					continue;
+				}
+
+				added++;
+
+				options.Add(new()
+				{
+					RoleId = role.Id,
+					RoleName = role.Name,
+					GuildId = ctx.Guild.Id,
+				});
 			}
+
+
+			await interaction.EditFollowupMessageAsync(message.Id, new DiscordWebhookBuilder()
+				.WithContent($"Added {Formatter.Bold(added.ToString())} roles to the menu." +
+				             (erroredResponsesBuilder.Length is 0 ? "" : $"\n\nThere were some issues with some of the roles, and they will not be added.\n{erroredResponsesBuilder}")));
 		}
 
 
