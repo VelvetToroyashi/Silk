@@ -10,8 +10,11 @@ namespace RoleMenuPlugin.Database
 	{
 		[Key]
 		public ulong MessageId { get; set; }
+
+		public ulong ChannelId { get; set; }
+
 		public ulong GuildId { get; set; }
-		
+
 		public List<RoleMenuOptionModel> Options { get; set; }
 	}
 
@@ -21,6 +24,9 @@ namespace RoleMenuPlugin.Database
 	public sealed record RoleMenuDto
 	{
 		public ulong MessageId { get; init; }
+
+		public ulong ChannelId { get; init; }
+
 		public ulong GuildId { get; init; }
 
 		public IReadOnlyList<RoleMenuOptionDto> Options { get; init; }
