@@ -22,7 +22,8 @@ namespace Silk.Core.Commands.General
 		             "`ace` or `asexual` \n" +
 		             "`demi[sexual]`, \n" +
 		             "`mlm` \n" +
-		             "`pan[sexual]`\n\n" +
+		             "`pan[sexual]`\n" +
+		             "`lgbtq[+]` or `pride`\n\n" +
 		             "Intensity can be specified as an extra parameter, between 50 and 100. \n" +
 		             "Defaults to 100.\n\n" +
 		             "Grayscale can be used if an image doesn't seem to turn out too well.\n" +
@@ -55,12 +56,13 @@ namespace Silk.Core.Commands.General
 				"pan" or "pansexual" => FlagOverlay.Pansexual,
 				"ace" or "asexual" => FlagOverlay.Asexual,
 				"mlm" => FlagOverlay.MaleLovingMale,
+				"pride" or "lgbtq" or "lgtbq+" => FlagOverlay.LGBTQPride,
 				_ => null
 			};
 
 			if (!overlay.HasValue)
 			{
-				await ctx.RespondAsync($"{type} is not a valid flag.");
+				await ctx.RespondAsync($"{type} is not a flag I seem to have an overlay for yet. Sorry!");
 				return;
 			}
 			try
