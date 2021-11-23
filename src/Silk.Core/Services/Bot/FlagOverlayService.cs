@@ -30,7 +30,8 @@ namespace Silk.Core.Services.Bot
 		NonBinary,
 		Bisexual,
 		Asexual,
-		Pansexual
+		Pansexual,
+		LGBTQPride
 	}
 
 	public sealed class FlagOverlayService
@@ -38,6 +39,8 @@ namespace Silk.Core.Services.Bot
 
 		private const int TwoMegaBytes = 1000 * 1000 * 2;
 		private const int MaxImageDimension = 3000;
+
+		private static readonly Image _prideImage = Image.Load(File.ReadAllBytes("./flags/pride.png"));
 		private static readonly Image _transImage = Image.Load(File.ReadAllBytes("./flags/trans.png"));
 		private static readonly Image _demiImage = Image.Load(File.ReadAllBytes("./flags/demi.png"));
 		private static readonly Image _enbyImage = Image.Load(File.ReadAllBytes("./flags/enby.png"));
@@ -104,6 +107,7 @@ namespace Silk.Core.Services.Bot
 		{
 			var overlaySelection = overlay switch
 			{
+				FlagOverlay.LGBTQPride => _prideImage,
 				FlagOverlay.MaleLovingMale => _mlmImage,
 				FlagOverlay.Bisexual => _biImage,
 				FlagOverlay.Demisexual => _demiImage,
