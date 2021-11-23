@@ -275,11 +275,7 @@ namespace RoleMenuPlugin
 				.AppendLine("`Edit option`:")
 				.Append("\u200b\t")
 				.AppendLine("This button allows you to edit options for the current role menu being setup.")
-				.AppendLine("After selecting the option you want to edit, you will be prompted with several buttons.")
-				.AppendLine("You can change the role of the option, the emoji, or the description.")
-				.AppendLine("If the emoji or description aren't set, you'll be prompted to add them instead.")
-				.AppendLine("You can also remove an option, if it was added by mistake.")
-				.AppendLine("The exit button will return you back to the main menu.")
+				.AppendLine("After selecting the option you want to edit, you can perform several actions with the provided buttons.")
 				.AppendLine()
 				.AppendLine("`Finish`:")
 				.Append("\u200b\t")
@@ -294,9 +290,9 @@ namespace RoleMenuPlugin
 				.AppendLine()
 				.AppendLine("**Note**:")
 				.Append("\u200b\t")
-				.AppendLine("If you're not sure what to do, try the `Add option(full)` button first. It's a bit slower, but it's the easiest.")
+				.AppendLine("If you're not sure what to do, try the `Add option(full)` button first.")
 				.Append("\u200b\t")
-				.AppendLine("Also, this is considered beta software, so please report any bugs you find to the developer.");
+				.AppendLine("Also, this is considered beta software, so please report any bugs you find!.");
 
 			await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(sb.ToString()).AsEphemeral(true));
 		}
@@ -306,7 +302,6 @@ namespace RoleMenuPlugin
 			DiscordRole? role;
 			DiscordEmoji? emoji;
 			string? description;
-
 
 			DiscordMessage tipMessage = await interaction.CreateFollowupMessageAsync(new() { Content = "\u200b", IsEphemeral = true });
 
@@ -390,9 +385,15 @@ namespace RoleMenuPlugin
 				if (added >= availableSlots)
 					break;
 
+				if (options.Any(o => o.RoleId == role.Id))
+				{
+					erroredResponsesBuilder.AppendLine($"{role.Mention} is already in the menu.");
+					continue;
+				}
+
 				if (role == ctx.Guild.EveryoneRole)
 				{
-					erroredResponsesBuilder.AppendLine($"You can't add the everyone role to the menu.");
+					erroredResponsesBuilder.AppendLine("You can't add the everyone role to the menu.");
 					continue;
 				}
 
@@ -423,7 +424,6 @@ namespace RoleMenuPlugin
 					GuildId = ctx.Guild.Id,
 				});
 			}
-
 
 			await interaction.EditFollowupMessageAsync(message.Id, new DiscordWebhookBuilder()
 				.WithContent($"Added {Formatter.Bold(added.ToString())} roles to the menu." +
@@ -650,7 +650,7 @@ namespace RoleMenuPlugin
 					var r = input.Value.MentionedRoles[0];
 
 					// Ensure the role is not above the user's highest role
-					if (!await EnsureNonDuplicatedRoleAsync(r) || !await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage))
+					if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage))
 						continue;
 
 					return r;
@@ -687,7 +687,7 @@ namespace RoleMenuPlugin
 						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
 					}
 
-					if (!await EnsureNonDuplicatedRoleAsync(role) || !await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage))
+					if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage))
 						continue;
 
 					await input.Value.DeleteAsync();
@@ -695,7 +695,7 @@ namespace RoleMenuPlugin
 				}
 			}
 
-			async Task<bool> EnsureNonDuplicatedRoleAsync(DiscordRole role)
+			async Task<bool> EnsureNonDuplicatedRoleAsync()
 			{
 				if (options.Any(r => r.RoleId == role.Id))
 				{
@@ -714,6 +714,8 @@ namespace RoleMenuPlugin
 			{
 				await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
 					.WithContent("You can't add roles that are above your highest role."));
+
+				await Task.Delay(MessageReadDelayMs);
 				return false;
 			}
 
