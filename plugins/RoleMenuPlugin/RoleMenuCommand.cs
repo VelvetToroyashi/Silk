@@ -359,7 +359,6 @@ namespace RoleMenuPlugin
 					await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
 						new DiscordInteractionResponseBuilder()
 							.WithContent(ret ? "Added role to menu." : "Cancelled."));
-
 				}
 
 				return ret;
@@ -469,21 +468,21 @@ namespace RoleMenuPlugin
 
 			var quitButton = new DiscordButtonComponent(ButtonStyle.Danger, "rm-quit", "Exit");
 
-			selectionMessage = await res.Result.Interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
-				.WithContent($"Editing option {index + 1}")
-				.AddEmbed(new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.Wheat)
-					.WithTitle("Current menu option:")
-					.AddField("Role", option.RoleName, true)
-					.AddField("Emoji", option.EmojiName is null ? "Not set." :
-						ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
-					.AddField("Description", option.Description ?? "None"))
-				.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 
 			while (true)
 			{
 				//TODO: Add buttons to make an option mutually exclusive.
 
+				selectionMessage = await res.Result.Interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
+					.WithContent($"Editing option {index + 1}")
+					.AddEmbed(new DiscordEmbedBuilder()
+						.WithColor(DiscordColor.Wheat)
+						.WithTitle("Current menu option:")
+						.AddField("Role", option.RoleName, true)
+						.AddField("Emoji", option.EmojiName is null ? "Not set." :
+							ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
+						.AddField("Description", option.Description ?? "None"))
+					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 				res = await interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(5));
 
 				if (res.TimedOut)
@@ -564,9 +563,27 @@ namespace RoleMenuPlugin
 				return Task.CompletedTask;
 			}
 
-			async Task AddEmojiAsync() { }
+			async Task AddEmojiAsync()
+			{
+				var ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
 
-			async Task AddDescriptionAsync() { }
+				if (ret.Value is not null)
+				{
+					option = option with { EmojiName = ret.Value };
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Emoji added successfully!"));
+				}
+			}
+
+			async Task AddDescriptionAsync()
+			{
+				var ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
+
+				if (ret is not null)
+				{
+					option = option with { Description = ret };
+					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Description added successfully!"));
+				}
+			}
 
 		}
 
