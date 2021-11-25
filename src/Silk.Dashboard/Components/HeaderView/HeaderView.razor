@@ -3,10 +3,14 @@
 <MudContainer Class="d-flex flex-column align-center justify-space-between">
     @if (HasImage)
     {
-        <img class="img-fluid mb-2 rounded-circle" style="max-width: 256px;" src="@ImageUrl" alt="Avatar URL" />
+        <img class="img-fluid mb-2 rounded-circle" 
+             style="max-width: 256px;" 
+             src="@ImageUrl" 
+             alt="Avatar URL" />
     }
 
-    <MudText Class="shades-text text-white" Typo="Typo.h3">
+    <MudText Class="shades-text text-white" 
+             Typo="Typo.h3">
         @Text
     </MudText>
 
