@@ -28,7 +28,6 @@ namespace RoleMenuPlugin
 	[ModuleLifespan(ModuleLifespan.Transient)]
 	public sealed class RoleMenuCommand : BaseCommandModule
 	{
-
 		private const int MessageReadDelayMs = 2200;
 
 		private static readonly DiscordButtonComponent _quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
@@ -64,8 +63,6 @@ namespace RoleMenuPlugin
 
 			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-			string selectionId;
-
 			var options = new List<RoleMenuOptionDto>();
 
 			var reset = true;
@@ -79,7 +76,7 @@ namespace RoleMenuPlugin
 				}
 
 				var selection = (await interactivity.WaitForButtonAsync(initialMenuMessage, ctx.User, CancellationToken.None)).Result;
-				selectionId = selection.Id;
+				var selectionId = selection.Id;
 
 				var t = selectionId switch
 				{
