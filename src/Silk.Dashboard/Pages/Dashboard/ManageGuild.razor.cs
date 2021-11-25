@@ -32,11 +32,11 @@ namespace Silk.Dashboard.Pages.Dashboard
         private volatile bool _savingChanges;
         private volatile bool _requestFailed;
 
-        private MudTabs _tabContainer;
         private string _pageTabQueryParam;
         private const string GenConfigTabId = "gen";
         private const string ModConfigTabId = "mod";
 
+        private MudTabs _tabContainer;
         private DiscordGuild _guild;
         private GuildConfigEntity _guildConfig;
         private GuildModConfigEntity _guildModConfig;
@@ -46,7 +46,7 @@ namespace Silk.Dashboard.Pages.Dashboard
         private bool CanShowSaveButton => _guildConfig is not null || _guildModConfig is not null;
 
         /* Max Characters for Discord Greeting Text */
-        private const uint MaxGreetingTextLength = 2000;
+        private const int MaxGreetingTextLength = 2000;
         private long RemainingChars => MaxGreetingTextLength - _guildConfig!.GreetingText.Length;
         private string RemainingCharsClass => RemainingChars < 20 ? "mud-error-text" : "";
 

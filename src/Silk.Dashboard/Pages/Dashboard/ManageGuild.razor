@@ -226,8 +226,24 @@ else
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
+                            <MudCheckBox @bind-Checked="_guildModConfig.DetectPhishingLinks"
+                                         Label="@LabelFor(nameof(_guildModConfig.DetectPhishingLinks))"/>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudCheckBox @bind-Checked="_guildModConfig.DeletePhishingLinks"
+                                         Label="@LabelFor(nameof(_guildModConfig.DeletePhishingLinks))"/>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.ScanInvites"
-                                         Label="@LabelFor(nameof(_guildModConfig.ScanInvites))" />
+                                         Label="@LabelFor(nameof(_guildModConfig.ScanInvites))"/>
+                        </MudItem>
+                        
+                        @* Todo: Make/Show another section to add the LoggingId and Webhook URL *@
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudCheckBox @bind-Checked="_guildModConfig.UseWebhookLogging"
+                                         Label="@LabelFor(nameof(_guildModConfig.UseWebhookLogging))"/>
                         </MudItem>
                     </MudGrid>
                 </div>
