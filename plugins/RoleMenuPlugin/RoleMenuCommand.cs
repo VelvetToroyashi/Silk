@@ -345,7 +345,7 @@ namespace RoleMenuPlugin
 						new DiscordButtonComponent(ButtonStyle.Danger, "n", "No (Cancel)")
 					));
 
-				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(10));
+				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(14));
 
 				var ret = res.Result?.Id switch
 				{
@@ -373,7 +373,7 @@ namespace RoleMenuPlugin
 
 			var erroredResponsesBuilder = new StringBuilder();
 
-			var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(10));
+			var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(14));
 
 			var roles = res.Result.MentionedRoles;
 			var availableSlots = 25 - roles.Count;
@@ -440,8 +440,8 @@ namespace RoleMenuPlugin
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
-			var t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(5));
-			var t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(5));
+			var t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
+			var t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(14));
 
 			var res = (await Task.WhenAny(t1, t2)).Result;
 
@@ -483,7 +483,7 @@ namespace RoleMenuPlugin
 							ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
 						.AddField("Description", option.Description ?? "None"))
 					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
-				res = await interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(5));
+				res = await interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
 
 				if (res.TimedOut)
 				{
