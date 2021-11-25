@@ -1,17 +1,18 @@
 ﻿@page "/Dashboard/ManageGuild/{GuildId:long}"
+
 @attribute [Authorize]
 
 @inherits ComponentBase
 
 @using Humanizer
-@using Silk.Core.Data.Models
+@using Silk.Core.Data.Entities
 
 @* Todo: Look into Blazor Redux *@
 @* Todo: Add ToolTips for model Properties on UI elements (use documentation comments) *@
 
 @if (_requestFailed)
 {
-    <MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100vh">
+    <MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100%">
         <MudText Class="shades-text text-white mb-4" Typo="Typo.h3">Uh Oh! 😢</MudText>
         <MudText Class="shades-text text-white" Typo="Typo.h4">
             Looks like the requested guild either isn't available or the request failed. <br />

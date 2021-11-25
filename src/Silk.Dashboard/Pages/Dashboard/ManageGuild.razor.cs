@@ -8,9 +8,9 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config.Mod;
-using Silk.Core.Data.Models;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 using Silk.Shared.Constants;
@@ -38,8 +38,8 @@ namespace Silk.Dashboard.Pages.Dashboard
         private const string ModConfigTabId = "mod";
 
         private DiscordGuild _guild;
-        private GuildConfig _guildConfig;
-        private GuildModConfig _guildModConfig;
+        private GuildConfigEntity _guildConfig;
+        private GuildModConfigEntity _guildModConfig;
 
         private readonly GreetingOption[] _greetingOptions = Enum.GetValues<GreetingOption>();
 
@@ -140,19 +140,19 @@ namespace Silk.Dashboard.Pages.Dashboard
             await InvokeAsync(StateHasChanged);
         }
 
-        private async Task<GuildConfig> FetchGuildConfigAsync()
+        private async Task<GuildConfigEntity> FetchGuildConfigAsync()
         {
             return await Mediator.Send(
                 new GetOrCreateGuildConfigRequest(GuildIdParsed, StringConstants.DefaultCommandPrefix));
         }
 
-        private async Task<GuildModConfig> FetchGuildModConfigAsync()
+        private async Task<GuildModConfigEntity> FetchGuildModConfigAsync()
         {
             return await Mediator.Send(
                 new GetOrCreateGuildModConfigRequest(GuildIdParsed, StringConstants.DefaultCommandPrefix));
         }
 
-        private async Task<GuildConfig> UpdateGuildConfigAsync()
+        private async Task<GuildConfigEntity> UpdateGuildConfigAsync()
         {
             if (_guildConfig is null) return null;
 
@@ -161,16 +161,15 @@ namespace Silk.Dashboard.Pages.Dashboard
                 GreetingOption = _guildConfig.GreetingOption,
                 GreetingChannelId = _guildConfig.GreetingChannel,
                 VerificationRoleId = _guildConfig.VerificationRole,
-                GreetOnScreeningComplete = _guildConfig.GreetingOption is GreetingOption.GreetOnScreening,
                 GreetingText = _guildConfig.GreetingText,
-                DisabledCommands = _guildConfig.DisabledCommands
+                DisabledCommands = _guildConfig.DisabledCommands,
             };
 
             var response = await Mediator.Send(request);
             return response;
         }
 
-        private async Task<GuildModConfig> UpdateGuildModConfigAsync()
+        private async Task<GuildModConfigEntity> UpdateGuildModConfigAsync()
         {
             if (_guildModConfig is null) return null;
 
