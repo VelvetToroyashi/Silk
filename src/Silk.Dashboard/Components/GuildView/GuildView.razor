@@ -5,10 +5,18 @@
 @using DSharpPlus.Entities
 @using BlazorComponentUtilities
 
-<MudCard Class="@ClassName" Style="@StyleName" @onclick="async () => await HandleOnClickAsync()">
+<MudCard Class="@ComponentClasses" 
+         Style="@ComponentStyles" 
+         @onclick="async () => await HandleOnClickAsync()">
     <MudCardContent Class="d-flex flex-column align-center pa-2">
-        <MudText Typo="Typo.h5" GutterBottom="true">@Guild.Name</MudText>
-        <img src="@GuildIconUrl" style="max-width: 256px" alt="@Guild.Name Logo" />
+        <MudText Typo="Typo.h5" 
+                 GutterBottom="true">
+            @Guild.Name
+        </MudText>
+
+        <img src="@GuildIconUrl" 
+             style="max-width: 256px" 
+             alt="@Guild.Name Logo" />
     </MudCardContent>
 </MudCard>
 
@@ -20,18 +28,16 @@
     [Parameter]
     public EventCallback<DiscordGuild> OnClick { get; set; }
 
-    private string ClassName =>
-        new CssBuilder()
-            .AddClass(Class)
-            .Build();
+    protected override string ComponentStyles
+        => GuildViewStyleBuilder.Build();
 
-    private string StyleName =>
-        new StyleBuilder()
+    private StyleBuilder GuildViewStyleBuilder 
+        => new StyleBuilder()
             .AddStyle("cursor", "pointer")
-            .AddStyle(Style)
-            .Build();
+            .AddStyle(base.ComponentStyles);
 
     private bool HasIcon => !string.IsNullOrEmpty(Guild.IconUrl);
+
     private string GuildIconUrl => HasIcon 
         ? $"{Guild.IconUrl}?size=256" 
         : "https://img.icons8.com/ios-filled/100/000000/no-image.png";
