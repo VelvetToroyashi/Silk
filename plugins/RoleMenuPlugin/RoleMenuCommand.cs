@@ -63,7 +63,7 @@ namespace RoleMenuPlugin
 
 			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-			var options = new List<RoleMenuOptionDto>();
+			var options = new List<RoleMenuOptionModel>();
 
 			var reset = true;
 
@@ -196,7 +196,7 @@ namespace RoleMenuPlugin
 				.WithContent(outputMessageBuilder.ToString())
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get Roles")));
 
-			var roleMenu = new RoleMenuDto
+			var roleMenu = new RoleMenuModel
 			{
 				MessageId = rmMessage.Id,
 				ChannelId = channel.Id,
@@ -207,7 +207,7 @@ namespace RoleMenuPlugin
 			await _mediator.Send(new CreateRoleMenu.Request(roleMenu));
 		}
 
-		private async Task<bool> ConfirmFinishedAsync(DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
+		private async Task<bool> ConfirmFinishedAsync(DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionModel> options)
 		{
 			var select = options
 				.Select(x => new DiscordSelectComponentOption(x.RoleName, x.RoleId.ToString(), x.Description, false, x.EmojiName is null ? null :
@@ -294,7 +294,7 @@ namespace RoleMenuPlugin
 			await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(sb.ToString()).AsEphemeral(true));
 		}
 
-		private static async Task AddFull(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
+		private static async Task AddFull(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionModel> options, InteractivityExtension interactivity)
 		{
 			DiscordRole? role;
 			DiscordEmoji? emoji;
@@ -362,7 +362,7 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private static async Task AddRoleOnly(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionDto> options, InteractivityExtension interactivity)
+		private static async Task AddRoleOnly(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionModel> options, InteractivityExtension interactivity)
 		{
 			var message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 				.WithContent("Please mention the roles you'd like to add to the menu.")
@@ -427,7 +427,7 @@ namespace RoleMenuPlugin
 		}
 
 
-		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionDto> options)
+		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionModel> options)
 		{
 			var sopts = options.Select((x, i) =>
 				new DiscordSelectComponentOption(x.RoleName, i.ToString(), x.Description));
@@ -522,11 +522,9 @@ namespace RoleMenuPlugin
 
 				if (ret is not null)
 				{
-					option = option with
-					{
-						RoleId = ret.Id,
-						RoleName = ret.Name
-					};
+					option.RoleId = ret.Id;
+					option.RoleName = ret.Name;
+
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Role changed successfully!"));
 				}
 			}
@@ -537,7 +535,8 @@ namespace RoleMenuPlugin
 
 				if (ret.Value is not null)
 				{
-					option = option with { EmojiName = ret.Value };
+					option.EmojiName = ret.Value;
+
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Emoji changed successfully!"));
 				}
 			}
@@ -548,7 +547,7 @@ namespace RoleMenuPlugin
 
 				if (ret is not null)
 				{
-					option = option with { Description = ret };
+					option.Description = ret;
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Description changed successfully!"));
 				}
 			}
@@ -564,9 +563,10 @@ namespace RoleMenuPlugin
 			{
 				var ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
 
-				if (ret.Value is not null)
+
+				if (!ret.Cancelled)
 				{
-					option = option with { EmojiName = ret.Value };
+					option.EmojiName = ret.Value?.ToString();
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Emoji added successfully!"));
 				}
 			}
@@ -577,7 +577,7 @@ namespace RoleMenuPlugin
 
 				if (ret is not null)
 				{
-					option = option with { Description = ret };
+					option.Description = ret;
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Description added successfully!"));
 				}
 			}
@@ -643,7 +643,7 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private static async Task<DiscordRole?> GetRoleAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage selectionMessage, List<RoleMenuOptionDto> options)
+		private static async Task<DiscordRole?> GetRoleAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage selectionMessage, List<RoleMenuOptionModel> options)
 		{
 			DiscordRole? role = null;
 

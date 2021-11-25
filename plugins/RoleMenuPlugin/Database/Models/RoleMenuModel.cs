@@ -17,18 +17,4 @@ namespace RoleMenuPlugin.Database
 
 		public List<RoleMenuOptionModel> Options { get; set; }
 	}
-
-	/// <summary>
-	/// A role menu dto.
-	/// </summary>
-	public sealed record RoleMenuDto
-	{
-		public ulong MessageId { get; init; }
-
-		public ulong ChannelId { get; init; }
-
-		public ulong GuildId { get; init; }
-
-		public IReadOnlyList<RoleMenuOptionDto> Options { get; init; }
-	}
 }
