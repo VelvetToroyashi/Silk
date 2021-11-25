@@ -1,0 +1,26 @@
+@namespace Silk.Dashboard.Components
+
+@inherits DashboardComponentBase
+
+@typeparam TItem
+
+@* Todo: Handle slight inconsistency in component styling usage (currently component doesn't make use of `ComponentClasses or ComponentStyles` *@
+
+@if (Data is not null && Data.Any())
+{
+    @* TODO: causes excessive DOM elements when Count > 100 *@
+    @foreach (var item in Data)
+    {
+        @ItemTemplate(item)
+    }
+}
+
+@code {
+
+    [Parameter]
+    public IEnumerable<TItem> Data { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> ItemTemplate { get; set; }
+
+}
