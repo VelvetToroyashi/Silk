@@ -9,11 +9,11 @@ namespace Silk.Shared.Types.Collections
 
         public new T this[int index]
         {
-            get => Count is 0 ? throw new ArgumentOutOfRangeException(nameof(index), "Colletion must be non-empty.") : base[index % Count];
+            get => Count is 0 ? throw new ArgumentOutOfRangeException(nameof(index), "Collection must be non-empty.") : base[index % Count];
             set
             {
                 if (Count is 0)
-                    throw new ArgumentOutOfRangeException(nameof(index), "Colletion must be non-empty.");
+                    throw new ArgumentOutOfRangeException(nameof(index), "Collection must be non-empty.");
                 base[index % Count] = value;
             }
         }

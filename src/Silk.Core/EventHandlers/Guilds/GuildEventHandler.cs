@@ -6,25 +6,23 @@ namespace Silk.Core.EventHandlers.Guilds
 {
 	public sealed class GuildEventHandler
 	{
-		private readonly GuildEventHandlerService _guildHandler;
-		public GuildEventHandler(GuildEventHandlerService guildHandler)
+		private readonly GuildCacher _guildHandler;
+		public GuildEventHandler(DiscordClient client, GuildCacher guildHandler)
 		{
+			client.GuildCreated += OnGuildJoin;
+			client.GuildAvailable += OnGuildAvailable;
+			
 			_guildHandler = guildHandler;
 		}
 
 		public async Task OnGuildJoin(DiscordClient client, GuildCreateEventArgs args)
 		{
-			_guildHandler.CacheQueue.Enqueue(() => _guildHandler.JoinedGuild(args));
+			_ =  _guildHandler.JoinedGuild(args);
 		}
 
 		public async Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs args)
 		{
-			_guildHandler.CacheQueue.Enqueue(() => _guildHandler.CacheGuildAsync(args.Guild, client.ShardId));
-		}
-
-		public async Task OnGuildDownload(DiscordClient client, GuildDownloadCompletedEventArgs _)
-		{
-			_guildHandler.MarkCompleted(client.ShardId);
+			_ = _guildHandler.CacheGuildAsync(args.Guild);
 		}
 	}
 }

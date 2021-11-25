@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
@@ -29,7 +29,7 @@ namespace Silk.Core.Commands.Miscellaneous
 		[Aliases("nick")]
 		[Command("nickname")]
 		[RequirePermissions(Permissions.ManageNicknames)]
-		[Description("Set members whom's name matches to the new nickname. This may take a while on large servers.")]
+		[Description("Set members who's name matches to the new nickname. This may take a while on large servers.")]
 		public async Task SetNickname(CommandContext ctx, string match, [RemainingText] string nickname)
 		{
 			IReadOnlyList<DiscordMember>? members = await ctx.Guild.SearchMembersAsync(match, 1000);

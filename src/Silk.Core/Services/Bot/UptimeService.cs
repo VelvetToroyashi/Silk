@@ -20,7 +20,7 @@ namespace Silk.Core.Services.Bot
 
 		private readonly AsyncManualResetEvent _reset;
 		private readonly ILogger<UptimeService> _logger;
-		public UptimeService(DiscordShardedClient client, ILogger<UptimeService> logger)
+		public UptimeService(DiscordClient client, ILogger<UptimeService> logger)
 		{
 			_logger = logger;
 			_reset = new(false);

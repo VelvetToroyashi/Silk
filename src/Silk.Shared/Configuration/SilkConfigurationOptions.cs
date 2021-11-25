@@ -17,12 +17,12 @@ namespace Silk.Shared.Configuration
     /// Ex. Below, the "Persistence" key correlates to the Persistence property in this class with the same name
     /// <code>
     /// {
-    ///     /* Root */
-    ///     "Silk":
-    ///     {
-    ///         /* Sub-Key property name */
-    ///         "Persistence": {...}
-    ///     }
+    /// /* Root */
+    /// "Silk":
+    /// {
+    ///     /* Sub-Key property name */
+    ///     "Persistence": {...}
+    /// }
     /// }
     /// </code>
     /// </summary>
@@ -43,6 +43,12 @@ namespace Silk.Shared.Configuration
         /// Property for controlling the level of Logging
         /// </summary>
         public string LogLevel { get; set; } = "Info";
+
+        /// <summary>
+        /// Property for determining whether to use global or guild specific slash commands.
+        /// Leave null for global slash commands.
+        /// </summary>
+        public ulong? SlashCommandsGuildId { get; set; } = null;
 
         /// <summary>
         /// Property for holding Persistence options (property name matching sub-key property in configuration file)

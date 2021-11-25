@@ -54,7 +54,7 @@ namespace PluginLoader.Unity
 		/// Returns an array of all potential plugin files.
 		/// </summary>
 		/// <param name="directory">The directory to search for plugins in.</param>
-		/// <returns>An array of plugin canidate file infos.</returns>
+		/// <returns>An array of plugin candidate file infos.</returns>
 		internal FileInfo[] DiscoverPluginFiles(string directory)
 		{
 			if (!Directory.Exists(directory))
@@ -67,15 +67,14 @@ namespace PluginLoader.Unity
 
 		internal PluginManifest LoadPluginFile(FileInfo file) // It's up to other things to keep track of plugin states. //
 		{
-			var alc = new AssemblyLoadContext(file.Name, true);
 			var asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-			var asm = alc.LoadFromStream(asmStream);
+			var asm = AssemblyLoadContext.Default.LoadFromStream(asmStream);
 			asmStream.Close();
 
 			var manifest = new PluginManifest
 			{
 				Assembly = asm,
-				LoadContext = alc,
+				
 				PluginInfo = file
 			};
 			
@@ -98,39 +97,43 @@ namespace PluginLoader.Unity
 
 		internal async Task RegisterPluginAsync(PluginManifest manifest)
 		{
-			if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))) is not { } injectorType)
-			{
-				_logger.LogDebug("Dependency handler was not found in assembly {Asm}; assuming plugin is context-agnostic.", manifest.Assembly.FullName);
-			}
-			else
-			{
-				var injector = (DependencyInjectionHandler)_container.Resolve(injectorType);
-
-				var services = injector.ConfigureServices(new ServiceCollection());
-				_container.AddServices(services);
-			
-				_logger.LogDebug("Loaded services for {Plugin}", manifest.PluginInfo.Name);
-			}
-
-			if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(Plugin))) is not { } pluginType)
-			{
-				_logger.LogWarning("Plugin assembly {Asm} contains multiple plugin types. This is not supported.", manifest.Assembly.FullName);
-				_plugins.Remove(manifest);
-				return;
-			}
-
 			try
 			{
-				var plugin = (Plugin)_container.Resolve(pluginType);
-				_container.RegisterInstance(typeof(Plugin), plugin);
+				if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(DependencyInjectionHandler))) is not { } injectorType)
+				{
+					_logger.LogDebug(Events.Plugin, "Dependency handler was not found in assembly {Asm}; assuming plugin is context-agnostic.", manifest.Assembly.FullName);
+				}
+				else
+				{
+					var injector = (DependencyInjectionHandler)_container.Resolve(injectorType);
 
-				manifest.Plugin = plugin;
+					var services = injector.ConfigureServices(new ServiceCollection());
+					_container.AddServices(services);
+
+					_logger.LogDebug(Events.Plugin, "Loaded services for {Plugin}", manifest.PluginInfo.Name);
+				}
+
+				if (manifest.Assembly.ExportedTypes.SingleOrDefault(t => t.IsSubclassOf(typeof(Plugin))) is not { } pluginType)
+				{
+					_logger.LogWarning(Events.Plugin, "Plugin assembly {Asm} contains multiple plugin types. This is not supported.", manifest.Assembly.FullName);
+					_plugins.Remove(manifest);
+					return;
+				}
+
+				try
+				{
+					var plugin = (Plugin)_container.Resolve(pluginType);
+					_container.RegisterInstance(typeof(Plugin), plugin);
+
+					manifest.Plugin = plugin;
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(Events.Plugin, e, "{Plugin} failed to load. Plugin version: {Version}. Exception:", pluginType.Name, manifest.Assembly.GetName().Version!.ToString(3));
+					_plugins.Remove(manifest);
+				}
 			}
-			catch (Exception e)
-			{
-				_logger.LogError(e, "{Plugin} failed to load. Plugin version: {Version}. Exception:", pluginType.Name, manifest.Assembly.GetName().Version!.ToString(3));
-				_plugins.Remove(manifest);
-			}
+			catch { }
 		}
 	}
 }

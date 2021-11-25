@@ -25,11 +25,11 @@ namespace RoleMenuPlugin
 
 		public Task Handle(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
-			HandleInternal(client, eventArgs);
+			_ = HandleInternal(client, eventArgs);
 			return Task.CompletedTask;
 		}
 		
-		private async void HandleInternal(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
+		private async Task HandleInternal(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
 		{
 			await Task.Yield(); // Yield so we return from the event handler ASAP //
 			
@@ -45,7 +45,7 @@ namespace RoleMenuPlugin
 				 * TODO: Set role ids to be preselected
 				 * TODO: Send ephemeral message
 				 */
-				var menu = await _mediator.Send(new GetRoleMenuRequest(eventArgs.Message.Id));
+				var menu = await _mediator.Send(new GetRoleMenu.Request(eventArgs.Message.Id));
 				var roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
 				
 				var options = menu.Options
@@ -80,9 +80,9 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private async Task HandleDropdownAsync(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
+		private async Task HandleDropdownAsync(DiscordClient _, ComponentInteractionCreateEventArgs eventArgs)
 		{
-			var config = await _mediator.Send(new GetRoleMenuRequest(ulong.Parse(eventArgs.Id)));
+			var config = await _mediator.Send(new GetRoleMenu.Request(ulong.Parse(eventArgs.Id)));
 
 			var member = (DiscordMember)eventArgs.User;
 			
@@ -106,7 +106,7 @@ namespace RoleMenuPlugin
 					continue;
 				}
 
-				if (FailedHeirarchy(eventArgs.Guild, role))
+				if (FailedHierarchy(eventArgs.Guild, role))
 				{
 					await NotifyOfHeiarchyFailureAsync(role);
 					continue;
@@ -148,21 +148,17 @@ namespace RoleMenuPlugin
 					Content = $"Sorry, but I can't assign {role.Mention} because it is above my highest role! Please notify a staff member about this.",
 				});
 				
-				_logger.LogWarning("A role was defined in a role-menu, but guild heirarchy has changed. Role-menus may no longer work for {Guild}", eventArgs.Guild.Id);
+				_logger.LogWarning("A role was defined in a role-menu, but guild hierarchy has changed. Role-menus may no longer work for {Guild}", eventArgs.Guild.Id);
 			}
 		}
 		
-		private bool FailedHeirarchy(DiscordGuild eventArgsGuild, DiscordRole role)
+		private bool FailedHierarchy(DiscordGuild eventArgsGuild, DiscordRole role)
 			=> eventArgsGuild.CurrentMember.Roles.Last().Position <= role.Position;
 		
 		private bool HasSelfPermissions(DiscordGuild eventArgsGuild) 
 			=> eventArgsGuild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles);
 
 		private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role)
-		{
-			role = guild.GetRole(id);
-
-			return role is not null;
-		}
+			=> (role = guild.GetRole(id)) is not null;
 	}
 }

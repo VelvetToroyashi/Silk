@@ -4,36 +4,35 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
 {
     /// <summary>
-    ///     Request to update a <see cref="Tag" />.
+    /// Request to update a <see cref="TagEntity" />.
     /// </summary>
     /// <param name="Name">The Name of the Tag</param>
     /// <param name="GuildId">The Id of the Guild</param>
-    public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<Tag>
+    public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<TagEntity>
     {
         public ulong? OwnerId { get; init; }
         public string? NewName { get; init; }
         public int? Uses { get; init; }
         public string? Content { get; init; }
-        public List<Tag>? Aliases { get; init; }
+        public List<TagEntity>? Aliases { get; init; }
     }
 
-    /// <inheritdoc />
     /// <summary>
-    ///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Tags.UpdateTagRequest" />.
+    /// The default handler for <see cref="T:Silk.Core.Data.MediatR.Tags.UpdateTagRequest" />.
     /// </summary>
-    public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, Tag>
+    public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, TagEntity>
     {
         private readonly GuildContext _db;
         public UpdateTagHandler(GuildContext db) => _db = db;
 
-        public async Task<Tag> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
+        public async Task<TagEntity> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {
-            Tag tag = await _db.Tags
+            TagEntity tag = await _db.Tags
                 .Include(t => t.Aliases)
                 .FirstAsync(t => t.Name == request.Name && t.GuildId == request.GuildId, cancellationToken);
 

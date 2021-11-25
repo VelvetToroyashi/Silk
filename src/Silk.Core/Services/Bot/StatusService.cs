@@ -7,18 +7,19 @@ using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Silk.Shared.Constants;
 using Silk.Shared.Types.Collections;
 
 namespace Silk.Core.Services.Bot
 {
 	public sealed class StatusService : BackgroundService
 	{
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<StatusService> _logger;
 		private readonly AsyncManualResetEvent _tcs = new(false);
 		private readonly LoopedList<string> _statuses = new()
 		{
-			"for s!help",
+			$"for {StringConstants.DefaultCommandPrefix}help",
 			"for @Silk help",
 			"you!",
 			"cute red pandas",
@@ -28,7 +29,7 @@ namespace Silk.Core.Services.Bot
 			"for donations! (ko-fi/patreon: VelvetThePanda)"
 		};
 
-		public StatusService(DiscordShardedClient client, ILogger<StatusService> logger)
+		public StatusService(DiscordClient client, ILogger<StatusService> logger)
 		{
 			_client = client;
 			_logger = logger;
@@ -51,7 +52,7 @@ namespace Silk.Core.Services.Bot
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			_logger.LogInformation("Started!");
+			_logger.LogInformation(EventIds.Service, "Started!");
 
 			try
 			{
@@ -67,7 +68,7 @@ namespace Silk.Core.Services.Bot
 			catch (TaskCanceledException) { }
 			finally
 			{
-				_logger.LogDebug("Cancelation requested. Stopping service.");
+				_logger.LogDebug(EventIds.Service, "Cancellation requested. Stopping service.");
 			}
 		}
 	}

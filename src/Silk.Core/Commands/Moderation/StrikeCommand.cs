@@ -11,8 +11,8 @@ using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using MediatR;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Infractions;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
@@ -37,7 +37,6 @@ namespace Silk.Core.Commands.Moderation
 		[Description("Strike a user and add it to their moderation history.")]
 		public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
 		{
-
 			(bool, InfractionType) escalated = await CheckForEscalationAsync(ctx, user, reason);
 			InfractionResult result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, escalated.Item1);
 			var response = "";
@@ -74,7 +73,7 @@ namespace Silk.Core.Commands.Moderation
 			if (infractions.Count(inf => inf.Type != InfractionType.Note) < 6)
 				return (false, default);
 
-			InfractionStep? currentStep = await _infractionHelper.GetCurrentInfractionStepAsync(ctx.Guild.Id, infractions);
+			InfractionStepEntity? currentStep = await _infractionHelper.GetCurrentInfractionStepAsync(ctx.Guild.Id, infractions);
 			InfractionType currentStepType = currentStep.Type is InfractionType.Ignore ? InfractionType.Ban : currentStep.Type;
 			DiscordMessageBuilder? builder = new DiscordMessageBuilder()
 				.WithContent("User has 5 or more infractions on record. Would you like to escalate?")

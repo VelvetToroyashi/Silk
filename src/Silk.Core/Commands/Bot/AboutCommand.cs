@@ -14,8 +14,8 @@ namespace Silk.Core.Commands.Bot
 	[Category(Categories.Bot)]
 	public class AboutCommand : BaseCommandModule
 	{
-		private readonly DiscordShardedClient _client;
-		public AboutCommand(DiscordShardedClient client)
+		private readonly DiscordClient _client;
+		public AboutCommand(DiscordClient client)
 		{
 			_client = client;
 		}
@@ -27,7 +27,7 @@ namespace Silk.Core.Commands.Bot
 			DiscordApplication? app = await ctx.Client.GetCurrentApplicationAsync();
 			Version? dsp = typeof(DiscordClient).Assembly.GetName().Version;
 
-			int guilds = _client.ShardClients.Values.Sum(c => c.Guilds.Count);
+			int guilds = _client.Guilds.Count;
 
 			DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 				.WithTitle("About Silk!")
@@ -37,16 +37,16 @@ namespace Silk.Core.Commands.Bot
 				.AddField("Bot version", StringConstants.Version, true)
 				.AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
 
-      var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands";
+      var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=972418070&scope=bot%20applications.commands";
       var builder = new DiscordMessageBuilder()
           .WithEmbed(embed)
           .AddComponents(
-              new DiscordLinkButtonComponent(invite, "Invite me!"),
+              new DiscordLinkButtonComponent(invite, "Invite Me!"),
               new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source Code!"),
               new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support Server!"))
           .AddComponents(
-              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/projects/dc41e8bf-975b-4108-ba22-25a04cd2f120", "Issue tracker"),
-              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/issue/SBP-4", "Feature requests"),
+              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/projects/dc41e8bf-975b-4108-ba22-25a04cd2f120", "Issue Tracker"),
+              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/issue/SBP-4", "Feature Requests"),
               new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Donations)"));
             await ctx.RespondAsync(builder);
         }

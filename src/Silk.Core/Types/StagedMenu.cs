@@ -9,7 +9,7 @@ using DSharpPlus.Menus.Entities;
 namespace Silk.Core.Types
 {
 	/// <summary>
-	///     A wrapper for <see cref="Menu" /> that allows backtracking.
+	/// A wrapper for <see cref="Menu" /> that allows backtracking.
 	/// </summary>
 	public abstract class StagedMenu : Menu
 	{

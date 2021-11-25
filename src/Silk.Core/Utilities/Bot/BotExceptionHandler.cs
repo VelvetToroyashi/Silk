@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,15 +12,17 @@ using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Silk.Extensions;
+using Silk.Shared.Constants;
+using YumeChan.PluginBase.Infrastructure;
 
 namespace Silk.Core.Utilities.Bot
 {
 	public class BotExceptionHandler
 	{
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<BotExceptionHandler> _logger;
 
-		public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordShardedClient client)
+		public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordClient client)
 		{
 			_logger = logger;
 			_client = client;
@@ -64,6 +65,7 @@ namespace Silk.Core.Utilities.Bot
 					RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
 					RequireDirectMessageAttribute => "Psst. You need to be in DMs to run this!",
 					RequireGuildAttribute => "As it would turn out, you can't run this in DMs!",
+					PluginCheckBaseAttribute pc => pc.ErrorMessage ?? $"A plugin command could not be executed, but I do not know why. The check is named `{pc.GetType().Name}`.",
 					_ => null
 				};
 
@@ -77,14 +79,14 @@ namespace Silk.Core.Utilities.Bot
 		private async Task OnClientErrored(DiscordClient c, ClientErrorEventArgs e)
 		{
 			if (e.Exception.Message.Contains("event"))
-				_logger.LogWarning("[{Event}] Timed out!", e.EventName);
+				_logger.LogWarning(EventIds.EventHandler, "[{Event}] Timed out!", e.EventName);
 			else
-				_logger.LogWarning(e.Exception, "Client threw an exception!");
+				_logger.LogWarning(EventIds.EventHandler, e.Exception, "Client threw an exception!");
 		}
 		private async Task OnSocketErrored(DiscordClient c, SocketCloseEventArgs e)
 		{
 			if (e.CloseCode is 4014)
-				_logger.LogCritical("Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
+				_logger.LogCritical(EventIds.Core, "Missing intents! Enable them on the developer dashboard (discord.com/developers/applications/{AppId})", _client.CurrentApplication.Id);
 		}
 
 		private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
@@ -96,14 +98,10 @@ namespace Silk.Core.Utilities.Bot
 		}
 		public async Task SubscribeToEventsAsync()
 		{
-			_logger.LogInformation("Hooking task and command exception events");
-			TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError("Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
-
-			IEnumerable<CommandsNextExtension?> commandsNext = (await _client.GetCommandsNextAsync()).Values;
-
-			foreach (CommandsNextExtension? c in commandsNext)
-				c!.CommandErrored += OnCommandErrored;
-			_logger.LogDebug("Registered command exception-handler for {Shards} shard(s)", commandsNext.Count());
+			_logger.LogInformation(EventIds.EventHandler, "Hooking task and command exception events");
+			TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError(EventIds.EventHandler, "Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
+			_client.GetCommandsNext().CommandErrored += OnCommandErrored;
+			_logger.LogDebug(EventIds.EventHandler, "Registered command exception-handler");
 		}
 	}
 }

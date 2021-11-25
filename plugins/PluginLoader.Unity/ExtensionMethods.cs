@@ -1,7 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace PluginLoader.Unity
 {
+	internal static class Events
+	{
+		public static EventId Plugin = new(5, "Plugin");
+	}
+	
 	/// <summary>
 	/// Extension methods for the plugin loader library.
 	/// </summary>
@@ -16,7 +22,7 @@ namespace PluginLoader.Unity
 			=> services
 				.TryRegisterSingleton<PluginLoader>()
 				.TryRegisterSingleton<PluginWatchdog>()
-				.AddSingleton<IPluginLoaderService, ShardedPluginLoaderService>();
+				.AddSingleton<IPluginLoaderService, PluginLoaderService>();
 
 		private static IServiceCollection TryRegisterSingleton<T>(this IServiceCollection services) where T : class
 		{

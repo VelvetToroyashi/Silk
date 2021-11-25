@@ -2,17 +2,17 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Reminders
 {
     /// <summary>
-    ///     Request to remove a reminder.
+    /// Request to remove a reminder.
     /// </summary>
     public record RemoveReminderRequest(int ReminderId) : IRequest;
 
     /// <summary>
-    ///     The default handler for <see cref="RemoveReminderRequest" />.
+    /// The default handler for <see cref="RemoveReminderRequest" />.
     /// </summary>
     public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
     {
@@ -25,7 +25,9 @@ namespace Silk.Core.Data.MediatR.Reminders
 
         public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
         {
-            Reminder? reminder = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
+            ReminderEntity? reminder = await _db.Reminders
+                .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
+            
             if (reminder is not null)
             {
                 _db.Reminders.Remove(reminder);

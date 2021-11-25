@@ -1,16 +1,24 @@
 #pragma warning disable CA1822 // Mark members as static
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Humanizer;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
+using Silk.Shared.Constants;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
@@ -22,17 +30,14 @@ namespace Silk.Core.Commands.Miscellaneous
 		[Description("Get info about a role")]
 		public async Task RoleInfo(CommandContext ctx, DiscordRole role)
 		{
-			IEnumerable<DiscordMember> members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
-			string memberString = members.Count() is 0 && role != ctx.Guild.EveryoneRole ?
-				"This role isn't assigned to anyone!" :
-				members.Take(members.Count() > 5 ? 5 :
-						members.Count())
-					.Select(m => m.Mention)
-					.Join(", ") + $"{(role == ctx.Guild.EveryoneRole ? "Everyone has the @everyone role!" : members.Count() > 5 ? $" (plus ...{members.Count() - 5} others)" : null)}";
-
+			var  members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
+			var memberString = GetRoleMemberCount(ctx, role, members);
+			
+			var ms = await GenerateColoredImageAsync(role.Color);
 
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithTitle($"Info for {role.Name} ({role.Id}):")
+				.WithImageUrl("attachment://color.png")
 				.AddField("Color:", role.Color.ToString())
 				.AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow)})")
 				.AddField("Hoisted:", role.IsHoisted.ToString())
@@ -42,13 +47,57 @@ namespace Silk.Core.Commands.Miscellaneous
 				.AddField("Mentionable:", role.IsMentionable.ToString())
 				.AddField("Permissions:", role.Permissions.ToPermissionString())
 				.WithColor(role.Color);
-			await ctx.RespondAsync(m => m.WithEmbed(embed));
+			
+			await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("color.png", ms));
 		}
-
+		
+		[Aliases("userinfo")]
 		[Command("info")]
-		[Description("Get info about a member")]
-		public async Task GetUserInfo(CommandContext ctx, DiscordMember member)
+		public async Task GetUserInfo(CommandContext ctx, DiscordUser user)
 		{
+			var embed = new DiscordEmbedBuilder()
+				.WithColor(DiscordColor.Orange)
+				.WithAuthor(user.ToDiscordName(), iconUrl: user.AvatarUrl)
+				.WithDescription($"Information about {user.Mention}!")
+				.WithFooter("⚠This member is not a part of this server, thus API information is limited.⚠");
+
+			embed.AddField("Joined Discord:", $"{Formatter.Timestamp(user.CreationTimestamp, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(user.CreationTimestamp)})");
+			embed.AddField("Flags:", user.Flags?.Humanize(LetterCasing.Title) ?? "None");
+			embed.AddField("Bot:", user.IsBot ? "Yes" : "No");
+
+			embed.WithThumbnail(user.AvatarUrl ?? user.DefaultAvatarUrl);
+
+			if (!string.IsNullOrEmpty(user.BannerHash))
+			{
+				embed.WithImageUrl(user.BannerUrl);
+				await ctx.RespondAsync(embed);
+			}
+			else if (user.BannerColor.HasValue)
+			{
+				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
+				
+				embed.WithImageUrl("attachment://banner.png");
+				
+				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
+				await ctx.RespondAsync(builder);
+			}
+			else
+			{
+				await ctx.RespondAsync(embed);
+			}
+		}
+		
+		[Priority(2)]
+		[Command("info")]
+		[Description("Get info about someone")]
+		public async Task GetMemberInfo(CommandContext ctx, DiscordMember member)
+		{
+			(typeof(BaseDiscordClient)
+				.GetProperty("UserCache", BindingFlags.NonPublic | BindingFlags.Instance)!
+				.GetValue(ctx.Client) as ConcurrentDictionary<ulong, DiscordUser>)!.TryRemove(member.Id, out _);
+
+			var user = await ctx.Client.GetUserAsync(member.Id);
+			
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
 				.WithDescription($"Information about {member.Mention}!")
@@ -77,64 +126,103 @@ namespace Silk.Core.Commands.Miscellaneous
 				.ToList();
 			string roles = string.Join(' ', roleList);
 			embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
-			embed.AddField("Flags:", string.IsNullOrWhiteSpace(member.Flags.ToString()) ? "None" : member.Flags.ToString());
-			embed.AddField("Bot:", member.IsBot.ToString());
-			await ctx.RespondAsync(embed).ConfigureAwait(false);
+			embed.AddField("Flags:", member.Flags?.Humanize(LetterCasing.Title) ?? "None");
+			embed.AddField("Bot:", member.IsBot ? "Yes" : "No");
+			
+			
+			embed.WithThumbnail(member.AvatarUrl ?? member.DefaultAvatarUrl);
+			
+			if (!string.IsNullOrEmpty(user.BannerHash))
+			{
+				embed.WithImageUrl(member.BannerUrl);
+				await ctx.RespondAsync(embed);
+			}
+			else if (user.BannerColor.HasValue)
+			{
+				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
+				
+				embed.WithImageUrl("attachment://banner.png");
+				
+				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
+				await ctx.RespondAsync(builder);
+			}
+			else
+			{
+				await ctx.RespondAsync(embed);
+			}
+		}
+	
+		private static async Task<MemoryStream> GenerateColoredImageAsync(DiscordColor color)
+		{
+			using var colorImage = new Image<Rgba32>(600, 200, Rgba32.ParseHex(color.ToString()));
+			var ms = new MemoryStream();
+
+			await colorImage.SaveAsPngAsync(ms);
+			ms.Position = 0;
+			return ms;
+		}
+		
+		private static string GetRoleMemberCount(CommandContext ctx, DiscordRole role, IEnumerable<DiscordMember> members)
+		{
+			if (role == ctx.Guild.EveryoneRole)
+				return "Everyone has the @everyone role!";
+
+			var memberCount = members.Count();
+			
+			if (memberCount is 0)
+				return "This role isn't assigned to anyone!";
+			
+			members = members.Take(5);
+
+			return $"{members.Select(m => m.Mention).Join(", ")} {(memberCount > 5 ? $"(...Plus {memberCount - 5} others.)" : null)}";
 		}
 
+		
 		private static string GetHierarchy(CommandContext ctx, DiscordRole role)
 		{
-			string roleString = string.Empty;
-			var hasAboveRole = false;
-
-			DiscordRole? rle;
-
-			DiscordRole[]? roles = ctx.Guild.Roles.Values.OrderBy(r => r.Position).ToArray();
-
-			if (roles.Any(r1 => r1.Position > role.Position))
+			var roleStringBuilder = new StringBuilder();
+			
+			foreach (var r in ctx.Guild.Roles.Values.OrderByDescending(r => r.Position))
 			{
-				hasAboveRole = true;
-				rle = roles.First(r => r.Position > role.Position);
-				roleString += $"{rle.Mention}\n";
+				if (r.Position + 1 == role.Position)
+				{
+					roleStringBuilder
+						.AppendLine("\t↑")
+						.AppendLine(r.Mention);
+				}
+				else if (r.Position == role.Position)
+				{
+					roleStringBuilder.AppendLine(role.Mention);
+				}
+				else if (r.Position - 1 == role.Position)
+				{
+					roleStringBuilder
+						.AppendLine(r.Mention)
+						.AppendLine("\t↑");
+				}
 			}
-
-			roleString += $"{(hasAboveRole ? "⠀⠀↑" : "")}\n{role.Mention}\n";
-			if (!roles.Any(r => r.Position < role.Position))
-				return roleString;
-
-			rle = roles.Last(r => r.Position < role.Position);
-			roleString += $"⠀⠀↑\n{rle.Mention}";
-
-			return roleString;
+			return roleStringBuilder.ToString();
 		}
 
 		private static DiscordEmoji GetPresenceEmoji(DiscordClient client, DiscordUser member, out string status)
 		{
 			status = string.Empty;
-			DiscordEmoji emoji = null!;
+			DiscordEmoji emoji;
 			switch (member.Presence?.Status)
 			{
 				case UserStatus.Online:
 					status = "Online";
-					return DiscordEmoji.TryFromGuildEmote(client, 743339430672203796, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟢");
+					return DiscordEmoji.TryFromGuildEmote(client, Emojis.OnlineId, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟢");
 				case UserStatus.Idle:
 					status = "Away";
-					return DiscordEmoji.TryFromGuildEmote(client, 743339431720910889, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟡");
+					return DiscordEmoji.TryFromGuildEmote(client, Emojis.AwayId, out emoji) ? emoji : DiscordEmoji.FromUnicode("🟡");
 				case UserStatus.DoNotDisturb:
 					status = "Do Not Disturb";
-					return DiscordEmoji.TryFromGuildEmote(client, 743339431632568450, out emoji) ? emoji : DiscordEmoji.FromUnicode("🔴");
-				case UserStatus.Offline:
-					status = "Offline";
-					return DiscordEmoji.TryFromGuildEmote(client, 743339431905198100, out emoji) ? emoji : DiscordEmoji.FromUnicode("⚫");
-				case UserStatus.Invisible:
-					break;
-				case null:
-					break;
+					return DiscordEmoji.TryFromGuildEmote(client, Emojis.DoNotDisturbId, out emoji) ? emoji : DiscordEmoji.FromUnicode("🔴");
 				default:
 					status = "Offline";
-					return DiscordEmoji.FromGuildEmote(client, 743339431905198100);
+					return DiscordEmoji.TryFromGuildEmote(client, Emojis.OfflineId, out emoji) ? emoji : DiscordEmoji.FromUnicode("⚫");
 			}
-			return emoji;
 		}
 	}
 }

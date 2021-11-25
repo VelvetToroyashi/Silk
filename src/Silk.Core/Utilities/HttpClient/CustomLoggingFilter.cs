@@ -6,8 +6,8 @@ namespace Silk.Core.Utilities.HttpClient
 {
     /// <inheritdoc />
     /// <summary>
-    ///     Overriding Logging Filter for HttpClientFactory
-    ///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
+    /// Overriding Logging Filter for HttpClientFactory
+    /// Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
     /// </summary>
     public sealed class CustomLoggingFilter : IHttpMessageHandlerBuilderFilter
 	{

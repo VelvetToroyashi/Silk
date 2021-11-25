@@ -2,19 +2,19 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users
 {
     /// <summary>
-    ///     Request to get a user from the database, or null, if it does not exist.
+    /// Request to get a user from the database, or null, if it does not exist.
     /// </summary>
-    public record GetUserRequest(ulong GuildId, ulong UserId) : IRequest<User?>;
+    public record GetUserRequest(ulong GuildId, ulong UserId) : IRequest<UserEntity?>;
 
     /// <summary>
-    ///     The default handler associated with <see cref="GetUserRequest" />.
+    /// The default handler associated with <see cref="GetUserRequest" />.
     /// </summary>
-    public class GetUserHandler : IRequestHandler<GetUserRequest, User?>
+    public class GetUserHandler : IRequestHandler<GetUserRequest, UserEntity?>
     {
         private readonly GuildContext _db;
         public GetUserHandler(GuildContext db)
@@ -22,9 +22,9 @@ namespace Silk.Core.Data.MediatR.Users
             _db = db;
         }
 
-        public async Task<User?> Handle(GetUserRequest request, CancellationToken cancellationToken)
+        public async Task<UserEntity?> Handle(GetUserRequest request, CancellationToken cancellationToken)
         {
-            User? user = await _db.Users
+            UserEntity? user = await _db.Users
                 .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
             return user;
         }

@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
@@ -37,8 +37,8 @@ namespace Silk.Core.Commands.Moderation
 				InfractionResult response = await _infractionService.KickAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
 				string? message = response switch
 				{
-					InfractionResult.FailedGuildHeirarchy => "I can't kick that person due to role heiarchy!",
-					InfractionResult.FailedSelfPermissions => "I don't have permission to kick members!", /* In rectrospect, these should never happen, but. */
+					InfractionResult.FailedGuildHeirarchy => "I can't kick that person due to role hierarchy!",
+					InfractionResult.FailedSelfPermissions => "I don't have permission to kick members!", /* In retrospect, these should never happen, but. */
 					InfractionResult.SucceededWithNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")}  (Notified with direct message).",
 					InfractionResult.SucceededWithoutNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")} (Unable to notify with Direct Message).",
 					_ => $"Unexpected response: {response}"

@@ -19,13 +19,15 @@ namespace Silk.Shared.Constants
 		/// The maximum amount of unique role mentions a message can contain.
 		/// </summary>
 		public const string MaxRoleMentions = "max_role_mentions";
+
+		public const string PhishingLinkDetected = "phishing_link";
 		
-		//TODO: More automod strings
+		//TODO: More auto-mod strings
 
 		public static ConcurrentDictionary<string, string> ActionStrings { get; } = new()
 		{
-			[MaxUserMentions] = "Maxiumim unique user pings",
-			[MaxRoleMentions] = "Maxiumim unique role pings",
+			[MaxUserMentions] = "Maximum unique user pings",
+			[MaxRoleMentions] = "Maximum unique role pings",
 		};
 	}
 }

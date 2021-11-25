@@ -6,7 +6,7 @@ using Npgsql;
 using NUnit.Framework;
 using Respawn;
 using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.Tests.MediatR
 {
@@ -52,7 +52,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Get_When_Guild_Is_Null_Returns_Null()
         {
             //Arrange
-            GuildConfig? result;
+            GuildConfigEntity? result;
             //Act
             result = await _mediator.Send(new GetGuildConfigRequest(GuildId));
             //Assert
@@ -63,7 +63,7 @@ namespace Silk.Core.Data.Tests.MediatR
         public async Task MediatR_Get_When_Guild_Is_Not_Null_Does_Not_Return_Null()
         {
             //Arrange
-            GuildConfig? result;
+            GuildConfigEntity? result;
             await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
             //Act
             result = await _mediator.Send(new GetGuildConfigRequest(GuildId));

@@ -18,6 +18,7 @@ using PluginLoader.Unity;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Serilog.Templates;
 using Silk.Core.AutoMod;
 using Silk.Core.Data;
 using Silk.Core.EventHandlers;
@@ -26,6 +27,7 @@ using Silk.Core.EventHandlers.MemberAdded;
 using Silk.Core.EventHandlers.MemberRemoved;
 using Silk.Core.EventHandlers.Messages;
 using Silk.Core.EventHandlers.Messages.AutoMod;
+using Silk.Core.Services;
 using Silk.Core.Services.Bot;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -45,8 +47,12 @@ using YumeChan.PluginBase.Tools.Data;
 
 namespace Silk.Core
 {
-	public sealed class Startup
+	public static class Startup
 	{
+
+		private static readonly List<Type> _startupTypes = new();
+		public static IUnityContainer Container { get; private set; }
+
 		public static async Task Main()
 		{
 			// Make Generic Host here. //
@@ -54,13 +60,17 @@ namespace Silk.Core
 
 			ConfigureServices(builder);
 
-
 			IHost builtBuilder = builder.UseConsoleLifetime().Build();
 			DiscordConfigurations.CommandsNext.Services = builtBuilder.Services; // Prevents double initialization of services. //
 			DiscordConfigurations.SlashCommands.Services = builtBuilder.Services;
-			
+
 			ConfigureDiscordClient(builtBuilder.Services);
 			await EnsureDatabaseCreatedAndApplyMigrations(builtBuilder);
+
+			Container = builtBuilder.Services.Get<IUnityContainer>()!;
+
+			foreach (var service in _startupTypes)
+				_ = Container.Resolve(service);
 
 			await builtBuilder.RunAsync().ConfigureAwait(false);
 		}
@@ -91,7 +101,14 @@ namespace Silk.Core
 		[SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
-			return ConfigureServices(CreateBuilder(), false);
+			var builder = CreateBuilder();
+			builder.ConfigureServices((context, container) =>
+			{
+				SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+				AddDatabases(container, silkConfig.Persistence);
+			});
+
+			return builder;
 		}
 
 		private static IHostBuilder CreateBuilder()
@@ -110,10 +127,12 @@ namespace Silk.Core
 		private static void AddLogging(HostBuilderContext host)
 		{
 			LoggerConfiguration? logger = new LoggerConfiguration()
-				.WriteTo.Console(outputTemplate: StringConstants.LogFormat, theme: new SilkLogTheme())
-				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.LogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
+				.Enrich.FromLogContext()
+				.WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
+				.WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Error);
+				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
+				.MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
 			SilkConfigurationOptions? configOptions = host.Configuration.GetSilkConfigurationOptionsFromSection();
 			Log.Logger = configOptions.LogLevel switch
@@ -132,9 +151,9 @@ namespace Silk.Core
 		private static IHostBuilder ConfigureServices(IHostBuilder builder, bool addServices = true)
 		{
 			return builder
-				.UseSerilog()
 				.UseUnityServiceProvider()
 				.ConfigureLogging(l => l.ClearProviders())
+				.UseSerilog()
 				.ConfigureContainer<IUnityContainer>((context, container) =>
 				{
 					var services = new ServiceCollection();
@@ -150,53 +169,57 @@ namespace Silk.Core
 
 					services.AddTransient(typeof(ILogger<>), typeof(Shared.Types.Logger<>));
 
-					services.AddSingleton(new DiscordShardedClient(DiscordConfigurations.Discord));
+					services.AddSingleton<DiscordClient>(s => new(new(DiscordConfigurations.Discord) { LoggerFactory = s.GetService<ILoggerFactory>() }));
 
 					services.AddMemoryCache(option => option.ExpirationScanFrequency = TimeSpan.FromSeconds(30));
 
-					
+
 					services.AddHttpClient(StringConstants.HttpClientName,
 						client => client.DefaultRequestHeaders.UserAgent.ParseAdd(
 							$"Silk Project by VelvetThePanda / v{StringConstants.Version}"));
 
 					services.Replace(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, CustomLoggingFilter>());
 
-					services.AddSingleton<GuildEventHandler>();
-
 					#region Services
 
 					services.AddSingleton<ConfigService>();
-					services.AddSingleton<MemberGreetingService>();
+					services.AddSingleton<FlagOverlayService>();
 
 					#endregion
 
 					#region AutoMod
 
-					services.AddSingleton<AutoModMuteApplier>();
 					services.AddSingleton<AntiInviteHelper>();
+					services.AddSingleton<AutoModAntiPhisher>();
 
 					#endregion
-					
-					services.AddSingleton<RoleAddedHandler>();
 
-					services.AddSingleton<MemberRemovedHandler>();
-					services.AddSingleton<RoleRemovedHandler>();
 					services.AddSingleton<BotExceptionHandler>();
 					services.AddSingleton<SlashCommandExceptionHandler>();
 					services.AddSingleton<SerilogLoggerFactory>();
-					services.AddSingleton<MessageRemovedHandler>();
 
+					#region Unmonitored Services
 
-					services.AddSingleton<CommandHandler>();
-					services.AddSingleton<MessageAddAntiInvite>();
+					services.AddUnmonitoredService<MessageAddAntiInvite>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<RoleAddedHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<RoleRemovedHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<GuildEventHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MemberGreetingService>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessageUpdateHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<CommandHandler>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessageAddAntiInvite>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MessagePhishingDetector>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<AutoModMuteApplier>(ServiceLifetime.Singleton);
+					services.AddUnmonitoredService<MemberRemovedHandler>(ServiceLifetime.Singleton);
 
-					services.AddSingleton<EventHelper>();
+					#endregion
 
-					services.AddScoped<IInputService, InputService>();
 					services.AddScoped<IPrefixCacheService, PrefixCacheService>();
 					services.AddSingleton<IInfractionService, InfractionService>();
 
 					services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
+
+					services.AddHostedService(b => b.GetRequiredService<AutoModAntiPhisher>());
 
 					services.AddSingleton<TagService>();
 
@@ -216,33 +239,43 @@ namespace Silk.Core
 					services.AddMediatR(typeof(Main));
 					services.AddMediatR(typeof(GuildContext));
 
-					services.AddSingleton<GuildEventHandlerService>();
-					services.AddHostedService(b => b.GetRequiredService<GuildEventHandlerService>());
+					services.AddSingleton<GuildCacher>();
 
 					//services.AddSingleton<UptimeService>();
 					//services.AddHostedService(b => b.GetRequiredService<UptimeService>());
 					services.RegisterShardedPluginServices();
-					
-					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
 
-					container.AddExtension(new LoggingExtension());
-					services.AddLogging(l =>
-					{
-						l.AddSerilog();
-						AddLogging(context);
-					});
+					services.AddSingleton(typeof(IDatabaseProvider<>), typeof(Types.DatabaseProvider<>));
+					container.AddExtension(new LoggingExtension(new SerilogLoggerFactory()));
+					container.AddServices(new ServiceCollection()
+						.AddLogging(l =>
+						{
+							l.AddSerilog();
+							AddLogging(context);
+						}));
 
 					container.AddExtension(new Diagnostic());
-					
-					container.AddServices(services); 
+
+					container.AddServices(services);
 				});
 		}
 
+		private static IServiceCollection AddUnmonitoredService<T>(this IServiceCollection services, ServiceLifetime lifetime)
+			=> services.AddUnmonitoredService<T, T>(lifetime);
+
+		private static IServiceCollection AddUnmonitoredService<TRegister, TImplemenation>(this IServiceCollection services, ServiceLifetime lifetime)
+		{
+			services.Add(new(typeof(TRegister), typeof(TImplemenation), lifetime));
+
+			_startupTypes.Add(typeof(TRegister));
+
+			return services;
+		}
 
 		private static void ConfigureDiscordClient(IServiceProvider services)
 		{
-			DiscordConfiguration client = DiscordConfigurations.Discord;
-			SilkConfigurationOptions? config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
+			var client = DiscordConfigurations.Discord;
+			var config = services.Get<IOptions<SilkConfigurationOptions>>()!.Value;
 
 			client.ShardCount = config!.Discord.Shards;
 			client.Token = config.Discord.BotToken;
@@ -266,7 +299,7 @@ namespace Silk.Core
 				b.EnableDetailedErrors();
 				#endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
 			}
-			
+
 			services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
 			services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
 			//services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
@@ -276,12 +309,12 @@ namespace Silk.Core
 	/* Todo: Move this class maybe? */
 	public static class IConfigurationExtensions
 	{
-        /// <summary>
-        ///     An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
-        /// </summary>
-        /// <param name="config">the configuration</param>
-        /// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>
-        public static SilkConfigurationOptions GetSilkConfigurationOptionsFromSection(this IConfiguration config)
+		/// <summary>
+		/// An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
+		/// </summary>
+		/// <param name="config">the configuration</param>
+		/// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>
+		public static SilkConfigurationOptions GetSilkConfigurationOptionsFromSection(this IConfiguration config)
 		{
 			return config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
 		}

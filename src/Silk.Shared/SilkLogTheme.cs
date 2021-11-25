@@ -1,11 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Serilog.Sinks.SystemConsole.Themes;
+using Serilog.Templates.Themes;
 
 namespace Silk.Shared
 {
+
+    public sealed class SilkLogTemplateTheme : TemplateTheme
+    {
+
+        public SilkLogTemplateTheme(IReadOnlyDictionary<TemplateThemeStyle, string> ansiStyles) : base(ansiStyles) { }
+        public SilkLogTemplateTheme(TemplateTheme baseTheme, IReadOnlyDictionary<TemplateThemeStyle, string> ansiStyles) : base(baseTheme, ansiStyles) { }
+    }
+    
+
     public sealed class SilkLogTheme : ConsoleTheme
     {
+        public static TemplateTheme TemplateTheme = new(TemplateTheme.Code, new Dictionary<TemplateThemeStyle, string>()
+        {
+            [TemplateThemeStyle.Number] = "\x1b[38;5;39m",
+            [TemplateThemeStyle.LevelDebug] = "\x1b[38;5;34m",
+            [TemplateThemeStyle.LevelError] = "\x1b[38;5;160m",
+            [TemplateThemeStyle.LevelFatal] = "\x1b[38;5;52m",
+            [TemplateThemeStyle.LevelVerbose] = "\x1b[38;5;164m",
+            [TemplateThemeStyle.LevelWarning] = "\x1b[38;5;220m",
+            [TemplateThemeStyle.SecondaryText] = "\x1b[38;5;39m",
+            [TemplateThemeStyle.LevelInformation] = "\x1b[38;5;255m",
+            [TemplateThemeStyle.Scalar] = "\x1b[38;5;39m",
+            [TemplateThemeStyle.TertiaryText] = "\x1b[38;5;39m",
+            [TemplateThemeStyle.Text] = "\x1b[38;5;220m"
+        });
+        
         public override bool CanBuffer => false;
 
         protected override int ResetCharCount => 0;

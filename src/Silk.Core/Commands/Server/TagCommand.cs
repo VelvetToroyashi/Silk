@@ -9,9 +9,9 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.HelpFormatter;
@@ -49,7 +49,7 @@ namespace Silk.Core.Commands.Server
 				return;
 			}
 
-			Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
+			TagEntity? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
 
 			if (dbTag is null)
 			{
@@ -57,7 +57,11 @@ namespace Silk.Core.Commands.Server
 			}
 			else
 			{
-				await ctx.RespondAsync(dbTag.Content);
+				if (ctx.Message.ReferencedMessage is DiscordMessage reply)
+					await reply.RespondAsync(dbTag.Content);
+				else
+					await ctx.RespondAsync(dbTag.Content);
+				
 				await _mediator.Send(new UpdateTagRequest(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
 			}
 		}
@@ -66,7 +70,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Get some Info about a Tag")]
 		public async Task Info(CommandContext ctx, [RemainingText] string tag)
 		{
-			Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
+			TagEntity? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
 
 			if (dbTag is null)
 			{
@@ -104,7 +108,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Create a Tag")]
 		public async Task Create(CommandContext ctx, string tagName, [RemainingText] string? content)
 		{
-			Tag? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
+			TagEntity? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
 			if (tag is not null)
 			{
 				await ctx.RespondAsync("Tag with that name already exists!");
@@ -138,13 +142,13 @@ namespace Silk.Core.Commands.Server
 				return;
 			}
 
-			Tag? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
+			TagEntity? tag = await _tagService.GetTagAsync(tagName, ctx.Guild.Id);
 			if (tag is null)
 			{
 				await ctx.RespondAsync("Tag not found!");
 				return;
 			}
-			User? user = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, ctx.User.Id));
+			UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, ctx.User.Id));
 
 			if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? false))
 			{
@@ -186,7 +190,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Search for a Tag by name")]
 		public async Task Search(CommandContext ctx, string tagName)
 		{
-			IEnumerable<Tag> tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
+			IEnumerable<TagEntity> tags = await _mediator.Send(new GetTagByNameRequest(tagName, ctx.Guild.Id));
 			if (!tags.Any())
 			{
 				await ctx.RespondAsync("No tags found :c");
@@ -225,7 +229,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Shows the Raw Content of a Tag")]
 		public async Task Raw(CommandContext ctx, string tag)
 		{
-			Tag? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
+			TagEntity? dbTag = await _tagService.GetTagAsync(tag, ctx.Guild.Id);
 
 			if (dbTag is null)
 			{
@@ -242,7 +246,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Shows a List of All Tags in this Server")]
 		public async Task List(CommandContext ctx)
 		{
-			IEnumerable<Tag> tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
+			IEnumerable<TagEntity> tags = await _tagService.GetGuildTagsAsync(ctx.Guild.Id);
 			if (!tags.Any())
 			{
 				await ctx.RespondAsync("No tags in this server! :c");
@@ -291,7 +295,7 @@ namespace Silk.Core.Commands.Server
 		[Description("Get Tags created by a User")]
 		public async Task Tags(CommandContext ctx, DiscordMember user)
 		{
-			IEnumerable<Tag> tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
+			IEnumerable<TagEntity> tags = await _tagService.GetUserTagsAsync(user.Id, ctx.Guild.Id);
 			if (!tags.Any())
 			{
 				await ctx.RespondAsync("User has no tags! :c");

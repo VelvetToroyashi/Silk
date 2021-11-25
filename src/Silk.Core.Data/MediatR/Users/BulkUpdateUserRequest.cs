@@ -4,19 +4,19 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users
 {
     /// <summary>
-    ///     Request for updating users in the database en masse.
+    /// Request for updating users in the database en masse.
     /// </summary>
-    public record BulkUpdateUserRequest(IEnumerable<User> Users) : IRequest<IEnumerable<User>>;
+    public record BulkUpdateUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
 
     /// <summary>
-    ///     The default handler for <see cref="BulkUpdateUserRequest" />.
+    /// The default handler for <see cref="BulkUpdateUserRequest" />.
     /// </summary>
-    public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnumerable<User>>
+    public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnumerable<UserEntity>>
     {
         private readonly GuildContext _db;
 
@@ -25,13 +25,13 @@ namespace Silk.Core.Data.MediatR.Users
             _db = db;
         }
 
-        public async Task<IEnumerable<User>> Handle(BulkUpdateUserRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserEntity>> Handle(BulkUpdateUserRequest request, CancellationToken cancellationToken)
         {
             try
             {
                 foreach (var user in request.Users)
                 {
-                    EntityEntry<User> state = _db.Attach(user);
+                    EntityEntry<UserEntity> state = _db.Attach(user);
                     state.State = EntityState.Modified;
                 }
 
@@ -43,7 +43,7 @@ namespace Silk.Core.Data.MediatR.Users
                 {
                     foreach (var user in request.Users)
                     {
-                        EntityEntry<User> state = _db.Attach(user);
+                        EntityEntry<UserEntity> state = _db.Attach(user);
                         state.State = EntityState.Modified;
                         await _db.SaveChangesAsync(cancellationToken);
                     }

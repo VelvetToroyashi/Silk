@@ -18,7 +18,7 @@ namespace Silk.Core.Tests.Types
 				executed = true;
 				return Task.CompletedTask;
 			}, TimeSpan.FromSeconds(1));
-			
+
 			//Act
 			timer.Start();
 			timer.Stop();
@@ -26,7 +26,7 @@ namespace Silk.Core.Tests.Types
 			//Assert
 			Assert.True(executed);
 		}
-		
+
 		[Test]
 		public void AsyncTimer_Executes_Task_WithParameters()
 		{
@@ -38,11 +38,11 @@ namespace Silk.Core.Tests.Types
 				executed = true;
 				return Task.CompletedTask;
 			}, null!, TimeSpan.FromSeconds(1));
-			
+
 			//Act
 			timer.Start();
 			timer.Stop();
-			
+
 			//Assert
 			Assert.True(executed);
 		}
@@ -58,14 +58,14 @@ namespace Silk.Core.Tests.Types
 				num++;
 				await Task.Delay(2000);
 			}, TimeSpan.FromSeconds(1));
-			
+
 			//Act
 			timer.Start();
 			Thread.Sleep(1200);
 			timer.Stop();
 
 			//Assert
-			Assert.Equals(3, num);
+			Assert.AreEqual(3, num);
 		}
 
 		[Test]
@@ -78,14 +78,14 @@ namespace Silk.Core.Tests.Types
 				num++;
 				await Task.Delay(3000);
 			}, TimeSpan.FromSeconds(2), true);
-			
+
 			//Act
 			timer.Start();
 			Thread.Sleep(2500);
 			timer.Stop();
-			
+
 			//Assert
-			Assert.Equals(2, num);
+			Assert.AreEqual(2, num);
 		}
 
 		[Test]
@@ -93,11 +93,11 @@ namespace Silk.Core.Tests.Types
 		{
 			//Arange
 			using var timer = new AsyncTimer(() => Task.FromResult(0), TimeSpan.FromSeconds(1));
-			
+
 			//Act
 			timer.Start();
 			Thread.Sleep(200);
-			
+
 			//Assert
 			Assert.Throws<InvalidOperationException>(() => timer.Start());
 		}
@@ -107,9 +107,9 @@ namespace Silk.Core.Tests.Types
 		{
 			//Arrange
 			var timer = new AsyncTimer(() => Task.CompletedTask, TimeSpan.Zero);
-			
+
 			//Act
-			
+
 			//Assert
 			Assert.Throws<InvalidOperationException>(() => timer.Stop());
 		}
@@ -119,12 +119,9 @@ namespace Silk.Core.Tests.Types
 		{
 			//Arrange
 			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
-			
-			//Act
-			var ex = Assert.Catch(() => timer.Start());
 
-			//Assert
-			Assert.Null(ex);
+			//Act
+			Assert.DoesNotThrow(() => timer.Start());
 		}
 
 		[Test]
@@ -134,7 +131,7 @@ namespace Silk.Core.Tests.Types
 			var errored = false;
 			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
 			timer.Errored += (_, _) => errored = true;
-			
+
 			//Act
 			timer.Start();
 			Thread.Sleep(100);
@@ -149,7 +146,7 @@ namespace Silk.Core.Tests.Types
 			var errored = false;
 			using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
 			timer.Errored += (_, _) => errored = true;
-			
+
 			//Act
 			timer.Start();
 			Thread.Sleep(100);

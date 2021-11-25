@@ -9,14 +9,14 @@ using Silk.Shared.Constants;
 namespace Silk.Core.AutoMod
 {
 	/// <summary>
-	///     An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
+	/// An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
 	/// </summary>
 	public sealed class AutoModMuteApplier
 	{
 		private readonly IInfractionService _infractions;
-		private readonly DiscordShardedClient _client;
+		private readonly DiscordClient _client;
 		private readonly ILogger<AutoModMuteApplier> _logger;
-		public AutoModMuteApplier(IInfractionService infractions, DiscordShardedClient client, ILogger<AutoModMuteApplier> logger)
+		public AutoModMuteApplier(IInfractionService infractions, DiscordClient client, ILogger<AutoModMuteApplier> logger)
 		{
 			_infractions = infractions;
 			_client = client;

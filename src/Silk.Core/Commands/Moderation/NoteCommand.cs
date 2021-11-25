@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
@@ -28,7 +28,7 @@ namespace Silk.Core.Commands.Moderation
 			InfractionResult res = await _infractionHelper.AddNoteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, note);
 			string response = res switch
 			{
-				InfractionResult.SucceededDoesNotNotify => "Succesfully added note!",
+				InfractionResult.SucceededDoesNotNotify => "Successfully added note!",
 				_ => $"An unexpected response was returned, but the note was added. This is probably safe to ignore! {res.Humanize(LetterCasing.Title)}"
 			};
 

@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Interfaces;
 
 namespace Silk.Core.Services.Data
@@ -14,40 +14,52 @@ namespace Silk.Core.Services.Data
 	{
 		private readonly IMemoryCache _cache;
 		private readonly IMediator _mediator;
+		private readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(60);
 
 		public ConfigService(IMemoryCache cache, IMediator mediator, ICacheUpdaterService updater)
 		{
 			_cache = cache;
 			_mediator = mediator;
-			updater.ConfigUpdated += u =>
-			{
-				cache.Remove(u);
-				cache.Remove(u + "_mod");
-			};
+			updater.ConfigUpdated += OnConfigUpdated;
 		}
 
-		public async ValueTask<GuildConfig> GetConfigAsync(ulong guildId)
+		private void OnConfigUpdated(ulong guildId)
 		{
-			if (_cache.TryGetValue(guildId, out GuildConfig config)) return config;
+			var guildCacheKey = GetCacheGuildConfigKey(guildId);
+			var guildModCacheKey = GetCacheGuildModConfigKey(guildId);
+			_cache.Remove(guildCacheKey);
+			_cache.Remove(guildModCacheKey);
+		}
+
+		private object GetCacheGuildConfigKey(ulong guildId) => guildId;
+		private object GetCacheGuildModConfigKey(ulong guildId) => $"{guildId}_mod";
+
+		public async ValueTask<GuildConfigEntity> GetConfigAsync(ulong guildId)
+		{
+			var cacheKey = GetCacheGuildConfigKey(guildId);
+			if (_cache.TryGetValue(cacheKey, out GuildConfigEntity config)) return config;
 			return await GetConfigFromDatabaseAsync(guildId);
 		}
 
-		public async ValueTask<GuildModConfig> GetModConfigAsync(ulong guildId)
+		public async ValueTask<GuildModConfigEntity> GetModConfigAsync(ulong guildId)
 		{
-			if (_cache.TryGetValue($"{guildId}_mod", out GuildModConfig config)) return config;
+			var cacheKey = GetCacheGuildModConfigKey(guildId);
+			if (_cache.TryGetValue(cacheKey, out GuildModConfigEntity config)) return config;
 			return await GetModConfigFromDatabaseAsync(guildId);
 		}
-		private async Task<GuildModConfig> GetModConfigFromDatabaseAsync(ulong guildId)
+		private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(ulong guildId)
 		{
-			GuildModConfig? configuration = await _mediator.Send(new GetGuildModConfigRequest(guildId), CancellationToken.None);
-			_cache.Set($"{guildId}_mod", configuration, TimeSpan.FromHours(1));
+			GuildModConfigEntity? configuration = await _mediator.Send(new GetGuildModConfigRequest(guildId), CancellationToken.None);
+			var cacheKey = GetCacheGuildModConfigKey(guildId);
+			_cache.Set(cacheKey, configuration, _defaultCacheExpiration);
 			return configuration;
 		}
 
-		private async Task<GuildConfig> GetConfigFromDatabaseAsync(ulong guildId)
+		private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(ulong guildId)
 		{
-			GuildConfig configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
-			_cache.Set(guildId, configuration, TimeSpan.FromHours(1));
+			GuildConfigEntity? configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
+			var cacheKey = GetCacheGuildConfigKey(guildId);
+			_cache.Set(cacheKey, configuration, _defaultCacheExpiration);
 			return configuration;
 		}
 	}

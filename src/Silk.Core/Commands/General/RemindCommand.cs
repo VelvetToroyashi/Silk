@@ -9,7 +9,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
@@ -132,7 +132,7 @@ namespace Silk.Core.Commands.General
 		[Description("Gives you a list of your reminders")]
 		public async Task List(CommandContext ctx)
 		{
-			IEnumerable<Reminder> reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
+			IEnumerable<ReminderEntity> reminders = await _reminders.GetRemindersAsync(ctx.User.Id);
 
 			if (!reminders.Any())
 			{
@@ -197,7 +197,7 @@ namespace Silk.Core.Commands.General
 			}
 			else
 			{
-				await ctx.RespondAsync("I couldn’t find that reminder!");
+				await ctx.RespondAsync("I couldn't find that reminder!");
 			}
 		}
 	}

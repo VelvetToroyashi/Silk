@@ -3,22 +3,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    /// Request for updating a <see cref="GuildConfig" /> for a Guild.
+    /// Request for updating a <see cref="GuildConfigEntity" /> for a Guild.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
-    public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfig?>
+    public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
     {
         public ulong? GreetingChannelId { get; init; }
         public ulong? VerificationRoleId { get; init; }
         public GreetingOption? GreetingOption { get; init; }
-        public bool? GreetOnScreeningComplete { get; init; }
         public string? GreetingText { get; init; }
-        public List<DisabledCommand>? DisabledCommands { get; init; }
+        public List<DisabledCommandEntity>? DisabledCommands { get; init; }
 
         //public List<BlacklistedWord>? BlacklistedWords { get; init; }
     }
@@ -26,15 +25,15 @@ namespace Silk.Core.Data.MediatR.Guilds
     /// <summary>
     /// The default handler for <see cref="UpdateGuildConfigRequest" />.
     /// </summary>
-    public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfig?>
+    public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfigEntity?>
     {
         private readonly GuildContext _db;
 
         public UpdateGuildConfigHandler(GuildContext db) => _db = db;
 
-        public async Task<GuildConfig?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
         {
-            GuildConfig config = await _db.GuildConfigs
+            GuildConfigEntity? config = await _db.GuildConfigs
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 

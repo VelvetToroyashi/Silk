@@ -17,10 +17,10 @@ namespace Silk.Core.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.6")
+                .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("Silk.Core.Data.Models.CommandInvocation", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.CommandInvocationEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,7 +42,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("CommandInvocations");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.DisabledCommand", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.DisabledCommandEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace Silk.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("GuildConfigId")
+                    b.Property<int?>("GuildConfigEntityId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("GuildId")
@@ -61,15 +61,49 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildConfigId");
+                    b.HasIndex("GuildConfigEntityId");
 
                     b.HasIndex("GuildId", "CommandName")
                         .IsUnique();
 
-                    b.ToTable("DisabledCommand");
+                    b.ToTable("DisabledCommandEntity");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.GlobalUser", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.ExemptionEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Exemption")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("exempt_from");
+
+                    b.Property<decimal>("Guild")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<int?>("GuildModConfigEntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Target")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("target_id");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildModConfigEntityId");
+
+                    b.ToTable("ExemptionEntity");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Entities.GlobalUserEntity", b =>
                 {
                     b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,22 +120,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("GlobalUsers");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Guild", b =>
-                {
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("Prefix")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Guilds");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildConfig", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildConfigEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -132,7 +151,22 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("GuildConfigs");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildEntity", b =>
+                {
+                    b.Property<decimal>("Id")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("Prefix")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildModConfigEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -154,6 +188,12 @@ namespace Silk.Core.Data.Migrations
                     b.Property<bool>("DeleteMessageOnMatchedInvite")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("DeletePhishingLinks")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("DetectPhishingLinks")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
@@ -168,6 +208,9 @@ namespace Silk.Core.Data.Migrations
 
                     b.Property<decimal>("LoggingChannel")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("LoggingWebhookUrl")
+                        .HasColumnType("text");
 
                     b.Property<int>("MaxRoleMentions")
                         .HasColumnType("integer");
@@ -188,8 +231,14 @@ namespace Silk.Core.Data.Migrations
                     b.Property<bool>("UseAggressiveRegex")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("UseWebhookLogging")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("WarnOnMatchedInvite")
                         .HasColumnType("boolean");
+
+                    b.Property<decimal>("WebhookLoggingId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -199,7 +248,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("GuildModConfigs");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Infraction", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InfractionEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -252,7 +301,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("Infractions");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.InfractionStep", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InfractionStepEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -272,10 +321,10 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasIndex("ConfigId");
 
-                    b.ToTable("InfractionStep");
+                    b.ToTable("InfractionStepEntity");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Invite", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InviteEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -285,7 +334,7 @@ namespace Silk.Core.Data.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<int?>("GuildModConfigId")
+                    b.Property<int?>("GuildModConfigEntityId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("InviteGuildId")
@@ -297,12 +346,12 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildModConfigId");
+                    b.HasIndex("GuildModConfigEntityId");
 
-                    b.ToTable("Invite");
+                    b.ToTable("InviteEntity");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Reminder", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.ReminderEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -350,7 +399,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("Reminders");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.TagEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -363,6 +412,9 @@ namespace Silk.Core.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal?>("GuildEntityId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
@@ -382,14 +434,14 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("GuildEntityId");
 
                     b.HasIndex("OriginalTagId");
 
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.User", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.UserEntity", b =>
                 {
                     b.Property<decimal>("Id")
                         .HasColumnType("numeric(20,0)");
@@ -413,7 +465,7 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.UserHistory", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.UserHistoryEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -442,16 +494,16 @@ namespace Silk.Core.Data.Migrations
                     b.HasIndex("UserId", "GuildId")
                         .IsUnique();
 
-                    b.ToTable("UserHistory");
+                    b.ToTable("UserHistoryEntity");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.DisabledCommand", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.DisabledCommandEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildConfig", null)
+                    b.HasOne("Silk.Core.Data.Entities.GuildConfigEntity", null)
                         .WithMany("DisabledCommands")
-                        .HasForeignKey("GuildConfigId");
+                        .HasForeignKey("GuildConfigEntityId");
 
-                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
                         .WithMany()
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -460,37 +512,44 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildConfig", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.ExemptionEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                    b.HasOne("Silk.Core.Data.Entities.GuildModConfigEntity", null)
+                        .WithMany("Exemptions")
+                        .HasForeignKey("GuildModConfigEntityId");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildConfigEntity", b =>
+                {
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
                         .WithOne("Configuration")
-                        .HasForeignKey("Silk.Core.Data.Models.GuildConfig", "GuildId")
+                        .HasForeignKey("Silk.Core.Data.Entities.GuildConfigEntity", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildModConfigEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
                         .WithOne("ModConfig")
-                        .HasForeignKey("Silk.Core.Data.Models.GuildModConfig", "GuildId")
+                        .HasForeignKey("Silk.Core.Data.Entities.GuildModConfigEntity", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Infraction", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InfractionEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
                         .WithMany("Infractions")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Silk.Core.Data.Models.User", "User")
+                    b.HasOne("Silk.Core.Data.Entities.UserEntity", "User")
                         .WithMany("Infractions")
                         .HasForeignKey("UserId", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -501,9 +560,9 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.InfractionStep", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InfractionStepEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildModConfig", "Config")
+                    b.HasOne("Silk.Core.Data.Entities.GuildModConfigEntity", "Config")
                         .WithMany("InfractionSteps")
                         .HasForeignKey("ConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -512,31 +571,29 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Config");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Invite", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.InviteEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.GuildModConfig", null)
+                    b.HasOne("Silk.Core.Data.Entities.GuildModConfigEntity", null)
                         .WithMany("AllowedInvites")
-                        .HasForeignKey("GuildModConfigId");
+                        .HasForeignKey("GuildModConfigEntityId");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.TagEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.Guild", null)
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", null)
                         .WithMany("Tags")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuildEntityId");
 
-                    b.HasOne("Silk.Core.Data.Models.Tag", "OriginalTag")
+                    b.HasOne("Silk.Core.Data.Entities.TagEntity", "OriginalTag")
                         .WithMany("Aliases")
                         .HasForeignKey("OriginalTagId");
 
                     b.Navigation("OriginalTag");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.User", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.UserEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.Guild", "Guild")
+                    b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
                         .WithMany("Users")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -545,18 +602,23 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.UserHistory", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.UserHistoryEntity", b =>
                 {
-                    b.HasOne("Silk.Core.Data.Models.User", "User")
+                    b.HasOne("Silk.Core.Data.Entities.UserEntity", "User")
                         .WithOne("History")
-                        .HasForeignKey("Silk.Core.Data.Models.UserHistory", "UserId", "GuildId")
+                        .HasForeignKey("Silk.Core.Data.Entities.UserHistoryEntity", "UserId", "GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Guild", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildConfigEntity", b =>
+                {
+                    b.Navigation("DisabledCommands");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildEntity", b =>
                 {
                     b.Navigation("Configuration")
                         .IsRequired();
@@ -571,24 +633,21 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildConfig", b =>
-                {
-                    b.Navigation("DisabledCommands");
-                });
-
-            modelBuilder.Entity("Silk.Core.Data.Models.GuildModConfig", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildModConfigEntity", b =>
                 {
                     b.Navigation("AllowedInvites");
+
+                    b.Navigation("Exemptions");
 
                     b.Navigation("InfractionSteps");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.Tag", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.TagEntity", b =>
                 {
                     b.Navigation("Aliases");
                 });
 
-            modelBuilder.Entity("Silk.Core.Data.Models.User", b =>
+            modelBuilder.Entity("Silk.Core.Data.Entities.UserEntity", b =>
                 {
                     b.Navigation("History")
                         .IsRequired();

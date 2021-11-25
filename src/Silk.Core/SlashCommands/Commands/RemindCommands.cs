@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentAssertions.Common;
 using Humanizer;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
 using Silk.Core.Types;
 using Silk.Core.Utilities.Bot;
@@ -22,8 +22,8 @@ namespace Silk.Core.SlashCommands.Commands
 		public sealed class ReminderCommands : ApplicationCommandModule
 		{
 			private readonly ReminderService _reminders;
-			private readonly DiscordShardedClient _client;
-			public ReminderCommands(ReminderService reminders, DiscordShardedClient client)
+			private readonly DiscordClient _client;
+			public ReminderCommands(ReminderService reminders, DiscordClient client)
 			{
 				_reminders = reminders;
 				_client = client;
@@ -34,7 +34,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				Reminder[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
+				ReminderEntity[] reminders = (await _reminders.GetRemindersAsync(ctx.User.Id)).ToArray();
 
 				if (!reminders.Any())
 				{
@@ -103,7 +103,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Reminder>? reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
+				IEnumerable<ReminderEntity>? reminder = await _reminders.GetRemindersAsync(ctx.User.Id);
 
 				if (!reminder.Any() || reminder.All(r => r.Id != reminderId))
 				{

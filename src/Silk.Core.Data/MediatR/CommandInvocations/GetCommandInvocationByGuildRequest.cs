@@ -4,19 +4,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.CommandInvocations
 {
     /// <summary>
-    ///     Request for getting commands invoked on a specific guild.
+    /// Request for getting commands invoked on a specific guild.
     /// </summary>
-    public record GetCommandInvocationByGuildRequest(ulong GuildId) : IRequest<IEnumerable<CommandInvocation>>;
+    public record GetCommandInvocationByGuildRequest(ulong GuildId) : IRequest<IEnumerable<CommandInvocationEntity>>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetCommandInvocationByGuildRequest" />.
+    /// The default handler for <see cref="GetCommandInvocationByGuildRequest" />.
     /// </summary>
-    public class GetCommandInvocationByGuildHandler : IRequestHandler<GetCommandInvocationByGuildRequest, IEnumerable<CommandInvocation>>
+    public class GetCommandInvocationByGuildHandler : IRequestHandler<GetCommandInvocationByGuildRequest, IEnumerable<CommandInvocationEntity>>
     {
         private readonly GuildContext _db;
 
@@ -25,11 +25,12 @@ namespace Silk.Core.Data.MediatR.CommandInvocations
             _db = db;
         }
 
-        public async Task<IEnumerable<CommandInvocation>> Handle(GetCommandInvocationByGuildRequest request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CommandInvocationEntity>> Handle(GetCommandInvocationByGuildRequest request, CancellationToken cancellationToken)
         {
-            IEnumerable<CommandInvocation> commands = await _db.CommandInvocations
+            IEnumerable<CommandInvocationEntity> commands = await _db.CommandInvocations
                 .Where(c => c.UserId == request.GuildId)
                 .ToListAsync(cancellationToken);
+
             return commands;
         }
     }

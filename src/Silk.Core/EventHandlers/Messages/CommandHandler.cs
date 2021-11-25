@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Silk.Core.Data.MediatR.CommandInvocations;
 using Silk.Core.Services.Interfaces;
+using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Messages
 {
@@ -15,8 +16,10 @@ namespace Silk.Core.EventHandlers.Messages
 		private readonly IMediator _mediator;
 		private readonly ILogger<CommandHandler> _logger;
 		private readonly IPrefixCacheService _prefixService;
-		public CommandHandler(IPrefixCacheService prefixService, IMediator mediator, ILogger<CommandHandler> logger)
+		
+		public CommandHandler(DiscordClient client, IPrefixCacheService prefixService, IMediator mediator, ILogger<CommandHandler> logger)
 		{
+			client.MessageCreated += Handle;
 			_prefixService = prefixService;
 			_mediator = mediator;
 			_logger = logger;
@@ -50,7 +53,7 @@ namespace Silk.Core.EventHandlers.Messages
 
 			if (command is null)
 			{
-				_logger.LogWarning("Could not find command. Message: {Message}", args.Message.Content);
+				_logger.LogWarning(EventIds.Service, "Could not find command. Message: {Message}", args.Message.Content);
 				return;
 			}
 

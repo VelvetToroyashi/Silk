@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 namespace Silk.Core.Types
 {
     /// <summary>
-    ///     Denotes this command is experimental, and may not work properly.
+    /// Denotes this command is experimental, and may not work properly.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class ExperimentalAttribute : Attribute { }

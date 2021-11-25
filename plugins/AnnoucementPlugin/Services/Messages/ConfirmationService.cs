@@ -9,18 +9,15 @@ namespace AnnoucementPlugin.Services
 {
 	public class ConfirmationService : IConfirmationService
 	{
-		private readonly DiscordShardedClient _client;
-		public ConfirmationService(DiscordShardedClient client) => _client = client;
+		private readonly DiscordClient _client;
+		public ConfirmationService(DiscordClient client) => _client = client;
 
 		public async Task<bool> GetConfirmationAsync(ulong userId, ulong guildId, ulong channelId, string prompt)
 		{
 			var confirm = new DiscordButtonComponent(ButtonStyle.Success, new Guid().ToString(), "Yes");
 			var decline = new DiscordButtonComponent(ButtonStyle.Danger, new Guid().ToString(), "No");
-
-			var shard = _client.GetShard(guildId);
-			var interactivity = shard.GetInteractivity();
-
-			var guild = shard.Guilds[guildId];
+			
+			var guild = _client.Guilds[guildId];
 			var message = await guild.Channels[channelId].SendMessageAsync(m => m.WithContent(prompt).AddComponents(confirm, decline));
 
 			var result = await message.WaitForButtonAsync(guild.Members[userId], CancellationToken.None);

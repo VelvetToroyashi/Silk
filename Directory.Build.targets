@@ -2,38 +2,42 @@
     <ItemGroup Label="Common Solution Packages">
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
-        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-00968"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-00968"/>
-        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-00968"/>
-        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-00968"/>
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034"/>
+        <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01038"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
 
         <PackageReference Update="Humanizer" Version="2.11.10" />
         <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
 
-        <PackageReference Update="YumeChan.PluginBase" Version="2.4.2" />
+        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
 
-        <PackageReference Update="FluentAssertions" Version="6.1.0" />
-
-        <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.1"/>
-
+        <PackageReference Update="FluentAssertions" Version="6.2.0" />
+        <PackageReference Update="FluentValidation" Version="10.3.4" />
+        <PackageReference Update="FluentValidation.AspNetCore" Version="10.3.4" />
+        <PackageReference Update="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
+        
+        <PackageReference Update="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
+        
         <PackageReference Update="MediatR" Version="9.0.0"/>
         <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
 
         <PackageReference Update="Unity" Version="5.11.10" />
         <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
         
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7"/>
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10"/>
 
         <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1" />
 
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.9"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.11"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.11"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.11"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.11"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
 
         <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="5.0.0"/>
@@ -47,6 +51,11 @@
         <PackageReference Update="Microsoft.Extensions.Http" Version="5.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+
+        <PackageReference Update="Swashbuckle.AspNetCore" Version="5.6.3" />
+        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.14.0" />
+        <PackageReference Update="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+        <PackageReference Update="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.11" />
 
         <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.10.0" />
         <PackageReference Update="Moq" Version="4.16.1" />

@@ -7,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 using Silk.Core.Types;
 using Silk.Core.Utilities;
@@ -19,8 +19,10 @@ namespace Silk.Core.EventHandlers.MemberAdded
 		private readonly ConfigService _configService;
 
 		private readonly AsyncTimer _timer;
-		public MemberGreetingService(ConfigService configService, ILogger<MemberGreetingService> logger)
+		public MemberGreetingService(DiscordClient client, ConfigService configService, ILogger<MemberGreetingService> logger)
 		{
+			client.GuildMemberAdded += OnMemberAdded;
+			
 			_configService = configService;
 			_timer = new(OnTick, TimeSpan.FromSeconds(1));
 			_timer.Start();
@@ -29,12 +31,13 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
 		public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
 		{
-			GuildConfig? config = await _configService.GetConfigAsync(e.Guild.Id);
-			GuildModConfig? modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
+			GuildConfigEntity? config = await _configService.GetConfigAsync(e.Guild.Id);
+			GuildModConfigEntity? modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
 
-			if (config is null!) // Wasn't cached yet //
+			if (config is null) // Wasn't cached yet //
 				return;
-			// This should be done in a seperate service //
+
+			// This should be done in a separate service //
 			if (modConfig.LogMemberJoins && modConfig.LoggingChannel is not 0)
 				await e.Guild.GetChannel(modConfig.LoggingChannel).SendMessageAsync(GetJoinEmbed(e));
 
@@ -46,7 +49,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 			else await GreetMemberAsync(e.Member, config);
 		}
 
-		private static async Task GreetMemberAsync(DiscordMember member, GuildConfig config)
+		private static async Task GreetMemberAsync(DiscordMember member, GuildConfigEntity config)
 		{
 			bool shouldGreet = config.GreetingOption is not GreetingOption.DoNotGreet;
 			bool hasValidGreetingChannel = config.GreetingChannel is not 0;
@@ -76,7 +79,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
 			for (var i = 0; i < MemberQueue.Count; i++)
 			{
 				DiscordMember member = MemberQueue[i];
-				GuildConfig config = (await _configService.GetConfigAsync(member.Guild.Id));
+				GuildConfigEntity config = (await _configService.GetConfigAsync(member.Guild.Id));
 
 				if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true)
 					continue;

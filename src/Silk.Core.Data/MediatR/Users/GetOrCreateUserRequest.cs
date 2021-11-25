@@ -2,19 +2,19 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users
 {
     /// <summary>
-    ///     Request to get a user from the database, or creates one if it does not exist.
+    /// Request to get a user from the database, or creates one if it does not exist.
     /// </summary>
-    public record GetOrCreateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<User>;
+    public record GetOrCreateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<UserEntity>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetOrCreateUserRequest" />.
+    /// The default handler for <see cref="GetOrCreateUserRequest" />.
     /// </summary>
-    public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, User>
+    public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, UserEntity>
     {
         private readonly GuildContext _db;
         public GetOrCreateUserHandler(GuildContext db)
@@ -22,9 +22,9 @@ namespace Silk.Core.Data.MediatR.Users
             _db = db;
         }
 
-        public async Task<User> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
+        public async Task<UserEntity> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
         {
-            User? user = await _db.Users
+            UserEntity? user = await _db.Users
                 .Include(u => u.Guild)
                 .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId,
                     cancellationToken);

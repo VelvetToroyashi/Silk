@@ -2,19 +2,19 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
     /// <summary>
-    ///     Request for updating a <see cref="Guild" />.
+    /// Request for updating a <see cref="GuildEntity" />.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
     /// <param name="Infraction">The infraction for this update (can pass null as argument if not needed)</param>
-    public record UpdateGuildRequest(ulong GuildId, Infraction? Infraction) : IRequest;
+    public record UpdateGuildRequest(ulong GuildId, InfractionEntity? Infraction) : IRequest;
 
     /// <summary>
-    ///     The default handler for <see cref="UpdateGuildRequest" />
+    /// The default handler for <see cref="UpdateGuildRequest" />
     /// </summary>
     public class UpdateGuildHandler : IRequestHandler<UpdateGuildRequest>
     {
@@ -27,7 +27,7 @@ namespace Silk.Core.Data.MediatR.Guilds
 
         public async Task<Unit> Handle(UpdateGuildRequest request, CancellationToken cancellationToken)
         {
-            Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
+            GuildEntity guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
 
             if (request.Infraction is not null)
             {

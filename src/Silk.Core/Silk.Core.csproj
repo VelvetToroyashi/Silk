@@ -32,19 +32,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+        <PackageReference Include="AsyncEnumerator" />
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
-        <PackageReference Include="Config.Net" Version="4.15.0" />
-        <PackageReference Include="Config.Net.Json" Version="4.15.0" />
+        <PackageReference Include="Config.Net" Version="4.17.0" />
+        <PackageReference Include="Config.Net.Json" Version="4.17.0" />
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
         <PackageReference Include="DSharpPlus.Menus" />
+        <PackageReference Include="DSharpPlus.SlashCommands" />
         <PackageReference Include="DSharpPlus.VoiceNext" />
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="Humanizer" />
-        <PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
         <PackageReference Include="MediatR" />
@@ -67,30 +68,60 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="Microsoft.Extensions.Http" />
         <PackageReference Include="Microsoft.Extensions.Logging" />
+        <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.1" />
         <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Serilog" Version="2.10.1-dev-01366" />
-        <PackageReference Include="Serilog.Expressions" Version="2.0.0" />
+        <PackageReference Include="Serilog.Expressions" Version="3.2.1-dev-00071" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
-        <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
-        <PackageReference Include="SharpYaml" Version="1.6.6" />
-        <PackageReference Include="Svg.Skia" Version="0.5.7.1" />
+        <PackageReference Include="SharpYaml" Version="1.8.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+        <PackageReference Include="Svg.Skia" Version="0.5.8.3" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6" />
         <PackageReference Include="Unity" Version="5.11.10" />
         <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
-        <PackageReference Include="YumeChan.PluginBase" />
+        <PackageReference Include="YumeChan.PluginBase"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj" />
-        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
-        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
+        <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj"/>
+        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj"/>
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
+        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="flags\trans.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pan.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\mlm.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\enby.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\demi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\bi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\ace.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pride.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

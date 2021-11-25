@@ -8,11 +8,12 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using MediatR;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Tags;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
 using Silk.Core.Services.Server;
 using Silk.Core.SlashCommands.Attributes;
+using Silk.Core.SlashCommands.ChoiceProviders;
 using Silk.Core.Types;
 using Silk.Extensions.DSharpPlus;
 
@@ -30,11 +31,11 @@ namespace Silk.Core.SlashCommands.Commands
 				"raw", "list"
 			};
 
-
 			private readonly IMediator _mediator;
 			private readonly TagService _tags;
 			public TagCommandGroup(TagService tags, IMediator mediator)
 			{
+
 				_tags = tags;
 				_mediator = mediator;
 			}
@@ -43,10 +44,13 @@ namespace Silk.Core.SlashCommands.Commands
 			[RequireBot]
 			[RequireGuild]
 			[SlashCommand("delete", "Delete a tag. This can't be undone!")]
-			public async Task Delete(InteractionContext ctx, [Option("tag", "The tag to delete")] string tagName)
+			public async Task Delete(InteractionContext ctx, 
+				[Autocomplete(typeof(TagChoiceProvider))]
+				[Option("tag", "The tag to delete")]
+				string tagName)
 			{
 				await ctx.CreateThinkingResponseAsync();
-				Tag? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
+				TagEntity? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
 
 				if (tag is null)
 				{
@@ -61,7 +65,7 @@ namespace Silk.Core.SlashCommands.Commands
 					return;
 				}
 
-				User? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+				UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
 				bool staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
 
 				if (!staff)
@@ -76,10 +80,13 @@ namespace Silk.Core.SlashCommands.Commands
 
 			[RequireGuild]
 			[SlashCommand("info", "Get info about a tag!")]
-			public async Task Info(InteractionContext ctx, [Option("tag", "The tag you want to get information about.")] string tagName)
+			public async Task Info(InteractionContext ctx, 
+				[Autocomplete(typeof(TagChoiceProvider))]
+				[Option("tag", "The tag you want to get information about.")]
+				string tagName)
 			{
 				await ctx.CreateThinkingResponseAsync();
-				Tag? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
+				TagEntity? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
 
 				if (tag is null)
 				{
@@ -127,6 +134,7 @@ namespace Silk.Core.SlashCommands.Commands
 			[SlashCommand("alias", "Point a tag to another tag!")]
 			public async Task Alias(
 				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))]
 				[Option("tag", "The tag to alias")] string tagname,
 				[Option("alias", "The name of th alias")] string aliasName)
 			{
@@ -134,16 +142,19 @@ namespace Silk.Core.SlashCommands.Commands
 
 				TagCreationResult result = await _tags.AliasTagAsync(tagname, aliasName, ctx.Interaction.GuildId.Value, ctx.User.Id);
 
-				await ctx.EditResponseAsync(new() { Content = result.Reason ?? $"Successfuly aliased tag {Formatter.Bold(aliasName)} to {Formatter.Bold(tagname)}" });
+				await ctx.EditResponseAsync(new() { Content = result.Reason ?? $"Successfully aliased tag {Formatter.Bold(aliasName)} to {Formatter.Bold(tagname)}" });
 			}
 
 			[RequireGuild]
 			[SlashCommand("raw", "View the raw content of a tag!")]
-			public async Task Raw(InteractionContext ctx, [Option("tag", "The tag to view")] string tag)
+			public async Task Raw(InteractionContext ctx, 
+				[Autocomplete(typeof(TagChoiceProvider))]
+				[Option("tag", "The tag to view")]
+				string tag)
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
+				TagEntity? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
 
 				if (dbTag is null)
 				{
@@ -160,7 +171,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
+				IEnumerable<TagEntity> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
 				if (!tags.Any())
 				{
 					await ctx.EditResponseAsync(new() { Content = "This server doesn't have any tags!" });
@@ -195,10 +206,13 @@ namespace Silk.Core.SlashCommands.Commands
 
 			[RequireGuild]
 			[SlashCommand("use", "Display a tag!")]
-			public async Task Use(InteractionContext ctx, [Option("tag-name", "What's the name of the tag you want to use?")] string tagname)
+			public async Task Use(InteractionContext ctx, 
+				[Autocomplete(typeof(TagChoiceProvider))]
+				[Option("tag-name", "What's the name of the tag you want to use?")]
+				string tagname)
 			{
 
-				Tag? dbtag = await _tags.GetTagAsync(tagname, ctx.Interaction.GuildId.Value);
+				TagEntity? dbtag = await _tags.GetTagAsync(tagname, ctx.Interaction.GuildId.Value);
 				if (dbtag is null)
 				{
 					await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() { Content = "Sorry, but I don't see a tag by that name!", IsEphemeral = true });
@@ -215,7 +229,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Tag> tags = await _tags.SearchTagsAsync(tagName, ctx.Interaction.GuildId.Value);
+				IEnumerable<TagEntity> tags = await _tags.SearchTagsAsync(tagName, ctx.Interaction.GuildId.Value);
 
 				if (!tags.Any())
 				{
@@ -240,7 +254,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Tag> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Interaction.GuildId.Value);
+				IEnumerable<TagEntity> tags = await _tags.GetUserTagsAsync(user.Id, ctx.Interaction.GuildId.Value);
 
 				if (!tags.Any())
 				{
@@ -285,7 +299,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				IEnumerable<Tag> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
+				IEnumerable<TagEntity> tags = await _tags.GetGuildTagsAsync(ctx.Interaction.GuildId.Value);
 				if (!tags.Any())
 				{
 					await ctx.EditResponseAsync(new() { Content = "This server doesn't have any tags! You could be the first." });
@@ -312,11 +326,13 @@ namespace Silk.Core.SlashCommands.Commands
 			[RequireBot]
 			[RequireGuild]
 			[SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
-			public async Task Claim(InteractionContext ctx, [Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
+			public async Task Claim(InteractionContext ctx, 
+				[Autocomplete(typeof(TagChoiceProvider))]
+				[Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
 			{
 				await ctx.CreateThinkingResponseAsync();
 
-				Tag? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
+				TagEntity? dbTag = await _tags.GetTagAsync(tag, ctx.Interaction.GuildId.Value);
 
 				if (dbTag is null)
 				{
@@ -326,7 +342,7 @@ namespace Silk.Core.SlashCommands.Commands
 
 				bool exists = ctx.Guild.Members.ContainsKey(dbTag.OwnerId);
 
-				User? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+				UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
 				bool staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
 
 				if (!staff)

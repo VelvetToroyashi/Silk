@@ -1,4 +1,10 @@
-﻿using System;
+﻿// This file is part of Companion Cube project, initially licensed under Apache 2.0.
+//
+// Copyright (C) 2018-2021 Emzi0767
+// 
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

@@ -5,8 +5,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Models;
 using Silk.Extensions;
 
 namespace Silk.Core.Utilities
@@ -17,7 +17,7 @@ namespace Silk.Core.Utilities
 		private static readonly HashSet<ulong> _cachedMembers = new();
 
         /// <summary>
-        ///     Check for a requisite flag from the database, and execute if check passes.
+        /// Check for a requisite flag from the database, and execute if check passes.
         /// </summary>
         /// <param name="requisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
         /// <param name="requireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
@@ -36,7 +36,7 @@ namespace Silk.Core.Utilities
 
 			using var scope = ctx.Services.CreateScope();
 			IMediator mediator = scope.ServiceProvider.Get<IMediator>()!;
-			User? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
+			UserEntity? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 
 			if (member is null) return false;
 			if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);

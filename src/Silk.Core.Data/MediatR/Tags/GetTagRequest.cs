@@ -2,19 +2,19 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.Models;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
 {
     /// <summary>
-    ///     Request to get a <see cref="Tag" />, or null if it doesn't exist.
+    /// Request to get a <see cref="TagEntity" />, or null if it doesn't exist.
     /// </summary>
-    public record GetTagRequest(string Name, ulong GuildId) : IRequest<Tag?>;
+    public record GetTagRequest(string Name, ulong GuildId) : IRequest<TagEntity?>;
 
     /// <summary>
-    ///     The default handler for <see cref="GetTagRequest" />.
+    /// The default handler for <see cref="GetTagRequest" />.
     /// </summary>
-    public class GetTagHandler : IRequestHandler<GetTagRequest, Tag?>
+    public class GetTagHandler : IRequestHandler<GetTagRequest, TagEntity?>
     {
         private readonly GuildContext _db;
 
@@ -23,15 +23,16 @@ namespace Silk.Core.Data.MediatR.Tags
             _db = db;
         }
 
-        public async Task<Tag?> Handle(GetTagRequest request, CancellationToken cancellationToken)
+        public async Task<TagEntity?> Handle(GetTagRequest request, CancellationToken cancellationToken)
         {
-            Tag? tag = await _db.Tags
+            TagEntity? tag = await _db.Tags
                 .Include(t => t.OriginalTag)
                 .Include(t => t.Aliases)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(t =>
                     t.Name.ToLower() == request.Name.ToLower()
                     && t.GuildId == request.GuildId, cancellationToken);
+
             return tag;
         }
     }
