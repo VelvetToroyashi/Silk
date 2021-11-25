@@ -21,13 +21,13 @@ namespace Silk.Dashboard.Components
         public string Style { get; set; } = string.Empty;
 
         /// <summary>
-        /// Rivet for attaching data object to the component
+        /// Tag for attaching data object to the component
         /// </summary>
         /// <remarks>
         /// Inspiration taken from <b>MudBlazor</b><a href="https://github.com/Garderoben/MudBlazor/blob/dev/src/MudBlazor/Base/MudComponentBase.cs"/>
         /// </remarks>
         [Parameter]
-        public object Rivet { get; set; }
+        public object Tag { get; set; }
 
         /// <summary>
         /// Attributes added to component that don't match any of its parameters
@@ -63,7 +63,7 @@ namespace Silk.Dashboard.Components
             {
                 IsBusy = false;
                 if (callStateHasChanged) 
-                    StateHasChanged();
+                    await InvokeAsync(StateHasChanged);
             }
         }
     }
