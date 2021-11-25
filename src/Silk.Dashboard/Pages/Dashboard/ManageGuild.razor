@@ -95,8 +95,8 @@ else
                             </MudText>
                         </MudTooltip>
 
-                        <MudNumericField @bind-Value="_guildConfig.GreetingChannel"
-                                         Variant="Variant.Outlined" HideSpinButtons="true" />
+                        <MudTextField T="ulong" @bind-Value="_guildConfig.GreetingChannel" 
+                                      Variant="Variant.Outlined" HideSpinButtons="true" />
                     </div>
 
                     <div>
@@ -141,8 +141,8 @@ else
                                 </MudText>
                             </MudTooltip>
 
-                            <MudNumericField @bind-Value="_guildConfig.VerificationRole"
-                                             Variant="Variant.Outlined" HideSpinButtons="true" />
+                            <MudTextField T="ulong" @bind-Value="_guildConfig.VerificationRole" 
+                                          Variant="Variant.Outlined" HideSpinButtons="true" />
                         </div>
                     }
                 }
@@ -258,8 +258,8 @@ else
                                 </MudText>
                             </MudTooltip>
 
-                            <MudNumericField @bind-Value="_guildModConfig.MuteRoleId"
-                                             Variant="Variant.Outlined" HideSpinButtons="true" />
+                            <MudTextField T="ulong" @bind-Value="_guildModConfig.MuteRoleId" 
+                                          Variant="Variant.Outlined" HideSpinButtons="true" />
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -269,6 +269,7 @@ else
                                 </MudText>
                             </MudTooltip>
 
+                            @* Todo: Check that inputs to these fields don't cause similar bug behavior *@
                             <MudNumericField @bind-Value="_guildModConfig.MaxUserMentions"
                                              Min="0" Variant="Variant.Outlined" HideSpinButtons="true" />
                         </MudItem>
@@ -280,6 +281,7 @@ else
                                 </MudText>
                             </MudTooltip>
 
+                            @* Todo: Check that inputs to these fields don't cause similar bug behavior *@
                             <MudNumericField @bind-Value="_guildModConfig.MaxRoleMentions"
                                              Min="0" Variant="Variant.Outlined" HideSpinButtons="true" />
                         </MudItem>
@@ -291,8 +293,10 @@ else
                                 </MudText>
                             </MudTooltip>
 
-                            <MudNumericField @bind-Value="_guildModConfig.LoggingChannel"
-                                             Variant="Variant.Outlined" HideSpinButtons="true" />
+                            @* Todo: Fix Numeric field bugginess with large ulong value *@
+                            @* Fix: Use MudTextField T="ulong" *@
+                            <MudTextField T="ulong" @bind-Value="_guildModConfig.LoggingChannel"
+                                          Variant="Variant.Outlined" HideSpinButtons="true" />
                         </MudItem>
                     </MudGrid>
                 </div>

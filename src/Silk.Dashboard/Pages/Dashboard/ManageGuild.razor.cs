@@ -52,6 +52,7 @@ namespace Silk.Dashboard.Pages.Dashboard
 
         private static string LabelFor(string @string) 
             => @string.Humanize(LetterCasing.Title);
+
         private static bool PanelIdMatches(MudTabPanel panel, string panelId) 
             => string.Equals((string)panel.ID, panelId, StringComparison.OrdinalIgnoreCase);
 
