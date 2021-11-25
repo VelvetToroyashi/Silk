@@ -513,6 +513,7 @@ namespace RoleMenuPlugin
 				if (res.TimedOut || res.Result.Id == "rm-quit")
 				{
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Cancelled."));
+					return;
 				}
 			}
 
