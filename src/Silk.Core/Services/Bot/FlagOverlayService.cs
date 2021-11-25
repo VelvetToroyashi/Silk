@@ -70,11 +70,11 @@ namespace Silk.Core.Services.Bot
 		/// <returns>A result type that defines whether the operation succeeded, why it did not succeed, and a stream containing the content of the generated image.</returns>
 		public async Task<FlagResult> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
 		{
-			OverlayGaurd.ValidIntensity(intensity);
+			OverlayGuard.ValidIntensity(intensity);
 
-			OverlayGaurd.ValidFlagOverlay(overlay);
+			OverlayGuard.ValidFlagOverlay(overlay);
 
-			OverlayGaurd.ValidImageUrl(imageUrl, out Uri? imageUri);
+			OverlayGuard.ValidImageUrl(imageUrl, out Uri? imageUri);
 
 			try
 			{
@@ -103,7 +103,7 @@ namespace Silk.Core.Services.Bot
 			return new FlagResult(true, FlagResultType.Succeeded, overlayImage);
 		}
 
-		private async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
+		private static async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
 		{
 			var overlaySelection = overlay switch
 			{
@@ -151,7 +151,7 @@ namespace Silk.Core.Services.Bot
 
 		private async Task<MemoryStream> GetImageAsync(Uri imageUri) => new(await _httpClient.GetByteArrayAsync(imageUri));
 
-		private static class OverlayGaurd
+		private static class OverlayGuard
 		{
 			public static void ValidImageUrl(string imageUrl, out Uri? uri)
 			{
