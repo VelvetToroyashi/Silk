@@ -29,3 +29,55 @@ html, body {
     right: 0.75rem;
     top: 0.5rem;
 }
+
+/* Customize Blazor Disconnect/Reconnect Modal */
+#components-reconnect-modal {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    z-index: 1000;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.92);
+    text-align: center;
+    font-weight: bold;
+}
+
+#components-reconnect-modal.components-reconnect-hide {
+    display: none;
+}
+
+#blazorReconnect {
+    display: none;
+}
+
+#components-reconnect-modal.components-reconnect-show {
+    display: block;
+}
+
+#components-reconnect-modal.components-reconnect-show #blazorReconnect {
+    display: block;
+}
+
+#blazorFailedOrRejected {
+    display: none;
+}
+
+#components-reconnect-modal.components-reconnect-failed {
+    display: block;
+}
+
+#components-reconnect-modal.components-reconnect-failed #blazorFailedOrRejected {
+    display: block;
+}
+
+#components-reconnect-modal.components-reconnect-rejected {
+    display: block;
+}
+
+#components-reconnect-modal.components-reconnect-rejected #blazorFailedOrRejected {
+    display: block;
+}
+/* End - Customize Blazor Disconnect/Reconnect Modal */

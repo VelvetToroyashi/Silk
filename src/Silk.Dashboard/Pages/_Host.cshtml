@@ -1,9 +1,13 @@
 ﻿@page "/"
 @attribute [ResponseCache(NoStore = true)]
+
+@namespace Silk.Dashboard.Pages
+
 @using Microsoft.AspNetCore.Authentication
 @using Silk.Dashboard.Models
-@namespace Silk.Dashboard.Pages
+
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     Layout = null;
 }
@@ -11,12 +15,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!-- EMBED STUFF START -->
     <meta property="og:title" content="Silk!">
-    <meta property="og:description" content="Silk! is the Discord bot for all your needs!" />
+    <meta property="og:description" content="Silk! is the Discord bot for all your needs!"/>
     <meta property="og:url" content="https://silk.velvetthepanda.dev">
     <meta property="og:image" content="https://files.velvetthepanda.dev/silk.png">
     <meta property="og:image:width" content="148">
@@ -25,28 +29,28 @@
     <!-- EMBED STUFF END -->
 
     <title>Silk Dashboard</title>
-    <base href="~/" />
+    <base href="~/"/>
 
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-    
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="Silk.Dashboard.styles.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet"/>
+
+    <link href="css/site.css" rel="stylesheet"/>
+    <link href="Silk.Dashboard.styles.css" rel="stylesheet"/>
 </head>
 <body>
 
-    @{
-        var tokenExpiration = DiscordOAuthTokenResponse.GetAccessTokenExpiration(await HttpContext.GetTokenAsync("expires_at"));
-        var appState = new AppState
-        {
-            TokenResponse = new(
-                await HttpContext.GetTokenAsync("access_token"),
-                await HttpContext.GetTokenAsync("refresh_token"),
-                tokenExpiration)
-        };
-    }
+@{
+    var tokenExpiration = DiscordOAuthTokenResponse.GetAccessTokenExpiration(await HttpContext.GetTokenAsync("expires_at"));
+    var appState = new AppState
+    {
+        TokenResponse = new(
+            await HttpContext.GetTokenAsync("access_token"),
+            await HttpContext.GetTokenAsync("refresh_token"),
+            tokenExpiration)
+    };
+}
 
-<component type="@typeof(App)" render-mode="Server" param-InitialState="@appState" />
+<component type="@typeof(App)" render-mode="Server" param-InitialState="@appState"/>
 
 <div id="blazor-error-ui">
     <environment include="Staging,Production">
@@ -59,7 +63,28 @@
     <a class="dismiss">x</a>
 </div>
 
-<script src="_framework/blazor.server.js"></script>
+<div id="components-reconnect-modal">
+    <div id="blazorReconnect" style="color: black">
+        Attempting to reconnect to webserver ...
+    </div>
+
+    <div id="blazorFailedOrRejected" style="color: black">
+        Could not reconnect to webserver
+        <p onclick="location.reload()" 
+           style="text-decoration: underline;color: blue;cursor: pointer">
+            Reload the page
+        </p>
+    </div>
+</div>
+
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+@* Blazor *@
+<script src="_framework/blazor.server.js" autostart="false"></script>
+
+@* Blazor options *@
+<script>
+    Blazor.start({ reconnectionOptions: { maxRetries: 4, retryIntervalMilliseconds: 3000 } });
+</script>
 </body>
 </html>
