@@ -43,7 +43,7 @@ Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database sto
       "Persistence": {
          "Host": "localhost",
          "Port": "5432",
-         "Database": "",
+         "Database": "silk",
          "Username": "postgres",
          "Password": ""
       }
