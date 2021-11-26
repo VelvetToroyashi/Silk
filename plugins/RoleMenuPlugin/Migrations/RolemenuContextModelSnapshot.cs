@@ -7,7 +7,7 @@ using RoleMenuPlugin.Database;
 
 namespace RoleMenuPlugin.Migrations
 {
-    [DbContext(typeof(RolemenuContext))]
+    [DbContext(typeof(RoleMenuContext))]
     partial class RolemenuContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

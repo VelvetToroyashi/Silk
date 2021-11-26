@@ -8,13 +8,12 @@ namespace RoleMenuPlugin
 {
 	public sealed class RoleMenuPlugin : Plugin
 	{
-		public override string DisplayName => "Role-Menu Plugin";
+		private readonly DiscordClient _client;
+		private readonly RoleMenuContext _db;
 
 		private readonly RoleMenuRoleService _roleMenu;
-		private readonly DiscordClient _client;
-		private readonly RolemenuContext _db;
 
-		public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordClient client, RolemenuContext db)
+		public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordClient client, RoleMenuContext db)
 		{
 			_roleMenu = roleMenu;
 			_client = client;
@@ -22,13 +21,14 @@ namespace RoleMenuPlugin
 
 			Version = this.GetType().Assembly.GetName().Version!.ToString(3);
 		}
+		public override string DisplayName => "Role-Menu Plugin";
 
 		public override async Task LoadAsync()
 		{
 			await base.LoadAsync(); // Simply sets Loaded to true //
-		
+
 			await _db.Database.MigrateAsync();
-			
+
 			_client.ComponentInteractionCreated += _roleMenu.Handle;
 		}
 

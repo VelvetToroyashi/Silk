@@ -16,8 +16,8 @@ namespace RoleMenuPlugin.Database.MediatR
 
 		public sealed class Handler : IRequestHandler<Request, RoleMenuModel>
 		{
-			private readonly RolemenuContext _db;
-			public Handler(RolemenuContext db) => _db = db;
+			private readonly RoleMenuContext _db;
+			public Handler(RoleMenuContext db) => _db = db;
 
 			public async Task<RoleMenuModel> Handle(Request request, CancellationToken cancellationToken)
 			{

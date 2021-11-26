@@ -11,7 +11,7 @@ namespace RoleMenuPlugin
 		public override IServiceCollection ConfigureServices(IServiceCollection services)
 			=> services
 				.AddMediatR(typeof(DependencyHandler))
-				.AddDbContext<RolemenuContext>((provider, builder) =>
+				.AddDbContext<RoleMenuContext>((provider, builder) =>
 				{
 					var applyDb = provider
 						.GetService<IDatabaseProvider<RoleMenuPlugin>>()!

@@ -426,7 +426,6 @@ namespace RoleMenuPlugin
 				             (erroredResponsesBuilder.Length is 0 ? "" : $"\n\nThere were some issues with some of the roles, and they will not be added.\n{erroredResponsesBuilder}")));
 		}
 
-
 		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionModel> options)
 		{
 			var sopts = options.Select((x, i) =>
@@ -791,6 +790,10 @@ namespace RoleMenuPlugin
 
 			return new(false, input.Result);
 		}
+
+
+		[Command("edit")]
+		public async Task EditMenuAsync(CommandContext ctx, DiscordChannel? channel = null) { }
 
 		private void ResetToMenu(ref DiscordMessage message)
 		{

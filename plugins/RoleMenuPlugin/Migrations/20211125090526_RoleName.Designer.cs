@@ -8,7 +8,7 @@ using RoleMenuPlugin.Database;
 
 namespace RoleMenuPlugin.Migrations
 {
-    [DbContext(typeof(RolemenuContext))]
+    [DbContext(typeof(RoleMenuContext))]
     [Migration("20211125090526_RoleName")]
     partial class RoleName
     {
