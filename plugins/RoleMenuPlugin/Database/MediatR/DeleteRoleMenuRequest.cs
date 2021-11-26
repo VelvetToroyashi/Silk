@@ -6,7 +6,7 @@ using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-	public static class DeleteRoleMenuAsync
+	public static class DeleteRoleMenuRequest
 	{
 		public record Request(RoleMenuModel RoleMenu) : IRequest<Result>;
 
