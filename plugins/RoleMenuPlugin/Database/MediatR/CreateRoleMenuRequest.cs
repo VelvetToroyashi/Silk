@@ -1,20 +1,22 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
 	public static class CreateRoleMenu
 	{
-		public sealed record Request(RoleMenuModel Menu) : IRequest;
+		public sealed record Request(RoleMenuModel Menu) : IRequest<Result>;
 
-		public sealed class Handler : IRequestHandler<Request>
+		public sealed class Handler : IRequestHandler<Request, Result>
 		{
-			private readonly RolemenuContext _db;
-			public Handler(RolemenuContext db) => _db = db;
+			private readonly RoleMenuContext _db;
+			public Handler(RoleMenuContext db) => _db = db;
 
-			public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
+			public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
 			{
 				var rm = new RoleMenuModel()
 				{
@@ -31,10 +33,17 @@ namespace RoleMenuPlugin.Database.MediatR
 						.ToList()
 				};
 
-				_db.RoleMenus.Add(rm);
-				await _db.SaveChangesAsync(cancellationToken);
+				try
+				{
+					_db.RoleMenus.Add(rm);
+					await _db.SaveChangesAsync(cancellationToken);
 
-				return Unit.Value;
+					return Result.FromSuccess();
+				}
+				catch (Exception e)
+				{
+					return Result.FromError(new ExceptionError(e, "A role menu with the defined message ID was already present in the database."));
+				}
 			}
 		}
 	}
