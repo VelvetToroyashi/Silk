@@ -20,7 +20,10 @@ namespace RoleMenuPlugin.Database.MediatR
 
 			public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken token)
 			{
-				var results = await _db.RoleMenus.Where(x => x.GuildId == request.GuildId).ToListAsync(token);
+				var results = await _db.RoleMenus
+					.Include(c => c.Options)
+					.Where(x => x.GuildId == request.GuildId)
+					.ToListAsync(token);
 
 				return results.Any() ?
 					Result<IEnumerable<RoleMenuModel>>.FromSuccess(results) :
