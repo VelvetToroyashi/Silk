@@ -9,10 +9,12 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using FuzzySharp;
 using MediatR;
+using Remora.Results;
 using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Database.MediatR;
 
@@ -33,13 +35,44 @@ namespace RoleMenuPlugin
 		private static readonly DiscordButtonComponent _quitButton = new(ButtonStyle.Danger, "rm-quit", "Quit");
 		private readonly DiscordButtonComponent _addFullButton = new(ButtonStyle.Primary, "rm-add-full", "Add option (full)");
 		private readonly DiscordButtonComponent _addRoleOnlyButton = new(ButtonStyle.Secondary, "rm-add", "Add option (role only)");
+		private readonly DiscordClient _client;
 
 		private readonly DiscordButtonComponent _editButton = new(ButtonStyle.Primary, "rm-edit", "Edit the current options", true);
 		private readonly DiscordButtonComponent _finishButton = new(ButtonStyle.Success, "rm-finish", "Finish", true);
 
 		private readonly DiscordButtonComponent _htuButton = new(ButtonStyle.Primary, "rm-htu", "How do I use this thing???");
+
 		private readonly IMediator _mediator;
-		public RoleMenuCommand(IMediator mediator) => _mediator = mediator;
+
+		private readonly DiscordButtonComponent _v1ExplainationButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-explain-V1", "Why can't I edit my menu?");
+
+		private readonly string V1CutoffDate = Formatter.Timestamp(new DateTime(2021, 12, 10), TimestampFormat.ShortDate);
+
+		public RoleMenuCommand(IMediator mediator, DiscordClient client)
+		{
+			_mediator = mediator;
+			_client = client;
+
+			_client.ComponentInteractionCreated += ExplainV1Async;
+		}
+
+		private async Task ExplainV1Async(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+		{
+			if (e.Id == "rm-explain-V1")
+			{
+				await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+
+
+				await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+					.WithContent("Question: \"Why can't I edit my role menu?\"\n\n" +
+					             "Answer: " +
+					             $"Unfortunately, V1 role menus (anything created prior to {V1CutoffDate}) " +
+					             "do not store information about the channel they were created for.\n" +
+					             "If you wish to edit a V1 role menu, it's advised that you recreate it. Our role menu creator has been greatly improved, too!")
+					.AsEphemeral(true));
+			}
+		}
 
 		[Command]
 		[Description("Create a new role-menu. \n\n" +
@@ -593,7 +626,7 @@ namespace RoleMenuPlugin
 				                                                                                                  "Descriptions will be truncated at 100 characters.\n" +
 				                                                                                                  "Type `cancel` to cancel adding this role. Type `skip` to skip adding a description."));
 
-				Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, tipMessage.Id);
+				InputResult<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, tipMessage.Id);
 
 				if (input.Cancelled)
 					return description;
@@ -607,7 +640,7 @@ namespace RoleMenuPlugin
 			}
 		}
 
-		private static async Task<Result<DiscordEmoji?>> GetEmojiAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage interactionMessage)
+		private static async Task<InputResult<DiscordEmoji?>> GetEmojiAsync(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, DiscordMessage interactionMessage)
 		{
 			DiscordEmoji? emoji = null;
 			while (true)
@@ -617,10 +650,10 @@ namespace RoleMenuPlugin
 					             "If you don't see the emoji in the list, you may need to type it in the exact format it appears in the server (e.g. `:emoji:`).\n" +
 					             "Type `cancel` to cancel adding this role. Type `skip` to skip adding an emoji."));
 
-				Result<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, interactionMessage.Id);
+				InputResult<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, interactionMessage.Id);
 
 				if (input.Cancelled)
-					return new Result<DiscordEmoji?>(true, null);
+					return new InputResult<DiscordEmoji?>(true, null);
 
 				if (input.Value is null)
 					return new(false, null);
@@ -763,7 +796,7 @@ namespace RoleMenuPlugin
 			return true;
 		}
 
-		private static async Task<Result<DiscordMessage?>> GetInputAsync(InteractivityExtension it, DiscordInteraction interaction, ulong message)
+		private static async Task<InputResult<DiscordMessage?>> GetInputAsync(InteractivityExtension it, DiscordInteraction interaction, ulong message)
 		{
 			var input = await it.WaitForMessageAsync(m => m.Author == interaction.User, TimeSpan.FromMinutes(14));
 
@@ -793,14 +826,14 @@ namespace RoleMenuPlugin
 
 
 		[Command("edit")]
+		[Description("Edits a role menu. To delete a role menu, use `rolemenu delete`")]
 		public async Task EditMenuAsync(CommandContext ctx, DiscordChannel? channel = null)
 		{
-			Remora.Results.Result<IEnumerable<RoleMenuModel>> options;
+			Result<IEnumerable<RoleMenuModel>> options;
 
-			if (channel is not null)
-				options = await _mediator.Send(new GetChannelRoleMenusRequest.Request(channel.Id));
-			else options = await _mediator.Send(new GetGuildRoleMenusRequest.Request(ctx.Guild.Id));
-
+			options = channel is not null
+				? await _mediator.Send(new GetChannelRoleMenusRequest.Request(channel.Id))
+				: await _mediator.Send(new GetGuildRoleMenusRequest.Request(ctx.Guild.Id));
 
 			if (!options.IsSuccess)
 			{
@@ -808,7 +841,50 @@ namespace RoleMenuPlugin
 				return;
 			}
 
+			if (!options.Entity.Any(r => r.ChannelId is not 0))
+			{
+				await ctx.RespondAsync(m => m.WithContent("There are no role menus to edit.").AddComponents(_v1ExplainationButton));
+				return;
+			}
 
+			if (options.Entity.Count() > 1)
+			{
+				var interactivity = ctx.Client.GetInteractivity();
+
+				// Ask the user which menu they want to edit
+				var selectOptions = options.Entity.Where(c => c.ChannelId is not 0)
+					.Select(s =>
+					{
+						DiscordChannel? chn = ctx.Guild.GetChannel(s.ChannelId);
+
+						var option =
+							new DiscordSelectComponentOption("Role Menu in #" + chn is null!
+									? "deleted channel"
+									: chn?.Name,
+								s.MessageId.ToString(),
+								$"Message: {s.MessageId} | {options.Entity.Count()} options");
+
+						return option;
+					});
+
+				var msg = await ctx.RespondAsync(m => m.WithContent("There are multiple role menus that can be edited. Which one would you like?")
+					.AddComponents(new DiscordSelectComponent("rm-edit-select", "Select an option", selectOptions))
+					.AddComponents(_v1ExplainationButton));
+
+				var res = await interactivity.WaitForSelectAsync(msg, ctx.User, "rm-edit-select", TimeSpan.FromMinutes(5));
+
+				if (res.TimedOut)
+				{
+					await msg.ModifyAsync(m => m.Content = "Timed out.");
+					return;
+				}
+
+				var selected = options.Entity.FirstOrDefault(x => x.MessageId == ulong.Parse(res.Result.Values[0]));
+
+				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+				await Edit(ctx, res.Result.Interaction, interactivity, selected.Options);
+			}
 		}
 
 		private void ResetToMenu(ref DiscordMessage message)
@@ -821,6 +897,6 @@ namespace RoleMenuPlugin
 				.GetResult();
 		}
 
-		private record Result<T>(bool Cancelled, T? Value);
+		private record InputResult<T>(bool Cancelled, T? Value);
 	}
 }

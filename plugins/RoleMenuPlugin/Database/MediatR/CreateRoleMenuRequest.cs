@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -18,20 +17,7 @@ namespace RoleMenuPlugin.Database.MediatR
 
 			public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var rm = new RoleMenuModel()
-				{
-					MessageId = request.Menu.MessageId,
-					GuildId = request.Menu.GuildId,
-					Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
-						{
-							RoleId = o.RoleId,
-							GuildId = o.GuildId,
-							Description = o.Description,
-							ComponentId = o.ComponentId,
-							EmojiName = o.EmojiName
-						})
-						.ToList()
-				};
+				var rm = request.Menu;
 
 				try
 				{
