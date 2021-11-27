@@ -14,7 +14,7 @@ namespace RoleMenuPlugin.Database.MediatR
 		/// <param name="MessageId">The Id of the message to grab.</param>
 		public sealed record Request(ulong MessageId) : IRequest<RoleMenuModel>;
 
-		public sealed class Handler : IRequestHandler<Request, RoleMenuModel>
+		internal sealed class Handler : IRequestHandler<Request, RoleMenuModel>
 		{
 			private readonly RoleMenuContext _db;
 			public Handler(RoleMenuContext db) => _db = db;

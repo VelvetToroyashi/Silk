@@ -4,21 +4,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-	public static class GetGuildRoleMenus
+	public static class GetGuildRoleMenusRequest
 	{
-		public record Request(ulong GuildId) : IRequest<IEnumerable<RoleMenuModel>>;
+		public record Request(ulong GuildId) : IRequest<Result<IEnumerable<RoleMenuModel>>>;
 
-		internal class Handler : IRequestHandler<Request, IEnumerable<RoleMenuModel>>
+		internal class Handler : IRequestHandler<Request, Result<IEnumerable<RoleMenuModel>>>
 		{
 			private readonly RoleMenuContext _db;
 
 			public Handler(RoleMenuContext db) => _db = db;
 
-			public async Task<IEnumerable<RoleMenuModel>> Handle(Request request, CancellationToken token)
-				=> await _db.RoleMenus.Where(x => x.GuildId == request.GuildId).ToListAsync(token);
+			public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken token)
+			{
+				var results = await _db.RoleMenus.Where(x => x.GuildId == request.GuildId).ToListAsync(token);
+
+				return results.Any() ?
+					Result<IEnumerable<RoleMenuModel>>.FromSuccess(results) :
+					Result<IEnumerable<RoleMenuModel>>.FromError(new NotFoundError("No role menus have been registered for the guild."));
+			}
 		}
 	}
 }

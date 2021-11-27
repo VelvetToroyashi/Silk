@@ -793,7 +793,23 @@ namespace RoleMenuPlugin
 
 
 		[Command("edit")]
-		public async Task EditMenuAsync(CommandContext ctx, DiscordChannel? channel = null) { }
+		public async Task EditMenuAsync(CommandContext ctx, DiscordChannel? channel = null)
+		{
+			Remora.Results.Result<IEnumerable<RoleMenuModel>> options;
+
+			if (channel is not null)
+				options = await _mediator.Send(new GetChannelRoleMenusRequest.Request(channel.Id));
+			else options = await _mediator.Send(new GetGuildRoleMenusRequest.Request(ctx.Guild.Id));
+
+
+			if (!options.IsSuccess)
+			{
+				await ctx.RespondAsync(options.Error.Message);
+				return;
+			}
+
+
+		}
 
 		private void ResetToMenu(ref DiscordMessage message)
 		{
