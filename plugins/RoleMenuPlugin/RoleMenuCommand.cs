@@ -917,7 +917,7 @@ namespace RoleMenuPlugin
 
 					if (res.Result.Id == "rm-edit-quit")
 					{
-						await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Cancelled."));
+						await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Done. Any changes you've made will be updated."));
 						break;
 					}
 
@@ -935,7 +935,17 @@ namespace RoleMenuPlugin
 					await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(editOrAdd.Content).AddComponents(add, edit, quit));
 				}
 
+				var roleMenuChannel = ctx.Guild.GetChannel(selected.ChannelId);
+
+				if (roleMenuChannel is null)
+					throw new InvalidOperationException("Role menu channel is null");
+
+				var roleMenuMessage = await roleMenuChannel.GetMessageAsync(selected.MessageId);
+
+				await roleMenuMessage.ModifyAsync(m => m.Content = $"**Role Menu**\nAvailable Roles:\n:{string.Join('\n', selected.Options.Select(r => $"<@&{r.RoleId}>"))}");
+
 				await _mediator.Send(new UpdateRoleMenuRequest.Request(selected));
+
 			}
 		}
 
