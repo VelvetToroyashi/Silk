@@ -469,6 +469,7 @@ namespace RoleMenuPlugin
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
+			Wait:
 			var t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
 			var t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(14));
 
@@ -539,7 +540,14 @@ namespace RoleMenuPlugin
 				if (res.Result.Id == "rm-delete")
 				{
 					await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Done. That option is no longer a part of the menu. \nThis action cannot be undone."));
-					return;
+					await Task.Delay(MessageReadDelayMs);
+
+					selectionMessage = await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder()
+						.WithContent("\u200b")
+						.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
+						.AddComponents(_quitButton));
+
+					goto Wait;
 				}
 
 				if (res.TimedOut || res.Result.Id == "rm-quit")
@@ -694,7 +702,7 @@ namespace RoleMenuPlugin
 
 				if (input.Value!.MentionedRoles.Count is not 0)
 				{
-					var r = input.Value.MentionedRoles[0];
+					var r = role = input.Value.MentionedRoles[0];
 
 					// Ensure the role is not above the user's highest role
 					if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage))
@@ -879,11 +887,55 @@ namespace RoleMenuPlugin
 					return;
 				}
 
-				var selected = options.Entity.FirstOrDefault(x => x.MessageId == ulong.Parse(res.Result.Values[0]));
+				var interaction = res.Result.Interaction;
+				var selected = options.Entity.First(x => x.MessageId == ulong.Parse(res.Result.Values[0]));
 
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-				await Edit(ctx, res.Result.Interaction, interactivity, selected.Options);
+				var add = new DiscordButtonComponent(ButtonStyle.Primary, "rm-edit-add", "Add", selected.Options.Count == 25);
+				var edit = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-edit-edit", "Edit");
+				var quit = new DiscordButtonComponent(ButtonStyle.Danger, "rm-edit-quit", "Quit");
+
+
+				var editOrAdd = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+					.WithContent($"Please select an option. This menu expires {Formatter.Timestamp(DateTimeOffset.UtcNow.AddMinutes(5))}.")
+					.AddComponents(add, edit, quit));
+
+				while (true)
+				{
+					res = await editOrAdd.WaitForButtonAsync(TimeSpan.FromMinutes(5));
+
+
+					if (res.TimedOut)
+					{
+						await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("This menu has expired."));
+						break;
+					}
+
+					interaction = res.Result.Interaction;
+					await interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+					if (res.Result.Id == "rm-edit-quit")
+					{
+						await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Cancelled."));
+						break;
+					}
+
+					if (res.Result.Id == "rm-edit-add")
+					{
+						await AddFull(ctx, res.Result.Interaction, selected.Options, interactivity);
+					}
+					else
+					{
+						await Edit(ctx, res.Result.Interaction, interactivity, selected.Options);
+					}
+
+					_ = selected.Options.Count == 25 ? add.Disable() : add.Enable();
+
+					await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(editOrAdd.Content).AddComponents(add, edit, quit));
+				}
+
+				await _mediator.Send(new UpdateRoleMenuRequest.Request(selected));
 			}
 		}
 
