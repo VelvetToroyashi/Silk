@@ -26,7 +26,7 @@ namespace RoleMenuPlugin
 	[Group("rolemenu")]
 	[Aliases("role-menu", "rm")]
 	[Description("Role menu related commands.")]
-	[RequirePermissions(Permissions.ManageRoles)]
+	//[RequirePermissions(Permissions.ManageRoles)]
 	[ModuleLifespan(ModuleLifespan.Transient)]
 	public sealed class RoleMenuCommand : BaseCommandModule
 	{
@@ -947,6 +947,37 @@ namespace RoleMenuPlugin
 				await _mediator.Send(new UpdateRoleMenuRequest.Request(selected));
 
 			}
+		}
+
+		[Command]
+		[Description("Deletes a role menu. Provide a link to the menu to delete.")]
+		[Aliases("del")]
+		public async Task Delete(CommandContext ctx, DiscordMessage messageLink)
+		{
+			if (messageLink.Author != ctx.Guild.CurrentMember)
+			{
+				await ctx.RespondAsync("That message isn't even mine!");
+				return;
+			}
+
+			var options = await _mediator.Send(new GetChannelRoleMenusRequest.Request(ctx.Channel.Id));
+
+			if (!options.Entity.Any())
+			{
+				await ctx.RespondAsync("There are no role menus in that channel.");
+				return;
+			}
+
+			var selected = options.Entity.FirstOrDefault(x => x.MessageId == messageLink.Id);
+
+			if (selected is null)
+			{
+				await ctx.RespondAsync("That message isn't a role menu.");
+				return;
+			}
+
+			await ctx.RespondAsync("This action cannot be undone!");
+			await _mediator.Send(new DeleteRoleMenuRequest.Request(selected));
 		}
 
 		private void ResetToMenu(ref DiscordMessage message)
