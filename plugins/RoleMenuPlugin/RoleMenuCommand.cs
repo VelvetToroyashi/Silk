@@ -976,7 +976,16 @@ namespace RoleMenuPlugin
 				return;
 			}
 
-			await ctx.RespondAsync("This action cannot be undone!");
+			try
+			{
+				await messageLink.DeleteAsync("Role Menu deletion requested.");
+			}
+			catch
+			{
+				// ignored
+			}
+
+			await ctx.RespondAsync("Poof goes the role-menu! This action cannot be undone!");
 			await _mediator.Send(new DeleteRoleMenuRequest.Request(selected));
 		}
 
