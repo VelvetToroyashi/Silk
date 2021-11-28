@@ -7,7 +7,6 @@ using FuzzySharp;
 using Microsoft.Extensions.Caching.Memory;
 using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
-using Unity;
 
 namespace Silk.Core.SlashCommands.ChoiceProviders
 {
@@ -19,8 +18,8 @@ namespace Silk.Core.SlashCommands.ChoiceProviders
 
 		public TagChoiceProvider()
 		{
-			_tags = Startup.Container.Resolve<TagService>();
-			_cache = Startup.Container.Resolve<IMemoryCache>();
+			//_tags = Startup.Container.Resolve<TagService>();
+			//_cache = Startup.Container.Resolve<IMemoryCache>();
 
 		}
 
