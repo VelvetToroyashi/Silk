@@ -13,17 +13,17 @@ namespace Silk.Core.SlashCommands.ChoiceProviders
 {
 	public class TagChoiceProvider : IAutocompleteProvider
 	{
-		private readonly TagService _tags;
 
 		private readonly IMemoryCache _cache;
-		
+		private readonly TagService _tags;
+
 		public TagChoiceProvider()
 		{
 			_tags = Startup.Container.Resolve<TagService>();
 			_cache = Startup.Container.Resolve<IMemoryCache>();
 
 		}
-		
+
 		public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
 		{
 			// This is possibly inefficient. //
@@ -32,10 +32,10 @@ namespace Silk.Core.SlashCommands.ChoiceProviders
 			var query = ctx.OptionValue.ToString()!;
 
 			var results = Process.ExtractSorted(new() { Name = query }, tags, s => s.Name).Where(r => r.Score > 40);
-			
+
 			return results.Select(r => new DiscordAutoCompleteChoice($"{r.Value.Name} ({r.Score}% match)", r.Value.Name));
 		}
-		
+
 		private async Task<TagEntity[]> GetTagsAsync(AutocompleteContext ctx)
 		{
 			TagEntity[] tags;

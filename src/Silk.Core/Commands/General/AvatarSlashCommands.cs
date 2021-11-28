@@ -74,7 +74,7 @@ namespace Silk.Core.SlashCommands.Commands
 			{
 				return ctx.EditResponseAsync(new
 						DiscordWebhookBuilder()
-						.AddEmbed(new DiscordEmbedBuilder()
+					.AddEmbed(new DiscordEmbedBuilder()
 						.WithColor(DiscordColor.CornflowerBlue)
 						.WithTitle($"{user.Username}'s Guild-Specific Avatar:")
 						.WithAuthor(((DiscordMember)user).DisplayName, iconUrl: user.AvatarUrl)

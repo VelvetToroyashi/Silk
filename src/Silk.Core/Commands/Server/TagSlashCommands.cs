@@ -24,14 +24,14 @@ namespace Silk.Core.SlashCommands.Commands
 		[SlashCommandGroup("tag", "Tag related commands!")]
 		public class TagCommandGroup : ApplicationCommandModule
 		{
+
+			private readonly IMediator _mediator;
 			private readonly string[] _reservedWords =
 			{
 				"create", "update", "delete",
 				"alias", "info", "claim",
 				"raw", "list"
 			};
-
-			private readonly IMediator _mediator;
 			private readonly TagService _tags;
 			public TagCommandGroup(TagService tags, IMediator mediator)
 			{
@@ -44,10 +44,9 @@ namespace Silk.Core.SlashCommands.Commands
 			[RequireBot]
 			[RequireGuild]
 			[SlashCommand("delete", "Delete a tag. This can't be undone!")]
-			public async Task Delete(InteractionContext ctx, 
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag", "The tag to delete")]
-				string tagName)
+			public async Task Delete(
+				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag", "The tag to delete")] string tagName)
 			{
 				await ctx.CreateThinkingResponseAsync();
 				TagEntity? tag = await _tags.GetTagAsync(tagName, ctx.Interaction.GuildId.Value);
@@ -80,9 +79,9 @@ namespace Silk.Core.SlashCommands.Commands
 
 			[RequireGuild]
 			[SlashCommand("info", "Get info about a tag!")]
-			public async Task Info(InteractionContext ctx, 
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag", "The tag you want to get information about.")]
+			public async Task Info(
+				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag", "The tag you want to get information about.")]
 				string tagName)
 			{
 				await ctx.CreateThinkingResponseAsync();
@@ -134,8 +133,7 @@ namespace Silk.Core.SlashCommands.Commands
 			[SlashCommand("alias", "Point a tag to another tag!")]
 			public async Task Alias(
 				InteractionContext ctx,
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag", "The tag to alias")] string tagname,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag", "The tag to alias")] string tagname,
 				[Option("alias", "The name of th alias")] string aliasName)
 			{
 				await ctx.CreateThinkingResponseAsync();
@@ -147,10 +145,9 @@ namespace Silk.Core.SlashCommands.Commands
 
 			[RequireGuild]
 			[SlashCommand("raw", "View the raw content of a tag!")]
-			public async Task Raw(InteractionContext ctx, 
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag", "The tag to view")]
-				string tag)
+			public async Task Raw(
+				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag", "The tag to view")] string tag)
 			{
 				await ctx.CreateThinkingResponseAsync();
 
@@ -206,9 +203,9 @@ namespace Silk.Core.SlashCommands.Commands
 
 			[RequireGuild]
 			[SlashCommand("use", "Display a tag!")]
-			public async Task Use(InteractionContext ctx, 
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag-name", "What's the name of the tag you want to use?")]
+			public async Task Use(
+				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag-name", "What's the name of the tag you want to use?")]
 				string tagname)
 			{
 
@@ -326,9 +323,10 @@ namespace Silk.Core.SlashCommands.Commands
 			[RequireBot]
 			[RequireGuild]
 			[SlashCommand("claim", "Claim a tag. Owner must not be in server.")]
-			public async Task Claim(InteractionContext ctx, 
-				[Autocomplete(typeof(TagChoiceProvider))]
-				[Option("tag", "What tag do you want to claim? **Requires staff**")] string tag)
+			public async Task Claim(
+				InteractionContext ctx,
+				[Autocomplete(typeof(TagChoiceProvider))] [Option("tag", "What tag do you want to claim? **Requires staff**")]
+				string tag)
 			{
 				await ctx.CreateThinkingResponseAsync();
 

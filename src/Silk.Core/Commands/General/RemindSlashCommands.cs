@@ -21,8 +21,8 @@ namespace Silk.Core.SlashCommands.Commands
 		[SlashCommandGroup("remind", "Reminder related commands!")]
 		public sealed class ReminderCommands : ApplicationCommandModule
 		{
-			private readonly ReminderService _reminders;
 			private readonly DiscordClient _client;
+			private readonly ReminderService _reminders;
 			public ReminderCommands(ReminderService reminders, DiscordClient client)
 			{
 				_reminders = reminders;

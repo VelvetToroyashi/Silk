@@ -123,6 +123,19 @@
         <None Update="flags\pride.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Remove="logs\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="logs\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="logs\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="AutoMod"/>
     </ItemGroup>
 
 </Project>

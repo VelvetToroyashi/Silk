@@ -13,8 +13,8 @@ namespace Silk.Core.AutoMod
 	/// </summary>
 	public sealed class AutoModMuteApplier
 	{
-		private readonly IInfractionService _infractions;
 		private readonly DiscordClient _client;
+		private readonly IInfractionService _infractions;
 		private readonly ILogger<AutoModMuteApplier> _logger;
 		public AutoModMuteApplier(IInfractionService infractions, DiscordClient client, ILogger<AutoModMuteApplier> logger)
 		{
@@ -38,6 +38,5 @@ namespace Silk.Core.AutoMod
 				await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied {memberArgs.Member.ToDiscordName()}'s mute on rejoin.");
 			}
 		}
-
 	}
 }
