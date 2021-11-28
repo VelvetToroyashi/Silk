@@ -312,7 +312,7 @@ public static class Startup
 	}
 }
 
-/* Todo: Move this class maybe? #1#
+/* Todo: Move this class maybe? 
 public static class IConfigurationExtensions
 {
 	/// <summary>

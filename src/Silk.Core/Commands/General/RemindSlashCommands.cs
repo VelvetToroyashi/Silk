@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using FluentAssertions.Common;
 using Humanizer;
 using Silk.Core.Data.Entities;
 using Silk.Core.Services.Server;
@@ -46,7 +45,7 @@ namespace Silk.Core.SlashCommands.Commands
 					.Select(r =>
 					{
 						string s = r.Type is ReminderType.Once ?
-							$"`{r.Id}` → Expiring <t:{r.Expiration.ToDateTimeOffset().ToUniversalTime().ToUnixTimeSeconds()}:R> :\n" :
+							$"`{r.Id}` → Expiring {Formatter.Timestamp(r.Expiration)} :\n" :
 							$"`{r.Id}` → Occurs **{r.Type.Humanize(LetterCasing.LowerCase)}**:\n";
 
 						if (r.ReplyId is not null)
@@ -95,7 +94,7 @@ namespace Silk.Core.SlashCommands.Commands
 				}
 
 				await _reminders.CreateReminder(DateTime.UtcNow + convRes.Value, ctx.User.Id, ctx.Interaction.ChannelId, 0, ctx.Interaction.GuildId, reminder);
-				await ctx.EditResponseAsync(new() { Content = $"Done. I'll remind you <t:{(DateTime.UtcNow + convRes.Value).ToDateTimeOffset().ToUnixTimeSeconds()}:R>!" });
+				await ctx.EditResponseAsync(new() { Content = $"Done. I'll remind you {Formatter.Timestamp(convRes.Value)}!" });
 			}
 
 			[SlashCommand("cancel", "Cancel a reminder!")]
