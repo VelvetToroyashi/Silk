@@ -12,7 +12,7 @@ using Svg.Skia;
 
 namespace Silk.Core.Commands.General
 {
-	[Category(Categories.General)]
+	[HelpCategory(Categories.General)]
 	public class EnlargeCommand : BaseCommandModule
 	{
 		private readonly IHttpClientFactory _httpClientFactory;

@@ -6,7 +6,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Bot
 {
-	[Category(Categories.Bot)]
+	[HelpCategory(Categories.Bot)]
 	public class DoasCommand : BaseCommandModule
 	{
 		[Command]

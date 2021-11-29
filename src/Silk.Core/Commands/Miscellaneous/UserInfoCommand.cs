@@ -22,7 +22,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
-	[Category(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	public class UserInfo : BaseCommandModule
 	{
 		[Command("roleinfo")]
@@ -30,9 +30,9 @@ namespace Silk.Core.Commands.Miscellaneous
 		[Description("Get info about a role")]
 		public async Task RoleInfo(CommandContext ctx, DiscordRole role)
 		{
-			var  members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
+			var members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
 			var memberString = GetRoleMemberCount(ctx, role, members);
-			
+
 			var ms = await GenerateColoredImageAsync(role.Color);
 
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -47,10 +47,10 @@ namespace Silk.Core.Commands.Miscellaneous
 				.AddField("Mentionable:", role.IsMentionable.ToString())
 				.AddField("Permissions:", role.Permissions.ToPermissionString())
 				.WithColor(role.Color);
-			
+
 			await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("color.png", ms));
 		}
-		
+
 		[Aliases("userinfo")]
 		[Command("info")]
 		public async Task GetUserInfo(CommandContext ctx, DiscordUser user)
@@ -75,9 +75,9 @@ namespace Silk.Core.Commands.Miscellaneous
 			else if (user.BannerColor.HasValue)
 			{
 				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
-				
+
 				embed.WithImageUrl("attachment://banner.png");
-				
+
 				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
 				await ctx.RespondAsync(builder);
 			}
@@ -86,7 +86,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				await ctx.RespondAsync(embed);
 			}
 		}
-		
+
 		[Priority(2)]
 		[Command("info")]
 		[Description("Get info about someone")]
@@ -97,7 +97,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				.GetValue(ctx.Client) as ConcurrentDictionary<ulong, DiscordUser>)!.TryRemove(member.Id, out _);
 
 			var user = await ctx.Client.GetUserAsync(member.Id);
-			
+
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
 				.WithDescription($"Information about {member.Mention}!")
@@ -128,10 +128,10 @@ namespace Silk.Core.Commands.Miscellaneous
 			embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
 			embed.AddField("Flags:", member.Flags?.Humanize(LetterCasing.Title) ?? "None");
 			embed.AddField("Bot:", member.IsBot ? "Yes" : "No");
-			
-			
+
+
 			embed.WithThumbnail(member.AvatarUrl ?? member.DefaultAvatarUrl);
-			
+
 			if (!string.IsNullOrEmpty(user.BannerHash))
 			{
 				embed.WithImageUrl(member.BannerUrl);
@@ -140,9 +140,9 @@ namespace Silk.Core.Commands.Miscellaneous
 			else if (user.BannerColor.HasValue)
 			{
 				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
-				
+
 				embed.WithImageUrl("attachment://banner.png");
-				
+
 				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
 				await ctx.RespondAsync(builder);
 			}
@@ -151,7 +151,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				await ctx.RespondAsync(embed);
 			}
 		}
-	
+
 		private static async Task<MemoryStream> GenerateColoredImageAsync(DiscordColor color)
 		{
 			using var colorImage = new Image<Rgba32>(600, 200, Rgba32.ParseHex(color.ToString()));
@@ -161,27 +161,27 @@ namespace Silk.Core.Commands.Miscellaneous
 			ms.Position = 0;
 			return ms;
 		}
-		
+
 		private static string GetRoleMemberCount(CommandContext ctx, DiscordRole role, IEnumerable<DiscordMember> members)
 		{
 			if (role == ctx.Guild.EveryoneRole)
 				return "Everyone has the @everyone role!";
 
 			var memberCount = members.Count();
-			
+
 			if (memberCount is 0)
 				return "This role isn't assigned to anyone!";
-			
+
 			members = members.Take(5);
 
 			return $"{members.Select(m => m.Mention).Join(", ")} {(memberCount > 5 ? $"(...Plus {memberCount - 5} others.)" : null)}";
 		}
 
-		
+
 		private static string GetHierarchy(CommandContext ctx, DiscordRole role)
 		{
 			var roleStringBuilder = new StringBuilder();
-			
+
 			foreach (var r in ctx.Guild.Roles.Values.OrderByDescending(r => r.Position))
 			{
 				if (r.Position + 1 == role.Position)

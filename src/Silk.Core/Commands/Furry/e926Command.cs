@@ -18,7 +18,7 @@ using Silk.Shared.Configuration;
 
 namespace Silk.Core.Commands.Furry
 {
-	[Utilities.HelpFormatter.Category(Categories.Misc)]
+	[Utilities.HelpFormatter.HelpCategory(Categories.Misc)]
 	public class e926Command : eBooruBaseCommand
 	{
 		private readonly SilkConfigurationOptions _options;

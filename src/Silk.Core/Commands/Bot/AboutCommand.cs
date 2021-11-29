@@ -11,7 +11,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands.Bot
 {
-	[Category(Categories.Bot)]
+	[HelpCategory(Categories.Bot)]
 	public class AboutCommand : BaseCommandModule
 	{
 		private readonly DiscordClient _client;
@@ -37,18 +37,18 @@ namespace Silk.Core.Commands.Bot
 				.AddField("Bot version", StringConstants.Version, true)
 				.AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
 
-      var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=972418070&scope=bot%20applications.commands";
-      var builder = new DiscordMessageBuilder()
-          .WithEmbed(embed)
-          .AddComponents(
-              new DiscordLinkButtonComponent(invite, "Invite Me!"),
-              new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source Code!"),
-              new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support Server!"))
-          .AddComponents(
-              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/projects/dc41e8bf-975b-4108-ba22-25a04cd2f120", "Issue Tracker"),
-              new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/issue/SBP-4", "Feature Requests"),
-              new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Donations)"));
-            await ctx.RespondAsync(builder);
-        }
-    }
+			var invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=972418070&scope=bot%20applications.commands";
+			var builder = new DiscordMessageBuilder()
+				.WithEmbed(embed)
+				.AddComponents(
+					new DiscordLinkButtonComponent(invite, "Invite Me!"),
+					new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source Code!"),
+					new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support Server!"))
+				.AddComponents(
+					new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/projects/dc41e8bf-975b-4108-ba22-25a04cd2f120", "Issue Tracker"),
+					new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/issue/SBP-4", "Feature Requests"),
+					new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Donations)"));
+			await ctx.RespondAsync(builder);
+		}
+	}
 }

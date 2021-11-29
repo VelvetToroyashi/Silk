@@ -14,7 +14,7 @@ using Silk.Core.Utilities.HelpFormatter;
 namespace Silk.Core.Commands.Miscellaneous
 {
 	[RequireFlag(UserFlag.Staff)]
-	[Category(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	public class NicknameCommand : BaseCommandModule
 	{
 		private readonly ILogger<NicknameCommand> _logger;

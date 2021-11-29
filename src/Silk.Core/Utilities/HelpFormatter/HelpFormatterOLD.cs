@@ -46,7 +46,7 @@ namespace Silk.Core.Utilities.HelpFormatter
 				embed.WithTitle("Silk Commands:")
 					.WithFooter("* = Group | ** = Executable group");
 				IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
-					.GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
+					.GroupBy(x => x.Module.ModuleType.GetCustomAttribute<HelpCategoryAttribute>()?.Name)
 					//.Where(x => x.Key is not null)
 					.OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
 

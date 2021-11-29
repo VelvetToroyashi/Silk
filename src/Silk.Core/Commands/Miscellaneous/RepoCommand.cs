@@ -6,7 +6,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
-	[Category(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	public class RepoCommand : BaseCommandModule
 	{
 		[Command("repo")]

@@ -10,7 +10,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[Category(Categories.Mod)]
+	[HelpCategory(Categories.Mod)]
 	public class UnbanCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractions;

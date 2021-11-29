@@ -9,7 +9,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General
 {
-	[Category(Categories.General)]
+	[HelpCategory(Categories.General)]
 	public class PickPeopleCommand : BaseCommandModule
 	{
 		[Command]

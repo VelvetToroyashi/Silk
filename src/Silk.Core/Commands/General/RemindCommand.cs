@@ -16,7 +16,7 @@ using Silk.Extensions;
 
 namespace Silk.Core.Commands.General
 {
-	[Category(Categories.General)]
+	[HelpCategory(Categories.General)]
 	public class RemindersCommand : BaseCommandModule
 	{
 		[Command]
@@ -36,7 +36,7 @@ namespace Silk.Core.Commands.General
 	[RequireGuild]
 	[Group("remind")]
 	[Aliases("reminder")]
-	[Category(Categories.General)]
+	[HelpCategory(Categories.General)]
 	public class RemindCommand : BaseCommandModule
 	{
 		private readonly ReminderService _reminders;

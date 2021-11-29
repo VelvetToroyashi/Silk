@@ -14,7 +14,7 @@ using Silk.Extensions;
 
 namespace Silk.Core.Commands.Server
 {
-	[Category(Categories.Server)]
+	[HelpCategory(Categories.Server)]
 	public class ServerInfoCommand : BaseCommandModule
 	{
 		private readonly GuildContext _db;

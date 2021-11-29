@@ -10,7 +10,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous
 {
-	[Category(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	public class UptimeCommand //: BaseCommandModule
 	{
 		private readonly UptimeService _uptime;

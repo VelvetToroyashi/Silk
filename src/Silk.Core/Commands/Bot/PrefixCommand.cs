@@ -12,7 +12,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands.Bot
 {
-	[Category(Categories.Bot)]
+	[HelpCategory(Categories.Bot)]
 	[ModuleLifespan(ModuleLifespan.Transient)]
 	public class PrefixCommand : BaseCommandModule
 	{

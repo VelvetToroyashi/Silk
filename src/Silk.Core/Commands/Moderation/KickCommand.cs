@@ -14,7 +14,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[Category(Categories.Mod)]
+	[HelpCategory(Categories.Mod)]
 	public class KickCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractionService;

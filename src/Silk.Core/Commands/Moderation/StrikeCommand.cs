@@ -20,7 +20,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[Category(Categories.Mod)]
+	[HelpCategory(Categories.Mod)]
 	public class StrikeCommand : BaseCommandModule
 	{
 		private readonly IInfractionService _infractionHelper;

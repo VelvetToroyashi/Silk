@@ -7,14 +7,14 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
-using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Commands.General
 {
-	[Category(Categories.Mod)]
+	[HelpCategory(Categories.Mod)]
 	public class ClearCommand : BaseCommandModule
 	{
 		private readonly IMediator _mediator;

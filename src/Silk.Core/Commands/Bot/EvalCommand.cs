@@ -20,7 +20,7 @@ using Silk.Core.Utilities.HelpFormatter;
 namespace Silk.Core.Commands.Bot
 {
 	// THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
-	[Category(Categories.Bot)]
+	[HelpCategory(Categories.Bot)]
 	public class EvalCommand : BaseCommandModule
 	{
 		[Command("eval")]

@@ -1,116 +1,102 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Converters;
-using DSharpPlus.CommandsNext.Entities;
-using DSharpPlus.Entities;
+using Remora.Commands.Trees.Nodes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
 using Silk.Extensions;
-using Silk.Shared.Constants;
 
 namespace Silk.Core.Utilities.HelpFormatter
 {
-	public class HelpFormatter : BaseHelpFormatter
+	public class HelpFormatter : IHelpFormatter
 	{
-
-		public HelpFormatter(CommandContext ctx) : base(ctx)
+		/// <inheritdoc/>
+		public IEmbed GetHelpEmbed(CommandNode command)
 		{
-			Command = null;
-			Subcommands = null;
-		}
-		public Command? Command { get; private set; }
-		public Command[]? Subcommands { get; private set; }
+			string? commandUsage = GetUsage(command);
 
-		public override BaseHelpFormatter WithCommand(Command command)
-		{
-			Command = command;
-			return this;
-		}
+			string usage = commandUsage is null ? "" : $"Usage: `{commandUsage}`\n";
+			string aliases = command.Aliases.Any() ? string.Join(", ", command.Aliases) + '\n' : "None";
 
-		public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> subcommands)
-		{
-			Subcommands = subcommands.ToArray();
-			return this;
-		}
+			var parameterHelp = command
+				.Shape
+				.Parameters
+				.Select(p => (IEmbedField)new EmbedField((p.IsOmissible() ? "(Optional) " : "") + p.HintName, p.Description));
 
-
-		public override CommandHelpMessage Build()
-		{
-			DiscordEmbedBuilder embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Azure);
-
-			if (Command == null)
+			var embed = new Embed
 			{
-				embed.WithTitle("Silk Commands:")
-					.WithFooter("* = Group | ** = Executable group");
-				IOrderedEnumerable<IGrouping<string?, Command>> modules = Subcommands!
-					.GroupBy(x => x.Module.ModuleType.GetCustomAttribute<CategoryAttribute>()?.Name)
-					//.Where(x => x.Key is not null)
-					.OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
+				Title = $"Help for {command.Key}",
+				Description = usage + command.Shape.Description,
+				Colour = Color.DodgerBlue,
+				Fields = new[]
+					{
+						new EmbedField("Aliases", aliases) //We use an array vs .Prepend() because there may be more to come.
+					}.Concat(parameterHelp)
+					.ToList()
+			};
 
-				foreach (IGrouping<string?, Command> commands in modules)
-					embed.AddField(commands.Key ?? Categories.Uncategorized,
-						commands
-							.Select(x => $"`{x.Name}" +
-							             $"{(x is CommandGroup g ? g.IsExecutableWithoutSubcommands ? "**" : "*" : "")}`")
-							.Join(", "));
+			return embed;
+		}
+
+		/// <inheritdoc/>
+		public IEmbed GetHelpEmbed(IEnumerable<IChildNode> subcommands)
+		{
+			IEmbed embed;
+			var commandString = string.Join('\n', subcommands.Select(c => '`' + c.Key + '`'));
+
+			var fields = new List<IEmbedField>();
+
+			var categories = subcommands
+				.GroupBy(x => x is CommandNode cn
+					? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
+					: ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
+					.GroupType.GetCustomAttribute<HelpCategoryAttribute>()
+					?.Name)
+				.OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
+
+			fields
+				.AddRange(categories
+					.Select(c => new EmbedField(c.Key ?? Categories.Uncategorized, c
+						.Select(cn => $"`{cn.Key}`")
+						.Join(", "))));
+
+			if (subcommands.First().Parent is RootNode)
+			{
+				// Root node, display all top level commands
+				embed = new Embed
+				{
+					Title = "Help",
+					Description = "Wanna see more information? Try specifing a command!",
+					Colour = Color.DodgerBlue,
+					Fields = fields
+				};
 			}
 			else
 			{
-				IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
+				var parent = subcommands.First().Parent as IChildNode;
 
-				string title = $"Command: `{Command!.QualifiedName}";
-				var builder = new StringBuilder(title)
-					.Append(GetArgs(args))
-					.Append('`');
-
-				embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
-
-				if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
-					embed.AddField($"{CustomEmoji.Staff} Developer", "You can't use it!", true);
-				else if (Command.IsHidden)
-					embed.AddField("\\👻 Hidden", "How did you find it?", true);
-
-				RequireUserPermissionsAttribute? userPerms =
-					Command
-						.ExecutionChecks
-						.OfType<RequireUserPermissionsAttribute>()
-						.FirstOrDefault();
-
-				if (userPerms is not null)
-					embed.AddField("Requires Permissions", userPerms.Permissions.ToPermissionString(), true);
-				if (Command.Aliases.Any())
-					embed.AddField("Aliases", Command.Aliases.Select(x => $"`{x}`").Join(", "), true);
-				if (Subcommands is not null)
-					embed.AddField("Subcommands", Subcommands.Select(x => $"`{x.QualifiedName}`").Join("\n"), true);
-				if (Command.Overloads.Count > 1)
-					embed.AddField("Command overloads:", Command.Overloads
-						.Skip(1)
-						.Select(o => $"`{Command.Name} {GetArgs(o.Arguments)}`")
-						.Join("\n"));
-
-				if ((Command as CommandGroup)?.IsExecutableWithoutSubcommands ?? false)
-					embed.WithFooter($"Tip: this can be run directly! ex: {StringConstants.DefaultCommandPrefix}{Command.QualifiedName}");
+				embed = new Embed
+				{
+					Title = $"Help for {parent!.Key}:",
+					Description = "Showing subcommands. \n" +
+					              "Specify a command name to see more information. \n" +
+					              commandString,
+					Colour = Color.DodgerBlue,
+					Fields = new[]
+					{
+						new EmbedField("Aliases", string.Join(", ", parent.Aliases), true),
+						new EmbedField("Subcommands", commandString, true)
+					}
+				};
 			}
 
-			return new(null, embed.Build());
+			return embed;
 		}
 
-		private string GetArgs(IReadOnlyList<CommandArgument>? args)
-		{
-			if (args is null)
-				return null!;
-
-			string argString = string.Empty;
-			foreach (CommandArgument arg in args)
-			{
-				argString += arg.IsOptional ? " [" : " <";
-				argString += arg.Name;
-				argString += arg.IsOptional ? "]" : ">";
-			}
-			return argString;
-		}
+		private string? GetUsage(CommandNode command)
+			=> !command.Shape.Parameters.Any()
+				? null
+				: string.Join(' ', command.Shape.Parameters.Select(p => p.IsOmissible() ? $"[{p.HintName}]" : $"<{p.HintName}>"));
 	}
 }

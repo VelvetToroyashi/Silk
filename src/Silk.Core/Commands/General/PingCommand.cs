@@ -11,11 +11,11 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General
 {
-	[Category(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	public class PingCommand : BaseCommandModule
 	{
-		private readonly GuildContext _dbFactory;
 		private readonly HttpClient _client;
+		private readonly GuildContext _dbFactory;
 
 		public PingCommand(GuildContext dbFactory, HttpClient client)
 		{
@@ -39,7 +39,7 @@ namespace Silk.Core.Commands.General
 				.AddField("→ Discord API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true);
 
 			DiscordMessage message = await ctx.RespondAsync(embed);
-			
+
 			DateTime now = DateTime.UtcNow;
 			await ctx.Channel.TriggerTypingAsync();
 

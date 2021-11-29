@@ -9,7 +9,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.General.DiceRoll
 {
-	[Category(Categories.General)]
+	[HelpCategory(Categories.General)]
 	public class DiceRollCommand : BaseCommandModule
 	{
 		[Command]

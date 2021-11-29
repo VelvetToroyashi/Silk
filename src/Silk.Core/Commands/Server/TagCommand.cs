@@ -21,7 +21,7 @@ namespace Silk.Core.Commands.Server
 {
 	[RequireGuild]
 	[Group("tag")]
-	[Category(Categories.Server)]
+	[HelpCategory(Categories.Server)]
 	public class TagCommand : BaseCommandModule
 	{
 		private readonly IMediator _mediator;
@@ -61,7 +61,7 @@ namespace Silk.Core.Commands.Server
 					await reply.RespondAsync(dbTag.Content);
 				else
 					await ctx.RespondAsync(dbTag.Content);
-				
+
 				await _mediator.Send(new UpdateTagRequest(tag, ctx.Guild.Id) { Uses = dbTag.Uses + 1 });
 			}
 		}
@@ -282,7 +282,7 @@ namespace Silk.Core.Commands.Server
 	}
 
 	[RequireGuild]
-	[Category(Categories.Server)]
+	[HelpCategory(Categories.Server)]
 	public class TagsCommand : BaseCommandModule
 	{
 		private readonly TagService _tagService;
