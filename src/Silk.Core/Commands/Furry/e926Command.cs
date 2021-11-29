@@ -1,70 +1,92 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Humanizer;
+using Microsoft.Extensions.Options;
+using Remora.Commands.Attributes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using Silk.Core.Commands.Furry.Types;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Shared.Configuration;
 
 namespace Silk.Core.Commands.Furry
 {
-	[Category(Categories.Misc)]
-	[ModuleLifespan(ModuleLifespan.Transient)]
-	[Cooldown(1, 15, CooldownBucketType.User)]
+	[Utilities.HelpFormatter.Category(Categories.Misc)]
 	public class e926Command : eBooruBaseCommand
 	{
-		public e926Command(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+		private readonly SilkConfigurationOptions _options;
+
+		public e926Command(
+			HttpClient client,
+			IOptions<SilkConfigurationOptions> options,
+			ICommandContext context,
+			IDiscordRestChannelAPI channel)
+			: base(client, context, channel)
 		{
 			baseUrl = "https://e926.net/posts.json?tags=";
+			_options = options.Value;
 		}
 
-		[Command("e926")]
-		[Aliases("e9")]
-		[Description("SFW! Get cute stuff off none other than e926.net." +
-		             "(See the [tags](https://e926.net/tags) section on e926.")]
-		public override async Task Search(CommandContext ctx, int amount = 1, [RemainingText] string? query = null)
+		//[RequireNsfw]
+		[Command("e926", "e9")]
+		[Description("Get cute furry content from e926.net")]
+		public override async Task<Result> Search(int amount = 3, string? query = null)
 		{
 			if (query?.Split().Length > 5)
+				return Result.FromError(new ArgumentOutOfRangeError("You can search 5 tags at a time!"));
+
+			if (amount > 10)
+				return Result.FromError(new ArgumentOutOfRangeError("You can only request 10 images every 10 seconds."));
+
+			Result<eBooruPostResult?> result;
+			if (string.IsNullOrWhiteSpace(username))
+				result = await DoQueryAsync(query); // May return empty results locked behind API key //
+			else
+				result = await DoKeyedQueryAsync(query, _options.E621.ApiKey, true);
+
+			if (!result.IsSuccess)
 			{
-				await ctx.RespondAsync("You can search 5 tags at a time!");
-				return;
-			}
-			if (amount > 7)
-			{
-				await ctx.RespondAsync("You can only request 7 images every 30 seconds.");
-				return;
+				var errorResult = await _channelApi.CreateMessageAsync(_context.ChannelID, result.Error!.Message);
+				return errorResult.IsSuccess
+					? Result.FromSuccess()
+					: Result.FromError(errorResult.Error);
 			}
 
-			eBooruPostResult? result = await DoQueryAsync(query);
-			if (result is null)
-			{
-				await ctx.RespondAsync("Seems like nothing exists by that search! Sorry! :(");
-				return;
-			}
+			var booruPosts = result.Entity?.Posts;
 
-			List<Post> posts = await GetPostsAsync(result, amount, (int)ctx.Message.Id);
-			foreach (Post post in posts)
-			{
-				DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-					.WithTitle(query)
-					.WithDescription($"[Direct Link](https://e926.net/posts/{post!.Id})\n" +
-					                 $"Description: {post.Description.Truncate(200)}")
-					.AddField("Score:", post.Score.Total.ToString())
-					.WithColor(DiscordColor.PhthaloBlue)
-					.WithImageUrl(post.File.Url)
-					.WithFooter("Limit: 7 img / 15 sec");
+			if (booruPosts is null || booruPosts.Count is 0)
+				return Result.FromError(new ArgumentOutOfRangeError("No results found."));
 
-				await ctx.RespondAsync(embed);
-				await Task.Delay(300);
-			}
-		}
+			IReadOnlyList<Post> posts = GetRandomPosts(booruPosts, amount, (int)((_context as MessageContext)?.MessageID.Value ?? 0));
+			List<IEmbed> embeds = posts.Select(post =>
+					new Embed()
+					{
+						Title = query!,
+						Description = $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}",
+						Colour = Color.RoyalBlue,
+						Image = new EmbedImage(post.File.Url.ToString()),
+						Fields = new IEmbedField[]
+						{
+							new EmbedField("Score:", post.Score.Total.ToString(), true),
+							new EmbedField("Source:", GetSource(post.Sources.FirstOrDefault()?.ToString()) ?? "No source available", true)
+						}
+					}
+				)
+				.Cast<IEmbed>()
+				.ToList();
 
-		[Command("e926")]
-		public async Task Search(CommandContext ctx, [RemainingText] string? search)
-		{
-			await Search(ctx, 3, search);
+			var send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
+
+			return send.IsSuccess
+				? Result.FromSuccess()
+				: Result.FromError(send.Error);
 		}
 	}
 }
