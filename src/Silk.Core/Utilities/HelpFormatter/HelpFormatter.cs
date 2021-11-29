@@ -8,7 +8,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
-using Silk.Core.Types;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
@@ -60,14 +59,9 @@ namespace Silk.Core.Utilities.HelpFormatter
 			}
 			else
 			{
-				if (Command.IsExperimental())
-					embed.WithColor(DiscordColor.DarkRed)
-						.WithFooter("\nThis command is in testing, and marked as Experimental! Please open a ticket if it breaks.");
-
-
 				IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
-				string title = Command!.IsExperimental() ? $"[EXP] Command: `{Command!.QualifiedName}" : $"Command: `{Command!.QualifiedName}";
+				string title = $"Command: `{Command!.QualifiedName}";
 				var builder = new StringBuilder(title)
 					.Append(GetArgs(args))
 					.Append('`');
@@ -108,7 +102,7 @@ namespace Silk.Core.Utilities.HelpFormatter
 		{
 			if (args is null)
 				return null!;
-			
+
 			string argString = string.Empty;
 			foreach (CommandArgument arg in args)
 			{

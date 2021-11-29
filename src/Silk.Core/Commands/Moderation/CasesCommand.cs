@@ -7,16 +7,14 @@ using DSharpPlus.Entities;
 using Humanizer;
 using MediatR;
 using Silk.Core.Data.DTOs;
+using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Data.MediatR.Users;
-using Silk.Core.Data.Entities;
-using Silk.Core.Types;
 using Silk.Core.Utilities;
 using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[Experimental]
 	[Category(Categories.Mod)]
 	public class CasesCommand : BaseCommandModule
 	{
