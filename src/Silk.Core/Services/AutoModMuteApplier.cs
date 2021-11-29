@@ -1,9 +1,11 @@
+using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Gateway.Responders;
+using Remora.Results;
 using Silk.Core.Services.Interfaces;
-using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.AutoMod
@@ -11,32 +13,42 @@ namespace Silk.Core.AutoMod
 	/// <summary>
 	/// An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
 	/// </summary>
-	public sealed class AutoModMuteApplier
+	public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
 	{
-		private readonly DiscordClient _client;
 		private readonly IInfractionService _infractions;
 		private readonly ILogger<AutoModMuteApplier> _logger;
-		public AutoModMuteApplier(IInfractionService infractions, DiscordClient client, ILogger<AutoModMuteApplier> logger)
+		private readonly IDiscordRestUserAPI _users;
+		public AutoModMuteApplier(IInfractionService infractions, ILogger<AutoModMuteApplier> logger, IDiscordRestUserAPI users)
 		{
-			_infractions = infractions;
-			_client = client;
+			_users = users;
 			_logger = logger;
-			_client.GuildMemberAdded += HandleMemberJoinAsync;
+			_infractions = infractions;
 		}
 
-		private async Task HandleMemberJoinAsync(DiscordClient client, GuildMemberAddEventArgs memberArgs)
+		public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
 		{
-			bool isMuted = await _infractions.IsMutedAsync(memberArgs.Member.Id, memberArgs.Guild.Id);
-			ulong member = memberArgs.Member.Id;
-			ulong guild = memberArgs.Guild.Id;
-			ulong automod = _client.CurrentUser.Id;
+			if (!gatewayEvent.User.IsDefined())
+				return Result.FromSuccess(); // ??? 
 
+			ulong guild = gatewayEvent.GuildID.Value;
+			ulong member = gatewayEvent.User.Value.ID.Value;
 
-			if (isMuted)
-			{
-				await _infractions.MuteAsync(member, guild, automod, "Re-applied active mute on join.", updateExpiration: false);
-				await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied {memberArgs.Member.ToDiscordName()}'s mute on rejoin.");
-			}
+			bool isMuted = await _infractions.IsMutedAsync(member, guild);
+
+			var automodRes = await _users.GetCurrentUserAsync(ct);
+
+			if (!automodRes.IsSuccess)
+				return Result.FromError(automodRes.Error);
+
+			var automod = automodRes.Entity.ID.Value;
+
+			if (!isMuted)
+				return Result.FromSuccess();
+
+			await _infractions.MuteAsync(member, guild, automod, "Re-applied active mute on join.", updateExpiration: false);
+			await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied mute for {member} on rejoin.");
+
+			return Result.FromSuccess();
 		}
 	}
 }
