@@ -13,16 +13,14 @@ namespace Silk.Core.Services.Data
 	/// <inheritdoc cref="IPrefixCacheService" />
 	public sealed class PrefixCacheService : IPrefixCacheService
 	{
-		private readonly IMediator _mediator;
 		private readonly ILogger<PrefixCacheService> _logger;
+		private readonly IMediator _mediator;
 		private readonly IMemoryCache _memoryCache;
 		public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
 		{
 			_logger = logger;
 			_memoryCache = memoryCache;
 			_mediator = mediator;
-
-			cacheUpdater.ConfigUpdated += PurgeCache;
 		}
 
 		[SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
@@ -43,10 +41,6 @@ namespace Silk.Core.Services.Data
 			_logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
 		}
 
-		public void PurgeCache(ulong id)
-		{
-			_ = GetDatabasePrefixAsync(id);
-		}
 
 		private async Task<string> GetDatabasePrefixAsync(ulong guildId)
 		{
