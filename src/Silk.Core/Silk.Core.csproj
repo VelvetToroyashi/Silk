@@ -47,7 +47,7 @@
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-1.final" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -56,7 +56,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet"/>
         <PackageReference Include="Microsoft.Extensions.Caching.Memory"/>
         <PackageReference Include="Microsoft.Extensions.Configuration"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
@@ -81,12 +81,12 @@
         <PackageReference Include="SharpYaml" Version="1.8.0"/>
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4"/>
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13"/>
-        <PackageReference Include="Svg.Skia" Version="0.5.8.3" />
-        <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
-        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />
-        <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6" />
-        <PackageReference Include="Unity" Version="5.11.10" />
-        <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
+        <PackageReference Include="Svg.Skia" Version="0.5.8.3"/>
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7"/>
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6"/>
+        <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.2.21154.6"/>
+        <PackageReference Include="Unity" Version="5.11.10"/>
+        <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1"/>
         <PackageReference Include="YumeChan.PluginBase"/>
     </ItemGroup>
 
@@ -128,13 +128,4 @@
     <ItemGroup>
         <Compile Remove="logs\**"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Remove="logs\**"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="AutoMod"/>
-    </ItemGroup>
-
 </Project>
