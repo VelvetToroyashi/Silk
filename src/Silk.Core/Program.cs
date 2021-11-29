@@ -1,12 +1,13 @@
 using System;
+using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Extensions;
@@ -27,17 +28,26 @@ namespace Silk.Core
 {
 	public class Program
 	{
-		public static void Main()
+		public static async Task Main()
 		{
 			var host = Host
 				.CreateDefaultBuilder()
 				.UseConsoleLifetime();
 
+			host.ConfigureAppConfiguration(configuration =>
+			{
+				configuration.SetBasePath(Directory.GetCurrentDirectory());
+				configuration.AddJsonFile("appSettings.json", true, false);
+				configuration.AddUserSecrets("VelvetThePanda-Silk", false);
+			});
+
+			ConfigureServices(host);
+
+			await host.Build().RunAsync();
 		}
 
 		private static IHostBuilder ConfigureServices(IHostBuilder builder)
 		{
-			string token = "";
 			builder
 				.ConfigureLogging(l => l.ClearProviders().AddSerilog())
 				.ConfigureServices((context, services) =>
@@ -81,7 +91,8 @@ namespace Silk.Core
 				})
 				.AddDiscordService(s =>
 				{
-					var config = s.Get<IOptions<SilkConfigurationOptions>>()!.Value;
+					var config = s.Get<IConfiguration>()!.GetSilkConfigurationOptionsFromSection();
+
 					return config.Discord.BotToken;
 				});
 
