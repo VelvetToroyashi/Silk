@@ -17,18 +17,19 @@ namespace Silk.Core.Services
 	public sealed class AutoModAntiPhisher : IHostedService
 	{
 		private const string HeaderName = "X-Identity";
-		private const string WebSocketUrl = "wss://phish.sinking.yachts/feed";
 		private const string ApiUrl = "https://phish.sinking.yachts/v2/all";
+		private const string WebSocketUrl = "wss://phish.sinking.yachts/feed";
+
 		private const int WebSocketBufferSize = 16 * 1024;
-		
+
+		private readonly HttpClient _client;
+
+		private readonly CancellationTokenSource _cts = new();
+
 		private readonly HashSet<string> _domains = new();
 
 		private readonly ILogger<AutoModAntiPhisher> _logger;
-
-		private readonly HttpClient _client;
 		private readonly ClientWebSocket _ws = new();
-
-		private readonly CancellationTokenSource _cts = new();
 
 		public AutoModAntiPhisher(ILogger<AutoModAntiPhisher> logger, HttpClient client)
 		{
@@ -37,8 +38,44 @@ namespace Silk.Core.Services
 			_ws.Options.SetRequestHeader(HeaderName, StringConstants.ProjectIdentifier); // requisite for gimme-domains
 		}
 
+		public async Task StartAsync(CancellationToken cancellationToken)
+		{
+			#if DEBUG
+			_logger.LogInformation("Phishing API is not contacted in debug mode.");
+			return;
+			#endif
+
+			if (!await GetDomainsAsync())
+			{
+				_logger.LogCritical("Failed to retrieve domains. API - Unavailable");
+				return;
+			}
+
+			try
+			{
+				await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
+			}
+			catch (WebSocketException)
+			{
+				_logger.LogCritical(EventIds.Service, "Failed to establish a websocket connection. API - Unavailable");
+				return;
+			}
+
+			_logger.LogInformation(EventIds.Service, "Opened websocket to phishing API.");
+
+			_ = Task.Run(ReceiveLoopAsync);
+		}
+
+
+		public async Task StopAsync(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation(EventIds.Service, "Cancellation requested. Stopping service.");
+
+			_cts.Cancel();
+		}
+
 		public bool IsBlacklisted(string link) => _domains.Contains(link);
-		
+
 		private async Task ReceiveLoopAsync()
 		{
 			try
@@ -53,7 +90,7 @@ namespace Silk.Core.Services
 					// See https://github.com/discord-net/Discord.Net/commit/ac389f5f6823e3a720aedd81b7805adbdd78b66d 
 					// for explanation on the cancellation token
 					// TL;DR passing cancellation token to websocket kills the socket //
-					
+
 					ValueWebSocketReceiveResult result;
 					do
 					{
@@ -83,7 +120,7 @@ namespace Silk.Core.Services
 					var domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
 
 					HandleWebsocketCommand(command, domains);
-					
+
 					buffer.Clear(); // Clear, or you'll get JSON exceptions //
 				}
 			}
@@ -99,7 +136,9 @@ namespace Silk.Core.Services
 
 		private async Task<bool> RestartWebsocketAsync()
 		{
-			await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested. I'll be back soon.", CancellationToken.None);
+			if (_ws.State is not (WebSocketState.Aborted or WebSocketState.Closed))
+				await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested. I'll be back soon.", CancellationToken.None);
+
 			try
 			{
 				await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
@@ -133,12 +172,12 @@ namespace Silk.Core.Services
 
 			foreach (var domain in payload)
 				_domains.Add(domain);
-			
+
 			_logger.LogInformation(EventIds.Service, "Retrieved {Count} phishing domains via REST", payload.Length);
-			
+
 			return true;
 		}
-		
+
 		private void HandleWebsocketCommand(string? command, string[] domains)
 		{
 			switch (command)
@@ -160,42 +199,6 @@ namespace Silk.Core.Services
 					_logger.LogDebug(EventIds.Service, "Unknown command from websocket ({Command}); skipping.", command);
 					break;
 			}
-		}
-		
-		public async Task StartAsync(CancellationToken cancellationToken)
-		{
-			#if DEBUG
-			_logger.LogInformation("Phishing API is not contacted in debug mode.");
-			return;
-			#endif
-			
-			if (!await GetDomainsAsync())
-			{
-				_logger.LogCritical("Failed to retrieve domains. API - Unavailable");
-				return;
-			}
-			
-			try
-			{
-				await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
-			}
-			catch (WebSocketException)
-			{
-				_logger.LogCritical(EventIds.Service, "Failed to establish a websocket connection. API - Unavailable");
-				return;
-			}
-
-			_logger.LogInformation(EventIds.Service, "Opened websocket to phishing API.");
-			
-			_ = Task.Run(ReceiveLoopAsync);
-		}
-
-
-		public async Task StopAsync(CancellationToken cancellationToken)
-		{
-			_logger.LogInformation(EventIds.Service, "Cancellation requested. Stopping service.");
-			
-			_cts.Cancel();
 		}
 	}
 }
