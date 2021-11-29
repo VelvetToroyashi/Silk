@@ -55,7 +55,7 @@ namespace Silk.Core
 					// There's a more elegant way to do this, but I'm lazy and this works.
 					//SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
-					//AddSilkConfigurationOptions(services, context.Configuration);
+					AddSilkConfigurationOptions(services, context.Configuration);
 					//AddDatabases(services, silkConfig.Persistence);
 
 					services.AddLogging(_ => AddLogging(context));
