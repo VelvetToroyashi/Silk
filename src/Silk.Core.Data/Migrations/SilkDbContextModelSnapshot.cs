@@ -166,6 +166,55 @@ namespace Silk.Core.Data.Migrations
                     b.ToTable("Guilds");
                 });
 
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildLoggingConfigEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal?>("FallbackLoggingChannel")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("fallback_logging_channel");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<int?>("InfractionsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MemberJoinsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MemberLeavesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MessageDeletesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MessageEditsId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("UseWebhookLogging")
+                        .HasColumnType("boolean")
+                        .HasColumnName("use_webhook_logging");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InfractionsId");
+
+                    b.HasIndex("MemberJoinsId");
+
+                    b.HasIndex("MemberLeavesId");
+
+                    b.HasIndex("MessageDeletesId");
+
+                    b.HasIndex("MessageEditsId");
+
+                    b.ToTable("GuildLoggingConfigEntity");
+                });
+
             modelBuilder.Entity("Silk.Core.Data.Entities.GuildModConfigEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -209,6 +258,9 @@ namespace Silk.Core.Data.Migrations
                     b.Property<decimal>("LoggingChannel")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<int?>("LoggingConfigEntityId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("LoggingWebhookUrl")
                         .HasColumnType("text");
 
@@ -244,6 +296,8 @@ namespace Silk.Core.Data.Migrations
 
                     b.HasIndex("GuildId")
                         .IsUnique();
+
+                    b.HasIndex("LoggingConfigEntityId");
 
                     b.ToTable("GuildModConfigs");
                 });
@@ -349,6 +403,35 @@ namespace Silk.Core.Data.Migrations
                     b.HasIndex("GuildModConfigEntityId");
 
                     b.ToTable("InviteEntity");
+                });
+
+            modelBuilder.Entity("Silk.Core.Data.Entities.LoggingChannelEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("WebhookId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("webhook_id");
+
+                    b.Property<string>("WebhookToken")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("webhook_token");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoggingChannelEntity");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Entities.ReminderEntity", b =>
@@ -530,6 +613,39 @@ namespace Silk.Core.Data.Migrations
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("Silk.Core.Data.Entities.GuildLoggingConfigEntity", b =>
+                {
+                    b.HasOne("Silk.Core.Data.Entities.LoggingChannelEntity", "Infractions")
+                        .WithMany()
+                        .HasForeignKey("InfractionsId");
+
+                    b.HasOne("Silk.Core.Data.Entities.LoggingChannelEntity", "MemberJoins")
+                        .WithMany()
+                        .HasForeignKey("MemberJoinsId");
+
+                    b.HasOne("Silk.Core.Data.Entities.LoggingChannelEntity", "MemberLeaves")
+                        .WithMany()
+                        .HasForeignKey("MemberLeavesId");
+
+                    b.HasOne("Silk.Core.Data.Entities.LoggingChannelEntity", "MessageDeletes")
+                        .WithMany()
+                        .HasForeignKey("MessageDeletesId");
+
+                    b.HasOne("Silk.Core.Data.Entities.LoggingChannelEntity", "MessageEdits")
+                        .WithMany()
+                        .HasForeignKey("MessageEditsId");
+
+                    b.Navigation("Infractions");
+
+                    b.Navigation("MemberJoins");
+
+                    b.Navigation("MemberLeaves");
+
+                    b.Navigation("MessageDeletes");
+
+                    b.Navigation("MessageEdits");
+                });
+
             modelBuilder.Entity("Silk.Core.Data.Entities.GuildModConfigEntity", b =>
                 {
                     b.HasOne("Silk.Core.Data.Entities.GuildEntity", "Guild")
@@ -538,7 +654,13 @@ namespace Silk.Core.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Silk.Core.Data.Entities.GuildLoggingConfigEntity", "LoggingConfigEntity")
+                        .WithMany()
+                        .HasForeignKey("LoggingConfigEntityId");
+
                     b.Navigation("Guild");
+
+                    b.Navigation("LoggingConfigEntity");
                 });
 
             modelBuilder.Entity("Silk.Core.Data.Entities.InfractionEntity", b =>
