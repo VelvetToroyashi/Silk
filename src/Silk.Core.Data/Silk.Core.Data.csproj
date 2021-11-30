@@ -21,6 +21,7 @@
         </PackageReference>
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Remora.Results" Version="7.0.3"/>
     </ItemGroup>
 
 </Project>
