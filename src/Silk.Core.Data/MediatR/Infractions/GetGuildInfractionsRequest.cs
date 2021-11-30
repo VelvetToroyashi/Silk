@@ -4,14 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Infractions
 {
-	public sealed record GetGuildInfractionsRequest(ulong GuildId) : IRequest<IEnumerable<InfractionDTO>>;
+	public sealed record GetGuildInfractionsRequest(ulong GuildId) : IRequest<IEnumerable<InfractionEntity>>;
 
-	public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfractionsRequest, IEnumerable<InfractionDTO>>
+	public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfractionsRequest, IEnumerable<InfractionEntity>>
 	{
 		private readonly GuildContext _db;
 		public GetGuildInfractionHandler(GuildContext db)
@@ -19,7 +18,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 			_db = db;
 		}
 
-		public async Task<IEnumerable<InfractionDTO>> Handle(
+		public async Task<IEnumerable<InfractionEntity>> Handle(
 			GetGuildInfractionsRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -28,7 +27,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 				.Where(inf => inf.GuildId == request.GuildId)
 				.ToListAsync(cancellationToken);
 
-			return infractions.Select(inf => new InfractionDTO(inf));
+			return infractions;
 		}
 	}
 }

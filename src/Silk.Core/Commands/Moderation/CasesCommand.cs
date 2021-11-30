@@ -6,7 +6,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
 using MediatR;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Data.MediatR.Users;
@@ -33,7 +32,7 @@ namespace Silk.Core.Commands.Moderation
 			DiscordMessageBuilder? mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
 			var eBuilder = new DiscordEmbedBuilder();
 
-			InfractionDTO[]? infractions = (await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id))).ToArray();
+			InfractionEntity[]? infractions = (await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id)))?.ToArray();
 			bool userExists = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, user.Id)) is not null;
 
 			if (!userExists || infractions.Length is 0)
@@ -44,11 +43,11 @@ namespace Silk.Core.Commands.Moderation
 			else
 			{
 				var stringBuilder = new StringBuilder();
-				foreach (InfractionDTO currentInfraction in infractions)
+				foreach (InfractionEntity currentInfraction in infractions)
 				{
 					stringBuilder
 						.Append($"Case {currentInfraction.CaseNumber}: ")
-						.Append($"`{currentInfraction.Type.Humanize(LetterCasing.Title)}`\n");
+						.Append($"`{currentInfraction.InfractionType.Humanize(LetterCasing.Title)}`\n");
 					if (currentInfraction.EscalatedFromStrike)
 						stringBuilder.AppendLine("\n[ESCALATED FROM STRIKE] ");
 

@@ -10,7 +10,6 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using MediatR;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Services.Interfaces;
@@ -67,10 +66,10 @@ namespace Silk.Core.Commands.Moderation
 
 		private async Task<(bool, InfractionType)> CheckForEscalationAsync(CommandContext ctx, DiscordUser user, string reason)
 		{
-			IEnumerable<InfractionDTO>? infractions = await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id));
+			IEnumerable<InfractionEntity>? infractions = await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id));
 			InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
-			if (infractions.Count(inf => inf.Type != InfractionType.Note) < 6)
+			if (infractions.Count(inf => inf?.InfractionType != InfractionType.Note) < 6)
 				return (false, default);
 
 			InfractionStepEntity? currentStep = await _infractionHelper.GetCurrentInfractionStepAsync(ctx.Guild.Id, infractions);

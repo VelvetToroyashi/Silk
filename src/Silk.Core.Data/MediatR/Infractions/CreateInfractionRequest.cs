@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 
@@ -13,9 +12,9 @@ namespace Silk.Core.Data.MediatR.Infractions
 	public sealed record CreateInfractionRequest(
 		ulong User, ulong Enforcer, ulong Guild,
 		string Reason, InfractionType Type, DateTime? Expiration,
-		bool HeldAgainstUser = true) : IRequest<InfractionDTO>;
+		bool HeldAgainstUser = true) : IRequest<InfractionEntity>;
 
-	public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, InfractionDTO>
+	public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, InfractionEntity>
 	{
 		private readonly GuildContext _db;
 		private readonly IMediator _mediator;
@@ -26,7 +25,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 			_mediator = mediator;
 		}
 
-		public async Task<InfractionDTO> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
+		public async Task<InfractionEntity> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
 		{
 			int guildInfractionCount = await _db.Infractions
 				.Where(inf => inf.GuildId == request.Guild)
@@ -50,7 +49,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 
 			await _db.SaveChangesAsync(cancellationToken);
 
-			return new(infraction);
+			return infraction;
 		}
 	}
 }

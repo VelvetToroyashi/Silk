@@ -5,14 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Infractions
 {
-	public record GetUserInfractionsRequest(ulong GuildId, ulong UserId) : IRequest<IEnumerable<InfractionDTO>>;
+	public record GetUserInfractionsRequest(ulong GuildId, ulong UserId) : IRequest<IEnumerable<InfractionEntity>>;
 
-	public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsRequest, IEnumerable<InfractionDTO>>
+	public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsRequest, IEnumerable<InfractionEntity>>
 	{
 		private readonly GuildContext _context;
 		public GetUserInfractionsHandler(GuildContext context)
@@ -20,7 +19,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 			_context = context;
 		}
 
-		public async Task<IEnumerable<InfractionDTO>> Handle(
+		public async Task<IEnumerable<InfractionEntity>> Handle(
 			GetUserInfractionsRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -29,7 +28,7 @@ namespace Silk.Core.Data.MediatR.Infractions
 				.Include(u => u.Infractions)
 				.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
-			return user?.Infractions.Select(inf => new InfractionDTO(inf)) ?? Array.Empty<InfractionDTO>();
+			return user?.Infractions ?? Array.Empty<InfractionEntity>().AsEnumerable();
 		}
 	}
 }

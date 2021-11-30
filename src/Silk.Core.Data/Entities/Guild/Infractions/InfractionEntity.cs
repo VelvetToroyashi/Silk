@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Silk.Core.Data.Entities
 {
@@ -75,5 +76,11 @@ namespace Silk.Core.Data.Entities
 		///     When this infraction is set to expire. Resolves to null
 		/// </summary>
 		public DateTime? Expiration { get; set; }
+
+		/// <summary>
+		/// How long this infraction is lasts.
+		/// </summary>
+		[NotMapped]
+		public TimeSpan? Duration => !Expiration.HasValue ? null : Expiration.Value - InfractionTime;
 	}
 }

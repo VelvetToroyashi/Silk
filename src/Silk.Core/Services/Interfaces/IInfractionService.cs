@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Silk.Core.Data.DTOs;
 using Silk.Core.Data.Entities;
 using Silk.Core.Types;
 
@@ -94,7 +93,7 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="guildId">The id of the guild to get the current infraction step for.</param>
 		/// <param name="infractions">The infractions to check. Only non-rescinded infractions (excluding notes) count toward the current infraction step.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
-		public Task<InfractionStepEntity> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionDTO> infractions);
+		public Task<InfractionStepEntity> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionEntity> infractions);
 
 		/// <summary>
 		///     Generates an infraction for the specified user.
@@ -111,7 +110,7 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="reason">The reason this infraction is being generated.</param>
 		/// <param name="expiration">When this infraction expires, if ever, if applicable.</param>
 		/// <returns>A value indicating the resulting state of the operation.</returns>
-		public Task<InfractionDTO> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason = "Not Given.", DateTime? expiration = null);
+		public Task<InfractionEntity> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason = "Not Given.", DateTime? expiration = null);
 
 
 		/// <summary>
