@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,13 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
-using Remora.Discord.API.Abstractions.Gateway.Commands;
-using Remora.Discord.API.Abstractions.Objects;
-using Remora.Discord.API.Gateway.Commands;
-using Remora.Discord.API.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Extensions;
-using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Serilog;
 using Serilog.Events;
@@ -53,6 +49,21 @@ namespace Silk.Core
 			await host.Build().RunAsync();
 		}
 
+		[SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
+		public static IHostBuilder CreateHostBuilder(string[] args)
+		{
+			var builder = Host
+				.CreateDefaultBuilder(args);
+
+			builder.ConfigureServices((context, container) =>
+			{
+				SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+				AddDatabases(container, silkConfig.Persistence);
+			});
+
+			return builder;
+		}
+
 		private static IHostBuilder ConfigureServices(IHostBuilder builder)
 		{
 			builder
@@ -60,10 +71,10 @@ namespace Silk.Core
 				.ConfigureServices((context, services) =>
 				{
 					// There's a more elegant way to do this, but I'm lazy and this works.
-					//SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+					SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
 					AddSilkConfigurationOptions(services, context.Configuration);
-					//AddDatabases(services, silkConfig.Persistence);
+					AddDatabases(services, silkConfig.Persistence);
 
 					services.AddLogging(_ => AddLogging(context));
 
@@ -85,37 +96,6 @@ namespace Silk.Core
 						.AddCommands(asm) // Register types
 						.AddCommands(); // Register commands
 					//.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
-
-					services.Configure<DiscordGatewayClientOptions>(options =>
-					{
-						options.Intents =
-							GatewayIntents.Guilds
-							| GatewayIntents.GuildMembers
-							| GatewayIntents.GuildBans
-							| GatewayIntents.GuildEmojisAndStickers
-							| GatewayIntents.GuildIntegrations
-							| GatewayIntents.GuildWebhooks
-							| GatewayIntents.GuildInvites
-							| GatewayIntents.GuildVoiceStates
-							| GatewayIntents.GuildPresences
-							| GatewayIntents.GuildMessages
-							| GatewayIntents.GuildMessageReactions
-							| GatewayIntents.GuildMessageTyping
-							| GatewayIntents.DirectMessages
-							| GatewayIntents.DirectMessageReactions
-							| GatewayIntents.DirectMessageTyping;
-
-						options.Presence = new UpdatePresence
-						(
-							ClientStatus.Idle,
-							false,
-							DateTimeOffset.UtcNow,
-							new[]
-							{
-								new Activity("UwU", ActivityType.Custom)
-							}
-						);
-					});
 
 					services
 						.AddDiscordCommands()
