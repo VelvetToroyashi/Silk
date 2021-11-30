@@ -13,11 +13,14 @@ namespace RoleMenuPlugin.Database.MediatR
 		public sealed class Handler : IRequestHandler<Request, Result>
 		{
 			private readonly RoleMenuContext _db;
-			public Handler(RoleMenuContext db) => _db = db;
+			public Handler(RoleMenuContext db)
+			{
+				_db = db;
+			}
 
 			public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var rm = request.Menu;
+				RoleMenuModel? rm = request.Menu;
 
 				try
 				{

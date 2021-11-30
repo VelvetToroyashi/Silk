@@ -4,8 +4,8 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.MediatR.Users;
 using Silk.Extensions;
 
 namespace Silk.Core.EventHandlers

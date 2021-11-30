@@ -13,6 +13,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using FuzzySharp;
+using FuzzySharp.Extractor;
 using MediatR;
 using Remora.Results;
 using RoleMenuPlugin.Database;
@@ -21,7 +22,7 @@ using RoleMenuPlugin.Database.MediatR;
 namespace RoleMenuPlugin
 {
 	/// <summary>
-	/// The command module responsible for creating, modifying, and deleting role menus.
+	///     The command module responsible for creating, modifying, and deleting role menus.
 	/// </summary>
 	[Group("rolemenu")]
 	[Aliases("role-menu", "rm")]
@@ -44,7 +45,7 @@ namespace RoleMenuPlugin
 
 		private readonly IMediator _mediator;
 
-		private readonly DiscordButtonComponent _v1ExplainationButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-explain-V1", "Why can't I edit my menu?");
+		private readonly DiscordButtonComponent _v1ExplainationButton = new(ButtonStyle.Secondary, "rm-explain-V1", "Why can't I edit my menu?");
 
 		private readonly string V1CutoffDate = Formatter.Timestamp(new DateTime(2021, 12, 10), TimestampFormat.ShortDate);
 
@@ -108,10 +109,10 @@ namespace RoleMenuPlugin
 					reset = false;
 				}
 
-				var selection = (await interactivity.WaitForButtonAsync(initialMenuMessage, ctx.User, CancellationToken.None)).Result;
-				var selectionId = selection.Id;
+				ComponentInteractionCreateEventArgs? selection = (await interactivity.WaitForButtonAsync(initialMenuMessage, ctx.User, CancellationToken.None)).Result;
+				string? selectionId = selection.Id;
 
-				var t = selectionId switch
+				Task? t = selectionId switch
 				{
 					"rm-quit" => Task.CompletedTask,
 					"rm-finish" => Task.CompletedTask,
@@ -153,11 +154,11 @@ namespace RoleMenuPlugin
 
 					return;
 				}
-				else if (selectionId == "rm-finish")
+				if (selectionId == "rm-finish")
 				{
 					if (await ConfirmFinishedAsync(selection.Interaction, interactivity, options))
 					{
-						await selection.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+						await selection.Interaction.EditOriginalResponseAsync(new()
 						{
 							Content = "Thank you for choosing Silk! Your role menu has been deployed to the specified channel."
 						});
@@ -204,7 +205,7 @@ namespace RoleMenuPlugin
 				try
 				{
 					await selection.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-						.WithContent($"Silk! Role Menu Creator v2.0")
+						.WithContent("Silk! Role Menu Creator v2.0")
 						.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
 						.AddComponents(_finishButton, _quitButton, _htuButton));
 
@@ -218,14 +219,14 @@ namespace RoleMenuPlugin
 			}
 
 			// if we're here, we're done
-			var outputMessageBuilder = new StringBuilder()
+			StringBuilder? outputMessageBuilder = new StringBuilder()
 				.AppendLine(Formatter.Bold("Role Menu:"))
 				.AppendLine("Click the button below to view the role menu.")
 				.AppendLine("Available roles are:")
 				.AppendLine()
 				.AppendLine(string.Join("\n", options.Select(x => $"<@&{x.RoleId}>")));
 
-			var rmMessage = await channel.SendMessageAsync(m => m
+			DiscordMessage? rmMessage = await channel.SendMessageAsync(m => m
 				.WithContent(outputMessageBuilder.ToString())
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, RoleMenuRoleService.RoleMenuPrefix, "Get Roles")));
 
@@ -242,11 +243,11 @@ namespace RoleMenuPlugin
 
 		private async Task<bool> ConfirmFinishedAsync(DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionModel> options)
 		{
-			var select = options
+			IEnumerable<DiscordSelectComponentOption>? select = options
 				.Select(x => new DiscordSelectComponentOption(x.RoleName, x.RoleId.ToString(), x.Description, false, x.EmojiName is null ? null :
-					ulong.TryParse(x.EmojiName, out var id) ? new(id) : new(x.EmojiName)));
+					ulong.TryParse(x.EmojiName, out ulong id) ? new(id) : new(x.EmojiName)));
 
-			var message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+			DiscordMessage? message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 				.WithContent("Please confirm you want to finish the creation of this role menu by verifying the options below.\n" +
 				             "This is the same dropdown users will see when they select their roles!")
 				.AddComponents(new DiscordSelectComponent(interaction.Id.ToString(), "Select your roles!", select, false, 0, options.Count))
@@ -254,7 +255,7 @@ namespace RoleMenuPlugin
 					new DiscordButtonComponent(ButtonStyle.Danger, "rm-cancel", "Cancel"))
 				.AsEphemeral(true));
 
-			var res = await interactivity.WaitForButtonAsync(message, interaction.User, TimeSpan.FromMinutes(14));
+			InteractivityResult<ComponentInteractionCreateEventArgs> res = await interactivity.WaitForButtonAsync(message, interaction.User, TimeSpan.FromMinutes(14));
 
 			if (!res.TimedOut)
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -340,7 +341,7 @@ namespace RoleMenuPlugin
 			if (role is null)
 				return;
 
-			var emojiRes = await GetEmojiAsync(ctx, interaction, interactivity, tipMessage);
+			InputResult<DiscordEmoji?>? emojiRes = await GetEmojiAsync(ctx, interaction, interactivity, tipMessage);
 
 			if (emojiRes.Cancelled)
 				return;
@@ -365,7 +366,7 @@ namespace RoleMenuPlugin
 
 			async Task<bool> GetConfirmationAsync()
 			{
-				var confirmMessage = await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
+				DiscordMessage? confirmMessage = await interaction.EditFollowupMessageAsync(tipMessage.Id, new DiscordWebhookBuilder()
 					.WithContent("Are you sure you want to add this role to the menu?\n" +
 					             $"Role: {role.Name}\n" +
 					             $"Emoji: {emoji}\n" +
@@ -375,9 +376,9 @@ namespace RoleMenuPlugin
 						new DiscordButtonComponent(ButtonStyle.Danger, "n", "No (Cancel)")
 					));
 
-				var res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(14));
+				InteractivityResult<ComponentInteractionCreateEventArgs> res = await interactivity.WaitForButtonAsync(confirmMessage, TimeSpan.FromMinutes(14));
 
-				var ret = res.Result?.Id switch
+				bool ret = res.Result?.Id switch
 				{
 					"y" => true,
 					"n" => false,
@@ -397,16 +398,16 @@ namespace RoleMenuPlugin
 
 		private static async Task AddRoleOnly(CommandContext ctx, DiscordInteraction interaction, List<RoleMenuOptionModel> options, InteractivityExtension interactivity)
 		{
-			var message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+			DiscordMessage? message = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
 				.WithContent("Please mention the roles you'd like to add to the menu.")
 				.AsEphemeral(true));
 
 			var erroredResponsesBuilder = new StringBuilder();
 
-			var res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(14));
+			InteractivityResult<DiscordMessage> res = await interactivity.WaitForMessageAsync(m => m.MentionedRoles.Any(), TimeSpan.FromMinutes(14));
 
-			var roles = res.Result.MentionedRoles;
-			var availableSlots = 25 - roles.Count;
+			IReadOnlyList<DiscordRole>? roles = res.Result.MentionedRoles;
+			int availableSlots = 25 - roles.Count;
 			var added = 0;
 
 			foreach (DiscordRole role in roles)
@@ -461,19 +462,19 @@ namespace RoleMenuPlugin
 
 		private static async Task Edit(CommandContext ctx, DiscordInteraction interaction, InteractivityExtension interactivity, List<RoleMenuOptionModel> options)
 		{
-			var sopts = options.Select((x, i) =>
+			IEnumerable<DiscordSelectComponentOption>? sopts = options.Select((x, i) =>
 				new DiscordSelectComponentOption(x.RoleName, i.ToString(), x.Description));
 
-			var selectionMessage = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AsEphemeral(true)
+			DiscordMessage? selectionMessage = await interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AsEphemeral(true)
 				.WithContent("\u200b")
 				.AddComponents(new DiscordSelectComponent("rm-edit-current", "Select the option you want to edit", sopts))
 				.AddComponents(_quitButton));
 
 			Wait:
-			var t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
-			var t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(14));
+			Task<InteractivityResult<ComponentInteractionCreateEventArgs>>? t1 = interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
+			Task<InteractivityResult<ComponentInteractionCreateEventArgs>>? t2 = interactivity.WaitForSelectAsync(selectionMessage, "rm-edit-current", TimeSpan.FromMinutes(14));
 
-			var res = (await Task.WhenAny(t1, t2)).Result;
+			InteractivityResult<ComponentInteractionCreateEventArgs> res = (await Task.WhenAny(t1, t2)).Result;
 
 			if (!res.TimedOut && res.Result.Id != "rm-quit")
 			{
@@ -485,8 +486,8 @@ namespace RoleMenuPlugin
 				return;
 			}
 
-			var index = int.Parse(res.Result.Values[0]);
-			var option = options[index]; // Default min value is 1, so there's always an index.
+			int index = int.Parse(res.Result.Values[0]);
+			RoleMenuOptionModel? option = options[index]; // Default min value is 1, so there's always an index.
 
 			var changeRoleButton = new DiscordButtonComponent(ButtonStyle.Primary, "rm-change-role", "Change Role");
 			var changeEmojiButton = new DiscordButtonComponent(ButtonStyle.Secondary, "rm-change-emoji", "Change Emoji");
@@ -510,7 +511,7 @@ namespace RoleMenuPlugin
 						.WithTitle("Current menu option:")
 						.AddField("Role", option.RoleName, true)
 						.AddField("Emoji", option.EmojiName is null ? "Not set." :
-							ulong.TryParse(option.EmojiName, out var emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
+							ulong.TryParse(option.EmojiName, out ulong emoji) ? $"<a:{emoji}>" : option.EmojiName, true)
 						.AddField("Description", option.Description ?? "None"))
 					.AddComponents(changeRoleButton, option.EmojiName is null ? addEmojiButton : changeEmojiButton, option.Description is null ? addDescriptionButton : changeDescriptionButton, deleteButton, quitButton));
 				res = await interactivity.WaitForButtonAsync(selectionMessage, TimeSpan.FromMinutes(14));
@@ -521,7 +522,7 @@ namespace RoleMenuPlugin
 					return;
 				}
 
-				var t = res.Result.Id switch
+				Task? t = res.Result.Id switch
 				{
 					"rm-change-role" => ChangeRoleAsync(),
 					"rm-change-emoji" => ChangeEmojiAsync(),
@@ -559,7 +560,7 @@ namespace RoleMenuPlugin
 
 			async Task ChangeRoleAsync()
 			{
-				var ret = await GetRoleAsync(ctx, interaction, interactivity, selectionMessage, options);
+				DiscordRole? ret = await GetRoleAsync(ctx, interaction, interactivity, selectionMessage, options);
 
 				if (ret is not null)
 				{
@@ -572,7 +573,7 @@ namespace RoleMenuPlugin
 
 			async Task ChangeEmojiAsync()
 			{
-				var ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
+				InputResult<DiscordEmoji?>? ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
 
 				if (ret.Value is not null)
 				{
@@ -584,7 +585,7 @@ namespace RoleMenuPlugin
 
 			async Task ChangeDescriptionAsync()
 			{
-				var ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
+				string? ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
 
 				if (ret is not null)
 				{
@@ -602,7 +603,7 @@ namespace RoleMenuPlugin
 
 			async Task AddEmojiAsync()
 			{
-				var ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
+				InputResult<DiscordEmoji?>? ret = await GetEmojiAsync(ctx, interaction, interactivity, selectionMessage);
 
 
 				if (!ret.Cancelled)
@@ -614,7 +615,7 @@ namespace RoleMenuPlugin
 
 			async Task AddDescriptionAsync()
 			{
-				var ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
+				string? ret = await GetDescriptionAsync(interaction, interactivity, selectionMessage);
 
 				if (ret is not null)
 				{
@@ -661,14 +662,14 @@ namespace RoleMenuPlugin
 				InputResult<DiscordMessage?> input = await GetInputAsync(interactivity, interaction, interactionMessage.Id);
 
 				if (input.Cancelled)
-					return new InputResult<DiscordEmoji?>(true, null);
+					return new(true, null);
 
 				if (input.Value is null)
 					return new(false, null);
 
 				var converter = (IArgumentConverter<DiscordEmoji>)new DiscordEmojiConverter();
 
-				var result = await converter.ConvertAsync(input.Value.Content, ctx);
+				Optional<DiscordEmoji> result = await converter.ConvertAsync(input.Value.Content, ctx);
 
 				if (!result.HasValue)
 				{
@@ -695,14 +696,14 @@ namespace RoleMenuPlugin
 					             "If you don't see the role in the list, you may need to type it in the exact format it appears in the server (e.g. `@Role`).\n" +
 					             "Type `cancel` to cancel adding roles."));
 
-				var input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
+				InputResult<DiscordMessage?>? input = await GetInputAsync(interactivity, interaction, selectionMessage.Id);
 
 				if (input.Cancelled)
 					return role;
 
 				if (input.Value!.MentionedRoles.Count is not 0)
 				{
-					var r = role = input.Value.MentionedRoles[0];
+					DiscordRole? r = role = input.Value.MentionedRoles[0];
 
 					// Ensure the role is not above the user's highest role
 					if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, r, selectionMessage))
@@ -710,44 +711,41 @@ namespace RoleMenuPlugin
 
 					return r;
 				}
+				// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
+				// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
+
+				//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
+				var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
+
+				//Try to convert the input to a role
+				Optional<DiscordRole> result = await roleConverter.ConvertAsync(input.Value.Content, ctx);
+
+				if (result.HasValue)
+				{
+					role = result.Value;
+				}
 				else
 				{
-					// Accurate route: Use DiscordRoleConverter | This is the most accurate way to get the role, but doesn't support names
-					// Less accurate route: Use FuzzySharp to fuzzy match the role name, but use a high drop-off threshold
+					ExtractedResult<(string, ulong)>? fuzzyRes = Process.ExtractSorted((input.Value.Content, default(ulong)),
+							ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
+							r => r.Item1, cutoff: 80)
+						.FirstOrDefault();
 
-					//We need to check role names via RoleConverter casted to IArgumentConverter<DiscordRole>
-					var roleConverter = (IArgumentConverter<DiscordRole>)new DiscordRoleConverter();
-
-					//Try to convert the input to a role
-					var result = await roleConverter.ConvertAsync(input.Value.Content, ctx);
-
-					if (result.HasValue)
+					if (fuzzyRes?.Value is null)
 					{
-						role = result.Value;
-					}
-					else
-					{
-						var fuzzyRes = Process.ExtractSorted((input.Value.Content, default(ulong)),
-								ctx.Guild.Roles.Select(r => (r.Value.Name, r.Key)),
-								r => r.Item1, cutoff: 80)
-							.FirstOrDefault();
-
-						if (fuzzyRes?.Value is null)
-						{
-							await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that role. Try again."));
-							await Task.Delay(MessageReadDelayMs);
-							continue;
-						}
-
-						role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
-					}
-
-					if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage))
+						await interaction.EditFollowupMessageAsync(selectionMessage.Id, new DiscordWebhookBuilder().WithContent("Could not find that role. Try again."));
+						await Task.Delay(MessageReadDelayMs);
 						continue;
+					}
 
-					await input.Value.DeleteAsync();
-					return role;
+					role = ctx.Guild.Roles[fuzzyRes.Value.Item2];
 				}
+
+				if (!await EnsureNonDuplicatedRoleAsync() || !await ValidateRoleHeirarchyAsync(ctx, interaction, role, selectionMessage))
+					continue;
+
+				await input.Value.DeleteAsync();
+				return role;
 			}
 
 			async Task<bool> EnsureNonDuplicatedRoleAsync()
@@ -806,7 +804,7 @@ namespace RoleMenuPlugin
 
 		private static async Task<InputResult<DiscordMessage?>> GetInputAsync(InteractivityExtension it, DiscordInteraction interaction, ulong message)
 		{
-			var input = await it.WaitForMessageAsync(m => m.Author == interaction.User, TimeSpan.FromMinutes(14));
+			InteractivityResult<DiscordMessage> input = await it.WaitForMessageAsync(m => m.Author == interaction.User, TimeSpan.FromMinutes(14));
 
 			if (input.TimedOut)
 				return new(true, null);
@@ -857,10 +855,10 @@ namespace RoleMenuPlugin
 
 			if (options.Entity.Count() > 1)
 			{
-				var interactivity = ctx.Client.GetInteractivity();
+				InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
 
 				// Ask the user which menu they want to edit
-				var selectOptions = options.Entity.Where(c => c.ChannelId is not 0)
+				IEnumerable<DiscordSelectComponentOption>? selectOptions = options.Entity.Where(c => c.ChannelId is not 0)
 					.Select(s =>
 					{
 						DiscordChannel? chn = ctx.Guild.GetChannel(s.ChannelId);
@@ -875,11 +873,11 @@ namespace RoleMenuPlugin
 						return option;
 					});
 
-				var msg = await ctx.RespondAsync(m => m.WithContent("There are multiple role menus that can be edited. Which one would you like?")
+				DiscordMessage? msg = await ctx.RespondAsync(m => m.WithContent("There are multiple role menus that can be edited. Which one would you like?")
 					.AddComponents(new DiscordSelectComponent("rm-edit-select", "Select an option", selectOptions))
 					.AddComponents(_v1ExplainationButton));
 
-				var res = await interactivity.WaitForSelectAsync(msg, ctx.User, "rm-edit-select", TimeSpan.FromMinutes(5));
+				InteractivityResult<ComponentInteractionCreateEventArgs> res = await interactivity.WaitForSelectAsync(msg, ctx.User, "rm-edit-select", TimeSpan.FromMinutes(5));
 
 				if (res.TimedOut)
 				{
@@ -887,8 +885,8 @@ namespace RoleMenuPlugin
 					return;
 				}
 
-				var interaction = res.Result.Interaction;
-				var selected = options.Entity.First(x => x.MessageId == ulong.Parse(res.Result.Values[0]));
+				DiscordInteraction? interaction = res.Result.Interaction;
+				RoleMenuModel? selected = options.Entity.First(x => x.MessageId == ulong.Parse(res.Result.Values[0]));
 
 				await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
@@ -897,7 +895,7 @@ namespace RoleMenuPlugin
 				var quit = new DiscordButtonComponent(ButtonStyle.Danger, "rm-edit-quit", "Quit");
 
 
-				var editOrAdd = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				DiscordMessage? editOrAdd = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
 					.WithContent($"Please select an option. This menu expires {Formatter.Timestamp(DateTimeOffset.UtcNow.AddMinutes(5))}.")
 					.AddComponents(add, edit, quit));
 
@@ -935,12 +933,12 @@ namespace RoleMenuPlugin
 					await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(editOrAdd.Content).AddComponents(add, edit, quit));
 				}
 
-				var roleMenuChannel = ctx.Guild.GetChannel(selected.ChannelId);
+				DiscordChannel? roleMenuChannel = ctx.Guild.GetChannel(selected.ChannelId);
 
 				if (roleMenuChannel is null)
 					throw new InvalidOperationException("Role menu channel is null");
 
-				var roleMenuMessage = await roleMenuChannel.GetMessageAsync(selected.MessageId);
+				DiscordMessage? roleMenuMessage = await roleMenuChannel.GetMessageAsync(selected.MessageId);
 
 				await roleMenuMessage.ModifyAsync(m => m.Content = $"**Role Menu**\nAvailable Roles:\n:{string.Join('\n', selected.Options.Select(r => $"<@&{r.RoleId}>"))}");
 
@@ -960,7 +958,7 @@ namespace RoleMenuPlugin
 				return;
 			}
 
-			var options = await _mediator.Send(new GetChannelRoleMenusRequest.Request(ctx.Channel.Id));
+			Result<IEnumerable<RoleMenuModel>> options = await _mediator.Send(new GetChannelRoleMenusRequest.Request(ctx.Channel.Id));
 
 			if (!options.Entity.Any())
 			{
@@ -968,7 +966,7 @@ namespace RoleMenuPlugin
 				return;
 			}
 
-			var selected = options.Entity.FirstOrDefault(x => x.MessageId == messageLink.Id);
+			RoleMenuModel? selected = options.Entity.FirstOrDefault(x => x.MessageId == messageLink.Id);
 
 			if (selected is null)
 			{
@@ -992,7 +990,7 @@ namespace RoleMenuPlugin
 		private void ResetToMenu(ref DiscordMessage message)
 		{
 			message = message.ModifyAsync(m => m
-					.WithContent($"Silk! Role Menu Creator v2.0")
+					.WithContent("Silk! Role Menu Creator v2.0")
 					.AddComponents(_addFullButton, _addRoleOnlyButton, _editButton)
 					.AddComponents(_finishButton, _quitButton, _htuButton))
 				.GetAwaiter()

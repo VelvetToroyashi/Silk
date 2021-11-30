@@ -22,6 +22,9 @@ namespace Silk.Core.Commands.Bot
 
 		[Command("help")]
 		[Description("Shows help for a command or group of commands.")]
-		public Task<Result<IMessage>> Help([Greedy] [Description("View help about a command. Omit to show all commands.")] string? command = null) => _help.SendHelpAsync(command, _context.ChannelID);
+		public Task<Result<IMessage>> Help([Greedy] [Description("View help about a command. Omit to show all commands.")] string? command = null)
+		{
+			return _help.SendHelpAsync(command, _context.ChannelID);
+		}
 	}
 }

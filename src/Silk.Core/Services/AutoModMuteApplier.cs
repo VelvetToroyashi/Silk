@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
@@ -11,7 +12,7 @@ using Silk.Shared.Constants;
 namespace Silk.Core.AutoMod
 {
 	/// <summary>
-	/// An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
+	///     An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
 	/// </summary>
 	public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
 	{
@@ -35,12 +36,12 @@ namespace Silk.Core.AutoMod
 
 			bool isMuted = await _infractions.IsMutedAsync(member, guild);
 
-			var automodRes = await _users.GetCurrentUserAsync(ct);
+			Result<IUser> automodRes = await _users.GetCurrentUserAsync(ct);
 
 			if (!automodRes.IsSuccess)
 				return Result.FromError(automodRes.Error);
 
-			var automod = automodRes.Entity.ID.Value;
+			ulong automod = automodRes.Entity.ID.Value;
 
 			if (!isMuted)
 				return Result.FromSuccess();

@@ -13,8 +13,8 @@ namespace Silk.Core.Services.Data
 	public class ConfigService
 	{
 		private readonly IMemoryCache _cache;
-		private readonly IMediator _mediator;
 		private readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(60);
+		private readonly IMediator _mediator;
 
 		public ConfigService(IMemoryCache cache, IMediator mediator, ICacheUpdaterService updater)
 		{
@@ -25,32 +25,38 @@ namespace Silk.Core.Services.Data
 
 		private void OnConfigUpdated(ulong guildId)
 		{
-			var guildCacheKey = GetCacheGuildConfigKey(guildId);
-			var guildModCacheKey = GetCacheGuildModConfigKey(guildId);
+			object? guildCacheKey = GetCacheGuildConfigKey(guildId);
+			object? guildModCacheKey = GetCacheGuildModConfigKey(guildId);
 			_cache.Remove(guildCacheKey);
 			_cache.Remove(guildModCacheKey);
 		}
 
-		private object GetCacheGuildConfigKey(ulong guildId) => guildId;
-		private object GetCacheGuildModConfigKey(ulong guildId) => $"{guildId}_mod";
+		private object GetCacheGuildConfigKey(ulong guildId)
+		{
+			return guildId;
+		}
+		private object GetCacheGuildModConfigKey(ulong guildId)
+		{
+			return $"{guildId}_mod";
+		}
 
 		public async ValueTask<GuildConfigEntity> GetConfigAsync(ulong guildId)
 		{
-			var cacheKey = GetCacheGuildConfigKey(guildId);
+			object? cacheKey = GetCacheGuildConfigKey(guildId);
 			if (_cache.TryGetValue(cacheKey, out GuildConfigEntity config)) return config;
 			return await GetConfigFromDatabaseAsync(guildId);
 		}
 
 		public async ValueTask<GuildModConfigEntity> GetModConfigAsync(ulong guildId)
 		{
-			var cacheKey = GetCacheGuildModConfigKey(guildId);
+			object? cacheKey = GetCacheGuildModConfigKey(guildId);
 			if (_cache.TryGetValue(cacheKey, out GuildModConfigEntity config)) return config;
 			return await GetModConfigFromDatabaseAsync(guildId);
 		}
 		private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(ulong guildId)
 		{
 			GuildModConfigEntity? configuration = await _mediator.Send(new GetGuildModConfigRequest(guildId), CancellationToken.None);
-			var cacheKey = GetCacheGuildModConfigKey(guildId);
+			object? cacheKey = GetCacheGuildModConfigKey(guildId);
 			_cache.Set(cacheKey, configuration, _defaultCacheExpiration);
 			return configuration;
 		}
@@ -58,7 +64,7 @@ namespace Silk.Core.Services.Data
 		private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(ulong guildId)
 		{
 			GuildConfigEntity? configuration = await _mediator.Send(new GetGuildConfigRequest(guildId), CancellationToken.None);
-			var cacheKey = GetCacheGuildConfigKey(guildId);
+			object? cacheKey = GetCacheGuildConfigKey(guildId);
 			_cache.Set(cacheKey, configuration, _defaultCacheExpiration);
 			return configuration;
 		}

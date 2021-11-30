@@ -19,7 +19,7 @@ namespace Silk.Core.Utilities.HelpFormatter
 			string usage = commandUsage is null ? "" : $"Usage: `{commandUsage}`\n";
 			string aliases = command.Aliases.Any() ? string.Join(", ", command.Aliases) + '\n' : "None";
 
-			var parameterHelp = command
+			IEnumerable<IEmbedField>? parameterHelp = command
 				.Shape
 				.Parameters
 				.Select(p => (IEmbedField)new EmbedField((p.IsOmissible() ? "(Optional) " : "") + p.HintName, p.Description));
@@ -43,11 +43,11 @@ namespace Silk.Core.Utilities.HelpFormatter
 		public IEmbed GetHelpEmbed(IEnumerable<IChildNode> subcommands)
 		{
 			IEmbed embed;
-			var commandString = string.Join('\n', subcommands.Select(c => '`' + c.Key + '`'));
+			string? commandString = string.Join('\n', subcommands.Select(c => '`' + c.Key + '`'));
 
 			var fields = new List<IEmbedField>();
 
-			var categories = subcommands
+			IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
 				.GroupBy(x => x is CommandNode cn
 					? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
 					: ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
@@ -95,8 +95,10 @@ namespace Silk.Core.Utilities.HelpFormatter
 		}
 
 		private string? GetUsage(CommandNode command)
-			=> !command.Shape.Parameters.Any()
+		{
+			return !command.Shape.Parameters.Any()
 				? null
 				: string.Join(' ', command.Shape.Parameters.Select(p => p.IsOmissible() ? $"[{p.HintName}]" : $"<{p.HintName}>"));
+		}
 	}
 }

@@ -16,11 +16,14 @@ namespace RoleMenuPlugin.Database.MediatR
 		{
 			private readonly RoleMenuContext _db;
 
-			public Handler(RoleMenuContext db) => _db = db;
+			public Handler(RoleMenuContext db)
+			{
+				_db = db;
+			}
 
 			public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken token)
 			{
-				var results = await _db.RoleMenus
+				List<RoleMenuModel>? results = await _db.RoleMenus
 					.Include(c => c.Options)
 					.Where(x => x.GuildId == request.GuildId)
 					.ToListAsync(token);

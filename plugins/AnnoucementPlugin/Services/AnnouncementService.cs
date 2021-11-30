@@ -13,18 +13,18 @@ namespace AnnoucementPlugin.Services
 	// We can't use IHostedService/BackgroundService (which implements IHostedService) because there's no guarantee that this is not hot-plugged. //
 	public sealed class AnnouncementService
 	{
-		private readonly IMediator _mediator;
+		private readonly List<AnnouncementModel> _announcements = new();
 		private readonly AsyncTimer _announcementTimer;
+		private readonly ConcurrentHashSet<AnnouncementModel> _databaseAnnouncements = new();
 		private readonly IMessageDispatcher _dispatcher;
 		private readonly ILogger<AnnouncementService> _logger;
-		private readonly List<AnnouncementModel> _announcements = new();
-		private readonly ConcurrentHashSet<AnnouncementModel> _databaseAnnouncements = new();
+		private readonly IMediator _mediator;
 
 		/// <summary>
-		/// Minimum threshold time required for an announcement to be saved to the database. 
+		///     Minimum threshold time required for an announcement to be saved to the database.
 		/// </summary>
 		private readonly TimeSpan _minExpirationDatabaseThreshold = TimeSpan.FromSeconds(5);
-		
+
 		private bool _started;
 
 		public AnnouncementService(ILogger<AnnouncementService> logger, IMessageDispatcher dispatcher, IMediator mediator)
@@ -39,7 +39,7 @@ namespace AnnoucementPlugin.Services
 		{
 			if (_started)
 				throw new InvalidOperationException("This service has already been started");
-			
+
 			_started = true;
 			_announcementTimer.Start();
 		}
@@ -55,13 +55,13 @@ namespace AnnoucementPlugin.Services
 					ChannelId = channel,
 					ScheduledFor = DateTime.UtcNow + expiration
 				};
-				
+
 				_announcements.Add(nonCachedAnnouncement);
 			}
 			else
 			{
-				var dbBackedAnnouncement = await _mediator.Send(new CreateAnnouncementRequest(content, guild, channel, DateTime.UtcNow + expiration));
-				
+				AnnouncementModel dbBackedAnnouncement = await _mediator.Send(new CreateAnnouncementRequest(content, guild, channel, DateTime.UtcNow + expiration));
+
 				_announcements.Add(dbBackedAnnouncement);
 				_databaseAnnouncements.Add(dbBackedAnnouncement);
 			}
@@ -71,11 +71,11 @@ namespace AnnoucementPlugin.Services
 		{
 			for (int i = _announcements.Count - 1; i >= 0; i--)
 			{
-				var announcement = _announcements[i];
+				AnnouncementModel announcement = _announcements[i];
 				if (announcement.ScheduledFor <= DateTime.UtcNow)
 				{
 					_announcements.Remove(announcement);
-					var res = await _dispatcher.DispatchMessage(announcement.GuildId, announcement.ChannelId, announcement.AnnouncementMessage);
+					MessageSendResult res = await _dispatcher.DispatchMessage(announcement.GuildId, announcement.ChannelId, announcement.AnnouncementMessage);
 
 					if (!res.Succeeded)
 					{
@@ -85,7 +85,7 @@ namespace AnnoucementPlugin.Services
 					else
 					{
 						_logger.LogDebug("Successfully dispatched announcement.");
-						
+
 						if (_databaseAnnouncements.TryRemove(announcement))
 							await _mediator.Send(new RemoveAnnouncementRequest(announcement));
 					}

@@ -61,13 +61,16 @@ namespace Silk.Core.Services.Bot
 		public FlagOverlayService(HttpClient client) : this(client, NullLogger<FlagOverlayService>.Instance) { }
 
 		/// <summary>
-		/// Generates a flag image from the given url.
+		///     Generates a flag image from the given url.
 		/// </summary>
 		/// <param name="imageUrl">The url of the image to overlay</param>
 		/// <param name="overlay">The overlay to apply</param>
 		/// <param name="intensity">The intensity of the overlay to apply with.</param>
 		/// <param name="grayscale">The amount of grayscale to apply to the image</param>
-		/// <returns>A result type that defines whether the operation succeeded, why it did not succeed, and a stream containing the content of the generated image.</returns>
+		/// <returns>
+		///     A result type that defines whether the operation succeeded, why it did not succeed, and a stream containing the content of the generated
+		///     image.
+		/// </returns>
 		public async Task<FlagResult> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
 		{
 			OverlayGuard.ValidIntensity(intensity);
@@ -79,33 +82,33 @@ namespace Silk.Core.Services.Bot
 			try
 			{
 				if (!await ValidateImageSizeAsync(imageUrl))
-					return new FlagResult(false, FlagResultType.FileSizeTooLarge, null);
+					return new(false, FlagResultType.FileSizeTooLarge, null);
 			}
-			catch { return new FlagResult(false, FlagResultType.FileNotFound, null); }
+			catch { return new(false, FlagResultType.FileNotFound, null); }
 
 			_logger.LogDebug(EventIds.Service, "Processing overlay: {OverlayType}", overlay);
 
-			var before = DateTime.UtcNow;
+			DateTime before = DateTime.UtcNow;
 
 			await using MemoryStream imageStream = await GetImageAsync(imageUri!);
 
-			using var image = await Image.LoadAsync(imageStream);
+			using Image? image = await Image.LoadAsync(imageStream);
 
 			if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
-				return new FlagResult(false, FlagResultType.FileDimensionsTooLarge, null);
+				return new(false, FlagResultType.FileDimensionsTooLarge, null);
 
-			var overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
+			Stream? overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
 
-			var after = DateTime.UtcNow;
+			DateTime after = DateTime.UtcNow;
 
 			_logger.LogDebug(EventIds.Service, "Processed overlay in {Time:N1}ms", (after - before).TotalMilliseconds);
 
-			return new FlagResult(true, FlagResultType.Succeeded, overlayImage);
+			return new(true, FlagResultType.Succeeded, overlayImage);
 		}
 
 		private static async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
 		{
-			var overlaySelection = overlay switch
+			Image? overlaySelection = overlay switch
 			{
 				FlagOverlay.LGBTQPride => _prideImage,
 				FlagOverlay.MaleLovingMale => _mlmImage,
@@ -119,7 +122,7 @@ namespace Silk.Core.Services.Bot
 				_ => throw new ArgumentOutOfRangeException(nameof(overlay), overlay, null)
 			};
 
-			using var resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
+			using Image? resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
 
 			image.Mutate(x => x.Grayscale(grayscale).DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
 
@@ -132,24 +135,24 @@ namespace Silk.Core.Services.Bot
 		private async Task<bool> ValidateImageSizeAsync(string imageUrl)
 		{
 			// Typically a 'preflight' request is OPTIONS, not HEAD, but we're concerned about the size of the image, so we're using HEAD
-			using var preflight = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, imageUrl));
+			using HttpResponseMessage? preflight = await _httpClient.SendAsync(new(HttpMethod.Head, imageUrl));
 
 			if (preflight.IsSuccessStatusCode) // False if the host doesn't support HEAD requests
 			{
 				return preflight.Content.Headers.ContentLength < TwoMegaBytes;
 			}
-			else
-			{
-				_logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
-				using var secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
+			_logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
+			using HttpResponseMessage? secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
 
-				secondarySizeRequest.EnsureSuccessStatusCode();
+			secondarySizeRequest.EnsureSuccessStatusCode();
 
-				return secondarySizeRequest.Content.Headers.ContentLength < TwoMegaBytes;
-			}
+			return secondarySizeRequest.Content.Headers.ContentLength < TwoMegaBytes;
 		}
 
-		private async Task<MemoryStream> GetImageAsync(Uri imageUri) => new(await _httpClient.GetByteArrayAsync(imageUri));
+		private async Task<MemoryStream> GetImageAsync(Uri imageUri)
+		{
+			return new(await _httpClient.GetByteArrayAsync(imageUri));
+		}
 
 		private static class OverlayGuard
 		{

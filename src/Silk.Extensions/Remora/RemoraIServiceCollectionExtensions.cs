@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +13,7 @@ namespace Silk.Extensions.Remora
 	{
 		public static IServiceCollection AddResponders(this IServiceCollection collection, Assembly assembly)
 		{
-			var types = assembly
+			IEnumerable<Type>? types = assembly
 				.GetTypes()
 				.Where(t => t.IsClass && !t.IsAbstract && t.IsResponder());
 
@@ -23,7 +25,7 @@ namespace Silk.Extensions.Remora
 
 		public static IServiceCollection AddCommands(this IServiceCollection collection, Assembly assembly)
 		{
-			var types = assembly
+			IEnumerable<Type>? types = assembly
 				.GetExportedTypes()
 				.Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
 

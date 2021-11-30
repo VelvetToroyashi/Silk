@@ -16,7 +16,7 @@ namespace Silk.Core.EventHandlers
 		public RoleAddedHandler(DiscordClient client, IMediator mediator)
 		{
 			client.GuildMemberUpdated += CheckStaffRole;
-			
+
 			_mediator = mediator;
 		}
 
@@ -25,7 +25,7 @@ namespace Silk.Core.EventHandlers
 			if (e.RolesBefore.Count >= e.RolesAfter.Count || e.Member.IsBot) return;
 			bool isStaff = e.RolesAfter.Except(e.RolesBefore).Any(r => r.Permissions.HasPermission(FlagConstants.CacheFlag));
 			bool isAdmin = e.Member.HasPermission(Permissions.Administrator);
-			
+
 			if (isStaff)
 			{
 				UserEntity? user = await _mediator.Send(new GetUserRequest(e.Guild.Id, e.Member.Id));

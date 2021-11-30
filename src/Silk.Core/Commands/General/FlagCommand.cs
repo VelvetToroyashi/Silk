@@ -9,7 +9,10 @@ namespace Silk.Core.Commands.General
 	public class FlagCommand : BaseCommandModule
 	{
 		private readonly FlagOverlayService _flags;
-		public FlagCommand(FlagOverlayService flags) => _flags = flags;
+		public FlagCommand(FlagOverlayService flags)
+		{
+			_flags = flags;
+		}
 
 		[Command]
 		[Priority(0)]
@@ -67,7 +70,7 @@ namespace Silk.Core.Commands.General
 			}
 			try
 			{
-				var result = await _flags.GetFlagAsync(image, overlay.Value, intensity, grayscale);
+				FlagResult? result = await _flags.GetFlagAsync(image, overlay.Value, intensity, grayscale);
 
 				if (result.Succeeded)
 				{
@@ -77,7 +80,7 @@ namespace Silk.Core.Commands.General
 				}
 				else
 				{
-					var message = result.Reason switch
+					string? message = result.Reason switch
 					{
 						FlagResultType.FileNotFound => "It seems that image has gone missing. Try a different link?",
 						FlagResultType.FileNotImage => "It...Appears that isn't an image. Sorry!",

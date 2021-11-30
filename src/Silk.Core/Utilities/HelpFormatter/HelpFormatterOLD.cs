@@ -62,14 +62,14 @@ namespace Silk.Core.Utilities.HelpFormatter
 				IReadOnlyList<CommandArgument>? args = Command?.Overloads.OrderByDescending(x => x.Priority).FirstOrDefault()?.Arguments;
 
 				string title = $"Command: `{Command!.QualifiedName}";
-				var builder = new StringBuilder(title)
+				StringBuilder? builder = new StringBuilder(title)
 					.Append(GetArgs(args))
 					.Append('`');
 
 				embed.WithTitle(builder.ToString()).WithDescription(Command.Description);
 
 				if (Command.ExecutionChecks.OfType<RequireOwnerAttribute>().Any())
-					embed.AddField($"Developer", "You can't use it!", true);
+					embed.AddField("Developer", "You can't use it!", true);
 				else if (Command.IsHidden)
 					embed.AddField("\\👻 Hidden", "How did you find it?", true);
 

@@ -24,11 +24,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-      <DebugType>full</DebugType>
+        <DebugType>full</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
+        <Content Include="appSettings.json" CopyToOutputDirectory="Always"/>
     </ItemGroup>
 
     <ItemGroup>

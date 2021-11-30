@@ -33,7 +33,7 @@ namespace Silk.Core
 	{
 		public static async Task Main()
 		{
-			var host = Host
+			IHostBuilder? host = Host
 				.CreateDefaultBuilder()
 				.UseConsoleLifetime();
 
@@ -52,7 +52,7 @@ namespace Silk.Core
 		[SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
-			var builder = Host
+			IHostBuilder? builder = Host
 				.CreateDefaultBuilder(args);
 
 			builder.ConfigureServices((context, container) =>
@@ -108,7 +108,7 @@ namespace Silk.Core
 				})
 				.AddDiscordService(s =>
 				{
-					var config = s.Get<IConfiguration>()!.GetSilkConfigurationOptionsFromSection();
+					SilkConfigurationOptions? config = s.Get<IConfiguration>()!.GetSilkConfigurationOptionsFromSection();
 
 					return config.Discord.BotToken;
 				});
@@ -126,7 +126,7 @@ namespace Silk.Core
 				.MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
 				.MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
-			var configOptions = host.Configuration["Logging"];
+			string? configOptions = host.Configuration["Logging"];
 			Log.Logger = configOptions switch
 			{
 				"All" => logger.MinimumLevel.Verbose().CreateLogger(),
@@ -170,7 +170,7 @@ namespace Silk.Core
 	public static class IConfigurationExtensions
 	{
 		/// <summary>
-		/// An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
+		///     An extension method to get a <see cref="SilkConfigurationOptions"/> instance from the Configuration by Section Key
 		/// </summary>
 		/// <param name="config">the configuration</param>
 		/// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>

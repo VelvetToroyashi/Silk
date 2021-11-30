@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Silk.Core.Utilities.HttpClient
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// Overriding Logging Scope Handler for HttpClientFactory
-    /// Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
-    /// </summary>
-    public sealed class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
+	/// <inheritdoc/>
+	/// <summary>
+	///     Overriding Logging Scope Handler for HttpClientFactory
+	///     Source: https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
+	/// </summary>
+	public sealed class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
 	{
 		private readonly ILogger _logger;
 

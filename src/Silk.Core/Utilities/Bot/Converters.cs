@@ -11,17 +11,17 @@ using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Utilities.Bot
 {
-	
+
 	public class InfractionTypeConverter : IArgumentConverter<InfractionType>
 	{
 		public Task<Optional<InfractionType>> ConvertAsync(string value, CommandContext ctx)
 		{
-			var res = Enum.TryParse(typeof(InfractionType), value, true, out var inf);
+			bool res = Enum.TryParse(typeof(InfractionType), value, true, out object? inf);
 
 			return res ? Task.FromResult(Optional.FromValue((InfractionType)inf!)) : Task.FromResult(Optional.FromNoValue<InfractionType>());
 		}
 	}
-	
+
 	public class MemberConverter : IArgumentConverter<DiscordMember>
 	{
 		private static Regex UserRegex { get; } =
@@ -34,7 +34,7 @@ namespace Silk.Core.Utilities.Bot
 			if (user is not null) return Optional.FromValue(user);
 			return await ConvertMemberAsync(value, ctx);
 		}
-		
+
 		// Basically ripped from the source since we can't call this from the built-in one *shrug*
 
 		private static async Task<Optional<DiscordMember>> ConvertMemberAsync(string value, CommandContext ctx)
@@ -79,12 +79,12 @@ namespace Silk.Core.Utilities.Bot
 
 	public sealed class TimeSpanConverter
 	{
-		private static Regex TimeSpanRegex { get; }
 
 		static TimeSpanConverter()
 		{
 			TimeSpanRegex = new("^(?<days>\\d+d\\s*)?(?<hours>\\d{1,2}h\\s*)?(?<minutes>\\d{1,2}m\\s*)?(?<seconds>\\d{1,2}s\\s*)?$", RegexOptions.Compiled | RegexOptions.ECMAScript);
 		}
+		private static Regex TimeSpanRegex { get; }
 
 		public Task<Optional<TimeSpan>> ConvertAsync(string value)
 		{

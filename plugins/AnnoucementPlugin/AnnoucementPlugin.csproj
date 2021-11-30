@@ -6,19 +6,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
-      <PackageReference Include="DSharpPlus.CommandsNext" />
-      <PackageReference Include="DSharpPlus.Interactivity" />
-      <PackageReference Include="MediatR" />
-      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-      <PackageReference Include="YumeChan.PluginBase" />
-      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+        <PackageReference Include="ConcurrentHashSet" Version="1.3.0"/>
+        <PackageReference Include="DSharpPlus.CommandsNext"/>
+        <PackageReference Include="DSharpPlus.Interactivity"/>
+        <PackageReference Include="MediatR"/>
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
+        <PackageReference Include="YumeChan.PluginBase"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations" />
+        <Folder Include="Migrations"/>
     </ItemGroup>
 
 </Project>

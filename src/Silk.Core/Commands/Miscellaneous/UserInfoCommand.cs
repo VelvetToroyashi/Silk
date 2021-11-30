@@ -30,10 +30,10 @@ namespace Silk.Core.Commands.Miscellaneous
 		[Description("Get info about a role")]
 		public async Task RoleInfo(CommandContext ctx, DiscordRole role)
 		{
-			var members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
-			var memberString = GetRoleMemberCount(ctx, role, members);
+			IEnumerable<DiscordMember>? members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
+			string? memberString = GetRoleMemberCount(ctx, role, members);
 
-			var ms = await GenerateColoredImageAsync(role.Color);
+			MemoryStream? ms = await GenerateColoredImageAsync(role.Color);
 
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithTitle($"Info for {role.Name} ({role.Id}):")
@@ -55,7 +55,7 @@ namespace Silk.Core.Commands.Miscellaneous
 		[Command("info")]
 		public async Task GetUserInfo(CommandContext ctx, DiscordUser user)
 		{
-			var embed = new DiscordEmbedBuilder()
+			DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 				.WithColor(DiscordColor.Orange)
 				.WithAuthor(user.ToDiscordName(), iconUrl: user.AvatarUrl)
 				.WithDescription($"Information about {user.Mention}!")
@@ -74,11 +74,11 @@ namespace Silk.Core.Commands.Miscellaneous
 			}
 			else if (user.BannerColor.HasValue)
 			{
-				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
+				await using MemoryStream? banner = await GenerateColoredImageAsync(user.BannerColor.Value);
 
 				embed.WithImageUrl("attachment://banner.png");
 
-				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
+				DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
 				await ctx.RespondAsync(builder);
 			}
 			else
@@ -96,7 +96,7 @@ namespace Silk.Core.Commands.Miscellaneous
 				.GetProperty("UserCache", BindingFlags.NonPublic | BindingFlags.Instance)!
 				.GetValue(ctx.Client) as ConcurrentDictionary<ulong, DiscordUser>)!.TryRemove(member.Id, out _);
 
-			var user = await ctx.Client.GetUserAsync(member.Id);
+			DiscordUser? user = await ctx.Client.GetUserAsync(member.Id);
 
 			DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
 				.WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
@@ -139,11 +139,11 @@ namespace Silk.Core.Commands.Miscellaneous
 			}
 			else if (user.BannerColor.HasValue)
 			{
-				await using var banner = await GenerateColoredImageAsync(user.BannerColor.Value);
+				await using MemoryStream? banner = await GenerateColoredImageAsync(user.BannerColor.Value);
 
 				embed.WithImageUrl("attachment://banner.png");
 
-				var builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
+				DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithEmbed(embed).WithFile("banner.png", banner);
 				await ctx.RespondAsync(builder);
 			}
 			else
@@ -167,7 +167,7 @@ namespace Silk.Core.Commands.Miscellaneous
 			if (role == ctx.Guild.EveryoneRole)
 				return "Everyone has the @everyone role!";
 
-			var memberCount = members.Count();
+			int memberCount = members.Count();
 
 			if (memberCount is 0)
 				return "This role isn't assigned to anyone!";

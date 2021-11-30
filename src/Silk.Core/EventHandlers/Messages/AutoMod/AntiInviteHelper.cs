@@ -16,7 +16,7 @@ using Silk.Shared.Constants;
 namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
 	/// <summary>
-	/// Utility class for anti-invite functionality.
+	///     Utility class for anti-invite functionality.
 	/// </summary>
 	public sealed class AntiInviteHelper
 	{
@@ -34,18 +34,18 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		}
 
 		/// <summary>
-		/// Regex to match discord invites using discord's main invite URL (discord.gg)
+		///     Regex to match discord invites using discord's main invite URL (discord.gg)
 		/// </summary>
 		public static Regex LenientRegexPattern { get; } = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", FlagConstants.RegexFlags);
 
 		/// <summary>
-		/// A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern" />.
-		/// Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
+		///     A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern"/>.
+		///     Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
 		/// </summary>
 		public static Regex AggressiveRegexPattern { get; } = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-]{2,})", FlagConstants.RegexFlags);
 
 		/// <summary>
-		/// Checks if a <see cref="DiscordMessage" /> has a valid <see cref="DiscordInvite" />.
+		///     Checks if a <see cref="DiscordMessage"/> has a valid <see cref="DiscordInvite"/>.
 		/// </summary>
 		/// <param name="message">The message to check.</param>
 		/// <param name="config">The configuration of the guild the message was sent on.</param>
@@ -70,7 +70,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		}
 
 		/// <summary>
-		/// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
+		///     Checks if a suspected <see cref="DiscordInvite"/> is blacklisted.
 		/// </summary>
 		/// <param name="message">The message to check.</param>
 		/// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
@@ -104,7 +104,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 		}
 
 		/// <summary>
-		/// Attempts to warn (creates an infraction) a member for posting an invite.
+		///     Attempts to warn (creates an infraction) a member for posting an invite.
 		/// </summary>
 		/// <param name="message"></param>
 		public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfigEntity config)
@@ -114,7 +114,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			if (!userResult.IsSuccess)
 				return;
 
-			var user = userResult.Entity;
+			UserEntity? user = userResult.Entity;
 
 			if (user.Flags.HasFlag(UserFlag.InfractionExemption))
 				return;

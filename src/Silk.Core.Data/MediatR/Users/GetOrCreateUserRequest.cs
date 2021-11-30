@@ -8,17 +8,20 @@ using Silk.Core.Data.Entities;
 namespace Silk.Core.Data.MediatR.Users
 {
 	/// <summary>
-	/// Request to get a user from the database, or creates one if it does not exist.
+	///     Request to get a user from the database, or creates one if it does not exist.
 	/// </summary>
 	public record GetOrCreateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<Result<UserEntity>>;
 
 	/// <summary>
-	/// The default handler for <see cref="GetOrCreateUserRequest" />.
+	///     The default handler for <see cref="GetOrCreateUserRequest"/>.
 	/// </summary>
 	public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, Result<UserEntity>>
 	{
 		private readonly GuildContext _db;
-		public GetOrCreateUserHandler(GuildContext db) => _db = db;
+		public GetOrCreateUserHandler(GuildContext db)
+		{
+			_db = db;
+		}
 
 		public async Task<Result<UserEntity>> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
 		{

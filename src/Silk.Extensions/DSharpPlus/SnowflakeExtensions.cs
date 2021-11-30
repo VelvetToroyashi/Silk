@@ -8,46 +8,45 @@ using DSharpPlus.Net;
 
 namespace Silk.Extensions.DSharpPlus
 {
-    public static class SnowflakeExtensions
-    {
-        public static IEnumerable<TType> OfType<T, TType>(this IEnumerable<TType> collection, T type) where TType : SnowflakeObject where T : Enum
-        {
-            var snowflakeObjects = collection as SnowflakeObject[] ?? collection.ToArray();
-            
-            if (!snowflakeObjects.Any())
-                yield break;
+	public static class SnowflakeExtensions
+	{
+		public static IEnumerable<TType> OfType<T, TType>(this IEnumerable<TType> collection, T type) where TType : SnowflakeObject where T : Enum
+		{
+			SnowflakeObject[]? snowflakeObjects = collection as SnowflakeObject[] ?? collection.ToArray();
 
-            var prop = snowflakeObjects.First().GetType().GetProperty("Type", BindingFlags.Public | BindingFlags.Instance);
+			if (!snowflakeObjects.Any())
+				yield break;
 
-            if (prop is null)
-                throw new ArgumentException("Snowflake object in collection does not contain a 'Type' property to check.");
-            
-            foreach (var entity in snowflakeObjects)
-            {
-                var value = (T)prop.GetValue(entity)!;
+			PropertyInfo? prop = snowflakeObjects.First().GetType().GetProperty("Type", BindingFlags.Public | BindingFlags.Instance);
 
-                if (value.Equals(type))
-                    yield return (entity as TType)!;
-            }
-        }
-        
-        public static DiscordClient GetClient(this SnowflakeObject snowflake)
-        {
-            Type type = snowflake.GetType() == typeof(SnowflakeObject) ? snowflake.GetType() : snowflake.GetType().BaseType!;
+			if (prop is null)
+				throw new ArgumentException("Snowflake object in collection does not contain a 'Type' property to check.");
 
-            var client = type
-                .GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .GetValue(snowflake) as DiscordClient;
-            return client!;
-        }
+			foreach (var entity in snowflakeObjects)
+			{
+				var value = (T)prop.GetValue(entity)!;
 
-        public static DiscordApiClient GetApiClient(this DiscordClient client)
-        {
-            var api = typeof(DiscordClient)
-                .GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .GetValue(client) as DiscordApiClient;
-            return api!;
-        }
-        
-    }
+				if (value.Equals(type))
+					yield return (entity as TType)!;
+			}
+		}
+
+		public static DiscordClient GetClient(this SnowflakeObject snowflake)
+		{
+			Type type = snowflake.GetType() == typeof(SnowflakeObject) ? snowflake.GetType() : snowflake.GetType().BaseType!;
+
+			var client = type
+				.GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
+				.GetValue(snowflake) as DiscordClient;
+			return client!;
+		}
+
+		public static DiscordApiClient GetApiClient(this DiscordClient client)
+		{
+			var api = typeof(DiscordClient)
+				.GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!
+				.GetValue(client) as DiscordApiClient;
+			return api!;
+		}
+	}
 }

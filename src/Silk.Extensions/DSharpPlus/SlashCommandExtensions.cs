@@ -7,6 +7,8 @@ namespace Silk.Extensions.DSharpPlus
 	public static class SlashCommandExtensions
 	{
 		public static Task CreateThinkingResponseAsync(this InteractionContext ctx, bool ephemeral = true)
-			=> ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() {IsEphemeral = ephemeral});
+		{
+			return ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new() { IsEphemeral = ephemeral });
+		}
 	}
 }

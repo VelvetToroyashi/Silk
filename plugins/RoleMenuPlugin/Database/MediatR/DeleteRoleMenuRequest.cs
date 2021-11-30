@@ -14,11 +14,14 @@ namespace RoleMenuPlugin.Database.MediatR
 		{
 			private readonly RoleMenuContext _context;
 
-			public Handler(RoleMenuContext context) => _context = context;
+			public Handler(RoleMenuContext context)
+			{
+				_context = context;
+			}
 
 			public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
 			{
-				var entity = await _context.RoleMenus.FirstOrDefaultAsync(r => r.MessageId == request.RoleMenu.MessageId, cancellationToken);
+				RoleMenuModel? entity = await _context.RoleMenus.FirstOrDefaultAsync(r => r.MessageId == request.RoleMenu.MessageId, cancellationToken);
 
 				if (entity == null)
 					return Result.FromError(new NotFoundError());

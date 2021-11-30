@@ -13,47 +13,33 @@ namespace AnnoucementPlugin.Utilities
 	public delegate Task AsyncTimerDelegate<in T1, in T2>(T1 t1, T2 t2);
 
 
-  /// <summary>
-  /// An asynchronous timer that can yield to tasks if necessary.
-  /// </summary>
-  public sealed class AsyncTimer : IDisposable
+	/// <summary>
+	///     An asynchronous timer that can yield to tasks if necessary.
+	/// </summary>
+	public sealed class AsyncTimer : IDisposable
 	{
-    /// <summary>
-    /// Whether this timer has been started.
-    /// </summary>
-    public bool Started { get; private set; }
-
-    /// <summary>
-    /// Whether the timer yields when executing the callback.
-    /// </summary>
-    public bool YieldsWhenRunning { get; }
-
-    /// <summary>
-    /// An event fired when the callback throws an exception.
-    /// </summary>
-    public event EventHandler<Exception> Errored;
+		private readonly object[] _args = Array.Empty<object>();
 
 		private readonly TimeSpan _interval;
 
-		private bool _running;
-
 		private readonly Delegate _taskDelegate;
-		private readonly object[] _args = Array.Empty<object>();
 		private bool _isDisposed;
 
+		private bool _running;
 
-    /// <summary>
-    /// Constructs an instance of an AsyncTimer.
-    /// </summary>
-    /// <param name="method">The method to invoke.</param>
-    /// <param name="interval">How often the timer should fire.</param>
-    /// <param name="yieldToTask">
-    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    /// if the callback's execution time is greater than the interval.
-    /// </param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
-    public AsyncTimer(AsyncTimerDelegate method, TimeSpan interval, bool yieldToTask = false)
+
+		/// <summary>
+		///     Constructs an instance of an AsyncTimer.
+		/// </summary>
+		/// <param name="method">The method to invoke.</param>
+		/// <param name="interval">How often the timer should fire.</param>
+		/// <param name="yieldToTask">
+		///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+		///     if the callback's execution time is greater than the interval.
+		/// </param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
+		public AsyncTimer(AsyncTimerDelegate method, TimeSpan interval, bool yieldToTask = false)
 		{
 			if (interval == null)
 				throw new ArgumentNullException(nameof(interval), "Interval must be non-null.");
@@ -72,19 +58,19 @@ namespace AnnoucementPlugin.Utilities
 			_taskDelegate = method;
 		}
 
-    /// <summary>
-    /// Constructs an instance of an AsyncTimer.
-    /// </summary>
-    /// <param name="method">The method to invoke.</param>
-    /// <param name="parameter">A state parameter to pass to <paramref name="method" /> to avoid a closure.</param>
-    /// <param name="interval">How often the timer should fire.</param>
-    /// <param name="yieldToTask">
-    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    /// if the callback's execution time is greater than the interval.
-    /// </param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
-    public AsyncTimer(AsyncTimerDelegate<object> method, object parameter, TimeSpan interval, bool yieldToTask = false)
+		/// <summary>
+		///     Constructs an instance of an AsyncTimer.
+		/// </summary>
+		/// <param name="method">The method to invoke.</param>
+		/// <param name="parameter">A state parameter to pass to <paramref name="method"/> to avoid a closure.</param>
+		/// <param name="interval">How often the timer should fire.</param>
+		/// <param name="yieldToTask">
+		///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+		///     if the callback's execution time is greater than the interval.
+		/// </param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is less than zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
+		public AsyncTimer(AsyncTimerDelegate<object> method, object parameter, TimeSpan interval, bool yieldToTask = false)
 		{
 			if (interval == null)
 				throw new ArgumentNullException(nameof(interval), "Interval must be non-null.");
@@ -104,19 +90,19 @@ namespace AnnoucementPlugin.Utilities
 			YieldsWhenRunning = yieldToTask;
 		}
 
-    /// <summary>
-    /// Constructs an instance of an AsyncTimer.
-    /// </summary>
-    /// <param name="method">The method to invoke.</param>
-    /// <param name="parameters">A collection of objects to pass to <paramref name="method" /> to avoid a closure.</param>
-    /// <param name="interval">How often the timer should fire.</param>
-    /// <param name="yieldToTask">
-    /// Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
-    /// if the callback's execution time is greater than the interval.
-    /// </param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target" /> or <paramref name="interval" /> are null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue" />.</exception>
-    public AsyncTimer(AsyncTimerDelegate<object, object> method, IEnumerable<object> parameters, TimeSpan interval, bool yieldToTask = false)
+		/// <summary>
+		///     Constructs an instance of an AsyncTimer.
+		/// </summary>
+		/// <param name="method">The method to invoke.</param>
+		/// <param name="parameters">A collection of objects to pass to <paramref name="method"/> to avoid a closure.</param>
+		/// <param name="interval">How often the timer should fire.</param>
+		/// <param name="yieldToTask">
+		///     Whether the timer should yield when invoking the callback. This will prevent the callback from being called multiple times
+		///     if the callback's execution time is greater than the interval.
+		/// </param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method.Target"/> or <paramref name="interval"/> are null.</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown if the interval is zero or greater than <see cref="TimeSpan.MaxValue"/>.</exception>
+		public AsyncTimer(AsyncTimerDelegate<object, object> method, IEnumerable<object> parameters, TimeSpan interval, bool yieldToTask = false)
 		{
 			if (interval == null)
 				throw new ArgumentNullException(nameof(interval), "Interval must be non-null.");
@@ -135,12 +121,33 @@ namespace AnnoucementPlugin.Utilities
 			_args = parameters as object[] ?? parameters?.ToArray();
 			YieldsWhenRunning = yieldToTask;
 		}
+		/// <summary>
+		///     Whether this timer has been started.
+		/// </summary>
+		public bool Started { get; private set; }
 
-    /// <summary>
-    /// Starts the timer. The callback is executed immediately on the first call.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the timer is already started.</exception>
-    public void Start()
+		/// <summary>
+		///     Whether the timer yields when executing the callback.
+		/// </summary>
+		public bool YieldsWhenRunning { get; }
+
+		public void Dispose()
+		{
+			_isDisposed = true;
+			_running = false;
+			Started = false;
+		}
+
+		/// <summary>
+		///     An event fired when the callback throws an exception.
+		/// </summary>
+		public event EventHandler<Exception> Errored;
+
+		/// <summary>
+		///     Starts the timer. The callback is executed immediately on the first call.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if the timer is already started.</exception>
+		public void Start()
 		{
 			if (Started)
 				throw new InvalidOperationException("Timer is already started.");
@@ -195,13 +202,6 @@ namespace AnnoucementPlugin.Utilities
 			if (!_running && !_isDisposed)
 				throw new InvalidOperationException("Timer is not running.");
 
-			_running = false;
-			Started = false;
-		}
-
-		public void Dispose()
-		{
-			_isDisposed = true;
 			_running = false;
 			Started = false;
 		}

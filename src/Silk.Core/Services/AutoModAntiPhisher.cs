@@ -74,13 +74,16 @@ namespace Silk.Core.Services
 			_cts.Cancel();
 		}
 
-		public bool IsBlacklisted(string link) => _domains.Contains(link);
+		public bool IsBlacklisted(string link)
+		{
+			return _domains.Contains(link);
+		}
 
 		private async Task ReceiveLoopAsync()
 		{
 			try
 			{
-				var stoppingToken = _cts.Token;
+				CancellationToken stoppingToken = _cts.Token;
 
 				// 16KB cache; should be more than sufficient for the foreseeable future. //
 				using var buffer = new ArrayPoolBufferWriter<byte>(WebSocketBufferSize);
@@ -94,7 +97,7 @@ namespace Silk.Core.Services
 					ValueWebSocketReceiveResult result;
 					do
 					{
-						var mem = buffer.GetMemory(WebSocketBufferSize);
+						Memory<byte> mem = buffer.GetMemory(WebSocketBufferSize);
 						result = await _ws.ReceiveAsync(mem, CancellationToken.None);
 
 						if (result.MessageType is WebSocketMessageType.Close)
@@ -112,12 +115,12 @@ namespace Silk.Core.Services
 						return;
 					}
 
-					var json = Encoding.UTF8.GetString(buffer.WrittenSpan);
+					string? json = Encoding.UTF8.GetString(buffer.WrittenSpan);
 
-					var payload = JObject.Parse(json);
+					JObject? payload = JObject.Parse(json);
 
 					var command = payload["type"]!.ToString(); // "add" or "delete"
-					var domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
+					string[]? domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
 
 					HandleWebsocketCommand(command, domains);
 
@@ -159,7 +162,7 @@ namespace Silk.Core.Services
 				Headers = { { HeaderName, StringConstants.ProjectIdentifier } } // X-Identifier MUST be set or we get 403'd //
 			};
 
-			using var res = await _client.SendAsync(req);
+			using HttpResponseMessage? res = await _client.SendAsync(req);
 
 			if (!res.IsSuccessStatusCode)
 			{
@@ -167,8 +170,8 @@ namespace Silk.Core.Services
 				return false;
 			}
 
-			var json = await res.Content.ReadAsStringAsync();
-			var payload = JsonConvert.DeserializeObject<string[]>(json)!;
+			string? json = await res.Content.ReadAsStringAsync();
+			string[]? payload = JsonConvert.DeserializeObject<string[]>(json)!;
 
 			foreach (var domain in payload)
 				_domains.Add(domain);

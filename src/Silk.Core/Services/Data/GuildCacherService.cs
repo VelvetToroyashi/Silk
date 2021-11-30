@@ -26,7 +26,7 @@ namespace Silk.Core.Services.Data
 
 
 		/// <summary>
-		/// A collection of guilds known to be already joined. Populated on READY gateway event.
+		///     A collection of guilds known to be already joined. Populated on READY gateway event.
 		/// </summary>
 		private readonly HashSet<Snowflake> _knownGuilds = new();
 
@@ -42,13 +42,13 @@ namespace Silk.Core.Services.Data
 
 
 		/// <summary>
-		/// Stores hashes of guilds that are available during READY to differientiate from joining a new guild.
+		///     Stores hashes of guilds that are available during READY to differientiate from joining a new guild.
 		/// </summary>
 		/// <param name="ready">The gateway event to store IDs from.</param>
 		/// <returns></returns>
 		public Result StoreKnownGuilds(IReady ready)
 		{
-			bool failed = false;
+			var failed = false;
 			var errors = new List<IResult>();
 
 			foreach (var guild in ready.Guilds)
@@ -64,18 +64,21 @@ namespace Silk.Core.Services.Data
 		}
 
 		/// <summary>
-		/// Checks whether a guild was just joined, or if it was already joined.
+		///     Checks whether a guild was just joined, or if it was already joined.
 		/// </summary>
 		/// <param name="guildID">The ID of the guild to check.</param>
 		/// <returns></returns>
-		public bool IsNewGuild(Snowflake guildID) => !_knownGuilds.Contains(guildID);
+		public bool IsNewGuild(Snowflake guildID)
+		{
+			return !_knownGuilds.Contains(guildID);
+		}
 
 		public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
 		{
 			if (members.Count > 2) // Just us. Rip.
 				return Result.FromError(new ArgumentOutOfRangeError("Members only contained current user."));
 
-			var guild = await _mediator.Send(new GetOrCreateGuildRequest(guildID.Value, StringConstants.DefaultCommandPrefix));
+			GuildEntity? guild = await _mediator.Send(new GetOrCreateGuildRequest(guildID.Value, StringConstants.DefaultCommandPrefix));
 
 
 
@@ -94,20 +97,20 @@ namespace Silk.Core.Services.Data
 			{
 				if (!member.User.IsDefined(out IUser? user))
 				{
-					erroredMembers.Add(Result.FromError(new InvalidOperationError($"Member did not have a defined user.")));
+					erroredMembers.Add(Result.FromError(new InvalidOperationError("Member did not have a defined user.")));
 					continue;
 				}
 
-				if (user.IsBot.IsDefined(out var bot) && bot)
+				if (user.IsBot.IsDefined(out bool bot) && bot)
 					continue;
 
-				bool eligible = member.Permissions.IsDefined(out var permissions)
+				bool eligible = member.Permissions.IsDefined(out IDiscordPermissionSet? permissions)
 				                && permissions.HasPermission(DiscordPermission.KickMembers)
 				                && permissions.HasPermission(DiscordPermission.ManageMessages);
 
 				if (!eligible) continue;
 
-				var result = await _mediator.Send(new GetOrCreateUserRequest(guildID.Value, user.ID.Value, UserFlag.Staff));
+				Result<UserEntity> result = await _mediator.Send(new GetOrCreateUserRequest(guildID.Value, user.ID.Value, UserFlag.Staff));
 
 
 			}

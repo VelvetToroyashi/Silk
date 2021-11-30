@@ -23,12 +23,12 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
 			{
 				GuildModConfigEntity? config = await _config.GetModConfigAsync(args.Guild.Id);
-				
+
 				bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
-				
+
 				if (!hasInvite)
 					return;
-				
+
 				bool isBlacklisted = await _inviteHelper.IsBlacklistedInvite(args.Message, config, invite);
 
 				if (isBlacklisted)

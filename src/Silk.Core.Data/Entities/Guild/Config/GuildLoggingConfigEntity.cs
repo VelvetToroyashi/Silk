@@ -3,29 +3,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Silk.Core.Data.Entities
 {
 	/// <summary>
-	/// Various bits of configuration related to logging.
+	///     Various bits of configuration related to logging.
 	/// </summary>
 	public class GuildLoggingConfigEntity
 	{
 		/// <summary>
-		/// Gets the numeric, auto-incrementing ID of the guild logging config.
+		///     Gets the numeric, auto-incrementing ID of the guild logging config.
 		/// </summary>
 		public int Id { get; set; }
 
 		/// <summary>
-		/// The guild this configuration is for.
+		///     The guild this configuration is for.
 		/// </summary>
 		[Column("guild_id")]
 		public ulong GuildId { get; set; }
 
 		/// <summary>
-		/// The fallback channel to use if it's not specified for a specific scope.
+		///     The fallback channel to use if it's not specified for a specific scope.
 		/// </summary>
 		[Column("fallback_logging_channel")]
 		public ulong? FallbackLoggingChannel { get; set; }
 
 		/// <summary>
-		/// Whether to use webhooks to log messages.
+		///     Whether to use webhooks to log messages.
 		/// </summary>
 		[Column("use_webhook_logging")]
 		public bool UseWebhookLogging { get; set; }

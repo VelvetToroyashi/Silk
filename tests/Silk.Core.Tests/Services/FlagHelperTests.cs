@@ -27,7 +27,7 @@ namespace Silk.Core.Tests.Services
 
 		public FlagHelperTests()
 		{
-			_httpClient = new HttpClient(_mockHttpMessageHandler.Object);
+			_httpClient = new(_mockHttpMessageHandler.Object);
 
 			// Set up a blank white image so multiplying will result in the source image
 			using var stream = new MemoryStream();
@@ -262,7 +262,7 @@ namespace Silk.Core.Tests.Services
 
 			var flagHelper = new FlagOverlayService(httpClient);
 
-			Func<HttpResponseMessage> response = () => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(_imageThatExceedsMaxSize) { Headers = { ContentLength = _imageThatExceedsMaxSize.Length } } };
+			Func<HttpResponseMessage> response = () => new(HttpStatusCode.OK) { Content = new ByteArrayContent(_imageThatExceedsMaxSize) { Headers = { ContentLength = _imageThatExceedsMaxSize.Length } } };
 
 			mockHttpMessageHandler
 				.Protected()
@@ -306,13 +306,13 @@ namespace Silk.Core.Tests.Services
 			Assert.True(result.Succeeded);
 			Assert.AreEqual(FlagResultType.Succeeded, result.Reason);
 
-			var expected = _enby;
-			var actual = Image.Load<Rgba32>(result.Image);
+			Image<Rgba32> expected = _enby;
+			Image<Rgba32> actual = Image.Load<Rgba32>(result.Image);
 
-			for (int i = 0; i < expected.Height; i++)
+			for (var i = 0; i < expected.Height; i++)
 			{
-				var e = expected.GetPixelRowSpan(i);
-				var a = actual.GetPixelRowSpan(i);
+				Span<Rgba32> e = expected.GetPixelRowSpan(i);
+				Span<Rgba32> a = actual.GetPixelRowSpan(i);
 
 				//Assert.True(e.SequenceEqual(a));
 				e.SequenceEqual(a);

@@ -17,15 +17,15 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
 	public sealed class MessagePhishingDetector
 	{
-		private static readonly Regex LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
 		private const string Phishing = "Message contained a phishing link.";
+		private static readonly Regex LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
 		private readonly ConfigService _config;
-		private readonly AutoModAntiPhisher _phishing;
 		private readonly IInfractionService _infractions;
 		private readonly ILogger<MessagePhishingDetector> _logger;
-		
+		private readonly AutoModAntiPhisher _phishing;
+
 		public MessagePhishingDetector(
 			ConfigService config, DiscordClient client,
 			AutoModAntiPhisher phishing, IInfractionService infractions,
@@ -37,19 +37,19 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			_infractions = infractions;
 			client.MessageCreated += CreatedSignal;
 		}
-		
+
 		private Task CreatedSignal(DiscordClient sender, MessageCreateEventArgs e)
 		{
 			if (string.IsNullOrEmpty(e.Message.Content))
 				return Task.CompletedTask; // No content, no need to check.
-			
+
 			Task.Run(async () =>
 			{
 				try
 				{
 					await HandleCreatedAsync(e.Message);
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					_logger.LogCritical(ex, "An exception was thrown while handling phishing {GuildId}, {ChannelId}, {MessageId}, {UserId}", e.Guild?.Id, e.Channel?.Id, e.Message?.Id, e.Author?.Id);
 				}
@@ -64,17 +64,17 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			if (message.Channel?.Guild is null)
 				return;
 
-			var config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
+			GuildModConfigEntity? config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
 
 			if (!config?.DetectPhishingLinks ?? false) // This could be an issue if it's null.
 				return;
-			
-			var match = LinkRegex.Match(message.Content); // Run (what this method invokes) returns Match? but Match returns Match. Absolute scam.
+
+			Match? match = LinkRegex.Match(message.Content); // Run (what this method invokes) returns Match? but Match returns Match. Absolute scam.
 
 			if (match?.Success ?? false)
 			{
-				var link = match.Groups["link"].Value;
-				
+				string? link = match.Groups["link"].Value;
+
 				if (_phishing.IsBlacklisted(link))
 				{
 					_logger.LogInformation(EventIds.AutoMod, "Caught link {Link}, Message info: Sent by {Author} in {Guild} in {Channel}", link, message.Author.Id, message.Channel.Guild.Name, message.Channel.Name);
@@ -85,7 +85,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 		private async Task HandleLinkAsync(string link, DiscordMessage message)
 		{
-			var config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
+			GuildModConfigEntity? config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
 
 			if (config.DeletePhishingLinks)
 			{
@@ -101,11 +101,11 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
 			if (config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var inf))
 			{
-				var authorId = message.Author.Id;
-				var guildId = message.Channel.Guild.Id;
-				var memberId = message.Channel.Guild.CurrentMember.Id;
-				
-				var task = inf.Type switch
+				ulong authorId = message.Author.Id;
+				ulong guildId = message.Channel.Guild.Id;
+				ulong memberId = message.Channel.Guild.CurrentMember.Id;
+
+				Task<InfractionResult>? task = inf.Type switch
 				{
 					InfractionType.Ban => _infractions.BanAsync(authorId, guildId, memberId, $"Sent phishing link: `{link}`."),
 					InfractionType.Kick => _infractions.KickAsync(authorId, guildId, memberId, $"Sent phishing link: `{link}`."),
@@ -117,7 +117,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			}
 			else
 			{
-				var guild = message.Channel.Guild;
+				DiscordGuild? guild = message.Channel.Guild;
 
 				if (!guild.Channels.TryGetValue(config.LoggingChannel, out var chn))
 				{

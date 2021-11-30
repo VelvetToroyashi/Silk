@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,6 +9,8 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
@@ -31,45 +34,56 @@ namespace Silk.Core.Commands
 	public class ConfigModule : BaseCommandModule
 	{
 		private readonly ICacheUpdaterService _updater;
-		public ConfigModule(ICacheUpdaterService updater) => _updater = updater;
+		public ConfigModule(ICacheUpdaterService updater)
+		{
+			_updater = updater;
+		}
 
 		[Command]
 		[Description("Reloads the config from the database. May temporarily slow down response time. (Configs are automatically reloaded every 10 minutes!)")]
 		public async Task Reload(CommandContext ctx)
 		{
-			var res = await EditConfigModule.GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+			bool res = await EditConfigModule.GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 			if (!res) return;
-			
+
 			_updater.UpdateGuild(ctx.Guild.Id);
 		}
-		
+
 		// Wrapper that points to config view //
 		[GroupCommand]
-		public Task Default(CommandContext ctx) =>
-			ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
-		
+		public Task Default(CommandContext ctx)
+		{
+			return ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
+		}
+
 		[Group("view")]
 		[RequireFlag(UserFlag.Staff)]
 		[Description("View the current config, or specify a sub-command to see detailed information.")]
 		public sealed class ViewConfigModule : BaseCommandModule
 		{
 			private readonly IMediator _mediator;
-			public ViewConfigModule(IMediator mediator) => _mediator = mediator;
+			public ViewConfigModule(IMediator mediator)
+			{
+				_mediator = mediator;
+			}
 
-			private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
-			
+			private string GetCountString(int count)
+			{
+				return count is 0 ? "Not set/enabled" : count.ToString();
+			}
+
 			[GroupCommand]
 			[RequireFlag(UserFlag.Staff)]
 			[Description("View the current config.")]
 			public async Task View(CommandContext ctx)
 			{
-				var config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
-				var modConfig = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+				GuildConfigEntity? config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+				GuildModConfigEntity? modConfig = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
 				var embed = new DiscordEmbedBuilder();
 				var contentBuilder = new StringBuilder();
-				
+
 				contentBuilder
 					.Clear()
 					.AppendLine("**General Config:**")
@@ -114,10 +128,10 @@ namespace Silk.Core.Commands
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
 					.WithColor(DiscordColor.Azure)
 					.WithDescription(contentBuilder.ToString());
-				
+
 				await ctx.RespondAsync(embed);
 			}
-			
+
 			// Justification for omitting a Log command in the View group:			//
 			// The commands below exist because they house complex information		//
 			// that would otherwise bloat the main embed to > 4096 characters,		//
@@ -130,25 +144,25 @@ namespace Silk.Core.Commands
 			[Description("View available auto-mod actions.")]
 			public async Task AutoModOptions(CommandContext ctx)
 			{
-				var options = AutoModConstants.ActionStrings.Select(o => $"`{o.Key}` Definition: {o.Value}").Join("\n");
+				string? options = AutoModConstants.ActionStrings.Select(o => $"`{o.Key}` Definition: {o.Value}").Join("\n");
 				if (options.Length <= 4000)
 				{
 					await ctx.RespondAsync(new DiscordEmbedBuilder().WithColor(DiscordColor.Azure).WithDescription(options));
 				}
 				else
 				{
-					var interactivity = ctx.Client.GetInteractivity();
-					var pages = interactivity.GeneratePagesInEmbed(options, SplitType.Line, new() { Color = DiscordColor.Azure });
+					InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
+					IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(options, SplitType.Line, new() { Color = DiscordColor.Azure });
 					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
 				}
 			}
-			
+
 			[Command]
 			[Description("View in-depth greeting-related config.")]
 			public async Task Greeting(CommandContext ctx)
 			{
 				var contentBuilder = new StringBuilder();
-				var config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+				GuildConfigEntity? config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
 				contentBuilder
 					.Clear()
@@ -158,7 +172,7 @@ namespace Silk.Core.Commands
 					.AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"\n\n{config.GreetingText}")}")
 					.AppendLine($"> Greeting role: {(config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is var role and not 0 ? $"<@&{role}>" : "N/A")}");
 
-				var explanation = config.GreetingOption switch
+				string? explanation = config.GreetingOption switch
 				{
 					GreetingOption.DoNotGreet => "I will not greet members at all.",
 					GreetingOption.GreetOnJoin => "I will greet members as soon as they join",
@@ -172,7 +186,7 @@ namespace Silk.Core.Commands
 					.AppendLine("**Greeting option explanation:**")
 					.AppendLine(explanation);
 
-				var embed = new DiscordEmbedBuilder()
+				DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 					.WithColor(DiscordColor.Azure)
 					.WithTitle($"Config for {ctx.Guild.Name}")
 					.WithDescription(contentBuilder.ToString());
@@ -185,7 +199,7 @@ namespace Silk.Core.Commands
 			public async Task Invites(CommandContext ctx)
 			{
 				//TODO: config view invites-list
-				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+				GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 				var contentBuilder = new StringBuilder();
 
 				contentBuilder
@@ -201,12 +215,12 @@ namespace Silk.Core.Commands
 
 				if (config.AllowedInvites.Count > 15)
 					contentBuilder.AppendLine($"..Plus {config.AllowedInvites.Count - 15} more");
-				
+
 				contentBuilder
 					.AppendLine("Aggressive pattern matching are any invites that match this rule:")
 					.AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`");
 
-				var embed = new DiscordEmbedBuilder()
+				DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
 					.WithColor(DiscordColor.Azure)
 					.WithDescription(contentBuilder.ToString());
@@ -218,9 +232,9 @@ namespace Silk.Core.Commands
 			[Description("View in-depth infraction-related config.")]
 			public async Task Infractions(CommandContext ctx)
 			{
-				var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-				
-				var contentBuilder = new StringBuilder()
+				GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
+				StringBuilder? contentBuilder = new StringBuilder()
 					.AppendLine("__Infractions:__")
 					.AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
 					.AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
@@ -233,16 +247,16 @@ namespace Silk.Core.Commands
 						.AppendLine("Infraction steps:")
 						.AppendLine(config.InfractionSteps.Select((inf, count) => $"` {count + 1} ` strikes -> {inf.Type} {(inf.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Duration.Time.Humanize()}")}").Join("\n"));
 				}
-				
+
 				if (config.NamedInfractionSteps?.Any() ?? false)
 				{
 					contentBuilder
-					.AppendLine()
-					.AppendLine("Auto-Mod action steps:")
-					.AppendLine(config.NamedInfractionSteps.Select(inf => $"`{inf.Key}` -> {inf.Value.Type} {(inf.Value.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Value.Duration.Time.Humanize()}")}").Join("\n"));
+						.AppendLine()
+						.AppendLine("Auto-Mod action steps:")
+						.AppendLine(config.NamedInfractionSteps.Select(inf => $"`{inf.Key}` -> {inf.Value.Type} {(inf.Value.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Value.Duration.Time.Humanize()}")}").Join("\n"));
 				}
-				
-				var embed = new DiscordEmbedBuilder()
+
+				DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
 					.WithTitle($"Configuration for {ctx.Guild.Name}:")
 					.WithColor(DiscordColor.Azure)
 					.WithDescription(contentBuilder.ToString());
@@ -265,24 +279,27 @@ namespace Silk.Core.Commands
 
 			private static readonly DiscordInteractionResponseBuilder _confirmBuilder = new DiscordInteractionResponseBuilder().WithContent("Alrighty!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
 			private static readonly DiscordInteractionResponseBuilder _declineBuilder = new DiscordInteractionResponseBuilder().WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled);
+			private static readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens = new();
 
 			private readonly IMediator _mediator;
-			private static readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens = new();
-			public EditConfigModule(IMediator mediator) => _mediator = mediator;
-			
-			
+			public EditConfigModule(IMediator mediator)
+			{
+				_mediator = mediator;
+			}
+
+
 			[Command]
 			[RequireFlag(UserFlag.Staff)]
 			[Description("Edit the mute role to give to members when muting. If this isn't configured, one will be generated as necessary.")]
 			public async Task Mute(CommandContext ctx, DiscordRole role)
 			{
-				var notMuteRole = role.Permissions.HasPermission(Permissions.SendMessages);
-				var canChangeMuteRole = ctx.Guild.CurrentMember.HasPermission(Permissions.ManageRoles);
-				var roleTooHigh = ctx.Guild.CurrentMember.Roles.Max(r => r.Position) <= role.Position;
+				bool notMuteRole = role.Permissions.HasPermission(Permissions.SendMessages);
+				bool canChangeMuteRole = ctx.Guild.CurrentMember.HasPermission(Permissions.ManageRoles);
+				bool roleTooHigh = ctx.Guild.CurrentMember.Roles.Max(r => r.Position) <= role.Position;
 
 				if (notMuteRole)
 				{
-					var msg = (canChangeMuteRole, roleTooHigh) switch
+					string? msg = (canChangeMuteRole, roleTooHigh) switch
 					{
 						(true, false) => "",
 						(true, true) => "That role is too high and has permission to send messages! Please fix this and try again.",
@@ -295,15 +312,12 @@ namespace Silk.Core.Commands
 						await ctx.RespondAsync(msg);
 						return;
 					}
-					else
-					{
-						await role.ModifyAsync(m => m.Permissions = role.Permissions ^ Permissions.SendMessages);
-					}
+					await role.ModifyAsync(m => m.Permissions = role.Permissions ^ Permissions.SendMessages);
 				}
-					
+
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
@@ -318,7 +332,7 @@ namespace Silk.Core.Commands
 			{
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
@@ -332,26 +346,26 @@ namespace Silk.Core.Commands
 			{
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
 				await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { MaxRoleMentions = (int)mentions });
 			}
-			
-			
+
+
 			[Command]
 			[Aliases("welcome")]
 			[Description("Edit whether or not I greet members\nOptions: \n\n`role` -> greet on role, \n`join` -> greet on join, \n`disable` -> disable greetings \n`screening` -> greet when membership screening is passed")]
 			public async Task Greeting(CommandContext ctx, string option)
 			{
-				var parsedOption = option.ToLower() switch
+				GreetingOption parsedOption = option.ToLower() switch
 				{
 					"disable" => GreetingOption.DoNotGreet,
 					"role" => GreetingOption.GreetOnRole,
 					"join" => GreetingOption.GreetOnJoin,
 					"screening" => GreetingOption.GreetOnScreening,
-					_ => (GreetingOption) (-1)
+					_ => (GreetingOption)(-1)
 				};
 
 				if ((int)parsedOption is -1)
@@ -359,10 +373,10 @@ namespace Silk.Core.Commands
 					await ctx.RespondAsync("That doesn't appear to be a valid option!");
 					return;
 				}
-				
+
 				EnsureCancellationTokenCancellation(ctx.User.Id);
-				
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
@@ -373,17 +387,17 @@ namespace Silk.Core.Commands
 			[Aliases("greeting-channel", "welcomechannel", "welcome-channel", "gc", "wc")]
 			public async Task GreetingChannel(CommandContext ctx, DiscordChannel channel)
 			{
-				var conf = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+				GuildConfigEntity? conf = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
 				if (string.IsNullOrEmpty(conf.GreetingText))
 				{
 					await ctx.RespondAsync("Set a welcome message first!");
 					return;
 				}
-				
+
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
@@ -400,10 +414,10 @@ namespace Silk.Core.Commands
 					await ctx.RespondAsync("No, you cannot use the everyone role for that.");
 					return;
 				}
-				
+
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
@@ -411,7 +425,7 @@ namespace Silk.Core.Commands
 			}
 
 			[Command]
-			[Aliases("greeting-message","welcomemessage", "wm", "gm")]
+			[Aliases("greeting-message", "welcomemessage", "wm", "gm")]
 			[Description("What should I greet members with? Substitutions: \n`{u}` - Username \n`{@u}` - User ping \n`{s}` - Server name")]
 			public async Task GreetingMessage(CommandContext ctx, [RemainingText] string message)
 			{
@@ -426,17 +440,77 @@ namespace Silk.Core.Commands
 					await ctx.RespondAsync("You must provide a message!");
 					return;
 				}
-				
+
 				EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+				bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 				if (!res) return;
 
 				await _mediator.Send(new UpdateGuildConfigRequest(ctx.Guild.Id) { GreetingText = message });
 			}
-			
-			
+
+			/// <summary>
+			///     Waits indefinitely for user confirmation unless the associated token is cancelled.
+			/// </summary>
+			/// <param name="user">The id of the user to assign a token to and wait for input from.</param>
+			/// <param name="channel">The channel to send a message to, to request user input.</param>
+			/// <returns>True if the user selected true, or false if the user selected no OR the cancellation token was cancelled.</returns>
+			internal static async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
+			{
+				DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
+
+				DiscordMessage? message = await builder.SendAsync(channel);
+				CancellationToken token = GetTokenFromWaitQueue(user.Id);
+
+				InteractivityResult<ComponentInteractionCreateEventArgs> interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, token);
+
+				if (interactivityResult.TimedOut) // CT was yeeted. //
+				{
+					await message.ModifyAsync(b => b.WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled));
+					return false;
+				}
+
+				// Nobody likes 'This interaction failed'. //
+				if (interactivityResult.Result.Id == _yesButton.CustomId)
+				{
+					await interactivityResult.Result
+						.Interaction
+						.CreateResponseAsync(InteractionResponseType.UpdateMessage, _confirmBuilder);
+
+					return true;
+				}
+				await interactivityResult.Result
+					.Interaction
+					.CreateResponseAsync(InteractionResponseType.UpdateMessage, _declineBuilder);
+
+				return false;
+			}
+
+			/// <summary>
+			///     Cancels and removes the token with the specified id if it exists.
+			/// </summary>
+			/// <param name="id">The id of the user to look up.</param>
+			private static void EnsureCancellationTokenCancellation(ulong id)
+			{
+				if (_tokens.TryRemove(id, out var token))
+				{
+					token.Cancel();
+					token.Dispose();
+				}
+			}
+
+			/// <summary>
+			///     Gets a <see cref="CancellationToken"/>, creating one if necessary.
+			/// </summary>
+			/// <param name="id">The id of the user to assign the token to.</param>
+			/// <returns>The returned or generated token.</returns>
+			private static CancellationToken GetTokenFromWaitQueue(ulong id)
+			{
+				return _tokens.GetOrAdd(id, id => _tokens[id] = new()).Token;
+			}
+
+
 			[Group("phishing")]
 			[Aliases("phish", "psh")]
 			[RequireFlag(UserFlag.Staff)]
@@ -444,7 +518,10 @@ namespace Silk.Core.Commands
 			public sealed class EditPhishingModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
-				public EditPhishingModule(IMediator mediator) => _mediator = mediator;
+				public EditPhishingModule(IMediator mediator)
+				{
+					_mediator = mediator;
+				}
 
 				[Command]
 				[Description("Enables scanning for phishing links.")]
@@ -452,26 +529,26 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
-					
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DetectPhishingLinks = true });
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DetectPhishingLinks = true });
 				}
-				
+
 				[Command]
 				[Description("Disables scanning for phishing links.")]
 				public async Task Disable(CommandContext ctx)
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
-					
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DetectPhishingLinks = false });
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DetectPhishingLinks = false });
 				}
-				
+
 				[Command]
 				[Aliases("delete_links", "delete-links", "dl")]
 				[Description("Whether messages will be deleted when a phishing link is detected.")]
@@ -479,18 +556,18 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
-					
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) {  DeletePhishingLinks = delete });
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeletePhishingLinks = delete });
 				}
 
 				[Command]
 				[Description("The action to take when a phishing link is detected.\nOptions: Kick, Ban, Note, None.\nNone will still log links, but they will not be attached to the user.")]
 				public async Task Action(CommandContext ctx, string action)
 				{
-					InfractionType type = InfractionType.Pardon;
+					var type = InfractionType.Pardon;
 					if (!string.Equals("none", action, StringComparison.OrdinalIgnoreCase))
 					{
 						if (!Enum.TryParse(action, true, out type))
@@ -504,26 +581,26 @@ namespace Silk.Core.Commands
 							await ctx.RespondAsync("Action must be of type Kick, Ban, Note, or None.");
 						}
 					}
-					
+
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
-					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-					
+					GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
 					config.NamedInfractionSteps.Remove(AutoModConstants.PhishingLinkDetected);
-					
-					
-					if (type is not InfractionType.Pardon) 
-						config.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = type};
+
+
+					if (type is not InfractionType.Pardon)
+						config.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = type };
 
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
 				}
 			}
-			
+
 
 			[Group("invite")]
 			[Aliases("invites", "inv")]
@@ -532,7 +609,66 @@ namespace Silk.Core.Commands
 			public sealed class EditInviteModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
-				public EditInviteModule(IMediator mediator) => _mediator = mediator;
+				public EditInviteModule(IMediator mediator)
+				{
+					_mediator = mediator;
+				}
+
+				[Command]
+				[Aliases("so", "scan")]
+				[Description("Whether or not an effort should be made to check the origin of an invite before taking action. \nLow impact to AutoMod latency.")]
+				public async Task ScanOrigin(CommandContext ctx, bool scan)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { ScanInvites = scan });
+				}
+
+				[Command]
+				[Aliases("warn", "wom")]
+				[Description("Whether members should be warned for sending non-whitelisted invites. \nIf `auto-escalate-infractions` is set to true, the configured auto-mod setting will be used, else it will fallback to the configured infraction step depending on the user's current infraction count.")]
+				public async Task WarnOnMatch(CommandContext ctx, bool warn)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { WarnOnMatchedInvite = warn });
+				}
+
+				[Command]
+				[Aliases("dom", "delete")]
+				[Description("Whether or not invites will be deleted when they're detected in messages.")]
+				public async Task DeleteOnMatch(CommandContext ctx, bool delete)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeleteOnMatchedInvite = delete });
+				}
+
+				[Command]
+				[Aliases("ma")]
+				[Description("Whether or not to use the aggressive invite matching regex. \n`disc((ord)?(((app)?\\.com\\/invite)|(\\.gg)))\\/([A-z0-9-_]{2,})`")]
+				public async Task MatchAggressively(CommandContext ctx, bool match)
+				{
+					EnsureCancellationTokenCancellation(ctx.User.Id);
+
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					if (!res) return;
+
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { UseAggressiveRegex = match });
+				}
 
 				[Group("whitelist")]
 				[RequireFlag(UserFlag.Staff)]
@@ -540,7 +676,10 @@ namespace Silk.Core.Commands
 				public sealed class EditInviteWhitelistModule : BaseCommandModule
 				{
 					private readonly IMediator _mediator;
-					public EditInviteWhitelistModule(IMediator mediator) => _mediator = mediator;
+					public EditInviteWhitelistModule(IMediator mediator)
+					{
+						_mediator = mediator;
+					}
 
 					[Command]
 					public async Task Add(CommandContext ctx, string invite)
@@ -573,11 +712,11 @@ namespace Silk.Core.Commands
 						if (inviteObj.Guild.VanityUrlCode is null || inviteObj.Guild.VanityUrlCode != inviteObj.Code)
 							await ctx.RespondAsync(":warning: Warning, this code is not a vanity code!");
 
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
-						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 						config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
 
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
@@ -587,13 +726,13 @@ namespace Silk.Core.Commands
 					public async Task Add(CommandContext ctx, [RemainingText] params string[] invites)
 					{
 						EnsureCancellationTokenCancellation(ctx.User.Id);
-						
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
-						
-						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						
+
+						GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+
 						foreach (var inviteCode in invites)
 						{
 							DiscordInvite inviteObj;
@@ -602,16 +741,16 @@ namespace Silk.Core.Commands
 								inviteObj = await ctx.Client.GetInviteByCodeAsync(inviteCode.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Last());
 							}
 							catch { continue; }
-							
-							if (inviteObj.Guild.Id == ctx.Guild.Id)	
+
+							if (inviteObj.Guild.Id == ctx.Guild.Id)
 								continue;
-							
+
 							config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
 						}
-						
+
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
 					}
-					
+
 					[Command]
 					public async Task Remove(CommandContext ctx, string invite)
 					{
@@ -634,13 +773,13 @@ namespace Silk.Core.Commands
 
 						EnsureCancellationTokenCancellation(ctx.User.Id);
 
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
-						var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
-						var inv = config.AllowedInvites.SingleOrDefault(i => i.VanityURL == inviteObj.Code);
+						InviteEntity? inv = config.AllowedInvites.SingleOrDefault(i => i.VanityURL == inviteObj.Code);
 
 						if (inv is null) return;
 
@@ -655,7 +794,7 @@ namespace Silk.Core.Commands
 					{
 						EnsureCancellationTokenCancellation(ctx.User.Id);
 
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
@@ -667,7 +806,7 @@ namespace Silk.Core.Commands
 					{
 						EnsureCancellationTokenCancellation(ctx.User.Id);
 
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
@@ -679,68 +818,12 @@ namespace Silk.Core.Commands
 					{
 						EnsureCancellationTokenCancellation(ctx.User.Id);
 
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 						if (!res) return;
 
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { BlacklistInvites = false });
 					}
-				}
-
-				[Command]
-				[Aliases("so", "scan")]
-				[Description("Whether or not an effort should be made to check the origin of an invite before taking action. \nLow impact to AutoMod latency.")]
-				public async Task ScanOrigin(CommandContext ctx, bool scan)
-				{
-					EnsureCancellationTokenCancellation(ctx.User.Id);
-
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-					if (!res) return;
-
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { ScanInvites = scan });
-				}
-
-				[Command]
-				[Aliases("warn", "wom")]
-				[Description("Whether members should be warned for sending non-whitelisted invites. \nIf `auto-escalate-infractions` is set to true, the configured auto-mod setting will be used, else it will fallback to the configured infraction step depending on the user's current infraction count.")]
-				public async Task WarnOnMatch(CommandContext ctx, bool warn)
-				{
-					EnsureCancellationTokenCancellation(ctx.User.Id);
-
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-					if (!res) return;
-
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { WarnOnMatchedInvite = warn});
-				}
-
-				[Command]
-				[Aliases("dom", "delete")]
-				[Description("Whether or not invites will be deleted when they're detected in messages.")]
-				public async Task DeleteOnMatch(CommandContext ctx, bool delete)
-				{
-					EnsureCancellationTokenCancellation(ctx.User.Id);
-
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-					if (!res) return;
-
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { DeleteOnMatchedInvite = delete});
-				}
-
-				[Command]
-				[Aliases("ma")]
-				[Description("Whether or not to use the aggressive invite matching regex. \n`disc((ord)?(((app)?\\.com\\/invite)|(\\.gg)))\\/([A-z0-9-_]{2,})`")]
-				public async Task MatchAggressively(CommandContext ctx, bool match)
-				{
-					EnsureCancellationTokenCancellation(ctx.User.Id);
-
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-					if (!res) return;
-
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { UseAggressiveRegex = match});
 				}
 			}
 
@@ -750,8 +833,11 @@ namespace Silk.Core.Commands
 			public sealed class EditLogModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
-				public EditLogModule(IMediator mediator) => _mediator = mediator;
-				
+				public EditLogModule(IMediator mediator)
+				{
+					_mediator = mediator;
+				}
+
 				[Command]
 				[Description("Edit the channel I logs infractions, users, etc to!")]
 				public async Task Channel(CommandContext ctx, DiscordChannel channel)
@@ -761,16 +847,16 @@ namespace Silk.Core.Commands
 						await ctx.RespondAsync($"I don't have proper permissions to log there! I need {FlagConstants.LoggingPermissions.ToPermissionString()}");
 						return;
 					}
-				
+
 					EnsureCancellationTokenCancellation(ctx.User.Id);
-				
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LoggingChannel = channel.Id });
 				}
-				
+
 				[Command("member-joins")]
 				[Aliases("members-joining", "mj")]
 				[Description("Edit whether or not I log members that join")]
@@ -778,13 +864,13 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMembersJoining = log });
 				}
-				
+
 				[Command("member-leaves")]
 				[Aliases("members-leaving", "ml")]
 				[Description("Edit whether or not I log members that leave")]
@@ -792,7 +878,7 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
@@ -805,13 +891,12 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { LogMessageChanges = log });
 				}
-				
 			}
 
 			[Group("infractions")]
@@ -821,8 +906,11 @@ namespace Silk.Core.Commands
 			public sealed class EditInfractionModule : BaseCommandModule
 			{
 				private readonly IMediator _mediator;
-				public EditInfractionModule(IMediator mediator) => _mediator = mediator;
-				
+				public EditInfractionModule(IMediator mediator)
+				{
+					_mediator = mediator;
+				}
+
 				[Command]
 				[Aliases("escalate", "esc")]
 				[Description("Whether strikes should be automatically escalated. " +
@@ -833,98 +921,11 @@ namespace Silk.Core.Commands
 				{
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
-					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { EscalateInfractions = escalate});
-				}
-
-				[Group("steps")]
-				[Description("Infraction step related settings.")]
-				public sealed class InfractionStepsModule : BaseCommandModule
-				{
-					private readonly IMediator _mediator;
-					public InfractionStepsModule(IMediator mediator) => _mediator = mediator;
-					
-					[Command]
-					[Description("Adds a new infraction step. This action will be used when the user has **`n`** infractions.\n\n" +
-					             "If the infraction step count (see `config view`) is 2, when a user has one strike\n" +
-					             "(or strike that were escalated), and the second infraction step is set to a 10 minute mute," +
-					             "they will be muted for 10 minutes the next time they are struck.\n\n" +
-					             "Duration is only applicable to Mute and SoftBan.\n\n" +
-					             "Available option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
-					             "A note on `Ignore`: If the step is set to ignore, AutoMod will add a note to the user. The strike command will escalate to ban if the current step is ignore.")]
-					public async Task Add(CommandContext ctx, InfractionType type, [RemainingText] TimeSpan? duration = null)
-					{
-						EnsureCancellationTokenCancellation(ctx.User.Id);
-
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-						if (!res) return;
-
-						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						conf.InfractionSteps.Add(new() { Type = type, Duration = duration.HasValue ? NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration.Value) : NpgsqlTimeSpan.Zero});
-						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
-					}
-
-					[Command]
-					[Description("Edits an infraction step. `index` is the number of infractions. If you want to edit the third step (3 infractions), simply pass 3. \nAvailable option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
-					public async Task Edit(CommandContext ctx, uint index, InfractionType type, TimeSpan? duration = null)
-					{
-						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						if (!conf.InfractionSteps.Any())
-						{
-							await ctx.RespondAsync("There are no infraction steps to edit.");
-							return;
-						}
-						
-						if (index is 0 || index > conf.InfractionSteps.Count )
-						{
-							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
-							return;
-						}
-						
-						EnsureCancellationTokenCancellation(ctx.User.Id);
-
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-						if (!res) return;
-						var step = conf.InfractionSteps[(int)index - 1];
-						
-						step.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
-						step.Type = type;
-						
-						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
-					}
-
-					[Command]
-					[Description("Removes an infraction step at the given index. If you want to remove the third step (3 infractions) pass 3. \n**This cannot be undone!**\n" +
-					             "All subsequent steps will be shifted left. If you want to edit a step, see `config edit infraction step edit`.")]
-					public async Task Remove(CommandContext ctx, uint index)
-					{
-						var conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-						if (!conf.InfractionSteps.Any())
-						{
-							await ctx.RespondAsync("There are no infraction steps to edit.");
-							return;
-						}
-						
-						if (index is 0 || index > conf.InfractionSteps.Count )
-						{
-							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
-							return;
-						}
-						
-						EnsureCancellationTokenCancellation(ctx.User.Id);
-
-						var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
-
-						if (!res) return;
-						conf.InfractionSteps.RemoveAt((int)index - 1);
-
-						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
-					}
+					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { EscalateInfractions = escalate });
 				}
 
 				[Command]
@@ -938,14 +939,14 @@ namespace Silk.Core.Commands
 						await ctx.RespondAsync("Sorry, but that doesn't seem to be a valid option.");
 						return;
 					}
-					
+
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
-					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+					GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
 					if (config.NamedInfractionSteps.TryGetValue(option, out var action))
 					{
@@ -965,7 +966,7 @@ namespace Silk.Core.Commands
 					await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
 				}
 
-				
+
 				[Command]
 				[Description("Removes a defined AutoMod action. See `config view auto-mod-actions` for a full list.")]
 				public async Task Remove(CommandContext ctx, string option, InfractionType type, TimeSpan? duration = null)
@@ -975,79 +976,109 @@ namespace Silk.Core.Commands
 						await ctx.RespondAsync("Sorry, but that doesn't seem to be a valid option.");
 						return;
 					}
-					
+
 					EnsureCancellationTokenCancellation(ctx.User.Id);
 
-					var res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+					bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
 
 					if (!res) return;
 
-					var config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+					GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
 					if (config.NamedInfractionSteps.Remove(option))
 						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
 				}
-			}
 
-			/// <summary>
-			/// Waits indefinitely for user confirmation unless the associated token is cancelled.
-			/// </summary>
-			/// <param name="user">The id of the user to assign a token to and wait for input from.</param>
-			/// <param name="channel">The channel to send a message to, to request user input.</param>
-			/// <returns>True if the user selected true, or false if the user selected no OR the cancellation token was cancelled.</returns>
-			internal static async Task<bool> GetButtonConfirmationUserInputAsync(DiscordUser user, DiscordChannel channel)
-			{
-				var builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
+				[Group("steps")]
+				[Description("Infraction step related settings.")]
+				public sealed class InfractionStepsModule : BaseCommandModule
+				{
+					private readonly IMediator _mediator;
+					public InfractionStepsModule(IMediator mediator)
+					{
+						_mediator = mediator;
+					}
 
-				var message = await builder.SendAsync(channel);
-				var token = GetTokenFromWaitQueue(user.Id);
-				
-				var interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, token);
+					[Command]
+					[Description("Adds a new infraction step. This action will be used when the user has **`n`** infractions.\n\n" +
+					             "If the infraction step count (see `config view`) is 2, when a user has one strike\n" +
+					             "(or strike that were escalated), and the second infraction step is set to a 10 minute mute," +
+					             "they will be muted for 10 minutes the next time they are struck.\n\n" +
+					             "Duration is only applicable to Mute and SoftBan.\n\n" +
+					             "Available option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n" +
+					             "A note on `Ignore`: If the step is set to ignore, AutoMod will add a note to the user. The strike command will escalate to ban if the current step is ignore.")]
+					public async Task Add(CommandContext ctx, InfractionType type, [RemainingText] TimeSpan? duration = null)
+					{
+						EnsureCancellationTokenCancellation(ctx.User.Id);
 
-				if (interactivityResult.TimedOut) // CT was yeeted. //
-				{
-					await message.ModifyAsync(b => b.WithContent("Cancelled!").AddComponents(_yesButtonDisabled, _noButtonDisabled));
-					return false;
-				}
-				
-				// Nobody likes 'This interaction failed'. //
-				if (interactivityResult.Result.Id == _yesButton.CustomId)
-				{
-					await interactivityResult.Result
-						.Interaction
-						.CreateResponseAsync(InteractionResponseType.UpdateMessage, _confirmBuilder);
-					
-					return true;
-				}
-				else
-				{
-					await interactivityResult.Result
-						.Interaction
-						.CreateResponseAsync(InteractionResponseType.UpdateMessage, _declineBuilder);
-					
-					return false;
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+
+						GuildModConfigEntity? conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						conf.InfractionSteps.Add(new() { Type = type, Duration = duration.HasValue ? NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration.Value) : NpgsqlTimeSpan.Zero });
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
+
+					[Command]
+					[Description("Edits an infraction step. `index` is the number of infractions. If you want to edit the third step (3 infractions), simply pass 3. \nAvailable option types: Strike, Kick, Mute, SoftBan, Ban, Ignore. \nThese are case **in**sensitive.\n\n")]
+					public async Task Edit(CommandContext ctx, uint index, InfractionType type, TimeSpan? duration = null)
+					{
+						GuildModConfigEntity? conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						if (!conf.InfractionSteps.Any())
+						{
+							await ctx.RespondAsync("There are no infraction steps to edit.");
+							return;
+						}
+
+						if (index is 0 || index > conf.InfractionSteps.Count)
+						{
+							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
+							return;
+						}
+
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						InfractionStepEntity? step = conf.InfractionSteps[(int)index - 1];
+
+						step.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
+						step.Type = type;
+
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
+
+					[Command]
+					[Description("Removes an infraction step at the given index. If you want to remove the third step (3 infractions) pass 3. \n**This cannot be undone!**\n" +
+					             "All subsequent steps will be shifted left. If you want to edit a step, see `config edit infraction step edit`.")]
+					public async Task Remove(CommandContext ctx, uint index)
+					{
+						GuildModConfigEntity? conf = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+						if (!conf.InfractionSteps.Any())
+						{
+							await ctx.RespondAsync("There are no infraction steps to edit.");
+							return;
+						}
+
+						if (index is 0 || index > conf.InfractionSteps.Count)
+						{
+							await ctx.RespondAsync($"Please choose an infraction between 1 and {conf.InfractionSteps.Count}");
+							return;
+						}
+
+						EnsureCancellationTokenCancellation(ctx.User.Id);
+
+						bool res = await GetButtonConfirmationUserInputAsync(ctx.User, ctx.Channel);
+
+						if (!res) return;
+						conf.InfractionSteps.RemoveAt((int)index - 1);
+
+						await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
+					}
 				}
 			}
-			
-			/// <summary>
-			/// Cancels and removes the token with the specified id if it exists.
-			/// </summary>
-			/// <param name="id">The id of the user to look up.</param>
-			private static void EnsureCancellationTokenCancellation(ulong id)
-			{
-				if (_tokens.TryRemove(id, out var token))
-				{
-					token.Cancel();
-					token.Dispose();
-				}
-			}
-			
-			/// <summary>
-			/// Gets a <see cref="CancellationToken"/>, creating one if necessary.
-			/// </summary>
-			/// <param name="id">The id of the user to assign the token to.</param>
-			/// <returns>The returned or generated token.</returns>
-			private static CancellationToken GetTokenFromWaitQueue(ulong id) => _tokens.GetOrAdd(id, id => _tokens[id] = new()).Token;
 		}
 	}
 }

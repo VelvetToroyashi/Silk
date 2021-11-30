@@ -67,7 +67,7 @@ namespace Silk.Core.Utilities.HelpFormatter
 			if (!command.Contains(' ')) // Top level command, only search the immediate children
 				return parent.Children.FirstOrDefault(x => command.Equals(x.Key, StringComparison.OrdinalIgnoreCase) ||
 				                                           x.Aliases.Contains(command, StringComparer.OrdinalIgnoreCase));
-			var commandRoute = command.Split(' ');
+			string[]? commandRoute = command.Split(' ');
 
 			foreach (var token in commandRoute)
 				foreach (var child in parent.Children)
@@ -83,12 +83,11 @@ namespace Silk.Core.Utilities.HelpFormatter
 		{
 			if (node is not GroupNode gn)
 			{
-				var res = await CheckConditionsAsync(_services, node, (node as CommandNode)!.CommandMethod, CancellationToken.None);
+				Result res = await CheckConditionsAsync(_services, node, (node as CommandNode)!.CommandMethod, CancellationToken.None);
 
 
 
 			}
-			else { }
 
 			return default;
 		}
@@ -101,20 +100,20 @@ namespace Silk.Core.Utilities.HelpFormatter
 			CancellationToken ct
 		)
 		{
-			var conditionAttributes = attributeProvider.GetCustomAttributes(typeof(ConditionAttribute), false);
+			object[]? conditionAttributes = attributeProvider.GetCustomAttributes(typeof(ConditionAttribute), false);
 
 			if (!conditionAttributes.Any())
 				return Result.FromSuccess();
 
 			foreach (var conditionAttribute in conditionAttributes)
 			{
-				var conditionType = typeof(ICondition<>).MakeGenericType(conditionAttribute.GetType());
+				Type? conditionType = typeof(ICondition<>).MakeGenericType(conditionAttribute.GetType());
 
-				var conditionMethod = conditionType.GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync));
+				MethodInfo? conditionMethod = conditionType.GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync));
 				if (conditionMethod is null)
 					throw new InvalidOperationException();
 
-				var conditions = services
+				List<ICondition>? conditions = services
 					.GetServices(conditionType)
 					.Where(c => c is not null)
 					.Cast<ICondition>()
@@ -125,9 +124,9 @@ namespace Silk.Core.Utilities.HelpFormatter
 
 				foreach (var condition in conditions)
 				{
-					var invocationResult = conditionMethod.Invoke(condition, new[] { conditionAttribute, ct }) ?? throw new InvalidOperationException();
+					object? invocationResult = conditionMethod.Invoke(condition, new[] { conditionAttribute, ct }) ?? throw new InvalidOperationException();
 
-					var result = await (ValueTask<Result>)invocationResult;
+					Result result = await (ValueTask<Result>)invocationResult;
 
 					if (!result.IsSuccess)
 						return Result.FromError(new ConditionNotSatisfiedError($"The condition \"{condition.GetType().Name}\" was not satisfied.", node), result);

@@ -21,7 +21,7 @@ namespace Silk.Benchmarks
 			}
 
 			var t = new Timer(Callback);
-			
+
 			Thread.Sleep(5);
 			t.Dispose();
 		}
@@ -34,7 +34,7 @@ namespace Silk.Benchmarks
 			Thread.Sleep(5);
 			t.Stop();
 		}
-		
+
 		[Benchmark]
 		public void AsyncTimerWithYield()
 		{

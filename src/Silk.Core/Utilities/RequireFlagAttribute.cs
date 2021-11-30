@@ -16,12 +16,12 @@ namespace Silk.Core.Utilities
 	{
 		private static readonly HashSet<ulong> _cachedMembers = new();
 
-        /// <summary>
-        /// Check for a requisite flag from the database, and execute if check passes.
-        /// </summary>
-        /// <param name="requisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
-        /// <param name="requireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
-        public RequireFlagAttribute(UserFlag requisiteUserFlag, bool requireGuild = false)
+		/// <summary>
+		///     Check for a requisite flag from the database, and execute if check passes.
+		/// </summary>
+		/// <param name="requisiteUserFlag">The required flag for the command to run; this flag is ignored when run in a help context</param>
+		/// <param name="requireGuild">Restrict command usage to guild as well as requisite flag. Defaults to false.</param>
+		public RequireFlagAttribute(UserFlag requisiteUserFlag, bool requireGuild = false)
 		{
 			RequisiteUserFlag = requisiteUserFlag;
 			RequireGuild = requireGuild;
@@ -34,7 +34,7 @@ namespace Silk.Core.Utilities
 			if (ctx.Guild is null && RequireGuild) return false; //Is a private channel and requires a Guild//
 			if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
-			using var scope = ctx.Services.CreateScope();
+			using IServiceScope? scope = ctx.Services.CreateScope();
 			IMediator mediator = scope.ServiceProvider.Get<IMediator>()!;
 			UserEntity? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 

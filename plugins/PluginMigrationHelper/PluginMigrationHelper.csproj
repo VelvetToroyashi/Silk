@@ -6,19 +6,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AnnoucementPlugin\AnnoucementPlugin.csproj" />
-      <ProjectReference Include="..\RoleMenuPlugin\RoleMenuPlugin.csproj" />
+        <ProjectReference Include="..\AnnoucementPlugin\AnnoucementPlugin.csproj"/>
+        <ProjectReference Include="..\RoleMenuPlugin\RoleMenuPlugin.csproj"/>
     </ItemGroup>
 
 </Project>

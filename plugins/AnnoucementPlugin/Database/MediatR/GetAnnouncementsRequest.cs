@@ -10,9 +10,14 @@ namespace AnnoucementPlugin.Database.MediatR
 	public sealed class GetAnnouncementsHandler : IRequestHandler<GetAnnouncementsRequest, AnnouncementModel[]>
 	{
 		private readonly AnnouncementContext _db;
-		public GetAnnouncementsHandler(AnnouncementContext db) => _db = db;
+		public GetAnnouncementsHandler(AnnouncementContext db)
+		{
+			_db = db;
+		}
 
 		public Task<AnnouncementModel[]> Handle(GetAnnouncementsRequest request, CancellationToken cancellationToken)
-			=> _db.Announcements.ToArrayAsync(cancellationToken);
+		{
+			return _db.Announcements.ToArrayAsync(cancellationToken);
+		}
 	}
 }

@@ -10,7 +10,8 @@ namespace AnnoucementPlugin
 	public sealed class DependencyHandler : DependencyInjectionHandler
 	{
 		public override IServiceCollection ConfigureServices(IServiceCollection services)
-			=> services
+		{
+			return services
 				.AddMediatR(typeof(DependencyHandler))
 				.AddSingleton<AnnouncementService>()
 				.AddDbContext<AnnouncementContext>((p, b) =>
@@ -19,5 +20,6 @@ namespace AnnoucementPlugin
 						.GetPostgresContextOptionsBuilder()(b);
 				})
 				.AddSingleton<IMessageDispatcher, MessageDispatcher>();
+		}
 	}
 }

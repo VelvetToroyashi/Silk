@@ -18,7 +18,7 @@ using Silk.Shared.Configuration;
 
 namespace Silk.Core.Commands.Furry
 {
-	[Utilities.HelpFormatter.HelpCategory(Categories.Misc)]
+	[HelpCategory(Categories.Misc)]
 	//[ModuleLifespan(ModuleLifespan.Transient)]
 	//[Cooldown(1, 10, CooldownBucketType.User)]
 	public class e621Command : eBooruBaseCommand
@@ -56,20 +56,20 @@ namespace Silk.Core.Commands.Furry
 
 			if (!result.IsSuccess)
 			{
-				var errorResult = await _channelApi.CreateMessageAsync(_context.ChannelID, result.Error!.Message);
+				Result<IMessage> errorResult = await _channelApi.CreateMessageAsync(_context.ChannelID, result.Error!.Message);
 				return errorResult.IsSuccess
 					? Result.FromSuccess()
 					: Result.FromError(errorResult.Error);
 			}
 
-			var booruPosts = result.Entity?.Posts;
+			List<Post>? booruPosts = result.Entity?.Posts;
 
 			if (booruPosts is null || booruPosts.Count is 0)
 				return Result.FromError(new ArgumentOutOfRangeError("No results found."));
 
 			IReadOnlyList<Post> posts = GetRandomPosts(booruPosts, amount, (int)((_context as MessageContext)?.MessageID.Value ?? 0));
 			List<IEmbed> embeds = posts.Select(post =>
-					new Embed()
+					new Embed
 					{
 						Title = query!,
 						Description = $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}",
@@ -85,7 +85,7 @@ namespace Silk.Core.Commands.Furry
 				.Cast<IEmbed>()
 				.ToList();
 
-			var send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
+			Result<IMessage> send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
 
 			return send.IsSuccess
 				? Result.FromSuccess()

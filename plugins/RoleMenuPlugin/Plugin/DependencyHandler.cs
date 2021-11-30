@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RoleMenuPlugin.Database;
 using YumeChan.PluginBase;
@@ -9,15 +11,17 @@ namespace RoleMenuPlugin
 	public sealed class DependencyHandler : DependencyInjectionHandler
 	{
 		public override IServiceCollection ConfigureServices(IServiceCollection services)
-			=> services
+		{
+			return services
 				.AddMediatR(typeof(DependencyHandler))
 				.AddDbContext<RoleMenuContext>((provider, builder) =>
 				{
-					var applyDb = provider
+					Action<DbContextOptionsBuilder>? applyDb = provider
 						.GetService<IDatabaseProvider<RoleMenuPlugin>>()!
 						.GetPostgresContextOptionsBuilder();
 					applyDb(builder);
 				})
 				.AddSingleton<RoleMenuRoleService>();
+		}
 	}
 }

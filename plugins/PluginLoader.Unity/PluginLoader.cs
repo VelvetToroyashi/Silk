@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,7 @@ using Unity.Microsoft.DependencyInjection;
 using YumeChan.PluginBase;
 
 namespace PluginLoader.Unity
-{ 
+{
 /*
 	This class is an inspired work from YumeChan's PluginLoader, which is licensed under GPL-3. 
 	A copy of the GPL-3 license has been attached below for legal compliance.
@@ -34,24 +35,24 @@ namespace PluginLoader.Unity
 */
 
 	/// <summary>
-	/// A helper class that loads and instantiates plugins from assemblies located in the plugins folder.
+	///     A helper class that loads and instantiates plugins from assemblies located in the plugins folder.
 	/// </summary>
 	public sealed class PluginLoader
 	{
-		private readonly ILogger<PluginLoader> _logger;
-		public IReadOnlyList<PluginManifest> Plugins => _plugins;
-		private readonly List<PluginManifest> _plugins = new();
 
 		private readonly IUnityContainer _container;
-		
+		private readonly ILogger<PluginLoader> _logger;
+		private readonly List<PluginManifest> _plugins = new();
+
 		public PluginLoader(ILogger<PluginLoader> logger, IUnityContainer container)
 		{
 			_logger = logger;
 			_container = container;
 		}
+		public IReadOnlyList<PluginManifest> Plugins => _plugins;
 
 		/// <summary>
-		/// Returns an array of all potential plugin files.
+		///     Returns an array of all potential plugin files.
 		/// </summary>
 		/// <param name="directory">The directory to search for plugins in.</param>
 		/// <returns>An array of plugin candidate file infos.</returns>
@@ -60,31 +61,31 @@ namespace PluginLoader.Unity
 			if (!Directory.Exists(directory))
 				return Array.Empty<FileInfo>();
 
-			var files = Directory.GetFiles(directory, "*Plugin.dll");
+			string[] files = Directory.GetFiles(directory, "*Plugin.dll");
 
 			return files.Select(f => new FileInfo(f)).ToArray();
 		}
 
 		internal PluginManifest LoadPluginFile(FileInfo file) // It's up to other things to keep track of plugin states. //
 		{
-			var asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-			var asm = AssemblyLoadContext.Default.LoadFromStream(asmStream);
+			FileStream asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+			Assembly asm = AssemblyLoadContext.Default.LoadFromStream(asmStream);
 			asmStream.Close();
 
 			var manifest = new PluginManifest
 			{
 				Assembly = asm,
-				
+
 				PluginInfo = file
 			};
-			
+
 			_plugins.Add(manifest);
 			return manifest;
 		}
 
 		internal async Task<bool> UnloadPluginFileAsync(FileInfo info)
 		{
-			if (_plugins.SingleOrDefault(m => m.PluginInfo.FullName == info.FullName) is not {} manifest)
+			if (_plugins.SingleOrDefault(m => m.PluginInfo.FullName == info.FullName) is not { } manifest)
 				return false;
 
 			try { await manifest.Plugin?.UnloadAsync()!; }
@@ -107,7 +108,7 @@ namespace PluginLoader.Unity
 				{
 					var injector = (DependencyInjectionHandler)_container.Resolve(injectorType);
 
-					var services = injector.ConfigureServices(new ServiceCollection());
+					IServiceCollection services = injector.ConfigureServices(new ServiceCollection());
 					_container.AddServices(services);
 
 					_logger.LogDebug(Events.Plugin, "Loaded services for {Plugin}", manifest.PluginInfo.Name);

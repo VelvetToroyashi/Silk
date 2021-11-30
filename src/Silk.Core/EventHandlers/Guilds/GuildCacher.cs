@@ -48,7 +48,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 			if (_guilds.Add(guild.Id))
 			{
-				var current = Interlocked.Increment(ref _guildCount);
+				long current = Interlocked.Increment(ref _guildCount);
 
 				LogMembers(members, guild.Members.Count, current);
 			}
@@ -89,7 +89,7 @@ namespace Silk.Core.EventHandlers.Guilds
 
 		private void LogMembers(int members, int totalMembers, long currentGuilds)
 		{
-			var message = members is 0 ?
+			string? message = members is 0 ?
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}]" :
 				"Guild cached! Shard [{Shard}/{Shards}] → Guild [{CurrentGuild}/{Guilds}] → Staff [{Members}/{AllMembers}]";
 
@@ -125,6 +125,8 @@ namespace Silk.Core.EventHandlers.Guilds
 		}
 
 		private static bool MemberIsStaff(DiscordMember m)
-			=> !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag);
+		{
+			return !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag);
+		}
 	}
 }

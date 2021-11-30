@@ -32,7 +32,7 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
 		/// <summary>
-		/// Execute the query from the specified booru site.
+		///     Execute the query from the specified booru site.
 		/// </summary>
 		/// <param name="amount">Amount of images to return.</param>
 		/// <param name="query">Query sent to the booru site.</param>
@@ -40,7 +40,7 @@ namespace Silk.Core.Commands.Furry.Types
 
 
 		/// <summary>
-		/// Make a GET request to the booru site (e6/e9), and return the result.
+		///     Make a GET request to the booru site (e6/e9), and return the result.
 		/// </summary>
 		/// <param name="query"></param>
 		/// <returns></returns>
@@ -53,7 +53,7 @@ namespace Silk.Core.Commands.Furry.Types
 
 			request.Headers.TryAddWithoutValidation("User-Agent", StringConstants.ProjectIdentifier);
 
-			using var result = await _client.SendAsync(request);
+			using HttpResponseMessage? result = await _client.SendAsync(request);
 
 			if (!result.IsSuccessStatusCode)
 				return Result<eBooruPostResult?>.FromError(new HttpResultError(result.StatusCode, "API is down."));
@@ -68,11 +68,11 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
 		/// <summary>
-		/// Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
+		///     Similar to <see cref="DoQueryAsync"/> but adds a specified API key when making a GET request.
 		/// </summary>
 		/// <param name="query">search query to put in the GET request.</param>
 		/// <param name="apiKey">The API key.</param>
-		/// <param name="requireUsername">Add <see cref="username" /> to the HTTP header or not.</param>
+		/// <param name="requireUsername">Add <see cref="username"/> to the HTTP header or not.</param>
 		/// <returns></returns>
 		private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
 		{
@@ -100,11 +100,11 @@ namespace Silk.Core.Commands.Furry.Types
 		}
 
 		/// <summary>
-		/// Get a set number of posts randomly from the list of available posts.
+		///     Get a set number of posts randomly from the list of available posts.
 		/// </summary>
 		/// <param name="resultPosts">e6/e9 post result.</param>
 		/// <param name="amount">The amount of posts to return.</param>
-		/// <param name="seed">The seed for the <see cref="Random" /> used to pick posts, preferably being a casted message Id.</param>
+		/// <param name="seed">The seed for the <see cref="Random"/> used to pick posts, preferably being a casted message Id.</param>
 		/// <returns>A list of mostly random posts from a given post result.</returns>
 		private protected IReadOnlyList<Post> GetRandomPosts(List<Post>? resultPosts, int amount, int seed = default)
 		{

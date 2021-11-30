@@ -9,23 +9,32 @@ using YumeChan.PluginBase.Tools.Data;
 namespace Silk.Core.Types
 {
 	/// <summary>
-	/// Implementation of <see cref="IDatabaseProvider{TPlugin}"/> that provides support for Postgres (NpgSQL).
+	///     Implementation of <see cref="IDatabaseProvider{TPlugin}"/> that provides support for Postgres (NpgSQL).
 	/// </summary>
 	public class DatabaseProvider<T> : IDatabaseProvider<T> where T : Plugin
 	{
 		private readonly IOptions<SilkConfigurationOptions> _options;
-		public DatabaseProvider(IOptions<SilkConfigurationOptions> options) => _options = options;
+		public DatabaseProvider(IOptions<SilkConfigurationOptions> options)
+		{
+			_options = options;
+		}
 
-		public virtual IMongoDatabase GetMongoDatabase() => throw new NotSupportedException();
-		public virtual void SetMongoDb(string connectionString, string databaseName) => throw new NotSupportedException();
+		public virtual IMongoDatabase GetMongoDatabase()
+		{
+			throw new NotSupportedException();
+		}
+		public virtual void SetMongoDb(string connectionString, string databaseName)
+		{
+			throw new NotSupportedException();
+		}
 
 
 		public Action<DbContextOptionsBuilder> GetPostgresContextOptionsBuilder()
 		{
 			return o =>
 			{
-				var options = _options.Value;
-				var dboptions = options.Persistence
+				SilkConfigurationOptions? options = _options.Value;
+				string? dboptions = options.Persistence
 					.GetConnectionString()
 					.Replace("Database=silk;", $"Database=Silk.Plugin-{typeof(T).Name.Replace("Plugin", null)};");
 

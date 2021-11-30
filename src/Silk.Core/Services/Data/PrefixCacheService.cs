@@ -10,7 +10,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Data
 {
-	/// <inheritdoc cref="IPrefixCacheService" />
+	/// <inheritdoc cref="IPrefixCacheService"/>
 	public sealed class PrefixCacheService : IPrefixCacheService
 	{
 		private readonly ILogger<PrefixCacheService> _logger;

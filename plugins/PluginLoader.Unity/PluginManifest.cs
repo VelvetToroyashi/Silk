@@ -6,7 +6,7 @@ using YumeChan.PluginBase;
 namespace PluginLoader.Unity
 {
 	/// <summary>
-	/// A data-like class that holds information about a plugin, including the instance of the plugin itself.
+	///     A data-like class that holds information about a plugin, including the instance of the plugin itself.
 	/// </summary>
 	public sealed record PluginManifest
 	{
@@ -15,6 +15,9 @@ namespace PluginLoader.Unity
 		public FileInfo PluginInfo { get; init; }
 		public AssemblyLoadContext LoadContext { get; init; }
 
-		public static implicit operator Plugin(PluginManifest manifest) => manifest.Plugin;
+		public static implicit operator Plugin(PluginManifest manifest)
+		{
+			return manifest.Plugin;
+		}
 	}
 }

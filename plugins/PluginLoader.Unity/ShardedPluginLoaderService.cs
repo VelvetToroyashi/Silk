@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -11,14 +12,14 @@ using YumeChan.PluginBase;
 namespace PluginLoader.Unity
 {
 	/// <summary>
-	/// A service for loading plugins.
+	///     A service for loading plugins.
 	/// </summary>
 	public sealed class ShardedPluginLoaderService : IPluginLoaderService
 	{
 		private const string DefaultPluginsDirectory = "./plugins";
+		private readonly DiscordShardedClient _client;
 
 		private readonly PluginLoader _loader;
-		private readonly DiscordShardedClient _client;
 		private readonly ILogger<IPluginLoaderService> _logger;
 		public ShardedPluginLoaderService(PluginLoader loader, ILogger<IPluginLoaderService> logger, DiscordShardedClient client)
 		{
@@ -30,16 +31,16 @@ namespace PluginLoader.Unity
 
 		public async Task LoadPluginsAsync()
 		{
-			var files = _loader.DiscoverPluginFiles(DefaultPluginsDirectory);
+			FileInfo[] files = _loader.DiscoverPluginFiles(DefaultPluginsDirectory);
 			var manifests = new List<PluginManifest>();
-			
-			foreach (var file in files)
+
+			foreach (FileInfo file in files)
 				manifests.Add(_loader.LoadPluginFile(file));
 
-			foreach (var manifest in manifests)
+			foreach (PluginManifest manifest in manifests)
 				await _loader.RegisterPluginAsync(manifest);
-			
-			foreach (var plugin in manifests)
+
+			foreach (PluginManifest plugin in manifests)
 			{
 				try
 				{
@@ -55,11 +56,11 @@ namespace PluginLoader.Unity
 
 		public async Task RegisterPluginCommandsAsync()
 		{
-			var cnextExtensions = (await _client.GetCommandsNextAsync()).Select(c => c.Value);
+			IEnumerable<CommandsNextExtension> cnextExtensions = (await _client.GetCommandsNextAsync()).Select(c => c.Value);
 
-			foreach (var plugin in _loader.Plugins)
+			foreach (PluginManifest plugin in _loader.Plugins)
 			{
-				foreach (var ext in cnextExtensions)
+				foreach (CommandsNextExtension ext in cnextExtensions)
 				{
 					try
 					{
@@ -72,16 +73,16 @@ namespace PluginLoader.Unity
 					}
 				}
 			}
-			
+
 		}
 
 		public async Task RegisterPluginCommandsAsync(IEnumerable<Plugin> plugins)
 		{
-			var cnext = await _client.GetCommandsNextAsync();
-			
-			foreach (var plugin in plugins)
+			IReadOnlyDictionary<int, CommandsNextExtension> cnext = await _client.GetCommandsNextAsync();
+
+			foreach (Plugin plugin in plugins)
 			{
-				foreach (var ext in cnext.Values)
+				foreach (CommandsNextExtension ext in cnext.Values)
 				{
 					try { ext.RegisterCommands(plugin.GetType().Assembly); }
 					catch (DuplicateCommandException e)

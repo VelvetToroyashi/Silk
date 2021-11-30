@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace RoleMenuPlugin.Database
 {
 	/// <summary>
-	/// A role menu model containing the message it belongs to and its options.
+	///     A role menu model containing the message it belongs to and its options.
 	/// </summary>
 	public sealed class RoleMenuModel
 	{

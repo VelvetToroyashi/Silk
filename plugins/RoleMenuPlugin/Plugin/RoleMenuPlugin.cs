@@ -19,7 +19,7 @@ namespace RoleMenuPlugin
 			_client = client;
 			_db = db;
 
-			Version = this.GetType().Assembly.GetName().Version!.ToString(3);
+			Version = GetType().Assembly.GetName().Version!.ToString(3);
 		}
 		public override string DisplayName => "Role-Menu Plugin";
 

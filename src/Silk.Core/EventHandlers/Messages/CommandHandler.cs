@@ -13,10 +13,10 @@ namespace Silk.Core.EventHandlers.Messages
 {
 	public sealed class CommandHandler
 	{
-		private readonly IMediator _mediator;
 		private readonly ILogger<CommandHandler> _logger;
+		private readonly IMediator _mediator;
 		private readonly IPrefixCacheService _prefixService;
-		
+
 		public CommandHandler(DiscordClient client, IPrefixCacheService prefixService, IMediator mediator, ILogger<CommandHandler> logger)
 		{
 			client.MessageCreated += Handle;
