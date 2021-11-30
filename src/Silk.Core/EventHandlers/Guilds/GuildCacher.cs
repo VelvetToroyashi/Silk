@@ -19,18 +19,18 @@ namespace Silk.Core.EventHandlers.Guilds
 	public sealed class GuildCacher
 	{
 
-		private static readonly string _onGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
-		                                                  $"\n\nI respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`" +
-		                                                  "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
-		                                                  "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
-		                                                  "\nDonations via Ko-Fi *greatly* aid in this endeavour. <3";
+		private const string _onGuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs." +
+		                                                   $"\n\nI respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`" +
+		                                                   "\n\nThere's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!" +
+		                                                   "\n\nAlso! Development, hosting, infrastructure, etc. is expensive! " +
+		                                                   "\nDonations via Ko-Fi *greatly* aid in this endeavour. <3";
 		private readonly DiscordClient _client;
+		private readonly HashSet<ulong> _guilds = new();
 		private readonly ILogger<GuildCacher> _logger;
 
 		private readonly IMediator _mediator;
-		private readonly HashSet<ulong> _guilds = new();
 		private long _guildCount;
-		
+
 		private DateTime? _startTime;
 		public GuildCacher(IMediator mediator, DiscordClient client, ILogger<GuildCacher> logger)
 		{
@@ -49,7 +49,7 @@ namespace Silk.Core.EventHandlers.Guilds
 			if (_guilds.Add(guild.Id))
 			{
 				var current = Interlocked.Increment(ref _guildCount);
-				
+
 				LogMembers(members, guild.Members.Count, current);
 			}
 		}
@@ -83,10 +83,10 @@ namespace Silk.Core.EventHandlers.Guilds
 
 				await thankYouChannel.SendMessageAsync(builder);
 			}
-			
+
 			await CacheGuildAsync(args.Guild);
 		}
-		
+
 		private void LogMembers(int members, int totalMembers, long currentGuilds)
 		{
 			var message = members is 0 ?
@@ -124,7 +124,7 @@ namespace Silk.Core.EventHandlers.Guilds
 			return staffCount;
 		}
 
-		private static bool MemberIsStaff(DiscordMember m) 
+		private static bool MemberIsStaff(DiscordMember m)
 			=> !m.IsBot && m.Permissions.HasPermission(FlagConstants.CacheFlag);
 	}
 }
