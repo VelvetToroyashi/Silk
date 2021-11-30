@@ -7,95 +7,95 @@ using Microsoft.Extensions.Logging;
 
 namespace AnnoucementPlugin.Services
 {
-	public sealed class MessageDispatcher : IMessageDispatcher
-	{
-		private readonly DiscordClient _client;
-		private readonly ILogger<MessageDispatcher> _logger;
+    public sealed class MessageDispatcher : IMessageDispatcher
+    {
+        private readonly DiscordClient              _client;
+        private readonly ILogger<MessageDispatcher> _logger;
 
-		public MessageDispatcher(ILogger<MessageDispatcher> logger, DiscordClient client)
-		{
-			_logger = logger;
-			_client = client;
-		}
+        public MessageDispatcher(ILogger<MessageDispatcher> logger, DiscordClient client)
+        {
+            _logger = logger;
+            _client = client;
+        }
 
-		public async Task<MessageSendResult> DispatchMessage(ulong guild, ulong channel, string message)
-		{
-			bool exists = AnnouncementChannelExists(guild, channel);
+        public async Task<MessageSendResult> DispatchMessage(ulong guild, ulong channel, string message)
+        {
+            bool exists = AnnouncementChannelExists(guild, channel);
 
-			if (!exists)
-				return new(false, MessageSendErrorType.ChannelDoesNotExist);
+            if (!exists)
+                return new(false, MessageSendErrorType.ChannelDoesNotExist);
 
-			bool unlocked = await UnlockChannelAsync(guild, channel);
+            bool unlocked = await UnlockChannelAsync(guild, channel);
 
-			if (!unlocked)
-				return new(false, MessageSendErrorType.CouldNotUnlockChannel);
+            if (!unlocked)
+                return new(false, MessageSendErrorType.CouldNotUnlockChannel);
 
-			DiscordChannel messageChannel = _client.Guilds[guild].Channels[channel];
+            DiscordChannel messageChannel = _client.Guilds[guild].Channels[channel];
 
-			if (message.Length <= 2000)
-			{
-				try
-				{
-					await messageChannel.SendMessageAsync(message);
-				}
-				catch
-				{
-					return new(false, MessageSendErrorType.Unknown);
-				}
-			}
-			else
-			{
-				DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-					.WithColor(DiscordColor.Azure)
-					.WithDescription(message);
+            if (message.Length <= 2000)
+            {
+                try
+                {
+                    await messageChannel.SendMessageAsync(message);
+                }
+                catch
+                {
+                    return new(false, MessageSendErrorType.Unknown);
+                }
+            }
+            else
+            {
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                                           .WithColor(DiscordColor.Azure)
+                                           .WithDescription(message);
 
-				try
-				{
-					await messageChannel.SendMessageAsync(embed);
-				}
-				catch
-				{
-					return new(false, MessageSendErrorType.Unknown);
-				}
-			}
+                try
+                {
+                    await messageChannel.SendMessageAsync(embed);
+                }
+                catch
+                {
+                    return new(false, MessageSendErrorType.Unknown);
+                }
+            }
 
-			return new(true);
-		}
-
-
-		private async Task<bool> UnlockChannelAsync(ulong guildId, ulong channelId)
-		{
-			DiscordGuild guild = _client.Guilds[guildId];
-			DiscordChannel channel = guild.GetChannel(channelId);
+            return new(true);
+        }
 
 
-			bool canSendMessages = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.SendMessages);
+        private async Task<bool> UnlockChannelAsync(ulong guildId, ulong channelId)
+        {
+            DiscordGuild guild = _client.Guilds[guildId];
+            DiscordChannel channel = guild.GetChannel(channelId);
 
-			if (canSendMessages)
-				return true;
 
-			bool roleCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
-			bool memberCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
+            bool canSendMessages = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.SendMessages);
 
-			if (!roleCanModifyChannel && !memberCanModifyChannel)
-				return false;
+            if (canSendMessages)
+                return true;
 
-			try
-			{
-				await channel.AddOverwriteAsync(guild.CurrentMember, Permissions.SendMessages);
-				return true;
-			}
-			catch (UnauthorizedException)
-			{
-				return false;
-			}
-		}
+            bool roleCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
+            bool memberCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
 
-		private bool AnnouncementChannelExists(ulong guild, ulong channel)
-		{
-			DiscordGuild guildObj = _client.Guilds[guild];
+            if (!roleCanModifyChannel && !memberCanModifyChannel)
+                return false;
 
-			return guildObj.Channels.TryGetValue(channel, out _);
-		}
-	}
+            try
+            {
+                await channel.AddOverwriteAsync(guild.CurrentMember, Permissions.SendMessages);
+                return true;
+            }
+            catch (UnauthorizedException)
+            {
+                return false;
+            }
+        }
+
+        private bool AnnouncementChannelExists(ulong guild, ulong channel)
+        {
+            DiscordGuild guildObj = _client.Guilds[guild];
+
+            return guildObj.Channels.TryGetValue(channel, out _);
+        }
+    }
 }

@@ -5,19 +5,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AnnoucementPlugin.Database.MediatR
 {
-	public sealed record GetAnnouncementsRequest : IRequest<AnnouncementModel[]>;
+    public sealed record GetAnnouncementsRequest : IRequest<AnnouncementModel[]>;
 
-	public sealed class GetAnnouncementsHandler : IRequestHandler<GetAnnouncementsRequest, AnnouncementModel[]>
-	{
-		private readonly AnnouncementContext _db;
-		public GetAnnouncementsHandler(AnnouncementContext db)
-		{
-			_db = db;
-		}
+    public sealed class GetAnnouncementsHandler : IRequestHandler<GetAnnouncementsRequest, AnnouncementModel[]>
+    {
+        private readonly AnnouncementContext _db;
+        public GetAnnouncementsHandler(AnnouncementContext db)
+        {
+            _db = db;
+        }
 
-		public Task<AnnouncementModel[]> Handle(GetAnnouncementsRequest request, CancellationToken cancellationToken)
-		{
-			return _db.Announcements.ToArrayAsync(cancellationToken);
-		}
-	}
+        public Task<AnnouncementModel[]> Handle(GetAnnouncementsRequest request, CancellationToken cancellationToken)
+        {
+            return _db.Announcements.ToArrayAsync(cancellationToken);
+        }
+    }
 }

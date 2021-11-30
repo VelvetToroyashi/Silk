@@ -23,65 +23,65 @@ namespace Silk.Core.Data.MediatR.Users
 	public record BulkAddUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
 
 	/// <summary>
-	///     The default handler for <see cref="BulkAddUserRequest"/>.
+	///     The default handler for <see cref="BulkAddUserRequest" />.
 	/// </summary>
 	public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerable<UserEntity>>
-	{
-		private readonly GuildContext _db;
+    {
+        private readonly GuildContext _db;
 
-		public BulkAddUserHandler(GuildContext db)
-		{
-			_db = db;
-		}
+        public BulkAddUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
-		public async Task<IEnumerable<UserEntity>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
-		{
-			try
-			{
-				_db.AddRange(request.Users);
-				await _db.SaveChangesAsync(cancellationToken);
-			}
-			catch (DbUpdateException)
-			{
-				_db.ChangeTracker.Clear();
+        public async Task<IEnumerable<UserEntity>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _db.AddRange(request.Users);
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException)
+            {
+                _db.ChangeTracker.Clear();
 
-				List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
-				nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
+                List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
+                nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
 
-				_db.Users.AddRange(nonAddedUsers);
+                _db.Users.AddRange(nonAddedUsers);
 
 
-				try
-				{
-					await _db.SaveChangesAsync(cancellationToken);
-				}
-				catch (DbUpdateException) { await AttemptAddUsersSlowAsync(request.Users); }
-				// Y'know. I hope whoever forces the catch branch to run has a warm pillow. //
-			}
-			return request.Users;
-		}
+                try
+                {
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+                catch (DbUpdateException) { await AttemptAddUsersSlowAsync(request.Users); }
+                // Y'know. I hope whoever forces the catch branch to run has a warm pillow. //
+            }
+            return request.Users;
+        }
 
-		/// <summary>
-		///     Adds users individually to mitigate an entire query failing when adding in bulk.
-		///     <para>This is considerably slower than <see cref="Handle"/>.</para>
-		/// </summary>
-		/// <param name="users">The collection of users to add.</param>
-		private async Task AttemptAddUsersSlowAsync(IEnumerable<UserEntity> users)
-		{
-			foreach (var user in users)
-			{
-				try
-				{
-					// This is slow and expensive*. //
-					_db.ChangeTracker.Clear(); // Uncertain that SaveChangesAsync clears this. 
-					_db.Users.Add(user); // The issue on github (https://github.com/dotnet/efcore/issues/9118) is still open. //
-					await _db.SaveChangesAsync();
-				}
-				catch (DbUpdateException)
-				{
-					/* I give up. Screw you. */
-				}
-			}
-		}
-	}
+        /// <summary>
+        ///     Adds users individually to mitigate an entire query failing when adding in bulk.
+        ///     <para>This is considerably slower than <see cref="Handle" />.</para>
+        /// </summary>
+        /// <param name="users">The collection of users to add.</param>
+        private async Task AttemptAddUsersSlowAsync(IEnumerable<UserEntity> users)
+        {
+            foreach (var user in users)
+            {
+                try
+                {
+                    // This is slow and expensive*. //
+                    _db.ChangeTracker.Clear(); // Uncertain that SaveChangesAsync clears this. 
+                    _db.Users.Add(user);       // The issue on github (https://github.com/dotnet/efcore/issues/9118) is still open. //
+                    await _db.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    /* I give up. Screw you. */
+                }
+            }
+        }
+    }
 }

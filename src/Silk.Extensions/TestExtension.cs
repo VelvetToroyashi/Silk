@@ -1,6 +1,6 @@
 ﻿namespace Silk__Extensions
 {
 
-	public class FooBar { }
+    public class FooBar { }
 
 }

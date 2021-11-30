@@ -4,11 +4,11 @@ using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.EntityConfigurations
 {
-	public class ReminderEntityConfiguration : IEntityTypeConfiguration<ReminderEntity>
-	{
-		public void Configure(EntityTypeBuilder<ReminderEntity> builder)
-		{
-			builder.HasKey(r => r.Id);
-		}
-	}
+    public class ReminderEntityConfiguration : IEntityTypeConfiguration<ReminderEntity>
+    {
+        public void Configure(EntityTypeBuilder<ReminderEntity> builder)
+        {
+            builder.HasKey(r => r.Id);
+        }
+    }
 }

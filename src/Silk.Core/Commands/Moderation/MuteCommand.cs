@@ -15,100 +15,100 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[HelpCategory(Categories.Mod)]
-	public class MuteCommand : BaseCommandModule
-	{
-		private readonly IInfractionService _infractions;
+    [HelpCategory(Categories.Mod)]
+    public class MuteCommand : BaseCommandModule
+    {
+        private readonly IInfractionService _infractions;
 
-		public MuteCommand(IInfractionService infractions)
-		{
-			_infractions = infractions;
-		}
+        public MuteCommand(IInfractionService infractions)
+        {
+            _infractions = infractions;
+        }
 
-		[Command("mute")]
-		[RequireFlag(UserFlag.Staff)]
-		[RequirePermissions(Permissions.ManageRoles)]
-		[Description("Mute a guild member!")]
-		[Priority(0)]
-		public async Task Mute(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
-		{
-			DiscordMember bot = ctx.Guild.CurrentMember;
+        [Command("mute")]
+        [RequireFlag(UserFlag.Staff)]
+        [RequirePermissions(Permissions.ManageRoles)]
+        [Description("Mute a guild member!")]
+        [Priority(0)]
+        public async Task Mute(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
+        {
+            DiscordMember bot = ctx.Guild.CurrentMember;
 
-			if (user.IsAbove(bot))
-			{
-				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
+            if (user.IsAbove(bot))
+            {
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
 
-				string? message = roleDiff is not 0 ?
-					$"I can't do that! They're {roleDiff} role(s) above me!" :
-					"We have the same top role! I can't add roles to this person.";
+                string? message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above me!" :
+                    "We have the same top role! I can't add roles to this person.";
 
-				await ctx.RespondAsync(message);
-				return;
-			}
+                await ctx.RespondAsync(message);
+                return;
+            }
 
-			if (user.IsAbove(ctx.Member))
-			{
-				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+            if (user.IsAbove(ctx.Member))
+            {
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
 
-				string? message = roleDiff is not 0 ?
-					$"I can't do that! They're {roleDiff} role(s) above you!" :
-					"You two see eye to eye! c: I can't mute someone with the same role as you.";
+                string? message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above you!" :
+                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
 
-				await ctx.RespondAsync(message);
-				return;
-			}
+                await ctx.RespondAsync(message);
+                return;
+            }
 
-			InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-			string? msg = res switch
-			{
-				InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (User notified with Direct Message).",
-				InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Failed to DM).",
-				InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server).",
-				InfractionResult.SucceededDoesNotNotify => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Updating active mute does not notify)."
-			};
-			await ctx.RespondAsync(msg);
-		}
+            InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
+            string? msg = res switch
+            {
+                InfractionResult.SucceededWithNotification    => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (User notified with Direct Message).",
+                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Failed to DM).",
+                InfractionResult.FailedGuildMemberCache       => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server).",
+                InfractionResult.SucceededDoesNotNotify       => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Updating active mute does not notify)."
+            };
+            await ctx.RespondAsync(msg);
+        }
 
-		[Priority(1)]
-		[Command("mute")]
-		[RequireFlag(UserFlag.Staff)]
-		public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
-		{
-			DiscordMember bot = ctx.Guild.CurrentMember;
+        [Priority(1)]
+        [Command("mute")]
+        [RequireFlag(UserFlag.Staff)]
+        public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
+        {
+            DiscordMember bot = ctx.Guild.CurrentMember;
 
-			if (user.IsAbove(bot))
-			{
-				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
+            if (user.IsAbove(bot))
+            {
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
 
-				string? message = roleDiff is not 0 ?
-					$"I can't do that! They're {roleDiff} role(s) above me!" :
-					"We have the same top role! I can't add roles to this person.";
+                string? message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above me!" :
+                    "We have the same top role! I can't add roles to this person.";
 
-				await ctx.RespondAsync(message);
-				return;
-			}
+                await ctx.RespondAsync(message);
+                return;
+            }
 
-			if (user.IsAbove(ctx.Member))
-			{
-				int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
+            if (user.IsAbove(ctx.Member))
+            {
+                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
 
-				string? message = roleDiff is not 0 ?
-					$"I can't do that! They're {roleDiff} role(s) above you!" :
-					"You two see eye to eye! c: I can't mute someone with the same role as you.";
+                string? message = roleDiff is not 0 ?
+                    $"I can't do that! They're {roleDiff} role(s) above you!" :
+                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
 
-				await ctx.RespondAsync(message);
-				return;
-			}
+                await ctx.RespondAsync(message);
+                return;
+            }
 
-			InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
-			string? msg = res switch
-			{
-				InfractionResult.SucceededWithNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
-				InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Failed to DM).",
-				InfractionResult.FailedGuildMemberCache => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server).",
-				InfractionResult.SucceededDoesNotNotify => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Updating active mute does not notify)."
-			};
-			await ctx.RespondAsync(msg);
-		}
-	}
+            InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
+            string? msg = res switch
+            {
+                InfractionResult.SucceededWithNotification    => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
+                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Failed to DM).",
+                InfractionResult.FailedGuildMemberCache       => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server).",
+                InfractionResult.SucceededDoesNotNotify       => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Updating active mute does not notify)."
+            };
+            await ctx.RespondAsync(msg);
+        }
+    }
 }

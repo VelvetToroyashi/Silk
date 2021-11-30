@@ -1,19 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" >
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+    <PropertyGroup >
+        <TargetFramework >net6.0</TargetFramework >
+        <Nullable >enable</Nullable >
+    </PropertyGroup >
 
-    <ItemGroup>
-        <PackageReference Include="DSharpPlus"/>
-        <PackageReference Include="DSharpPlus.CommandsNext"/>
-        <PackageReference Include="Serilog.Expressions" Version="3.2.1-dev-00071"/>
-        <PackageReference Include="Serilog.Sinks.Console"/>
-    </ItemGroup>
+    <ItemGroup >
+        <PackageReference Include="DSharpPlus" />
+        <PackageReference Include="DSharpPlus.CommandsNext" />
+        <PackageReference Include="Serilog.Expressions" Version="3.2.1-dev-00071" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+    </ItemGroup >
 
-    <ItemGroup>
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj"/>
-    </ItemGroup>
+    <ItemGroup >
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
+    </ItemGroup >
 
-</Project>
+</Project >

@@ -8,30 +8,30 @@ using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-	public static class GetChannelRoleMenusRequest
-	{
-		public record Request(ulong ChannelId) : IRequest<Result<IEnumerable<RoleMenuModel>>>;
+    public static class GetChannelRoleMenusRequest
+    {
+        public record Request(ulong ChannelId) : IRequest<Result<IEnumerable<RoleMenuModel>>>;
 
-		internal class Handler : IRequestHandler<Request, Result<IEnumerable<RoleMenuModel>>>
-		{
-			private readonly RoleMenuContext _db;
+        internal class Handler : IRequestHandler<Request, Result<IEnumerable<RoleMenuModel>>>
+        {
+            private readonly RoleMenuContext _db;
 
-			public Handler(RoleMenuContext db)
-			{
-				_db = db;
-			}
+            public Handler(RoleMenuContext db)
+            {
+                _db = db;
+            }
 
-			public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken cancellationToken)
-			{
-				List<RoleMenuModel>? results = await _db.RoleMenus
-					.Include(c => c.Options)
-					.Where(x => x.ChannelId == request.ChannelId)
-					.ToListAsync(cancellationToken);
+            public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken cancellationToken)
+            {
+                List<RoleMenuModel>? results = await _db.RoleMenus
+                                                        .Include(c => c.Options)
+                                                        .Where(x => x.ChannelId == request.ChannelId)
+                                                        .ToListAsync(cancellationToken);
 
-				return results.Any() ?
-					Result<IEnumerable<RoleMenuModel>>.FromSuccess(results) :
-					Result<IEnumerable<RoleMenuModel>>.FromError(new NotFoundError("No role menus found for channel"));
-			}
-		}
-	}
+                return results.Any() ?
+                    Result<IEnumerable<RoleMenuModel>>.FromSuccess(results) :
+                    Result<IEnumerable<RoleMenuModel>>.FromError(new NotFoundError("No role menus found for channel"));
+            }
+        }
+    }
 }

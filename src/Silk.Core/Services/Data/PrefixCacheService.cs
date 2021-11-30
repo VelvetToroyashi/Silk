@@ -10,48 +10,48 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Data
 {
-	/// <inheritdoc cref="IPrefixCacheService"/>
+	/// <inheritdoc cref="IPrefixCacheService" />
 	public sealed class PrefixCacheService : IPrefixCacheService
-	{
-		private readonly ILogger<PrefixCacheService> _logger;
-		private readonly IMediator _mediator;
-		private readonly IMemoryCache _memoryCache;
-		public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
-		{
-			_logger = logger;
-			_memoryCache = memoryCache;
-			_mediator = mediator;
-		}
+    {
+        private readonly ILogger<PrefixCacheService> _logger;
+        private readonly IMediator                   _mediator;
+        private readonly IMemoryCache                _memoryCache;
+        public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
+        {
+            _logger = logger;
+            _memoryCache = memoryCache;
+            _mediator = mediator;
+        }
 
-		[SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
-		public string RetrievePrefix(ulong? guildId)
-		{
-			if (guildId is null or 0) return string.Empty;
-			if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string)prefix;
-			return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
-		}
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
+        public string RetrievePrefix(ulong? guildId)
+        {
+            if (guildId is null or 0) return string.Empty;
+            if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string)prefix;
+            return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
+        }
 
-		// I don't know if updating a reference will update 
-		public void UpdatePrefix(ulong id, string prefix)
-		{
-			string key = GetGuildString(id);
+        // I don't know if updating a reference will update 
+        public void UpdatePrefix(ulong id, string prefix)
+        {
+            string key = GetGuildString(id);
 
-			_memoryCache.TryGetValue(key, out string oldPrefix);
-			_memoryCache.Set(key, prefix);
-			_logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
-		}
+            _memoryCache.TryGetValue(key, out string oldPrefix);
+            _memoryCache.Set(key, prefix);
+            _logger.LogDebug($"Updated prefix for {id} - {oldPrefix} -> {prefix}");
+        }
 
 
-		private async Task<string> GetDatabasePrefixAsync(ulong guildId)
-		{
-			GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(guildId, StringConstants.DefaultCommandPrefix));
-			_memoryCache.Set(GetGuildString(guildId), guild.Prefix);
-			return guild.Prefix;
-		}
+        private async Task<string> GetDatabasePrefixAsync(ulong guildId)
+        {
+            GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(guildId, StringConstants.DefaultCommandPrefix));
+            _memoryCache.Set(GetGuildString(guildId), guild.Prefix);
+            return guild.Prefix;
+        }
 
-		private static string GetGuildString(ulong id)
-		{
-			return $"GUILD_PREFIX_KEY_{id}";
-		}
-	}
+        private static string GetGuildString(ulong id)
+        {
+            return $"GUILD_PREFIX_KEY_{id}";
+        }
+    }
 }

@@ -8,20 +8,20 @@ using YumeChan.PluginBase.Tools.Data;
 
 namespace RoleMenuPlugin
 {
-	public sealed class DependencyHandler : DependencyInjectionHandler
-	{
-		public override IServiceCollection ConfigureServices(IServiceCollection services)
-		{
-			return services
-				.AddMediatR(typeof(DependencyHandler))
-				.AddDbContext<RoleMenuContext>((provider, builder) =>
-				{
-					Action<DbContextOptionsBuilder>? applyDb = provider
-						.GetService<IDatabaseProvider<RoleMenuPlugin>>()!
-						.GetPostgresContextOptionsBuilder();
-					applyDb(builder);
-				})
-				.AddSingleton<RoleMenuRoleService>();
-		}
-	}
+    public sealed class DependencyHandler : DependencyInjectionHandler
+    {
+        public override IServiceCollection ConfigureServices(IServiceCollection services)
+        {
+            return services
+                  .AddMediatR(typeof(DependencyHandler))
+                  .AddDbContext<RoleMenuContext>((provider, builder) =>
+                   {
+                       Action<DbContextOptionsBuilder>? applyDb = provider
+                                                                 .GetService<IDatabaseProvider<RoleMenuPlugin>>()!
+                                                                 .GetPostgresContextOptionsBuilder();
+                       applyDb(builder);
+                   })
+                  .AddSingleton<RoleMenuRoleService>();
+        }
+    }
 }

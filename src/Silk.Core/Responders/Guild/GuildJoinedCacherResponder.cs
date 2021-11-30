@@ -17,7 +17,7 @@ namespace Silk.Core.Responders
 
         public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
+            if (gatewayEvent.IsUnavailable.IsDefined(out bool unavailable) && unavailable)
                 return Result.FromSuccess(); //???
 
             if (_guildCacherService.IsNewGuild(gatewayEvent.ID))

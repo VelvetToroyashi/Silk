@@ -13,27 +13,27 @@ namespace Silk.Core.Data.MediatR.GlobalUsers
 	public record GetOrCreateGlobalUserRequest(ulong UserId) : IRequest<GlobalUserEntity>;
 
 	/// <summary>
-	///     The default handler for <see cref="GetOrCreateGlobalUserRequest"/>.
+	///     The default handler for <see cref="GetOrCreateGlobalUserRequest" />.
 	/// </summary>
 	public class GetOrCreateGlobalUserHandler : IRequestHandler<GetOrCreateGlobalUserRequest, GlobalUserEntity>
-	{
-		private readonly GuildContext _db;
+    {
+        private readonly GuildContext _db;
 
-		public GetOrCreateGlobalUserHandler(GuildContext db)
-		{
-			_db = db;
-		}
+        public GetOrCreateGlobalUserHandler(GuildContext db)
+        {
+            _db = db;
+        }
 
-		public async Task<GlobalUserEntity> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
-		{
-			GlobalUserEntity? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
-			user ??= new()
-			{
-				Id = request.UserId,
-				LastCashOut = DateTime.MinValue
-			};
-			await _db.SaveChangesAsync(cancellationToken);
-			return user;
-		}
-	}
+        public async Task<GlobalUserEntity> Handle(GetOrCreateGlobalUserRequest request, CancellationToken cancellationToken)
+        {
+            GlobalUserEntity? user = await _db.GlobalUsers.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            user ??= new()
+            {
+                Id = request.UserId,
+                LastCashOut = DateTime.MinValue
+            };
+            await _db.SaveChangesAsync(cancellationToken);
+            return user;
+        }
+    }
 }

@@ -27,7 +27,7 @@ namespace Silk.Core.Services.Data
         private readonly IDiscordRestGuildAPI   _guildApi;
 
         /// <summary>
-        /// A collection of guilds known to be already joined. Populated on READY gateway event.
+        ///     A collection of guilds known to be already joined. Populated on READY gateway event.
         /// </summary>
         private readonly HashSet<Snowflake> _knownGuilds = new();
 
@@ -42,7 +42,7 @@ namespace Silk.Core.Services.Data
         private readonly IDiscordRestUserAPI _userApi;
 
         /// <summary>
-        /// Required permissions to send a welcome message to a new guild.
+        ///     Required permissions to send a welcome message to a new guild.
         /// </summary>
         private readonly DiscordPermissionSet _welcomeMessagePermissions = new(DiscordPermission.SendMessages, DiscordPermission.EmbedLinks);
 
@@ -69,20 +69,20 @@ namespace Silk.Core.Services.Data
             //a guild fetched from REST here, which typically doesn't have
             //channels defined, which is a big issue, but that's on the caller
 
-            var currentUserResult = await _userApi.GetCurrentUserAsync();
+            Result<IUser> currentUserResult = await _userApi.GetCurrentUserAsync();
 
             if (!currentUserResult.IsSuccess)
                 return Result.FromError(currentUserResult.Error);
 
-            var currentMemberResult = await _guildApi.GetGuildMemberAsync(guild.ID, currentUserResult.Entity.ID);
+            Result<IGuildMember> currentMemberResult = await _guildApi.GetGuildMemberAsync(guild.ID, currentUserResult.Entity.ID);
 
             if (!currentMemberResult.IsSuccess)
                 return Result.FromError(currentMemberResult.Error);
 
-            var currentMember = currentMemberResult.Entity;
-            var currentUser = currentMember.User.Value;
+            IGuildMember? currentMember = currentMemberResult.Entity;
+            IUser? currentUser = currentMember.User.Value;
 
-            var channels = guild.Channels.Value;
+            IReadOnlyList<IChannel>? channels = guild.Channels.Value;
 
             IChannel? availableChannel = null;
             foreach (var channel in channels)
@@ -90,13 +90,13 @@ namespace Silk.Core.Services.Data
                 if (channel.Type is not ChannelType.GuildText)
                     continue;
 
-                var overwrites = channel.PermissionOverwrites.Value;
+                IReadOnlyList<IPermissionOverwrite>? overwrites = channel.PermissionOverwrites.Value;
 
-                var permissions = DiscordPermissionSet.ComputePermissions(
-                                                                          currentUser.ID,
-                                                                          guild.Roles.Single(r => r.ID == guild.ID),
-                                                                          guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
-                                                                          overwrites);
+                IDiscordPermissionSet? permissions = DiscordPermissionSet.ComputePermissions(
+                                                                                             currentUser.ID,
+                                                                                             guild.Roles.Single(r => r.ID == guild.ID),
+                                                                                             guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
+                                                                                             overwrites);
 
                 if (permissions.HasPermission(DiscordPermission.SendMessages) && permissions.HasPermission(DiscordPermission.EmbedLinks))
                 {
@@ -111,7 +111,7 @@ namespace Silk.Core.Services.Data
             }
             else
             {
-                var send = await _channelApi.CreateMessageAsync(availableChannel.ID, embeds: new[] { _onGuildJoinEmbed });
+                Result<IMessage> send = await _channelApi.CreateMessageAsync(availableChannel.ID, embeds: new[] { _onGuildJoinEmbed });
 
                 if (send.IsSuccess)
                 {

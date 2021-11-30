@@ -10,29 +10,29 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Core.Commands.Moderation
 {
-	[HelpCategory(Categories.Mod)]
-	public class UnbanCommand : BaseCommandModule
-	{
-		private readonly IInfractionService _infractions;
-		public UnbanCommand(IInfractionService infractions)
-		{
-			_infractions = infractions;
-		}
+    [HelpCategory(Categories.Mod)]
+    public class UnbanCommand : BaseCommandModule
+    {
+        private readonly IInfractionService _infractions;
+        public UnbanCommand(IInfractionService infractions)
+        {
+            _infractions = infractions;
+        }
 
-		[Command("unban")]
-		[RequireBotPermissions(Permissions.BanMembers)]
-		[RequireUserPermissions(Permissions.BanMembers)]
-		[Description("Un-bans someone from the current server!")]
-		public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
-		{
-			InfractionResult res = await _infractions.UnBanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-			string? message = res switch
-			{
-				InfractionResult.SucceededDoesNotNotify => $"Unbanned **{user.ToDiscordName()}**!",
-				InfractionResult.FailedResourceDeleted => "That member doesn't appear to be banned!"
-			};
+        [Command("unban")]
+        [RequireBotPermissions(Permissions.BanMembers)]
+        [RequireUserPermissions(Permissions.BanMembers)]
+        [Description("Un-bans someone from the current server!")]
+        public async Task UnBan(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
+        {
+            InfractionResult res = await _infractions.UnBanAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
+            string? message = res switch
+            {
+                InfractionResult.SucceededDoesNotNotify => $"Unbanned **{user.ToDiscordName()}**!",
+                InfractionResult.FailedResourceDeleted  => "That member doesn't appear to be banned!"
+            };
 
-			await ctx.RespondAsync(message);
-		}
-	}
+            await ctx.RespondAsync(message);
+        }
+    }
 }

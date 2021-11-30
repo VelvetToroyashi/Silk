@@ -1,53 +1,53 @@
-﻿<Project>
-    <ItemGroup Label="Common Solution Packages">
-        <PackageReference Update="AsyncEnumerator" Version="4.0.2"/>
+﻿<Project >
+    <ItemGroup Label="Common Solution Packages" >
+        <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
-        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01038"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01038"/>
-        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034"/>
-        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01038" />
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01038" />
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034" />
+        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01038" />
 
 
-        <PackageReference Update="Humanizer" Version="2.13.14"/>
-        <PackageReference Update="Newtonsoft.Json" Version="13.0.1"/>
-        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3"/>
+        <PackageReference Update="Humanizer" Version="2.13.14" />
+        <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
 
-        <PackageReference Update="MediatR" Version="9.0.0"/>
-        <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0"/>
+        <PackageReference Update="MediatR" Version="9.0.0" />
+        <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
 
-        <PackageReference Update="Unity" Version="5.11.10"/>
-        <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5"/>
+        <PackageReference Update="Unity" Version="5.11.10" />
+        <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
 
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10"/>
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
 
-        <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1"/>
+        <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1" />
 
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.11"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3" />
 
-        <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Http" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Logging" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Http" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Logging" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 
-        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.10.0"/>
-        <PackageReference Update="Moq" Version="4.16.1"/>
-        <PackageReference Update="NUnit" Version="3.13.2"/>
-        <PackageReference Update="NUnit3TestAdapter" Version="4.0.0"/>
-        <PackageReference Update="Respawn" Version="4.0.0"/>
+        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+        <PackageReference Update="Moq" Version="4.16.1" />
+        <PackageReference Update="NUnit" Version="3.13.2" />
+        <PackageReference Update="NUnit3TestAdapter" Version="4.0.0" />
+        <PackageReference Update="Respawn" Version="4.0.0" />
 
-    </ItemGroup>
-</Project>
+    </ItemGroup >
+</Project >

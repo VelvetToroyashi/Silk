@@ -97,7 +97,7 @@ installed, make sure to install it before trying to run the Visual Studio soluti
 1. In the `Silk.Core` project, a `UserSecretsId` property is defined in the `Silk.Core.csproj` file which looks like
    this:
     - ```xml
-     <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
+   <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
      ```
 
 2. The structure for the file is the same for the [Default](#default) - `appSettings.json` approach
@@ -119,7 +119,7 @@ installed, make sure to install it before trying to run the Visual Studio soluti
 1. If you have `dotnet ef` command line tools installed, you can run the following command in the root folder of Silk to
    apply the latest migration.
     - ```
-     dotnet ef database update -s src\Silk.Core -p src\Silk.Core.Data --verbose
+   dotnet ef database update -s src\Silk.Core -p src\Silk.Core.Data --verbose
      ``` 
     - You can install the `dotnet ef` command line tool by following this
       document [Entity Framework Core Tools CLI](https://docs.microsoft.com/en-us/ef/core/cli/dotnet)
@@ -127,7 +127,7 @@ installed, make sure to install it before trying to run the Visual Studio soluti
 2. If you're using Visual Studio, you can use the `Package Manager Console`. **Note**: Make sure in the tool window, to
    change the `Default project` to `src\Silk.Core.Data`. Then execute the following command:
     - ```
-     Update-Database
+   Update-Database
      ``` 
     - You can install the `Package Manager Console` tools by following this
       document [Entity Framework Core Tools - Package Manager Console in Visual Studio](https://docs.microsoft.com/en-us/ef/core/cli/powershell)
