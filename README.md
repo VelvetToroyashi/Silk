@@ -1,10 +1,10 @@
 # Silk!
 
 Silk is a simple and the fastest Discord bot written in C# until proven otherwise. Silk is built on top of
-the [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus) .NET Discord library, with the goal to not only be a great
-bot but to also fill in the gaps that some bots have. Silk aims to be a bot your members will want to use, while not
-being a cookie-cutter game, moderation, or entertainment bot. Silk is also made with large guilds in mind. Feel free to
-join the [Silk! Server](https://discord.gg/HZfZb95) to ask any questions you may have or any general support you may
+the [Remora.Discord](https://github.com/Nihlus/Remora.Discord) .NET Discord library, with the goal to not only be a
+great bot but to also fill in the gaps that some bots have. Silk aims to be a bot your members will want to use, while
+not being a cookie-cutter game, moderation, or entertainment bot. Silk is also made with large guilds in mind. Feel free
+to join the [Silk! Server](https://discord.gg/HZfZb95) to ask any questions you may have or any general support you may
 need. Want this bot on your
 server? [Feel free to invite it!](https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands)
 
@@ -151,4 +151,4 @@ Both Postgres and Silk! will have to initialize on the first run, which may caus
 Silk! creates requisite tables on the database.
 
 Further startup times should be no more than ~3 seconds to fully initialize and do cache runs.
-![](https://files.velvetthepanda.dev/silk.png)
+![Silk! Logo](https://files.velvetthepanda.dev/silk.png)
