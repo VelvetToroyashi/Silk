@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Remora.Results;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Services.Interfaces;
@@ -14,15 +15,15 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
-    /// <summary>
-    /// Utility class for anti-invite functionality.
-    /// </summary>
-    public sealed class AntiInviteHelper
+	/// <summary>
+	/// Utility class for anti-invite functionality.
+	/// </summary>
+	public sealed class AntiInviteHelper
 	{
+		private readonly DiscordClient _client;
+		private readonly IInfractionService _infractions;
 		private readonly ILogger<AntiInviteHelper> _logger;
 		private readonly IMediator _mediator;
-		private readonly IInfractionService _infractions;
-		private readonly DiscordClient _client;
 
 		public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordClient client)
 		{
@@ -32,25 +33,25 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			_client = client;
 		}
 
-        /// <summary>
-        /// Regex to match discord invites using discord's main invite URL (discord.gg)
-        /// </summary>
-        public static Regex LenientRegexPattern { get; } = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", FlagConstants.RegexFlags);
+		/// <summary>
+		/// Regex to match discord invites using discord's main invite URL (discord.gg)
+		/// </summary>
+		public static Regex LenientRegexPattern { get; } = new(@"discord.gg\/([A-z]*-*[0-9]*){2,}", FlagConstants.RegexFlags);
 
-        /// <summary>
-        /// A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern" />.
-        /// Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
-        /// </summary>
-        public static Regex AggressiveRegexPattern { get; } = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-]{2,})", FlagConstants.RegexFlags);
+		/// <summary>
+		/// A more aggressive regex to match anything that could be considered an invite/attempt to circumvent <see cref="LenientRegexPattern" />.
+		/// Includes, but is not limited to discord.gg, discord.com/invite, and disc.gg
+		/// </summary>
+		public static Regex AggressiveRegexPattern { get; } = new(@"disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-]{2,})", FlagConstants.RegexFlags);
 
-        /// <summary>
-        /// Checks if a <see cref="DiscordMessage" /> has a valid <see cref="DiscordInvite" />.
-        /// </summary>
-        /// <param name="message">The message to check.</param>
-        /// <param name="config">The configuration of the guild the message was sent on.</param>
-        /// <param name="invite">The invite that was matched, if any.</param>
-        /// <returns>Whether further action should be taken</returns>
-        public bool CheckForInvite(DiscordMessage message, GuildModConfigEntity config, out string invite)
+		/// <summary>
+		/// Checks if a <see cref="DiscordMessage" /> has a valid <see cref="DiscordInvite" />.
+		/// </summary>
+		/// <param name="message">The message to check.</param>
+		/// <param name="config">The configuration of the guild the message was sent on.</param>
+		/// <param name="invite">The invite that was matched, if any.</param>
+		/// <returns>Whether further action should be taken</returns>
+		public bool CheckForInvite(DiscordMessage message, GuildModConfigEntity config, out string invite)
 		{
 			invite = "";
 
@@ -68,14 +69,14 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			return match.Success;
 		}
 
-        /// <summary>
-        /// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
-        /// </summary>
-        /// <param name="message">The message to check.</param>
-        /// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
-        /// <param name="invite">The invite to check.</param>
-        /// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
-        public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfigEntity config, string invite)
+		/// <summary>
+		/// Checks if a suspected <see cref="DiscordInvite" /> is blacklisted.
+		/// </summary>
+		/// <param name="message">The message to check.</param>
+		/// <param name="config">The guild configuration, to determine whether an API call should be made.</param>
+		/// <param name="invite">The invite to check.</param>
+		/// <returns>Whether Auto-Mod should progress with the infraction steps regarding invites.</returns>
+		public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfigEntity config, string invite)
 		{
 			if (config is null) return false;
 			if (!config.ScanInvites) return config.AllowedInvites.All(inv => inv.VanityURL != invite);
@@ -102,20 +103,25 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 			return blacklisted;
 		}
 
-        /// <summary>
-        /// Attempts to warn (creates an infraction) a member for posting an invite.
-        /// </summary>
-        /// <param name="message"></param>
-        public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfigEntity config)
+		/// <summary>
+		/// Attempts to warn (creates an infraction) a member for posting an invite.
+		/// </summary>
+		/// <param name="message"></param>
+		public async Task TryAddInviteInfractionAsync(DiscordMessage message, GuildModConfigEntity config)
 		{
-			UserEntity? user = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
+			Result<UserEntity> userResult = await _mediator.Send(new GetOrCreateUserRequest(message.Channel.Guild.Id, message.Author.Id));
+
+			if (!userResult.IsSuccess)
+				return;
+
+			var user = userResult.Entity;
 
 			if (user.Flags.HasFlag(UserFlag.InfractionExemption))
 				return;
 
 			if (config.DeleteMessageOnMatchedInvite)
 				await message.DeleteAsync("[AutoMod] Detected a blacklisted invite.");
-			
+
 			if (config.WarnOnMatchedInvite)
 				await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", config.AutoEscalateInfractions);
 		}
