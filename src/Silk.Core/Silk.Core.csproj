@@ -1,37 +1,37 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" >
-    <PropertyGroup >
-        <TargetFramework >net6.0</TargetFramework >
-        <Platforms >AnyCPU;x64</Platforms >
-        <IsPackable >false</IsPackable >
-        <Nullable >enable</Nullable >
-        <AllowUnsafeBlocks >true</AllowUnsafeBlocks >
-        <AssemblyVersion >1.5.2</AssemblyVersion >
-        <OutputType >Exe</OutputType >
-        <ServerGarbageCollection >true</ServerGarbageCollection >
-        <UserSecretsId >VelvetThePanda-Silk</UserSecretsId >
-    </PropertyGroup >
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Platforms>AnyCPU;x64</Platforms>
+        <IsPackable>false</IsPackable>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyVersion>1.5.2</AssemblyVersion>
+        <OutputType>Exe</OutputType>
+        <ServerGarbageCollection>true</ServerGarbageCollection>
+        <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
+    </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" >
-        <Optimize >false</Optimize >
-        <WarningLevel >2</WarningLevel >
-        <DebugType >full</DebugType >
-    </PropertyGroup >
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+        <Optimize>false</Optimize>
+        <WarningLevel>2</WarningLevel>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Release'" >
-        <AllowUnsafeBlocks >false</AllowUnsafeBlocks >
-        <DebugSymbols >true</DebugSymbols >
-        <DebugType >full</DebugType >
-    </PropertyGroup >
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' " >
-        <DebugType >full</DebugType >
-    </PropertyGroup >
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
-    </ItemGroup >
+    </ItemGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <PackageReference Include="AsyncEnumerator" />
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
@@ -49,14 +49,14 @@
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0-1.final" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" >
-            <PrivateAssets >all</PrivateAssets >
-            <IncludeAssets >runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets >
-        </PackageReference >
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" >
-            <PrivateAssets >all</PrivateAssets >
-            <IncludeAssets >runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets >
-        </PackageReference >
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="Microsoft.Extensions.Configuration" />
@@ -89,44 +89,44 @@
         <PackageReference Include="Unity" Version="5.11.10" />
         <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
         <PackageReference Include="YumeChan.PluginBase" />
-    </ItemGroup >
+    </ItemGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj" />
         <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
         <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
         <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
-    </ItemGroup >
+    </ItemGroup>
 
-    <ItemGroup >
-        <None Update="flags\trans.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\pan.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\mlm.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\enby.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\demi.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\bi.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\ace.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
-        <None Update="flags\pride.png" >
-            <CopyToOutputDirectory >Always</CopyToOutputDirectory >
-        </None >
+    <ItemGroup>
+        <None Update="flags\trans.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pan.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\mlm.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\enby.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\demi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\bi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\ace.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pride.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Remove="logs\**" />
-    </ItemGroup >
+    </ItemGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <Compile Remove="logs\**" />
-    </ItemGroup >
-</Project >
+    </ItemGroup>
+</Project>
