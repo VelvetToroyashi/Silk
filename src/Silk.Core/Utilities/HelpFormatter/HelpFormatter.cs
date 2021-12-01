@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using Remora.Commands.Attributes;
+using Remora.Commands.Signatures;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
@@ -14,26 +16,22 @@ namespace Silk.Core.Utilities.HelpFormatter
 	    /// <inheritdoc />
 	    public IEmbed GetHelpEmbed(CommandNode command)
         {
-            string? commandUsage = GetUsage(command);
-
-            string usage = commandUsage is null ? "" : $"Usage: `{commandUsage}`\n";
             string aliases = command.Aliases.Any() ? string.Join(", ", command.Aliases) + '\n' : "None";
-
-            IEnumerable<IEmbedField>? parameterHelp = command
-                                                     .Shape
-                                                     .Parameters
-                                                     .Select(p => (IEmbedField)new EmbedField((p.IsOmissible() ? "(Optional) " : "") + p.HintName, p.Description));
-
+            
+            var parameterHelp = 
+                    string.Join('\n', command
+                   .Shape
+                   .Parameters
+                   .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
+            
             var embed = new Embed
             {
-                Title = $"Help for {command.Key}",
-                Description = usage + command.Shape.Description,
-                Colour = Color.DodgerBlue,
-                Fields = new[]
-                    {
-                        new EmbedField("Aliases", aliases) //We use an array vs .Prepend() because there may be more to come.
-                    }.Concat(parameterHelp)
-                     .ToList()
+                //Title = command.Key,
+                Description = $"**command** - {command.Key}\n"             +
+                              $"**aliases** - {aliases}\n"                 +
+                              $"**usage**\n {parameterHelp}\n\n"           +
+                              $"**description** - {command.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
+                Colour = Color.DodgerBlue
             };
 
             return embed;
@@ -44,26 +42,27 @@ namespace Silk.Core.Utilities.HelpFormatter
         {
             IEmbed embed;
             string? commandString = string.Join('\n', subcommands.Select(c => '`' + c.Key + '`'));
-
-            var fields = new List<IEmbedField>();
-
-            IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
-                                                                            .GroupBy(x => x is CommandNode cn
-                                                                                         ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
-                                                                                         : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
-                                                                                          .GroupType.GetCustomAttribute<HelpCategoryAttribute>()
-                                                                                         ?.Name)
-                                                                            .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
-
-            fields
-               .AddRange(categories
-                            .Select(c => new EmbedField(c.Key ?? Categories.Uncategorized, c
-                                                                                          .Select(cn => $"`{cn.Key}`")
-                                                                                          .Join(", "))));
-
+            
             if (subcommands.First().Parent is RootNode)
             {
                 // Root node, display all top level commands
+                
+                var fields = new List<IEmbedField>();
+
+                IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
+                                                                                .GroupBy(x => x is CommandNode cn
+                                                                                             ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
+                                                                                             : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
+                                                                                              .GroupType.GetCustomAttribute<HelpCategoryAttribute>()
+                                                                                             ?.Name)
+                                                                                .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
+
+                fields
+                   .AddRange(categories
+                                .Select(c => new EmbedField(c.Key ?? Categories.Uncategorized, c
+                                                                                              .Select(cn => $"`{cn.Key}`")
+                                                                                              .Join(", "))));
+                
                 embed = new Embed
                 {
                     Title = "Help",
@@ -96,11 +95,34 @@ namespace Silk.Core.Utilities.HelpFormatter
             return embed;
         }
 
-        private string? GetUsage(CommandNode command)
+        /// <summary>
+        /// Gets the 'usage' of a command, formatting it's paremeters 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        private string GetUsage(CommandNode command) => string.Join('\n', command.Shape.Parameters.Select(GetHumanFriendlyParemeterName));
+        
+        /// <summary>
+        /// Gets a neatly formatted parameter name for the help embed.
+        /// </summary>
+        /// <param name="param">The paremeter to generate a help name for.</param>
+        /// <returns>The paremeter name, formatted to respect switches and options, if applicable.</returns>
+        private string GetHumanFriendlyParemeterName(IParameterShape param)
         {
-            return !command.Shape.Parameters.Any()
-                ? null
-                : string.Join(' ', command.Shape.Parameters.Select(p => p.IsOmissible() ? $"[{p.HintName}]" : $"<{p.HintName}>"));
+            var attributes = param.Parameter.CustomAttributes;
+
+            string hintName = param.HintName.Length > 1 ? "--" + param.HintName : "-" + param.HintName;
+                
+            if (attributes.Any(a => a.AttributeType == typeof(SwitchAttribute)))
+            {
+                return param.IsOmissible() ? $"[{hintName}]" : $"<--{hintName}>";
+            }
+            else if (attributes.Any(a => a.AttributeType == typeof(OptionAttribute)))
+            {
+                return param.IsOmissible() ? $"[--{param.HintName} <{param.Parameter.Name}>]" : $"<--{param.HintName} <{param.Parameter.Name}>>";
+            }
+
+            return param.IsOmissible() ? $"[{param.HintName}]" : $"<{param.HintName}>";
         }
     }
 }
