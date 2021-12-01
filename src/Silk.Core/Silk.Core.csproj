@@ -129,4 +129,8 @@
     <ItemGroup>
         <Compile Remove="logs\**" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\Errors" />
+    </ItemGroup>
 </Project>

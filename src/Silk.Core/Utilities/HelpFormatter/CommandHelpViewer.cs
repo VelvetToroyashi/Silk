@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Conditions;
-using Remora.Commands.Services;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
@@ -18,21 +17,13 @@ namespace Silk.Core.Utilities.HelpFormatter
 {
     public class CommandHelpViewer
     {
-        private static readonly Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>> _evaluateConditionAsync = 
-            (Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>>)
-            typeof(ICondition<>)
-               .GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync))!
-               .CreateDelegate(typeof(Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>>));
-        
         private readonly IDiscordRestChannelAPI _channelApi;
-        private readonly CommandService         _commands;
         private readonly IServiceProvider       _services;
         private readonly CommandTree            _tree;
         
-        public CommandHelpViewer(CommandTree tree, CommandService commands, IServiceProvider services, IDiscordRestChannelAPI channelApi)
+        public CommandHelpViewer(CommandTree tree, IServiceProvider services, IDiscordRestChannelAPI channelApi)
         {
             _tree = tree;
-            _commands = commands;
             _services = services;
             _channelApi = channelApi;
         }
@@ -44,11 +35,16 @@ namespace Silk.Core.Utilities.HelpFormatter
             if (formatter is null)
                 return Result<IMessage>.FromError(new InvalidOperationError("No help formatter was registered with the container."));
 
-            IEmbed embed = null;
+            IEmbed embed;
 
             if (command is null)
             {
+                var commands = await GetApplicableCommandsAsync(_services, _tree.Root.Children);
                 
+                if (!commands.Any())
+                    return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
+
+                embed = formatter.GetHelpEmbed(commands);
             }
             else
             {
@@ -57,10 +53,17 @@ namespace Silk.Core.Utilities.HelpFormatter
                 if (node is null) //TODO: Change this message to "No command was found with the name '<name>'."
                     return Result<IMessage>.FromError(new NotFoundError("The specified command does not exist."));
 
-                embed = node is GroupNode gn ? formatter.GetHelpEmbed(gn.Children) : formatter.GetHelpEmbed((CommandNode)node);
+                var childCommands = await GetApplicableCommandsAsync(_services, node is IParentNode parent ? parent.Children : new[] { node });
+                
+                if (!childCommands.Any())
+                    return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
+                
+                embed = formatter.GetHelpEmbed(childCommands);
             }
 
-            return await _channelApi.CreateMessageAsync(channelID, embeds: new[] { embed });
+            var res = await _channelApi.CreateMessageAsync(channelID, embeds: new[] { embed });
+
+            return res;
         }
 
         public IChildNode? GetCommands(string command, IParentNode parent)
@@ -118,9 +121,9 @@ namespace Silk.Core.Utilities.HelpFormatter
                     conditionsToEvaluate.AddRange(commandAttributes);
                 }
 
-                foreach (var contionToEvaluate in conditionsToEvaluate)
+                foreach (var conditionToEvaluate in conditionsToEvaluate)
                 {
-                    var conditionType = typeof(ICondition<>).MakeGenericType(contionToEvaluate.GetType());
+                    var conditionType = typeof(ICondition<>).MakeGenericType(conditionToEvaluate.GetType());
                     
                     var conditionServices = services
                                            .GetServices(conditionType)
@@ -129,22 +132,22 @@ namespace Silk.Core.Utilities.HelpFormatter
                                            .ToArray();
 
                     if (!conditionServices.Any())
-                        throw new InvalidOperationException($"Command was marked with {contionToEvaluate.GetType().Name}, but no service was registered to handle it.");
+                        throw new InvalidOperationException($"Command was marked with {conditionToEvaluate.GetType().Name}, but no service was registered to handle it.");
 
                     bool add = true;
                     foreach (var condition in conditionServices)
                     {
-                        var res = await _evaluateConditionAsync(condition, contionToEvaluate, CancellationToken.None);
+                        var method = typeof(ICondition<>).MakeGenericType(conditionToEvaluate.GetType()).GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync));
+                        var res = await (ValueTask<Result>)method!.Invoke(condition, new object[] { conditionToEvaluate, CancellationToken.None })!;
 
-                        if (res.IsSuccess)
+                        if (!res.IsSuccess)
                         {
                             add = false;
                             break;
                         }
                     }
                     
-                    if (add)
-                        commands.Add(node);
+                    if (add) commands.Add(node);
                 }
             }
 

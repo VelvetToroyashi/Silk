@@ -80,12 +80,11 @@ namespace Silk.Core.Utilities.HelpFormatter
                 {
                     Title = $"Help for {parent!.Key}:",
                     Description = "Showing subcommands. \n"                            +
-                                  "Specify a command name to see more information. \n" +
-                                  commandString,
+                                  "Specify a command name to see more information. \n",
                     Colour = Color.DodgerBlue,
                     Fields = new[]
                     {
-                        new EmbedField("Aliases", string.Join(", ", parent.Aliases), true),
+                        new EmbedField("Aliases", parent.Aliases.Any() ? string.Join(", ", parent.Aliases) : "None", true),
                         new EmbedField("Subcommands", commandString, true)
                     }
                 };
