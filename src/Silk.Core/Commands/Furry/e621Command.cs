@@ -12,6 +12,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Core.Commands.Conditions.cs;
 using Silk.Core.Commands.Furry.Types;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Shared.Configuration;
@@ -38,6 +39,8 @@ namespace Silk.Core.Commands.Furry
         }
 
         //[RequireNsfw]
+        
+        [NSFWChannel]
         [Command("e621", "e6")]
         [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
         public override async Task<Result> Search(int amount = 3, string? query = null)

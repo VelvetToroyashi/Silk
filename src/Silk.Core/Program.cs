@@ -7,7 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Remora.Commands.Extensions;
 using Serilog;
+using Silk.Core.Commands.Conditions.cs;
 using Silk.Core.Data;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
@@ -64,6 +66,8 @@ namespace Silk.Core
 
                     services.AddSilkLogging(context);
 
+                    services.AddCondition<RequireNSFWCondition>();
+                    
                     services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                     services.AddSingleton<GuildCacherService>();
                     //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
