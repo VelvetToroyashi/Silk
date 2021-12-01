@@ -15,7 +15,7 @@ namespace Silk.Core.Commands
         [Description("Edit various settings for your guild!")]
         public class EditConfig : CommandGroup
         {
-            [Command("a")]
+            [Command("aaa")]
             [Description("AAAAAAAAAAAAAAAAAAAAAAAA")]
             public async Task<Result> A() => Result.FromSuccess();
         }

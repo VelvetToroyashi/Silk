@@ -58,7 +58,9 @@ namespace Silk.Core.Utilities.HelpFormatter
                 if (!childCommands.Any())
                     return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
                 
-                embed = formatter.GetHelpEmbed(childCommands);
+                embed = node is IParentNode 
+                    ? formatter.GetHelpEmbed(childCommands) 
+                    : formatter.GetHelpEmbed((CommandNode)node);
             }
 
             var res = await _channelApi.CreateMessageAsync(channelID, embeds: new[] { embed });

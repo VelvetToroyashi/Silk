@@ -74,17 +74,20 @@ namespace Silk.Core.Utilities.HelpFormatter
             }
             else
             {
-                var parent = subcommands.First().Parent as IChildNode;
-
-                embed = new Embed
+                IChildNode node;
+                if (subcommands.Count() is 1)
+                    node = subcommands.Single().Parent as IChildNode;
+                else node = subcommands.First();
+                
+                    embed = new Embed
                 {
-                    Title = $"Help for {parent!.Key}:",
+                    Title = $"Help for {node!.Key}:",
                     Description = "Showing subcommands. \n"                            +
                                   "Specify a command name to see more information. \n",
                     Colour = Color.DodgerBlue,
                     Fields = new[]
                     {
-                        new EmbedField("Aliases", parent.Aliases.Any() ? string.Join(", ", parent.Aliases) : "None", true),
+                        new EmbedField("Aliases", node.Aliases.Any() ? string.Join(", ", node.Aliases) : "None", true),
                         new EmbedField("Subcommands", commandString, true)
                     }
                 };
