@@ -5,9 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using OneOf;
 using Remora.Commands.Conditions;
-using Remora.Commands.Results;
 using Remora.Commands.Services;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
@@ -20,14 +18,17 @@ namespace Silk.Core.Utilities.HelpFormatter
 {
     public class CommandHelpViewer
     {
-
-
+        private static readonly Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>> _evaluateConditionAsync = 
+            (Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>>)
+            typeof(ICondition<>)
+               .GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync))!
+               .CreateDelegate(typeof(Func<ICondition, ConditionAttribute, CancellationToken, ValueTask<Result>>));
+        
         private readonly IDiscordRestChannelAPI _channelApi;
         private readonly CommandService         _commands;
         private readonly IServiceProvider       _services;
         private readonly CommandTree            _tree;
-
-
+        
         public CommandHelpViewer(CommandTree tree, CommandService commands, IServiceProvider services, IDiscordRestChannelAPI channelApi)
         {
             _tree = tree;
@@ -43,11 +44,11 @@ namespace Silk.Core.Utilities.HelpFormatter
             if (formatter is null)
                 return Result<IMessage>.FromError(new InvalidOperationError("No help formatter was registered with the container."));
 
-            IEmbed embed;
+            IEmbed embed = null;
 
             if (command is null)
             {
-                embed = formatter.GetHelpEmbed(_tree.Root.Children);
+                
             }
             else
             {
@@ -79,61 +80,75 @@ namespace Silk.Core.Utilities.HelpFormatter
             return null;
         }
 
-        public async Task<OneOf<IChildNode, IEnumerable<IChildNode>>> GetApplicableCommands(IUser user, IChildNode node)
-        {
-            if (node is not GroupNode gn)
-            {
-                Result res = await CheckConditionsAsync(_services, node, (node as CommandNode)!.CommandMethod, CancellationToken.None);
-
-
-
-            }
-
-            return default;
-        }
-
-        private async Task<Result> CheckConditionsAsync
+        public async Task<IEnumerable<IChildNode>> GetApplicableCommandsAsync
         (
-            IServiceProvider         services,
-            IChildNode?              node,
-            ICustomAttributeProvider attributeProvider,
-            CancellationToken        ct
+            IServiceProvider        services,
+            IEnumerable<IChildNode> nodes
         )
         {
-            object[]? conditionAttributes = attributeProvider.GetCustomAttributes(typeof(ConditionAttribute), false);
+            var commands = new List<IChildNode>();
 
-            if (!conditionAttributes.Any())
-                return Result.FromSuccess();
-
-            foreach (var conditionAttribute in conditionAttributes)
+            foreach (var node in nodes)
             {
-                Type? conditionType = typeof(ICondition<>).MakeGenericType(conditionAttribute.GetType());
-
-                MethodInfo? conditionMethod = conditionType.GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync));
-                if (conditionMethod is null)
-                    throw new InvalidOperationException();
-
-                List<ICondition>? conditions = services
-                                              .GetServices(conditionType)
-                                              .Where(c => c is not null)
-                                              .Cast<ICondition>()
-                                              .ToList();
-
-                if (!conditions.Any())
-                    throw new InvalidOperationException("Condition attributes were applied, but no matching condition was registered.");
-
-                foreach (var condition in conditions)
+                var conditionsToEvaluate = new List<ConditionAttribute>();
+                if (node is GroupNode gn)
                 {
-                    object? invocationResult = conditionMethod.Invoke(condition, new[] { conditionAttribute, ct }) ?? throw new InvalidOperationException();
+                    var groupAttributes = gn.GetType().GetCustomAttributes<ConditionAttribute>(false);
 
-                    Result result = await (ValueTask<Result>)invocationResult;
+                    if (!groupAttributes.Any())
+                    {
+                        commands.Add(gn);
+                        continue;
+                    }
+                    
+                    conditionsToEvaluate.AddRange(groupAttributes);
+                }
+                else
+                {
+                    var command = node as CommandNode;
 
-                    if (!result.IsSuccess)
-                        return Result.FromError(new ConditionNotSatisfiedError($"The condition \"{condition.GetType().Name}\" was not satisfied.", node), result);
+                    var commandAttributes = command.CommandMethod.GetCustomAttributes<ConditionAttribute>();
+                    
+                    if (!commandAttributes.Any())
+                    {
+                        commands.Add(command);
+                        continue;
+                    }
+                    
+                    conditionsToEvaluate.AddRange(commandAttributes);
+                }
+
+                foreach (var contionToEvaluate in conditionsToEvaluate)
+                {
+                    var conditionType = typeof(ICondition<>).MakeGenericType(contionToEvaluate.GetType());
+                    
+                    var conditionServices = services
+                                           .GetServices(conditionType)
+                                           .Where(c => c is not null)
+                                           .Cast<ICondition>()
+                                           .ToArray();
+
+                    if (!conditionServices.Any())
+                        throw new InvalidOperationException($"Command was marked with {contionToEvaluate.GetType().Name}, but no service was registered to handle it.");
+
+                    bool add = true;
+                    foreach (var condition in conditionServices)
+                    {
+                        var res = await _evaluateConditionAsync(condition, contionToEvaluate, CancellationToken.None);
+
+                        if (res.IsSuccess)
+                        {
+                            add = false;
+                            break;
+                        }
+                    }
+                    
+                    if (add)
+                        commands.Add(node);
                 }
             }
 
-            return Result.FromSuccess();
+            return commands;
         }
     }
 }
