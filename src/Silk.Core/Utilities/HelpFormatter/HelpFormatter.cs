@@ -27,10 +27,10 @@ namespace Silk.Core.Utilities.HelpFormatter
             var embed = new Embed
             {
                 //Title = command.Key,
-                Description = $"**command** - {command.Key}\n"             +
-                              $"**aliases** - {aliases}\n"                 +
-                              $"**usage**\n {parameterHelp}\n\n"           +
-                              $"**description** - {command.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
+                Description = $"**Command** - {command.Key}\n"             +
+                              $"**Aliases** - {aliases}\n"                 +
+                              $"**Usage**\n {parameterHelp}\n\n"           +
+                              $"**Description** - {command.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
                 Colour = Color.DodgerBlue
             };
 
