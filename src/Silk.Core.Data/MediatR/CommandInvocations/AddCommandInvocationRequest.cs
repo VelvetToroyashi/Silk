@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.Entities;
@@ -8,7 +9,7 @@ namespace Silk.Core.Data.MediatR.CommandInvocations
     /// <summary>
     ///     Request for adding a <see cref="CommandInvocationEntity" />.
     /// </summary>
-    public record AddCommandInvocationRequest(ulong UserId, ulong? GuildId, string CommandName) : IRequest;
+    public record AddCommandInvocationRequest(string CommandName) : IRequest;
 
     /// <summary>
     ///     The default handler for <see cref="AddCommandInvocationRequest" />.
@@ -23,9 +24,8 @@ namespace Silk.Core.Data.MediatR.CommandInvocations
         {
             CommandInvocationEntity command = new()
             {
-                UserId = request.UserId,
-                GuildId = request.GuildId,
-                CommandName = request.CommandName
+                CommandName = request.CommandName,
+                InvocationTime = DateTime.UtcNow
             };
 
             _db.CommandInvocations.Add(command);
