@@ -5,7 +5,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Silk.Core.Data.MediatR.CommandInvocations;
 using Silk.Core.Services.Interfaces;
 using Silk.Shared.Constants;
 
@@ -24,12 +23,7 @@ namespace Silk.Core.EventHandlers.Messages
             _mediator = mediator;
             _logger = logger;
         }
-
-        public Task AddCommandInvocation(CommandsNextExtension ext, CommandEventArgs args)
-        {
-            return _mediator.Send(new AddCommandInvocationRequest(args.Context.User.Id, args.Context.Guild?.Id, args.Command.QualifiedName));
-        }
-
+        
         public async Task Handle(DiscordClient client, MessageCreateEventArgs args)
         {
             bool isBot = args.Author.IsBot;
