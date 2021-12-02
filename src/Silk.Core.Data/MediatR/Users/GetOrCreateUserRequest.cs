@@ -19,10 +19,7 @@ namespace Silk.Core.Data.MediatR.Users
     public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, Result<UserEntity>>
     {
         private readonly GuildContext _db;
-        public GetOrCreateUserHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetOrCreateUserHandler(GuildContext db) => _db = db;
 
         public async Task<Result<UserEntity>> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
         {

@@ -14,9 +14,6 @@
         public int TotalNumber;
         public int DiceNoSides;
 
-        public Step(StepType type, int totalNo, int diceNoSides)
-        {
-            (Type, TotalNumber, DiceNoSides) = (type, totalNo, diceNoSides);
-        }
+        public Step(StepType type, int totalNo, int diceNoSides) => (Type, TotalNumber, DiceNoSides) = (type, totalNo, diceNoSides);
     }
 }

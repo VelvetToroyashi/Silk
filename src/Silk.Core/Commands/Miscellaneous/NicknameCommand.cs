@@ -19,10 +19,7 @@ namespace Silk.Core.Commands.Miscellaneous
     {
         private readonly ILogger<NicknameCommand> _logger;
 
-        public NicknameCommand(ILogger<NicknameCommand> logger)
-        {
-            _logger = logger;
-        }
+        public NicknameCommand(ILogger<NicknameCommand> logger) => _logger = logger;
 
 
         [Priority(1)]

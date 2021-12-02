@@ -18,10 +18,7 @@ namespace Silk.Core.Data.MediatR.Tags
     {
         private readonly GuildContext _db;
 
-        public CreateTagHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public CreateTagHandler(GuildContext db) => _db = db;
 
         public async Task<TagEntity> Handle(CreateTagRequest request, CancellationToken cancellationToken)
         {

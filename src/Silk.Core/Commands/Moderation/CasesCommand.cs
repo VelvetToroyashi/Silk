@@ -18,10 +18,7 @@ namespace Silk.Core.Commands.Moderation
     public class CasesCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
-        public CasesCommand(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public CasesCommand(IMediator mediator) => _mediator = mediator;
 
         [Command]
         [RequireGuild]

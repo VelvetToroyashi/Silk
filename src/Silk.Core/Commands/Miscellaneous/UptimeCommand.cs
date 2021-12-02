@@ -14,10 +14,7 @@ namespace Silk.Core.Commands.Miscellaneous
     public class UptimeCommand //: BaseCommandModule
     {
         private readonly UptimeService _uptime;
-        public UptimeCommand(UptimeService uptime)
-        {
-            _uptime = uptime;
-        }
+        public UptimeCommand(UptimeService uptime) => _uptime = uptime;
 
         [Command]
         [Description("See how long Silk has been running!")]

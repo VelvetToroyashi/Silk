@@ -63,7 +63,7 @@ namespace Silk.Core.Services.Server
             await Task.Yield();
 
             _logger.LogInformation(EventIds.Service, "Loading infractions");
-            Task<IEnumerable<InfractionEntity>>? infractionsTask = _mediator.Send(new GetCurrentInfractionsRequest(), cancellationToken);
+            Task<IEnumerable<InfractionEntity>>? infractionsTask = _mediator.Send(new GetActiveInfractionsRequest(), cancellationToken);
             Task? delayTask = Task.Delay(200, cancellationToken);
 
             if (await Task.WhenAny(infractionsTask, delayTask) != delayTask)

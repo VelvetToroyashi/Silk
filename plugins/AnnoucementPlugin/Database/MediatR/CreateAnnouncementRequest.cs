@@ -10,10 +10,7 @@ namespace AnnoucementPlugin.Database.MediatR
     public sealed class CreateAnnouncementHandler : IRequestHandler<CreateAnnouncementRequest, AnnouncementModel>
     {
         private readonly AnnouncementContext _db;
-        public CreateAnnouncementHandler(AnnouncementContext db)
-        {
-            _db = db;
-        }
+        public CreateAnnouncementHandler(AnnouncementContext db) => _db = db;
 
         public async Task<AnnouncementModel> Handle(CreateAnnouncementRequest request, CancellationToken cancellationToken)
         {

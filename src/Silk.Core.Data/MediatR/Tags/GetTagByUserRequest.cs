@@ -21,10 +21,7 @@ namespace Silk.Core.Data.MediatR.Tags
 	public class GetTagByUserHandler : IRequestHandler<GetTagByUserRequest, IEnumerable<TagEntity>>
     {
         private readonly GuildContext _db;
-        public GetTagByUserHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetTagByUserHandler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<TagEntity>> Handle(GetTagByUserRequest request, CancellationToken cancellationToken)
         {

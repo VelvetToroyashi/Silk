@@ -286,10 +286,7 @@ namespace Silk.Core.Commands.Server
     public class TagsCommand : BaseCommandModule
     {
         private readonly TagService _tagService;
-        public TagsCommand(TagService tagService)
-        {
-            _tagService = tagService;
-        }
+        public TagsCommand(TagService tagService) => _tagService = tagService;
 
         [Command]
         [Description("Get Tags created by a User")]

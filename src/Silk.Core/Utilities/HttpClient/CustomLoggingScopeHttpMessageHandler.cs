@@ -16,10 +16,7 @@ namespace Silk.Core.Utilities.HttpClient
     {
         private readonly ILogger _logger;
 
-        public CustomLoggingScopeHttpMessageHandler(ILogger logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        public CustomLoggingScopeHttpMessageHandler(ILogger logger) => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,

@@ -9,10 +9,7 @@
         int              _nextWhitespaceEnd;
         protected string _source;
 
-        public TextParser(string currentString)
-        {
-            _source = currentString;
-        }
+        public TextParser(string currentString) => _source = currentString;
 
         protected char ReadChar()
         {

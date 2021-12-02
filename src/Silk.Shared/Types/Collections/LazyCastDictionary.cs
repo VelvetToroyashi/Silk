@@ -46,16 +46,10 @@ namespace Silk.Shared.Types.Collections
 
         private readonly IReadOnlyDictionary<TKey, TValueFrom> _underlyingDict;
 
-        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false)
-        {
-            _underlyingDict = (IReadOnlyDictionary<TKey, TValueFrom>)dictionary;
-        }
+        public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary) : this(false) => _underlyingDict = (IReadOnlyDictionary<TKey, TValueFrom>)dictionary;
 
         public LazyCastDictionary(IDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
-            this(dictionary)
-        {
-            _castFunc = castDelegate;
-        }
+            this(dictionary) => _castFunc = castDelegate;
 
         public LazyCastDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary) : this(false)
         {
@@ -64,16 +58,10 @@ namespace Silk.Shared.Types.Collections
         }
 
         public LazyCastDictionary(IReadOnlyDictionary<TKey, TValueFrom> dictionary, Func<TValueFrom, TValueTo> castDelegate) :
-            this(dictionary)
-        {
-            _castFunc = castDelegate;
-        }
+            this(dictionary) => _castFunc = castDelegate;
 
         /// <param name="isCastableToBaseType">Dictates whether <see cref="TValueTo" /> can be casted back to <see cref="TValueFrom" />.</param>
-        private LazyCastDictionary(bool isCastableToBaseType)
-        {
-            _isCastable = isCastableToBaseType;
-        }
+        private LazyCastDictionary(bool isCastableToBaseType) => _isCastable = isCastableToBaseType;
         public bool IsReadOnly => true;
         public int  Count      => _underlyingDict.Count;
 

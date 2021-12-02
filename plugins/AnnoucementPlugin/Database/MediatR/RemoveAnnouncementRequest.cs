@@ -9,10 +9,7 @@ namespace AnnoucementPlugin.Database.MediatR
     public sealed class RemoveAnnouncemtHandler : IRequestHandler<RemoveAnnouncementRequest>
     {
         private readonly AnnouncementContext _db;
-        public RemoveAnnouncemtHandler(AnnouncementContext db)
-        {
-            _db = db;
-        }
+        public RemoveAnnouncemtHandler(AnnouncementContext db) => _db = db;
 
         public async Task<Unit> Handle(RemoveAnnouncementRequest request, CancellationToken cancellationToken)
         {

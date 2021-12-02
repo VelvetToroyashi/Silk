@@ -14,10 +14,7 @@ namespace Silk.Core.Types
 	public class DatabaseProvider<T> : IDatabaseProvider<T> where T : Plugin
     {
         private readonly IOptions<SilkConfigurationOptions> _options;
-        public DatabaseProvider(IOptions<SilkConfigurationOptions> options)
-        {
-            _options = options;
-        }
+        public DatabaseProvider(IOptions<SilkConfigurationOptions> options) => _options = options;
 
         public virtual IMongoDatabase GetMongoDatabase()
         {

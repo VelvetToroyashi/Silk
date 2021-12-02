@@ -10,10 +10,7 @@ namespace Silk.Core.Responders
     public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
     {
         private readonly GuildCacherService _guildCacherService;
-        public GuildJoinedCacherResponder(GuildCacherService guildCacherService)
-        {
-            _guildCacherService = guildCacherService;
-        }
+        public GuildJoinedCacherResponder(GuildCacherService guildCacherService) => _guildCacherService = guildCacherService;
 
         public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
         {

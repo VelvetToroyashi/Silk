@@ -16,10 +16,7 @@ namespace RoleMenuPlugin.Database.MediatR
         {
             private readonly RoleMenuContext _db;
 
-            public Handler(RoleMenuContext db)
-            {
-                _db = db;
-            }
+            public Handler(RoleMenuContext db) => _db = db;
 
             public async Task<Result<IEnumerable<RoleMenuModel>>> Handle(Request request, CancellationToken cancellationToken)
             {

@@ -29,10 +29,7 @@ namespace Silk.Core.Data.MediatR.Guilds
     {
         private readonly GuildContext _db;
 
-        public UpdateGuildConfigHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateGuildConfigHandler(GuildContext db) => _db = db;
 
         public async Task<GuildConfigEntity?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
         {

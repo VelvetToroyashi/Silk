@@ -12,10 +12,7 @@ namespace AnnoucementPlugin.Services
     public class ConfirmationService : IConfirmationService
     {
         private readonly DiscordClient _client;
-        public ConfirmationService(DiscordClient client)
-        {
-            _client = client;
-        }
+        public ConfirmationService(DiscordClient client) => _client = client;
 
         public async Task<bool> GetConfirmationAsync(ulong userId, ulong guildId, ulong channelId, string prompt)
         {

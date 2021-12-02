@@ -18,10 +18,7 @@ namespace Silk.Core.Data.MediatR.Reminders
     {
         private readonly GuildContext _db;
 
-        public RemoveReminderHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public RemoveReminderHandler(GuildContext db) => _db = db;
 
         public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
         {

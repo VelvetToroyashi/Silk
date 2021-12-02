@@ -16,11 +16,7 @@ namespace Silk.Core.Data.MediatR.Users
     public class AddUserHandler : IRequestHandler<AddUserRequest, UserEntity>
     {
         private readonly GuildContext _db;
-
-        public AddUserHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public AddUserHandler(GuildContext db) => _db = db;
 
         public async Task<UserEntity> Handle(AddUserRequest request, CancellationToken cancellationToken)
         {

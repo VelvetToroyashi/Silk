@@ -100,8 +100,11 @@ namespace Silk.Core.Utilities.HelpFormatter
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        private string GetUsage(CommandNode command) => string.Join('\n', command.Shape.Parameters.Select(GetHumanFriendlyParemeterName));
-        
+        private string GetUsage(CommandNode command)
+        {
+            return string.Join('\n', command.Shape.Parameters.Select(GetHumanFriendlyParemeterName));
+        }
+
         /// <summary>
         /// Gets a neatly formatted parameter name for the help embed.
         /// </summary>

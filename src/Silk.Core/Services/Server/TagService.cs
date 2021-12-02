@@ -11,10 +11,7 @@ namespace Silk.Core.Services.Server
     public sealed class TagService
     {
         private readonly IMediator _mediator;
-        public TagService(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public TagService(IMediator mediator) => _mediator = mediator;
 
         public async Task<TagEntity?> GetTagAsync(string tagName, ulong guildId)
         {

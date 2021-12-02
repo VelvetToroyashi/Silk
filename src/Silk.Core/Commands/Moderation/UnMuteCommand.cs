@@ -16,10 +16,7 @@ namespace Silk.Core.Commands.Moderation
     public class UnMuteCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractions;
-        public UnMuteCommand(IInfractionService infractions)
-        {
-            _infractions = infractions;
-        }
+        public UnMuteCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command]
         [RequireFlag(UserFlag.Staff)]

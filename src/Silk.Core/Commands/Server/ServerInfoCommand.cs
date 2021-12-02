@@ -19,10 +19,7 @@ namespace Silk.Core.Commands.Server
     {
         private readonly GuildContext _db;
 
-        public ServerInfoCommand(GuildContext _db)
-        {
-            this._db = _db;
-        }
+        public ServerInfoCommand(GuildContext _db) => this._db = _db;
 
         [Command]
         [Description("Get info about the current Guild")]

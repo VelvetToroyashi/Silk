@@ -13,17 +13,12 @@ namespace Silk.Core.Data.MediatR.Infractions
 
     public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsRequest, IEnumerable<InfractionEntity>>
     {
-        private readonly GuildContext _context;
-        public GetUserInfractionsHandler(GuildContext context)
-        {
-            _context = context;
-        }
+        private readonly GuildContext _db;
+        public GetUserInfractionsHandler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<InfractionEntity>> Handle(
-            GetUserInfractionsRequest request,
-            CancellationToken         cancellationToken)
+        public async Task<IEnumerable<InfractionEntity>> Handle(GetUserInfractionsRequest request, CancellationToken cancellationToken)
         {
-            UserEntity? user = await _context
+            UserEntity? user = await _db
                                     .Users
                                     .Include(u => u.Infractions)
                                     .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);

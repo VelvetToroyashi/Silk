@@ -9,10 +9,7 @@ namespace Silk.Core.Commands.General
     public class FlagCommand : BaseCommandModule
     {
         private readonly FlagOverlayService _flags;
-        public FlagCommand(FlagOverlayService flags)
-        {
-            _flags = flags;
-        }
+        public FlagCommand(FlagOverlayService flags) => _flags = flags;
 
         [Command]
         [Priority(0)]

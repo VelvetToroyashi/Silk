@@ -12,10 +12,7 @@ namespace Silk.Core.Data.MediatR.Reminders
     public class UpdateReminderHandler : IRequestHandler<UpdateReminderRequest, ReminderEntity>
     {
         private readonly GuildContext _db;
-        public UpdateReminderHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateReminderHandler(GuildContext db) => _db = db;
 
         public async Task<ReminderEntity> Handle(UpdateReminderRequest request, CancellationToken cancellationToken)
         {

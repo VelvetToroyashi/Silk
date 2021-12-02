@@ -40,10 +40,7 @@ namespace Silk.Core.Commands.General
     public class RemindCommand : BaseCommandModule
     {
         private readonly ReminderService _reminders;
-        public RemindCommand(ReminderService reminders)
-        {
-            _reminders = reminders;
-        }
+        public RemindCommand(ReminderService reminders) => _reminders = reminders;
 
         [GroupCommand]
         [Description("Creates a reminder")]

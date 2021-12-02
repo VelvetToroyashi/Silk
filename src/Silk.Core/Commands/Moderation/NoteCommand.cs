@@ -15,10 +15,7 @@ namespace Silk.Core.Commands.Moderation
     public class NoteCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractionHelper;
-        public NoteCommand(IInfractionService infractionHelper)
-        {
-            _infractionHelper = infractionHelper;
-        }
+        public NoteCommand(IInfractionService infractionHelper) => _infractionHelper = infractionHelper;
 
         [Command]
         [RequireFlag(UserFlag.Staff)]

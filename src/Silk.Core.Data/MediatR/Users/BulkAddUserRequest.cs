@@ -29,10 +29,7 @@ namespace Silk.Core.Data.MediatR.Users
     {
         private readonly GuildContext _db;
 
-        public BulkAddUserHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public BulkAddUserHandler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<UserEntity>> Handle(BulkAddUserRequest request, CancellationToken cancellationToken)
         {

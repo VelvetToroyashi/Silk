@@ -15,10 +15,7 @@ namespace Silk.Core.Commands.Bot
     public class AboutCommand : BaseCommandModule
     {
         private readonly DiscordClient _client;
-        public AboutCommand(DiscordClient client)
-        {
-            _client = client;
-        }
+        public AboutCommand(DiscordClient client) => _client = client;
 
         [Command("about")]
         [Description("Shows relevant information, data and links about Silk!")]

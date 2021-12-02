@@ -43,10 +43,7 @@ namespace Silk.Core.Data.MediatR.Guilds
     public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfigEntity?>
     {
         private readonly GuildContext _db;
-        public UpdateGuildModConfigHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateGuildModConfigHandler(GuildContext db) => _db = db;
 
         public async Task<GuildModConfigEntity?> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
         {

@@ -28,10 +28,7 @@ namespace Silk.Core.Data.MediatR.Tags
 	public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, TagEntity>
     {
         private readonly GuildContext _db;
-        public UpdateTagHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public UpdateTagHandler(GuildContext db) => _db = db;
 
         public async Task<TagEntity> Handle(UpdateTagRequest request, CancellationToken cancellationToken)
         {

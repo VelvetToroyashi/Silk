@@ -19,10 +19,7 @@ namespace Silk.Core.Data.MediatR.Guilds
     {
         private readonly IMediator _mediator;
 
-        public GetOrCreateGuildConfigHandler(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public GetOrCreateGuildConfigHandler(IMediator mediator) => _mediator = mediator;
 
         public async Task<GuildConfigEntity> Handle(GetOrCreateGuildConfigRequest configRequest, CancellationToken cancellationToken)
         {

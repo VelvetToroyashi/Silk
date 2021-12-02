@@ -34,10 +34,7 @@ namespace Silk.Core.Commands
     public class ConfigModule : BaseCommandModule
     {
         private readonly ICacheUpdaterService _updater;
-        public ConfigModule(ICacheUpdaterService updater)
-        {
-            _updater = updater;
-        }
+        public ConfigModule(ICacheUpdaterService updater) => _updater = updater;
 
         [Command]
         [Description("Reloads the config from the database. May temporarily slow down response time. (Configs are automatically reloaded every 10 minutes!)")]
@@ -63,10 +60,7 @@ namespace Silk.Core.Commands
         public sealed class ViewConfigModule : BaseCommandModule
         {
             private readonly IMediator _mediator;
-            public ViewConfigModule(IMediator mediator)
-            {
-                _mediator = mediator;
-            }
+            public ViewConfigModule(IMediator mediator) => _mediator = mediator;
 
             private string GetCountString(int count)
             {
@@ -282,10 +276,7 @@ namespace Silk.Core.Commands
             private static readonly ConcurrentDictionary<ulong, CancellationTokenSource> _tokens         = new();
 
             private readonly IMediator _mediator;
-            public EditConfigModule(IMediator mediator)
-            {
-                _mediator = mediator;
-            }
+            public EditConfigModule(IMediator mediator) => _mediator = mediator;
 
 
             [Command]
@@ -518,10 +509,7 @@ namespace Silk.Core.Commands
             public sealed class EditPhishingModule : BaseCommandModule
             {
                 private readonly IMediator _mediator;
-                public EditPhishingModule(IMediator mediator)
-                {
-                    _mediator = mediator;
-                }
+                public EditPhishingModule(IMediator mediator) => _mediator = mediator;
 
                 [Command]
                 [Description("Enables scanning for phishing links.")]
@@ -609,10 +597,7 @@ namespace Silk.Core.Commands
             public sealed class EditInviteModule : BaseCommandModule
             {
                 private readonly IMediator _mediator;
-                public EditInviteModule(IMediator mediator)
-                {
-                    _mediator = mediator;
-                }
+                public EditInviteModule(IMediator mediator) => _mediator = mediator;
 
                 [Command]
                 [Aliases("so", "scan")]
@@ -676,10 +661,7 @@ namespace Silk.Core.Commands
                 public sealed class EditInviteWhitelistModule : BaseCommandModule
                 {
                     private readonly IMediator _mediator;
-                    public EditInviteWhitelistModule(IMediator mediator)
-                    {
-                        _mediator = mediator;
-                    }
+                    public EditInviteWhitelistModule(IMediator mediator) => _mediator = mediator;
 
                     [Command]
                     public async Task Add(CommandContext ctx, string invite)
@@ -833,10 +815,7 @@ namespace Silk.Core.Commands
             public sealed class EditLogModule : BaseCommandModule
             {
                 private readonly IMediator _mediator;
-                public EditLogModule(IMediator mediator)
-                {
-                    _mediator = mediator;
-                }
+                public EditLogModule(IMediator mediator) => _mediator = mediator;
 
                 [Command]
                 [Description("Edit the channel I logs infractions, users, etc to!")]
@@ -906,10 +885,7 @@ namespace Silk.Core.Commands
             public sealed class EditInfractionModule : BaseCommandModule
             {
                 private readonly IMediator _mediator;
-                public EditInfractionModule(IMediator mediator)
-                {
-                    _mediator = mediator;
-                }
+                public EditInfractionModule(IMediator mediator) => _mediator = mediator;
 
                 [Command]
                 [Aliases("escalate", "esc")]
@@ -994,10 +970,7 @@ namespace Silk.Core.Commands
                 public sealed class InfractionStepsModule : BaseCommandModule
                 {
                     private readonly IMediator _mediator;
-                    public InfractionStepsModule(IMediator mediator)
-                    {
-                        _mediator = mediator;
-                    }
+                    public InfractionStepsModule(IMediator mediator) => _mediator = mediator;
 
                     [Command]
                     [Description("Adds a new infraction step. This action will be used when the user has **`n`** infractions.\n\n"         +

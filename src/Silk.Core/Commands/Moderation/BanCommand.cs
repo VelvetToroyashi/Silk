@@ -15,10 +15,7 @@ namespace Silk.Core.Commands.Moderation
     public class BanCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractions;
-        public BanCommand(IInfractionService infractions)
-        {
-            _infractions = infractions;
-        }
+        public BanCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command]
         [RequireGuild]

@@ -18,10 +18,7 @@ namespace Silk.Core.Commands.Server
     public class ToggleCommandCommand : BaseCommandModule
     {
         private readonly IMediator _mediator;
-        public ToggleCommandCommand(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public ToggleCommandCommand(IMediator mediator) => _mediator = mediator;
 
         //[Command]
         [RequireGuild]

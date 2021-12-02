@@ -20,10 +20,7 @@ namespace Silk.Core.Data.MediatR.Tags
     {
         private readonly GuildContext _db;
 
-        public GetTagByGuildHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetTagByGuildHandler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<TagEntity>> Handle(GetTagByGuildRequest request, CancellationToken cancellationToken)
         {

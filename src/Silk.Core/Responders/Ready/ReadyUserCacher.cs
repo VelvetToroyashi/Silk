@@ -15,10 +15,7 @@ namespace Silk.Core.Responders
     public class ReadyUserCacher : IResponder<IReady>
     {
         private readonly IMemoryCache _cache;
-        public ReadyUserCacher(IMemoryCache cache)
-        {
-            _cache = cache;
-        }
+        public ReadyUserCacher(IMemoryCache cache) => _cache = cache;
 
         public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
         {

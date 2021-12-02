@@ -13,10 +13,7 @@ namespace Silk.Core.Utilities.HttpClient
     {
         private readonly ILoggerFactory _loggerFactory;
 
-        public CustomLoggingFilter(ILoggerFactory loggerFactory)
-        {
-            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-        }
+        public CustomLoggingFilter(ILoggerFactory loggerFactory) => _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 
         public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next)
         {

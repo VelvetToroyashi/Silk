@@ -13,14 +13,9 @@ namespace Silk.Core.Data.MediatR.Infractions
     public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfractionsRequest, IEnumerable<InfractionEntity>>
     {
         private readonly GuildContext _db;
-        public GetGuildInfractionHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetGuildInfractionHandler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<InfractionEntity>> Handle(
-            GetGuildInfractionsRequest request,
-            CancellationToken          cancellationToken)
+        public async Task<IEnumerable<InfractionEntity>> Handle(GetGuildInfractionsRequest request, CancellationToken cancellationToken)
         {
             List<InfractionEntity>? infractions = await _db
                                                        .Infractions

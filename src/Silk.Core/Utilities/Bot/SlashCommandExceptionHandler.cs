@@ -15,10 +15,7 @@ namespace Silk.Core.SlashCommands
         private const string MissingBotUserMessage = "Sorry, but I was only invited for slash commands! Contact a staff member and ask them to re-autheneticate me with the bot scope!";
 
         private readonly ILogger<SlashCommandExceptionHandler> _logger;
-        public SlashCommandExceptionHandler(ILogger<SlashCommandExceptionHandler> logger)
-        {
-            _logger = logger;
-        }
+        public SlashCommandExceptionHandler(ILogger<SlashCommandExceptionHandler> logger) => _logger = logger;
 
         public async Task Handle(SlashCommandsExtension slashExt, SlashCommandErrorEventArgs args)
         {

@@ -17,10 +17,7 @@ namespace Silk.Core.Data.MediatR.CommandInvocations
     {
         private readonly GuildContext _db;
 
-        public AddCommandInvocationHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public AddCommandInvocationHandler(GuildContext db) => _db = db;
 
         public async Task<Unit> Handle(AddCommandInvocationRequest request, CancellationToken cancellationToken)
         {

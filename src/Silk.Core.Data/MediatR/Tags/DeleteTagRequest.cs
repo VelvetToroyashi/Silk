@@ -18,10 +18,7 @@ namespace Silk.Core.Data.MediatR.Tags
 	public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
     {
         private readonly GuildContext _db;
-        public DeleteTagHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public DeleteTagHandler(GuildContext db) => _db = db;
 
         public async Task<Unit> Handle(DeleteTagRequest request, CancellationToken cancellationToken)
         {

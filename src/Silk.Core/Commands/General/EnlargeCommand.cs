@@ -16,10 +16,7 @@ namespace Silk.Core.Commands.General
     public class EnlargeCommand : BaseCommandModule
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        public EnlargeCommand(IHttpClientFactory httpClientFactory)
-        {
-            _httpClientFactory = httpClientFactory;
-        }
+        public EnlargeCommand(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
         [Command("enlarge")] [Aliases("enbiggen", "emoji", "emote")]
         [Description("Displays a larger version of the provided emoji or custom emote.")]

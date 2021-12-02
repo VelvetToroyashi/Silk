@@ -8,29 +8,29 @@ using Silk.Core.Data.Entities;
 namespace Silk.Core.Data.MediatR.Infractions
 {
     public sealed record GetUserInfractionRequest(
-        ulong UserId, ulong GuildId, InfractionType Type,
-        int?  CaseId = null) : IRequest<InfractionEntity?>;
+        ulong          UserId,
+        ulong          GuildId,
+        InfractionType Type,
+        int?           CaseId = null) : IRequest<InfractionEntity?>;
 
     public sealed class GetUserInfractionHandler : IRequestHandler<GetUserInfractionRequest, InfractionEntity?>
     {
         private readonly GuildContext _db;
-        public GetUserInfractionHandler(GuildContext db)
-        {
-            _db = db;
-        }
+        public GetUserInfractionHandler(GuildContext db) => _db = db;
 
         public async Task<InfractionEntity?> Handle(GetUserInfractionRequest request, CancellationToken cancellationToken)
         {
-            InfractionEntity? inf;
+            InfractionEntity? infraction;
+            
             if (request.CaseId is not null)
             {
-                inf = await _db.Infractions
-                               .Where(inf => inf.CaseNumber == request.CaseId)
+                infraction = await _db.Infractions
+                               .Where(inf => inf.GuildId == request.GuildId && inf.CaseNumber == request.CaseId)
                                .SingleOrDefaultAsync(cancellationToken);
             }
             else
             {
-                inf = await _db.Infractions
+                infraction = await _db.Infractions
                                .Where(inf => inf.UserId         == request.UserId)
                                .Where(inf => inf.GuildId        == request.GuildId)
                                .Where(inf => inf.InfractionType == request.Type)
@@ -39,7 +39,7 @@ namespace Silk.Core.Data.MediatR.Infractions
                                .LastOrDefaultAsync(cancellationToken);
             }
 
-            return inf;
+            return infraction;
         }
     }
 }

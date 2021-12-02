@@ -15,10 +15,7 @@ namespace Silk.Core.Commands.Moderation
     public class PardonCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractions;
-        public PardonCommand(IInfractionService infractions)
-        {
-            _infractions = infractions;
-        }
+        public PardonCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command("pardon")]
         [RequireFlag(UserFlag.Staff)]

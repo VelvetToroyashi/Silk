@@ -14,10 +14,7 @@ namespace Silk.Core.Commands.Moderation
     public class UnbanCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractions;
-        public UnbanCommand(IInfractionService infractions)
-        {
-            _infractions = infractions;
-        }
+        public UnbanCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command("unban")]
         [RequireBotPermissions(Permissions.BanMembers)]

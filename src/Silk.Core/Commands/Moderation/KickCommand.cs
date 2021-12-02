@@ -18,10 +18,7 @@ namespace Silk.Core.Commands.Moderation
     public class KickCommand : BaseCommandModule
     {
         private readonly IInfractionService _infractionService;
-        public KickCommand(IInfractionService infractionService)
-        {
-            _infractionService = infractionService;
-        }
+        public KickCommand(IInfractionService infractionService) => _infractionService = infractionService;
 
 
         [Command]

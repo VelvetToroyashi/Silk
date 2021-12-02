@@ -19,10 +19,7 @@ namespace Silk.Core.Commands.General
     {
         private readonly IMediator _mediator;
 
-        public ClearCommand(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public ClearCommand(IMediator mediator) => _mediator = mediator;
 
         [Command]
         [Description("Cleans all messages from all users.")]

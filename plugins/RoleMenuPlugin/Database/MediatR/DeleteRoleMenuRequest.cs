@@ -14,10 +14,7 @@ namespace RoleMenuPlugin.Database.MediatR
         {
             private readonly RoleMenuContext _context;
 
-            public Handler(RoleMenuContext context)
-            {
-                _context = context;
-            }
+            public Handler(RoleMenuContext context) => _context = context;
 
             public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
             {

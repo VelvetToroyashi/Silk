@@ -80,10 +80,7 @@ namespace Silk.Core.Utilities.Bot
     public sealed class TimeSpanConverter
     {
 
-        static TimeSpanConverter()
-        {
-            TimeSpanRegex = new("^(?<days>\\d+d\\s*)?(?<hours>\\d{1,2}h\\s*)?(?<minutes>\\d{1,2}m\\s*)?(?<seconds>\\d{1,2}s\\s*)?$", RegexOptions.Compiled | RegexOptions.ECMAScript);
-        }
+        static TimeSpanConverter() => TimeSpanRegex = new("^(?<days>\\d+d\\s*)?(?<hours>\\d{1,2}h\\s*)?(?<minutes>\\d{1,2}m\\s*)?(?<seconds>\\d{1,2}s\\s*)?$", RegexOptions.Compiled | RegexOptions.ECMAScript);
         private static Regex TimeSpanRegex { get; }
 
         public Task<Optional<TimeSpan>> ConvertAsync(string value)
