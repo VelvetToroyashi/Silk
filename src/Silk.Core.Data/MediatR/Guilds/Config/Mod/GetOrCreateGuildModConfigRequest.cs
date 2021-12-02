@@ -23,7 +23,7 @@ namespace Silk.Core.Data.MediatR.Guilds.Config.Mod
         public async Task<GuildModConfigEntity> Handle(GetOrCreateGuildModConfigRequest configRequest, CancellationToken cancellationToken)
         {
             var guildModConfigRequest = new GetGuildModConfigRequest(configRequest.GuildId);
-            GuildModConfigEntity guildModConfig = await _mediator.Send(guildModConfigRequest, cancellationToken);
+            GuildModConfigEntity? guildModConfig = await _mediator.Send(guildModConfigRequest, cancellationToken);
 
             if (guildModConfig is not null)
                 return guildModConfig;
