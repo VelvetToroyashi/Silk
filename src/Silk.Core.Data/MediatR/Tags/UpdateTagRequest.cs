@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags
@@ -15,11 +15,11 @@ namespace Silk.Core.Data.MediatR.Tags
 	/// <param name="GuildId">The Id of the Guild</param>
 	public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<TagEntity>
     {
-        public ulong?           OwnerId { get; init; }
-        public string?          NewName { get; init; }
-        public int?             Uses    { get; init; }
-        public string?          Content { get; init; }
-        public List<TagEntity>? Aliases { get; init; }
+        public Optional<ulong>           OwnerId { get; init; }
+        public Optional<string>          NewName { get; init; }
+        public Optional<int>             Uses    { get; init; }
+        public Optional<string>          Content { get; init; }
+        public Optional<List<TagEntity>> Aliases { get; init; }
     }
 
 	/// <summary>
@@ -36,18 +36,28 @@ namespace Silk.Core.Data.MediatR.Tags
                                      .Include(t => t.Aliases)
                                      .FirstAsync(t => t.Name == request.Name && t.GuildId == request.GuildId, cancellationToken);
 
-            tag.Uses = request.Uses       ?? tag.Uses;
-            tag.Name = request.NewName    ?? tag.Name;
-            tag.OwnerId = request.OwnerId ?? tag.OwnerId;
-            tag.Content = request.Content ?? tag.Content;
-            tag.Aliases = request.Aliases ?? tag.Aliases;
-            await _db.SaveChangesAsync(cancellationToken);
-            _db.ChangeTracker.Clear();
-
-            if (tag.Aliases?.Any() ?? false)
-                foreach (var alias in request.Aliases!)
+            if (request.Uses.IsDefined(out var uses))
+	            tag.Uses = uses;
+            
+            if (request.Content.IsDefined(out var content))
+	            tag.Content = content;
+            
+            if (request.OwnerId.IsDefined(out var ownerId))
+                tag.OwnerId = ownerId;
+            
+            if (request.NewName.IsDefined(out var newName))
+            {
+                tag.Name = newName;
+                tag.Aliases?.ForEach(a => a.Name = newName);
+            }
+            
+            if (request.Aliases.IsDefined(out var aliases))
+                tag.Aliases = aliases;
+            
+            if (request.Aliases.IsDefined(out aliases))
+                foreach (var alias in aliases)
                     alias.Content = tag.Content;
-
+            
             await _db.SaveChangesAsync(cancellationToken);
 
             return tag;
