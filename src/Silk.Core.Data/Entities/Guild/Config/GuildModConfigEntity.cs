@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Silk.Core.Data.Entities
 {
@@ -31,6 +32,7 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Channel Id to log moderation/message changes to.
         /// </summary>
+        [Obsolete($"Use {nameof(GuildLoggingConfigEntity.FallbackLoggingChannel)} instead.")]
         public ulong LoggingChannel { get; set; }
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Blacklist certain words.
         /// </summary>
+        [Obsolete]
         public bool BlacklistWords { get; set; }
 
         /// <summary>
@@ -81,6 +84,7 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Whether to automatically de-hoist members.
         /// </summary>
+        [Obsolete]
         public bool AutoDehoist { get; set; }
 
         /// <summary>
@@ -106,16 +110,19 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Whether to use webhooks to log infractions.
         /// </summary>
+        [Obsolete($"Use {nameof(GuildLoggingConfigEntity.UseWebhookLogging)} instead.")]
         public bool UseWebhookLogging { get; set; }
 
         /// <summary>
         ///     The id of the webhook to log with.
         /// </summary>
+        [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookId)} instead.")]
         public ulong WebhookLoggingId { get; set; }
 
         /// <summary>
         ///     The url of the webhook to log with, if applicable.
         /// </summary>
+        [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookToken)} instead.")]
         public string? LoggingWebhookUrl { get; set; }
 
         /// <summary>
