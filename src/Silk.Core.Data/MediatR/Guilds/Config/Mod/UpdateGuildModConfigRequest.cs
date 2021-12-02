@@ -11,43 +11,33 @@ using Silk.Core.Data.Migrations;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
-    public record UpdateGuildModConfigRequest : IRequest<GuildModConfigEntity?>
+    public record UpdateGuildModConfigRequest(ulong GuildId) : IRequest<GuildModConfigEntity?>
     {
-        public UpdateGuildModConfigRequest(ulong guildId)
-        {
-            GuildId = guildId;
-        }
-        public ulong GuildId { get; init; }
-
-        public Optional<bool> EscalateInfractions { get; init; }
-        public Optional<bool> ScanInvites         { get; init; }
-        public Optional<bool> BlacklistWords      { get; init; }
-        public Optional<bool> BlacklistInvites    { get; init; }
-        public Optional<bool> LogMembersJoining   { get; init; }
-        public Optional<bool> LogMembersLeaving   { get; init; }
-        public Optional<bool> UseAggressiveRegex  { get; init; }
-        public Optional<bool> WarnOnMatchedInvite { get; init; }
-
-        public Optional<bool> DetectPhishingLinks { get; init; }
-
-        public Optional<bool> DeletePhishingLinks { get; init; }
-
-        public Optional<bool> DeleteOnMatchedInvite { get; init; }
-        public Optional<int> MaxUserMentions       { get; init; }
-        public Optional<int> MaxRoleMentions       { get; init; }
-
-        public Optional<List<InviteEntity>> AllowedInvites { get; init; }
-
-        public Optional<List<ExemptionEntity>>           Exemptions        { get; init; }
-        public Optional<List<InfractionStepEntity>>      InfractionSteps   { get; init; }
-        public Optional<ulong>                           MuteRoleId        { get; init; }
-        public Optional<ulong>                           LoggingChannel    { get; init; }
-        public Optional<bool>                            LogMessageChanges { get; init; }
-        public Optional<bool>                            UseWebhookLogging { get; init; }
-        public Optional<ulong>                           WebhookLoggingId  { get; init; }
-        public Optional<string>                          WebhookLoggingUrl { get; init; }
-        public Optional<LoggingConfiguration>            LoggingConfig     { get; init; }
-        public Dictionary<string, InfractionStepEntity>? AutoModActions    { get; init; }
+        public Optional<bool>   ScanInvites           { get; init; }
+        public Optional<ulong>  MuteRoleId            { get; init; }
+        public Optional<ulong>  LoggingChannel        { get; init; }
+        public Optional<int>    MaxUserMentions       { get; init; }
+        public Optional<int>    MaxRoleMentions       { get; init; }
+        public Optional<bool>   BlacklistInvites      { get; init; }
+        public Optional<bool>   LogMembersJoining     { get; init; }
+        public Optional<bool>   LogMembersLeaving     { get; init; }
+        public Optional<bool>   LogMessageChanges     { get; init; }
+        public Optional<bool>   UseWebhookLogging     { get; init; }
+        public Optional<ulong>  WebhookLoggingId      { get; init; }
+        public Optional<bool>   UseAggressiveRegex    { get; init; }
+        public Optional<bool>   EscalateInfractions   { get; init; }
+        public Optional<bool>   WarnOnMatchedInvite   { get; init; }
+        public Optional<bool>   DetectPhishingLinks   { get; init; }
+        public Optional<bool>   DeletePhishingLinks   { get; init; }
+        public Optional<string> WebhookLoggingUrl     { get; init; }
+        public Optional<bool>   DeleteOnMatchedInvite { get; init; }
+        
+        public Optional<LoggingConfiguration>            LoggingConfig   { get; init; }
+        
+        public Optional<List<InviteEntity>>              AllowedInvites  { get; init; }
+        public Optional<List<ExemptionEntity>>           Exemptions      { get; init; }
+        public Optional<List<InfractionStepEntity>>      InfractionSteps { get; init; }
+        public Dictionary<string, InfractionStepEntity>? AutoModActions  { get; init; }
     }
 
     public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfigEntity?>
@@ -124,7 +114,7 @@ namespace Silk.Core.Data.MediatR.Guilds
             if (request.AllowedInvites.IsDefined(out var whitelistedInvites))
             {
                 _db.RemoveRange(config.AllowedInvites.Except(whitelistedInvites));
-                config.AllowedInvites = whitelistedInvites!;
+                config.AllowedInvites = whitelistedInvites;
             }
 
             EntityEntry<GuildModConfigEntity>? updatedEntry = _db.GuildModConfigs.Update(config);
