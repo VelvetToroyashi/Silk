@@ -5,6 +5,7 @@
         DoNotGreet,
         GreetOnRole,
         GreetOnJoin,
-        GreetOnScreening
+        GreetOnScreening,
+        GreetOnChannelAccess,
     }
 }

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds
@@ -13,13 +14,13 @@ namespace Silk.Core.Data.MediatR.Guilds
 	/// <param name="GuildId">The Id of the Guild</param>
 	public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
     {
-        public ulong?                       GreetingChannelId  { get; init; }
-        public ulong?                       VerificationRoleId { get; init; }
-        public GreetingOption?              GreetingOption     { get; init; }
-        public string?                      GreetingText       { get; init; }
+        public Optional<ulong>              GreetingChannelId  { get; init; }
+        public Optional<ulong>              VerificationRoleId { get; init; }
+        public Optional<GreetingOption>     GreetingOption     { get; init; }
+        public Optional<string>             GreetingText       { get; init; }
+        
+        //TODO: Either remove this or actually implement it. It cannot remain in limbo, which it currently is.
         public List<DisabledCommandEntity>? DisabledCommands   { get; init; }
-
-        //public List<BlacklistedWord>? BlacklistedWords { get; init; }
     }
 
 	/// <summary>
@@ -37,12 +38,18 @@ namespace Silk.Core.Data.MediatR.Guilds
                                                  .AsSplitQuery()
                                                  .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
-            config.GreetingOption = request.GreetingOption ?? config.GreetingOption;
-
-            config.GreetingChannel = request.GreetingChannelId   ?? config.GreetingChannel;
-            config.VerificationRole = request.VerificationRoleId ?? config.VerificationRole;
-
-            config.GreetingText = request.GreetingText         ?? config.GreetingText;
+            if (request.GreetingOption.IsDefined(out var greeting))
+	            config.GreetingOption = greeting;
+            
+            if (request.GreetingChannelId.IsDefined(out var channel))
+                config.GreetingChannel = channel;
+            
+            if (request.VerificationRoleId.IsDefined(out var role))
+                config.VerificationRole = role;
+            
+            if (request.GreetingText.IsDefined(out var text))
+                config.GreetingText = text;
+            
             config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
 
             await _db.SaveChangesAsync(cancellationToken);

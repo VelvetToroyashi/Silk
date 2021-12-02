@@ -38,7 +38,7 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     The text that will be used to greet new members.
         /// </summary>
-        public string GreetingText { get; set; } = "";
+        public string GreetingText { get; set; }
 
         /// <summary>
         ///     A list of disabled commands on this server
