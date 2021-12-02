@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
+using Silk.Core.Data.Migrations;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
@@ -17,35 +19,35 @@ namespace Silk.Core.Data.MediatR.Guilds
         }
         public ulong GuildId { get; init; }
 
-        public bool? EscalateInfractions { get; init; }
-        public bool? ScanInvites         { get; init; }
-        public bool? BlacklistWords      { get; init; }
-        public bool? BlacklistInvites    { get; init; }
-        public bool? LogMembersJoining   { get; init; }
-        public bool? LogMembersLeaving   { get; init; }
-        public bool? UseAggressiveRegex  { get; init; }
-        public bool? WarnOnMatchedInvite { get; init; }
+        public Optional<bool> EscalateInfractions { get; init; }
+        public Optional<bool> ScanInvites         { get; init; }
+        public Optional<bool> BlacklistWords      { get; init; }
+        public Optional<bool> BlacklistInvites    { get; init; }
+        public Optional<bool> LogMembersJoining   { get; init; }
+        public Optional<bool> LogMembersLeaving   { get; init; }
+        public Optional<bool> UseAggressiveRegex  { get; init; }
+        public Optional<bool> WarnOnMatchedInvite { get; init; }
 
-        public bool? DetectPhishingLinks { get; init; }
+        public Optional<bool> DetectPhishingLinks { get; init; }
 
-        public bool? DeletePhishingLinks { get; init; }
+        public Optional<bool> DeletePhishingLinks { get; init; }
 
-        public bool? DeleteOnMatchedInvite { get; init; }
-        public int?  MaxUserMentions       { get; init; }
-        public int?  MaxRoleMentions       { get; init; }
+        public Optional<bool> DeleteOnMatchedInvite { get; init; }
+        public Optional<int> MaxUserMentions       { get; init; }
+        public Optional<int> MaxRoleMentions       { get; init; }
 
-        public List<InviteEntity>? AllowedInvites { get; init; }
+        public Optional<List<InviteEntity>> AllowedInvites { get; init; }
 
-        public List<ExemptionEntity>?      Exemptions        { get; init; }
-        public List<InfractionStepEntity>? InfractionSteps   { get; init; }
-        public ulong?                      MuteRoleId        { get; init; }
-        public ulong?                      LoggingChannel    { get; init; }
-        public bool?                       LogMessageChanges { get; init; }
-        public bool?                       UseWebhookLogging { get; init; }
-        public ulong?                      WebhookLoggingId  { get; init; }
-        public string?                     WebhookLoggingUrl { get; init; }
-
-        public Dictionary<string, InfractionStepEntity>? AutoModActions { get; init; }
+        public Optional<List<ExemptionEntity>>           Exemptions        { get; init; }
+        public Optional<List<InfractionStepEntity>>      InfractionSteps   { get; init; }
+        public Optional<ulong>                           MuteRoleId        { get; init; }
+        public Optional<ulong>                           LoggingChannel    { get; init; }
+        public Optional<bool>                            LogMessageChanges { get; init; }
+        public Optional<bool>                            UseWebhookLogging { get; init; }
+        public Optional<ulong>                           WebhookLoggingId  { get; init; }
+        public Optional<string>                          WebhookLoggingUrl { get; init; }
+        public Optional<LoggingConfiguration>            LoggingConfig     { get; init; }
+        public Dictionary<string, InfractionStepEntity>? AutoModActions    { get; init; }
     }
 
     public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildModConfigRequest, GuildModConfigEntity?>
@@ -64,38 +66,65 @@ namespace Silk.Core.Data.MediatR.Guilds
                                                     .Include(c => c.AllowedInvites)
                                                     .FirstAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
-            config.MuteRoleId = request.MuteRoleId                              ?? config.MuteRoleId;
-            config.AutoEscalateInfractions = request.EscalateInfractions        ?? config.AutoEscalateInfractions;
-            config.LogMessageChanges = request.LogMessageChanges                ?? config.LogMessageChanges;
-            config.MaxUserMentions = request.MaxUserMentions                    ?? config.MaxUserMentions;
-            config.MaxRoleMentions = request.MaxRoleMentions                    ?? config.MaxRoleMentions;
-            config.LoggingChannel = request.LoggingChannel                      ?? config.LoggingChannel;
-            config.ScanInvites = request.ScanInvites                            ?? config.ScanInvites;
-            config.DetectPhishingLinks = request.DetectPhishingLinks            ?? config.DetectPhishingLinks;
-            config.DeletePhishingLinks = request.DeletePhishingLinks            ?? config.DeletePhishingLinks;
-            config.BlacklistWords = request.BlacklistWords                      ?? config.BlacklistWords;
-            config.BlacklistInvites = request.BlacklistInvites                  ?? config.BlacklistInvites;
-            config.LogMemberJoins = request.LogMembersJoining                   ?? config.LogMemberJoins;
-            config.LogMemberLeaves = request.LogMembersLeaving                  ?? config.LogMemberLeaves;
-            config.UseAggressiveRegex = request.UseAggressiveRegex              ?? config.UseAggressiveRegex;
-            config.WarnOnMatchedInvite = request.WarnOnMatchedInvite            ?? config.WarnOnMatchedInvite;
-            config.UseWebhookLogging = request.UseWebhookLogging                ?? config.UseWebhookLogging;
-            config.WebhookLoggingId = request.WebhookLoggingId                  ?? config.WebhookLoggingId;
-            config.LoggingWebhookUrl = request.WebhookLoggingUrl                ?? config.LoggingWebhookUrl;
-            config.DeleteMessageOnMatchedInvite = request.DeleteOnMatchedInvite ?? config.DeleteMessageOnMatchedInvite;
-            config.Exemptions = request.Exemptions                              ?? config.Exemptions;
+            
+            if (request.MuteRoleId.IsDefined(out var muteRole))
+                config.MuteRoleId =  muteRole;
+            
+            if (request.EscalateInfractions.IsDefined(out var escalate))
+                config.AutoEscalateInfractions = escalate;
+            
+            if (request.LogMessageChanges.IsDefined(out var messageChanges))
+                config.LogMessageChanges = messageChanges;
+            
+            if (request.MaxUserMentions.IsDefined(out var maxUserMentions))
+                config.MaxUserMentions = maxUserMentions;
+            
+            if (request.MaxRoleMentions.IsDefined(out var maxRoleMentions))
+                config.MaxRoleMentions = maxRoleMentions;
+            
+            if (request.UseAggressiveRegex.IsDefined(out var useAggressiveRegex))
+                config.UseAggressiveRegex = useAggressiveRegex;
+            
+            if (request.ScanInvites.IsDefined(out var scanInvites))
+                config.ScanInvites = scanInvites;
+            
+            if (request.DeletePhishingLinks.IsDefined(out var deletePhishingLinks))
+                config.DeletePhishingLinks = deletePhishingLinks;
+            
+            if (request.DetectPhishingLinks.IsDefined(out var detectPhishingLinks))
+                config.DetectPhishingLinks = detectPhishingLinks;
+
+            if (request.BlacklistInvites.IsDefined(out var blacklistInvites))
+                config.BlacklistInvites = blacklistInvites;
+            
+            if (request.WarnOnMatchedInvite.IsDefined(out var warnOnMatchedInvite))
+                config.WarnOnMatchedInvite = warnOnMatchedInvite;
+            
+            if (request.DeleteOnMatchedInvite.IsDefined(out var deleteOnMatchedInvite))
+                config.DeleteMessageOnMatchedInvite = deleteOnMatchedInvite;
+            
+            if (request.LogMembersJoining.IsDefined(out var logMembersJoining))
+                config.LogMemberJoins = logMembersJoining;
+            
+            if (request.LogMembersLeaving.IsDefined(out var logMembersLeaving))
+                config.LogMemberLeaves = logMembersLeaving;
+
+
+            if (request.Exemptions.IsDefined(out var exemptions))
+                config.Exemptions = exemptions;
+            
             config.NamedInfractionSteps = request.AutoModActions                ?? config.NamedInfractionSteps;
 
-            if (request.InfractionSteps?.Any() ?? false)
+            if (request.InfractionSteps.IsDefined(out var infractionSteps))
             {
-                _db.RemoveRange(config.InfractionSteps.Except(request.InfractionSteps!));
-                config.InfractionSteps = request.InfractionSteps!;
+                _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
+                config.InfractionSteps = infractionSteps;
             }
 
-            if (request.AllowedInvites?.Any() ?? false)
+            if (request.AllowedInvites.IsDefined(out var whitelistedInvites))
             {
-                _db.RemoveRange(config.AllowedInvites.Except(request.AllowedInvites!));
-                config.AllowedInvites = request.AllowedInvites!;
+                _db.RemoveRange(config.AllowedInvites.Except(whitelistedInvites));
+                config.AllowedInvites = whitelistedInvites!;
             }
 
             EntityEntry<GuildModConfigEntity>? updatedEntry = _db.GuildModConfigs.Update(config);
