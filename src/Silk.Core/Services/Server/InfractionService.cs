@@ -802,13 +802,13 @@ namespace Silk.Core.Services.Server
                     _webhookClient.AddWebhook(wh);
                 }
 
-                await _mediator.Send(new UpdateGuildModConfigRequest(guildId)
-                {
-                    LoggingChannel = chn.Id,
-                    UseWebhookLogging = wh is not null,
-                    WebhookLoggingId = wh?.Id,
-                    WebhookLoggingUrl = wh is null ? null : $"https://discord.com/api/v9/webhooks/{wh.Id}/{wh.Token}"
-                });
+                // await _mediator.Send(new UpdateGuildModConfigRequest(guildId)
+                // {
+                //     LoggingChannel = chn.Id,
+                //     UseWebhookLogging = wh is not null,
+                //     WebhookLoggingId = wh?.Id,
+                //     WebhookLoggingUrl = wh is null ? null : $"https://discord.com/api/v9/webhooks/{wh.Id}/{wh.Token}"
+                // });
 
                 _updater.UpdateGuild(guildId);
             }
