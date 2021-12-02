@@ -15,12 +15,7 @@ namespace Silk.Core.Data
         public DbSet<UserEntity> Users { get; set; } = null!;
 
         public DbSet<InfractionEntity> Infractions { get; set; } = null!;
-
-        /// <summary>
-        ///     Users on a bot level; contains information that should have a globally persisted state.
-        /// </summary>
-        public DbSet<GlobalUserEntity> GlobalUsers { get; set; } = null!;
-
+        
         public DbSet<CommandInvocationEntity> CommandInvocations { get; set; } = null!;
 
         public DbSet<GuildConfigEntity> GuildConfigs { get; set; } = null!;
