@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Silk.Core.Data.Entities
 {
@@ -23,23 +24,28 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     The trigger to greet new members, if any. Default to DoNotGreet.
         /// </summary>
+        [Obsolete]
         public GreetingOption GreetingOption { get; set; } = GreetingOption.DoNotGreet;
 
         /// <summary>
         ///     The Id of the role to wait for to be granted while
         /// </summary>
+        [Obsolete]
         public ulong VerificationRole { get; set; }
 
         /// <summary>
         ///     Id of the channel to greet members in.
         /// </summary>
+        [Obsolete]
         public ulong GreetingChannel { get; set; }
 
         /// <summary>
         ///     The text that will be used to greet new members.
         /// </summary>
+        [Obsolete]
         public string GreetingText { get; set; }
 
+        public List<GuildGreetingEntity> Greetings { get; set; }
         /// <summary>
         ///     A list of disabled commands on this server
         /// </summary>

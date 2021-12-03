@@ -131,6 +131,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Commands\Unported" />
       <Folder Include="Infrastructure\Errors" />
     </ItemGroup>
 </Project>

@@ -20,7 +20,6 @@ namespace Silk.Core.EventHandlers.MemberAdded
         public MemberGreetingService(DiscordClient client, GuildConfigCacheService guildConfigCacheService, ILogger<MemberGreetingService> logger)
         {
             client.GuildMemberAdded += OnMemberAdded;
-
             _guildConfigCacheService = guildConfigCacheService;
             _timer = new(OnTick, TimeSpan.FromSeconds(1));
             _timer.Start();
