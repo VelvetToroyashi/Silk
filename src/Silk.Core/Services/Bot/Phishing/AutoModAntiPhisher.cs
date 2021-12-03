@@ -22,15 +22,12 @@ namespace Silk.Core.Services
 
         private const int WebSocketBufferSize = 16 * 1024;
 
-        private readonly HttpClient _client;
-
-        private readonly CancellationTokenSource _cts = new();
-
-        private readonly HashSet<string> _domains = new();
-
+        private readonly HttpClient                  _client;
+        private readonly ClientWebSocket             _ws      = new();
+        private readonly HashSet<string>             _domains = new();
+        private readonly CancellationTokenSource     _cts     = new();
         private readonly ILogger<AutoModAntiPhisher> _logger;
-        private readonly ClientWebSocket             _ws = new();
-
+        
         public AutoModAntiPhisher(ILogger<AutoModAntiPhisher> logger, HttpClient client)
         {
             _logger = logger;
