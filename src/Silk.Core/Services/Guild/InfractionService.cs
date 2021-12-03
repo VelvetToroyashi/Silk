@@ -27,7 +27,7 @@ namespace Silk.Core.Services.Server
     {
         private readonly DiscordClient _client;
 
-        private readonly ConfigService _config;
+        private readonly GuildConfigCacheService _guildConfigCache;
 
         private readonly InfractionStepEntity _ignoreStep = new() { Type = InfractionType.Ignore };
 
@@ -45,11 +45,11 @@ namespace Silk.Core.Services.Server
 
         private readonly DiscordWebhookClient _webhookClient = new();
 
-        public InfractionService(IMediator mediator, DiscordClient client, ConfigService config, ICacheUpdaterService updater, ILogger<IInfractionService> logger)
+        public InfractionService(IMediator mediator, DiscordClient client, GuildConfigCacheService guildConfigCache, ICacheUpdaterService updater, ILogger<IInfractionService> logger)
         {
             _mediator = mediator;
             _client = client;
-            _config = config;
+            _guildConfigCache = guildConfigCache;
             _updater = updater;
             _logger = logger;
             _timer = new(DequeueInfractionsAsync, TimeSpan.FromSeconds(1), true);
@@ -285,7 +285,7 @@ namespace Silk.Core.Services.Server
         public async Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason, DateTime? expiration, bool updateExpiration = true)
         {
             DiscordGuild guild = _client.Guilds[guildId];
-            GuildModConfigEntity conf = await _config.GetModConfigAsync(guildId);
+            GuildModConfigEntity conf = await _guildConfigCache.GetModConfigAsync(guildId);
             DiscordRole? muteRole = guild.GetRole(conf!.MuteRoleId);
 
             if (await IsMutedAsync(userId, guildId))
@@ -380,7 +380,7 @@ namespace Silk.Core.Services.Server
             DiscordGuild? guild = _client.Guilds[guildId];
             if (guild.Members.TryGetValue(userId, out var member))
             {
-                GuildModConfigEntity? conf = await _config.GetModConfigAsync(guildId);
+                GuildModConfigEntity? conf = await _guildConfigCache.GetModConfigAsync(guildId);
                 DiscordRole? role = guild.Roles[conf.MuteRoleId];
                 await member.RevokeRoleAsync(role);
 
@@ -409,7 +409,7 @@ namespace Silk.Core.Services.Server
 
         public async Task<InfractionStepEntity> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionEntity> infractions)
         {
-            GuildModConfigEntity conf = await _config.GetModConfigAsync(guildId);
+            GuildModConfigEntity conf = await _guildConfigCache.GetModConfigAsync(guildId);
             if (!conf.InfractionSteps.Any())
                 return _ignoreStep;
 
@@ -461,7 +461,7 @@ namespace Silk.Core.Services.Server
                                                   .WithTitle($"Note (case {infractionNote.CaseNumber})");
 
             await EnsureModLogChannelExistsAsync(guildId);
-            GuildModConfigEntity? conf = await _config.GetModConfigAsync(guildId);
+            GuildModConfigEntity? conf = await _guildConfigCache.GetModConfigAsync(guildId);
             if (conf.LoggingChannel is 0)
                 return InfractionResult.FailedNotConfigured;
             DiscordChannel? channel = guild.Channels[conf.LoggingChannel];
@@ -566,7 +566,7 @@ namespace Silk.Core.Services.Server
         private async Task<InfractionResult> LogUpdatedInfractionAsync(InfractionEntity infOld, InfractionEntity infNew)
         {
             await EnsureModLogChannelExistsAsync(infNew.GuildId);
-            GuildModConfigEntity? conf = await _config.GetModConfigAsync(infNew.GuildId);
+            GuildModConfigEntity? conf = await _guildConfigCache.GetModConfigAsync(infNew.GuildId);
 
             ulong modLog = conf.LoggingChannel;
             DiscordGuild? guild = _client.Guilds[infNew.GuildId];
@@ -645,7 +645,7 @@ namespace Silk.Core.Services.Server
         {
             await EnsureModLogChannelExistsAsync(inf.GuildId);
 
-            GuildModConfigEntity? config = await _config.GetModConfigAsync(inf.GuildId);
+            GuildModConfigEntity? config = await _guildConfigCache.GetModConfigAsync(inf.GuildId);
             DiscordGuild? guild = _client.Guilds[inf.GuildId];
 
             if (config.LoggingChannel is 0)
@@ -742,7 +742,7 @@ namespace Silk.Core.Services.Server
         /// </summary>
         private async Task EnsureModLogChannelExistsAsync(ulong guildId)
         {
-            GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
+            GuildModConfigEntity config = await _guildConfigCache.GetModConfigAsync(guildId);
             DiscordGuild guild = _client.Guilds[guildId];
 
             if (config.LoggingChannel is not 0)

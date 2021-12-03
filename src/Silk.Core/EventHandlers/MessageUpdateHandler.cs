@@ -17,13 +17,13 @@ namespace Silk.Core.EventHandlers
 {
     public sealed class MessageUpdateHandler
     {
-        private readonly ConfigService                 _cache;
+        private readonly GuildConfigCacheService                 _cache;
         private readonly HttpClient                    _client;
         private readonly ILogger<MessageUpdateHandler> _logger;
 
         private readonly DiscordWebhookClient _whClient = new();
 
-        public MessageUpdateHandler(DiscordClient dclient, ConfigService cache, HttpClient client, ILogger<MessageUpdateHandler> logger)
+        public MessageUpdateHandler(DiscordClient dclient, GuildConfigCacheService cache, HttpClient client, ILogger<MessageUpdateHandler> logger)
         {
             _cache = cache;
             _client = client;

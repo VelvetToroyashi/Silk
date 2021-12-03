@@ -8,13 +8,13 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 {
     public sealed class MessageAddAntiInvite
     {
-        private readonly ConfigService    _config;
+        private readonly GuildConfigCacheService    _guildConfigCache;
         private readonly AntiInviteHelper _inviteHelper;
 
-        public MessageAddAntiInvite(DiscordClient client, ConfigService config, AntiInviteHelper inviteHelper)
+        public MessageAddAntiInvite(DiscordClient client, GuildConfigCacheService guildConfigCache, AntiInviteHelper inviteHelper)
         {
             client.MessageCreated += CheckForInvite;
-            _config = config;
+            _guildConfigCache = guildConfigCache;
             _inviteHelper = inviteHelper;
         }
 
@@ -22,7 +22,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         {
             if (!args.Channel.IsPrivate && args.Author != client.CurrentUser)
             {
-                GuildModConfigEntity? config = await _config.GetModConfigAsync(args.Guild.Id);
+                GuildModConfigEntity? config = await _guildConfigCache.GetModConfigAsync(args.Guild.Id);
 
                 bool hasInvite = _inviteHelper.CheckForInvite(args.Message, config, out string invite);
 

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.MediatR.Guilds.Config.Mod
+namespace Silk.Core.Data.MediatR.Guilds.Config
 {
 	/// <summary>
 	///     Request for retrieving or creating a <see cref="GuildModConfigEntity" />.

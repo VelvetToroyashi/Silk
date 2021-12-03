@@ -46,7 +46,6 @@ namespace Silk.Core.Services.Data
         /// </summary>
         private readonly DiscordPermissionSet _welcomeMessagePermissions = new(DiscordPermission.SendMessages, DiscordPermission.EmbedLinks);
 
-
         public GuildCacherService
         (
             IMediator                   mediator,

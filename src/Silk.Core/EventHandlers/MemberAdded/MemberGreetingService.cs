@@ -14,14 +14,14 @@ namespace Silk.Core.EventHandlers.MemberAdded
 {
     public sealed class MemberGreetingService
     {
-        private readonly ConfigService _configService;
+        private readonly GuildConfigCacheService _guildConfigCacheService;
 
         private readonly AsyncTimer _timer;
-        public MemberGreetingService(DiscordClient client, ConfigService configService, ILogger<MemberGreetingService> logger)
+        public MemberGreetingService(DiscordClient client, GuildConfigCacheService guildConfigCacheService, ILogger<MemberGreetingService> logger)
         {
             client.GuildMemberAdded += OnMemberAdded;
 
-            _configService = configService;
+            _guildConfigCacheService = guildConfigCacheService;
             _timer = new(OnTick, TimeSpan.FromSeconds(1));
             _timer.Start();
         }
@@ -29,8 +29,8 @@ namespace Silk.Core.EventHandlers.MemberAdded
 
         public async Task OnMemberAdded(DiscordClient c, GuildMemberAddEventArgs e)
         {
-            GuildConfigEntity? config = await _configService.GetConfigAsync(e.Guild.Id);
-            GuildModConfigEntity? modConfig = await _configService.GetModConfigAsync(e.Guild.Id);
+            GuildConfigEntity? config = await _guildConfigCacheService.GetConfigAsync(e.Guild.Id);
+            GuildModConfigEntity? modConfig = await _guildConfigCacheService.GetModConfigAsync(e.Guild.Id);
 
             if (config is null) // Wasn't cached yet //
                 return;
@@ -73,7 +73,7 @@ namespace Silk.Core.EventHandlers.MemberAdded
             for (var i = 0; i < MemberQueue.Count; i++)
             {
                 DiscordMember member = MemberQueue[i];
-                GuildConfigEntity config = (await _configService.GetConfigAsync(member.Guild.Id));
+                GuildConfigEntity config = (await _guildConfigCacheService.GetConfigAsync(member.Guild.Id));
 
                 if (config.GreetingOption is GreetingOption.GreetOnScreening && member.IsPending is true)
                     continue;

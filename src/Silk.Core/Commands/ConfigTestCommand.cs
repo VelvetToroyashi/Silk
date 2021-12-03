@@ -131,7 +131,6 @@ namespace Silk.Core.Commands
                 return Result.FromSuccess();
             }
             
-            
             private async Task<LoggingChannelEntity> CreateLoggingChannelAsync(bool? useWebhooks, IChannel channel)
             {
                 if (!useWebhooks ?? false)

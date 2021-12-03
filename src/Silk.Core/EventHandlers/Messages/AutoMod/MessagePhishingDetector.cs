@@ -21,19 +21,19 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
         private const           string Phishing  = "Message contained a phishing link.";
         private static readonly Regex  LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
-        private readonly ConfigService                    _config;
+        private readonly GuildConfigCacheService                    _guildConfigCache;
         private readonly IInfractionService               _infractions;
         private readonly ILogger<MessagePhishingDetector> _logger;
         private readonly AutoModAntiPhisher               _phishing;
 
         public MessagePhishingDetector(
-            ConfigService                    config,   DiscordClient      client,
+            GuildConfigCacheService                    guildConfigCache,   DiscordClient      client,
             AutoModAntiPhisher               phishing, IInfractionService infractions,
             ILogger<MessagePhishingDetector> logger)
         {
             _logger = logger;
             _phishing = phishing;
-            _config = config;
+            _guildConfigCache = guildConfigCache;
             _infractions = infractions;
             client.MessageCreated += CreatedSignal;
         }
@@ -64,7 +64,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
             if (message.Channel?.Guild is null)
                 return;
 
-            GuildModConfigEntity? config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
+            GuildModConfigEntity? config = await _guildConfigCache.GetModConfigAsync(message.Channel.Guild.Id);
 
             if (!config?.DetectPhishingLinks ?? false) // This could be an issue if it's null.
                 return;
@@ -85,7 +85,7 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
 
         private async Task HandleLinkAsync(string link, DiscordMessage message)
         {
-            GuildModConfigEntity? config = await _config.GetModConfigAsync(message.Channel.Guild.Id);
+            GuildModConfigEntity? config = await _guildConfigCache.GetModConfigAsync(message.Channel.Guild.Id);
 
             if (config.DeletePhishingLinks)
             {

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using Silk.Core.Data.MediatR.Guilds;
@@ -12,7 +13,7 @@ namespace Silk.Core.Tests.Services
     public class ConfigServiceTests
     {
         private readonly Mock<IMemoryCache> _cache;
-        private readonly ConfigService      _configService;
+        private readonly GuildConfigCacheService      _guildConfigCacheService;
         private readonly Mock<IMediator>    _mediator;
 
         public ConfigServiceTests()
@@ -28,7 +29,7 @@ namespace Silk.Core.Tests.Services
                .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                .Verifiable("uHHHH");
 
-            _configService = new(_cache.Object, _mediator.Object, new CacheUpdaterService());
+            _guildConfigCacheService = new(_cache.Object, _mediator.Object, new CacheUpdaterService(), NullLogger<GuildConfigCacheService>.Instance);
         }
 
         [Test]
@@ -37,7 +38,7 @@ namespace Silk.Core.Tests.Services
             //Act
             object discard;
             _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
-            await _configService.GetConfigAsync(0);
+            await _guildConfigCacheService.GetConfigAsync(0);
             //Assert
             _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         }
