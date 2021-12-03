@@ -94,8 +94,7 @@ namespace Silk.Core.Data.MediatR.Guilds
             
             if (request.LogMembersLeaving.IsDefined(out var logMembersLeaving))
                 config.LogMemberLeaves = logMembersLeaving;
-
-
+            
             if (request.Exemptions.IsDefined(out var exemptions))
                 config.Exemptions = exemptions;
             

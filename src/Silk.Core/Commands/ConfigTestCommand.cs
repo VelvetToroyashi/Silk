@@ -124,7 +124,7 @@ namespace Silk.Core.Commands
 
                 await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value.Value)
                 {
-                    
+                    LoggingConfig = logging
                 });
                 
 
