@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
-using Silk.Core.Data.Migrations;
 
 namespace Silk.Core.Data.MediatR.Guilds
 {
@@ -32,7 +31,7 @@ namespace Silk.Core.Data.MediatR.Guilds
         public Optional<string> WebhookLoggingUrl     { get; init; }
         public Optional<bool>   DeleteOnMatchedInvite { get; init; }
         
-        public Optional<LoggingConfiguration>            LoggingConfig   { get; init; }
+        public Optional<GuildLoggingConfigEntity>        LoggingConfig   { get; init; }
         
         public Optional<List<InviteEntity>>              AllowedInvites  { get; init; }
         public Optional<List<ExemptionEntity>>           Exemptions      { get; init; }
