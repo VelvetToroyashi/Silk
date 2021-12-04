@@ -8,9 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Gateway.Responders;
 using Serilog;
 using Silk.Core.Commands.Conditions.cs;
 using Silk.Core.Data;
+using Silk.Core.Responders;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Shared.Configuration;
@@ -66,6 +69,9 @@ namespace Silk.Core
 
                     services.AddSilkLogging(context);
 
+                    services.AddResponder<EarlyCacheSnapshotResponder>(ResponderGroup.Early);
+                    services.AddResponder<LateCacheSnapshotRespodner>(ResponderGroup.Late);
+                    
                     services.AddCondition<RequireNSFWCondition>();
                     
                     services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
