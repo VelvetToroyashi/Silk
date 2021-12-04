@@ -163,7 +163,7 @@ namespace Silk.Core.Services.Server
                     continue;
                 }
 
-                for (int i = _membersToGreet.Count; i >= 0; i--)
+                for (int i = _membersToGreet.Count - 1; i >= 0; i--)
                 {
                     var potentialGreeting = _membersToGreet[i];
                     var config = await _config.GetConfigAsync(potentialGreeting.GuildId);
