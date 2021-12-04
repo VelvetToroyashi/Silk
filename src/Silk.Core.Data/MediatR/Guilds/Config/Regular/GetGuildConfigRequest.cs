@@ -23,6 +23,7 @@ namespace Silk.Core.Data.MediatR.Guilds
         public async Task<GuildConfigEntity?> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
         {
             GuildConfigEntity? config = await _db.GuildConfigs
+                                                 .Include(g => g.Greetings)
                                                  .Include(c => c.DisabledCommands)
                                                   //.Include(c => c.BlackListedWords)
                                                  .AsSplitQuery()
