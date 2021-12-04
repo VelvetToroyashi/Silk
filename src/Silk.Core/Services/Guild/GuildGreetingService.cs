@@ -50,12 +50,71 @@ namespace Silk.Core.Services.Server
         }
 
         /// <summary>
+        /// <para>
+        /// Determines the specified channel is a greeting channel, and that the specified member can be greeted in that channel.
+        ///
+        /// "Can be greeted" refers to the member being able to access the channel, and that there's a greeting set up for that channel.
+        ///
+        /// This method returns false if both of those conditions are not met.
+        /// </para>
+        /// </summary>
+        /// <param name="guildID">The ID of the guild to check for a greeting on.</param>
+        /// <param name="channel">The channel to check the permissions for.</param>
+        /// <param name="member">The member to check.</param>
+        /// <returns>True if the member should be thrown on the queue to greet, otherwise false.</returns>
+        public async Task<bool> CanAccessGreetingChannelAsync(Snowflake guildID, IChannel channel, IGuildMember member)
+        {
+            var config = await _config.GetConfigAsync(guildID.Value);
+
+            if (config.Greetings.All(c => c.Option is not GreetingOption.GreetOnChannelAccess || c.MetadataSnowflake != channel.ID.Value))
+                return false;
+            
+            var guildRolesResult = await _guildApi.GetGuildRolesAsync(guildID);
+
+            if (!guildRolesResult.IsDefined(out var roles))
+                return false;
+            
+            var memberRoles = member.Roles.Select(mRole => roles.Single(sRole => sRole.ID == mRole));
+            
+            var permissions = DiscordPermissionSet.ComputePermissions
+                (
+                 member.User.Value.ID,
+                 roles.Single(r => r.ID == guildID),
+                 memberRoles.ToArray(),
+                 channel.PermissionOverwrites.Value
+                );
+
+            return permissions.HasPermission(DiscordPermission.SendMessages);
+        }
+        
+        /// <summary>
+        /// Determines whether a guild has a greeting set up for roles, and that the member has said role.
+        /// </summary>
+        /// <param name="guildID">The ID of the guild to check against.</param>
+        /// <param name="member">The member whom's roles will be compared.</param>
+        /// <returns>True if the member contains a role used to greet, otherwise false.</returns>
+        public async Task<bool> HasGreetingRoleAsync(Snowflake guildID, IGuildMember member)
+        {
+            var config = await _config.GetConfigAsync(guildID.Value);
+            
+            foreach (var greeting in config.Greetings)
+            {
+                if (greeting.Option is not GreetingOption.GreetOnRole)
+                    continue;
+                
+                return member.Roles.Any(r => r.Value == greeting.MetadataSnowflake);
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Queues a user on a specific guild to be greeted.
         /// </summary>
         /// <param name="guildID">The ID of the guild the member resides on.</param>
         /// <param name="userID">The ID of the user to greet.</param>
+        /// <param name="option"> When to greet the user.</param>
         /// <returns></returns>
-        public async Task<Result> QueueGreeting(Snowflake guildID, Snowflake userID)
+        public async Task<Result> QueueGreetingAsync(Snowflake guildID, Snowflake userID, GreetingOption option)
         {
             if (_membersToGreet.Any(g => g.GuildId == guildID.Value && g.UserId == userID.Value))
                 return Result.FromError(new InvalidOperationError($"{userID} is already being greeted on {guildID}."));
@@ -74,14 +133,17 @@ namespace Silk.Core.Services.Server
                 if (greeting.Option is GreetingOption.DoNotGreet)
                     continue;
 
-                var greetingResult = await _mediator.Send(new AddMemberGreeting.Request(guildID.Value, userID.Value));
-                
-                
-                _membersToGreet.Add(new()
+                var greetingResult = await _mediator.Send(new AddMemberGreeting.Request(guildID.Value, userID.Value, option));
+
+                if (!greetingResult.IsSuccess)
                 {
-                    UserId = userID.Value,
-                    GuildId = guildID.Value,
-                });
+                    return Result.FromError(greetingResult.Error);
+                }
+                else
+                {
+                    _membersToGreet.Add(greetingResult.Entity);
+                    break;
+                }
             }
 
             return Result.FromSuccess();
@@ -123,7 +185,7 @@ namespace Silk.Core.Services.Server
                             break;
                         }
                         
-                        if (greeting.Option is GreetingOption.GreetOnJoin)
+                        if (greeting.Option is GreetingOption.GreetOnJoin && potentialGreeting.Greeting is GreetingOption.GreetOnJoin)
                         {
                             var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
                             
@@ -132,7 +194,7 @@ namespace Silk.Core.Services.Server
                             
                             break;
                         }
-                        else if (greeting.Option is GreetingOption.GreetOnRole)
+                        else if (greeting.Option is GreetingOption.GreetOnRole && potentialGreeting.Greeting is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
                         {
                             if (member.Roles.All(r => r.Value != greeting.MetadataSnowflake))
                                 continue;
@@ -142,7 +204,7 @@ namespace Silk.Core.Services.Server
                             if (!res.IsSuccess)
                                 _logger.LogError(EventIds.Service, res.Error.Message);
                         }
-                        else if (greeting.Option is GreetingOption.GreetOnChannelAccess)
+                        else if (greeting.Option is GreetingOption.GreetOnChannelAccess && potentialGreeting.Greeting is GreetingOption.GreetOnChannelAccess)
                         {
                             if (!greeting.MetadataSnowflake.HasValue)
                             {
@@ -225,6 +287,5 @@ namespace Silk.Core.Services.Server
                 ? Result.FromSuccess()
                 : Result.FromError(sendResult.Error);
         }
-
     }
 }
