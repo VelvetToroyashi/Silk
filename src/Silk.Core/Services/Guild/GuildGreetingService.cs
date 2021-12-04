@@ -151,6 +151,10 @@ namespace Silk.Core.Services.Server
         
         protected override async Task ExecuteAsync(CancellationToken ct)
         {
+            var greetings = await _mediator.Send(new GetMemberGreetings.Request(), ct);
+            
+            _membersToGreet.AddRange(greetings);
+            
             while (!ct.IsCancellationRequested)
             {
                 if (_membersToGreet.Count == 0)
@@ -159,7 +163,7 @@ namespace Silk.Core.Services.Server
                     continue;
                 }
 
-                for (int i = _membersToGreet.Count; i <= 0; i--)
+                for (int i = _membersToGreet.Count; i >= 0; i--)
                 {
                     var potentialGreeting = _membersToGreet[i];
                     var config = await _config.GetConfigAsync(potentialGreeting.GuildId);
