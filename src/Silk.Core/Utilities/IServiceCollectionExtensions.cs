@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Serilog;
 using Serilog.Events;
@@ -55,6 +57,11 @@ namespace Silk.Core
                .AddDiscordCommands()
                .AddDiscordCaching();
 
+            services.Configure<DiscordGatewayClientOptions>(gw =>
+            {
+                gw.Intents |= GatewayIntents.GuildMembers | GatewayIntents.GuildPresences;
+            });
+            
             return services;
         }
 

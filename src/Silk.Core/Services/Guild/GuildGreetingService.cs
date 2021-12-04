@@ -192,6 +192,8 @@ namespace Silk.Core.Services.Server
                         if (greeting.Option is GreetingOption.GreetOnJoin && potentialGreeting.Greeting is GreetingOption.GreetOnJoin)
                         {
                             var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
+
+                            _membersToGreet.Remove(potentialGreeting);
                             
                             if (!res.IsSuccess)
                                 _logger.LogError(EventIds.Service, res.Error.Message);
@@ -205,6 +207,8 @@ namespace Silk.Core.Services.Server
 
                             var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
 
+                            _membersToGreet.Remove(potentialGreeting);
+                            
                             if (!res.IsSuccess)
                                 _logger.LogError(EventIds.Service, res.Error.Message);
                         }
@@ -237,10 +241,11 @@ namespace Silk.Core.Services.Server
                             
                             var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
                             
+                            _membersToGreet.Remove(potentialGreeting);
+                            
                             if (!res.IsSuccess)
                                 _logger.LogError(EventIds.Service, res.Error.Message);
                         }
-                        
                     }
                 }
             }

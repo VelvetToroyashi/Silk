@@ -156,13 +156,11 @@ namespace Silk.Core.Services.Data
 
         public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
         {
-            if (members.Count > 2) // Just us. Rip.
+            if (members.Count < 2) // Just us. Rip.
                 return Result.FromError(new ArgumentOutOfRangeError("Members only contained current user."));
 
             await _mediator.Send(new GetOrCreateGuildRequest(guildID.Value, StringConstants.DefaultCommandPrefix));
-
-
-
+            
             return default;
         }
 
