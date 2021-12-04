@@ -38,16 +38,19 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Whether to log when messages are edited/deleted.
         /// </summary>
+        [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMessageEdits)} instead.")]
         public bool LogMessageChanges { get; set; }
 
         /// <summary>
         ///     Whether to log members joining or not.
         /// </summary>
+        [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMemberJoins)} instead.")]
         public bool LogMemberJoins { get; set; }
 
         /// <summary>
         ///     Whether to log members leaving or not.
         /// </summary>
+        [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMemberLeaves)} instead.")]
         public bool LogMemberLeaves { get; set; }
 
         /// <summary>
