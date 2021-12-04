@@ -7,15 +7,15 @@ namespace Silk.Core.Data
     {
         public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
         
-        public DbSet<TagEntity>                   Tags                   { get; set; }
-        public DbSet<UserEntity>                  Users                  { get; set; }
-        public DbSet<GuildEntity>                 Guilds                 { get; set; }
-        public DbSet<ReminderEntity>              Reminders              { get; set; }
-        public DbSet<InfractionEntity>            Infractions            { get; set; }
-        public DbSet<GuildConfigEntity>           GuildConfigs           { get; set; }
-        public DbSet<GuildModConfigEntity>        GuildModConfigs        { get; set; }
-        public DbSet<CommandInvocationEntity>     CommandInvocations     { get; set; }
-        public DbSet<PendingMemberGreetingEntity> PendingMemberGreetings { get; set; }
+        public DbSet<TagEntity>               Tags               { get; set; }
+        public DbSet<UserEntity>              Users              { get; set; }
+        public DbSet<GuildEntity>             Guilds             { get; set; }
+        public DbSet<ReminderEntity>          Reminders          { get; set; }
+        public DbSet<InfractionEntity>        Infractions        { get; set; }
+        public DbSet<GuildConfigEntity>       GuildConfigs       { get; set; }
+        public DbSet<GuildModConfigEntity>    GuildModConfigs    { get; set; }
+        public DbSet<MemberGreetingEntity>    MemberGreetings    { get; set; }
+        public DbSet<CommandInvocationEntity> CommandInvocations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
