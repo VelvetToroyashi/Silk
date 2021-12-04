@@ -98,36 +98,48 @@ namespace Silk.Core.Commands
                 bool? logInfractions = null
             )
             {
-                
                 var currentConfig = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value.Value));
 
                 var logging = currentConfig!.LoggingConfig;
 
+                if (logEdits.HasValue)
+                    logging.LogMessageEdits = logEdits.Value;
+                
+                if (logDeletes.HasValue)
+                    logging.LogMessageDeletes = logDeletes.Value;
+                
+                if (logJoins.HasValue)
+                    logging.LogMemberJoins = logJoins.Value;
+                
+                if (logLeaves.HasValue)
+                    logging.LogMemberLeaves = logLeaves.Value;
+                
+                if (logInfractions.HasValue)
+                    logging.LogInfractions = logInfractions.Value;
+                
                 if (fallbackChannel != null)
                     logging.FallbackLoggingChannel = fallbackChannel.ID.Value;
-                
+
                 if (infractionsChannel != null)
                     logging.Infractions = await CreateLoggingChannelAsync(useWebhooks, infractionsChannel);
-                
+
                 if (editsChannel != null)
                     logging.MessageEdits = await CreateLoggingChannelAsync(useWebhooks, editsChannel);
-                
+
                 if (deletesChannel != null)
                     logging.MessageDeletes = await CreateLoggingChannelAsync(useWebhooks, deletesChannel);
-                
+
                 if (joinsChannel != null)
                     logging.MemberJoins = await CreateLoggingChannelAsync(useWebhooks, joinsChannel);
-                
+
                 if (leavesChannel != null)
                     logging.MemberLeaves = await CreateLoggingChannelAsync(useWebhooks, leavesChannel);
                 
-
                 await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value.Value)
                 {
                     LoggingConfig = logging
                 });
                 
-
                 return Result.FromSuccess();
             }
             

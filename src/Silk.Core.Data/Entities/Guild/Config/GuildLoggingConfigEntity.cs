@@ -18,6 +18,37 @@ namespace Silk.Core.Data.Entities
 	    [Column("guild_id")]
         public ulong GuildId { get; set; }
 
+	    
+	    /// <summary>
+	    ///     Whether to log when messages are edited.
+	    /// </summary>
+	    [Column("log_message_edits")]
+	    public bool LogMessageEdits { get; set; }
+	    
+	    /// <summary>
+	    ///		Whether to log when messages are deleted.
+	    /// </summary>
+	    [Column("log_message_deletes")]
+	    public bool LogMessageDeletes { get; set; }
+
+	    /// <summary>
+	    ///		Whether to log when infractions occur. Defaults to true..
+	    /// </summary>
+	    [Column("log_infractions")]
+	    public bool LogInfractions { get; set; } = true;
+
+	    /// <summary>
+	    ///     Whether to log members joining or not.
+	    /// </summary>
+		[Column("log_member_joins")]
+	    public bool LogMemberJoins { get; set; }
+
+	    /// <summary>
+	    ///     Whether to log members leaving or not.
+	    /// </summary>
+	    [Column("log_member_leaves")]
+	    public bool LogMemberLeaves { get; set; }
+	    
 	    /// <summary>
 	    ///     The fallback channel to use if it's not specified for a specific scope.
 	    /// </summary>
