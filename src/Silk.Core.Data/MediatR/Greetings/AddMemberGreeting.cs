@@ -1,15 +1,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 using Silk.Core.Data.Entities;
-using EntityFrameworkQueryableExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
 
 namespace Silk.Core.Data.MediatR
 {
     public static class AddMemberGreeting
     {
-        public record Request(ulong GuildId, ulong UserId) : IRequest<Result<MemberGreetingEntity>>;
+        public record Request(ulong GuildId, ulong UserId, GreetingOption option) : IRequest<Result<MemberGreetingEntity>>;
         
         internal class Handler : IRequestHandler<Request, Result<MemberGreetingEntity>>
         {
@@ -32,7 +32,7 @@ namespace Silk.Core.Data.MediatR
                     GuildId = request.GuildId
                 };
 
-                _db.Add(existing);
+                _db.Add((object)existing);
                 await _db.SaveChangesAsync(cancellationToken);
                 
                 return Result<MemberGreetingEntity>.FromSuccess(existing);
