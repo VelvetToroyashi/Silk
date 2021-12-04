@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk" >
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup >
-        <TargetFramework >net6.0</TargetFramework >
-        <Nullable >enable</Nullable >
-    </PropertyGroup >
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
@@ -14,8 +14,8 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-        <PackageReference Include="Remora.Commands" Version="7.1.4" />
-        <PackageReference Include="Remora.Discord.Gateway" Version="6.1.0" />
-    </ItemGroup >
+        <PackageReference Include="Remora.Commands" Version="7.1.5" />
+        <PackageReference Include="Remora.Discord.Gateway" Version="6.2.0" />
+    </ItemGroup>
 
-</Project >
+</Project>
