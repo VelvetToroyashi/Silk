@@ -86,44 +86,42 @@ namespace Silk.Core
 
         private static IHostBuilder ConfigureServices(IHostBuilder builder)
         {
-        builder
-           .ConfigureLogging(l => l.ClearProviders().AddSerilog())
-           .ConfigureServices((context, services) =>
-            {
-                // There's a more elegant way to do this, but I'm lazy and this works.
-                SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+            builder
+               .ConfigureLogging(l => l.ClearProviders().AddSerilog())
+               .ConfigureServices((context, services) =>
+                {
+                    // There's a more elegant way to do this, but I'm lazy and this works.
+                    SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
-                AddSilkConfigurationOptions(services, context.Configuration);
-                AddDatabases(services, silkConfig.Persistence);
-                
-                services.AddRemoraServices();
-                services.AddSilkLogging(context);
+                    AddSilkConfigurationOptions(services, context.Configuration);
+                    AddDatabases(services, silkConfig.Persistence);
+                    
+                    services.AddRemoraServices();
+                    services.AddSilkLogging(context);
 
-                services.AddResponder<EarlyCacheSnapshotResponder>(ResponderGroup.Early);
-                services.AddResponder<LateCacheSnapshotRespodner>(ResponderGroup.Late);
-                
-                services.AddCondition<RequireNSFWCondition>();
-                
-                
-                services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
-                services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
-                services.AddSingleton<GuildConfigCacheService>();
-                services.AddSingleton<GuildCacherService>();
+                    services.AddResponder<EarlyCacheSnapshotResponder>(ResponderGroup.Early);
+                    services.AddResponder<LateCacheSnapshotRespodner>(ResponderGroup.Late);
+                    
+                    services.AddCondition<RequireNSFWCondition>();
+                    
+                    
+                    services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
+                    services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
+                    services.AddSingleton<GuildConfigCacheService>();
+                    services.AddSingleton<GuildCacherService>();
 
-                services.AddHostedService(s => s.GetRequiredService<GuildGreetingService>());
-                services.AddSingleton<GuildGreetingService>();
-                //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
+                    services.AddSingleton<GuildGreetingService>();
+                    //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
 
-                services.AddResponder<MemberGreetingResponder>();
+                    services.AddResponder<MemberGreetingResponder>();
 
-                services.AddMediatR(typeof(Program));
-                services.AddMediatR(typeof(GuildContext));
-            })
-           .AddRemoraHosting();
+                    services.AddMediatR(typeof(Program));
+                    services.AddMediatR(typeof(GuildContext));
+                })
+               .AddRemoraHosting();
 
-        return builder;
+            return builder;
         }
-
         
         private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
         {

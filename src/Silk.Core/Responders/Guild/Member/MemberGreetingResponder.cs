@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -27,73 +26,29 @@ namespace Silk.Core.Responders
         }
 
         public Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
-            => _greetingService.QueueGreetingAsync(gatewayEvent.GuildID, gatewayEvent.User.Value.ID, GreetingOption.GreetOnJoin);
+            => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User.Value, GreetingOption.GreetOnJoin);
 
-        public async Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-        {
-            var cacheKey = EarlyCacheSnapshotResponder.CacheKeyPrefix + KeyHelpers.CreateGuildMemberKey(gatewayEvent.GuildID, gatewayEvent.User.ID);
-            
-            if (!_cache.TryGetValue(cacheKey, out IGuildMember member))
-            {
-                var memberRes = await _guildApi.GetGuildMemberAsync(gatewayEvent.GuildID, gatewayEvent.User.ID, ct);
-                
-                if (!memberRes.IsDefined(out member!))
-                    return Result.FromError(memberRes.Error!);
+        public Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
+            => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User, GreetingOption.GreetOnRole);
 
-                if (!await _greetingService.HasGreetingRoleAsync(gatewayEvent.GuildID, member))
-                    return Result.FromSuccess(); // No greeting role, no greeting.
-                
-                return await _greetingService.QueueGreetingAsync(gatewayEvent.GuildID, gatewayEvent.User.ID, GreetingOption.GreetOnJoin);
-            }
-            else
-            {
-                if (member.Roles.Count <= gatewayEvent.Roles.Count)
-                    return Result.FromSuccess(); // Same or less roles, therefore we won't even attempt to greet.
-
-                if (!await _greetingService.HasGreetingRoleAsync(gatewayEvent.GuildID, member))
-                    return Result.FromSuccess(); // No greeting role, therefore we won't even attempt to greet.
-
-                return await _greetingService.QueueGreetingAsync(gatewayEvent.GuildID, gatewayEvent.User.ID, GreetingOption.GreetOnRole);
-            }
-        }
-
-        public async Task<Result> RespondAsync(IChannelUpdate gatewayEvent, CancellationToken ct = default)
+        public Task<Result> RespondAsync(IChannelUpdate gatewayEvent, CancellationToken ct = default)
         {
             if (!gatewayEvent.GuildID.IsDefined(out var guildID))
-                return Result.FromSuccess();
+                return Task.FromResult(Result.FromSuccess());
 
             if (!gatewayEvent.PermissionOverwrites.IsDefined(out var permissions))
-                return Result.FromSuccess();
+                return Task.FromResult(Result.FromSuccess());
             
             var cacheKey = EarlyCacheSnapshotResponder.CacheKeyPrefix + KeyHelpers.CreateChannelCacheKey(gatewayEvent.ID);
 
             if (_cache.TryGetValue(cacheKey, out IChannel oldChannel))
             {
-                if (oldChannel.PermissionOverwrites.Value.Count >= permissions.Count)
-                    return Result.FromSuccess(); // Same or less permissions, therefore we won't even attempt to greet.
+                var current = _cache.Get<IChannel>(KeyHelpers.CreateChannelCacheKey(gatewayEvent.ID));
 
-                var newPermissions =
-                    permissions
-                       .Where(p => p.Type is PermissionOverwriteType.Member)
-                       .Union(oldChannel.PermissionOverwrites.Value.Where(p => p.Type is PermissionOverwriteType.Member))
-                       .Distinct()
-                       .FirstOrDefault(); // If there's multiple differences, cache is fucked. ~Velvet
-                
-                if (newPermissions is null)
-                    return Result.FromSuccess();
-                
-                var memberRes = await _guildApi.GetGuildMemberAsync(guildID, newPermissions.ID, ct);
-                
-                if (!memberRes.IsDefined(out var member))
-                    return Result.FromError(memberRes.Error!);
-
-                if (!await _greetingService.CanAccessGreetingChannelAsync(guildID, gatewayEvent, member))
-                    return Result.FromSuccess(); // No greeting channel, no greeting.
-                
-                return await _greetingService.QueueGreetingAsync(guildID, member.User.Value.ID, GreetingOption.GreetOnJoin);
+                return _greetingService.TryGreetAsync(guildID, oldChannel, current);
             }
 
-            return Result.FromSuccess(); // Channel wasn't in cache, so we can't determine which overwrites to check.
+            return Task.FromResult(Result.FromSuccess()); // Channel wasn't in cache, so we can't determine which overwrites to check.
         }
     }
 }
