@@ -26,7 +26,15 @@ namespace Silk.Core.Responders
             => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User.Value, GreetingOption.GreetOnJoin);
 
         public Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-            => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User, GreetingOption.GreetOnRole);
+        {
+            if (!_cache.TryGetPreviousValue(KeyHelpers.CreateGuildMemberKey(gatewayEvent.GuildID, gatewayEvent.User.ID), out IGuildMember? guildMember))
+                return Task.FromResult(Result.FromSuccess());
+            
+            if (guildMember.Roles.Count <= gatewayEvent.Roles.Count)
+                return Task.FromResult(Result.FromSuccess());
+
+            return _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User, GreetingOption.GreetOnRole);
+        }
 
         public Task<Result> RespondAsync(IChannelUpdate gatewayEvent, CancellationToken ct = default)
         {
