@@ -59,7 +59,11 @@ namespace Silk.Core
 
             services.Configure<DiscordGatewayClientOptions>(gw =>
             {
-                gw.Intents |= GatewayIntents.GuildMembers | GatewayIntents.GuildPresences;
+                gw.Intents |=
+                    GatewayIntents.GuildMembers   |
+                    GatewayIntents.GuildPresences |
+                    GatewayIntents.Guilds         |
+                    GatewayIntents.GuildMessages;
             });
             
             return services;
