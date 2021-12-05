@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Core.Services.Interfaces;
 using Silk.Shared.Constants;
@@ -14,7 +13,7 @@ namespace Silk.Core.AutoMod
 	/// <summary>
 	///     An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
 	/// </summary>
-	public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
+	public sealed class AutoModMuteApplier //: IResponder<IGuildMemberAdd>
     {
         private readonly IInfractionService          _infractions;
         private readonly ILogger<AutoModMuteApplier> _logger;
