@@ -291,7 +291,20 @@ namespace Silk.Core.Services.Server
             {
                 var embed = new Embed(Colour: Color.FromArgb(47, 49, 54));
 
-                sendResult = await _channelApi.CreateMessageAsync(new(channelId), embeds: new[] { embed });
+                sendResult = await _channelApi
+                   .CreateMessageAsync
+                        (
+                          channelID: new(channelId),
+                          embeds: new[] { embed },
+                          allowedMentions: new AllowedMentions()
+                            {
+                                Parse = new []
+                                {
+                                    MentionType.Users,
+                                    MentionType.Roles
+                                }
+                            }
+                        );
             }
 
             await _mediator.Send(new DeleteMemberGreeting.Request(guildID, memberID));
