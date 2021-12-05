@@ -185,7 +185,11 @@ namespace Silk.Core.Services.Server
 
                         if (!memberResult.IsDefined(out var member))
                         {
-                            _logger.LogError(EventIds.Service, memberResult.Error!.Message);
+                            _logger.LogError(EventIds.Service, "Failed to fetch member. Error: {@Error}", memberResult.Error);
+                            
+                            _membersToGreet.Remove(potentialGreeting);
+                            await _mediator.Send(new DeleteMemberGreeting.Request(potentialGreeting.GuildId, potentialGreeting.UserId), ct);
+                            
                             break;
                         }
                         
