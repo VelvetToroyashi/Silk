@@ -149,6 +149,8 @@ namespace Silk.Core.Services.Server
             return Result.FromSuccess();
         }
         
+        
+        //TODO: Expressive logging.
         protected override async Task ExecuteAsync(CancellationToken ct)
         {
             var greetings = await _mediator.Send(new GetMemberGreetings.Request(), ct);
@@ -168,41 +170,36 @@ namespace Silk.Core.Services.Server
                     var potentialGreeting = _membersToGreet[i];
                     var config = await _config.GetConfigAsync(potentialGreeting.GuildId);
 
+                    var guildResult = await _guildApi.GetGuildAsync(new(potentialGreeting.GuildId), ct: ct);
+
+                    if (!guildResult.IsDefined(out var guild))
+                    {
+                        _logger.LogError($"Failed to get guild {potentialGreeting.GuildId}.");
+                        continue;
+                    }
+                    
+                    var memberResult = await _guildApi.GetGuildMemberAsync(new(potentialGreeting.GuildId), new(potentialGreeting.UserId), ct);
+
+                    if (!memberResult.IsDefined(out var member))
+                    {
+                        _logger.LogError(EventIds.Service, "Failed to fetch member. Error: {@Error}", memberResult.Error);
+                            
+                        _membersToGreet.Remove(potentialGreeting);
+                        await _mediator.Send(new DeleteMemberGreeting.Request(potentialGreeting.GuildId, potentialGreeting.UserId), ct);
+
+                        continue;
+                    }
+                    
                     foreach (var greeting in config.Greetings)
                     {
                         if (greeting.Option is GreetingOption.DoNotGreet)
                             continue;
-
-                        var guildResult = await _guildApi.GetGuildAsync(new(potentialGreeting.GuildId), ct: ct);
-
-                        if (!guildResult.IsDefined(out var guild))
-                        {
-                            _logger.LogError($"Failed to get guild {potentialGreeting.GuildId}.");
-                            continue;
-                        }
-                        
-                        var memberResult = await _guildApi.GetGuildMemberAsync(new(greeting.GuildId), new(potentialGreeting.UserId), ct);
-
-                        if (!memberResult.IsDefined(out var member))
-                        {
-                            _logger.LogError(EventIds.Service, "Failed to fetch member. Error: {@Error}", memberResult.Error);
-                            
-                            _membersToGreet.Remove(potentialGreeting);
-                            await _mediator.Send(new DeleteMemberGreeting.Request(potentialGreeting.GuildId, potentialGreeting.UserId), ct);
-                            
-                            break;
-                        }
                         
                         if (greeting.Option is GreetingOption.GreetOnJoin && potentialGreeting.Greeting is GreetingOption.GreetOnJoin)
                         {
-                            var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
+                            await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
 
                             _membersToGreet.Remove(potentialGreeting);
-                            
-                            if (!res.IsSuccess)
-                                _logger.LogError(EventIds.Service, res.Error.Message);
-                            
-                            break;
                         }
                         else if (greeting.Option is GreetingOption.GreetOnRole && potentialGreeting.Greeting is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
                         {
@@ -212,9 +209,6 @@ namespace Silk.Core.Services.Server
                             var res = await GreetAsync(greeting.GuildId, potentialGreeting.UserId, greeting.ChannelId, greeting.Message);
 
                             _membersToGreet.Remove(potentialGreeting);
-                            
-                            if (!res.IsSuccess)
-                                _logger.LogError(EventIds.Service, res.Error.Message);
                         }
                         else if (greeting.Option is GreetingOption.GreetOnChannelAccess && potentialGreeting.Greeting is GreetingOption.GreetOnChannelAccess)
                         {
@@ -225,12 +219,9 @@ namespace Silk.Core.Services.Server
                             }
                             
                             var channelResult = await _channelApi.GetChannelAsync(new(greeting.MetadataSnowflake.Value), ct);
-                            
+
                             if (!channelResult.IsDefined(out var channel))
-                            {
-                                _logger.LogError(EventIds.Service, channelResult.Error!.Message);
-                                break;
-                            }
+                                continue;
 
                             var permissions = DiscordPermissionSet.ComputePermissions
                                 (
