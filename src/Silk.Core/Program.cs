@@ -112,9 +112,6 @@ namespace Silk.Core
 
                 services.AddHostedService(s => s.GetRequiredService<GuildGreetingService>());
                 services.AddSingleton<GuildGreetingService>();
-
-                services.AddSingleton<IInfractionService, InfractionService>();
-                
                 //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
 
                 services.AddResponder<MemberGreetingResponder>();
