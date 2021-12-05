@@ -95,7 +95,8 @@ namespace Silk.Core
 
                 AddSilkConfigurationOptions(services, context.Configuration);
                 AddDatabases(services, silkConfig.Persistence);
-
+                
+                services.AddRemoraServices();
                 services.AddSilkLogging(context);
 
                 services.AddResponder<EarlyCacheSnapshotResponder>(ResponderGroup.Early);
@@ -109,12 +110,14 @@ namespace Silk.Core
                 services.AddSingleton<GuildConfigCacheService>();
                 services.AddSingleton<GuildCacherService>();
 
-                services.AddHostedService<GuildGreetingService>();
-                services.AddSingleton(s => s.GetRequiredService<GuildGreetingService>());
+                services.AddHostedService(s => s.GetRequiredService<GuildGreetingService>());
+                services.AddSingleton<GuildGreetingService>();
+
+                services.AddSingleton<IInfractionService, InfractionService>();
                 
                 //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
-                services.AddRemoraServices();
 
+                services.AddResponder<MemberGreetingResponder>();
 
                 services.AddMediatR(typeof(Program));
                 services.AddMediatR(typeof(GuildContext));
