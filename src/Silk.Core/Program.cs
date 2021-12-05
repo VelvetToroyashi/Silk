@@ -12,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
-using Remora.Discord.Gateway.Responders;
 using Serilog;
 using Silk.Core.Commands.Conditions.cs;
 using Silk.Core.Data;
@@ -99,11 +98,7 @@ namespace Silk.Core
                     services.AddRemoraServices();
                     services.AddSilkLogging(context);
 
-                    services.AddResponder<EarlyCacheSnapshotResponder>(ResponderGroup.Early);
-                    services.AddResponder<LateCacheSnapshotRespodner>(ResponderGroup.Late);
-                    
                     services.AddCondition<RequireNSFWCondition>();
-                    
                     
                     services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                     services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
