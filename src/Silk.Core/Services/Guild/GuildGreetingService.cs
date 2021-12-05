@@ -55,10 +55,10 @@ namespace Silk.Core.Services.Server
             var config = await _config.GetConfigAsync(guildID.Value);
             
             if (!config.Greetings.Any())
-                return Result.FromError(new InvalidOperationError($"No greetings are configured for {guildID}."));
+                return Result.FromSuccess();
 
             if (config.Greetings.All(p => p.Option is GreetingOption.DoNotGreet))
-                return Result.FromError(new InvalidOperationError($"{guildID} does not have any active greetings."));
+                return Result.FromSuccess();
             
             //There could be multiple greetings, so we check each one.
             foreach (var greeting in config.Greetings)
@@ -68,13 +68,24 @@ namespace Silk.Core.Services.Server
 
                 if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
                 {
-                    return await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                    var res = await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                    
+                    if (!res.IsSuccess)
+                        return res;
+
+                    continue; // There may be multiple greetings, so we continue.
                 }
 
                 if (greeting.Option is GreetingOption.GreetOnRole && option is GreetingOption.GreetOnRole)
                 {
-                   if (member.Roles.Any(r => r.Value == greeting.MetadataSnowflake))
-                    return await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                    if (member.Roles.Any(r => r.Value == greeting.MetadataSnowflake))
+                    {
+                        var res = await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                        
+                        if (!res.IsSuccess)
+                            return res;
+                    }
+                    continue;
                 }
 
                 if (greeting.Option is GreetingOption.GreetOnChannelAccess)
