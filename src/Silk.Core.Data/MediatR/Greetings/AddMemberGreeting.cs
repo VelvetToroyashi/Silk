@@ -9,7 +9,7 @@ namespace Silk.Core.Data.MediatR
 {
     public static class AddMemberGreeting
     {
-        public record Request(ulong GuildId, ulong UserId, GreetingOption option) : IRequest<Result<MemberGreetingEntity>>;
+        public record Request(ulong GuildId, ulong UserId, GreetingOption Option) : IRequest<Result<MemberGreetingEntity>>;
         
         internal class Handler : IRequestHandler<Request, Result<MemberGreetingEntity>>
         {
@@ -18,8 +18,9 @@ namespace Silk.Core.Data.MediatR
 
             public async Task<Result<MemberGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
             {
-                var existing = await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(_db
-                                                                                               .MemberGreetings, mge => mge.GuildId == request.GuildId && mge.UserId == request.UserId, cancellationToken);
+                var existing = await _db
+                                    .MemberGreetings
+                                    .FirstOrDefaultAsync(mge => mge.GuildId == request.GuildId && mge.UserId == request.UserId, cancellationToken);
 
                 if (existing is not null)
                     return 
@@ -29,7 +30,8 @@ namespace Silk.Core.Data.MediatR
                 existing = new()
                 {
                     UserId = request.UserId,
-                    GuildId = request.GuildId
+                    GuildId = request.GuildId,
+                    Greeting = request.Option
                 };
 
                 _db.Add((object)existing);
