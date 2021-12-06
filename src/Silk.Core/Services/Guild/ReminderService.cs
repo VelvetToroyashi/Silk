@@ -170,7 +170,7 @@ namespace Silk.Core.Services.Server
         {
             var dispatchMessage = new StringBuilder();
             
-            bool isReply = reminder.ReplyId is ulong reply;
+            bool isReply = reminder.ReplyId is ulong;
 
             if (inDMs)
             {

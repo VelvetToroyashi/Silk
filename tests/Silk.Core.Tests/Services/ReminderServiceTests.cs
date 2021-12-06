@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Data.Entities;
@@ -46,6 +47,60 @@ namespace Silk.Core.Tests.Services
             
             // Assert
             mediatorMock.Verify(x => x.Send(It.IsAny<CreateReminderRequest>(), default), Times.Once);
+        }
+
+        [Test]
+        public async Task ReminderService_AttemptsDM_When_MessageID_Is_Zero()
+        {
+            // Arrange
+            var mediatorMock = new Mock<IMediator>();
+            var userAPI = new Mock<IDiscordRestUserAPI>();
+            var channelAPI = new Mock<IDiscordRestChannelAPI>();
+            
+            var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, channelAPI.Object);
+
+            userAPI.Setup(u => u.CreateDMAsync(It.IsAny<Snowflake>(), default))
+                   .ReturnsAsync(new Channel(new Snowflake(1337), ChannelType.DM));
+            
+            mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
+                        .ReturnsAsync(() =>new[] { new ReminderEntity() { OwnerId = 69 } });
+            
+            // Act
+            await reminderService.StartAsync(default);
+            await reminderService.StopAsync(default);
+            
+            // Assert
+            userAPI.Verify(u => u.CreateDMAsync(new Snowflake(69, default), default), Times.Once);
+            
+            channelAPI.Verify(c => c.CreateMessageAsync(It.IsAny<Snowflake>(), It.IsAny<Optional<string>>(), default, default, default, default, default, default, default, default, default), Times.Once);
+        }
+
+        [Test]
+        public async Task ReminderService_RepliesTo_OriginalMessage_When_Exists()
+        {
+            // Arrange
+            var mediatorMock = new Mock<IMediator>();
+            var userAPI = new Mock<IDiscordRestUserAPI>();
+            var channelAPI = new Mock<IDiscordRestChannelAPI>();
+            
+            var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, channelAPI.Object);
+
+            userAPI.Setup(u => u.CreateDMAsync(It.IsAny<Snowflake>(), default))
+                   .ReturnsAsync(new Channel(new Snowflake(1337), ChannelType.DM));
+
+            channelAPI.Setup(c => c.GetChannelMessageAsync(It.IsAny<Snowflake>(), It.IsAny<Snowflake>(), default))
+                      .ReturnsAsync(Result<IMessage>.FromSuccess(Mock.Of<IMessage>())); //There's no actual reason to use Mock.Of<T> other than saving a bunch of default,.
+            
+            mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
+                        .ReturnsAsync(() =>new[] { new ReminderEntity() { OwnerId = 69, MessageId = 420 } });
+            
+            // Act
+            await reminderService.StartAsync(default);
+            await reminderService.StopAsync(default);
+            
+            // Assert
+            channelAPI.Verify(c => c.GetChannelMessageAsync(It.IsAny<Snowflake>(), new Snowflake(420, default), default), Times.Once);
+            
         }
 
         [Test]
