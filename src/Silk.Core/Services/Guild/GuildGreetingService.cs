@@ -8,6 +8,7 @@ using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Data.Entities;
+using Silk.Core.Errors;
 using Silk.Core.Services.Data;
 
 namespace Silk.Core.Services.Server
@@ -68,7 +69,7 @@ namespace Silk.Core.Services.Server
 
                 if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
                 {
-                    var res = await GreetAsync(guildID, user.ID, greeting.ChannelId, greeting.Message);
+                    var res = await GreetAsync(guildID, user.ID, new(greeting.ChannelId), greeting.Message);
                     
                     if (!res.IsSuccess)
                         return res;
@@ -80,7 +81,7 @@ namespace Silk.Core.Services.Server
                 {
                     if (member.Roles.Any(r => r.Value == greeting.MetadataSnowflake))
                     {
-                        var res = await GreetAsync(guildID, user.ID, greeting.ChannelId, greeting.Message);
+                        var res = await GreetAsync(guildID, user.ID, new(greeting.ChannelId), greeting.Message);
                         
                         if (!res.IsSuccess)
                             return res;
@@ -130,13 +131,13 @@ namespace Silk.Core.Services.Server
                 if (overwrite.Type is not PermissionOverwriteType.Member)
                     continue;
                 
-                return await GreetAsync(guildID, overwrite.ID, greeting.MetadataSnowflake.Value, greeting.Message);
+                return await GreetAsync(guildID, overwrite.ID, new(greeting.MetadataSnowflake.Value), greeting.Message);
             }
             
             return Result.FromSuccess();
         }
         
-        private async Task<Result> GreetAsync(Snowflake guildID, Snowflake memberID, ulong channelId, string greetingMessage)
+        private async Task<Result> GreetAsync(Snowflake guildID, Snowflake memberID, Snowflake channelId, string greetingMessage)
         {
             string formattedMessage;
             
@@ -144,6 +145,11 @@ namespace Silk.Core.Services.Server
 
             if (!memberResult.IsDefined(out var member))
                 return Result.FromError(memberResult.Error!);
+
+            var permissionRes = await EnsurePermissionsAsync(guildID, channelId);
+
+            if (!permissionRes.IsSuccess)
+                return permissionRes;
             
             if (greetingMessage.Contains("{s}"))
             {
@@ -166,7 +172,7 @@ namespace Silk.Core.Services.Server
 
             if (formattedMessage.Length <= 2000)
             {
-                sendResult = await _channelApi.CreateMessageAsync(new(channelId), formattedMessage);
+                sendResult = await _channelApi.CreateMessageAsync(channelId, formattedMessage);
             }
             else
             {
@@ -175,7 +181,7 @@ namespace Silk.Core.Services.Server
                 sendResult = await _channelApi
                    .CreateMessageAsync
                     (
-                      channelID: new(channelId),
+                      channelID: channelId,
                       embeds: new[] { embed },
                       allowedMentions: new AllowedMentions()
                         {
@@ -191,6 +197,64 @@ namespace Silk.Core.Services.Server
             return sendResult.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(sendResult.Error);
+        }
+        
+        /// <summary>
+        /// Determines whether requisite permissions exist for a given channel.
+        /// </summary>
+        /// <param name="guildID">The ID of the guild the channel exists on.</param>
+        /// <param name="channelID">The ID of the channel to check.</param>
+        /// <returns>A successful result if the permissions are correct.</returns>
+        private async Task<Result> EnsurePermissionsAsync(Snowflake guildID, Snowflake channelID)
+        {
+            var userResult = await _userApi.GetCurrentUserAsync();
+
+            if (!userResult.IsDefined(out var user))
+            {
+                _logger.LogCritical("Unable to fetch current user.");
+                return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch current user."));
+            }
+
+            var memberResult = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
+            
+            if (!memberResult.IsDefined(out var member))
+            {
+                _logger.LogCritical("Unable to fetch current user's member.");
+                return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch current member."));
+            }
+
+            var channelResult = await _channelApi.GetChannelAsync(channelID);
+            
+            if (!channelResult.IsDefined(out var channel))
+            {
+                _logger.LogCritical("Unable to fetch channel.");
+                return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch channel."));
+            }
+            
+            var rolesResult = await _guildApi.GetGuildRolesAsync(guildID);
+            
+            if (!rolesResult.IsDefined(out var roles))
+            {
+                _logger.LogCritical("Unable to fetch guild.");
+                return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch roles."));
+            }
+
+            var permissions = DiscordPermissionSet
+               .ComputePermissions
+                    (
+                     user.ID,
+                     roles.Single(r => r.ID == guildID),
+                     roles.Where(r => member.Roles.Contains(r.ID)).ToArray(),
+                     channel.PermissionOverwrites.Value
+                    );
+            
+            if (!permissions.HasPermission(DiscordPermission.SendMessages))
+                return Result.FromError(new PermissionError($"I cannot send messages to the specified greeting channel ({channel.ID})."));
+            
+            if (!permissions.HasPermission(DiscordPermission.EmbedLinks))
+                return Result.FromError(new PermissionError($"I cannot embed links in the specified greeting channel ({channel.ID})."));
+            
+            return Result.FromSuccess();
         }
     }
 }
