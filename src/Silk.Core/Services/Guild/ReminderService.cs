@@ -28,10 +28,8 @@ namespace Silk.Core.Services.Server
         private readonly IDiscordRestUserAPI    _userApi;
         private readonly IDiscordRestChannelAPI _channelApi;
         
-        private List<ReminderEntity> _reminders; // We're gonna slurp all reminders into memory. Yolo, I guess.
-        private AsyncTimer           _timer;
-
-        private CancellationTokenSource _cts = new();
+        private List<ReminderEntity> _reminders = new(); // We're gonna slurp all reminders into memory. Yolo, I guess.
+        private readonly AsyncTimer           _timer;
         
         public ReminderService(ILogger<ReminderService> logger, IMediator mediator, IDiscordRestUserAPI userApi, IDiscordRestChannelAPI channelApi)
         {
@@ -40,7 +38,7 @@ namespace Silk.Core.Services.Server
             _userApi = userApi;
             _channelApi = channelApi;
 
-            _timer = new(DispatchLoopAsync, TimeSpan.FromSeconds(1));
+            _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
         }
         
         public async Task CreateReminder
@@ -71,21 +69,15 @@ namespace Silk.Core.Services.Server
         /// <summary>
         /// The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
         /// </summary>
-        private async Task DispatchLoopAsync()
+        private async Task TryDispatchRemindersAsync()
         {
-            while (!_cts.Token.IsCancellationRequested)
-            {
-                if (_reminders.Count is 0)
-                {
-                    await Task.Delay(400);
-                    continue;
-                }
-                
-                var now = DateTime.UtcNow;
-                var reminders = _reminders.Where(r => r.Expiration <= now);
+            if (!_reminders.Any())
+                return;
+            
+            var now = DateTime.UtcNow;
+            var reminders = _reminders.Where(r => r.Expiration <= now);
 
-                await Task.WhenAll(reminders.Select(DispatchReminderAsync));
-            }
+            await Task.WhenAll(reminders.Select(DispatchReminderAsync));
         }
         
         /// <summary>
@@ -201,6 +193,8 @@ namespace Silk.Core.Services.Server
         /// <returns>A result that may or may have not succeeded.</returns>
         private async Task<Result> AttemptDispatchDMReminderAsync(ReminderEntity reminder)
         {
+            await RemoveReminderAsync(reminder.Id);
+            
             var message = GetReminderMessage(reminder.CreationTime, reminder.MessageContent!, reminder.OwnerId);
             
             var now = DateTimeOffset.UtcNow;
@@ -209,17 +203,16 @@ namespace Silk.Core.Services.Server
 
             if (!channelRes.IsSuccess)
             {
-                _logger.LogError(EventIds.Database,"Failed to create a DM channel with {Owner}", reminder.OwnerId);
+                _logger.LogError(EventIds.Service,"Failed to create a DM channel with {Owner}", reminder.OwnerId);
+
                 return Result.FromError(channelRes.Error);
             }
             
-            var messageRes = await _channelApi.CreateMessageAsync(channelRes.Entity.ID, reminder.MessageContent!);
-
-            await RemoveReminderAsync(reminder.Id);
+            var messageRes = await _channelApi.CreateMessageAsync(channelRes.Entity.ID, message);
             
             if (!messageRes.IsSuccess)
             {
-                _logger.LogError(EventIds.Database,"Failed to dispatch reminder to {Owner}.", reminder.OwnerId);
+                _logger.LogError(EventIds.Service,"Failed to dispatch reminder to {Owner}.", reminder.OwnerId);
                 return Result.FromError(messageRes.Error);
             }
             else
@@ -300,7 +293,6 @@ namespace Silk.Core.Services.Server
         /// <inheritdoc />
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _cts.Cancel();
             _timer.Stop();
             _reminders.Clear();
             
