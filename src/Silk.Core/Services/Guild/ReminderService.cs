@@ -45,20 +45,19 @@ namespace Silk.Core.Services.Server
         
         public async Task CreateReminder
         (
-            DateTime     expiry,
-            ulong        owner,
-            ulong        channel,                         
-            ulong        message, 
-            ulong?       guild,
-            string?      conent,                    
-            bool         isReply      = false,
-            ReminderType type         = ReminderType.Once,
-            ulong?       reply        = null,
-            ulong?       replyAuthor  = null,
-            string?      replyContent = null
+            DateTime expiry,
+            ulong    owner,
+            ulong    channel,                         
+            ulong    message, 
+            ulong?   guild,
+            string?  conent,                    
+            bool     isReply      = false,
+            ulong?   reply        = null,
+            ulong?   replyAuthor  = null,
+            string?  replyContent = null
         )
         {
-            ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiry, owner, channel, message, guild, conent, isReply, type, reply, replyAuthor, replyContent));
+            ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiry, owner, channel, message, guild, conent, isReply, reply, replyAuthor, replyContent));
             _reminders.Add(reminder);
         }
 

@@ -2,27 +2,11 @@
 
 namespace Silk.Core.Data.Entities
 {
+    /// <summary>
+    /// A reminder that is sent to a user at a later time.
+    /// </summary>
     public class ReminderEntity
     {
-
-
-        public ReminderEntity() { }
-        public ReminderEntity(int id, DateTime expiration, DateTime creationTime, ulong ownerId, ulong channelId, ulong guildId, ulong messageId, ReminderType type, string? messageContent, string? replyMessageContent, ulong? replyAuthorId, ulong? replyId, bool wasReply)
-        {
-            Id = id;
-            Expiration = expiration;
-            CreationTime = creationTime;
-            OwnerId = ownerId;
-            ChannelId = channelId;
-            GuildId = guildId;
-            MessageId = messageId;
-            Type = type;
-            MessageContent = messageContent;
-            ReplyMessageContent = replyMessageContent;
-            ReplyAuthorId = replyAuthorId;
-            ReplyId = replyId;
-            WasReply = wasReply;
-        }
         public int Id { get; set; }
 
         /// <summary>
@@ -54,11 +38,6 @@ namespace Silk.Core.Data.Entities
         ///     The Id of the message to remind them of
         /// </summary>
         public ulong MessageId { get; set; }
-
-        /// <summary>
-        ///     The type of reminder, be it recurring or non-recurring.
-        /// </summary>
-        public ReminderType Type { get; set; }
 
         /// <summary>
         ///     The content of the original reminder, in case a message can't be sent to the original channel.

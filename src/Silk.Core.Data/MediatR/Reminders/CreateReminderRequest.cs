@@ -10,12 +10,19 @@ namespace Silk.Core.Data.MediatR.Reminders
 	/// <summary>
 	///     Request for creating a <see cref="ReminderEntity" />.
 	/// </summary>
-	public record CreateReminderRequest(
-        DateTime     Expiration,           ulong   OwnerId,
-        ulong        ChannelId,            ulong?  MessageId, ulong? GuildId,
-        string?      MessageContent,       bool    WasReply,
-        ReminderType Type,                 ulong?  ReplyId             = null,
-        ulong?       ReplyAuthorId = null, string? ReplyMessageContent = null) : IRequest<ReminderEntity>;
+	public record CreateReminderRequest
+    (
+        DateTime Expiration,
+        ulong    OwnerId,
+        ulong    ChannelId,            
+        ulong?   MessageId, 
+        ulong?   GuildId,
+        string?  MessageContent,       
+        bool     WasReply,
+        ulong?   ReplyId       = null,
+        ulong?   ReplyAuthorId = null, 
+        string? ReplyMessageContent = null
+    ) : IRequest<ReminderEntity>;
 
 	/// <summary>
 	///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Reminders.CreateReminderRequest" />.
@@ -44,7 +51,6 @@ namespace Silk.Core.Data.MediatR.Reminders
                 ChannelId = request.ChannelId,
                 MessageId = request.MessageId ?? 0,
                 GuildId = request.GuildId     ?? 0,
-                Type = request.Type,
                 ReplyId = request.ReplyId,
                 MessageContent = request.MessageContent,
                 WasReply = request.WasReply,
