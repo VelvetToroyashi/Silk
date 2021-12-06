@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.API.Objects;
-using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Reminders;
@@ -116,48 +113,25 @@ namespace Silk.Core.Services.Server
         private async Task<Result> AttemptDispatchReminderAsync(ReminderEntity reminder)
         {
             var now = DateTimeOffset.UtcNow;
-            
-            string? replyLink = null;
+            var replyExists = false;
 
             if (reminder.ReplyId is ulong reply)
             {
                 var replyResult = await _channelApi.GetChannelMessageAsync(new(reminder.ChannelId), new(reply));
-                
-                if (replyResult.IsSuccess)
-                {
-                    var replyMessage = replyResult.Entity;
-                    replyLink = $"https://discordapp.com/channels/{replyMessage.GuildID}/{replyMessage.ChannelID}/{replyMessage.ID}";
-                }
+                replyExists = replyResult.IsSuccess;
             }
             
             var reminderMessage = await _channelApi.GetChannelMessageAsync(new(reminder.ChannelId), new(reminder.MessageId));
 
             var originalMessageExists = reminderMessage.IsSuccess;
-            
-            var dispatchMessage = GetReminderMessage
-                    (
-                     reminder.CreationTime,
-                     reminder.MessageContent!,
-                     reminder.OwnerId,
-                     originalMessageExists,
-                     !originalMessageExists,
-                     originalMessageExists ? null : "I couldn't seem to find your oringinal message.",
-                     replyLink,
-                     reminder.ReplyMessageContent,
-                     reminder.ReplyAuthorId
-                    );
-            
-            var dispatchReuslt =  await _channelApi.CreateMessageAsync
-                (
-                 new(reminder.ChannelId),
-                 dispatchMessage,
-                 messageReference: reminder.ReplyId is ulong rpid && replyLink is not null 
-                     ? new  MessageReference(new Snowflake(rpid), new Snowflake(reminder.ChannelId))
-                     : default(Optional<IMessageReference>));
+
+            var dispatchMessage = GetReminderMessageString(reminder, false, replyExists, originalMessageExists).ToString();
+
+            var dispatchReuslt = await _channelApi.CreateMessageAsync(new(reminder.ChannelId), dispatchMessage);
 
             if (dispatchReuslt.IsSuccess)
             {
-                _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (now - DateTimeOffset.UtcNow).TotalMilliseconds.ToString("N1"));
+                _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds.ToString("N1"));
                
                 await RemoveReminderAsync(reminder.Id);
 
@@ -171,21 +145,66 @@ namespace Silk.Core.Services.Server
 
                 if (fallbackResult.IsSuccess)
                 {
-                    _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (now - DateTimeOffset.UtcNow).TotalMilliseconds.ToString("N1"));
+                    _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds.ToString("N1"));
                     
                     return Result.FromSuccess();
                 }
                 else
                 {
                     _logger.LogError(EventIds.Service, "Failed to dispatch reminder. Giving up.");
-
-                    await RemoveReminderAsync(reminder.Id);
                     
                     return Result.FromError(fallbackResult.Error);
                 }
             }
         }
         
+        /// <summary>
+        /// Creates a formatted reminder message string.
+        /// </summary>
+        /// <param name="reminder">The reminder.</param>
+        /// <param name="inDMs">Whether this reminder is being sent in DMs.</param>
+        /// <param name="replyExists">Whether the reply (if any) still exists.</param>
+        /// <param name="originalMessageExists">Whether the invocation messsage for the reminder still exists.</param>
+        /// <returns>A StringBuilder contianing the built message.</returns>
+        private static StringBuilder GetReminderMessageString(ReminderEntity reminder, bool inDMs, bool replyExists, bool originalMessageExists)
+        {
+            var dispatchMessage = new StringBuilder();
+            
+            bool isReply = reminder.ReplyId is ulong reply;
+
+            if (inDMs)
+            {
+                dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
+                dispatchMessage.AppendLine(reminder.MessageContent);
+            }
+            else if (isReply)
+            {
+                dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerId}>! You asked me to remind you about this!");
+                
+                if (!replyExists)
+                    dispatchMessage.AppendLine("I couldn't find the message I was supposed to reply to.")
+                                   .AppendLine("Here's what you replied to, when you set the reminder, though!")
+                                   .AppendLine($"From <@{reminder.ReplyAuthorId}>:")
+                                   .AppendLine("> " + reminder.ReplyMessageContent);
+                
+                if (!string.IsNullOrEmpty(reminder.MessageContent))
+                    dispatchMessage.AppendLine("There was also additional context:")
+                                   .AppendLine($"> {reminder.MessageContent}");
+            }
+            else
+            {
+                dispatchMessage.AppendLine("Hey, you wanted to be reminded of this.");
+
+                if (!originalMessageExists)
+                    dispatchMessage.AppendLine("I couldn't find the original message, but here's what you wanted to be reminded of:");
+                
+                dispatchMessage.AppendLine(reminder.MessageContent);
+            }
+            
+            dispatchMessage.AppendLine($"This reminder was set <t:{((DateTimeOffset)reminder.CreationTime).ToUnixTimeSeconds()}:R> ago!");
+            return dispatchMessage;
+        }
+
         /// <summary>
         /// Dispatches a reminder to a user directly.
         /// </summary>
@@ -194,8 +213,8 @@ namespace Silk.Core.Services.Server
         private async Task<Result> AttemptDispatchDMReminderAsync(ReminderEntity reminder)
         {
             await RemoveReminderAsync(reminder.Id);
-            
-            var message = GetReminderMessage(reminder.CreationTime, reminder.MessageContent!, reminder.OwnerId);
+
+            var message = GetReminderMessageString(reminder, true, false, true).ToString();
             
             var now = DateTimeOffset.UtcNow;
             
@@ -222,58 +241,6 @@ namespace Silk.Core.Services.Server
             }
         }
         
-        /// <summary>
-        /// Gets a formatted reminder message.
-        /// </summary>
-        /// <param name="creationTime">The time the reminder was created.</param>
-        /// <param name="reminderMessage">The content of the reminder.</param>
-        /// <param name="ownerID">The owner of the reminder.</param>
-        /// <param name="isReplying">Whether this reminder is replying directly to the invocation message.</param>
-        /// <param name="mention">Whether the author of the reminder should be mentioned in the message.</param>
-        /// <param name="errorMessage">If there was an issue, this will be appended to the reminder.</param>
-        /// <param name="replyLink">If the invocation message of the reminder is a reply, the message link of the reply.</param>
-        /// <param name="replyText">If the invocation message of the reminder is a reply, the content of the reply.</param>
-        /// <param name="replyAuthorID">If the invocation message of the reminder is a reply, the author of the reply, to mention.</param>
-        /// <returns>The formatted reply message.</returns>
-        private string GetReminderMessage
-        (
-            DateTimeOffset creationTime,
-            string         reminderMessage,
-            ulong          ownerID,
-            bool           isReplying    = false,
-            bool           mention       = false,
-            string?        errorMessage  = null,
-            string?        replyLink     = null,
-            string?        replyText     = null,
-            ulong?         replyAuthorID = null
-        )
-        {
-            var message = new StringBuilder();
-            
-            if (mention)
-                message.AppendLine($"Hey, <@{ownerID}>! You wanted to be reminded of something, but {errorMessage ?? "(There was no error message specified...That's not good!)"}");
-            else if (isReplying)
-                message.AppendLine("Hey! You wanted to be reminded of this!");
-            else 
-                message.AppendLine("Hey, you wanted to be reminded of something! I've come to remind you of that:");
-
-            if (!isReplying)
-            {
-                message.AppendLine(reminderMessage);
-
-                if (replyText is not null)
-                {
-                    message.AppendLine($"Replying to <@{replyAuthorID}>:")
-                           .AppendLine($"> {replyText}")
-                           .AppendLine(replyLink);
-                }
-                
-                message.AppendLine($"This reminder was set <t:{creationTime.ToUnixTimeSeconds()}:r>");
-            }
-            
-            return message.ToString();
-        }
-
         /// <inheritdoc />
         public async Task StartAsync(CancellationToken cancellationToken)
         {
