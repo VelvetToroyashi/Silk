@@ -123,7 +123,7 @@ namespace Silk.Core.Services.Server
             if (greeting is null)
                 return Result.FromError(new InvalidOperationError($"No greetings are configured in {guildID} for {before.ID}."));
 
-            var distinctOverwrites = overwritesBefore.Union(overwritesAfter).Distinct();
+            var distinctOverwrites = overwritesAfter.Except(overwritesBefore);
             
             foreach (var overwrite in distinctOverwrites)
             {
