@@ -129,8 +129,4 @@
     <ItemGroup>
         <Compile Remove="logs\**" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Commands\Unported" />
-    </ItemGroup>
 </Project>
