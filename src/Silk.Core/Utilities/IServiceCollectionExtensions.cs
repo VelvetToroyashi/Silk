@@ -6,7 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
+using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
@@ -20,6 +22,7 @@ using Silk.Extensions.Remora;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
+using IChannel = MongoDB.Driver.Core.Bindings.IChannel;
 
 namespace Silk.Core
 {
@@ -57,14 +60,20 @@ namespace Silk.Core
                .AddDiscordCommands()
                .AddDiscordCaching();
 
-            services.Configure<DiscordGatewayClientOptions>(gw =>
-            {
-                gw.Intents |=
-                    GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
-                    GatewayIntents.Guilds         |
-                    GatewayIntents.GuildMessages;
-            });
+            services
+               .Configure<DiscordGatewayClientOptions>(gw =>
+                {
+                    gw.Intents |=
+                        GatewayIntents.GuildMembers   |
+                        GatewayIntents.GuildPresences |
+                        GatewayIntents.Guilds         |
+                        GatewayIntents.GuildMessages;
+                })
+               .Configure<CacheSettings>(cs =>
+                {
+                    cs.SetAbsoluteExpiration<IChannel>(null)
+                      .SetAbsoluteExpiration<IMessage>(null);
+                });
             
             return services;
         }

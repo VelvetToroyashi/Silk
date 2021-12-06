@@ -68,7 +68,7 @@ namespace Silk.Core.Services.Server
 
                 if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
                 {
-                    var res = await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                    var res = await GreetAsync(guildID, user.ID, greeting.ChannelId, greeting.Message);
                     
                     if (!res.IsSuccess)
                         return res;
@@ -80,7 +80,7 @@ namespace Silk.Core.Services.Server
                 {
                     if (member.Roles.Any(r => r.Value == greeting.MetadataSnowflake))
                     {
-                        var res = await GreetAsync(guildID.Value, user.ID.Value, greeting.ChannelId, greeting.Message);
+                        var res = await GreetAsync(guildID, user.ID, greeting.ChannelId, greeting.Message);
                         
                         if (!res.IsSuccess)
                             return res;
@@ -106,9 +106,6 @@ namespace Silk.Core.Services.Server
         /// <returns>A result that may or may have not succeeded.</returns>
         public async Task<Result> TryGreetAsync(Snowflake guildID, IChannel before, IChannel after)
         {
-            if (!before.GuildID.IsDefined() || !after.GuildID.IsDefined())
-                return Result.FromSuccess();
-            
             if (!before.PermissionOverwrites.IsDefined(out var overwritesBefore) || 
                 !after.PermissionOverwrites.IsDefined(out var overwritesAfter))
                 return Result.FromSuccess();
@@ -120,8 +117,8 @@ namespace Silk.Core.Services.Server
 
             var greeting = config.Greetings
                                  .FirstOrDefault(greeting =>
-                                                     greeting.Option is not GreetingOption.GreetOnChannelAccess &&
-                                                     greeting.MetadataSnowflake != before.ID.Value);
+                                                     greeting.Option is GreetingOption.GreetOnChannelAccess &&
+                                                     greeting.MetadataSnowflake == before.ID.Value);
             
             if (greeting is null)
                 return Result.FromError(new InvalidOperationError($"No greetings are configured in {guildID} for {before.ID}."));
@@ -133,24 +130,24 @@ namespace Silk.Core.Services.Server
                 if (overwrite.Type is not PermissionOverwriteType.Member)
                     continue;
                 
-                return await GreetAsync(guildID.Value, overwrite.ID.Value, greeting.MetadataSnowflake.Value, greeting.Message);
+                return await GreetAsync(guildID, overwrite.ID, greeting.MetadataSnowflake.Value, greeting.Message);
             }
             
             return Result.FromSuccess();
         }
         
-        private async Task<Result> GreetAsync(ulong guildID, ulong memberID, ulong channelId, string greetingMessage)
+        private async Task<Result> GreetAsync(Snowflake guildID, Snowflake memberID, ulong channelId, string greetingMessage)
         {
             string formattedMessage;
             
-            var memberResult = await _userApi.GetUserAsync(new(memberID));
+            var memberResult = await _userApi.GetUserAsync(memberID);
 
             if (!memberResult.IsDefined(out var member))
                 return Result.FromError(memberResult.Error!);
             
             if (greetingMessage.Contains("{s}"))
             {
-                var guildResult = await _guildApi.GetGuildAsync(new(guildID));
+                var guildResult = await _guildApi.GetGuildAsync(guildID);
                 
                 if (!guildResult.IsDefined(out var guild))
                     return Result.FromError(guildResult.Error!); //This checks `IsSuccess`, which implies the error isn't null
