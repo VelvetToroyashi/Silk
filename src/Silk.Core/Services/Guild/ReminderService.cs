@@ -149,7 +149,7 @@ namespace Silk.Core.Services.Server
                      reminder.OwnerId,
                      originalMessageExists,
                      !originalMessageExists,
-                     !originalMessageExists ? null : "I couldn't seem to find your oringinal message.",
+                     originalMessageExists ? null : "I couldn't seem to find your oringinal message.",
                      replyLink,
                      reminder.ReplyMessageContent,
                      reminder.ReplyAuthorId
