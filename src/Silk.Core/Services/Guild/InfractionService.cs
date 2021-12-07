@@ -59,6 +59,7 @@ namespace Silk.Core.Services.Server
             _webhooks = webhooks;
         }
 
+        /// <inheritdoc/>
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting infraction service...");
@@ -70,41 +71,52 @@ namespace Silk.Core.Services.Server
             _logger.LogInformation("Infraction service started.");
         }
 
+        /// <inheritdoc/>
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping infraction service...");
             _queueTimer.Stop();
+            _queue.Clear();
             _logger.LogInformation("Infraction service stopped.");
         }
         
+        /// <inheritdoc/>
         public async Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => default;
         
+        /// <inheritdoc/>
         public async Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string?   newReson = null, Optional<TimeSpan?> newExpiration = default) => default;
         
+        /// <inheritdoc/>
         public async Task<Result> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => default;
         
+        /// <inheritdoc/>
         public async Task<Result> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => default;
         
+        /// <inheritdoc/>
         public async Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null) => default;
         
+        /// <inheritdoc/>
         public async Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => default;
         
+        /// <inheritdoc/>
         public async ValueTask<bool> IsMutedAsync(Snowflake guildID, Snowflake targetID) => false;
         
+        /// <inheritdoc/>
         public async Task<Result> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null) => default;
         
+        /// <inheritdoc/>
         public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => default;
        
+        /// <inheritdoc/>
         public async Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) => default;
         
+        /// <inheritdoc/>
         public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int    caseID, string reason = "Not Given.") => default;
-
         
         /// <summary>
         /// Ensures an available logging channel exists on the guild, creating one if neccecary.
         /// </summary>
         /// <param name="guildID"></param>
-        /// <returns></returns>
         private async Task<Result> EnsureLoggingChannelExistsAsync(Snowflake guildID)
         {
             var config = await _config.GetModConfigAsync(guildID.Value);
