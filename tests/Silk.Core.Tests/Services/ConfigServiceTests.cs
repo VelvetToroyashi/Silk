@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using Silk.Core.Data.MediatR.Guilds;
@@ -29,7 +28,7 @@ namespace Silk.Core.Tests.Services
                .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
                .Verifiable("uHHHH");
 
-            _guildConfigCacheService = new(_cache.Object, _mediator.Object, new CacheUpdaterService(), NullLogger<GuildConfigCacheService>.Instance);
+            _guildConfigCacheService = new(_cache.Object, _mediator.Object);
         }
 
         [Test]
