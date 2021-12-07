@@ -855,29 +855,34 @@ namespace RoleMenuPlugin
 				return;
 			}
 
-			if (options.Entity.Count() > 1)
+			if (!options.Entity.Any())
+			{
+				await ctx.RespondAsync(m => m.WithContent("There are no role menus to edit.").AddComponents(_v1ExplainationButton));
+				return;
+			}
+			else
 			{
 				var interactivity = ctx.Client.GetInteractivity();
 
 				// Ask the user which menu they want to edit
 				var selectOptions = options.Entity.Where(c => c.ChannelId is not 0)
-					.Select(s =>
-					{
-						DiscordChannel? chn = ctx.Guild.GetChannel(s.ChannelId);
+				                           .Select(s =>
+				                            {
+					                            DiscordChannel? chn = ctx.Guild.GetChannel(s.ChannelId);
 
-						var option =
-							new DiscordSelectComponentOption("Role Menu in #" + chn is null!
-									? "deleted channel"
-									: chn?.Name,
-								s.MessageId.ToString(),
-								$"Message: {s.MessageId} | {options.Entity.Count()} options");
+					                            var option =
+						                            new DiscordSelectComponentOption("Role Menu in #" + chn is null!
+							                                                             ? "deleted channel"
+							                                                             : chn?.Name,
+						                                                             s.MessageId.ToString(),
+						                                                             $"Message: {s.MessageId} | {options.Entity.Count()} options");
 
-						return option;
-					});
+					                            return option;
+				                            });
 
 				var msg = await ctx.RespondAsync(m => m.WithContent("There are multiple role menus that can be edited. Which one would you like?")
-					.AddComponents(new DiscordSelectComponent("rm-edit-select", "Select an option", selectOptions))
-					.AddComponents(_v1ExplainationButton));
+				                                       .AddComponents(new DiscordSelectComponent("rm-edit-select", "Select an option", selectOptions))
+				                                       .AddComponents(_v1ExplainationButton));
 
 				var res = await interactivity.WaitForSelectAsync(msg, ctx.User, "rm-edit-select", TimeSpan.FromMinutes(5));
 
@@ -898,8 +903,8 @@ namespace RoleMenuPlugin
 
 
 				var editOrAdd = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-					.WithContent($"Please select an option. This menu expires {Formatter.Timestamp(DateTimeOffset.UtcNow.AddMinutes(5))}.")
-					.AddComponents(add, edit, quit));
+				                                                           .WithContent($"Please select an option. This menu expires {Formatter.Timestamp(DateTimeOffset.UtcNow.AddMinutes(5))}.")
+				                                                           .AddComponents(add, edit, quit));
 
 				while (true)
 				{
@@ -942,10 +947,9 @@ namespace RoleMenuPlugin
 
 				var roleMenuMessage = await roleMenuChannel.GetMessageAsync(selected.MessageId);
 
-				await roleMenuMessage.ModifyAsync(m => m.Content = $"**Role Menu**\nAvailable Roles:\n:{string.Join('\n', selected.Options.Select(r => $"<@&{r.RoleId}>"))}");
+				await roleMenuMessage.ModifyAsync(m => m.Content = $"**Role Menu**\nAvailable Roles:\n{string.Join('\n', selected.Options.Select(r => $"<@&{r.RoleId}>"))}");
 
 				await _mediator.Send(new UpdateRoleMenuRequest.Request(selected));
-
 			}
 		}
 
