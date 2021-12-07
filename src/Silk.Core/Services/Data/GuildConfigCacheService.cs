@@ -3,11 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
-using Silk.Core.Services.Interfaces;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
 
@@ -15,20 +13,17 @@ namespace Silk.Core.Services.Data
 {
     public class GuildConfigCacheService
     {
-        private readonly ILogger<GuildConfigCacheService> _logger;
         private readonly IMemoryCache                     _cache;
         private readonly IMediator                        _mediator;
         private readonly TimeSpan                         _defaultCacheExpiration = TimeSpan.FromMinutes(10);
 
-        public GuildConfigCacheService(IMemoryCache cache, IMediator mediator, ICacheUpdaterService updater, ILogger<GuildConfigCacheService> logger)
+        public GuildConfigCacheService(IMemoryCache cache, IMediator mediator)
         {
             _cache = cache;
             _mediator = mediator;
-            _logger = logger;
-            updater.ConfigUpdated += OnConfigUpdated;
         }
 
-        private void OnConfigUpdated(ulong guildId)
+        public void PurgeCache(ulong guildId)
         {
             object? guildCacheKey = ConfigKeyHelper.GenerateGuildKey(guildId);
             object? guildModCacheKey = ConfigKeyHelper.GenerateGuildModKey(guildId);
