@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Services.Interfaces
 {
@@ -18,7 +19,15 @@ namespace Silk.Core.Services.Interfaces
 		/// <param name="enforcerID">The ID of the enforcer that invoked this.</param>
 		/// <param name="reason">The reason the infraction is being given.</param>
 		public Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
-	    
+		
+		/// <summary>
+		/// Updates an existing infraction with a new reason or expiration.
+		/// </summary>
+		/// <param name="infraction">The infraction to update.</param>
+		/// <param name="newReson">The new reason to apply to the infraction.</param>
+		/// <param name="newExpiration">The new expiration to apply to the infraction.</param>
+		public Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string? newReson = null, Optional<TimeSpan?> newExpiration = default);
+		
 		/// <summary>
 		/// Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.
 		/// </summary>
