@@ -1,137 +1,107 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Silk.Core.Data.Entities;
-using Silk.Core.Types;
+using Remora.Rest.Core;
+using Remora.Results;
 
 namespace Silk.Core.Services.Interfaces
 {
 	/// <summary>
-	///     A robust set of moderation-related methods for handling and enforcing infractions.
+	/// A service for applying infractions to userrs.
 	/// </summary>
 	public interface IInfractionService
-    {
+	{
+		/// <summary>
+		/// Automatically determines the appropriate infraction type and applies it to a user based on their pre-existing infractions, taking exemptions into account.
+		/// </summary>
+		/// <param name="guildID">The ID of the guild the infraction occurred on.</param>
+		/// <param name="targetID">The ID of the target to infract.</param>
+		/// <param name="enforcerID">The ID of the enforcer that invoked this.</param>
+		/// <param name="reason">The reason the infraction is being given.</param>
+		public Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	    
+		/// <summary>
+		/// Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.
+		/// </summary>
+		/// <param name="guildID">The ID of the guild the target is being striked on.</param>
+		/// <param name="targetID">The ID of the target to be striked.</param>
+		/// <param name="enforcerID">The ID of user striking the target.</param>
+		/// <param name="reason">The reason strike was given.</param>
+		public Task<Result> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	    
+	    
 	    /// <summary>
-	    ///     Kicks a member from the specified guild.
+	    /// Kicks a member from the specified guild, generating an infraction.
 	    /// </summary>
-	    /// <param name="userId">The id of the user to remove.</param>
-	    /// <param name="guildId">The id of the guild to remove the user from.</param>
-	    /// <param name="enforcerId">The id of the member that removed the specified user.</param>
-	    /// <param name="reason">The reason the user is being removed.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> KickAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
+	    /// <param name="guildID">The ID of the guild the target will be kicked from.</param>
+	    /// <param name="targetID">The ID of the target to be kicked.</param>
+	    /// <param name="enforcerID">The ID of the user that kicked the target.</param>
+	    /// <param name="reason">The reason the target was kicked.</param>
+	    public Task<Result> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
 
 	    /// <summary>
-	    ///     Bans a member from the specified guild, either permanently or temporarily.
+	    /// Bans a member from the specified guild, generating an infraction.
 	    /// </summary>
-	    /// <param name="userId">The id of the user to ban.</param>
-	    /// <param name="guildId">The id of the guild to ban the user on.</param>
-	    /// <param name="enforcerId">The id fo the member that is banning the specified user</param>
-	    /// <param name="reason">The reason the user is being banned.</param>
-	    /// <param name="expiration">If the user is being temp-banned, the date the user should be unbanned.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> BanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", DateTime? expiration = null);
+	    /// <param name="guildID">The ID of the guild the target is being banned from.</param>
+	    /// <param name="targetID">The ID of the target to ban.</param>
+	    /// <param name="enforcerID">The ID of the user that banned the target.</param>
+	    /// <param name="reason">The reason the target was banned.</param>
+	    /// <param name="expirationRelativeToNow">A time relative to now to automatically unban the target.</param>
+	    public Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
 
 	    /// <summary>
-	    ///     Un-bans a member from the specified guild.
+	    /// Unbans a user from the specified guild.
 	    /// </summary>
-	    /// <param name="userId">The id of the user to unban.</param>
-	    /// <param name="guildId">THe id of the guild to unban the user from.</param>
-	    /// <param name="enforcerId">The id of the member that is unbanning the user.</param>
-	    /// <param name="reason">The reason the user is being unbanned.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> UnBanAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
+	    /// <param name="guildID">The ID of the guild to unban the target from.</param>
+	    /// <param name="targetID">The ID of the target to unban.</param>
+	    /// <param name="enforcerID">The ID of user that unbanned the target.</param>
+	    /// <param name="reason">The reason the target was unbanned.</param>
+	    public Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
 
-	    /// <summary>
-	    ///     Warns/"strikes" a user on the specified guild.
-	    /// </summary>
-	    /// <param name="userId">The id of the user being struck.</param>
-	    /// <param name="guildId">The id of the guild the user is being struck on.</param>
-	    /// <param name="enforcerId">The id of the member that is striking the user.</param>
-	    /// <param name="reason">The reason the user is being struck.</param>
-	    /// <param name="autoEscalate">Whether or not the strike should be automatically escalated.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> StrikeAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", bool autoEscalate = false);
-
-	    /// <summary>
-	    ///     Gets whether a user has an active mute on the specified guild.
-	    ///     <remarks>
-	    ///         This method's signature is <see cref="ValueTask{TResult}" /> in contrast to the rest being <see cref="Task{TResult}" />
-	    ///         because in typical use-case it is expected that infractions are cached, and can provide a sync path via in-memory lookup.
-	    ///     </remarks>
-	    /// </summary>
-	    /// <param name="userId">The id of the user to check.</param>
-	    /// <param name="guildId">The id of the guild to check.</param>
-	    /// <returns>Whether the user is currently muted.</returns>
-	    public ValueTask<bool> IsMutedAsync(ulong userId, ulong guildId);
-
-	    /// <summary>
-	    ///     Mutes a user on the guild, either temporarily or permanently.
-	    /// </summary>
-	    /// <param name="userId">The id of the user to mute.</param>
-	    /// <param name="guildId">The id of the guild to mute the user on.</param>
-	    /// <param name="enforcerId">The member that's muting the user.</param>
-	    /// <param name="reason">The reason the user is being muted.</param>
-	    /// <param name="expiration">If temporarily muting, when this mute is set to expire.</param>
-	    /// <param name="updateExpiration">Whether or not the expiration of the mute should be updated.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> MuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.", DateTime? expiration = null, bool updateExpiration = true);
-
-	    /// <summary>
-	    ///     Un-mutes a member on the specified guild.
-	    /// </summary>
-	    /// <param name="userId">The id of the user to unmute.</param>
-	    /// <param name="guildId">The id of the guild to unmute the user on.</param>
-	    /// <param name="enforcerId">The member that's un-muting the user.</param>
-	    /// <param name="reason">The reason teh member was un-muted.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> UnMuteAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
-
-	    /// <summary>
-	    ///     Gets the currently configured infraction step. Primarily used for auto-mod.
-	    /// </summary>
-	    /// <param name="guildId">The id of the guild to get the current infraction step for.</param>
-	    /// <param name="infractions">The infractions to check. Only non-rescinded infractions (excluding notes) count toward the current infraction step.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionStepEntity> GetCurrentInfractionStepAsync(ulong guildId, IEnumerable<InfractionEntity> infractions);
-
-	    /// <summary>
-	    ///     Generates an infraction for the specified user.
-	    ///     <remarks>
-	    ///         This method is utilized in internal APIs and is not meant for direct use.
-	    ///         <br />
-	    ///         This method is subject to change and should not be used outside of API wrappers.
-	    ///     </remarks>
-	    /// </summary>
-	    /// <param name="userId">The id of the user to generate an infraction for.</param>
-	    /// <param name="guildId">The id of the guild to generate an infraction for.</param>
-	    /// <param name="enforcerId">The id of the member that generated this infraction.</param>
-	    /// <param name="type">The type of infraction being generated.</param>
-	    /// <param name="reason">The reason this infraction is being generated.</param>
-	    /// <param name="expiration">When this infraction expires, if ever, if applicable.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionEntity> GenerateInfractionAsync(ulong userId, ulong guildId, ulong enforcerId, InfractionType type, string reason = "Not Given.", DateTime? expiration = null);
 
 
 	    /// <summary>
-	    ///     Adds a note to the specified user. Notes do not count toward automatic infraction-escalation.
+	    /// Checks whether a the specified target has an active mute on the specified guild.
 	    /// </summary>
-	    /// <param name="userId">The id of the user to add a note to .</param>
-	    /// <param name="guildId">The id of the guild the user is on.</param>
-	    /// <param name="noterId">The if of the member adding the note to the user.</param>
-	    /// <param name="note">The note to add.</param>
-	    /// <returns>A value indicating the resulting state of the operation.</returns>
-	    public Task<InfractionResult> AddNoteAsync(ulong userId, ulong guildId, ulong noterId, string note);
-
+	    /// <param name="guildID">The ID of the guild to check.</param>
+	    /// <param name="targetID">The ID of the target to check.</param>
+	    public ValueTask<bool> IsMutedAsync(Snowflake guildID, Snowflake targetID);
 
 	    /// <summary>
-	    ///     Pardons a user from their most recent infraction (strike or escalated).
+	    /// Mutes a user on the specified guild.
 	    /// </summary>
-	    /// <param name="userId"></param>
-	    /// <param name="guildId"></param>
-	    /// <param name="enforcerId"></param>
-	    /// <param name="reason"></param>
-	    /// <returns></returns>
-	    public Task<InfractionResult> PardonAsync(ulong userId, ulong guildId, ulong enforcerId, string reason = "Not Given.");
+	    /// <param name="guildID">The ID of the guild the user should be muted on.</param>
+	    /// <param name="targetID">The ID of the target to be muted.</param>
+	    /// <param name="enforcerID">The ID of the user that invoked this action.</param>
+	    /// <param name="reason">The reason the target is being muted.</param>
+	    /// <param name="expirationRelativeToNow">Specifies a time relative to now for the user to be automatically unmuted at.</param>
+	    public Task<Result> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
+
+	    /// <summary>
+	    /// Attempts to unmute a user on the specified guild.
+	    /// </summary>
+	    /// <param name="guildID">The ID of the guild the mute was applied on.</param>
+	    /// <param name="targetID">The ID of the target to be unmuted.</param>
+	    /// <param name="enforcerID">The ID of user that invoked this action.</param>
+	    /// <param name="reason">The reason the target is being umuted.</param>
+	    public Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	    
+		/// <summary>
+		/// Adds a note-infraction to the specified user. Notes are not taken into account when calculating automod actions.
+		/// </summary>
+		/// <param name="guildID">The ID of the guild this action was invoked from.</param>
+		/// <param name="targetID">The ID of the target this action is taken against.</param>
+		/// <param name="enforcerID">The ID of entity that invoked this action. The "moderator", in other words.</param>
+		/// <param name="note">The content of the note to add to the target.</param>
+		public Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note);
+		
+        /// <summary>
+        /// Pardons a user from a specific infraction. Only strikes that are held against the user can be pardoned.
+        /// </summary>
+        /// <param name="guildID">The ID of the guild the infraction occured on.</param>
+        /// <param name="targetID">The ID of the target to be pardoned.</param>
+        /// <param name="enforcerID">The ID of the entity pardoning the target.</param>
+        /// <param name="caseID">The ID of the case to pardon the target from.</param>
+        /// <param name="reason">The reason the pardon is being given.</param>
+        public Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int caseID, string reason = "Not Given.");
     }
 }
