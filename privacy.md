@@ -13,7 +13,7 @@ What we do collect, and store persistently are:
 
 - Your Discord [Snowflake](https://discord.dev/reference#snowflakes)
 - The ID of guilds where Silk! is used
-- Any user-submitted content
+- Certain user-submitted content
 
 ## 2. Why do we store this information?
 
