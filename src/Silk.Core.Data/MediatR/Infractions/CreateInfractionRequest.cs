@@ -11,12 +11,12 @@ namespace Silk.Core.Data.MediatR.Infractions
 {
     public sealed record CreateInfractionRequest
     (
-        ulong          UserId,
-        ulong          EnforcerId,
-        ulong          GuildId,
+        ulong          GuildID,
+        ulong          TargetID,
+        ulong          EnforcerID,
         string         Reason,
         InfractionType Type,
-        DateTime?      Expiration,
+        DateTime?      Expiration      = null,
         bool           HeldAgainstUser = true
     ) : IRequest<InfractionEntity>;
 
@@ -34,24 +34,24 @@ namespace Silk.Core.Data.MediatR.Infractions
         public async Task<InfractionEntity> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
         {
             int guildInfractionCount = await _db.Infractions
-                                                .Where(inf => inf.GuildId == request.GuildId)
+                                                .Where(inf => inf.GuildId == request.GuildID)
                                                 .CountAsync(cancellationToken) + 1;
 
             var infraction = new InfractionEntity
             {
-                GuildId = request.GuildId,
+                GuildId = request.GuildID,
                 CaseNumber = guildInfractionCount,
-                Enforcer = request.EnforcerId,
+                Enforcer = request.EnforcerID,
                 Reason = request.Reason,
                 HeldAgainstUser = request.HeldAgainstUser,
                 Expiration = request.Expiration,
                 InfractionTime = DateTime.UtcNow,
-                UserId = request.UserId,
+                UserId = request.TargetID,
                 InfractionType = request.Type
             };
 
             _db.Infractions.Add(infraction);
-            await _mediator.Send(new GetOrCreateUserRequest(request.GuildId, request.UserId), cancellationToken);
+            await _mediator.Send(new GetOrCreateUserRequest(request.GuildID, request.TargetID), cancellationToken);
 
             await _db.SaveChangesAsync(cancellationToken);
 
