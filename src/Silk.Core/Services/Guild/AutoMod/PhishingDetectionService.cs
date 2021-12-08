@@ -128,7 +128,7 @@ namespace Silk.Core.AutoMod
 
             var infractionResult = step.Type switch
             {
-                InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, Phishing),
+                InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, Phishing),
                 InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, Phishing),
                 InfractionType.Strike => await _infractions.StrikeAsync(guildID, authorID, self.ID, Phishing),
                 InfractionType.Mute   => await _infractions.MuteAsync(guildID, authorID, self.ID, Phishing, step.Duration.Time == TimeSpan.Zero ? null : step.Duration.Time),
