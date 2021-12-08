@@ -143,6 +143,7 @@ namespace Silk.Core.Data.Entities
         ///     which may have different consequences than another. In the event a key is not found in this dictionary, it should be assumed the action would
         ///     result to <see cref="InfractionType.Strike" />.
         /// </summary>
+        [Obsolete("Soon to be replaced with a dedicated automod action object.")]
         public Dictionary<string, InfractionStepEntity> NamedInfractionSteps { get; set; } = new();
     }
 }
