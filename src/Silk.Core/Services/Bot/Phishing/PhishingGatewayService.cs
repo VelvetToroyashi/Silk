@@ -14,7 +14,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Core.Services
 {
-    public sealed class AutoModAntiPhisher : IHostedService
+    public sealed class PhishingGatewayService : IHostedService
     {
         private const string HeaderName   = "X-Identity";
         private const string ApiUrl       = "https://phish.sinking.yachts/v2/all";
@@ -26,9 +26,9 @@ namespace Silk.Core.Services
         private readonly ClientWebSocket             _ws      = new();
         private readonly HashSet<string>             _domains = new();
         private readonly CancellationTokenSource     _cts     = new();
-        private readonly ILogger<AutoModAntiPhisher> _logger;
+        private readonly ILogger<PhishingGatewayService> _logger;
         
-        public AutoModAntiPhisher(ILogger<AutoModAntiPhisher> logger, HttpClient client)
+        public PhishingGatewayService(ILogger<PhishingGatewayService> logger, HttpClient client)
         {
             _logger = logger;
             _client = client;
@@ -71,10 +71,7 @@ namespace Silk.Core.Services
             _cts.Cancel();
         }
 
-        public bool IsBlacklisted(string link)
-        {
-            return _domains.Contains(link);
-        }
+        public bool IsBlacklisted(string link) => _domains.Contains(link);
 
         private async Task ReceiveLoopAsync()
         {
