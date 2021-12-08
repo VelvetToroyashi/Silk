@@ -103,57 +103,56 @@ namespace Silk.Core.Services.Server
         /// <inheritdoc/>
         public async Task<Result> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
         {
-            //TODO: Log the infraction to the user.
             IUser target;
             IUser enforcer;
+
+            var canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
             
-            var enforcerResult = await _guilds.GetGuildMemberAsync(guildID, enforcerID);
-
-            var rolesResult = await _guilds.GetGuildRolesAsync(guildID);
+            if (!canInfractResult.IsSuccess)
+                return Result.FromError(canInfractResult.Error);
             
-            if (!rolesResult.IsDefined(out var roles))
-                return Result.FromError(rolesResult.Error!);
-            
-            if (!enforcerResult.IsDefined(out var enforcerMember))
-                return Result.FromError(new NotFoundError("Enforcer is not present on the specified guild."));
-
-            enforcer = enforcerMember.User.Value;
-            
-            var targetMemberResult = await _guilds.GetGuildMemberAsync(guildID, targetID);
-
-            if (!targetMemberResult.IsDefined(out var targetMember))
-            {
-                var targetResult = await _users.GetUserAsync(targetID);
-
-                if (!targetResult.IsDefined(out var targetUser))
-                    return Result.FromError(new NotFoundError("Target does not exist."));
-
-                target = targetUser;
-            }
-            else
-            {
-                var targetRoles = roles.Where(r => targetMember.Roles.Contains(r.ID));
-                var enforcerRoles = roles.Where(r => enforcerMember.Roles.Contains(r.ID));
-
-                var roleDiff = targetRoles.Max(r => r.Position) - enforcerRoles.Max(r => r.Position);
-
-                if (roleDiff >= 0)
-                    return Result.FromError(new HierarchyError("Enforcer cannot strike target due to hierachy."));
-
-                target = targetMember.User.Value;
-            }
+            (target, enforcer) = canInfractResult.Entity;
             
             var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Strike));
 
+            await TryInformTargetAsync(infraction, enforcer, guildID);
+            
+                
             var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
             return returnResult.IsSuccess 
                 ? Result.FromSuccess() 
                 : Result.FromError(new AggregateError(SemiSuccessfulAction, returnResult));
         }
-        
+
         /// <inheritdoc/>
-        public async Task<Result> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => throw new NotImplementedException();
+        public async Task<Result> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+        {
+            IUser target;
+            IUser enforcer;
+
+            var canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+            
+            if (!canInfractResult.IsSuccess)
+                return Result.FromError(canInfractResult.Error);
+
+            (target, enforcer) = canInfractResult.Entity;
+            
+            var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Strike));
+
+            await TryInformTargetAsync(infraction, target, guildID);
+            
+            var kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
+            
+            if (!kickResult.IsSuccess)
+                return Result.FromError(new PermissionError("I don't have permission to kick people!"));    
+            
+            var returnResult = await LogInfractionAsync(infraction, target, enforcer);
+            
+            return returnResult.IsSuccess 
+                ? Result.FromSuccess() 
+                : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+        }
         
         /// <inheritdoc/>
         public async Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null) => throw new NotImplementedException();
@@ -200,7 +199,72 @@ namespace Silk.Core.Services.Server
                 _queue.Add(infraction);
         }
 
-        
+
+        private async Task<Result<(IUser target, IUser enforcer)>> TryGetEnforcerAndTargetAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID)
+        {
+            IUser target;
+            IUser enforcer;
+
+            var currentResult = await _users.GetCurrentUserAsync();
+
+            if (!currentResult.IsDefined(out var bot))
+            {
+                _logger.LogError(EventIds.Service, "Failed to get current bot user.");
+                return Result<(IUser target, IUser enforcer)>.FromError(currentResult.Error!);
+            }
+            
+            var currentMemberResult = await _guilds.GetGuildMemberAsync(guildID, bot.ID);
+            
+            if (!currentMemberResult.IsDefined(out var currentMember))
+            {
+                _logger.LogError(EventIds.Service, "Failed to get current bot member.");
+                return Result<(IUser target, IUser enforcer)>.FromError(currentMemberResult.Error!);
+            }
+            
+            var rolesResult = await _guilds.GetGuildRolesAsync(guildID);
+            
+            if (!rolesResult.IsDefined(out var roles))
+                return Result<(IUser target, IUser enforcer)>.FromError(rolesResult.Error!);
+            
+            var enforcerResult = await _guilds.GetGuildMemberAsync(guildID, enforcerID);
+            
+            if (!enforcerResult.IsDefined(out var enforcerMember))
+                return Result<(IUser target, IUser enforcer)>.FromError(new NotFoundError("Enforcer is not present on the specified guild."));
+
+            enforcer = enforcerMember.User.Value;
+            
+            var targetMemberResult = await _guilds.GetGuildMemberAsync(guildID, targetID);
+
+            if (!targetMemberResult.IsDefined(out var targetMember))
+            {
+                var targetResult = await _users.GetUserAsync(targetID);
+
+                if (!targetResult.IsDefined(out var targetUser))
+                    return Result<(IUser target, IUser enforcer)>.FromError(new NotFoundError("Target does not exist."));
+
+                target = targetUser;
+            }
+            else
+            {
+                var targetRoles = roles.Where(r => targetMember.Roles.Contains(r.ID));
+                var enforcerRoles = roles.Where(r => enforcerMember.Roles.Contains(r.ID));
+                var botRoles = roles.Where(r => currentMember.Roles.Contains(r.ID));
+                
+                var targetEnforcerRoleDiff = targetRoles.Max(r => r.Position) - enforcerRoles.Max(r => r.Position);
+                var targetBotRoleDiff = roles.Max(r => r.Position)            - botRoles.Max(r => r.Position);
+                
+                if (targetEnforcerRoleDiff >= 0)
+                    return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to yours! I can't do anything."));
+
+                if (targetBotRoleDiff >= 0)
+                    return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to mine! I can't do anything."));
+                
+                target = targetMember.User.Value;
+            }
+            
+            return Result<(IUser target, IUser enforcer)>.FromSuccess((target, enforcer));
+        }
+
         /// <summary>
         /// Attempts to log an infraction to a user.
         /// </summary>
