@@ -24,9 +24,9 @@ namespace Silk.Core.Services.Interfaces
 		/// Updates an existing infraction with a new reason or expiration.
 		/// </summary>
 		/// <param name="infraction">The infraction to update.</param>
-		/// <param name="newReson">The new reason to apply to the infraction.</param>
+		/// <param name="newReason">The new reason to apply to the infraction.</param>
 		/// <param name="newExpiration">The new expiration to apply to the infraction.</param>
-		public Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string? newReson = null, Optional<TimeSpan?> newExpiration = default);
+		public Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string? newReason = null, Optional<TimeSpan?> newExpiration = default);
 		
 		/// <summary>
 		/// Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.
