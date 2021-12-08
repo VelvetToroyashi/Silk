@@ -131,7 +131,7 @@ namespace Silk.Core.Data.Entities
         /// <summary>
         ///     Gets various logging-related settings.
         /// </summary>
-        public GuildLoggingConfigEntity LoggingConfig { get; set; }
+        public GuildLoggingConfigEntity LoggingConfig { get; set; } = new();
 
         /// <summary>
         ///     A list of steps depending on the number of infractions a <see cref="UserEntity" /> has.

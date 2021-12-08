@@ -35,7 +35,7 @@ namespace Silk.Core.Data.Entities
 	    ///		Whether to log when infractions occur. Defaults to true..
 	    /// </summary>
 	    [Column("log_infractions")]
-	    public bool LogInfractions { get; set; } = true;
+	    public bool LogInfractions { get; set; }
 
 	    /// <summary>
 	    ///     Whether to log members joining or not.
