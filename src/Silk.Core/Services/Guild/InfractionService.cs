@@ -11,9 +11,11 @@ using Microsoft.Extensions.Logging;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Abstractions.Results;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Results;
 using Remora.Rest.Core;
+using Remora.Rest.Results;
 using Remora.Results;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
@@ -22,6 +24,7 @@ using Silk.Core.Errors;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
+using Silk.Extensions;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Server
@@ -138,14 +141,14 @@ namespace Silk.Core.Services.Server
 
             (target, enforcer) = canInfractResult.Entity;
             
-            var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Strike));
+            var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Kick));
 
             await TryInformTargetAsync(infraction, target, guildID);
             
             var kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
-            
+
             if (!kickResult.IsSuccess)
-                return Result.FromError(new PermissionError("I don't have permission to kick people!"));    
+                return GetActionFailedErrorMessage(kickResult, "kick"); 
             
             var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
@@ -153,10 +156,35 @@ namespace Silk.Core.Services.Server
                 ? Result.FromSuccess() 
                 : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
         }
-        
+
         /// <inheritdoc/>
-        public async Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null) => throw new NotImplementedException();
-        
+        public async Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+        {            
+            IUser target;
+            IUser enforcer;
+
+            var canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+            
+            if (!canInfractResult.IsSuccess)
+                return Result.FromError(canInfractResult.Error);
+
+            (target, enforcer) = canInfractResult.Entity;
+            
+            var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Kick));
+
+            await TryInformTargetAsync(infraction, target, guildID);
+
+            var banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
+
+            if (!banResult.IsSuccess)
+                return GetActionFailedErrorMessage(banResult, "ban"); 
+            
+            var returnResult = await LogInfractionAsync(infraction, target, enforcer);
+
+            return returnResult.IsSuccess 
+                ? Result.FromSuccess() 
+                : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+        }
         /// <inheritdoc/>
         public async Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => throw new NotImplementedException();
         
@@ -199,6 +227,24 @@ namespace Silk.Core.Services.Server
                 _queue.Add(infraction);
         }
 
+
+        /// <summary>
+        /// Gets a user-friendly error message for REST errors.
+        /// </summary>
+        /// <param name="result">The result from a REST request</param>
+        /// <param name="actionName">The infraction action what was being performed. </param>
+        private Result GetActionFailedErrorMessage(Result result, string actionName)
+        {
+            if (result.Error is not RestResultError<RestError> re)
+                return result;
+
+            return re.Error.Code switch
+            {
+                DiscordError.MissingAccess => Result.FromError(new PermissionError($"I don't have permission to {actionName} people!")),
+                DiscordError.UnknownUser   => Result.FromError(new NotFoundError($"That user doesn't seem to exist! Are you sure you typed their ID correctly?")),
+                _                          => result
+            };
+        }
 
         private async Task<Result<(IUser target, IUser enforcer)>> TryGetEnforcerAndTargetAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID)
         {
@@ -250,8 +296,8 @@ namespace Silk.Core.Services.Server
                 var enforcerRoles = roles.Where(r => enforcerMember.Roles.Contains(r.ID));
                 var botRoles = roles.Where(r => currentMember.Roles.Contains(r.ID));
                 
-                var targetEnforcerRoleDiff = targetRoles.Max(r => r.Position) - enforcerRoles.Max(r => r.Position);
-                var targetBotRoleDiff = roles.Max(r => r.Position)            - botRoles.Max(r => r.Position);
+                var targetBotRoleDiff =  targetRoles.MaxOrDefault(r => r.Position)     - botRoles.MaxOrDefault(r => r.Position);
+                var targetEnforcerRoleDiff = targetRoles.MaxOrDefault(r => r.Position) - enforcerRoles.MaxOrDefault(r => r.Position);
                 
                 if (targetEnforcerRoleDiff >= 0)
                     return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to yours! I can't do anything."));
