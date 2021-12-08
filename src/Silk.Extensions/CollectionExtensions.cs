@@ -1,6 +1,8 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -22,5 +24,8 @@ namespace Silk.Extensions
         {
             return string.Join(separator, values);
         }
+
+        public static TResult? MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector) 
+            => source.Any() ? source.Max(selector) : default;
     }
 }
