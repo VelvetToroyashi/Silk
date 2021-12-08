@@ -102,6 +102,7 @@ namespace Silk.Core
                     
                     services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                     services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
+                    services.AddSingleton<IInfractionService, InfractionService>();
                     services.AddSingleton<GuildConfigCacheService>();
                     services.AddSingleton<GuildCacherService>();
 
