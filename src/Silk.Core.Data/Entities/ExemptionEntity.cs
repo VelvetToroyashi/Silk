@@ -1,13 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Silk.Core.Data.Entities
 {
-    public enum ExemptionType
+    public enum ExemptionTarget
     {
         Role,
         User,
         Channel
     }
+
+	[Flags]
+	public enum ExemptionCoverage
+	{
+	    MessageEdits,
+	    MessageDeletes,
+	    Phishing,
+	    Spam,
+	    Invites,
+	    WordBlacklist
+	}
 
     public sealed class ExemptionEntity
     {
@@ -20,19 +32,19 @@ namespace Silk.Core.Data.Entities
 	    ///     What this exemption covers.
 	    /// </summary>
 	    [Column("exempt_from")]
-        public string Exemption { get; set; }
+        public ExemptionCoverage ExemptFrom { get; set; }
 
 	    /// <summary>
 	    ///     What type of exemption this is.
 	    /// </summary>
 	    [Column("type")]
-        public ExemptionType Type { get; set; }
-
+        public ExemptionTarget TargetType { get; set; }
+	    
 	    /// <summary>
 	    ///     The target of the exemption.
 	    /// </summary>
 	    [Column("target_id")]
-        public ulong Target { get; set; }
+        public ulong TargetId { get; set; }
 
 	    /// <summary>
 	    ///     The guild this exemption applies to.
