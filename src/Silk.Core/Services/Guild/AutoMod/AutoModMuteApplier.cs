@@ -1,12 +1,6 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.API.Abstractions.Gateway.Events;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Results;
 using Silk.Core.Services.Interfaces;
-using Silk.Shared.Constants;
 
 namespace Silk.Core.AutoMod
 {
@@ -25,7 +19,7 @@ namespace Silk.Core.AutoMod
             _infractions = infractions;
         }
 
-        public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
+        /*public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
         {
             if (!gatewayEvent.User.IsDefined())
                 return Result.FromSuccess(); // ??? 
@@ -49,6 +43,6 @@ namespace Silk.Core.AutoMod
             await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied mute for {member} on rejoin.");
 
             return Result.FromSuccess();
-        }
+        }*/
     }
 }

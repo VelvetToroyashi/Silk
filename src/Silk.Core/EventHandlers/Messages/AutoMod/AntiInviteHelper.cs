@@ -10,7 +10,6 @@ using Remora.Results;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 using Silk.Core.Services.Interfaces;
-using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.EventHandlers.Messages.AutoMod
@@ -122,8 +121,8 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod
             if (config.DeleteMessageOnMatchedInvite)
                 await message.DeleteAsync("[AutoMod] Detected a blacklisted invite.");
 
-            if (config.WarnOnMatchedInvite)
-                await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", config.AutoEscalateInfractions);
+            //if (config.WarnOnMatchedInvite)
+                //await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", config.AutoEscalateInfractions);
         }
     }
 }
