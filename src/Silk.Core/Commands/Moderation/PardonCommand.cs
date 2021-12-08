@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿/*using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -35,4 +35,4 @@ namespace Silk.Core.Commands.Moderation
                 await ctx.RespondAsync($"🚩 Pardoned **{user.ToDiscordName()}**. {(res is InfractionResult.SucceededWithNotification ? "(User notified with direct message)" : "(Failed to DM)")}");
         }
     }
-}
+}*/

@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿/*using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -35,7 +35,7 @@ namespace Silk.Core.Commands.Moderation
                 string? message = response switch
                 {
                     InfractionResult.FailedGuildHeirarchy         => "I can't kick that person due to role hierarchy!",
-                    InfractionResult.FailedSelfPermissions        => "I don't have permission to kick members!", /* In retrospect, these should never happen, but. */
+                    InfractionResult.FailedSelfPermissions        => "I don't have permission to kick members!", /* In retrospect, these should never happen, but. #1#
                     InfractionResult.SucceededWithNotification    => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")}  (Notified with direct message).",
                     InfractionResult.SucceededWithoutNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")} (Unable to notify with Direct Message).",
                     _                                             => $"Unexpected response: {response}"
@@ -73,4 +73,4 @@ namespace Silk.Core.Commands.Moderation
                   .WithColor(DiscordColor.Red);
         }
     }
-}
+}*/

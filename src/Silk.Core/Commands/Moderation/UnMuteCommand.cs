@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -41,4 +41,4 @@ namespace Silk.Core.Commands.Moderation
             await ctx.RespondAsync(message);
         }
     }
-}
+}*/
