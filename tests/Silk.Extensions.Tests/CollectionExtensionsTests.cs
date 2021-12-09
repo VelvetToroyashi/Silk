@@ -1,4 +1,3 @@
-﻿namespace Silk.Extensions.Tests
-{
-    public class CollectionExtensionsTests { }
-}
+﻿namespace Silk.Extensions.Tests;
+
+public class CollectionExtensionsTests { }

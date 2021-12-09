@@ -4,34 +4,33 @@ using System.Threading.Tasks;
 using MediatR;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.MediatR.CommandInvocations
+namespace Silk.Core.Data.MediatR.CommandInvocations;
+
+/// <summary>
+///     Request for adding a <see cref="CommandInvocationEntity" />.
+/// </summary>
+public record AddCommandInvocationRequest(string CommandName) : IRequest;
+
+/// <summary>
+///     The default handler for <see cref="AddCommandInvocationRequest" />.
+/// </summary>
+public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationRequest>
 {
-    /// <summary>
-    ///     Request for adding a <see cref="CommandInvocationEntity" />.
-    /// </summary>
-    public record AddCommandInvocationRequest(string CommandName) : IRequest;
+    private readonly GuildContext _db;
 
-    /// <summary>
-    ///     The default handler for <see cref="AddCommandInvocationRequest" />.
-    /// </summary>
-    public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationRequest>
+    public AddCommandInvocationHandler(GuildContext db) => _db = db;
+
+    public async Task<Unit> Handle(AddCommandInvocationRequest request, CancellationToken cancellationToken)
     {
-        private readonly GuildContext _db;
-
-        public AddCommandInvocationHandler(GuildContext db) => _db = db;
-
-        public async Task<Unit> Handle(AddCommandInvocationRequest request, CancellationToken cancellationToken)
+        CommandInvocationEntity command = new()
         {
-            CommandInvocationEntity command = new()
-            {
-                CommandName = request.CommandName,
-                InvocationTime = DateTime.UtcNow
-            };
+            CommandName = request.CommandName,
+            InvocationTime = DateTime.UtcNow
+        };
 
-            _db.CommandInvocations.Add(command);
+        _db.CommandInvocations.Add(command);
 
-            await _db.SaveChangesAsync(cancellationToken);
-            return new();
-        }
+        await _db.SaveChangesAsync(cancellationToken);
+        return new();
     }
 }

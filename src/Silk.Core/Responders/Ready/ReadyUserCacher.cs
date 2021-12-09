@@ -7,24 +7,23 @@ using Remora.Discord.Caching;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace Silk.Core.Responders
+namespace Silk.Core.Responders;
+
+/// <summary>
+///     Caches the current user data based on the <see cref="IReady" /> event data.
+/// </summary>
+public class ReadyUserCacher : IResponder<IReady>
 {
-    /// <summary>
-    ///     Caches the current user data based on the <see cref="IReady" /> event data.
-    /// </summary>
-    public class ReadyUserCacher : IResponder<IReady>
+    private readonly IMemoryCache _cache;
+    public ReadyUserCacher(IMemoryCache cache) => _cache = cache;
+
+    public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
     {
-        private readonly IMemoryCache _cache;
-        public ReadyUserCacher(IMemoryCache cache) => _cache = cache;
+        IUser currentUserObject = gatewayEvent.User;
+        object currentUserCacheKey = KeyHelpers.CreateCurrentUserCacheKey();
 
-        public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
-        {
-            IUser currentUserObject = gatewayEvent.User;
-            object currentUserCacheKey = KeyHelpers.CreateCurrentUserCacheKey();
+        _cache.Set(currentUserCacheKey, currentUserObject, new MemoryCacheEntryOptions { Priority = CacheItemPriority.NeverRemove });
 
-            _cache.Set(currentUserCacheKey, currentUserObject, new MemoryCacheEntryOptions { Priority = CacheItemPriority.NeverRemove });
-
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
     }
 }

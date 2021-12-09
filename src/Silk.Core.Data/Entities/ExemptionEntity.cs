@@ -1,55 +1,54 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Silk.Core.Data.Entities
+namespace Silk.Core.Data.Entities;
+
+public enum ExemptionTarget
 {
-    public enum ExemptionTarget
-    {
-        Role,
-        User,
-        Channel
-    }
+	Role,
+	User,
+	Channel
+}
 
-	[Flags]
-	public enum ExemptionCoverage
-	{
-	    MessageEdits,
-	    MessageDeletes,
-	    Phishing,
-	    Spam,
-	    Invites,
-	    WordBlacklist
-	}
+[Flags]
+public enum ExemptionCoverage
+{
+	MessageEdits,
+	MessageDeletes,
+	Phishing,
+	Spam,
+	Invites,
+	WordBlacklist
+}
 
-    public sealed class ExemptionEntity
-    {
-	    /// <summary>
-	    ///     The Id of this exemption.
-	    /// </summary>
-	    public int Id { get; set; }
+public sealed class ExemptionEntity
+{
+	/// <summary>
+	///     The Id of this exemption.
+	/// </summary>
+	public int Id { get; set; }
 
-	    /// <summary>
-	    ///     What this exemption covers.
-	    /// </summary>
-	    [Column("exempt_from")]
-        public ExemptionCoverage ExemptFrom { get; set; }
+	/// <summary>
+	///     What this exemption covers.
+	/// </summary>
+	[Column("exempt_from")]
+	public ExemptionCoverage ExemptFrom { get; set; }
 
-	    /// <summary>
-	    ///     What type of exemption this is.
-	    /// </summary>
-	    [Column("type")]
-        public ExemptionTarget TargetType { get; set; }
+	/// <summary>
+	///     What type of exemption this is.
+	/// </summary>
+	[Column("type")]
+	public ExemptionTarget TargetType { get; set; }
 	    
-	    /// <summary>
-	    ///     The target of the exemption.
-	    /// </summary>
-	    [Column("target_id")]
-        public ulong TargetId { get; set; }
+	/// <summary>
+	///     The target of the exemption.
+	/// </summary>
+	[Column("target_id")]
+	public ulong TargetId { get; set; }
 
-	    /// <summary>
-	    ///     The guild this exemption applies to.
-	    /// </summary>
-	    [Column("guild_id")]
-        public ulong Guild { get; set; }
-    }
+	/// <summary>
+	///     The guild this exemption applies to.
+	/// </summary>
+	[Column("guild_id")]
+	public ulong Guild { get; set; }
 }

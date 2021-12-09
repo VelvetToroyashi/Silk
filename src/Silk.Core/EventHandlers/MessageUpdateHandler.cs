@@ -13,252 +13,251 @@ using Silk.Core.Data.Entities;
 using Silk.Core.Services.Data;
 using Silk.Extensions.DSharpPlus;
 
-namespace Silk.Core.EventHandlers
+namespace Silk.Core.EventHandlers;
+
+public sealed class MessageUpdateHandler
 {
-    public sealed class MessageUpdateHandler
+    private readonly GuildConfigCacheService                 _cache;
+    private readonly HttpClient                    _client;
+    private readonly ILogger<MessageUpdateHandler> _logger;
+
+    private readonly DiscordWebhookClient _whClient = new();
+
+    public MessageUpdateHandler(DiscordClient dclient, GuildConfigCacheService cache, HttpClient client, ILogger<MessageUpdateHandler> logger)
     {
-        private readonly GuildConfigCacheService                 _cache;
-        private readonly HttpClient                    _client;
-        private readonly ILogger<MessageUpdateHandler> _logger;
+        _cache = cache;
+        _client = client;
+        _logger = logger;
 
-        private readonly DiscordWebhookClient _whClient = new();
+        dclient.MessageDeleted += MessageRemoved;
+        dclient.MessageUpdated += MessageUpdated;
+    }
 
-        public MessageUpdateHandler(DiscordClient dclient, GuildConfigCacheService cache, HttpClient client, ILogger<MessageUpdateHandler> logger)
+    private async Task MessageUpdated(DiscordClient c, MessageUpdateEventArgs e)
+    {
+        if (e.Message.Author.IsBot) return;
+        if (e.Message.Content == e.MessageBefore?.Content) return;
+        if (e.Message.Author.IsCurrent) return;
+        if (string.IsNullOrEmpty(e.Message.Content) || string.IsNullOrEmpty(e.MessageBefore?.Content)) return;
+
+        _ = Task.Run(async () =>
         {
-            _cache = cache;
-            _client = client;
-            _logger = logger;
+            GuildModConfigEntity config = await _cache.GetModConfigAsync(e.Guild.Id);
 
-            dclient.MessageDeleted += MessageRemoved;
-            dclient.MessageUpdated += MessageUpdated;
-        }
+            if (!config.LogMessageChanges) return;
+            if (config.LoggingChannel is 0) return;
 
-        private async Task MessageUpdated(DiscordClient c, MessageUpdateEventArgs e)
-        {
-            if (e.Message.Author.IsBot) return;
-            if (e.Message.Content == e.MessageBefore?.Content) return;
-            if (e.Message.Author.IsCurrent) return;
-            if (string.IsNullOrEmpty(e.Message.Content) || string.IsNullOrEmpty(e.MessageBefore?.Content)) return;
-
-            _ = Task.Run(async () =>
+            if (e.Message.Content.Length > 1950 || e.MessageBefore.Content.Length > 1950)
             {
-                GuildModConfigEntity config = await _cache.GetModConfigAsync(e.Guild.Id);
+                DiscordEmbedBuilder? embed = AddLoggingFields(new())
+                    .WithTitle("A message was edited:")
+                    .WithDescription("The message was too big, and have been added to a separate embed.")
+                    .WithColor(DiscordColor.Orange);
 
-                if (!config.LogMessageChanges) return;
-                if (config.LoggingChannel is 0) return;
+                DiscordEmbedBuilder? contentBefore = new DiscordEmbedBuilder()
+                    .WithTitle("Content before:")
+                    .WithColor(DiscordColor.Orange)
+                    .WithDescription(e.MessageBefore.Content ?? "Message did not previously have content");
 
-                if (e.Message.Content.Length > 1950 || e.MessageBefore.Content.Length > 1950)
+                DiscordEmbedBuilder? contentAfter = new DiscordEmbedBuilder()
+                    .WithTitle("Content after:")
+                    .WithColor(DiscordColor.Orange)
+                    .WithDescription(e.Message.Content);
+
+
+
+                if (!e.Guild.Channels.TryGetValue(config.LoggingChannel, out var channel))
                 {
-                    DiscordEmbedBuilder? embed = AddLoggingFields(new())
-                                                .WithTitle("A message was edited:")
-                                                .WithDescription("The message was too big, and have been added to a separate embed.")
-                                                .WithColor(DiscordColor.Orange);
-
-                    DiscordEmbedBuilder? contentBefore = new DiscordEmbedBuilder()
-                                                        .WithTitle("Content before:")
-                                                        .WithColor(DiscordColor.Orange)
-                                                        .WithDescription(e.MessageBefore.Content ?? "Message did not previously have content");
-
-                    DiscordEmbedBuilder? contentAfter = new DiscordEmbedBuilder()
-                                                       .WithTitle("Content after:")
-                                                       .WithColor(DiscordColor.Orange)
-                                                       .WithDescription(e.Message.Content);
-
-
-
-                    if (!e.Guild.Channels.TryGetValue(config.LoggingChannel, out var channel))
-                    {
-                        _logger.LogWarning("Configured logging channel was not present in guild: {Guild}", e.Guild.Id);
-                    }
-                    else
-                    {
-                        if (!config.UseWebhookLogging)
-                        {
-                            await channel.SendMessageAsync(m => m.AddEmbed(embed).AddEmbed(contentBefore).AddEmbed(contentAfter));
-                        }
-                        else
-                        {
-                            DiscordWebhook? wh = _whClient.GetRegisteredWebhook(config.WebhookLoggingId) ?? await _whClient.AddWebhookAsync(new(config.LoggingWebhookUrl!));
-                            await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(c.CurrentUser.AvatarUrl).AddEmbed(embed).AddEmbed(contentBefore).AddEmbed(contentAfter));
-                        }
-                        //TODO: Metrics
-                    }
+                    _logger.LogWarning("Configured logging channel was not present in guild: {Guild}", e.Guild.Id);
                 }
                 else
                 {
-                    DiscordEmbedBuilder? embed = AddLoggingFields(new())
-                                                .WithTitle("A message was edited:")
-                                                .WithDescription($"{Formatter.Bold("Content Before:")}\n{e.MessageBefore.Content}\n\n{Formatter.Bold("Content After:")}\n{e.Message.Content}")
-                                                .WithColor(DiscordColor.Orange);
-
-                    if (!e.Guild.Channels.TryGetValue(config.LoggingChannel, out var channel))
+                    if (!config.UseWebhookLogging)
                     {
-                        _logger.LogWarning("Configured logging channel was not present in guild: {Guild}", e.Guild.Id);
+                        await channel.SendMessageAsync(m => m.AddEmbed(embed).AddEmbed(contentBefore).AddEmbed(contentAfter));
                     }
                     else
                     {
-                        if (!config.UseWebhookLogging)
-                        {
-                            try
-                            {
-                                await channel.SendMessageAsync(m => m.AddEmbed(embed));
-                            }
-                            catch (UnauthorizedException)
-                            {
-                                _logger.LogWarning("Log channel exists; permissions were changed. Guild: {Guild}", e.Guild.Id);
-                            }
-                            catch (NotFoundException)
-                            {
-                                _logger.LogWarning("Log channel was deleted. Guild: {Guild}", e.Guild.Id);
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                DiscordWebhook? wh = _whClient.GetRegisteredWebhook(config.WebhookLoggingId) ?? await _whClient.AddWebhookAsync(new(config.LoggingWebhookUrl!));
-
-
-                                await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(c.CurrentUser.AvatarUrl).AddEmbed(embed));
-                            }
-                            catch
-                            {
-                                _logger.LogWarning("Log channel and/or Log webhook have gone missing. Guild: {Guild}", e.Guild.Id);
-                            }
-                        }
+                        DiscordWebhook? wh = _whClient.GetRegisteredWebhook(config.WebhookLoggingId) ?? await _whClient.AddWebhookAsync(new(config.LoggingWebhookUrl!));
+                        await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(c.CurrentUser.AvatarUrl).AddEmbed(embed).AddEmbed(contentBefore).AddEmbed(contentAfter));
                     }
+                    //TODO: Metrics
                 }
-
-            });
-
-            DiscordEmbedBuilder AddLoggingFields(DiscordEmbedBuilder builder)
-            {
-                return builder
-                      .WithThumbnail(e.Message.Author?.AvatarUrl ?? string.Empty)
-                      .AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
-                      .AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
-                      .AddField("\u200b", "\u200b", true)
-                      .AddField("Edited at:", Formatter.Timestamp(DateTime.Now), true)
-                      .AddField("Sent at:", Formatter.Timestamp(e.Message.Timestamp), true)
-                      .AddField("\u200b", "\u200b", true)
-                      .AddField("Message ID:", $"[{e.Message.Id}]({e.Message.JumpLink})", true)
-                      .AddField("User ID:", e.Message.Author is null ? "I wasn't around at the time. Sorry!" : $"[{e.Message.Author.Id}]({e.Author.GetUrl()})", true);
             }
-        }
-
-        public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
-        {
-            if (e.Message?.Author is null || e.Message is null) return; // Message isn't cached. //
-            if (e.Message.Author.IsCurrent) return;                     // Self-evident.                            //
-            if (e.Channel.IsPrivate) return;                            // Goes without saying.                           //
-            _ = Task.Run(async () =>
+            else
             {
-                GuildModConfigEntity config = await _cache.GetModConfigAsync(e.Guild.Id);
+                DiscordEmbedBuilder? embed = AddLoggingFields(new())
+                    .WithTitle("A message was edited:")
+                    .WithDescription($"{Formatter.Bold("Content Before:")}\n{e.MessageBefore.Content}\n\n{Formatter.Bold("Content After:")}\n{e.Message.Content}")
+                    .WithColor(DiscordColor.Orange);
 
-                if (!config.LogMessageChanges) return;
-                if (config.LoggingChannel is 0) return;
-
-                DiscordEmbedBuilder editEmbed = GetDeletionEmbed(e);
-                DiscordChannel channel = await c.GetChannelAsync(config.LoggingChannel);
-
-                if (e.Message.Attachments.Count is 1)
+                if (!e.Guild.Channels.TryGetValue(config.LoggingChannel, out var channel))
                 {
-                    DiscordAttachment? attachment = e.Message.Attachments.First();
-
-                    Stream? stream = await GetSingleAttachmentAsync(e.Message);
-
-                    if (stream is null)
-                    {
-                        await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
-                        return;
-                    }
-
-                    var builder = new DiscordMessageBuilder();
-
-                    builder.WithFile(attachment.FileName, stream);
-
-                    DiscordEmbedBuilder? attachmentEmbed = new DiscordEmbedBuilder()
-                                                          .WithColor(DiscordColor.Red)
-                                                          .WithTitle($"Attachment 1 for {e.Message.Id}:")
-                                                          .AddField("File Name:", attachment.FileName, true)
-                                                          .AddField("File Size:", $"{attachment.FileSize / 1024} kb", true)
-                                                          .WithImageUrl($"attachment://{attachment.FileName}");
-
-                    builder.AddEmbeds(new DiscordEmbed[] { editEmbed, attachmentEmbed });
-
-                    await channel.SendMessageAsync(builder);
-                    return;
+                    _logger.LogWarning("Configured logging channel was not present in guild: {Guild}", e.Guild.Id);
                 }
-
-                if (e.Message.Embeds.Any())
+                else
                 {
-                    var builder = new DiscordMessageBuilder();
-                    IEnumerable<DiscordEmbedBuilder>? theirEmbeds = e.Message.Embeds.Select(e => new DiscordEmbedBuilder(e));
-
-                    foreach (var embed in theirEmbeds)
+                    if (!config.UseWebhookLogging)
                     {
-                        if (embed.ImageUrl is not null)
+                        try
                         {
-                            string[]? split = embed.ImageUrl.Split('.');
-                            string? name = split[^2] + "." + split[^1];
-
-                            await GetImageAsync(embed.ImageUrl, name, builder);
+                            await channel.SendMessageAsync(m => m.AddEmbed(embed));
+                        }
+                        catch (UnauthorizedException)
+                        {
+                            _logger.LogWarning("Log channel exists; permissions were changed. Guild: {Guild}", e.Guild.Id);
+                        }
+                        catch (NotFoundException)
+                        {
+                            _logger.LogWarning("Log channel was deleted. Guild: {Guild}", e.Guild.Id);
                         }
                     }
+                    else
+                    {
+                        try
+                        {
+                            DiscordWebhook? wh = _whClient.GetRegisteredWebhook(config.WebhookLoggingId) ?? await _whClient.AddWebhookAsync(new(config.LoggingWebhookUrl!));
 
-                    builder.AddEmbeds(theirEmbeds.Select(embed => embed.Build()));
 
-                    await channel.SendMessageAsync(editEmbed);
+                            await wh.ExecuteAsync(new DiscordWebhookBuilder().WithAvatarUrl(c.CurrentUser.AvatarUrl).AddEmbed(embed));
+                        }
+                        catch
+                        {
+                            _logger.LogWarning("Log channel and/or Log webhook have gone missing. Guild: {Guild}", e.Guild.Id);
+                        }
+                    }
+                }
+            }
 
-                    await channel.SendMessageAsync(builder);
+        });
 
+        DiscordEmbedBuilder AddLoggingFields(DiscordEmbedBuilder builder)
+        {
+            return builder
+                .WithThumbnail(e.Message.Author?.AvatarUrl ?? string.Empty)
+                .AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
+                .AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
+                .AddField("\u200b", "\u200b", true)
+                .AddField("Edited at:", Formatter.Timestamp(DateTime.Now), true)
+                .AddField("Sent at:", Formatter.Timestamp(e.Message.Timestamp), true)
+                .AddField("\u200b", "\u200b", true)
+                .AddField("Message ID:", $"[{e.Message.Id}]({e.Message.JumpLink})", true)
+                .AddField("User ID:", e.Message.Author is null ? "I wasn't around at the time. Sorry!" : $"[{e.Message.Author.Id}]({e.Author.GetUrl()})", true);
+        }
+    }
+
+    public async Task MessageRemoved(DiscordClient c, MessageDeleteEventArgs e)
+    {
+        if (e.Message?.Author is null || e.Message is null) return; // Message isn't cached. //
+        if (e.Message.Author.IsCurrent) return;                     // Self-evident.                            //
+        if (e.Channel.IsPrivate) return;                            // Goes without saying.                           //
+        _ = Task.Run(async () =>
+        {
+            GuildModConfigEntity config = await _cache.GetModConfigAsync(e.Guild.Id);
+
+            if (!config.LogMessageChanges) return;
+            if (config.LoggingChannel is 0) return;
+
+            DiscordEmbedBuilder editEmbed = GetDeletionEmbed(e);
+            DiscordChannel channel = await c.GetChannelAsync(config.LoggingChannel);
+
+            if (e.Message.Attachments.Count is 1)
+            {
+                DiscordAttachment? attachment = e.Message.Attachments.First();
+
+                Stream? stream = await GetSingleAttachmentAsync(e.Message);
+
+                if (stream is null)
+                {
+                    await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
                     return;
                 }
 
+                var builder = new DiscordMessageBuilder();
 
-                await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
-            });
-        }
+                builder.WithFile(attachment.FileName, stream);
 
-        public async Task GetImageAsync(string url, string name, DiscordMessageBuilder builder)
-        {
-            HttpResponseMessage? ret = await _client.GetAsync(url);
+                DiscordEmbedBuilder? attachmentEmbed = new DiscordEmbedBuilder()
+                    .WithColor(DiscordColor.Red)
+                    .WithTitle($"Attachment 1 for {e.Message.Id}:")
+                    .AddField("File Name:", attachment.FileName, true)
+                    .AddField("File Size:", $"{attachment.FileSize / 1024} kb", true)
+                    .WithImageUrl($"attachment://{attachment.FileName}");
 
-            if (!ret.IsSuccessStatusCode)
+                builder.AddEmbeds(new DiscordEmbed[] { editEmbed, attachmentEmbed });
+
+                await channel.SendMessageAsync(builder);
                 return;
+            }
 
-            Stream? str = await ret.Content.ReadAsStreamAsync();
+            if (e.Message.Embeds.Any())
+            {
+                var builder = new DiscordMessageBuilder();
+                IEnumerable<DiscordEmbedBuilder>? theirEmbeds = e.Message.Embeds.Select(e => new DiscordEmbedBuilder(e));
 
-            builder.WithFile(name, str);
-        }
+                foreach (var embed in theirEmbeds)
+                {
+                    if (embed.ImageUrl is not null)
+                    {
+                        string[]? split = embed.ImageUrl.Split('.');
+                        string? name = split[^2] + "." + split[^1];
 
-        private async Task<Stream?> GetSingleAttachmentAsync(DiscordMessage message)
-        {
-            HttpResponseMessage? ret = await _client.GetAsync(message.Attachments.First().Url);
+                        await GetImageAsync(embed.ImageUrl, name, builder);
+                    }
+                }
 
-            if (!ret.IsSuccessStatusCode)
-                return null;
+                builder.AddEmbeds(theirEmbeds.Select(embed => embed.Build()));
 
-            return await ret.Content.ReadAsStreamAsync();
-        }
+                await channel.SendMessageAsync(editEmbed);
+
+                await channel.SendMessageAsync(builder);
+
+                return;
+            }
 
 
-        private DiscordEmbedBuilder GetDeletionEmbed(MessageDeleteEventArgs e)
-        {
-            return new DiscordEmbedBuilder()
-                  .WithTitle("A message was deleted:")
-                  .WithDescription(
-                                   $"Content: {(string.IsNullOrEmpty(e.Message.Content) ? "Message did not contain content." : $"```\n{e.Message.Content}```")}")
-                  .AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
-                  .AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
-                  .AddField("\u200b", "\u200b", true)
-                  .AddField("Deleted at:", Formatter.Timestamp(DateTime.Now), true)
-                  .AddField("Sent at:", Formatter.Timestamp(e.Message.Timestamp), true)
-                  .AddField("\u200b", "\u200b", true)
-                  .AddField("Message ID:", e.Message.Id.ToString(), true)
-                  .AddField("User ID:", e.Message.Author?.Id.ToString() ?? "I wasn't around at the time. Sorry!", true)
-                  .WithThumbnail(e.Message.Author?.AvatarUrl            ?? string.Empty)
-                  .WithColor(DiscordColor.Red);
-        }
+            await channel.SendMessageAsync(editEmbed).ConfigureAwait(false);
+        });
+    }
+
+    public async Task GetImageAsync(string url, string name, DiscordMessageBuilder builder)
+    {
+        HttpResponseMessage? ret = await _client.GetAsync(url);
+
+        if (!ret.IsSuccessStatusCode)
+            return;
+
+        Stream? str = await ret.Content.ReadAsStreamAsync();
+
+        builder.WithFile(name, str);
+    }
+
+    private async Task<Stream?> GetSingleAttachmentAsync(DiscordMessage message)
+    {
+        HttpResponseMessage? ret = await _client.GetAsync(message.Attachments.First().Url);
+
+        if (!ret.IsSuccessStatusCode)
+            return null;
+
+        return await ret.Content.ReadAsStreamAsync();
+    }
+
+
+    private DiscordEmbedBuilder GetDeletionEmbed(MessageDeleteEventArgs e)
+    {
+        return new DiscordEmbedBuilder()
+            .WithTitle("A message was deleted:")
+            .WithDescription(
+                $"Content: {(string.IsNullOrEmpty(e.Message.Content) ? "Message did not contain content." : $"```\n{e.Message.Content}```")}")
+            .AddField("Channel", e.Channel.IsThread ? e.Channel.Parent.Mention : e.Channel.Mention, true)
+            .AddField("Thread", e.Channel.IsThread ? e.Channel.Mention : "None", true)
+            .AddField("\u200b", "\u200b", true)
+            .AddField("Deleted at:", Formatter.Timestamp(DateTime.Now), true)
+            .AddField("Sent at:", Formatter.Timestamp(e.Message.Timestamp), true)
+            .AddField("\u200b", "\u200b", true)
+            .AddField("Message ID:", e.Message.Id.ToString(), true)
+            .AddField("User ID:", e.Message.Author?.Id.ToString() ?? "I wasn't around at the time. Sorry!", true)
+            .WithThumbnail(e.Message.Author?.AvatarUrl            ?? string.Empty)
+            .WithColor(DiscordColor.Red);
     }
 }

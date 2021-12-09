@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Silk.Core.Data.Entities
+namespace Silk.Core.Data.Entities;
+
+public class UserEntity
 {
-    public class UserEntity
-    {
-        public ulong Id { get; set; }
+    public ulong Id { get; set; }
 
-        public long DatabaseId { get; set; }
+    public long DatabaseId { get; set; }
 
-        public ulong GuildId { get; set; }
+    public ulong GuildId { get; set; }
 
-        public GuildEntity Guild { get; set; } = null!;
+    public GuildEntity Guild { get; set; } = null!;
 
-        public UserFlag Flags { get; set; }
+    public UserFlag Flags { get; set; }
 
-        public DateTime InitialJoinDate { get; set; }
+    public DateTime InitialJoinDate { get; set; }
 
-        public UserHistoryEntity History { get; set; }
+    public UserHistoryEntity History { get; set; }
 
-        public List<InfractionEntity> Infractions { get; set; }
-        //public List<Reminder> Reminders { get; set; } = new();
-    }
+    public List<InfractionEntity> Infractions { get; set; }
+    //public List<Reminder> Reminders { get; set; } = new();
 }

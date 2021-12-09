@@ -6,23 +6,35 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.MediatR.Users
+namespace Silk.Core.Data.MediatR.Users;
+
+/// <summary>
+///     Request for updating users in the database en masse.
+/// </summary>
+public record BulkUpdateUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
+
+/// <summary>
+///     The default handler for <see cref="BulkUpdateUserRequest" />.
+/// </summary>
+public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnumerable<UserEntity>>
 {
-	/// <summary>
-	///     Request for updating users in the database en masse.
-	/// </summary>
-	public record BulkUpdateUserRequest(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
+    private readonly GuildContext _db;
 
-	/// <summary>
-	///     The default handler for <see cref="BulkUpdateUserRequest" />.
-	/// </summary>
-	public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnumerable<UserEntity>>
+    public BulkUpdateUserHandler(GuildContext db) => _db = db;
+
+    public async Task<IEnumerable<UserEntity>> Handle(BulkUpdateUserRequest request, CancellationToken cancellationToken)
     {
-        private readonly GuildContext _db;
+        try
+        {
+            foreach (var user in request.Users)
+            {
+                EntityEntry<UserEntity> state = _db.Attach(user);
+                state.State = EntityState.Modified;
+            }
 
-        public BulkUpdateUserHandler(GuildContext db) => _db = db;
-
-        public async Task<IEnumerable<UserEntity>> Handle(BulkUpdateUserRequest request, CancellationToken cancellationToken)
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException) // Data wasn't actually modified. Save individually. //
         {
             try
             {
@@ -30,27 +42,14 @@ namespace Silk.Core.Data.MediatR.Users
                 {
                     EntityEntry<UserEntity> state = _db.Attach(user);
                     state.State = EntityState.Modified;
+                    await _db.SaveChangesAsync(cancellationToken);
                 }
-
-                await _db.SaveChangesAsync(cancellationToken);
             }
-            catch (DbUpdateConcurrencyException) // Data wasn't actually modified. Save individually. //
+            catch
             {
-                try
-                {
-                    foreach (var user in request.Users)
-                    {
-                        EntityEntry<UserEntity> state = _db.Attach(user);
-                        state.State = EntityState.Modified;
-                        await _db.SaveChangesAsync(cancellationToken);
-                    }
-                }
-                catch
-                {
-                    /* Continue. */
-                }
+                /* Continue. */
             }
-            return request.Users;
         }
+        return request.Users;
     }
 }

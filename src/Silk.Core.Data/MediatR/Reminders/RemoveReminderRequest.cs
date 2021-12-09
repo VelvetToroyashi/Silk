@@ -4,39 +4,38 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.MediatR.Reminders
+namespace Silk.Core.Data.MediatR.Reminders;
+
+/// <summary>
+///     Request to remove a reminder.
+/// </summary>
+public record RemoveReminderRequest(int ReminderId) : IRequest;
+
+/// <summary>
+///     The default handler for <see cref="RemoveReminderRequest" />.
+/// </summary>
+public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
 {
-	/// <summary>
-	///     Request to remove a reminder.
-	/// </summary>
-	public record RemoveReminderRequest(int ReminderId) : IRequest;
+    private readonly GuildContext _db;
 
-	/// <summary>
-	///     The default handler for <see cref="RemoveReminderRequest" />.
-	/// </summary>
-	public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
+    public RemoveReminderHandler(GuildContext db) => _db = db;
+
+    public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
     {
-        private readonly GuildContext _db;
+        ReminderEntity? reminder = await _db.Reminders
+            .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
 
-        public RemoveReminderHandler(GuildContext db) => _db = db;
-
-        public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
+        if (reminder is not null)
         {
-            ReminderEntity? reminder = await _db.Reminders
-                                                .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
-
-            if (reminder is not null)
+            _db.Reminders.Remove(reminder);
+            try
             {
-                _db.Reminders.Remove(reminder);
-                try
-                {
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                // Timer timed out and it got dequeued slower than it should've. //
-                catch (DbUpdateConcurrencyException) { }
+                await _db.SaveChangesAsync(cancellationToken);
             }
-
-            return new();
+            // Timer timed out and it got dequeued slower than it should've. //
+            catch (DbUpdateConcurrencyException) { }
         }
+
+        return new();
     }
 }

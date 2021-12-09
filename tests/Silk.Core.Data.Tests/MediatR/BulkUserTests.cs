@@ -10,134 +10,133 @@ using Respawn;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 
-namespace Silk.Core.Data.Tests.MediatR
+namespace Silk.Core.Data.Tests.MediatR;
+
+public class BulkUserTests
 {
-    public class BulkUserTests
+    private const    ulong              GuildId          = 10;
+    private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly IServiceCollection _provider        = new ServiceCollection();
+
+    private GuildContext _context;
+
+    private IMediator _mediator;
+
+    [OneTimeSetUp]
+    public async Task GlobalSetUp()
     {
-        private const    ulong              GuildId          = 10;
-        private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-        private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
-        private readonly IServiceCollection _provider        = new ServiceCollection();
+        _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
+        _provider.AddMediatR(typeof(GuildContext));
+        _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
-        private GuildContext _context;
+        _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
+        await _context.Database.MigrateAsync();
+        _context.Guilds.Add(new() { Id = GuildId });
+        await _context.SaveChangesAsync();
+    }
 
-        private IMediator _mediator;
-
-        [OneTimeSetUp]
-        public async Task GlobalSetUp()
+    [OneTimeTearDown]
+    public async Task Cleanup()
+    {
+        if (_context.Guilds.Any())
         {
-            _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
-            _provider.AddMediatR(typeof(GuildContext));
-            _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
-
-            _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
-            await _context.Database.MigrateAsync();
-            _context.Guilds.Add(new() { Id = GuildId });
+            _context.ChangeTracker.Clear();
+            _context.Guilds.RemoveRange(_context.Guilds);
             await _context.SaveChangesAsync();
         }
+        await _context.DisposeAsync();
+    }
 
-        [OneTimeTearDown]
-        public async Task Cleanup()
+    [SetUp]
+    public async Task SetUp()
+    {
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync();
+        await _checkpoint.Reset(connection);
+    }
+
+    [Test]
+    public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
+    {
+        //Arrange
+        List<UserEntity> users = new()
         {
-            if (_context.Guilds.Any())
-            {
-                _context.ChangeTracker.Clear();
-                _context.Guilds.RemoveRange(_context.Guilds);
-                await _context.SaveChangesAsync();
-            }
-            await _context.DisposeAsync();
-        }
+            new() { Id = 1, GuildId = GuildId },
+            new() { Id = 2, GuildId = GuildId }
+        };
 
-        [SetUp]
-        public async Task SetUp()
+        int result;
+        //Act
+        await _mediator.Send(new BulkAddUserRequest(users));
+        result = _context.Users.Count();
+        //Assert
+        Assert.AreEqual(users.Count, result);
+    }
+
+    [Test]
+    public async Task MediatR_BulkAdd_Skips_Users_When_User_Exists()
+    {
+        //Arrange
+        await _mediator.Send(new AddUserRequest(GuildId, 1));
+        List<UserEntity> users = new()
         {
-            await using var connection = new NpgsqlConnection(ConnectionString);
-            await connection.OpenAsync();
-            await _checkpoint.Reset(connection);
-        }
+            new() { Id = 1, GuildId = GuildId },
+            new() { Id = 2, GuildId = GuildId }
+        };
+        int result;
 
-        [Test]
-        public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
+        //Act
+        await _mediator.Send(new BulkAddUserRequest(users));
+        result = _context.Users.ToArray().Length;
+
+        //Assert
+        Assert.AreEqual(users.Count, result);
+    }
+
+    [Test]
+    public async Task MediatR_BulkAdd_Takes_Slow_Route_When_Passed_Malformed_Collection()
+    {
+        //Arrange
+        List<UserEntity> users = new()
         {
-            //Arrange
-            List<UserEntity> users = new()
-            {
-                new() { Id = 1, GuildId = GuildId },
-                new() { Id = 2, GuildId = GuildId }
-            };
+            new() { Id = 1, GuildId = GuildId },
+            new() { Id = 2 }
+        };
+        int result;
 
-            int result;
-            //Act
-            await _mediator.Send(new BulkAddUserRequest(users));
-            result = _context.Users.Count();
-            //Assert
-            Assert.AreEqual(users.Count, result);
-        }
+        //Act
+        await _mediator.Send(new BulkAddUserRequest(users));
+        result = _context.Users.Count();
 
-        [Test]
-        public async Task MediatR_BulkAdd_Skips_Users_When_User_Exists()
+        //Assert
+        Assert.AreNotEqual(users.Count, result);
+        Assert.AreEqual(1, result);
+    }
+
+    [Test]
+    public async Task MediatR_Bulk_Update_Updates_All_Users()
+    {
+        //Arrange
+        UserEntity[] updatedUsers = new UserEntity[2];
+        List<UserEntity> users = new()
         {
-            //Arrange
-            await _mediator.Send(new AddUserRequest(GuildId, 1));
-            List<UserEntity> users = new()
-            {
-                new() { Id = 1, GuildId = GuildId },
-                new() { Id = 2, GuildId = GuildId }
-            };
-            int result;
+            new() { Id = 1, GuildId = GuildId },
+            new() { Id = 2, GuildId = GuildId }
+        };
+        users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
+        //Act
+        users.CopyTo(updatedUsers);
 
-            //Act
-            await _mediator.Send(new BulkAddUserRequest(users));
-            result = _context.Users.ToArray().Length;
+        foreach (UserEntity u in updatedUsers)
+            u.Flags = UserFlag.Staff;
 
-            //Assert
-            Assert.AreEqual(users.Count, result);
-        }
+        await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
+        updatedUsers = _context.Users.ToArray();
+        //Assert
+        Assert.AreNotEqual(users, updatedUsers);
 
-        [Test]
-        public async Task MediatR_BulkAdd_Takes_Slow_Route_When_Passed_Malformed_Collection()
-        {
-            //Arrange
-            List<UserEntity> users = new()
-            {
-                new() { Id = 1, GuildId = GuildId },
-                new() { Id = 2 }
-            };
-            int result;
-
-            //Act
-            await _mediator.Send(new BulkAddUserRequest(users));
-            result = _context.Users.Count();
-
-            //Assert
-            Assert.AreNotEqual(users.Count, result);
-            Assert.AreEqual(1, result);
-        }
-
-        [Test]
-        public async Task MediatR_Bulk_Update_Updates_All_Users()
-        {
-            //Arrange
-            UserEntity[] updatedUsers = new UserEntity[2];
-            List<UserEntity> users = new()
-            {
-                new() { Id = 1, GuildId = GuildId },
-                new() { Id = 2, GuildId = GuildId }
-            };
-            users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
-            //Act
-            users.CopyTo(updatedUsers);
-
-            foreach (UserEntity u in updatedUsers)
-                u.Flags = UserFlag.Staff;
-
-            await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
-            updatedUsers = _context.Users.ToArray();
-            //Assert
-            Assert.AreNotEqual(users, updatedUsers);
-
-            foreach (var user in updatedUsers)
-                Assert.AreEqual(UserFlag.Staff, user.Flags);
-        }
+        foreach (var user in updatedUsers)
+            Assert.AreEqual(UserFlag.Staff, user.Flags);
     }
 }

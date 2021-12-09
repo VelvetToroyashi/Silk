@@ -2,13 +2,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.EntityConfigurations
+namespace Silk.Core.Data.EntityConfigurations;
+
+public class ReminderEntityConfiguration : IEntityTypeConfiguration<ReminderEntity>
 {
-    public class ReminderEntityConfiguration : IEntityTypeConfiguration<ReminderEntity>
+    public void Configure(EntityTypeBuilder<ReminderEntity> builder)
     {
-        public void Configure(EntityTypeBuilder<ReminderEntity> builder)
-        {
-            builder.HasKey(r => r.Id);
-        }
+        builder.HasKey(r => r.Id);
     }
 }

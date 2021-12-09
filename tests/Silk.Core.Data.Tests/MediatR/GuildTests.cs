@@ -9,106 +9,105 @@ using Respawn;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 
-namespace Silk.Core.Data.Tests.MediatR
+namespace Silk.Core.Data.Tests.MediatR;
+
+public class GuildTests
 {
-    public class GuildTests
+    private const    ulong              GuildId          = 10;
+    private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly IServiceCollection _provider        = new ServiceCollection();
+
+    private GuildContext _context;
+
+    private IMediator _mediator;
+
+    [OneTimeSetUp]
+    public async Task GlobalSetUp()
     {
-        private const    ulong              GuildId          = 10;
-        private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-        private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
-        private readonly IServiceCollection _provider        = new ServiceCollection();
+        _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
+        _provider.AddMediatR(typeof(GuildContext));
+        _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
-        private GuildContext _context;
+        _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
+        _context.Database.Migrate();
+    }
 
-        private IMediator _mediator;
+    [OneTimeTearDown]
+    public async Task Cleanup()
+    {
+        _context.Guilds.RemoveRange(_context.Guilds);
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+    }
 
-        [OneTimeSetUp]
-        public async Task GlobalSetUp()
-        {
-            _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
-            _provider.AddMediatR(typeof(GuildContext));
-            _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
+    [SetUp]
+    public async Task SetUp()
+    {
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync();
+        await _checkpoint.Reset(connection);
+    }
 
-            _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
-            _context.Database.Migrate();
-        }
+    [Test]
+    public async Task MediatR_Get_Or_Create_Creates_When_Guild_Does_Not_Exist()
+    {
+        //Arrange
+        GuildEntity result;
+        int before,
+            after;
+        //Act
+        before = _context.Guilds.Count();
+        result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        after = _context.Guilds.Count();
+        //Assert
+        Assert.IsNotNull(result);
+        Assert.AreNotEqual(before, after);
+    }
 
-        [OneTimeTearDown]
-        public async Task Cleanup()
-        {
-            _context.Guilds.RemoveRange(_context.Guilds);
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
-        }
+    [Test]
+    public async Task MediatR_Get_Or_Create_Does_Not_Create_When_Guild_Exists()
+    {
+        //Arrange
+        GuildEntity? result;
+        int before,
+            after;
 
-        [SetUp]
-        public async Task SetUp()
-        {
-            await using var connection = new NpgsqlConnection(ConnectionString);
-            await connection.OpenAsync();
-            await _checkpoint.Reset(connection);
-        }
+        await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
 
-        [Test]
-        public async Task MediatR_Get_Or_Create_Creates_When_Guild_Does_Not_Exist()
-        {
-            //Arrange
-            GuildEntity result;
-            int before,
-                after;
-            //Act
-            before = _context.Guilds.Count();
-            result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
-            after = _context.Guilds.Count();
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreNotEqual(before, after);
-        }
+        //Act
+        before = _context.Guilds.Count();
+        result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        after = _context.Guilds.Count();
 
-        [Test]
-        public async Task MediatR_Get_Or_Create_Does_Not_Create_When_Guild_Exists()
-        {
-            //Arrange
-            GuildEntity? result;
-            int before,
-                after;
+        //Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(before, after);
+    }
 
-            await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+    [Test]
+    public async Task MediatR_Get_Returns_Null_When_Guild_Does_Not_Exist()
+    {
+        //Arrange
+        GuildEntity? result;
+        //Act
+        result = await _mediator.Send(new GetGuildRequest(GuildId));
+        //Assert
+        Assert.IsNull(result);
+    }
 
-            //Act
-            before = _context.Guilds.Count();
-            result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
-            after = _context.Guilds.Count();
+    [Test]
+    public async Task MediatR_Get_Returns_NonNull_When_Guild_Exists()
+    {
+        //Arrange
+        GuildEntity? result;
+        await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
 
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(before, after);
-        }
+        //Act
+        result = await _mediator.Send(new GetGuildRequest(GuildId));
 
-        [Test]
-        public async Task MediatR_Get_Returns_Null_When_Guild_Does_Not_Exist()
-        {
-            //Arrange
-            GuildEntity? result;
-            //Act
-            result = await _mediator.Send(new GetGuildRequest(GuildId));
-            //Assert
-            Assert.IsNull(result);
-        }
+        //Assert
+        Assert.IsNotNull(result);
 
-        [Test]
-        public async Task MediatR_Get_Returns_NonNull_When_Guild_Exists()
-        {
-            //Arrange
-            GuildEntity? result;
-            await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
-
-            //Act
-            result = await _mediator.Send(new GetGuildRequest(GuildId));
-
-            //Assert
-            Assert.IsNotNull(result);
-
-        }
     }
 }

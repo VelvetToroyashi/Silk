@@ -1,18 +1,17 @@
 ﻿using DSharpPlus.SlashCommands;
 
-namespace Silk.Core.Types
+namespace Silk.Core.Types;
+
+public enum ReminderTypeOption
 {
-    public enum ReminderTypeOption
-    {
-        [ChoiceName("Once")]
-        Once,
-        [ChoiceName("Hourly")]
-        Hourly,
-        [ChoiceName("Daily")]
-        Daily,
-        [ChoiceName("Weekly")]
-        Weekly,
-        [ChoiceName("Monthly")]
-        Monthly
-    }
+    [ChoiceName("Once")]
+    Once,
+    [ChoiceName("Hourly")]
+    Hourly,
+    [ChoiceName("Daily")]
+    Daily,
+    [ChoiceName("Weekly")]
+    Weekly,
+    [ChoiceName("Monthly")]
+    Monthly
 }

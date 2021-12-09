@@ -1,60 +1,59 @@
-﻿namespace Silk.Shared.Types
+﻿namespace Silk.Shared.Types;
+
+public abstract class TextParser
 {
-    public abstract class TextParser
+    public const char EOT = '\0';
+
+    protected int _currentPosition;
+
+    int              _nextWhitespaceEnd;
+    protected string _source;
+
+    public TextParser(string currentString) => _source = currentString;
+
+    protected char ReadChar()
     {
-        public const char EOT = '\0';
+        if (!TryConsumeWhitespace()) return EOT;
+        return _source[_currentPosition++];
+    }
 
-        protected int _currentPosition;
+    protected char PeekChar()
+    {
+        if (!TryConsumeWhitespace()) return EOT;
+        return _source[_currentPosition];
+    }
 
-        int              _nextWhitespaceEnd;
-        protected string _source;
+    protected bool TryConsumeWhitespace()
+    {
+        if (_currentPosition >= _source.Length) return false;
 
-        public TextParser(string currentString) => _source = currentString;
+        while (char.IsWhiteSpace(_source[_currentPosition])) _currentPosition++;
+        return true;
+    }
 
-        protected char ReadChar()
+    public bool ReadIf(char c)
+    {
+        char next = PeekChar();
+
+        if (next == c)
         {
-            if (!TryConsumeWhitespace()) return EOT;
-            return _source[_currentPosition++];
-        }
-
-        protected char PeekChar()
-        {
-            if (!TryConsumeWhitespace()) return EOT;
-            return _source[_currentPosition];
-        }
-
-        protected bool TryConsumeWhitespace()
-        {
-            if (_currentPosition >= _source.Length) return false;
-
-            while (char.IsWhiteSpace(_source[_currentPosition])) _currentPosition++;
+            ReadChar();
             return true;
         }
 
-        public bool ReadIf(char c)
-        {
-            char next = PeekChar();
+        return false;
+    }
 
-            if (next == c)
-            {
-                ReadChar();
-                return true;
-            }
+    public int ReadNumber()
+    {
+        if (!char.IsNumber(PeekChar())) throw new($"Expected integer at position {_currentPosition}!");
 
-            return false;
-        }
+        int startPos = _currentPosition;
 
-        public int ReadNumber()
-        {
-            if (!char.IsNumber(PeekChar())) throw new($"Expected integer at position {_currentPosition}!");
+        // Read the numerical characters.
+        while (char.IsNumber(PeekChar())) ReadChar();
 
-            int startPos = _currentPosition;
-
-            // Read the numerical characters.
-            while (char.IsNumber(PeekChar())) ReadChar();
-
-            // Convert the number.
-            return int.Parse(_source[startPos.._currentPosition]);
-        }
+        // Convert the number.
+        return int.Parse(_source[startPos.._currentPosition]);
     }
 }

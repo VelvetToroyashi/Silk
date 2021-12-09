@@ -6,37 +6,36 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
-namespace Silk.Core.Commands.Conditions.cs
+namespace Silk.Core.Commands.Conditions.cs;
+
+/// <summary>
+/// Represents that a channel should be marked as NSFW.
+/// </summary>
+public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
 {
-    /// <summary>
-    /// Represents that a channel should be marked as NSFW.
-    /// </summary>
-    public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channelApi;
+    public RequireNSFWCondition(ICommandContext context, IDiscordRestChannelAPI channelApi)
     {
-        private readonly ICommandContext        _context;
-        private readonly IDiscordRestChannelAPI _channelApi;
-        public RequireNSFWCondition(ICommandContext context, IDiscordRestChannelAPI channelApi)
-        {
-            _context = context;
-            _channelApi = channelApi;
-        }
+        _context = context;
+        _channelApi = channelApi;
+    }
 
-        public async ValueTask<Result> CheckAsync(NSFWChannelAttribute attribute, CancellationToken ct = default)
-        {
-            var channelRes = await _channelApi.GetChannelAsync(_context.ChannelID, ct);
+    public async ValueTask<Result> CheckAsync(NSFWChannelAttribute attribute, CancellationToken ct = default)
+    {
+        var channelRes = await _channelApi.GetChannelAsync(_context.ChannelID, ct);
             
-            if (!channelRes.IsSuccess)
-                return Result.FromError(channelRes.Error);
+        if (!channelRes.IsSuccess)
+            return Result.FromError(channelRes.Error);
             
-            var channel = channelRes.Entity;
+        var channel = channelRes.Entity;
             
-            if (channel.IsNsfw.IsDefined(out var nsfw) && nsfw)
-                return Result.FromSuccess();
+        if (channel.IsNsfw.IsDefined(out var nsfw) && nsfw)
+            return Result.FromSuccess();
 
-            if (channel.Type is ChannelType.DM)
-                return Result.FromSuccess(); // DMs are always NSFW ;3
+        if (channel.Type is ChannelType.DM)
+            return Result.FromSuccess(); // DMs are always NSFW ;3
             
-            return Result.FromError(new InvalidOperationError("This channel is not NSFW."));
-        }
+        return Result.FromError(new InvalidOperationError("This channel is not NSFW."));
     }
 }

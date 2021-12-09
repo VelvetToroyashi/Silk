@@ -4,110 +4,109 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Silk.Extensions;
 
-namespace Silk.Benchmarks
+namespace Silk.Benchmarks;
+
+[MemoryDiagnoser]
+[TailCallDiagnoser]
+public class SilkStringCenterTest
 {
-    [MemoryDiagnoser]
-    [TailCallDiagnoser]
-    public class SilkStringCenterTest
+    private readonly string anchor = "Longer\tCenter";
+    private readonly string input  = "Center";
+
+
+    public string CenterWithPad()
     {
-        private readonly string anchor = "Longer\tCenter";
-        private readonly string input  = "Center";
+        string interpretedAnchor = anchor.Replace("\t", "    ");
+        return input.PadLeft((interpretedAnchor.Length - input.Length) / 2).PadRight(interpretedAnchor.Length);
+    }
 
+    [Benchmark]
+    public string CenterWithExtensionMethod()
+    {
+        return input.Center(anchor);
+    }
 
-        public string CenterWithPad()
+    public string CenterWithCountInsteadOfSum()
+    {
+        int refLength = anchor.Length;
+        if (input.Contains('\t'))
         {
-            string interpretedAnchor = anchor.Replace("\t", "    ");
-            return input.PadLeft((interpretedAnchor.Length - input.Length) / 2).PadRight(interpretedAnchor.Length);
+            refLength += anchor.Count(c => c is '\t') * 3;
+
         }
 
-        [Benchmark]
-        public string CenterWithExtensionMethod()
+        if (input.Length >= refLength) return input;
+
+        int start = (refLength - input.Length) / 2;
+
+        return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
         {
-            return input.Center(anchor);
+            span.Fill(' ');
+            state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+        });
+    }
+
+    public string CenterWithWhereCount()
+    {
+        int refLength = anchor.Length;
+        if (input.Contains('\t'))
+        {
+            refLength += anchor.Where(c => c is '\t').Count() * 3;
+
         }
 
-        public string CenterWithCountInsteadOfSum()
+        if (input.Length >= refLength) return input;
+
+        int start = (refLength - input.Length) / 2;
+
+        return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
         {
-            int refLength = anchor.Length;
-            if (input.Contains('\t'))
-            {
-                refLength += anchor.Count(c => c is '\t') * 3;
+            span.Fill(' ');
+            state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+        });
+    }
 
-            }
+    public string CenterWithForLoop()
+    {
+        int refLength = anchor.Length;
+        if (input.Contains('\t'))
+        {
+            for (var i = 0; i < anchor.Length; i++)
+                if (anchor[i] is '\t')
+                    refLength += 3;
 
-            if (input.Length >= refLength) return input;
-
-            int start = (refLength - input.Length) / 2;
-
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
-            {
-                span.Fill(' ');
-                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
-            });
         }
 
-        public string CenterWithWhereCount()
+        if (input.Length >= refLength) return input;
+
+        int start = (refLength - input.Length) / 2;
+
+        return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
         {
-            int refLength = anchor.Length;
-            if (input.Contains('\t'))
-            {
-                refLength += anchor.Where(c => c is '\t').Count() * 3;
+            span.Fill(' ');
+            state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+        });
+    }
 
-            }
+    public string CenterWithForeach()
+    {
+        int refLength = anchor.Length;
+        if (input.Contains('\t'))
+        {
+            foreach (char t in anchor)
+                if (t is '\t')
+                    refLength += 3;
 
-            if (input.Length >= refLength) return input;
-
-            int start = (refLength - input.Length) / 2;
-
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
-            {
-                span.Fill(' ');
-                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
-            });
         }
 
-        public string CenterWithForLoop()
+        if (input.Length >= refLength) return input;
+
+        int start = (refLength - input.Length) / 2;
+
+        return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
         {
-            int refLength = anchor.Length;
-            if (input.Contains('\t'))
-            {
-                for (var i = 0; i < anchor.Length; i++)
-                    if (anchor[i] is '\t')
-                        refLength += 3;
-
-            }
-
-            if (input.Length >= refLength) return input;
-
-            int start = (refLength - input.Length) / 2;
-
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
-            {
-                span.Fill(' ');
-                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
-            });
-        }
-
-        public string CenterWithForeach()
-        {
-            int refLength = anchor.Length;
-            if (input.Contains('\t'))
-            {
-                foreach (char t in anchor)
-                    if (t is '\t')
-                        refLength += 3;
-
-            }
-
-            if (input.Length >= refLength) return input;
-
-            int start = (refLength - input.Length) / 2;
-
-            return string.Create(refLength, (start, input), static (Span<char> span, (int start, string str) state) =>
-            {
-                span.Fill(' ');
-                state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
-            });
-        }
+            span.Fill(' ');
+            state.str.AsSpan().CopyTo(span.Slice(state.start, state.str.Length));
+        });
     }
 }

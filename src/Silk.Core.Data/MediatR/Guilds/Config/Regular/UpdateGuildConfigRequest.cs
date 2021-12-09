@@ -6,55 +6,54 @@ using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
-namespace Silk.Core.Data.MediatR.Guilds
+namespace Silk.Core.Data.MediatR.Guilds;
+
+/// <summary>
+///     Request for updating a <see cref="GuildConfigEntity" /> for a Guild.
+/// </summary>
+/// <param name="GuildId">The Id of the Guild</param>
+public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
 {
-	/// <summary>
-	///     Request for updating a <see cref="GuildConfigEntity" /> for a Guild.
-	/// </summary>
-	/// <param name="GuildId">The Id of the Guild</param>
-	public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
-    {
-        public Optional<ulong>              GreetingChannelId  { get; init; }
-        public Optional<ulong>              VerificationRoleId { get; init; }
-        public Optional<GreetingOption>     GreetingOption     { get; init; }
-        public Optional<string>             GreetingText       { get; init; }
+    public Optional<ulong>              GreetingChannelId  { get; init; }
+    public Optional<ulong>              VerificationRoleId { get; init; }
+    public Optional<GreetingOption>     GreetingOption     { get; init; }
+    public Optional<string>             GreetingText       { get; init; }
         
-        //TODO: Either remove this or actually implement it. It cannot remain in limbo, which it currently is.
-        public List<DisabledCommandEntity>? DisabledCommands   { get; init; }
-    }
+    //TODO: Either remove this or actually implement it. It cannot remain in limbo, which it currently is.
+    public List<DisabledCommandEntity>? DisabledCommands   { get; init; }
+}
 
-	/// <summary>
-	///     The default handler for <see cref="UpdateGuildConfigRequest" />.
-	/// </summary>
-	public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfigEntity?>
+/// <summary>
+///     The default handler for <see cref="UpdateGuildConfigRequest" />.
+/// </summary>
+public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfigEntity?>
+{
+    private readonly GuildContext _db;
+
+    public UpdateGuildConfigHandler(GuildContext db) => _db = db;
+
+    public async Task<GuildConfigEntity?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
     {
-        private readonly GuildContext _db;
+        GuildConfigEntity? config = await _db.GuildConfigs
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
-        public UpdateGuildConfigHandler(GuildContext db) => _db = db;
-
-        public async Task<GuildConfigEntity?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
-        {
-            GuildConfigEntity? config = await _db.GuildConfigs
-                                                 .AsSplitQuery()
-                                                 .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
-
-            if (request.GreetingOption.IsDefined(out var greeting))
-	            config.GreetingOption = greeting;
+        if (request.GreetingOption.IsDefined(out var greeting))
+            config.GreetingOption = greeting;
             
-            if (request.GreetingChannelId.IsDefined(out var channel))
-                config.GreetingChannel = channel;
+        if (request.GreetingChannelId.IsDefined(out var channel))
+            config.GreetingChannel = channel;
             
-            if (request.VerificationRoleId.IsDefined(out var role))
-                config.VerificationRole = role;
+        if (request.VerificationRoleId.IsDefined(out var role))
+            config.VerificationRole = role;
             
-            if (request.GreetingText.IsDefined(out var text))
-                config.GreetingText = text;
+        if (request.GreetingText.IsDefined(out var text))
+            config.GreetingText = text;
             
-            config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
+        config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
 
-            await _db.SaveChangesAsync(cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
 
-            return config;
-        }
+        return config;
     }
 }
