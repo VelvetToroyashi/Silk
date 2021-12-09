@@ -112,10 +112,13 @@ public class GuildGreetingService
             !after.PermissionOverwrites.IsDefined(out IReadOnlyList<IPermissionOverwrite>? overwritesAfter))
             return Result.FromSuccess();
 
+        if (overwritesBefore.Count >= overwritesAfter.Count)
+            return Result.FromSuccess();
+        
         GuildConfigEntity config = await _config.GetConfigAsync(guildID.Value);
 
         if (!config.Greetings.Any())
-            return Result.FromError(new InvalidOperationError($"No greetings are configured for {guildID}."));
+            return Result.FromSuccess();
 
         GuildGreetingEntity? greeting = config.Greetings
                                               .FirstOrDefault(greeting =>
@@ -123,7 +126,7 @@ public class GuildGreetingService
                                                                   greeting.MetadataSnowflake == before.ID.Value);
 
         if (greeting is null)
-            return Result.FromError(new InvalidOperationError($"No greetings are configured in {guildID} for {before.ID}."));
+            return Result.FromSuccess();
 
         IEnumerable<IPermissionOverwrite> distinctOverwrites = overwritesAfter.Except(overwritesBefore);
 
