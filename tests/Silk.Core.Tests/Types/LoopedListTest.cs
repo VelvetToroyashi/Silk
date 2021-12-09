@@ -13,7 +13,7 @@ public class LoopedListTest
     public void LoopedIntList_Indexer_Accesses_LastElement()
     {
         //Arrange
-        int index = _loopedIntList.Count - 1;
+        int index    = _loopedIntList.Count - 1;
         var expected = 4;
         int result;
         //Act
@@ -58,8 +58,8 @@ public class LoopedListTest
     public void LoopedIntList_Setter_Sets_Index_Within_Bounds()
     {
         //Arrange
-        var expected = 2;
-        int result;
+        var             expected = 2;
+        int             result;
         LoopedList<int> list = new() { 1, 2, 3, 4 };
         //Act
         result = list[2] = expected;
@@ -83,7 +83,7 @@ public class LoopedListTest
     public void LoopedIntList_Setter_Throws_When_Empty()
     {
         //Arrange
-        var expected = 2;
+        var          expected = 2;
         TestDelegate tDelegate;
         //Act
         tDelegate = () => _emptyIntList[0] = expected;

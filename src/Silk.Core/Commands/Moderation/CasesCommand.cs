@@ -27,10 +27,10 @@ public class CasesCommand : BaseCommandModule
     public async Task Cases(CommandContext ctx, DiscordUser user)
     {
         DiscordMessageBuilder? mBuilder = new DiscordMessageBuilder().WithReply(ctx.Message.Id);
-        var eBuilder = new DiscordEmbedBuilder();
+        var                    eBuilder = new DiscordEmbedBuilder();
 
         InfractionEntity[]? infractions = (await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id)))?.ToArray();
-        bool userExists = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, user.Id)) is not null;
+        bool                userExists  = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, user.Id)) is not null;
 
         if (!userExists || infractions.Length is 0)
         {
@@ -43,8 +43,8 @@ public class CasesCommand : BaseCommandModule
             foreach (InfractionEntity currentInfraction in infractions)
             {
                 stringBuilder
-                    .Append($"Case {currentInfraction.CaseNumber}: ")
-                    .Append($"`{currentInfraction.InfractionType.Humanize(LetterCasing.Title)}`\n");
+                   .Append($"Case {currentInfraction.CaseNumber}: ")
+                   .Append($"`{currentInfraction.InfractionType.Humanize(LetterCasing.Title)}`\n");
                 if (currentInfraction.EscalatedFromStrike)
                     stringBuilder.AppendLine("\n[ESCALATED FROM STRIKE] ");
 
@@ -57,9 +57,9 @@ public class CasesCommand : BaseCommandModule
             }
 
             eBuilder
-                .WithColor(DiscordColor.Gold)
-                .WithTitle($"Cases for {user.Id}")
-                .WithDescription(stringBuilder.ToString());
+               .WithColor(DiscordColor.Gold)
+               .WithTitle($"Cases for {user.Id}")
+               .WithDescription(stringBuilder.ToString());
             mBuilder.WithEmbed(eBuilder);
 
             await ctx.RespondAsync(mBuilder);

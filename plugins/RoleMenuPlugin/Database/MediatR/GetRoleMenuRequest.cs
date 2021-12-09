@@ -8,11 +8,11 @@ namespace RoleMenuPlugin.Database.MediatR
 
     public static class GetRoleMenu
     {
-	    /// <summary>
-	    ///     Retrieves a <see cref="RoleMenuModel" /> from the database in the form of a <see cref="RoleMenuModel" />
-	    /// </summary>
-	    /// <param name="MessageId">The Id of the message to grab.</param>
-	    public sealed record Request(ulong MessageId) : IRequest<RoleMenuModel>;
+        /// <summary>
+        ///     Retrieves a <see cref="RoleMenuModel" /> from the database in the form of a <see cref="RoleMenuModel" />
+        /// </summary>
+        /// <param name="MessageId">The Id of the message to grab.</param>
+        public sealed record Request(ulong MessageId) : IRequest<RoleMenuModel>;
 
         internal sealed class Handler : IRequestHandler<Request, RoleMenuModel>
         {

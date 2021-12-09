@@ -6,7 +6,7 @@ namespace Silk.Core.Data;
 public class GuildContext : DbContext
 {
     public GuildContext(DbContextOptions<GuildContext> options) : base(options) { }
-        
+
     public DbSet<TagEntity>               Tags               { get; set; }
     public DbSet<UserEntity>              Users              { get; set; }
     public DbSet<GuildEntity>             Guilds             { get; set; }

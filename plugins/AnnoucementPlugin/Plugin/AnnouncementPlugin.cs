@@ -14,7 +14,7 @@ namespace AnnoucementPlugin
         public AnnouncementPlugin(AnnouncementService announcement, AnnouncementContext database)
         {
             _announcement = announcement;
-            _database = database;
+            _database     = database;
         }
         public override string DisplayName => "Announcement Plugin";
 

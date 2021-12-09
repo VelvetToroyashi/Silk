@@ -19,7 +19,7 @@ namespace AnnoucementPlugin.Services
             var confirm = new DiscordButtonComponent(ButtonStyle.Success, new Guid().ToString(), "Yes");
             var decline = new DiscordButtonComponent(ButtonStyle.Danger, new Guid().ToString(), "No");
 
-            DiscordGuild guild = _client.Guilds[guildId];
+            DiscordGuild   guild   = _client.Guilds[guildId];
             DiscordMessage message = await guild.Channels[channelId].SendMessageAsync(m => m.WithContent(prompt).AddComponents(confirm, decline));
 
             InteractivityResult<ComponentInteractionCreateEventArgs> result = await message.WaitForButtonAsync(guild.Members[userId], CancellationToken.None);

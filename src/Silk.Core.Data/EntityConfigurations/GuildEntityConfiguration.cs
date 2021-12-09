@@ -11,18 +11,18 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
         builder.Property(g => g.Id).ValueGeneratedNever();
 
         builder
-            .HasMany(u => u.Users)
-            .WithOne(u => u.Guild);
+           .HasMany(u => u.Users)
+           .WithOne(u => u.Guild);
 
         builder
-            .HasOne(g => g.Configuration)
-            .WithOne(g => g.Guild)
-            .HasForeignKey<GuildConfigEntity>(g => g.GuildId);
+           .HasOne(g => g.Configuration)
+           .WithOne(g => g.Guild)
+           .HasForeignKey<GuildConfigEntity>(g => g.GuildId);
 
         builder
-            .HasOne(g => g.ModConfig)
-            .WithOne(g => g.Guild)
-            .HasForeignKey<GuildModConfigEntity>(g => g.GuildId);
+           .HasOne(g => g.ModConfig)
+           .WithOne(g => g.Guild)
+           .HasForeignKey<GuildModConfigEntity>(g => g.GuildId);
 
         builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
     }

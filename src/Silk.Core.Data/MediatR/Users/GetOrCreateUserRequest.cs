@@ -24,17 +24,17 @@ public class GetOrCreateUserHandler : IRequestHandler<GetOrCreateUserRequest, Re
     public async Task<Result<UserEntity>> Handle(GetOrCreateUserRequest request, CancellationToken cancellationToken)
     {
         UserEntity? user = await _db.Users
-            .Include(u => u.Guild)
-            .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId,
-                cancellationToken);
+                                    .Include(u => u.Guild)
+                                    .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId,
+                                                         cancellationToken);
 
         if (user is not null) return user;
         //Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
         user = new()
         {
-            Id = request.UserId,
+            Id      = request.UserId,
             GuildId = request.GuildId,
-            Flags = request.Flags ?? UserFlag.None
+            Flags   = request.Flags ?? UserFlag.None
         };
 
         _db.Users.Add(user);

@@ -49,10 +49,7 @@ public class ConfigModule : BaseCommandModule
 
     // Wrapper that points to config view //
     [GroupCommand]
-    public Task Default(CommandContext ctx)
-    {
-        return ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
-    }
+    public Task Default(CommandContext ctx) => ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
 
     [Group("view")]
     [RequireFlag(UserFlag.Staff)]
@@ -62,66 +59,63 @@ public class ConfigModule : BaseCommandModule
         private readonly IMediator _mediator;
         public ViewConfigModule(IMediator mediator) => _mediator = mediator;
 
-        private string GetCountString(int count)
-        {
-            return count is 0 ? "Not set/enabled" : count.ToString();
-        }
+        private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
 
         [GroupCommand]
         [RequireFlag(UserFlag.Staff)]
         [Description("View the current config.")]
         public async Task View(CommandContext ctx)
         {
-            GuildConfigEntity? config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+            GuildConfigEntity?    config    = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
             GuildModConfigEntity? modConfig = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
-            var embed = new DiscordEmbedBuilder();
+            var embed          = new DiscordEmbedBuilder();
             var contentBuilder = new StringBuilder();
 
             contentBuilder
-                .Clear()
-                .AppendLine("**General Config:**")
-                .AppendLine("__Greeting:__")
-                .AppendLine($"> Option: {config.GreetingOption.Humanize()}")
-                .AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
-                .AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"[See {ctx.Prefix}config view greeting]")}")
-                .AppendLine()
-                .AppendLine()
-                .AppendLine("**Moderation Config:**")
-                .AppendLine()
-                .AppendLine("__Logging:__")
-                .AppendLine($"> Channel: {(modConfig.LoggingChannel is var channel and not 0 ? $"<#{channel}>" : "Not set")}")
-                .AppendLine($"> Log members joining: <:_:{(modConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Log members leaving: <:_:{(modConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Log message edits/deletions: <:_:{(modConfig.LogMessageChanges ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine()
-                .AppendLine($"Max role mentions: {GetCountString(modConfig.MaxRoleMentions)}")
-                .AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
-                .AppendLine()
-                .AppendLine("__Invites:__")
-                .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Warn on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
-                .AppendLine("Aggressive pattern matching regex:")
-                .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
-                .AppendLine()
-                .AppendLine("__Infractions:__")
-                .AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
-                .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
-                .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
-                .AppendLine()
-                .AppendLine("__Anti-Phishing__ **(Beta)**:")
-                .AppendLine($"> Anti-Phishing enabled: <:_:{(modConfig.DetectPhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Delete Phishing Links: <:_:{(modConfig.DeletePhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Phishing detection action: {(modConfig.NamedInfractionSteps!.TryGetValue(AutoModConstants.PhishingLinkDetected, out var action) ? action.Type : "Not configured")}");
+               .Clear()
+               .AppendLine("**General Config:**")
+               .AppendLine("__Greeting:__")
+               .AppendLine($"> Option: {config.GreetingOption.Humanize()}")
+               .AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
+               .AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"[See {ctx.Prefix}config view greeting]")}")
+               .AppendLine()
+               .AppendLine()
+               .AppendLine("**Moderation Config:**")
+               .AppendLine()
+               .AppendLine("__Logging:__")
+               .AppendLine($"> Channel: {(modConfig.LoggingChannel is var channel and not 0 ? $"<#{channel}>" : "Not set")}")
+               .AppendLine($"> Log members joining: <:_:{(modConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log members leaving: <:_:{(modConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log message edits/deletions: <:_:{(modConfig.LogMessageChanges ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine()
+               .AppendLine($"Max role mentions: {GetCountString(modConfig.MaxRoleMentions)}")
+               .AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
+               .AppendLine()
+               .AppendLine("__Invites:__")
+               .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
+               .AppendLine("Aggressive pattern matching regex:")
+               .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
+               .AppendLine()
+               .AppendLine("__Infractions:__")
+               .AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
+               .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
+               .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
+               .AppendLine()
+               .AppendLine("__Anti-Phishing__ **(Beta)**:")
+               .AppendLine($"> Anti-Phishing enabled: <:_:{(modConfig.DetectPhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete Phishing Links: <:_:{(modConfig.DeletePhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Phishing detection action: {(modConfig.NamedInfractionSteps!.TryGetValue(AutoModConstants.PhishingLinkDetected, out InfractionStepEntity? action) ? action.Type : "Not configured")}");
 
             embed
-                .WithTitle($"Configuration for {ctx.Guild.Name}:")
-                .WithColor(DiscordColor.Azure)
-                .WithDescription(contentBuilder.ToString());
+               .WithTitle($"Configuration for {ctx.Guild.Name}:")
+               .WithColor(DiscordColor.Azure)
+               .WithDescription(contentBuilder.ToString());
 
             await ctx.RespondAsync(embed);
         }
@@ -146,7 +140,7 @@ public class ConfigModule : BaseCommandModule
             else
             {
                 InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
-                IEnumerable<Page>? pages = interactivity.GeneratePagesInEmbed(options, SplitType.Line, new() { Color = DiscordColor.Azure });
+                IEnumerable<Page>?      pages         = interactivity.GeneratePagesInEmbed(options, SplitType.Line, new() { Color = DiscordColor.Azure });
                 await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages);
             }
         }
@@ -155,16 +149,16 @@ public class ConfigModule : BaseCommandModule
         [Description("View in-depth greeting-related config.")]
         public async Task Greeting(CommandContext ctx)
         {
-            var contentBuilder = new StringBuilder();
-            GuildConfigEntity? config = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
+            var                contentBuilder = new StringBuilder();
+            GuildConfigEntity? config         = await _mediator.Send(new GetGuildConfigRequest(ctx.Guild.Id));
 
             contentBuilder
-                .Clear()
-                .AppendLine("__**Greeting option:**__")
-                .AppendLine($"> Option: {config.GreetingOption.Humanize()}")
-                .AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
-                .AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"\n\n{config.GreetingText}")}")
-                .AppendLine($"> Greeting role: {(config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is var role and not 0 ? $"<@&{role}>" : "N/A")}");
+               .Clear()
+               .AppendLine("__**Greeting option:**__")
+               .AppendLine($"> Option: {config.GreetingOption.Humanize()}")
+               .AppendLine($"> Greeting channel {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"<#{config.GreetingChannel}>")}")
+               .AppendLine($"> Greeting text: {(config.GreetingOption is GreetingOption.DoNotGreet ? "N/A" : $"\n\n{config.GreetingText}")}")
+               .AppendLine($"> Greeting role: {(config.GreetingOption is GreetingOption.GreetOnRole && config.VerificationRole is var role and not 0 ? $"<@&{role}>" : "N/A")}");
 
             string? explanation = config.GreetingOption switch
             {
@@ -176,14 +170,14 @@ public class ConfigModule : BaseCommandModule
             };
 
             contentBuilder
-                .AppendLine()
-                .AppendLine("**Greeting option explanation:**")
-                .AppendLine(explanation);
+               .AppendLine()
+               .AppendLine("**Greeting option explanation:**")
+               .AppendLine(explanation);
 
             DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Azure)
-                .WithTitle($"Config for {ctx.Guild.Name}")
-                .WithDescription(contentBuilder.ToString());
+                                        .WithColor(DiscordColor.Azure)
+                                        .WithTitle($"Config for {ctx.Guild.Name}")
+                                        .WithDescription(contentBuilder.ToString());
 
             await ctx.RespondAsync(embed);
         }
@@ -193,31 +187,31 @@ public class ConfigModule : BaseCommandModule
         public async Task Invites(CommandContext ctx)
         {
             //TODO: config view invites-list
-            GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-            var contentBuilder = new StringBuilder();
+            GuildModConfigEntity? config         = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
+            var                   contentBuilder = new StringBuilder();
 
             contentBuilder
-                .Clear()
-                .AppendLine("__Invites:__")
-                .AppendLine($"> Scan invite: <:_:{(config.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Warn on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine($@"> Use aggressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-                .AppendLine()
-                .AppendLine($"> Allowed invites: {(config.AllowedInvites.Count is 0 ? "There are no whitelisted invites!" : $"{config.AllowedInvites.Count} allowed invites:")}")
-                .AppendLine($"> {config.AllowedInvites.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
+               .Clear()
+               .AppendLine("__Invites:__")
+               .AppendLine($"> Scan invite: <:_:{(config.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($@"> Use aggressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine()
+               .AppendLine($"> Allowed invites: {(config.AllowedInvites.Count is 0 ? "There are no whitelisted invites!" : $"{config.AllowedInvites.Count} allowed invites:")}")
+               .AppendLine($"> {config.AllowedInvites.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
 
             if (config.AllowedInvites.Count > 15)
                 contentBuilder.AppendLine($"..Plus {config.AllowedInvites.Count - 15} more");
 
             contentBuilder
-                .AppendLine("Aggressive pattern matching are any invites that match this rule:")
-                .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`");
+               .AppendLine("Aggressive pattern matching are any invites that match this rule:")
+               .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`");
 
             DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-                .WithTitle($"Configuration for {ctx.Guild.Name}:")
-                .WithColor(DiscordColor.Azure)
-                .WithDescription(contentBuilder.ToString());
+                                        .WithTitle($"Configuration for {ctx.Guild.Name}:")
+                                        .WithColor(DiscordColor.Azure)
+                                        .WithDescription(contentBuilder.ToString());
 
             await ctx.RespondAsync(embed);
         }
@@ -229,31 +223,31 @@ public class ConfigModule : BaseCommandModule
             GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
             StringBuilder? contentBuilder = new StringBuilder()
-                .AppendLine("__Infractions:__")
-                .AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
-                .AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
-                .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
+                                           .AppendLine("__Infractions:__")
+                                           .AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
+                                           .AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
+                                           .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
 
             if (config.InfractionSteps.Any())
             {
                 contentBuilder
-                    .AppendLine()
-                    .AppendLine("Infraction steps:")
-                    .AppendLine(config.InfractionSteps.Select((inf, count) => $"` {count + 1} ` strikes -> {inf.Type} {(inf.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Duration.Time.Humanize()}")}").Join("\n"));
+                   .AppendLine()
+                   .AppendLine("Infraction steps:")
+                   .AppendLine(config.InfractionSteps.Select((inf, count) => $"` {count + 1} ` strikes -> {inf.Type} {(inf.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Duration.Time.Humanize()}")}").Join("\n"));
             }
 
             if (config.NamedInfractionSteps?.Any() ?? false)
             {
                 contentBuilder
-                    .AppendLine()
-                    .AppendLine("Auto-Mod action steps:")
-                    .AppendLine(config.NamedInfractionSteps.Select(inf => $"`{inf.Key}` -> {inf.Value.Type} {(inf.Value.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Value.Duration.Time.Humanize()}")}").Join("\n"));
+                   .AppendLine()
+                   .AppendLine("Auto-Mod action steps:")
+                   .AppendLine(config.NamedInfractionSteps.Select(inf => $"`{inf.Key}` -> {inf.Value.Type} {(inf.Value.Duration == NpgsqlTimeSpan.Zero ? "" : $"For {inf.Value.Duration.Time.Humanize()}")}").Join("\n"));
             }
 
             DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-                .WithTitle($"Configuration for {ctx.Guild.Name}:")
-                .WithColor(DiscordColor.Azure)
-                .WithDescription(contentBuilder.ToString());
+                                        .WithTitle($"Configuration for {ctx.Guild.Name}:")
+                                        .WithColor(DiscordColor.Azure)
+                                        .WithDescription(contentBuilder.ToString());
 
             await ctx.RespondAsync(embed);
         }
@@ -284,9 +278,9 @@ public class ConfigModule : BaseCommandModule
         [Description("Edit the mute role to give to members when muting. If this isn't configured, one will be generated as necessary.")]
         public async Task Mute(CommandContext ctx, DiscordRole role)
         {
-            bool notMuteRole = role.Permissions.HasPermission(Permissions.SendMessages);
+            bool notMuteRole       = role.Permissions.HasPermission(Permissions.SendMessages);
             bool canChangeMuteRole = ctx.Guild.CurrentMember.HasPermission(Permissions.ManageRoles);
-            bool roleTooHigh = ctx.Guild.CurrentMember.Roles.Max(r => r.Position) <= role.Position;
+            bool roleTooHigh       = ctx.Guild.CurrentMember.Roles.Max(r => r.Position) <= role.Position;
 
             if (notMuteRole)
             {
@@ -451,8 +445,8 @@ public class ConfigModule : BaseCommandModule
         {
             DiscordMessageBuilder? builder = new DiscordMessageBuilder().WithContent("Are you sure?").AddComponents(_yesButton, _noButton);
 
-            DiscordMessage? message = await builder.SendAsync(channel);
-            CancellationToken token = GetTokenFromWaitQueue(user.Id);
+            DiscordMessage?   message = await builder.SendAsync(channel);
+            CancellationToken token   = GetTokenFromWaitQueue(user.Id);
 
             InteractivityResult<ComponentInteractionCreateEventArgs> interactivityResult = await channel.GetClient().GetInteractivity().WaitForButtonAsync(message, user, token);
 
@@ -466,14 +460,14 @@ public class ConfigModule : BaseCommandModule
             if (interactivityResult.Result.Id == _yesButton.CustomId)
             {
                 await interactivityResult.Result
-                    .Interaction
-                    .CreateResponseAsync(InteractionResponseType.UpdateMessage, _confirmBuilder);
+                                         .Interaction
+                                         .CreateResponseAsync(InteractionResponseType.UpdateMessage, _confirmBuilder);
 
                 return true;
             }
             await interactivityResult.Result
-                .Interaction
-                .CreateResponseAsync(InteractionResponseType.UpdateMessage, _declineBuilder);
+                                     .Interaction
+                                     .CreateResponseAsync(InteractionResponseType.UpdateMessage, _declineBuilder);
 
             return false;
         }
@@ -484,7 +478,7 @@ public class ConfigModule : BaseCommandModule
         /// <param name="id">The id of the user to look up.</param>
         private static void EnsureCancellationTokenCancellation(ulong id)
         {
-            if (_tokens.TryRemove(id, out var token))
+            if (_tokens.TryRemove(id, out CancellationTokenSource? token))
             {
                 token.Cancel();
                 token.Dispose();
@@ -715,7 +709,7 @@ public class ConfigModule : BaseCommandModule
 
                     GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
-                    foreach (var inviteCode in invites)
+                    foreach (string inviteCode in invites)
                     {
                         DiscordInvite inviteObj;
                         try
@@ -924,17 +918,17 @@ public class ConfigModule : BaseCommandModule
 
                 GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
-                if (config.NamedInfractionSteps.TryGetValue(option, out var action))
+                if (config.NamedInfractionSteps.TryGetValue(option, out InfractionStepEntity? action))
                 {
-                    action.Type = type;
+                    action.Type     = type;
                     action.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
                 }
                 else
                 {
                     config.NamedInfractionSteps[option] = new()
                     {
-                        Type = type,
-                        Config = config,
+                        Type     = type,
+                        Config   = config,
                         Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero),
                     };
                 }
@@ -1018,7 +1012,7 @@ public class ConfigModule : BaseCommandModule
                     InfractionStepEntity? step = conf.InfractionSteps[(int)index - 1];
 
                     step.Duration = NpgsqlTimeSpan.ToNpgsqlTimeSpan(duration ?? TimeSpan.Zero);
-                    step.Type = type;
+                    step.Type     = type;
 
                     await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { InfractionSteps = conf.InfractionSteps });
                 }

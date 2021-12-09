@@ -22,9 +22,9 @@ public class AddUserHandler : IRequestHandler<AddUserRequest, UserEntity>
     {
         var user = new UserEntity
         {
-            Id = request.UserId,
+            Id      = request.UserId,
             GuildId = request.GuildId,
-            Flags = request.Flags ?? UserFlag.None
+            Flags   = request.Flags ?? UserFlag.None
         };
 
         _db.Users.Add(user);

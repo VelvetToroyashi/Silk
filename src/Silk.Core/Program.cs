@@ -28,8 +28,8 @@ public class Program
     public static async Task Main()
     {
         IHostBuilder? hostBuilder = Host
-            .CreateDefaultBuilder()
-            .UseConsoleLifetime();
+                                   .CreateDefaultBuilder()
+                                   .UseConsoleLifetime();
 
         hostBuilder.ConfigureAppConfiguration(configuration =>
         {
@@ -39,11 +39,11 @@ public class Program
         });
 
         ConfigureServices(hostBuilder);
-            
-        var host = hostBuilder.Build();
+
+        IHost? host = hostBuilder.Build();
 
         await EnsureDatabaseCreatedAndApplyMigrations(host);
-            
+
         await host.RunAsync();
     }
 
@@ -51,18 +51,18 @@ public class Program
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
         IHostBuilder? builder = Host
-            .CreateDefaultBuilder(args);
+           .CreateDefaultBuilder(args);
 
         builder.ConfigureServices((context, container) =>
         {
             SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
-                
+
             AddDatabases(container, silkConfig.Persistence);
         });
 
         return builder;
     }
-        
+
     private static async Task EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
     {
         try
@@ -71,8 +71,8 @@ public class Program
             if (serviceScope is not null)
             {
                 await using GuildContext? dbContext = serviceScope.ServiceProvider
-                    .GetRequiredService<IDbContextFactory<GuildContext>>()
-                    .CreateDbContext();
+                                                                  .GetRequiredService<IDbContextFactory<GuildContext>>()
+                                                                  .CreateDbContext();
 
                 IEnumerable<string>? pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
 
@@ -86,20 +86,20 @@ public class Program
     private static IHostBuilder ConfigureServices(IHostBuilder builder)
     {
         builder
-            .ConfigureLogging(l => l.ClearProviders().AddSerilog())
-            .ConfigureServices((context, services) =>
+           .ConfigureLogging(l => l.ClearProviders().AddSerilog())
+           .ConfigureServices((context, services) =>
             {
                 // There's a more elegant way to do this, but I'm lazy and this works.
                 SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
                 AddSilkConfigurationOptions(services, context.Configuration);
                 AddDatabases(services, silkConfig.Persistence);
-                    
+
                 services.AddRemoraServices();
                 services.AddSilkLogging(context);
 
                 services.AddCondition<RequireNSFWCondition>();
-                    
+
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
@@ -114,11 +114,11 @@ public class Program
                 services.AddMediatR(typeof(Program));
                 services.AddMediatR(typeof(GuildContext));
             })
-            .AddRemoraHosting();
+           .AddRemoraHosting();
 
         return builder;
     }
-        
+
     private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
     {
         // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure
@@ -152,6 +152,6 @@ public static class IConfigurationExtensions
     /// </summary>
     /// <param name="config">the configuration</param>
     /// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>
-    public static SilkConfigurationOptions GetSilkConfigurationOptionsFromSection(this IConfiguration config) 
+    public static SilkConfigurationOptions GetSilkConfigurationOptionsFromSection(this IConfiguration config)
         => config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
 }

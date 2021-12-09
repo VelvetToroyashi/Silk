@@ -24,23 +24,23 @@ public class BotStatCommand : BaseCommandModule
     [Description("Get the current stats for Silk")]
     public async Task BotStat(CommandContext ctx)
     {
-        using var process = Process.GetCurrentProcess();
-        int guildCount = ctx.Client.Guilds.Count;
-        int memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
+        using var process     = Process.GetCurrentProcess();
+        int       guildCount  = ctx.Client.Guilds.Count;
+        int       memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
         GC.Collect(2, GCCollectionMode.Forced, true, true);
         GC.WaitForPendingFinalizers();
         GC.Collect(2, GCCollectionMode.Forced, true, true);
         DiscordEmbedBuilder embed = new();
         embed
-            .WithTitle("Stats for Silk!")
-            .WithColor(DiscordColor.Gold)
-            .AddField("Latency", $"{ctx.Client.Ping} ms", true)
-            .AddField("Total Guilds", $"{guildCount}", true)
-            .AddField("Total Members", $"{memberCount}", true)
-            .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-            .AddField("Memory", $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB", true)
-            .AddField("Threads", $"{ThreadPool.ThreadCount}", true)
-            .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
+           .WithTitle("Stats for Silk!")
+           .WithColor(DiscordColor.Gold)
+           .AddField("Latency", $"{ctx.Client.Ping} ms", true)
+           .AddField("Total Guilds", $"{guildCount}", true)
+           .AddField("Total Members", $"{memberCount}", true)
+           .AddField("Shards", $"{ctx.Client.ShardCount}", true)
+           .AddField("Memory", $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB", true)
+           .AddField("Threads", $"{ThreadPool.ThreadCount}", true)
+           .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
         await ctx.RespondAsync(embed);
     }
 }

@@ -19,22 +19,22 @@ public sealed class CommandHandler
     public CommandHandler(DiscordClient client, IPrefixCacheService prefixService, IMediator mediator, ILogger<CommandHandler> logger)
     {
         client.MessageCreated += Handle;
-        _prefixService = prefixService;
-        _mediator = mediator;
-        _logger = logger;
+        _prefixService        =  prefixService;
+        _mediator             =  mediator;
+        _logger               =  logger;
     }
-        
+
     public async Task Handle(DiscordClient client, MessageCreateEventArgs args)
     {
-        bool isBot = args.Author.IsBot;
+        bool isBot   = args.Author.IsBot;
         bool isEmpty = string.IsNullOrEmpty(args.Message.Content);
 
         if (isBot || isEmpty)
             return;
 
-        DiscordMember? bot = args.Guild?.CurrentMember;
+        DiscordMember?         bot          = args.Guild?.CurrentMember;
         CommandsNextExtension? commandsNext = client.GetCommandsNext();
-        string prefix = _prefixService.RetrievePrefix(args.Guild?.Id);
+        string                 prefix       = _prefixService.RetrievePrefix(args.Guild?.Id);
 
         int prefixLength = GetPrefixLength(prefix, args.Message, bot);
 

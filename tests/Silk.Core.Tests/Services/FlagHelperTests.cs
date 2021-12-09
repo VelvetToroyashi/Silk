@@ -31,12 +31,12 @@ public class FlagHelperTests
 
         // Set up a blank white image so multiplying will result in the source image
         using var stream = new MemoryStream();
-        using var image = new Image<Rgba32>(3000, 3000);
+        using var image  = new Image<Rgba32>(3000, 3000);
         image.Mutate(x => x.Fill(Color.White));
 
         image.SaveAsPng(stream);
         stream.Position = 0;
-        _mockArray = stream.ToArray();
+        _mockArray      = stream.ToArray();
 
         // Set up an image that exceeds the max size
         using var stream2 = new MemoryStream();
@@ -45,7 +45,7 @@ public class FlagHelperTests
         imageThatExceedsMaxSize.Mutate(x => x.Fill(Color.White));
 
         imageThatExceedsMaxSize.SaveAsPng(stream2);
-        stream2.Position = 0;
+        stream2.Position         = 0;
         _imageThatExceedsMaxSize = stream2.ToArray();
 
         _ = _enby;
@@ -161,14 +161,14 @@ public class FlagHelperTests
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
+           .Protected()
+           .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
         //.ReturnsAsync();
 
         // Act
@@ -176,8 +176,8 @@ public class FlagHelperTests
 
         // Assert
         mockHttpMessageHandler
-            .Protected()
-            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+           .Protected()
+           .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Test]
@@ -185,15 +185,15 @@ public class FlagHelperTests
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         mockHttpMessageHandler
-            .Protected()
-            .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.MethodNotAllowed))
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
+           .Protected()
+           .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.MethodNotAllowed))
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
 
 
         // Act
@@ -201,8 +201,8 @@ public class FlagHelperTests
 
         // Assert
         mockHttpMessageHandler
-            .Protected()
-            .Verify("SendAsync", Times.Exactly(2), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+           .Protected()
+           .Verify("SendAsync", Times.Exactly(2), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Test]
@@ -210,14 +210,14 @@ public class FlagHelperTests
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound));
+           .Protected()
+           .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound));
 
         // Act
         FlagResult? result = null;
@@ -234,14 +234,14 @@ public class FlagHelperTests
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
+           .Protected()
+           .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = int.MaxValue } } });
 
         // Act
         FlagResult? result = null;
@@ -258,17 +258,17 @@ public class FlagHelperTests
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         Func<HttpResponseMessage> response = () => new(HttpStatusCode.OK) { Content = new ByteArrayContent(_imageThatExceedsMaxSize) { Headers = { ContentLength = _imageThatExceedsMaxSize.Length } } };
 
         mockHttpMessageHandler
-            .Protected()
-            .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(response)  // We perform a preflight request to get the content length, and then we perform the actual request
-            .ReturnsAsync(response); // Since the request gets disposed, we need to re-create it
+           .Protected()
+           .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(response)  // We perform a preflight request to get the content length, and then we perform the actual request
+           .ReturnsAsync(response); // Since the request gets disposed, we need to re-create it
 
         // Act
         FlagResult? result = null;
@@ -287,15 +287,15 @@ public class FlagHelperTests
         var buffer = new byte[_mockArray.Length];
 
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var httpClient             = new HttpClient(mockHttpMessageHandler.Object);
 
         var flagHelper = new FlagOverlayService(httpClient);
 
         mockHttpMessageHandler
-            .Protected()
-            .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers = { ContentLength = _mockArray.Length } } })
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new MemoryStream(_mockArray)) { Headers = { ContentLength = _mockArray.Length } } });
+           .Protected()
+           .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") { Headers                           = { ContentLength = _mockArray.Length } } })
+           .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new MemoryStream(_mockArray)) { Headers = { ContentLength = _mockArray.Length } } });
 
         // Act
         FlagResult? result = null;
@@ -307,7 +307,7 @@ public class FlagHelperTests
         Assert.AreEqual(FlagResultType.Succeeded, result.Reason);
 
         Image<Rgba32> expected = _enby;
-        Image<Rgba32> actual = Image.Load<Rgba32>(result.Image);
+        Image<Rgba32> actual   = Image.Load<Rgba32>(result.Image);
 
         for (var i = 0; i < expected.Height; i++)
         {

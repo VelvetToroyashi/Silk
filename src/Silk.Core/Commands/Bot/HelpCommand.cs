@@ -16,14 +16,11 @@ public class HelpCommand : CommandGroup
     private readonly CommandHelpViewer _help;
     public HelpCommand(CommandHelpViewer help, ICommandContext context)
     {
-        _help = help;
+        _help    = help;
         _context = context;
     }
 
     [Command("help")]
     [Description("Shows help for a command or group of commands.")]
-    public Task<Result<IMessage>> Help([Greedy] [Description("View help about a command. Omit to show all commands.")] string? command = null)
-    {
-        return _help.SendHelpAsync(command, _context.ChannelID);
-    }
+    public Task<Result<IMessage>> Help([Greedy] [Description("View help about a command. Omit to show all commands.")] string? command = null) => _help.SendHelpAsync(command, _context.ChannelID);
 }

@@ -10,7 +10,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
     {
         builder.HasKey(u => new { u.Id, u.GuildId });
         builder.HasOne(u => u.History)
-            .WithOne(h => h.User)
-            .HasForeignKey<UserHistoryEntity>(u => new { u.UserId, u.GuildId });
+               .WithOne(h => h.User)
+               .HasForeignKey<UserHistoryEntity>(u => new { u.UserId, u.GuildId });
     }
 }

@@ -24,10 +24,10 @@ public class BotExceptionHandler
 
     public BotExceptionHandler(ILogger<BotExceptionHandler> logger, DiscordClient client)
     {
-        _logger = logger;
-        _client = client;
+        _logger               =  logger;
+        _client               =  client;
         _client.ClientErrored += OnClientErrored;
-        _client.SocketClosed += OnSocketErrored;
+        _client.SocketClosed  += OnSocketErrored;
     }
 
     private async Task OnCommandErrored(CommandsNextExtension c, CommandErrorEventArgs e)
@@ -92,14 +92,14 @@ public class BotExceptionHandler
     private async Task SendHelpAsync(DiscordClient c, string commandName, CommandContext originalContext)
     {
         CommandsNextExtension? cnext = c.GetCommandsNext();
-        Command? cmd = cnext.RegisteredCommands["help"];
-        CommandContext? ctx = cnext.CreateContext(originalContext.Message, null, cmd, commandName);
+        Command?               cmd   = cnext.RegisteredCommands["help"];
+        CommandContext?        ctx   = cnext.CreateContext(originalContext.Message, null, cmd, commandName);
         await cnext.ExecuteCommandAsync(ctx);
     }
     public async Task SubscribeToEventsAsync()
     {
         _logger.LogInformation(EventIds.EventHandler, "Hooking task and command exception events");
-        TaskScheduler.UnobservedTaskException += async (_, e) => _logger.LogError(EventIds.EventHandler, "Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
+        TaskScheduler.UnobservedTaskException    += async (_, e) => _logger.LogError(EventIds.EventHandler, "Task Scheduler caught an unobserved exception: {Exception}", e.Exception);
         _client.GetCommandsNext().CommandErrored += OnCommandErrored;
         _logger.LogDebug(EventIds.EventHandler, "Registered command exception-handler");
     }

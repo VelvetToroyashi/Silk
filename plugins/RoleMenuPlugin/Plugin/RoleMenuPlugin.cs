@@ -16,8 +16,8 @@ namespace RoleMenuPlugin
         public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordClient client, RoleMenuContext db)
         {
             _roleMenu = roleMenu;
-            _client = client;
-            _db = db;
+            _client   = client;
+            _db       = db;
 
             Version = GetType().Assembly.GetName().Version!.ToString(3);
         }

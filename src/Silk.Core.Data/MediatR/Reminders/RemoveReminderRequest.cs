@@ -23,7 +23,7 @@ public class RemoveReminderHandler : IRequestHandler<RemoveReminderRequest>
     public async Task<Unit> Handle(RemoveReminderRequest request, CancellationToken cancellationToken)
     {
         ReminderEntity? reminder = await _db.Reminders
-            .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
+                                            .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
 
         if (reminder is not null)
         {

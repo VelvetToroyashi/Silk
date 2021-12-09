@@ -13,7 +13,7 @@ public sealed class MemberRemovedHandler
     public MemberRemovedHandler(DiscordClient client, GuildConfigCacheService guildConfigCacheService)
     {
         client.GuildMemberRemoved += OnMemberRemoved;
-        _guildConfigCacheService = guildConfigCacheService;
+        _guildConfigCacheService  =  guildConfigCacheService;
     }
 
     public async Task OnMemberRemoved(DiscordClient c, GuildMemberRemoveEventArgs e)
@@ -24,13 +24,11 @@ public sealed class MemberRemovedHandler
             await e.Guild.GetChannel(config.LoggingChannel).SendMessageAsync(GetLeaveEmbed(e));
     }
 
-    private static DiscordEmbedBuilder GetLeaveEmbed(GuildMemberRemoveEventArgs e)
-    {
-        return new DiscordEmbedBuilder()
-            .WithTitle("User joined:")
-            .WithDescription($"User: {e.Member.Mention}")
-            .AddField("User ID:", e.Member.Id.ToString(), true)
-            .WithThumbnail(e.Member.AvatarUrl)
-            .WithColor(DiscordColor.Green);
-    }
+    private static DiscordEmbedBuilder GetLeaveEmbed(GuildMemberRemoveEventArgs e) =>
+        new DiscordEmbedBuilder()
+           .WithTitle("User joined:")
+           .WithDescription($"User: {e.Member.Mention}")
+           .AddField("User ID:", e.Member.Id.ToString(), true)
+           .WithThumbnail(e.Member.AvatarUrl)
+           .WithColor(DiscordColor.Green);
 }

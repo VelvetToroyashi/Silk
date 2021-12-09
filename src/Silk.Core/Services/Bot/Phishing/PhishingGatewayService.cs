@@ -22,12 +22,12 @@ public sealed class PhishingGatewayService : IHostedService
 
     private const int WebSocketBufferSize = 16 * 1024;
 
-    private readonly HttpClient                  _client;
-    private readonly ClientWebSocket             _ws      = new();
-    private readonly HashSet<string>             _domains = new();
-    private readonly CancellationTokenSource     _cts     = new();
+    private readonly HttpClient                      _client;
+    private readonly ClientWebSocket                 _ws      = new();
+    private readonly HashSet<string>                 _domains = new();
+    private readonly CancellationTokenSource         _cts     = new();
     private readonly ILogger<PhishingGatewayService> _logger;
-        
+
     public PhishingGatewayService(ILogger<PhishingGatewayService> logger, HttpClient client)
     {
         _logger = logger;
@@ -113,7 +113,7 @@ public sealed class PhishingGatewayService : IHostedService
 
                 JObject? payload = JObject.Parse(json);
 
-                var command = payload["type"]!.ToString();                     // "add" or "delete"
+                var       command = payload["type"]!.ToString();               // "add" or "delete"
                 string[]? domains = payload["domains"]!.ToObject<string[]>()!; // An array of domains. 
 
                 HandleWebsocketCommand(command, domains);
@@ -164,10 +164,10 @@ public sealed class PhishingGatewayService : IHostedService
             return false;
         }
 
-        string? json = await res.Content.ReadAsStringAsync();
+        string?   json    = await res.Content.ReadAsStringAsync();
         string[]? payload = JsonConvert.DeserializeObject<string[]>(json)!;
 
-        foreach (var domain in payload)
+        foreach (string domain in payload)
             _domains.Add(domain);
 
         _logger.LogInformation(EventIds.Service, "Retrieved {Count} phishing domains via REST", payload.Length);
@@ -182,13 +182,13 @@ public sealed class PhishingGatewayService : IHostedService
             case "add":
                 _logger.LogDebug(EventIds.Service, "Adding {Count} new domains.", domains.Length);
 
-                foreach (var domain in domains)
+                foreach (string domain in domains)
                     _domains.Add(domain);
                 break;
 
             case "delete":
                 _logger.LogDebug(EventIds.Service, "Removing {Count} domains.", domains.Length);
-                foreach (var domain in domains)
+                foreach (string domain in domains)
                     _domains.Remove(domain);
                 break;
 

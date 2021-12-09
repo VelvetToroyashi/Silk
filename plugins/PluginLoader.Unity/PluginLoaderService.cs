@@ -11,10 +11,10 @@ using YumeChan.PluginBase;
 
 namespace PluginLoader.Unity
 {
-	/// <summary>
-	///     A service for loading plugins.
-	/// </summary>
-	public sealed class PluginLoaderService : IPluginLoaderService
+    /// <summary>
+    ///     A service for loading plugins.
+    /// </summary>
+    public sealed class PluginLoaderService : IPluginLoaderService
     {
         private readonly DiscordClient                 _client;
         private readonly PluginLoader                  _loader;
@@ -29,8 +29,8 @@ namespace PluginLoader.Unity
 
         public async Task LoadPluginsAsync()
         {
-            FileInfo[] files = _loader.DiscoverPluginFiles("./plugins");
-            var manifests = new List<PluginManifest>();
+            FileInfo[] files     = _loader.DiscoverPluginFiles("./plugins");
+            var        manifests = new List<PluginManifest>();
 
             foreach (FileInfo file in files)
                 manifests.Add(_loader.LoadPluginFile(file));

@@ -22,7 +22,7 @@ public static class SnowflakeExtensions
         if (prop is null)
             throw new ArgumentException("Snowflake object in collection does not contain a 'Type' property to check.");
 
-        foreach (var entity in snowflakeObjects)
+        foreach (SnowflakeObject entity in snowflakeObjects)
         {
             var value = (T)prop.GetValue(entity)!;
 
@@ -36,16 +36,16 @@ public static class SnowflakeExtensions
         Type type = snowflake.GetType() == typeof(SnowflakeObject) ? snowflake.GetType() : snowflake.GetType().BaseType!;
 
         var client = type
-            .GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetValue(snowflake) as DiscordClient;
+                    .GetProperty("Discord", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(snowflake) as DiscordClient;
         return client!;
     }
 
     public static DiscordApiClient GetApiClient(this DiscordClient client)
     {
         var api = typeof(DiscordClient)
-            .GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!
-            .GetValue(client) as DiscordApiClient;
+                 .GetProperty("ApiClient", BindingFlags.Instance | BindingFlags.NonPublic)!
+                 .GetValue(client) as DiscordApiClient;
         return api!;
     }
 }

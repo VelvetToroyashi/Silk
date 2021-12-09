@@ -18,16 +18,16 @@ public sealed class PrefixCacheService : IPrefixCacheService
     private readonly IMemoryCache                _memoryCache;
     public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
     {
-        _logger = logger;
+        _logger      = logger;
         _memoryCache = memoryCache;
-        _mediator = mediator;
+        _mediator    = mediator;
     }
 
     [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
     public string RetrievePrefix(ulong? guildId)
     {
         if (guildId is null or 0) return string.Empty;
-        if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out var prefix)) return (string)prefix;
+        if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out object? prefix)) return (string)prefix;
         return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
     }
 
@@ -49,8 +49,5 @@ public sealed class PrefixCacheService : IPrefixCacheService
         return guild.Prefix;
     }
 
-    private static string GetGuildString(ulong id)
-    {
-        return $"GUILD_PREFIX_KEY_{id}";
-    }
+    private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
 }

@@ -5,8 +5,5 @@ namespace Silk.Core.Utilities.HttpClient;
 
 public static class HttpClientExtensions
 {
-    public static System.Net.Http.HttpClient CreateSilkClient(this IHttpClientFactory httpClientFactory)
-    {
-        return httpClientFactory.CreateClient(StringConstants.HttpClientName);
-    }
+    public static System.Net.Http.HttpClient CreateSilkClient(this IHttpClientFactory httpClientFactory) => httpClientFactory.CreateClient(StringConstants.HttpClientName);
 }

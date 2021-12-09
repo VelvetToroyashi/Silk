@@ -30,7 +30,7 @@ public class EnlargeCommand : BaseCommandModule
             embed.WithFooter(emoji.Name);
             embed.WithImageUrl(emoji.Url + "?size=2048");
             message.WithEmbed(embed)
-                .WithReply(ctx.Message.Id);
+                   .WithReply(ctx.Message.Id);
             await ctx.RespondAsync(message);
         }
         else // Unicode emote.
@@ -43,9 +43,9 @@ public class EnlargeCommand : BaseCommandModule
             Stream? image = await RenderEmojiAsync(emoji.Name);
 
             DiscordMessageBuilder? message = new DiscordMessageBuilder()
-                .WithEmbed(embed)
-                .WithFile("emote.jpeg", image)
-                .WithReply(ctx.Message.Id);
+                                            .WithEmbed(embed)
+                                            .WithFile("emote.jpeg", image)
+                                            .WithReply(ctx.Message.Id);
 
             await message.SendAsync(ctx.Channel);
         }
@@ -54,10 +54,10 @@ public class EnlargeCommand : BaseCommandModule
     private async Task<Stream> RenderEmojiAsync(string unicodeEmoji)
     {
         Stream svgStream,
-            imageStream = new MemoryStream();
+               imageStream = new MemoryStream();
 
         var emojiHex = char.ConvertToUtf32(unicodeEmoji, 0).ToString("X4");
-        var url = $"https://twemoji.maxcdn.com/2/svg/{emojiHex.ToLower()}.svg";
+        var url      = $"https://twemoji.maxcdn.com/2/svg/{emojiHex.ToLower()}.svg";
         svgStream = await _httpClientFactory.CreateSilkClient().GetStreamAsync(url);
 
         var svg = new SKSvg();

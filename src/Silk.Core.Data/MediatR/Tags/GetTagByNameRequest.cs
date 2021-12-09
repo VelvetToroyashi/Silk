@@ -18,20 +18,20 @@ public record GetTagByNameRequest(string Name, ulong GuildId) : IRequest<IEnumer
 /// </summary>
 public class GetTagByNameHandler : IRequestHandler<GetTagByNameRequest, IEnumerable<TagEntity>>
 {
-	private readonly GuildContext _db;
+    private readonly GuildContext _db;
 
-	public GetTagByNameHandler(GuildContext db) => _db = db;
+    public GetTagByNameHandler(GuildContext db) => _db = db;
 
-	public async Task<IEnumerable<TagEntity>> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
-	{
-		TagEntity[] tags = await _db
-			.Tags
-			.Include(t => t.Aliases)
-			.Include(t => t.OriginalTag)
-			.AsSplitQuery()
-			.Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
-			.ToArrayAsync(cancellationToken);
+    public async Task<IEnumerable<TagEntity>> Handle(GetTagByNameRequest request, CancellationToken cancellationToken)
+    {
+        TagEntity[] tags = await _db
+                                .Tags
+                                .Include(t => t.Aliases)
+                                .Include(t => t.OriginalTag)
+                                .AsSplitQuery()
+                                .Where(t => EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%'))
+                                .ToArrayAsync(cancellationToken);
 
-		return tags;
-	}
+        return tags;
+    }
 }

@@ -28,28 +28,28 @@ public class ServerInfoCommand : BaseCommandModule
         DiscordGuild guild = await ctx.Client.GetGuildAsync(ctx.Guild.Id, true);
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithTitle($"Guild info for {guild.Name}:")
-            .WithColor(DiscordColor.Gold)
-            .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
+                                   .WithTitle($"Guild info for {guild.Name}:")
+                                   .WithColor(DiscordColor.Gold)
+                                   .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
 
         embed.WithThumbnail(guild.IconUrl);
 
         embed.AddField("Server Icon:", guild.IconUrl is null ? "Not set." : $"[Link]({guild.IconUrl})", true)
-            .AddField("Invite Splash:", guild.SplashUrl is null ? "Not set." : $"[Link]({guild.SplashUrl})", true)
-            .AddField("Server banner:", guild.BannerUrl is null ? "Not set." : $"[Link]({guild.BannerUrl})", true);
+             .AddField("Invite Splash:", guild.SplashUrl is null ? "Not set." : $"[Link]({guild.SplashUrl})", true)
+             .AddField("Server banner:", guild.BannerUrl is null ? "Not set." : $"[Link]({guild.BannerUrl})", true);
 
         var stringBuilder = new StringBuilder();
         stringBuilder
-            .AppendLine($"Max: {guild.MaxMembers}")
-            .AppendLine($"Online: {guild.ApproximatePresenceCount.Value}")
-            .AppendLine($"Offline: {guild.Members.Count - guild.ApproximatePresenceCount.Value}")
-            .AppendLine($"**Total**: {guild.MemberCount}");
+           .AppendLine($"Max: {guild.MaxMembers}")
+           .AppendLine($"Online: {guild.ApproximatePresenceCount.Value}")
+           .AppendLine($"Offline: {guild.Members.Count - guild.ApproximatePresenceCount.Value}")
+           .AppendLine($"**Total**: {guild.MemberCount}");
         embed.AddField("Members:", stringBuilder.ToString(), true);
         stringBuilder.Clear();
 
 
         IEnumerable<IGrouping<ChannelType, KeyValuePair<ulong, DiscordChannel>>>? cTypes = guild.Channels.GroupBy(g => g.Value.Type);
-        foreach (var type in cTypes)
+        foreach (IGrouping<ChannelType, KeyValuePair<ulong, DiscordChannel>> type in cTypes)
         {
             _ = type.Key switch
             {
@@ -82,9 +82,9 @@ public class ServerInfoCommand : BaseCommandModule
         };
 
         stringBuilder
-            .AppendLine($"Emojis: {ctx.Guild.Emojis.Count}/{maxEmojis * 2}")
-            .AppendLine($"Roles: {guild.Roles.Count}/250")
-            .AppendLine($"Boosts: {guild.PremiumSubscriptionCount ?? 0} {tierName}");
+           .AppendLine($"Emojis: {ctx.Guild.Emojis.Count}/{maxEmojis * 2}")
+           .AppendLine($"Roles: {guild.Roles.Count}/250")
+           .AppendLine($"Boosts: {guild.PremiumSubscriptionCount ?? 0} {tierName}");
 
         embed.AddField("Other information:", stringBuilder.ToString(), true);
         stringBuilder.Clear();
@@ -92,8 +92,8 @@ public class ServerInfoCommand : BaseCommandModule
 
         var creation = $"{Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow)})";
         embed.AddField("Server Owner:", guild.Owner.Mention, true)
-            .AddField("Most recent member:", guild.Members.OrderBy(m => m.Value.JoinedAt).Last().Value.Mention, true)
-            .AddField("Creation date:", creation);
+             .AddField("Most recent member:", guild.Members.OrderBy(m => m.Value.JoinedAt).Last().Value.Mention, true)
+             .AddField("Creation date:", creation);
 
 
         embed.AddField("Guild features:", guild.Features.Select(ft => ft.ToLower().Titleize()).Join(", "));

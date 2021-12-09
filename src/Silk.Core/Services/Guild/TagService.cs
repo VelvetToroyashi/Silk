@@ -13,10 +13,7 @@ public sealed class TagService
     private readonly IMediator _mediator;
     public TagService(IMediator mediator) => _mediator = mediator;
 
-    public async Task<TagEntity?> GetTagAsync(string tagName, ulong guildId)
-    {
-        return await _mediator.Send(new GetTagRequest(tagName, guildId));
-    }
+    public async Task<TagEntity?> GetTagAsync(string tagName, ulong guildId) => await _mediator.Send(new GetTagRequest(tagName, guildId));
 
     /// <summary>
     ///     Creates a tag that points to another tag.
@@ -81,10 +78,7 @@ public sealed class TagService
     /// <param name="tag">The tag to update.</param>
     /// <param name="guildId">The Id of the guild the tag belongs to.</param>
     /// <param name="newOwnerId">The Id of the tag's new owner.</param>
-    public Task ClaimTagAsync(string tag, ulong guildId, ulong newOwnerId)
-    {
-        return _mediator.Send(new UpdateTagRequest(tag, guildId) { OwnerId = newOwnerId });
-    }
+    public Task ClaimTagAsync(string tag, ulong guildId, ulong newOwnerId) => _mediator.Send(new UpdateTagRequest(tag, guildId) { OwnerId = newOwnerId });
 
     /// <summary>
     ///     Creates a tag with a given name.
@@ -107,15 +101,9 @@ public sealed class TagService
     /// </summary>
     /// <param name="tagName">The name of the tag to remove.</param>
     /// <param name="guildId">The Id of the guild the tag belongs to.</param>
-    public Task RemoveTagAsync(string tagName, ulong guildId)
-    {
-        return _mediator.Send(new DeleteTagRequest(tagName, guildId));
-    }
+    public Task RemoveTagAsync(string tagName, ulong guildId) => _mediator.Send(new DeleteTagRequest(tagName, guildId));
 
-    public Task<IEnumerable<TagEntity>> SearchTagsAsync(string tagName, ulong guildId)
-    {
-        return _mediator.Send(new GetTagByNameRequest(tagName, guildId));
-    }
+    public Task<IEnumerable<TagEntity>> SearchTagsAsync(string tagName, ulong guildId) => _mediator.Send(new GetTagByNameRequest(tagName, guildId));
 
     /// <summary>
     ///     Gets a collection of tags a given user owns.
@@ -123,18 +111,12 @@ public sealed class TagService
     /// <param name="ownerId">The Id of the tag owner.</param>
     /// <param name="guildId">The Id of the guild the tag owner is from.</param>
     /// <returns>A collection of tags the tag owner in question owns, or null, if they do not own any tags.</returns>
-    public Task<IEnumerable<TagEntity>> GetUserTagsAsync(ulong ownerId, ulong guildId)
-    {
-        return _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
-    }
+    public Task<IEnumerable<TagEntity>> GetUserTagsAsync(ulong ownerId, ulong guildId) => _mediator.Send(new GetTagByUserRequest(guildId, ownerId));
 
     /// <summary>
     ///     Gets a collection of tags in a guild.
     /// </summary>
     /// <param name="guildId">The Id of the guild.</param>
     /// <returns>A collection of tags in the guild, or null if there are none.</returns>
-    public Task<IEnumerable<TagEntity>> GetGuildTagsAsync(ulong guildId)
-    {
-        return _mediator.Send(new GetTagByGuildRequest(guildId));
-    }
+    public Task<IEnumerable<TagEntity>> GetGuildTagsAsync(ulong guildId) => _mediator.Send(new GetTagByGuildRequest(guildId));
 }

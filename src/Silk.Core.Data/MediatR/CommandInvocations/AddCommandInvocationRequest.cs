@@ -24,7 +24,7 @@ public class AddCommandInvocationHandler : IRequestHandler<AddCommandInvocationR
     {
         CommandInvocationEntity command = new()
         {
-            CommandName = request.CommandName,
+            CommandName    = request.CommandName,
             InvocationTime = DateTime.UtcNow
         };
 

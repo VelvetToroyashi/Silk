@@ -65,7 +65,7 @@ public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerabl
     /// <param name="users">The collection of users to add.</param>
     private async Task AttemptAddUsersSlowAsync(IEnumerable<UserEntity> users)
     {
-        foreach (var user in users)
+        foreach (UserEntity user in users)
         {
             try
             {

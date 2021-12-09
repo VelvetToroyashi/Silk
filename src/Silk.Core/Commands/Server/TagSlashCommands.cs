@@ -36,7 +36,7 @@ public class TagCommands : ApplicationCommandModule
         public TagCommandGroup(TagService tags, IMediator mediator)
         {
 
-            _tags = tags;
+            _tags     = tags;
             _mediator = mediator;
         }
 
@@ -64,8 +64,8 @@ public class TagCommands : ApplicationCommandModule
                 return;
             }
 
-            UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
-            bool staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
+            UserEntity? user  = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+            bool        staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
 
             if (!staff)
             {
@@ -96,12 +96,12 @@ public class TagCommands : ApplicationCommandModule
             DiscordUser tagOwner = await ctx.Client.GetUserAsync(tag.OwnerId);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blurple)
-                .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
-                .WithTitle(tag.Name)
-                .AddField("Uses:", tag.Uses.ToString())
-                .WithFooter("Created:")
-                .WithTimestamp(tag.CreatedAt);
+                                         .WithColor(DiscordColor.Blurple)
+                                         .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                                         .WithTitle(tag.Name)
+                                         .AddField("Uses:", tag.Uses.ToString())
+                                         .WithFooter("Created:")
+                                         .WithTimestamp(tag.CreatedAt);
 
             if (tag.OriginalTag is not null)
                 builder.AddField("Original:", tag.OriginalTag.Name);
@@ -176,16 +176,16 @@ public class TagCommands : ApplicationCommandModule
             }
 
             string allTags = string.Join('\n', tags
-                .Select(t =>
-                {
-                    var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                    return s;
-                }));
+                                            .Select(t =>
+                                             {
+                                                 var s                              = $"`{t.Name}`";
+                                                 if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                                                 return s;
+                                             }));
             DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blurple)
-                .WithTitle($"Tags in {ctx.Guild.Name}:")
-                .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                          .WithColor(DiscordColor.Blurple)
+                                          .WithTitle($"Tags in {ctx.Guild.Name}:")
+                                          .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
             if (tags.Count() < 10)
             {
@@ -217,7 +217,7 @@ public class TagCommands : ApplicationCommandModule
             }
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new() { Content = dbtag.Content });
-            await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Interaction.GuildId.Value) { Uses = dbtag.Uses + 1 });
+            await _mediator.Send(new UpdateTagRequest(dbtag.Name, ctx.Interaction.GuildId.Value) { Uses     = dbtag.Uses + 1 });
         }
 
         [RequireGuild]
@@ -237,9 +237,9 @@ public class TagCommands : ApplicationCommandModule
                 string allTags = string.Join("\n\n", tags.Select(t => $"`{t.Name}`{(t.OriginalTag is null ? "" : $" → `{t.OriginalTag!.Name}`")} - <@{t.OwnerId}>"));
 
                 DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-                    .WithColor(DiscordColor.Blurple)
-                    .WithTitle($"Result for {tagName}:")
-                    .WithDescription(allTags);
+                                              .WithColor(DiscordColor.Blurple)
+                                              .WithTitle($"Result for {tagName}:")
+                                              .WithDescription(allTags);
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
             }
@@ -260,20 +260,20 @@ public class TagCommands : ApplicationCommandModule
             }
 
             string allTags = string.Join('\n', tags
-                .Select(t =>
-                {
-                    var s = $"`{t.Name}`";
+                                            .Select(t =>
+                                             {
+                                                 var s = $"`{t.Name}`";
 
-                    if (t.OriginalTagId is not null)
-                        s += $" → `{t.OriginalTag!.Name}`";
+                                                 if (t.OriginalTagId is not null)
+                                                     s += $" → `{t.OriginalTag!.Name}`";
 
-                    return s;
-                }));
+                                                 return s;
+                                             }));
 
             DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blurple)
-                .WithTitle($"Tags for {user.Username}:")
-                .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                          .WithColor(DiscordColor.Blurple)
+                                          .WithTitle($"Tags for {user.Username}:")
+                                          .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
             if (tags.Count() < 10)
             {
@@ -304,18 +304,18 @@ public class TagCommands : ApplicationCommandModule
             }
 
             string allTags = string.Join('\n', tags.Take(30)
-                .Select(t =>
-                {
-                    var s = $"`{t.Name}`";
-                    if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                    return s;
-                }));
+                                                   .Select(t =>
+                                                    {
+                                                        var s                              = $"`{t.Name}`";
+                                                        if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                                                        return s;
+                                                    }));
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.Blurple)
-                .WithTitle($"Tags in {ctx.Guild.Name}:")
-                .WithDescription(allTags + (tags.Count() > 30 ? $"\n+ {tags.Count() - 30} more..." : ""))
-                .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                         .WithColor(DiscordColor.Blurple)
+                                         .WithTitle($"Tags in {ctx.Guild.Name}:")
+                                         .WithDescription(allTags + (tags.Count() > 30 ? $"\n+ {tags.Count() - 30} more..." : ""))
+                                         .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
         }
@@ -340,8 +340,8 @@ public class TagCommands : ApplicationCommandModule
 
             bool exists = ctx.Guild.Members.ContainsKey(dbTag.OwnerId);
 
-            UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
-            bool staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
+            UserEntity? user  = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
+            bool        staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
 
             if (!staff)
             {

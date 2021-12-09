@@ -55,7 +55,7 @@ public sealed class FlagOverlayService
     public FlagOverlayService(HttpClient httpClient, ILogger<FlagOverlayService> logger)
     {
         _httpClient = httpClient;
-        _logger = logger;
+        _logger     = logger;
     }
 
     public FlagOverlayService(HttpClient client) : this(client, NullLogger<FlagOverlayService>.Instance) { }
@@ -149,10 +149,7 @@ public sealed class FlagOverlayService
         return secondarySizeRequest.Content.Headers.ContentLength < TwoMegaBytes;
     }
 
-    private async Task<MemoryStream> GetImageAsync(Uri imageUri)
-    {
-        return new(await _httpClient.GetByteArrayAsync(imageUri));
-    }
+    private async Task<MemoryStream> GetImageAsync(Uri imageUri) => new(await _httpClient.GetByteArrayAsync(imageUri));
 
     private static class OverlayGuard
     {

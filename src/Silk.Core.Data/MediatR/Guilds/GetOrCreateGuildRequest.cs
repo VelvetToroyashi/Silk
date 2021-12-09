@@ -18,28 +18,28 @@ public record GetOrCreateGuildRequest(ulong GuildId, string Prefix) : IRequest<G
 /// </summary>
 public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, GuildEntity>
 {
-	private readonly GuildContext _db;
-	private readonly IMediator    _mediator;
+    private readonly GuildContext _db;
+    private readonly IMediator    _mediator;
 
-	public GetOrCreateGuildHandler(GuildContext db, IMediator mediator)
-	{
-		_db = db;
-		_mediator = mediator;
-	}
+    public GetOrCreateGuildHandler(GuildContext db, IMediator mediator)
+    {
+        _db       = db;
+        _mediator = mediator;
+    }
 
-	public async Task<GuildEntity> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
-	{
-		GuildEntity? guild = await _db.Guilds
-			.AsSplitQuery()
-			.Include(g => g.Users)
-			.Include(g => g.Infractions)
-			.FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
+    public async Task<GuildEntity> Handle(GetOrCreateGuildRequest request, CancellationToken cancellationToken)
+    {
+        GuildEntity? guild = await _db.Guilds
+                                      .AsSplitQuery()
+                                      .Include(g => g.Users)
+                                      .Include(g => g.Infractions)
+                                      .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
 
-		if (guild is not null)
-			return guild;
+        if (guild is not null)
+            return guild;
 
-		guild = await _mediator.Send(new AddGuildRequest(request.GuildId, request.Prefix), cancellationToken);
+        guild = await _mediator.Send(new AddGuildRequest(request.GuildId, request.Prefix), cancellationToken);
 
-		return guild;
-	}
+        return guild;
+    }
 }

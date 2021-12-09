@@ -17,9 +17,9 @@ namespace AnnoucementPlugin.Database.MediatR
             var announcement = new AnnouncementModel
             {
                 AnnouncementMessage = request.Content,
-                GuildId = request.GuildId,
-                ChannelId = request.ChannelId,
-                ScheduledFor = request.ScheduledFor
+                GuildId             = request.GuildId,
+                ChannelId           = request.ChannelId,
+                ScheduledFor        = request.ScheduledFor
             };
 
             _db.Announcements.Add(announcement);

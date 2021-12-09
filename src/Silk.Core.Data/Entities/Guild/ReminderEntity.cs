@@ -3,7 +3,7 @@
 namespace Silk.Core.Data.Entities;
 
 /// <summary>
-/// A reminder that is sent to a user at a later time.
+///     A reminder that is sent to a user at a later time.
 /// </summary>
 public class ReminderEntity
 {

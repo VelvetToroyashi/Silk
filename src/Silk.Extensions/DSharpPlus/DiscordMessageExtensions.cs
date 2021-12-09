@@ -15,11 +15,11 @@ public static class DiscordMessageExtensions
 {
     public static async Task<DiscordEmoji[]> CreateReactionsAsync(this DiscordMessage msg, params ulong[] emojis)
     {
-        DiscordClient client = msg.GetClient();
-        var emojiArray = new DiscordEmoji[emojis.Length];
+        DiscordClient client     = msg.GetClient();
+        var           emojiArray = new DiscordEmoji[emojis.Length];
         for (var i = 0; i < emojis.Length; i++)
         {
-            ulong e = emojis[i];
+            ulong        e     = emojis[i];
             DiscordEmoji emoji = DiscordEmoji.FromGuildEmote(client, e);
             await msg.CreateReactionAsync(emoji);
             emojiArray[i] = emoji;

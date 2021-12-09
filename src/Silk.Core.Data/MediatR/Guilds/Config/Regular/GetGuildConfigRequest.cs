@@ -17,18 +17,18 @@ public record GetGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?
 /// </summary>
 public class GetGuildConfigHandler : IRequestHandler<GetGuildConfigRequest, GuildConfigEntity?>
 {
-	private readonly GuildContext _db;
-	public GetGuildConfigHandler(GuildContext db) => _db = db;
+    private readonly GuildContext _db;
+    public GetGuildConfigHandler(GuildContext db) => _db = db;
 
-	public async Task<GuildConfigEntity?> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
-	{
-		GuildConfigEntity? config = await _db.GuildConfigs
-			.Include(g => g.Greetings)
-			.Include(c => c.DisabledCommands)
-			//.Include(c => c.BlackListedWords)
-			.AsSplitQuery()
-			.FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
+    public async Task<GuildConfigEntity?> Handle(GetGuildConfigRequest request, CancellationToken cancellationToken)
+    {
+        GuildConfigEntity? config = await _db.GuildConfigs
+                                             .Include(g => g.Greetings)
+                                             .Include(c => c.DisabledCommands)
+                                              //.Include(c => c.BlackListedWords)
+                                             .AsSplitQuery()
+                                             .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
 
-		return config;
-	}
+        return config;
+    }
 }

@@ -31,7 +31,7 @@ public class RegexTest
     {
         string placeholder = Regex.Replace(input, @"({u[ser]?)}", user);
         placeholder = Regex.Replace(placeholder, @"({@u[ser]?})", mention);
-        _ = Regex.Replace(placeholder, @"({s[erver]?})", server);
+        _           = Regex.Replace(placeholder, @"({s[erver]?})", server);
     }
 
     [Benchmark]
@@ -39,6 +39,6 @@ public class RegexTest
     {
         string placeholder = userRegex.Replace(input, user);
         placeholder = mentionRegex.Replace(placeholder, mention);
-        _ = serverRegex.Replace(placeholder, server);
+        _           = serverRegex.Replace(placeholder, server);
     }
 }

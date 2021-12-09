@@ -8,14 +8,14 @@ namespace Silk.Core.EventHandlers.Messages.AutoMod;
 
 public sealed class MessageAddAntiInvite
 {
-    private readonly GuildConfigCacheService    _guildConfigCache;
-    private readonly AntiInviteHelper _inviteHelper;
+    private readonly GuildConfigCacheService _guildConfigCache;
+    private readonly AntiInviteHelper        _inviteHelper;
 
     public MessageAddAntiInvite(DiscordClient client, GuildConfigCacheService guildConfigCache, AntiInviteHelper inviteHelper)
     {
         client.MessageCreated += CheckForInvite;
-        _guildConfigCache = guildConfigCache;
-        _inviteHelper = inviteHelper;
+        _guildConfigCache     =  guildConfigCache;
+        _inviteHelper         =  inviteHelper;
     }
 
     public async Task CheckForInvite(DiscordClient client, MessageCreateEventArgs args)

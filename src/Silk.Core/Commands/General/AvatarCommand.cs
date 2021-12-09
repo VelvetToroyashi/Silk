@@ -22,9 +22,9 @@ public class AvatarCommand : BaseCommandModule
     public async Task GetAvatarAsync(CommandContext ctx, DiscordUser user)
     {
         DiscordEmbedBuilder embedBuilder = DefaultAvatarEmbed(ctx)
-            .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
-            .WithDescription($"{user.Mention}'s Avatar")
-            .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
+                                          .WithAuthor(ctx.User.Username, iconUrl: ctx.User.AvatarUrl)
+                                          .WithDescription($"{user.Mention}'s Avatar")
+                                          .WithImageUrl(AvatarImageResizedUrl(user.AvatarUrl));
 
         await ctx.RespondAsync(embedBuilder);
     }
@@ -37,8 +37,8 @@ public class AvatarCommand : BaseCommandModule
         var builder = new DiscordMessageBuilder();
         builder.WithReply(ctx.Message.Id);
         builder.WithEmbed(DefaultAvatarEmbed(ctx)
-            .WithTitle("Your Avatar!")
-            .WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
+                         .WithTitle("Your Avatar!")
+                         .WithImageUrl(AvatarImageResizedUrl(ctx.User.AvatarUrl)));
         await ctx.RespondAsync(builder);
     }
 
@@ -55,21 +55,16 @@ public class AvatarCommand : BaseCommandModule
         else
         {
             await ctx.RespondAsync(
-                DefaultAvatarEmbed(ctx)
-                    .WithDescription($"{userObj.Mention}'s Avatar")
-                    .WithImageUrl(AvatarImageResizedUrl(userObj.AvatarUrl)));
+                                   DefaultAvatarEmbed(ctx)
+                                      .WithDescription($"{userObj.Mention}'s Avatar")
+                                      .WithImageUrl(AvatarImageResizedUrl(userObj.AvatarUrl)));
         }
     }
 
-    private static string AvatarImageResizedUrl(string avatarUrl)
-    {
-        return avatarUrl.Replace("128", "4096&v=1");
-    }
+    private static string AvatarImageResizedUrl(string avatarUrl) => avatarUrl.Replace("128", "4096&v=1");
 
-    private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx)
-    {
-        return new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.CornflowerBlue)
-            .WithFooter($"Silk! | Requested by {ctx.User.Username}/{ctx.User.Id}", ctx.User.AvatarUrl);
-    }
+    private static DiscordEmbedBuilder DefaultAvatarEmbed(CommandContext ctx) =>
+        new DiscordEmbedBuilder()
+           .WithColor(DiscordColor.CornflowerBlue)
+           .WithFooter($"Silk! | Requested by {ctx.User.Username}/{ctx.User.Id}", ctx.User.AvatarUrl);
 }

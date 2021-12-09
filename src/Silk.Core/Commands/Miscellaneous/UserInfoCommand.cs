@@ -30,23 +30,23 @@ public class UserInfo : BaseCommandModule
     [Description("Get info about a role")]
     public async Task RoleInfo(CommandContext ctx, DiscordRole role)
     {
-        IEnumerable<DiscordMember>? members = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
-        string? memberString = GetRoleMemberCount(ctx, role, members);
+        IEnumerable<DiscordMember>? members      = ctx.Guild.Members.Values.Where(m => m.Roles.Contains(role));
+        string?                     memberString = GetRoleMemberCount(ctx, role, members);
 
         MemoryStream? ms = await GenerateColoredImageAsync(role.Color);
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithTitle($"Info for {role.Name} ({role.Id}):")
-            .WithImageUrl("attachment://color.png")
-            .AddField("Color:", role.Color.ToString())
-            .AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow)})")
-            .AddField("Hoisted:", role.IsHoisted.ToString())
-            .AddField("Hierarchy:", GetHierarchy(ctx, role))
-            .AddField("Bot role:", role.IsManaged.ToString())
-            .AddField("Members:", memberString)
-            .AddField("Mentionable:", role.IsMentionable.ToString())
-            .AddField("Permissions:", role.Permissions.ToPermissionString())
-            .WithColor(role.Color);
+                                   .WithTitle($"Info for {role.Name} ({role.Id}):")
+                                   .WithImageUrl("attachment://color.png")
+                                   .AddField("Color:", role.Color.ToString())
+                                   .AddField("Created:", $"{Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(role.CreationTimestamp - DateTime.UtcNow)})")
+                                   .AddField("Hoisted:", role.IsHoisted.ToString())
+                                   .AddField("Hierarchy:", GetHierarchy(ctx, role))
+                                   .AddField("Bot role:", role.IsManaged.ToString())
+                                   .AddField("Members:", memberString)
+                                   .AddField("Mentionable:", role.IsMentionable.ToString())
+                                   .AddField("Permissions:", role.Permissions.ToPermissionString())
+                                   .WithColor(role.Color);
 
         await ctx.RespondAsync(m => m.WithEmbed(embed).WithFile("color.png", ms));
     }
@@ -56,10 +56,10 @@ public class UserInfo : BaseCommandModule
     public async Task GetUserInfo(CommandContext ctx, DiscordUser user)
     {
         DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Orange)
-            .WithAuthor(user.ToDiscordName(), iconUrl: user.AvatarUrl)
-            .WithDescription($"Information about {user.Mention}!")
-            .WithFooter("⚠This member is not a part of this server, thus API information is limited.⚠");
+                                    .WithColor(DiscordColor.Orange)
+                                    .WithAuthor(user.ToDiscordName(), iconUrl: user.AvatarUrl)
+                                    .WithDescription($"Information about {user.Mention}!")
+                                    .WithFooter("⚠This member is not a part of this server, thus API information is limited.⚠");
 
         embed.AddField("Joined Discord:", $"{Formatter.Timestamp(user.CreationTimestamp, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(user.CreationTimestamp)})");
         embed.AddField("Flags:", user.Flags?.Humanize(LetterCasing.Title) ?? "None");
@@ -93,17 +93,17 @@ public class UserInfo : BaseCommandModule
     public async Task GetMemberInfo(CommandContext ctx, DiscordMember member)
     {
         (typeof(BaseDiscordClient)
-            .GetProperty("UserCache", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetValue(ctx.Client) as ConcurrentDictionary<ulong, DiscordUser>)!.TryRemove(member.Id, out _);
+        .GetProperty("UserCache", BindingFlags.NonPublic | BindingFlags.Instance)!
+        .GetValue(ctx.Client) as ConcurrentDictionary<ulong, DiscordUser>)!.TryRemove(member.Id, out _);
 
         DiscordUser? user = await ctx.Client.GetUserAsync(member.Id);
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
-            .WithDescription($"Information about {member.Mention}!")
-            .WithColor(DiscordColor.Orange);
+                                   .WithAuthor(member.ToDiscordName(), iconUrl: member.AvatarUrl)
+                                   .WithDescription($"Information about {member.Mention}!")
+                                   .WithColor(DiscordColor.Orange);
 
-        var status = string.Empty;
+        var           status = string.Empty;
         DiscordEmoji? emoji;
 
         try
@@ -121,9 +121,9 @@ public class UserInfo : BaseCommandModule
         embed.AddField("Creation Date:", $"{Formatter.Timestamp(member.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(member.CreationTimestamp - DateTime.UtcNow)})");
 
         List<string> roleList = member.Roles
-            .OrderByDescending(r => r.Position)
-            .Select(role => role.Mention)
-            .ToList();
+                                      .OrderByDescending(r => r.Position)
+                                      .Select(role => role.Mention)
+                                      .ToList();
         string roles = string.Join(' ', roleList);
         embed.AddField("Roles:", roles.Length < 1 ? "No roles." : roles);
         embed.AddField("Flags:", member.Flags?.Humanize(LetterCasing.Title) ?? "None");
@@ -155,7 +155,7 @@ public class UserInfo : BaseCommandModule
     private static async Task<MemoryStream> GenerateColoredImageAsync(DiscordColor color)
     {
         using var colorImage = new Image<Rgba32>(600, 200, Rgba32.ParseHex(color.ToString()));
-        var ms = new MemoryStream();
+        var       ms         = new MemoryStream();
 
         await colorImage.SaveAsPngAsync(ms);
         ms.Position = 0;
@@ -182,13 +182,13 @@ public class UserInfo : BaseCommandModule
     {
         var roleStringBuilder = new StringBuilder();
 
-        foreach (var r in ctx.Guild.Roles.Values.OrderByDescending(r => r.Position))
+        foreach (DiscordRole? r in ctx.Guild.Roles.Values.OrderByDescending(r => r.Position))
         {
             if (r.Position + 1 == role.Position)
             {
                 roleStringBuilder
-                    .AppendLine("\t↑")
-                    .AppendLine(r.Mention);
+                   .AppendLine("\t↑")
+                   .AppendLine(r.Mention);
             }
             else if (r.Position == role.Position)
             {
@@ -197,8 +197,8 @@ public class UserInfo : BaseCommandModule
             else if (r.Position - 1 == role.Position)
             {
                 roleStringBuilder
-                    .AppendLine(r.Mention)
-                    .AppendLine("\t↑");
+                   .AppendLine(r.Mention)
+                   .AppendLine("\t↑");
             }
         }
         return roleStringBuilder.ToString();

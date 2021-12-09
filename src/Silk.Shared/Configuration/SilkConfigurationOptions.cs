@@ -82,26 +82,24 @@ public class SilkConfigurationOptions
 /// </summary>
 public class SilkPersistenceOptions
 {
-	public string Host     { get; set; } = "localhost";
-	public string Port     { get; set; } = "5432";
-	public string Database { get; set; } = string.Empty;
-	public string Username { get; set; } = "postgres";
-	public string Password { get; set; } = string.Empty;
+    public string Host     { get; set; } = "localhost";
+    public string Port     { get; set; } = "5432";
+    public string Database { get; set; } = string.Empty;
+    public string Username { get; set; } = "postgres";
+    public string Password { get; set; } = string.Empty;
 
-	/// <summary>
-	///     Convenience method to compose the ConnectionString based on the provided Persistence options
-	///     <see cref="SilkPersistenceOptions" />
-	/// </summary>
-	/// <returns>The full connection string given the options, or invalid/incomplete connection string if pieces of configuration file are left blank</returns>
-	public string GetConnectionString()
-	{
-		return $"Server={Host};"       +
-		       $"Port={Port};"         +
-		       $"Database={Database};" +
-		       $"Username={Username};" +
-		       $"Password={Password};" +
-		       "Include Error Detail = true";
-	}
+    /// <summary>
+    ///     Convenience method to compose the ConnectionString based on the provided Persistence options
+    ///     <see cref="SilkPersistenceOptions" />
+    /// </summary>
+    /// <returns>The full connection string given the options, or invalid/incomplete connection string if pieces of configuration file are left blank</returns>
+    public string GetConnectionString() =>
+        $"Server={Host};"       +
+        $"Port={Port};"         +
+        $"Database={Database};" +
+        $"Username={Username};" +
+        $"Password={Password};" +
+        "Include Error Detail = true";
 }
 
 /// <summary>
@@ -109,10 +107,10 @@ public class SilkPersistenceOptions
 /// </summary>
 public class SilkDiscordOptions
 {
-	public int    Shards       { get; set; } = 1;
-	public string ClientId     { get; set; } = string.Empty;
-	public string ClientSecret { get; set; } = string.Empty;
-	public string BotToken     { get; set; } = string.Empty;
+    public int    Shards       { get; set; } = 1;
+    public string ClientId     { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+    public string BotToken     { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -121,22 +119,22 @@ public class SilkDiscordOptions
 /// </summary>
 public class SilkE621Options
 {
-	public string ApiKey   { get; set; } = string.Empty;
-	public string Username { get; set; } = string.Empty;
+    public string ApiKey   { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
 }
 
 public class SilkEmojiOptions
 {
-	public Dictionary<string, ulong> EmojiIds { get; set; }
+    public Dictionary<string, ulong> EmojiIds { get; set; }
 
-	public void PopulateEmojiConstants()
-	{
-		foreach (var prop in typeof(Emojis).GetProperties(BindingFlags.Static | BindingFlags.Public))
-		{
-			if (!EmojiIds.TryGetValue(prop.Name, out ulong val)) continue;
+    public void PopulateEmojiConstants()
+    {
+        foreach (PropertyInfo prop in typeof(Emojis).GetProperties(BindingFlags.Static | BindingFlags.Public))
+        {
+            if (!EmojiIds.TryGetValue(prop.Name, out ulong val)) continue;
 
-			prop.SetValue(null, val);
-			Log.Logger.Verbose("Successfully set {Property} to {Value}", prop.Name, val);
-		}
-	}
+            prop.SetValue(null, val);
+            Log.Logger.Verbose("Successfully set {Property} to {Value}", prop.Name, val);
+        }
+    }
 }

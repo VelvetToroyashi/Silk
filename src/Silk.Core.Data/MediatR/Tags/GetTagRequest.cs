@@ -16,20 +16,20 @@ public record GetTagRequest(string Name, ulong GuildId) : IRequest<TagEntity?>;
 /// </summary>
 public class GetTagHandler : IRequestHandler<GetTagRequest, TagEntity?>
 {
-	private readonly GuildContext _db;
+    private readonly GuildContext _db;
 
-	public GetTagHandler(GuildContext db) => _db = db;
+    public GetTagHandler(GuildContext db) => _db = db;
 
-	public async Task<TagEntity?> Handle(GetTagRequest request, CancellationToken cancellationToken)
-	{
-		TagEntity? tag = await _db.Tags
-			.Include(t => t.OriginalTag)
-			.Include(t => t.Aliases)
-			.AsSplitQuery()
-			.FirstOrDefaultAsync(t =>
-				t.Name.ToLower() == request.Name.ToLower()
-				&& t.GuildId     == request.GuildId, cancellationToken);
+    public async Task<TagEntity?> Handle(GetTagRequest request, CancellationToken cancellationToken)
+    {
+        TagEntity? tag = await _db.Tags
+                                  .Include(t => t.OriginalTag)
+                                  .Include(t => t.Aliases)
+                                  .AsSplitQuery()
+                                  .FirstOrDefaultAsync(t =>
+                                                           t.Name.ToLower() == request.Name.ToLower()
+                                                        && t.GuildId        == request.GuildId, cancellationToken);
 
-		return tag;
-	}
+        return tag;
+    }
 }

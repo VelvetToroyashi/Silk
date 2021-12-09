@@ -24,7 +24,7 @@ public class RestRequestCommand : BaseCommandModule
 
     public RestRequestCommand(IHttpClientFactory clientFactory, IOptions<SilkConfigurationOptions> options)
     {
-        _clientFactory = clientFactory;
+        _clientFactory     = clientFactory;
         _silkConfiguration = options.Value;
     }
 
@@ -50,28 +50,28 @@ public class RestRequestCommand : BaseCommandModule
         var message = new HttpRequestMessage
         {
             RequestUri = new(baseUri + uri),
-            Method = httpMethod,
-            Content = new StringContent(json ?? "", Encoding.UTF8, "application/json"),
+            Method     = httpMethod,
+            Content    = new StringContent(json ?? "", Encoding.UTF8, "application/json"),
         };
 
         client.DefaultRequestHeaders.Add("Authorization", $"Bot {_silkConfiguration.Discord.BotToken}");
         client.DefaultRequestHeaders.Add("Accept", "application/json");
 
         HttpResponseMessage? res = await client.SendAsync(message);
-        var jsn = JToken.Parse(await res.Content.ReadAsStringAsync() ?? "{}").ToString(Formatting.Indented);
+        var                  jsn = JToken.Parse(await res.Content.ReadAsStringAsync() ?? "{}").ToString(Formatting.Indented);
 
         if (jsn.Length > 1000)
         {
             await new DiscordMessageBuilder()
-                .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n(Response was > 1000 characters. I've attached the output to a file for you)")
-                .WithFile("response.json", jsn.AsStream())
-                .SendAsync(ctx.Channel);
+                 .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n(Response was > 1000 characters. I've attached the output to a file for you)")
+                 .WithFile("response.json", jsn.AsStream())
+                 .SendAsync(ctx.Channel);
         }
         else
         {
             await new DiscordMessageBuilder()
-                .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n {(jsn == "{}" ? "Request returned empty response." : Formatter.BlockCode(jsn, "json"))}")
-                .SendAsync(ctx.Channel);
+                 .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n {(jsn == "{}" ? "Request returned empty response." : Formatter.BlockCode(jsn, "json"))}")
+                 .SendAsync(ctx.Channel);
         }
     }
 }

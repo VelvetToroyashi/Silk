@@ -12,7 +12,6 @@ public delegate Task AsyncTimerDelegate<in T1>(T1 t1);
 
 public delegate Task AsyncTimerDelegate<in T1, in T2>(T1 t1, T2 t2);
 
-
 /// <summary>
 ///     An asynchronous timer that can yield to tasks if necessary.
 /// </summary>
@@ -53,9 +52,9 @@ public sealed class AsyncTimer : IDisposable
         if (method.Target is null)
             throw new ArgumentNullException(nameof(method), "Delegate cannot point to null target.");
 
-        _interval = interval;
+        _interval         = interval;
         YieldsWhenRunning = yieldToTask;
-        _taskDelegate = method;
+        _taskDelegate     = method;
     }
 
     /// <summary>
@@ -84,9 +83,9 @@ public sealed class AsyncTimer : IDisposable
         if (method.Target is null)
             throw new ArgumentNullException(nameof(method), "Delegate cannot point to null target.");
 
-        _interval = interval;
-        _taskDelegate = method;
-        _args = new[] { parameter };
+        _interval         = interval;
+        _taskDelegate     = method;
+        _args             = new[] { parameter };
         YieldsWhenRunning = yieldToTask;
     }
 
@@ -116,9 +115,9 @@ public sealed class AsyncTimer : IDisposable
         if (method.Target is null)
             throw new ArgumentNullException(nameof(method), "Delegate cannot point to null target.");
 
-        _interval = interval;
-        _taskDelegate = method;
-        _args = parameters as object[] ?? parameters?.ToArray();
+        _interval         = interval;
+        _taskDelegate     = method;
+        _args             = parameters as object[] ?? parameters?.ToArray();
         YieldsWhenRunning = yieldToTask;
     }
     /// <summary>
@@ -134,8 +133,8 @@ public sealed class AsyncTimer : IDisposable
     public void Dispose()
     {
         _isDisposed = true;
-        _running = false;
-        Started = false;
+        _running    = false;
+        Started     = false;
     }
 
     /// <summary>
@@ -152,7 +151,7 @@ public sealed class AsyncTimer : IDisposable
         if (Started)
             throw new InvalidOperationException("Timer is already started.");
 
-        Started = true;
+        Started  = true;
         _running = true;
         StartInternal();
     }
@@ -163,7 +162,7 @@ public sealed class AsyncTimer : IDisposable
         do
         {
             DateTime invoketime = DateTime.UtcNow;
-            Task task = _taskDelegate is AsyncTimerDelegate del ? del() : (Task)_taskDelegate.DynamicInvoke(_args)!;
+            Task     task       = _taskDelegate is AsyncTimerDelegate del ? del() : (Task)_taskDelegate.DynamicInvoke(_args)!;
 
 
             _ = task.ContinueWith(static (t, timer) =>
@@ -203,6 +202,6 @@ public sealed class AsyncTimer : IDisposable
             throw new InvalidOperationException("Timer is not running.");
 
         _running = false;
-        Started = false;
+        Started  = false;
     }
 }

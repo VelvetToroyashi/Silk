@@ -12,9 +12,6 @@ namespace AnnoucementPlugin.Database.MediatR
         private readonly AnnouncementContext _db;
         public GetAnnouncementsHandler(AnnouncementContext db) => _db = db;
 
-        public Task<AnnouncementModel[]> Handle(GetAnnouncementsRequest request, CancellationToken cancellationToken)
-        {
-            return _db.Announcements.ToArrayAsync(cancellationToken);
-        }
+        public Task<AnnouncementModel[]> Handle(GetAnnouncementsRequest request, CancellationToken cancellationToken) => _db.Announcements.ToArrayAsync(cancellationToken);
     }
 }

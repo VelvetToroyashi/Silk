@@ -42,24 +42,21 @@ public sealed class CustomLoggingScopeHttpMessageHandler : DelegatingHandler
 
         private static readonly Func<ILogger, HttpMethod, Uri, IDisposable> _beginRequestPipelineScope =
             LoggerMessage.DefineScope<HttpMethod, Uri>(
-                "HTTP {HttpMethod} {Uri}");
+                                                       "HTTP {HttpMethod} {Uri}");
 
         private static readonly Action<ILogger, HttpMethod, Uri, Exception> _requestPipelineStart =
             LoggerMessage.Define<HttpMethod, Uri>(
-                LogLevel.Trace,
-                EventIds.PipelineStart,
-                "Start processing HTTP request {HttpMethod} {Uri}");
+                                                  LogLevel.Trace,
+                                                  EventIds.PipelineStart,
+                                                  "Start processing HTTP request {HttpMethod} {Uri}");
 
         private static readonly Action<ILogger, HttpStatusCode, Exception> _requestPipelineEnd =
             LoggerMessage.Define<HttpStatusCode>(
-                LogLevel.Trace,
-                EventIds.PipelineEnd,
-                "End processing HTTP request - {StatusCode}");
+                                                 LogLevel.Trace,
+                                                 EventIds.PipelineEnd,
+                                                 "End processing HTTP request - {StatusCode}");
 
-        public static IDisposable BeginRequestPipelineScope(ILogger logger, HttpRequestMessage request)
-        {
-            return _beginRequestPipelineScope(logger, request.Method, request.RequestUri!);
-        }
+        public static IDisposable BeginRequestPipelineScope(ILogger logger, HttpRequestMessage request) => _beginRequestPipelineScope(logger, request.Method, request.RequestUri!);
 
         public static void RequestPipelineStart(ILogger logger, HttpRequestMessage request)
         {

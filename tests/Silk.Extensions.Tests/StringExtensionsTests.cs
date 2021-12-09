@@ -23,7 +23,7 @@ public class StringExtensionsTests
     public void Center_WhenOversizedInput_ReturnsOriginalString()
     {
         //Arrange
-        const string input = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+        const string input  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
         const string anchor = "This string is too short!";
         //Act
         string actual = input.Center(anchor);
@@ -35,9 +35,9 @@ public class StringExtensionsTests
     public void Pull_Returns_Entire_String_When_RangeEnd_Exceeds_Length()
     {
         //Arrange
-        string input = "This is a short string!";
+        var    input = "This is a short string!";
         string result;
-        Range range = ..25;
+        Range  range = ..25;
         //Act
         result = input.Pull(range);
         //Assert
@@ -48,9 +48,9 @@ public class StringExtensionsTests
     public void Pull_Returns_Entire_String_when_RangeStart_Exceeds_Length()
     {
         //Arrange
-        string input = "This is a short string!";
+        var    input = "This is a short string!";
         string result;
-        Range range = 25..;
+        Range  range = 25..;
         //Act
         result = input.Pull(range);
         //Assert
@@ -61,10 +61,10 @@ public class StringExtensionsTests
     public void Pull_Returns_Substring_When_Range_Does_Not_Exceed_Length()
     {
         //Arrange
-        string input = "This is a short string!";
-        string expected = "This is a ";
+        var    input    = "This is a short string!";
+        var    expected = "This is a ";
         string result;
-        Range range = ..10;
+        Range  range = ..10;
         //Act
         result = input.Pull(range);
         //Assert
@@ -76,10 +76,10 @@ public class StringExtensionsTests
     public void Pull_Returns_Substring_When_Range_Has_From_End_Defined()
     {
         //Arrange
-        string input = "This is a short string!";
-        string expected = "This is a short string";
+        var    input    = "This is a short string!";
+        var    expected = "This is a short string";
         string result;
-        Range range = ..^1;
+        Range  range = ..^1;
         //Act
         result = input.Pull(range);
         //Assert
@@ -91,7 +91,7 @@ public class StringExtensionsTests
     public void AsStream_Returns_Stream_When_String_Is_Not_Null()
     {
         //Arrange
-        string input = "This is a really cool string!";
+        var     input = "This is a really cool string!";
         Stream? stream;
         //Act
         stream = input.AsStream();

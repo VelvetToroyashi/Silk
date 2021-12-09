@@ -21,10 +21,7 @@ public class SilkStringCenterTest
     }
 
     [Benchmark]
-    public string CenterWithExtensionMethod()
-    {
-        return input.Center(anchor);
-    }
+    public string CenterWithExtensionMethod() => input.Center(anchor);
 
     public string CenterWithCountInsteadOfSum()
     {

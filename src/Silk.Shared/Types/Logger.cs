@@ -15,15 +15,9 @@ public class Logger<T> : ILogger<T>
         _logger = factory.CreateLogger(typeof(T).Name);
     }
 
-    public IDisposable BeginScope<TState>(TState state)
-    {
-        return _logger.BeginScope(state);
-    }
+    public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
 
-    public bool IsEnabled(LogLevel logLevel)
-    {
-        return _logger.IsEnabled(logLevel);
-    }
+    public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
 
     public void Log<TState>(
         LogLevel                        logLevel,

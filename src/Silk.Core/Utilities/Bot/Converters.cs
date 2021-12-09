@@ -29,7 +29,7 @@ public class MemberConverter : IArgumentConverter<DiscordMember>
     public async Task<Optional<DiscordMember>> ConvertAsync(string value, CommandContext ctx)
     {
         DiscordMember? user = ctx.Guild?.Members.Values.FirstOrDefault(m =>
-            m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
+                                                                           m.Nickname?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? m.Username.Contains(value, StringComparison.OrdinalIgnoreCase));
         if (user is not null) return Optional.FromValue(user);
         return await ConvertMemberAsync(value, ctx);
     }
@@ -51,7 +51,7 @@ public class MemberConverter : IArgumentConverter<DiscordMember>
 
         Match m = UserRegex.Match(value);
         if (m.Success && ulong.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture,
-                out uid))
+                                        out uid))
         {
             DiscordMember result = await ctx.Guild.GetMemberAsync(uid).ConfigureAwait(false);
             Optional<DiscordMember> ret =
@@ -61,15 +61,15 @@ public class MemberConverter : IArgumentConverter<DiscordMember>
 
         value = value.ToLowerInvariant();
 
-        int di = value.IndexOf('#');
-        string un = di  != -1 ? value.Substring(0, di) : value;
+        int     di = value.IndexOf('#');
+        string  un = di != -1 ? value.Substring(0, di) : value;
         string? dv = di != -1 ? value.Substring(di + 1) : null;
 
         IEnumerable<DiscordMember>? us = ctx.Guild?.Members.Values
-            .Where(xm =>
-                xm.Username.ToLowerInvariant() == un &&
-                (dv != null && xm.Discriminator == dv || dv == null)
-                || xm.Nickname?.ToLowerInvariant() == value);
+                                            .Where(xm =>
+                                                       xm.Username.ToLowerInvariant() == un &&
+                                                       (dv != null && xm.Discriminator == dv || dv == null)
+                                                    || xm.Nickname?.ToLowerInvariant() == value);
 
         DiscordMember? mbr = us?.FirstOrDefault();
         return mbr != null ? Optional.FromValue(mbr) : Optional.FromNoValue<DiscordMember>();
@@ -106,14 +106,14 @@ public sealed class TimeSpanConverter
         Match match = TimeSpanRegex.Match(value);
         if (!match.Success)
             return Task.FromResult(Optional.FromNoValue<TimeSpan>());
-        var days = 0;
-        var hours = 0;
+        var days    = 0;
+        var hours   = 0;
         var minutes = 0;
         var seconds = 0;
         for (result1 = 0; result1 < strArray1.Length; ++result1)
         {
             string groupname = strArray1[result1];
-            string str = match.Groups[groupname].Value;
+            string str       = match.Groups[groupname].Value;
             if (!string.IsNullOrWhiteSpace(str))
             {
                 char ch = str[^1];

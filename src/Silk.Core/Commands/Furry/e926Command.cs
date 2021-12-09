@@ -30,7 +30,7 @@ public class e926Command : eBooruBaseCommand
         IDiscordRestChannelAPI             channel)
         : base(client, context, channel)
     {
-        baseUrl = "https://e926.net/posts.json?tags=";
+        baseUrl  = "https://e926.net/posts.json?tags=";
         _options = options.Value;
     }
 
@@ -66,21 +66,21 @@ public class e926Command : eBooruBaseCommand
 
         IReadOnlyList<Post> posts = GetRandomPosts(booruPosts, amount, (int)((_context as MessageContext)?.MessageID.Value ?? 0));
         List<IEmbed> embeds = posts.Select(post =>
-                new Embed
-                {
-                    Title = query!,
-                    Description = $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}",
-                    Colour = Color.RoyalBlue,
-                    Image = new EmbedImage(post.File.Url.ToString()),
-                    Fields = new IEmbedField[]
-                    {
-                        new EmbedField("Score:", post.Score.Total.ToString(), true),
-                        new EmbedField("Source:", GetSource(post.Sources.FirstOrDefault()?.ToString()) ?? "No source available", true)
-                    }
-                }
-            )
-            .Cast<IEmbed>()
-            .ToList();
+                                               new Embed
+                                               {
+                                                   Title       = query!,
+                                                   Description = $"[Direct Link]({post!.File.Url})\nDescription: {post!.Description.Truncate(200)}",
+                                                   Colour      = Color.RoyalBlue,
+                                                   Image       = new EmbedImage(post.File.Url.ToString()),
+                                                   Fields = new IEmbedField[]
+                                                   {
+                                                       new EmbedField("Score:", post.Score.Total.ToString(), true),
+                                                       new EmbedField("Source:", GetSource(post.Sources.FirstOrDefault()?.ToString()) ?? "No source available", true)
+                                                   }
+                                               }
+                                          )
+                                   .Cast<IEmbed>()
+                                   .ToList();
 
         Result<IMessage> send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
 

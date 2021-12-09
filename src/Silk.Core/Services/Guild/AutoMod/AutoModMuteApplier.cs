@@ -14,8 +14,8 @@ public sealed class AutoModMuteApplier //: IResponder<IGuildMemberAdd>
     private readonly IDiscordRestUserAPI         _users;
     public AutoModMuteApplier(IInfractionService infractions, ILogger<AutoModMuteApplier> logger, IDiscordRestUserAPI users)
     {
-        _users = users;
-        _logger = logger;
+        _users       = users;
+        _logger      = logger;
         _infractions = infractions;
     }
 

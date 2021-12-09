@@ -65,7 +65,7 @@ namespace AnnoucementPlugin.Services
 
         private async Task<bool> UnlockChannelAsync(ulong guildId, ulong channelId)
         {
-            DiscordGuild guild = _client.Guilds[guildId];
+            DiscordGuild   guild   = _client.Guilds[guildId];
             DiscordChannel channel = guild.GetChannel(channelId);
 
 
@@ -74,7 +74,7 @@ namespace AnnoucementPlugin.Services
             if (canSendMessages)
                 return true;
 
-            bool roleCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
+            bool roleCanModifyChannel   = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
             bool memberCanModifyChannel = channel.PermissionsFor(guild.CurrentMember).HasPermission(Permissions.ManageChannels);
 
             if (!roleCanModifyChannel && !memberCanModifyChannel)

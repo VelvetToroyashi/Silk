@@ -21,22 +21,22 @@ public sealed class GetUserInfractionHandler : IRequestHandler<GetUserInfraction
     public async Task<InfractionEntity?> Handle(GetUserInfractionRequest request, CancellationToken cancellationToken)
     {
         InfractionEntity? infraction;
-            
+
         if (request.CaseId is not null)
         {
             infraction = await _db.Infractions
-                .Where(inf => inf.GuildId == request.GuildId && inf.CaseNumber == request.CaseId)
-                .SingleOrDefaultAsync(cancellationToken);
+                                  .Where(inf => inf.GuildId == request.GuildId && inf.CaseNumber == request.CaseId)
+                                  .SingleOrDefaultAsync(cancellationToken);
         }
         else
         {
             infraction = await _db.Infractions
-                .Where(inf => inf.UserId         == request.UserId)
-                .Where(inf => inf.GuildId        == request.GuildId)
-                .Where(inf => inf.InfractionType == request.Type)
-                .Where(inf => !inf.HeldAgainstUser)
-                .OrderBy(inf => inf.CaseNumber)
-                .LastOrDefaultAsync(cancellationToken);
+                                  .Where(inf => inf.UserId         == request.UserId)
+                                  .Where(inf => inf.GuildId        == request.GuildId)
+                                  .Where(inf => inf.InfractionType == request.Type)
+                                  .Where(inf => !inf.HeldAgainstUser)
+                                  .OrderBy(inf => inf.CaseNumber)
+                                  .LastOrDefaultAsync(cancellationToken);
         }
 
         return infraction;

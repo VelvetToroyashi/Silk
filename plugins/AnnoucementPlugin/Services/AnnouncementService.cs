@@ -29,9 +29,9 @@ namespace AnnoucementPlugin.Services
 
         public AnnouncementService(ILogger<AnnouncementService> logger, IMessageDispatcher dispatcher, IMediator mediator)
         {
-            _logger = logger;
-            _dispatcher = dispatcher;
-            _mediator = mediator;
+            _logger            = logger;
+            _dispatcher        = dispatcher;
+            _mediator          = mediator;
             _announcementTimer = new(OnTick, TimeSpan.FromSeconds(1), yieldToTask: false);
         }
 
@@ -51,9 +51,9 @@ namespace AnnoucementPlugin.Services
                 var nonCachedAnnouncement = new AnnouncementModel
                 {
                     AnnouncementMessage = content,
-                    GuildId = guild,
-                    ChannelId = channel,
-                    ScheduledFor = DateTime.UtcNow + expiration
+                    GuildId             = guild,
+                    ChannelId           = channel,
+                    ScheduledFor        = DateTime.UtcNow + expiration
                 };
 
                 _announcements.Add(nonCachedAnnouncement);

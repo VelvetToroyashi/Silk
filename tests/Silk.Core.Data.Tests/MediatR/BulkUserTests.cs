@@ -118,7 +118,7 @@ public class BulkUserTests
     public async Task MediatR_Bulk_Update_Updates_All_Users()
     {
         //Arrange
-        UserEntity[] updatedUsers = new UserEntity[2];
+        var updatedUsers = new UserEntity[2];
         List<UserEntity> users = new()
         {
             new() { Id = 1, GuildId = GuildId },
@@ -136,7 +136,7 @@ public class BulkUserTests
         //Assert
         Assert.AreNotEqual(users, updatedUsers);
 
-        foreach (var user in updatedUsers)
+        foreach (UserEntity user in updatedUsers)
             Assert.AreEqual(UserFlag.Staff, user.Flags);
     }
 }

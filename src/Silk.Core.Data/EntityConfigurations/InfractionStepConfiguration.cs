@@ -10,6 +10,6 @@ public class InfractionStepConfiguration : IEntityTypeConfiguration<InfractionSt
     public void Configure(EntityTypeBuilder<InfractionStepEntity> builder)
     {
         builder.Property(infs => infs.Duration)
-            .HasConversion(d => d.Ticks, d => NpgsqlTimeSpan.FromTicks(d));
+               .HasConversion(d => d.Ticks, d => NpgsqlTimeSpan.FromTicks(d));
     }
 }

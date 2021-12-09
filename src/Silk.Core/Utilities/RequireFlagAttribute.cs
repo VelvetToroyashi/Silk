@@ -24,7 +24,7 @@ public sealed class RequireFlagAttribute : CheckBaseAttribute
     public RequireFlagAttribute(UserFlag requisiteUserFlag, bool requireGuild = false)
     {
         RequisiteUserFlag = requisiteUserFlag;
-        RequireGuild = requireGuild;
+        RequireGuild      = requireGuild;
     }
     public bool     RequireGuild      { get; }
     public UserFlag RequisiteUserFlag { get; }
@@ -34,9 +34,9 @@ public sealed class RequireFlagAttribute : CheckBaseAttribute
         if (ctx.Guild is null                    && RequireGuild) return false; //Is a private channel and requires a Guild//
         if (_cachedMembers.Contains(ctx.User.Id) && RequireGuild) return true;
 
-        using IServiceScope? scope = ctx.Services.CreateScope();
-        IMediator mediator = scope.ServiceProvider.Get<IMediator>()!;
-        UserEntity? member = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
+        using IServiceScope? scope    = ctx.Services.CreateScope();
+        var                  mediator = scope.ServiceProvider.Get<IMediator>()!;
+        UserEntity?          member   = await mediator.Send(new GetUserRequest(ctx.Guild!.Id, ctx.User.Id));
 
         if (member is null) return false;
         if (member.Flags.HasFlag(UserFlag.Staff)) _cachedMembers.Add(member.Id);

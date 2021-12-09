@@ -32,10 +32,10 @@ public class ClearCommand : BaseCommandModule
         await ctx.Channel.DeleteMessagesAsync(queriedMessages, $"{commandIssuingUser} called clear command.");
 
         DiscordEmbedBuilder? responseEmbed = MakeResponseEmbed(ctx, numOfMessages);
-        DiscordMessage responseMsg = await ctx.RespondAsync(responseEmbed);
+        DiscordMessage       responseMsg   = await ctx.RespondAsync(responseEmbed);
 
-        GuildModConfigEntity guildConfig = await GetOrCreateGuildConfig(ctx);
-        DiscordChannel? loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
+        GuildModConfigEntity guildConfig    = await GetOrCreateGuildConfig(ctx);
+        DiscordChannel?      loggingChannel = ctx.Guild.GetChannel(guildConfig.LoggingChannel);
 
         DiscordEmbedBuilder? clearedMessagesEmbed = MakeLoggingChannelEmbed(ctx, numOfMessages);
         if (loggingChannel is not null) await loggingChannel.SendMessageAsync(clearedMessagesEmbed);
@@ -45,28 +45,24 @@ public class ClearCommand : BaseCommandModule
         catch (NotFoundException) { }
     }
 
-    private static DiscordEmbedBuilder MakeResponseEmbed(CommandContext ctx, int messages)
-    {
-        return new DiscordEmbedBuilder()
-            .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
-            .WithColor(DiscordColor.SpringGreen)
-            .WithDescription($"Cleared {messages} messages!");
-    }
+    private static DiscordEmbedBuilder MakeResponseEmbed(CommandContext ctx, int messages) =>
+        new DiscordEmbedBuilder()
+           .WithAuthor(ctx.Member.DisplayName, null, ctx.Member.AvatarUrl)
+           .WithColor(DiscordColor.SpringGreen)
+           .WithDescription($"Cleared {messages} messages!");
 
-    private static DiscordEmbedBuilder MakeLoggingChannelEmbed(CommandContext ctx, int messages)
-    {
-        return new DiscordEmbedBuilder()
-            .WithTitle("Cleared Messages:")
-            .WithDescription(
-                $"User: {ctx.User.Mention}\n"       +
-                $"Channel: {ctx.Channel.Mention}\n" +
-                $"Amount: **{messages}**")
-            .AddField("User ID:", ctx.User.Id.ToString(), true)
-            .WithThumbnail(ctx.Message.Author.AvatarUrl)
-            .WithFooter("Cleared Messages at (UTC)")
-            .WithTimestamp(DateTime.Now.ToUniversalTime())
-            .WithColor(DiscordColor.Red);
-    }
+    private static DiscordEmbedBuilder MakeLoggingChannelEmbed(CommandContext ctx, int messages) =>
+        new DiscordEmbedBuilder()
+           .WithTitle("Cleared Messages:")
+           .WithDescription(
+                            $"User: {ctx.User.Mention}\n"       +
+                            $"Channel: {ctx.Channel.Mention}\n" +
+                            $"Amount: **{messages}**")
+           .AddField("User ID:", ctx.User.Id.ToString(), true)
+           .WithThumbnail(ctx.Message.Author.AvatarUrl)
+           .WithFooter("Cleared Messages at (UTC)")
+           .WithTimestamp(DateTime.Now.ToUniversalTime())
+           .WithColor(DiscordColor.Red);
 
     private async Task<GuildModConfigEntity> GetOrCreateGuildConfig(CommandContext ctx)
     {

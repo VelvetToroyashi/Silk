@@ -11,9 +11,9 @@ namespace Silk.Core.Tests.Services;
 
 public class ConfigServiceTests
 {
-    private readonly Mock<IMemoryCache> _cache;
-    private readonly GuildConfigCacheService      _guildConfigCacheService;
-    private readonly Mock<IMediator>    _mediator;
+    private readonly Mock<IMemoryCache>      _cache;
+    private readonly GuildConfigCacheService _guildConfigCacheService;
+    private readonly Mock<IMediator>         _mediator;
 
     public ConfigServiceTests()
     {
@@ -24,9 +24,9 @@ public class ConfigServiceTests
 
 
         _mediator
-            .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
-            .Verifiable("uHHHH");
+           .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
+           .Verifiable("uHHHH");
 
         _guildConfigCacheService = new(_cache.Object, _mediator.Object);
     }

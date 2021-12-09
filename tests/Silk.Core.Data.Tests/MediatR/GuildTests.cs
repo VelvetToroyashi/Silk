@@ -59,7 +59,7 @@ public class GuildTests
         //Act
         before = _context.Guilds.Count();
         result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
-        after = _context.Guilds.Count();
+        after  = _context.Guilds.Count();
         //Assert
         Assert.IsNotNull(result);
         Assert.AreNotEqual(before, after);
@@ -78,7 +78,7 @@ public class GuildTests
         //Act
         before = _context.Guilds.Count();
         result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
-        after = _context.Guilds.Count();
+        after  = _context.Guilds.Count();
 
         //Assert
         Assert.IsNotNull(result);

@@ -26,7 +26,7 @@ public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnu
     {
         try
         {
-            foreach (var user in request.Users)
+            foreach (UserEntity user in request.Users)
             {
                 EntityEntry<UserEntity> state = _db.Attach(user);
                 state.State = EntityState.Modified;
@@ -38,7 +38,7 @@ public class BulkUpdateUserHandler : IRequestHandler<BulkUpdateUserRequest, IEnu
         {
             try
             {
-                foreach (var user in request.Users)
+                foreach (UserEntity user in request.Users)
                 {
                     EntityEntry<UserEntity> state = _db.Attach(user);
                     state.State = EntityState.Modified;

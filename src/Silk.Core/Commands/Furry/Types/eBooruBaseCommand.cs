@@ -26,8 +26,8 @@ public abstract class eBooruBaseCommand : CommandGroup
 
     public eBooruBaseCommand(HttpClient httpClientFactory, ICommandContext context, IDiscordRestChannelAPI channelApi)
     {
-        _client = httpClientFactory;
-        _context = context;
+        _client     = httpClientFactory;
+        _context    = context;
         _channelApi = channelApi;
     }
 
@@ -89,7 +89,7 @@ public abstract class eBooruBaseCommand : CommandGroup
 
         // TODO: Log if API key is rejected.
         string result = await (await _client.SendAsync(request)).Content.ReadAsStringAsync();
-        var posts = JsonConvert.DeserializeObject<eBooruPostResult>(result);
+        var    posts  = JsonConvert.DeserializeObject<eBooruPostResult>(result);
 
         for (var i = 0; i < posts!.Posts?.Count; i++)
             if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
@@ -111,7 +111,7 @@ public abstract class eBooruBaseCommand : CommandGroup
         if (resultPosts is null)
             return Array.Empty<Post>();
 
-        var rand = new Random(seed);
+        var rand  = new Random(seed);
         var posts = new List<Post?>();
         for (var i = 0; i < amount; i++)
         {

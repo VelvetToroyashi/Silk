@@ -36,9 +36,9 @@ public class GuildCacherService
     private readonly IMediator _mediator;
 
     private readonly IEmbed _onGuildJoinEmbed = new Embed(
-        Title: "Thank you for adding me!",
-        Description: GuildJoinThankYouMessage,
-        Colour: Color.Gold);
+                                                          Title: "Thank you for adding me!",
+                                                          Description: GuildJoinThankYouMessage,
+                                                          Colour: Color.Gold);
     private readonly IDiscordRestUserAPI _userApi;
 
     /// <summary>
@@ -47,19 +47,19 @@ public class GuildCacherService
     private readonly DiscordPermissionSet _welcomeMessagePermissions = new(DiscordPermission.SendMessages, DiscordPermission.EmbedLinks);
 
     public GuildCacherService
-    (
-        IMediator                   mediator,
-        IDiscordRestUserAPI         userApi,
-        IDiscordRestGuildAPI        guildApi,
-        IDiscordRestChannelAPI      channelApi,
-        ILogger<GuildCacherService> logger
-    )
+        (
+            IMediator                   mediator,
+            IDiscordRestUserAPI         userApi,
+            IDiscordRestGuildAPI        guildApi,
+            IDiscordRestChannelAPI      channelApi,
+            ILogger<GuildCacherService> logger
+        )
     {
-        _mediator = mediator;
-        _userApi = userApi;
-        _guildApi = guildApi;
+        _mediator   = mediator;
+        _userApi    = userApi;
+        _guildApi   = guildApi;
         _channelApi = channelApi;
-        _logger = logger;
+        _logger     = logger;
     }
 
     public async Task<Result> GreetGuildAsync(IGuild guild)
@@ -79,12 +79,12 @@ public class GuildCacherService
             return Result.FromError(currentMemberResult.Error);
 
         IGuildMember? currentMember = currentMemberResult.Entity;
-        IUser? currentUser = currentMember.User.Value;
+        IUser?        currentUser   = currentMember.User.Value;
 
         IReadOnlyList<IChannel>? channels = guild.Channels.Value;
 
         IChannel? availableChannel = null;
-        foreach (var channel in channels)
+        foreach (IChannel channel in channels)
         {
             if (channel.Type is not ChannelType.GuildText)
                 continue;
@@ -92,10 +92,10 @@ public class GuildCacherService
             IReadOnlyList<IPermissionOverwrite>? overwrites = channel.PermissionOverwrites.Value;
 
             IDiscordPermissionSet? permissions = DiscordPermissionSet.ComputePermissions(
-                currentUser.ID,
-                guild.Roles.Single(r => r.ID == guild.ID),
-                guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
-                overwrites);
+                                                                                         currentUser.ID,
+                                                                                         guild.Roles.Single(r => r.ID == guild.ID),
+                                                                                         guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
+                                                                                         overwrites);
 
             if (permissions.HasPermission(DiscordPermission.SendMessages) && permissions.HasPermission(DiscordPermission.EmbedLinks))
             {
@@ -132,7 +132,7 @@ public class GuildCacherService
         var failed = false;
         var errors = new List<IResult>();
 
-        foreach (var guild in ready.Guilds)
+        foreach (IUnavailableGuild guild in ready.Guilds)
         {
             if (!_knownGuilds.Add(guild.GuildID))
             {
@@ -149,10 +149,7 @@ public class GuildCacherService
     /// </summary>
     /// <param name="guildID">The ID of the guild to check.</param>
     /// <returns></returns>
-    public bool IsNewGuild(Snowflake guildID)
-    {
-        return !_knownGuilds.Contains(guildID);
-    }
+    public bool IsNewGuild(Snowflake guildID) => !_knownGuilds.Contains(guildID);
 
     public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
@@ -160,7 +157,7 @@ public class GuildCacherService
             return Result.FromSuccess();
 
         await _mediator.Send(new GetOrCreateGuildRequest(guildID.Value, StringConstants.DefaultCommandPrefix));
-            
+
         return default;
     }
 
@@ -172,7 +169,7 @@ public class GuildCacherService
 
         var erroredMembers = new List<IResult>();
 
-        foreach (var member in members)
+        foreach (IGuildMember member in members)
         {
             if (!member.User.IsDefined(out IUser? user))
             {
@@ -184,8 +181,8 @@ public class GuildCacherService
                 continue;
 
             bool eligible = member.Permissions.IsDefined(out IDiscordPermissionSet? permissions)
-                            && permissions.HasPermission(DiscordPermission.KickMembers)
-                            && permissions.HasPermission(DiscordPermission.ManageMessages);
+                         && permissions.HasPermission(DiscordPermission.KickMembers)
+                         && permissions.HasPermission(DiscordPermission.ManageMessages);
 
             if (!eligible) continue;
 

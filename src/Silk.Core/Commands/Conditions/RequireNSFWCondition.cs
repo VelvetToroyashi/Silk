@@ -9,7 +9,7 @@ using Remora.Results;
 namespace Silk.Core.Commands.Conditions.cs;
 
 /// <summary>
-/// Represents that a channel should be marked as NSFW.
+///     Represents that a channel should be marked as NSFW.
 /// </summary>
 public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
 {
@@ -17,25 +17,25 @@ public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
     private readonly IDiscordRestChannelAPI _channelApi;
     public RequireNSFWCondition(ICommandContext context, IDiscordRestChannelAPI channelApi)
     {
-        _context = context;
+        _context    = context;
         _channelApi = channelApi;
     }
 
     public async ValueTask<Result> CheckAsync(NSFWChannelAttribute attribute, CancellationToken ct = default)
     {
-        var channelRes = await _channelApi.GetChannelAsync(_context.ChannelID, ct);
-            
+        Result<IChannel> channelRes = await _channelApi.GetChannelAsync(_context.ChannelID, ct);
+
         if (!channelRes.IsSuccess)
             return Result.FromError(channelRes.Error);
-            
-        var channel = channelRes.Entity;
-            
-        if (channel.IsNsfw.IsDefined(out var nsfw) && nsfw)
+
+        IChannel channel = channelRes.Entity;
+
+        if (channel.IsNsfw.IsDefined(out bool nsfw) && nsfw)
             return Result.FromSuccess();
 
         if (channel.Type is ChannelType.DM)
             return Result.FromSuccess(); // DMs are always NSFW ;3
-            
+
         return Result.FromError(new InvalidOperationError("This channel is not NSFW."));
     }
 }

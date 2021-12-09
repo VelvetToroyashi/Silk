@@ -16,18 +16,18 @@ public record UpdateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = n
 /// </summary>
 public class UpdateUserHandler : IRequestHandler<UpdateUserRequest, UserEntity>
 {
-	private readonly GuildContext _db;
+    private readonly GuildContext _db;
 
-	public UpdateUserHandler(GuildContext db) => _db = db;
+    public UpdateUserHandler(GuildContext db) => _db = db;
 
-	public async Task<UserEntity> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
-	{
-		UserEntity user = await _db.Users
-			.FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+    public async Task<UserEntity> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
+    {
+        UserEntity user = await _db.Users
+                                   .FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
-		user.Flags = request.Flags ?? user.Flags;
-		await _db.SaveChangesAsync(cancellationToken);
+        user.Flags = request.Flags ?? user.Flags;
+        await _db.SaveChangesAsync(cancellationToken);
 
-		return user;
-	}
+        return user;
+    }
 }

@@ -27,13 +27,13 @@ public class DiceRollCommand : BaseCommandModule
         {
             return;
         }
-        var parser = new DiceParser(roll);
-        IList<Step> steps = parser.Run();
+        var         parser = new DiceParser(roll);
+        IList<Step> steps  = parser.Run();
 
-        DiscordEmbedBuilder embed = InitEmbed(new());
-        var ran = new Random((int)ctx.Message.Id);
-        var modifiers = new List<int>();
-        var rolls = new List<int>();
+        DiscordEmbedBuilder embed     = InitEmbed(new());
+        var                 ran       = new Random((int)ctx.Message.Id);
+        var                 modifiers = new List<int>();
+        var                 rolls     = new List<int>();
 
         for (var i = 0; i < steps.Count; i++)
         {
@@ -62,11 +62,9 @@ public class DiceRollCommand : BaseCommandModule
         await ctx.RespondAsync(embed).ConfigureAwait(false);
     }
 
-    private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed)
-    {
-        return embed
-            .WithColor(DiscordColor.PhthaloGreen)
-            .WithTitle("You rolled:")
-            .WithFooter("Made by alex#6555 with <3");
-    }
+    private static DiscordEmbedBuilder InitEmbed(DiscordEmbedBuilder embed) =>
+        embed
+           .WithColor(DiscordColor.PhthaloGreen)
+           .WithTitle("You rolled:")
+           .WithFooter("Made by alex#6555 with <3");
 }

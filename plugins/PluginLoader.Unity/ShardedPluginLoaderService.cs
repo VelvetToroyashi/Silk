@@ -11,10 +11,10 @@ using YumeChan.PluginBase;
 
 namespace PluginLoader.Unity
 {
-	/// <summary>
-	///     A service for loading plugins.
-	/// </summary>
-	public sealed class ShardedPluginLoaderService : IPluginLoaderService
+    /// <summary>
+    ///     A service for loading plugins.
+    /// </summary>
+    public sealed class ShardedPluginLoaderService : IPluginLoaderService
     {
         private const    string               DefaultPluginsDirectory = "./plugins";
         private readonly DiscordShardedClient _client;
@@ -31,8 +31,8 @@ namespace PluginLoader.Unity
 
         public async Task LoadPluginsAsync()
         {
-            FileInfo[] files = _loader.DiscoverPluginFiles(DefaultPluginsDirectory);
-            var manifests = new List<PluginManifest>();
+            FileInfo[] files     = _loader.DiscoverPluginFiles(DefaultPluginsDirectory);
+            var        manifests = new List<PluginManifest>();
 
             foreach (FileInfo file in files)
                 manifests.Add(_loader.LoadPluginFile(file));

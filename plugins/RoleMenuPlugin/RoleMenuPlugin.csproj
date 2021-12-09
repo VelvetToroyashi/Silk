@@ -1,54 +1,54 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" >
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <AssemblyVersion>1.2.0</AssemblyVersion>
-        <Nullable>enable</Nullable>
-        <LangVersion>9</LangVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
+    <PropertyGroup >
+        <TargetFramework >net6.0</TargetFramework >
+        <AssemblyVersion >1.2.0</AssemblyVersion >
+        <Nullable >enable</Nullable >
+        <LangVersion >9</LangVersion >
+        <AllowUnsafeBlocks >true</AllowUnsafeBlocks >
+    </PropertyGroup >
 
-    <ItemGroup>
+    <ItemGroup >
         <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="DSharpPlus.Interactivity" />
         <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" >
+            <IncludeAssets >runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets >
+            <PrivateAssets >all</PrivateAssets >
+        </PackageReference >
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Remora.Results" Version="7.1.0" />
         <PackageReference Include="YumeChan.PluginBase" />
-    </ItemGroup>
+    </ItemGroup >
 
-    <ItemGroup>
+    <ItemGroup >
         <Folder Include="Migrations" />
-    </ItemGroup>
+    </ItemGroup >
 
     <!-- Todo: Update this if support for multi-plugin project dll export is needed -->
-    <Target Name="CopyPluginDLL" AfterTargets="Build">
-        <PropertyGroup>
+    <Target Name="CopyPluginDLL" AfterTargets="Build" >
+        <PropertyGroup >
             <!-- Update 'RootPath' if solution file is renamed -->
-            <RootPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath>
+            <RootPath >$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath >
 
             <!-- Update if project 'Silk.Core' is renamed -->
-            <SilkCoreProjectName>Silk.Core</SilkCoreProjectName>
+            <SilkCoreProjectName >Silk.Core</SilkCoreProjectName >
 
             <!-- By default uses current project framework; update if 'Silk.Core' project framework changes -->
-            <SilkCoreProjectFramework>$(TargetFramework)</SilkCoreProjectFramework>
+            <SilkCoreProjectFramework >$(TargetFramework)</SilkCoreProjectFramework >
 
-            <PluginOutputDir>$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir>
-        </PropertyGroup>
+            <PluginOutputDir >$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir >
+        </PropertyGroup >
 
         <Message Text="Copying Plugin DLL ($(Configuration))" Importance="High" />
 
         <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;" DestinationFolder="$(PluginOutputDir)" />
 
         <Message Text="Copied Plugin DLL to $(PluginOutputDir)" Importance="High" />
-    </Target>
-</Project>
+    </Target >
+</Project >

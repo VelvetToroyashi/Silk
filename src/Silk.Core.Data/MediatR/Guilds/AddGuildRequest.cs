@@ -24,10 +24,10 @@ public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, GuildEnti
     {
         GuildEntity guild = new()
         {
-            Id = request.GuildId,
-            Prefix = request.Prefix,
+            Id            = request.GuildId,
+            Prefix        = request.Prefix,
             Configuration = new() { GuildId = request.GuildId },
-            ModConfig = new() { GuildId = request.GuildId },
+            ModConfig     = new() { GuildId = request.GuildId },
         };
 
         _db.Guilds.Add(guild);

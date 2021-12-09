@@ -76,7 +76,7 @@ public class UserTests
     public async Task MediatR_Add_Throws_When_User_Exists()
     {
         //Arrange
-        var request = new AddUserRequest(GuildId, UserId);
+        var               request = new AddUserRequest(GuildId, UserId);
         AsyncTestDelegate send;
         //Act
         await _mediator.Send(request);

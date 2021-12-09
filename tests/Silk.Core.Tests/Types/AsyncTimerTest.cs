@@ -128,8 +128,8 @@ public class AsyncTimerTest
     public void AsyncTimer_Fires_Errored_Event_On_Error()
     {
         //Arrange
-        var errored = false;
-        using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
+        var       errored = false;
+        using var timer   = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
         timer.Errored += (_, _) => errored = true;
 
         //Act
@@ -143,8 +143,8 @@ public class AsyncTimerTest
     public void AsyncTimer_Fires_Errored_Event_On_Error_When_Yielding()
     {
         //Arrange
-        var errored = false;
-        using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
+        var       errored = false;
+        using var timer   = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
         timer.Errored += (_, _) => errored = true;
 
         //Act

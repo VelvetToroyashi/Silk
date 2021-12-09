@@ -18,13 +18,13 @@ public static class AutoModConstants
 	/// </summary>
 	public const string MaxRoleMentions = "max_role_mentions";
 
-	public const string PhishingLinkDetected = "phishing_link";
+    public const string PhishingLinkDetected = "phishing_link";
 
-	//TODO: More auto-mod strings
+    //TODO: More auto-mod strings
 
-	public static ConcurrentDictionary<string, string> ActionStrings { get; } = new()
-	{
-		[MaxUserMentions] = "Maximum unique user pings",
-		[MaxRoleMentions] = "Maximum unique role pings",
-	};
+    public static ConcurrentDictionary<string, string> ActionStrings { get; } = new()
+    {
+        [MaxUserMentions] = "Maximum unique user pings",
+        [MaxRoleMentions] = "Maximum unique role pings",
+    };
 }

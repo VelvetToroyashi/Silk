@@ -16,23 +16,23 @@ public class LoggingChannelEntity
 	///     The guild this configuration belongs to.
 	/// </summary>
 	[Column("guild_id")]
-	public ulong GuildId { get; set; }
+    public ulong GuildId { get; set; }
 
 	/// <summary>
 	///     The ID of the webhook to use for logging, if configured.
 	/// </summary>
 	[Column("webhook_id")]
-	public ulong WebhookId { get; set; }
+    public ulong WebhookId { get; set; }
 
 	/// <summary>
 	///     The token of the webhook to use for logging, if configured.
 	/// </summary>
 	[Column("webhook_token")]
-	public string WebhookToken { get; set; }
+    public string WebhookToken { get; set; }
 
 	/// <summary>
 	///     The channel to log to.
 	/// </summary>
 	[Column("channel_id")]
-	public ulong ChannelId { get; set; }
+    public ulong ChannelId { get; set; }
 }

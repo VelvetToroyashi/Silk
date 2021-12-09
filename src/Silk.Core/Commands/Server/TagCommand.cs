@@ -35,7 +35,7 @@ public class TagCommand : BaseCommandModule
     private readonly TagService _tagService;
     public TagCommand(IMediator mediator, TagService tagService)
     {
-        _mediator = mediator;
+        _mediator   = mediator;
         _tagService = tagService;
     }
 
@@ -80,11 +80,11 @@ public class TagCommand : BaseCommandModule
 
         DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
         DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Blurple)
-            .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
-            .WithTitle(dbTag.Name)
-            .AddField("Uses:", dbTag.Uses.ToString())
-            .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
+                                     .WithColor(DiscordColor.Blurple)
+                                     .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
+                                     .WithTitle(dbTag.Name)
+                                     .AddField("Uses:", dbTag.Uses.ToString())
+                                     .AddField("Created At:", dbTag.CreatedAt.ToUniversalTime().ToString("MM/dd/yyyy - h:mm UTC"));
 
         if (dbTag.OriginalTag is not null)
             builder.AddField("Original:", dbTag.OriginalTag.Name);
@@ -198,17 +198,17 @@ public class TagCommand : BaseCommandModule
         }
 
         string allTags = string.Join("\n\n", tags!
-            .Select(t =>
-            {
-                var s = $"`{t.Name}`";
-                if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                s += $" - <@{t.OwnerId}>";
-                return s;
-            }));
+                                        .Select(t =>
+                                         {
+                                             var s                              = $"`{t.Name}`";
+                                             if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                                             s += $" - <@{t.OwnerId}>";
+                                             return s;
+                                         }));
         DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Blurple)
-            .WithTitle($"Result for {tagName}:")
-            .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                      .WithColor(DiscordColor.Blurple)
+                                      .WithTitle($"Result for {tagName}:")
+                                      .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
         if (tags.Count() < 10)
         {
@@ -254,17 +254,17 @@ public class TagCommand : BaseCommandModule
         }
 
         string allTags = string.Join('\n', tags
-            .Select(t =>
-            {
-                var s = $"`{t.Name}`";
-                if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                return s;
-            }));
+                                        .Select(t =>
+                                         {
+                                             var s                              = $"`{t.Name}`";
+                                             if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                                             return s;
+                                         }));
 
         DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Blurple)
-            .WithTitle($"Tags in {ctx.Guild.Name}:")
-            .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                      .WithColor(DiscordColor.Blurple)
+                                      .WithTitle($"Tags in {ctx.Guild.Name}:")
+                                      .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
         if (tags.Count() < 10)
         {
@@ -300,17 +300,17 @@ public class TagsCommand : BaseCommandModule
         }
 
         string allTags = string.Join('\n', tags
-            .Select(t =>
-            {
-                var s = $"`{t.Name}`";
-                if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                return s;
-            }));
+                                        .Select(t =>
+                                         {
+                                             var s                              = $"`{t.Name}`";
+                                             if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
+                                             return s;
+                                         }));
 
         DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Blurple)
-            .WithTitle($"Tags for {user.Username}:")
-            .WithFooter($"Silk! | Requested by {ctx.User.Id}");
+                                     .WithColor(DiscordColor.Blurple)
+                                     .WithTitle($"Tags for {user.Username}:")
+                                     .WithFooter($"Silk! | Requested by {ctx.User.Id}");
 
         if (tags.Count() < 10)
         {

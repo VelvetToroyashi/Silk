@@ -16,13 +16,13 @@ public record GetUserRequest(ulong GuildId, ulong UserId) : IRequest<UserEntity?
 /// </summary>
 public class GetUserHandler : IRequestHandler<GetUserRequest, UserEntity?>
 {
-	private readonly GuildContext _db;
-	public GetUserHandler(GuildContext db) => _db = db;
+    private readonly GuildContext _db;
+    public GetUserHandler(GuildContext db) => _db = db;
 
-	public async Task<UserEntity?> Handle(GetUserRequest request, CancellationToken cancellationToken)
-	{
-		UserEntity? user = await _db.Users
-			.FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
-		return user;
-	}
+    public async Task<UserEntity?> Handle(GetUserRequest request, CancellationToken cancellationToken)
+    {
+        UserEntity? user = await _db.Users
+                                    .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+        return user;
+    }
 }

@@ -10,19 +10,19 @@ public static class DiscordClientExtensions
     public static DiscordMember? GetMember(this DiscordClient client, Func<DiscordMember, bool> predicate)
     {
         return client
-            .Guilds
-            .Values
-            .SelectMany(g => g.Members.Values)
-            .FirstOrDefault(predicate);
+              .Guilds
+              .Values
+              .SelectMany(g => g.Members.Values)
+              .FirstOrDefault(predicate);
     }
 
     public static DiscordMember? GetMember(this DiscordShardedClient client, Func<DiscordMember, bool> predicate)
     {
         return client
-            .ShardClients
-            .Values
-            .SelectMany(c => c.Guilds.Values)
-            .SelectMany(g => g.Members.Values)
-            .FirstOrDefault(predicate);
+              .ShardClients
+              .Values
+              .SelectMany(c => c.Guilds.Values)
+              .SelectMany(g => g.Members.Values)
+              .FirstOrDefault(predicate);
     }
 }

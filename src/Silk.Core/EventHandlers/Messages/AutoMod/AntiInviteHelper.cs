@@ -26,10 +26,10 @@ public sealed class AntiInviteHelper
 
     public AntiInviteHelper(ILogger<AntiInviteHelper> logger, IMediator mediator, IInfractionService infractions, DiscordClient client)
     {
-        _logger = logger;
-        _mediator = mediator;
+        _logger      = logger;
+        _mediator    = mediator;
         _infractions = infractions;
-        _client = client;
+        _client      = client;
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public sealed class AntiInviteHelper
         if (message.Author.IsBot) return false;
 
         Regex scanPattern = config.UseAggressiveRegex ? AggressiveRegexPattern : LenientRegexPattern;
-        Match match = scanPattern.Match(message.Content);
+        Match match       = scanPattern.Match(message.Content);
 
         invite = match.Groups.Values.Last().Captures.FirstOrDefault()?.Value ?? "";
 

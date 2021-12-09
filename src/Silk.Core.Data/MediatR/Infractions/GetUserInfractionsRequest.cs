@@ -19,9 +19,9 @@ public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsReque
     public async Task<IEnumerable<InfractionEntity>> Handle(GetUserInfractionsRequest request, CancellationToken cancellationToken)
     {
         UserEntity? user = await _db
-            .Users
-            .Include(u => u.Infractions)
-            .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                                .Users
+                                .Include(u => u.Infractions)
+                                .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
 
         return user?.Infractions ?? Array.Empty<InfractionEntity>().AsEnumerable();
     }

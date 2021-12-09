@@ -9,7 +9,7 @@ public class InfractionEntityConfiguration : IEntityTypeConfiguration<Infraction
     public void Configure(EntityTypeBuilder<InfractionEntity> builder)
     {
         builder.HasOne(inf => inf.User)
-            .WithMany(u => u.Infractions)
-            .HasForeignKey(inf => new { inf.UserId, inf.GuildId });
+               .WithMany(u => u.Infractions)
+               .HasForeignKey(inf => new { inf.UserId, inf.GuildId });
     }
 }

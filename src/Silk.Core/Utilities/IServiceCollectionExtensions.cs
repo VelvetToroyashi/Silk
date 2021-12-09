@@ -44,24 +44,24 @@ public static class IServiceCollectionExtensions
 
         services
             //.AddInteractivity()
-            .AddResponders(asm);
+           .AddResponders(asm);
 
         services
-            .AddScoped<CommandHelpViewer>()
-            .AddScoped<IHelpFormatter, HelpFormatter>();
+           .AddScoped<CommandHelpViewer>()
+           .AddScoped<IHelpFormatter, HelpFormatter>();
 
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
-            .AddCommands(asm) // Register types
-            .AddCommands();   // Register commands
+           .AddCommands(asm) // Register types
+           .AddCommands();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
 
         services
-            .AddDiscordCommands()
-            .AddDiscordCaching();
+           .AddDiscordCommands()
+           .AddDiscordCaching();
 
         services
-            .Configure<DiscordGatewayClientOptions>(gw =>
+           .Configure<DiscordGatewayClientOptions>(gw =>
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
@@ -69,24 +69,24 @@ public static class IServiceCollectionExtensions
                     GatewayIntents.Guilds         |
                     GatewayIntents.GuildMessages;
             })
-            .Configure<CacheSettings>(cs =>
+           .Configure<CacheSettings>(cs =>
             {
                 cs.SetAbsoluteExpiration<IChannel>(null)
-                    .SetAbsoluteExpiration<IMessage>(null);
+                  .SetAbsoluteExpiration<IMessage>(null);
             });
-            
+
         return services;
     }
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, HostBuilderContext host)
     {
         LoggerConfiguration logger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
-            .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-            .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
-            .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
+                                    .Enrich.FromLogContext()
+                                    .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
+                                    .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
+                                    .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+                                    .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
+                                    .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         string? configOptions = host.Configuration["Logging"];
         Log.Logger = configOptions switch

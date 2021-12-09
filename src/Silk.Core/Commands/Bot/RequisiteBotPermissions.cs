@@ -20,16 +20,16 @@ public class RequisiteBotPermissions : BaseCommandModule
         string? description = ctx.Command.Description;
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.CornflowerBlue)
-            .WithTitle("Silk's Permissions:")
-            .WithDescription(description + "\n");
+                                   .WithColor(DiscordColor.CornflowerBlue)
+                                   .WithTitle("Silk's Permissions:")
+                                   .WithDescription(description + "\n");
 
         DiscordMember bot = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
         bool manageMessage = bot.HasPermission(Permissions.ManageMessages);
-        bool kick = bot.HasPermission(Permissions.KickMembers);
-        bool ban = bot.HasPermission(Permissions.BanMembers);
-        bool manageRoles = bot.HasPermission(Permissions.ManageRoles);
+        bool kick          = bot.HasPermission(Permissions.KickMembers);
+        bool ban           = bot.HasPermission(Permissions.BanMembers);
+        bool manageRoles   = bot.HasPermission(Permissions.ManageRoles);
 
         // Todo: Match / Collect commands with permissions the bot needs (could be based on Attribute), so the command names below can be updated dynamically
 
@@ -41,8 +41,5 @@ public class RequisiteBotPermissions : BaseCommandModule
         await ctx.RespondAsync(embed);
     }
 
-    private static string GetStatusEmoji(bool requirementMet)
-    {
-        return requirementMet ? ":white_check_mark:" : ":x:";
-    }
+    private static string GetStatusEmoji(bool requirementMet) => requirementMet ? ":white_check_mark:" : ":x:";
 }

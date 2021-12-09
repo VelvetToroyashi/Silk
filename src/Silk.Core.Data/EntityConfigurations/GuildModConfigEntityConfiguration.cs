@@ -11,8 +11,8 @@ public sealed class GuildModConfigEntityConfiguration : IEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<GuildModConfigEntity> builder)
     {
         builder.Property(b => b.NamedInfractionSteps)
-            .HasConversion(b => JsonConvert.SerializeObject(b,
-                    new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
-                b => JsonConvert.DeserializeObject<Dictionary<string, InfractionStepEntity>>(b)!);
+               .HasConversion(b => JsonConvert.SerializeObject(b,
+                                                               new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }),
+                              b => JsonConvert.DeserializeObject<Dictionary<string, InfractionStepEntity>>(b)!);
     }
 }

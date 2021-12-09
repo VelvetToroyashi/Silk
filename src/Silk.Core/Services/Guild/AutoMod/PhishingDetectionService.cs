@@ -16,14 +16,14 @@ using Silk.Shared.Constants;
 namespace Silk.Core.AutoMod;
 
 /// <summary>
-/// Handles potential phishing links.
+///     Handles potential phishing links.
 /// </summary>
 public class PhishingDetectionService
 {
     private const           string Phishing  = "Message contained a phishing link.";
     private static readonly Regex  LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
-        
-       
+
+
     private readonly IInfractionService                _infractions;
     private readonly IDiscordRestUserAPI               _userApi;
     private readonly IDiscordRestChannelAPI            _channelApi;
@@ -31,50 +31,50 @@ public class PhishingDetectionService
     private readonly GuildConfigCacheService           _configService;
     private readonly ExemptionEvaluationService        _exemptions;
     private readonly ILogger<PhishingDetectionService> _logger;
-        
+
     public PhishingDetectionService
-    (
-        IInfractionService infractions,
-        IDiscordRestUserAPI userApi,
-        IDiscordRestChannelAPI channelApi, 
-        PhishingGatewayService phishGateway, 
-        GuildConfigCacheService configService,
-        ExemptionEvaluationService exemptions,
-        ILogger<PhishingDetectionService> logger
-    )
+        (
+            IInfractionService                infractions,
+            IDiscordRestUserAPI               userApi,
+            IDiscordRestChannelAPI            channelApi,
+            PhishingGatewayService            phishGateway,
+            GuildConfigCacheService           configService,
+            ExemptionEvaluationService        exemptions,
+            ILogger<PhishingDetectionService> logger
+        )
     {
-        _infractions = infractions;
-        _userApi = userApi;
-        _channelApi = channelApi;
-        _phishGateway = phishGateway;
+        _infractions   = infractions;
+        _userApi       = userApi;
+        _channelApi    = channelApi;
+        _phishGateway  = phishGateway;
         _configService = configService;
-        _exemptions = exemptions;
-        _logger = logger;
+        _exemptions    = exemptions;
+        _logger        = logger;
     }
-        
+
     /// <summary>
-    /// Detects any phishing links in a given message.
+    ///     Detects any phishing links in a given message.
     /// </summary>
     /// <param name="message">The message to scan.</param>
     public async Task<Result> DetectPhishingAsync(IMessage message)
     {
-        if (message.Author.IsBot.IsDefined(out var bot) && bot)
+        if (message.Author.IsBot.IsDefined(out bool bot) && bot)
             return Result.FromSuccess(); // Sus.
-            
-        if (!message.GuildID.IsDefined(out var guildId))
+
+        if (!message.GuildID.IsDefined(out Snowflake guildId))
             return Result.FromSuccess(); // DM channels are exmepted.
 
-        var config = await _configService.GetModConfigAsync(guildId.Value);
-            
+        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildId.Value);
+
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
-            
+
         // As to why I don't use Regex.Match() instead:
         // Regex.Match casts its return value to a non-nullable Match.
         // Run(), the method which it invokes returns Match?, which can cause an unexpected null ref.
         // You'd think this would be documented, but I digress.
         // Source: https://source.dot.net/#System.Text.RegularExpressions/System/Text/RegularExpressions/Regex.cs,388
-        var links = LinkRegex.Matches(message.Content);
+        MatchCollection links = LinkRegex.Matches(message.Content);
 
         foreach (Match match in links)
         {
@@ -83,13 +83,13 @@ public class PhishingDetectionService
 
             if (match.Success)
             {
-                var link = match.Groups["link"].Value;
+                string link = match.Groups["link"].Value;
 
                 if (_phishGateway.IsBlacklisted(link))
                 {
                     _logger.LogInformation("Detected phishing link.");
-                        
-                    var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.Phishing, guildId, message.Author.ID, message.ChannelID);
+
+                    Result<bool> exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.Phishing, guildId, message.Author.ID, message.ChannelID);
 
                     if (!exemptionResult.IsSuccess)
                         return Result.FromError(exemptionResult.Error);
@@ -99,34 +99,34 @@ public class PhishingDetectionService
                 }
             }
         }
-            
+
         return Result.FromSuccess();
     }
-        
+
     /// <summary>
-    /// Handles a detected phishing link.
+    ///     Handles a detected phishing link.
     /// </summary>
     /// <param name="guildID">The ID of the guild the message was detected on.</param>
     /// <param name="authorId">The ID of the author.</param>
     /// <param name="delete">Whether to delete the detected phishing link.</param>
-    private async Task<Result> HandleDetectedPhishingAsync(Snowflake guildID, Snowflake authorID, Snowflake channelID, Snowflake messageID,  bool delete)
+    private async Task<Result> HandleDetectedPhishingAsync(Snowflake guildID, Snowflake authorID, Snowflake channelID, Snowflake messageID, bool delete)
     {
         if (delete)
             await _channelApi.DeleteMessageAsync(channelID, messageID);
-            
-        var config = await _configService.GetModConfigAsync(guildID.Value);
-            
-        if (!config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var step))
+
+        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildID.Value);
+
+        if (!config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out InfractionStepEntity? step))
             return Result.FromError(new InvalidOperationError("Failed to get step for phishing link detected."));
 
-        var selfResult = await _userApi.GetCurrentUserAsync();
-            
+        Result<IUser> selfResult = await _userApi.GetCurrentUserAsync();
+
         if (!selfResult.IsSuccess)
             return Result.FromError(selfResult.Error);
-            
-        var self = selfResult.Entity;
 
-        var infractionResult = step.Type switch
+        IUser self = selfResult.Entity;
+
+        Result infractionResult = step.Type switch
         {
             InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, Phishing),
             InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, Phishing),

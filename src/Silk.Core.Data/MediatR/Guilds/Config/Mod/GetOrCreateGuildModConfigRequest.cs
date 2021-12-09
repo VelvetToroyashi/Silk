@@ -17,22 +17,22 @@ public record GetOrCreateGuildModConfigRequest(ulong GuildId, string Prefix) : I
 /// </summary>
 public class GetOrCreateGuildModConfigHandler : IRequestHandler<GetOrCreateGuildModConfigRequest, GuildModConfigEntity>
 {
-	private readonly IMediator _mediator;
-	public GetOrCreateGuildModConfigHandler(IMediator mediator) => _mediator = mediator;
+    private readonly IMediator _mediator;
+    public GetOrCreateGuildModConfigHandler(IMediator mediator) => _mediator = mediator;
 
-	public async Task<GuildModConfigEntity> Handle(GetOrCreateGuildModConfigRequest configRequest, CancellationToken cancellationToken)
-	{
-		var guildModConfigRequest = new GetGuildModConfigRequest(configRequest.GuildId);
-		GuildModConfigEntity? guildModConfig = await _mediator.Send(guildModConfigRequest, cancellationToken);
+    public async Task<GuildModConfigEntity> Handle(GetOrCreateGuildModConfigRequest configRequest, CancellationToken cancellationToken)
+    {
+        var                   guildModConfigRequest = new GetGuildModConfigRequest(configRequest.GuildId);
+        GuildModConfigEntity? guildModConfig        = await _mediator.Send(guildModConfigRequest, cancellationToken);
 
-		if (guildModConfig is not null)
-			return guildModConfig;
+        if (guildModConfig is not null)
+            return guildModConfig;
 
-		var request = new GetOrCreateGuildRequest(configRequest.GuildId, configRequest.Prefix);
-		GuildEntity? response = await _mediator.Send(request, cancellationToken);
+        var          request  = new GetOrCreateGuildRequest(configRequest.GuildId, configRequest.Prefix);
+        GuildEntity? response = await _mediator.Send(request, cancellationToken);
 
-		guildModConfig = response.ModConfig;
+        guildModConfig = response.ModConfig;
 
-		return guildModConfig;
-	}
+        return guildModConfig;
+    }
 }

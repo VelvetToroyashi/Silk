@@ -46,7 +46,7 @@ public sealed class PluginLoader
 
         public PluginLoader(ILogger<PluginLoader> logger, IUnityContainer container)
         {
-            _logger = logger;
+            _logger    = logger;
             _container = container;
         }
         public IReadOnlyList<PluginManifest> Plugins => _plugins;
@@ -69,7 +69,7 @@ public sealed class PluginLoader
         internal PluginManifest LoadPluginFile(FileInfo file) // It's up to other things to keep track of plugin states. //
         {
             FileStream asmStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            Assembly asm = AssemblyLoadContext.Default.LoadFromStream(asmStream);
+            Assembly   asm       = AssemblyLoadContext.Default.LoadFromStream(asmStream);
             asmStream.Close();
 
             var manifest = new PluginManifest

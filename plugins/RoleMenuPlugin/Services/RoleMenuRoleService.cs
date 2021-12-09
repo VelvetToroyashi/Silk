@@ -22,7 +22,7 @@ namespace RoleMenuPlugin
         public RoleMenuRoleService(IMediator mediator, ILogger<RoleMenuRoleService> logger)
         {
             _mediator = mediator;
-            _logger = logger;
+            _logger   = logger;
         }
 
         public Task Handle(DiscordClient client, ComponentInteractionCreateEventArgs eventArgs)
@@ -47,8 +47,8 @@ namespace RoleMenuPlugin
                  * TODO: Set role ids to be preselected
                  * TODO: Send ephemeral message
                  */
-                RoleMenuModel? menu = await _mediator.Send(new GetRoleMenu.Request(eventArgs.Message.Id));
-                List<ulong>? roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
+                RoleMenuModel? menu  = await _mediator.Send(new GetRoleMenu.Request(eventArgs.Message.Id));
+                List<ulong>?   roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
 
                 DiscordSelectComponentOption[]? options = menu.Options
                                                               .Select(o =>
@@ -90,8 +90,8 @@ namespace RoleMenuPlugin
             var member = (DiscordMember)eventArgs.User;
 
             IEnumerable<ulong>? selectedMenuIds = eventArgs.Values.Select(ulong.Parse);
-            IEnumerable<ulong>? menuRoleIds = config.Options.Select(r => r.RoleId);
-            IEnumerable<ulong>? userRoleIds = member.Roles.Select(r => r.Id);
+            IEnumerable<ulong>? menuRoleIds     = config.Options.Select(r => r.RoleId);
+            IEnumerable<ulong>? userRoleIds     = member.Roles.Select(r => r.Id);
 
 
             foreach (ulong id in menuRoleIds)
@@ -103,7 +103,7 @@ namespace RoleMenuPlugin
                     return;
                 }
                 // Role was deleted //
-                if (!RoleExists(id, eventArgs.Guild, out var role))
+                if (!RoleExists(id, eventArgs.Guild, out DiscordRole role))
                 {
                     await NotifyOfInvalidRoleAsync(id);
                     continue;
@@ -126,7 +126,7 @@ namespace RoleMenuPlugin
                 await eventArgs.Interaction.CreateFollowupMessageAsync(new()
                 {
                     IsEphemeral = true,
-                    Content = "Sorry, but one or more roles has gone missing! Please notify a staff member about this.",
+                    Content     = "Sorry, but one or more roles has gone missing! Please notify a staff member about this.",
                 });
 
                 _logger.LogWarning("A role ({Role}) was not present on guild {Guild}, but is present in a defined role menu.", id, eventArgs.Guild.Id);
@@ -137,7 +137,7 @@ namespace RoleMenuPlugin
                 await eventArgs.Interaction.CreateFollowupMessageAsync(new()
                 {
                     IsEphemeral = true,
-                    Content = $"Sorry, but I do not have permission to assign roles! I need the {Permissions.ManageRoles} permission. Please notify a staff member about this.",
+                    Content     = $"Sorry, but I do not have permission to assign roles! I need the {Permissions.ManageRoles} permission. Please notify a staff member about this.",
                 });
 
                 _logger.LogWarning("Requisite permission for role menus on {Guild} is missing! Role-menus are non-functional on this guild.", eventArgs.Guild.Id);
@@ -148,26 +148,17 @@ namespace RoleMenuPlugin
                 await eventArgs.Interaction.CreateFollowupMessageAsync(new()
                 {
                     IsEphemeral = true,
-                    Content = $"Sorry, but I can't assign {role.Mention} because it is above my highest role! Please notify a staff member about this.",
+                    Content     = $"Sorry, but I can't assign {role.Mention} because it is above my highest role! Please notify a staff member about this.",
                 });
 
                 _logger.LogWarning("A role was defined in a role-menu, but guild hierarchy has changed. Role-menus may no longer work for {Guild}", eventArgs.Guild.Id);
             }
         }
 
-        private bool FailedHierarchy(DiscordGuild eventArgsGuild, DiscordRole role)
-        {
-            return eventArgsGuild.CurrentMember.Roles.Last().Position <= role.Position;
-        }
+        private bool FailedHierarchy(DiscordGuild eventArgsGuild, DiscordRole role) => eventArgsGuild.CurrentMember.Roles.Last().Position <= role.Position;
 
-        private bool HasSelfPermissions(DiscordGuild eventArgsGuild)
-        {
-            return eventArgsGuild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles);
-        }
+        private bool HasSelfPermissions(DiscordGuild eventArgsGuild) => eventArgsGuild.CurrentMember.Permissions.HasPermission(Permissions.ManageRoles);
 
-        private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role)
-        {
-            return (role = guild.GetRole(id)) is not null;
-        }
+        private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role) => (role = guild.GetRole(id)) is not null;
     }
 }

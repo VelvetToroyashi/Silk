@@ -9,6 +9,6 @@ namespace Silk.Core.Utilities.HelpFormatter;
 public class HelpCategoryAttribute : Attribute
 {
 
-	public HelpCategoryAttribute(string name) => Name = name;
-	public string Name { get; }
+    public HelpCategoryAttribute(string name) => Name = name;
+    public string Name { get; }
 }

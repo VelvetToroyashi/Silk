@@ -20,11 +20,8 @@ public static class CollectionExtensions
     }
 
     /// <summary>Fluid method that joins the members of a collection using the specified separator between them.</summary>
-    public static string Join<T>(this IEnumerable<T> values, string separator = "")
-    {
-        return string.Join(separator, values);
-    }
+    public static string Join<T>(this IEnumerable<T> values, string separator = "") => string.Join(separator, values);
 
-    public static TResult? MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector) 
+    public static TResult? MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         => source.Any() ? source.Max(selector) : default;
 }

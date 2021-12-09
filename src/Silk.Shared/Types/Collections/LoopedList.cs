@@ -18,8 +18,5 @@ public sealed class LoopedList<T> : List<T>
         }
     }
 
-    public T Next()
-    {
-        return unchecked(this[(int)_pos++]);
-    }
+    public T Next() => unchecked(this[(int)_pos++]);
 }

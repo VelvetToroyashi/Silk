@@ -23,12 +23,12 @@ public class UptimeService : BackgroundService
     public UptimeService(DiscordClient client, ILogger<UptimeService> logger)
     {
         _logger = logger;
-        _reset = new(false);
+        _reset  = new(false);
 
         client.SocketOpened += async (_, _) =>
         {
             _isUp = true;
-            _ = _reset.SetAsync();
+            _     = _reset.SetAsync();
         };
         client.SocketClosed += async (_, _) =>
         {

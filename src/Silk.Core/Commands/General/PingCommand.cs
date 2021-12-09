@@ -20,7 +20,7 @@ public class PingCommand : BaseCommandModule
     public PingCommand(GuildContext dbFactory, HttpClient client)
     {
         _dbFactory = dbFactory;
-        _client = client;
+        _client    = client;
     }
 
     [Command("ping")]
@@ -29,14 +29,14 @@ public class PingCommand : BaseCommandModule
     public async Task Ping(CommandContext ctx)
     {
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithColor(DiscordColor.Blue)
-            .AddField("→ Message Latency ←", "```cs\n"   + "Calculating..".PadLeft(15, '⠀')         + "```", true)
-            .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
-            .AddField("→ Silk! API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀')         + "```", true)
-            // Make the databse latency centered. //
-            .AddField("→ Database Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
-            .AddField("​", "​", true)
-            .AddField("→ Discord API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true);
+                                   .WithColor(DiscordColor.Blue)
+                                   .AddField("→ Message Latency ←", "```cs\n"   + "Calculating..".PadLeft(15, '⠀')         + "```", true)
+                                   .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
+                                   .AddField("→ Silk! API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀')         + "```", true)
+                                    // Make the databse latency centered. //
+                                   .AddField("→ Database Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
+                                   .AddField("​", "​", true)
+                                   .AddField("→ Discord API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true);
 
         DiscordMessage message = await ctx.RespondAsync(embed);
 
@@ -51,15 +51,15 @@ public class PingCommand : BaseCommandModule
         sw.Stop();
 
         embed
-            .ClearFields()
-            .AddField("→ Message Latency ←", "```cs\n"   + $"{(message.CreationTimestamp - ctx.Message.CreationTimestamp).Milliseconds} ms".PadLeft(10, '⠀') + "```", true)
-            .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀')                                                          + "```", true)
-            .AddField("→ Silk! API Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀')                                                   + "```", true)
+           .ClearFields()
+           .AddField("→ Message Latency ←", "```cs\n"   + $"{(message.CreationTimestamp - ctx.Message.CreationTimestamp).Milliseconds} ms".PadLeft(10, '⠀') + "```", true)
+           .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀')                                                          + "```", true)
+           .AddField("→ Silk! API Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀')                                                   + "```", true)
             // Make the databse latency centered. //
-            .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
-            .AddField("​", "​", true)
-            .AddField("→ Discord API Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(12) + "```", true)
-            .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
+           .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
+           .AddField("​", "​", true)
+           .AddField("→ Discord API Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(12) + "```", true)
+           .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
 
         await message.ModifyAsync(embed.Build());
     }

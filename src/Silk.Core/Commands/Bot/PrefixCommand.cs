@@ -23,7 +23,7 @@ public class PrefixCommand : BaseCommandModule
     public PrefixCommand(IPrefixCacheService prefixCache, GuildContext db)
     {
         _prefixCache = prefixCache;
-        _db = db;
+        _db          = db;
     }
 
     [Command("prefix")]

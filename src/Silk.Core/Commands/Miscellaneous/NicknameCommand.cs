@@ -30,7 +30,7 @@ public class NicknameCommand : BaseCommandModule
     public async Task SetNickname(CommandContext ctx, string match, [RemainingText] string nickname)
     {
         IReadOnlyList<DiscordMember>? members = await ctx.Guild.SearchMembersAsync(match, 1000);
-        IEnumerable<DiscordMember>? skipped = members.Where(m => m.Hierarchy > ctx.Guild.CurrentMember.Hierarchy);
+        IEnumerable<DiscordMember>?   skipped = members.Where(m => m.Hierarchy > ctx.Guild.CurrentMember.Hierarchy);
         members = members.Except(skipped).ToArray();
         Task[]? reqs = members.Select(mem => mem.ModifyAsync(m => m.Nickname = nickname)).ToArray();
 

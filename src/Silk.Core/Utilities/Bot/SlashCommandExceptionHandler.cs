@@ -27,10 +27,10 @@ public sealed class SlashCommandExceptionHandler
             else if (slchks.FailedChecks[0] is (RequireCommonGuildAttribute or RequireBotAttribute))
             {
                 await args.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder()
-                        .WithContent(slchks.FailedChecks[0] is RequireCommonGuildAttribute ? MissingCommonGuildMessage : MissingBotUserMessage)
-                        .AsEphemeral(true)
-                        .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={args.Context.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
+                                                       new DiscordInteractionResponseBuilder()
+                                                          .WithContent(slchks.FailedChecks[0] is RequireCommonGuildAttribute ? MissingCommonGuildMessage : MissingBotUserMessage)
+                                                          .AsEphemeral(true)
+                                                          .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={args.Context.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
 
             }
         }

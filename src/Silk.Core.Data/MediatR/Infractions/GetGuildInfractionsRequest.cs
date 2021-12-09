@@ -18,9 +18,9 @@ public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfracti
     public async Task<IEnumerable<InfractionEntity>> Handle(GetGuildInfractionsRequest request, CancellationToken cancellationToken)
     {
         List<InfractionEntity>? infractions = await _db
-            .Infractions
-            .Where(inf => inf.GuildId == request.GuildId)
-            .ToListAsync(cancellationToken);
+                                                   .Infractions
+                                                   .Where(inf => inf.GuildId == request.GuildId)
+                                                   .ToListAsync(cancellationToken);
 
         return infractions;
     }

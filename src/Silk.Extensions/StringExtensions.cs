@@ -38,8 +38,5 @@ public static class StringExtensions
         return text[range.Start..Math.Min(text.Length, range.End.Value)];
     }
 
-    public static Stream AsStream(this string s)
-    {
-        return new MemoryStream(Encoding.UTF8.GetBytes(s));
-    }
+    public static Stream AsStream(this string s) => new MemoryStream(Encoding.UTF8.GetBytes(s));
 }

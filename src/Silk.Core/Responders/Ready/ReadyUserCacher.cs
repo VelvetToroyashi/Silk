@@ -19,7 +19,7 @@ public class ReadyUserCacher : IResponder<IReady>
 
     public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
     {
-        IUser currentUserObject = gatewayEvent.User;
+        IUser  currentUserObject   = gatewayEvent.User;
         object currentUserCacheKey = KeyHelpers.CreateCurrentUserCacheKey();
 
         _cache.Set(currentUserCacheKey, currentUserObject, new MemoryCacheEntryOptions { Priority = CacheItemPriority.NeverRemove });

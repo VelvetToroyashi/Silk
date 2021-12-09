@@ -22,8 +22,8 @@ public class PickPeopleCommand : BaseCommandModule
         List<DiscordMember> users = ctx.Guild.Members.Values.Where(u => !u.IsBot).ToList();
         sampleSize = (uint)Math.Min(sampleSize, users.Count);
 
-        int seed = DateTime.UtcNow.Millisecond + DateTime.UtcNow.Second;
-        var random = new Random(seed);
+        int seed          = DateTime.UtcNow.Millisecond + DateTime.UtcNow.Second;
+        var random        = new Random(seed);
         var selectedUsers = new List<string>();
 
 
@@ -37,10 +37,10 @@ public class PickPeopleCommand : BaseCommandModule
         string result = string.Join('\n', selectedUsers);
 
         DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-            .WithTitle($"Selected {sampleSize} random users!")
-            .WithDescription($"Result:\n{result}")
-            .WithColor(DiscordColor.SapGreen)
-            .WithFooter($"RNG Seed: {seed}");
+                                    .WithTitle($"Selected {sampleSize} random users!")
+                                    .WithDescription($"Result:\n{result}")
+                                    .WithColor(DiscordColor.SapGreen)
+                                    .WithFooter($"RNG Seed: {seed}");
         await ctx.RespondAsync(embed);
     }
 }
