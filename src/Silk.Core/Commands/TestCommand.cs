@@ -27,11 +27,23 @@ namespace Silk.Core.Commands
         [Description("Test command")]
         public async Task<Result> A(IUser user)
         {
-            var res = await _infractions.StrikeAsync(_context.GuildID.Value, user.ID, _context.User.ID, "Because I said so.");
+            var res = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, 0,"Testing!..");
 
             if (!res.IsSuccess)
-                await _channelApi.CreateMessageAsync(_context.ChannelID, $"{res.Error}\n{(res.Error is InfractionError ie ? ie.Inner.Error : res.Inner?.Error)}");
+            {
+                await _channelApi.CreateMessageAsync(_context.ChannelID, $"{res.Error}\n{(res.Error is InfractionError ie ? ie.Message + ie.Inner.Error : res.Inner?.Error)}");
+                return res;
+            }
+            
+            else await _channelApi.CreateMessageAsync(_context.ChannelID, "Banned user. Unbanning...");
 
+            res = await _infractions.UnBanAsync(_context.GuildID.Value, user.ID, _context.User.ID);
+            
+            if (!res.IsSuccess)
+                await _channelApi.CreateMessageAsync(_context.ChannelID, $"{res.Error}\n{(res.Error is InfractionError ie ? ie.Inner.Error : res.Inner?.Error)}");
+            
+            else await _channelApi.CreateMessageAsync(_context.ChannelID, "Unbanned user.");
+            
             return Result.FromSuccess();
         }
         
