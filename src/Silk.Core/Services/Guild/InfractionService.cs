@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -46,7 +47,7 @@ namespace Silk.Core.Services.Server
         private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestChannelAPI _channels;
         private readonly IDiscordRestWebhookAPI _webhooks;
-        
+
         private readonly ConcurrentBag<InfractionEntity> _queue = new();
         public InfractionService
         (
@@ -163,12 +164,17 @@ namespace Silk.Core.Services.Server
             IUser target;
             IUser enforcer;
 
-            var canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+            var permissionResult = await EnsureHasPermissionsAsync(guildID, enforcerID, DiscordPermission.BanMembers);
             
-            if (!canInfractResult.IsSuccess)
-                return Result.FromError(canInfractResult.Error);
-
-            (target, enforcer) = canInfractResult.Entity;
+            if (!permissionResult.IsSuccess)
+                return Result.FromError(permissionResult.Error);
+            
+            var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+            
+            if (!hierarchyResult.IsSuccess)
+                return Result.FromError(hierarchyResult.Error);
+            
+            (target, enforcer) = hierarchyResult.Entity;
             
             var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Kick));
 
@@ -185,8 +191,33 @@ namespace Silk.Core.Services.Server
                 ? Result.FromSuccess() 
                 : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
         }
+        
         /// <inheritdoc/>
-        public async Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => throw new NotImplementedException();
+        public async Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+        {
+            IUser target;
+            IUser enforcer;
+
+            var banResult = await _guilds.RemoveGuildBanAsync(guildID, targetID, reason);
+            
+            if (!banResult.IsSuccess)
+                return GetActionFailedErrorMessage(banResult, "ban (required for unbanning)"); 
+            
+            var infraction = await _mediator.Send(new CreateInfractionRequest(guildID.Value, targetID.Value, enforcerID.Value, reason, InfractionType.Unban));
+            
+            var targetEnforcerResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+            
+            if (!targetEnforcerResult.IsSuccess)
+                return Result.FromError(targetEnforcerResult.Error);
+            
+            (target, enforcer) = targetEnforcerResult.Entity;
+            
+            var returnResult = await LogInfractionAsync(infraction, target, enforcer);
+            
+            return returnResult.IsSuccess 
+                ? Result.FromSuccess() 
+                : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+        }
         
         /// <inheritdoc/>
         public async ValueTask<bool> IsMutedAsync(Snowflake guildID, Snowflake targetID) => false;
@@ -241,7 +272,8 @@ namespace Silk.Core.Services.Server
             return re.Error.Code switch
             {
                 DiscordError.MissingAccess => Result.FromError(new PermissionError($"I don't have permission to {actionName} people!")),
-                DiscordError.UnknownUser   => Result.FromError(new NotFoundError($"That user doesn't seem to exist! Are you sure you typed their ID correctly?")),
+                DiscordError.UnknownUser   => Result.FromError(new NotFoundError("That user doesn't seem to exist! Are you sure you typed their ID correctly?")),
+                DiscordError.UnknownBan  => Result.FromError(new NotFoundError("That ban doesn't seem to exist! Are you sure you typed their ID correctly?")),
                 _                          => result
             };
         }
@@ -287,7 +319,7 @@ namespace Silk.Core.Services.Server
 
                 if (!targetResult.IsDefined(out var targetUser))
                     return Result<(IUser target, IUser enforcer)>.FromError(new NotFoundError("Target does not exist."));
-
+                
                 target = targetUser;
             }
             else
@@ -310,7 +342,56 @@ namespace Silk.Core.Services.Server
             
             return Result<(IUser target, IUser enforcer)>.FromSuccess((target, enforcer));
         }
+    
+        /// <summary>
+        /// Determines whether both the enforcer and bot have permission to act upon the target.
+        /// </summary>
+        /// <param name="guildID">The ID of the guild to check.</param>
+        /// <param name="enforcerID">The ID of the enforcer.</param>
+        /// <param name="permission">The permission to check</param>
+        private async Task<Result> EnsureHasPermissionsAsync(Snowflake guildID, Snowflake enforcerID, DiscordPermission permission)
+        {
+            var selfUserResult = await _users.GetCurrentUserAsync();
+            
+            if (!selfUserResult.IsSuccess)
+                return Result.FromError(selfUserResult.Error);
 
+            var selfResult = await _guilds.GetGuildMemberAsync(guildID, selfUserResult.Entity.ID);
+            
+            if (!selfResult.IsSuccess)
+                return Result.FromError(selfResult.Error);
+            
+            var self = selfResult.Entity;
+            
+            var enforcerResult = await _guilds.GetGuildMemberAsync(guildID, enforcerID);
+            
+            if (!enforcerResult.IsSuccess)
+                return Result.FromError(enforcerResult.Error);
+            
+            var enforcer = enforcerResult.Entity;
+            
+            var rolesResult = await _guilds.GetGuildRolesAsync(guildID);
+            
+            if (!rolesResult.IsSuccess)
+                return Result.FromError(rolesResult.Error);
+            
+            var roles = rolesResult.Entity;
+            
+            var enforcerRoles = roles.Where(r => enforcer.Roles.Contains(r.ID));
+            var selfRoles = roles.Where(r => self.Roles.Contains(r.ID));
+            
+            var enforcerCanAct = enforcerRoles.Any(r => r.Permissions.HasPermission(permission));
+            var selfCanAct = selfRoles.Any(r => r.Permissions.HasPermission(permission));
+
+            if (!enforcerCanAct)
+                return Result.FromError(new PermissionError($"You don't have permission to {permission.Humanize(LetterCasing.LowerCase)}!"));
+            
+            if (!selfCanAct)
+                return Result.FromError(new PermissionError($"I don't have permission to {permission.Humanize(LetterCasing.LowerCase)}!"));
+            
+            return Result.FromSuccess();
+        }
+        
         /// <summary>
         /// Attempts to log an infraction to a user.
         /// </summary>
