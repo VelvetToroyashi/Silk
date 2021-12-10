@@ -17,7 +17,7 @@ public sealed record CreateInfractionRequest
         Snowflake      EnforcerID,
         string         Reason,
         InfractionType Type,
-        DateTime?      Expiration      = null,
+        DateTimeOffset?      Expiration      = null,
         bool           HeldAgainstUser = true
     ) : IRequest<InfractionEntity>;
 
