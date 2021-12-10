@@ -31,7 +31,7 @@ namespace Silk.Core.Commands.Moderation
         }
 
         [Command("strike")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Aliases("warn", "w", "bonk")]
         [Description("Strike a user and add it to their moderation history.")]
         public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")

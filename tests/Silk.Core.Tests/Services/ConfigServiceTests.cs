@@ -37,7 +37,7 @@ public class ConfigServiceTests
         //Act
         object discard;
         _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
-        await _guildConfigCacheService.GetConfigAsync(0);
+        await _guildConfigCacheService.GetConfigAsync(new(0));
         //Assert
         _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }

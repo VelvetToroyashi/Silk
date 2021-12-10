@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿//TODO: This
+/*using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -57,7 +58,7 @@ public class TagCommands : ApplicationCommandModule
                 return;
             }
 
-            if (tag.OwnerId == ctx.User.Id)
+            if (tag.OwnerID == ctx.User.Id)
             {
                 await _tags.RemoveTagAsync(tagName, ctx.Interaction.GuildId.Value);
                 await ctx.EditResponseAsync(new() { Content = $"{(tag.OriginalTag is null ? "Tag" : "Alias")} {Formatter.Bold(tagName)} {(tag.Aliases?.Any() ?? false ? "" : "and all associated aliases")} successfully deleted!" });
@@ -93,7 +94,7 @@ public class TagCommands : ApplicationCommandModule
                 return;
             }
 
-            DiscordUser tagOwner = await ctx.Client.GetUserAsync(tag.OwnerId);
+            DiscordUser tagOwner = await ctx.Client.GetUserAsync(tag.OwnerID);
 
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
                                          .WithColor(DiscordColor.Blurple)
@@ -234,7 +235,7 @@ public class TagCommands : ApplicationCommandModule
             }
             else
             {
-                string allTags = string.Join("\n\n", tags.Select(t => $"`{t.Name}`{(t.OriginalTag is null ? "" : $" → `{t.OriginalTag!.Name}`")} - <@{t.OwnerId}>"));
+                string allTags = string.Join("\n\n", tags.Select(t => $"`{t.Name}`{(t.OriginalTag is null ? "" : $" → `{t.OriginalTag!.Name}`")} - <@{t.OwnerID}>"));
 
                 DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
                                               .WithColor(DiscordColor.Blurple)
@@ -338,7 +339,7 @@ public class TagCommands : ApplicationCommandModule
                 return;
             }
 
-            bool exists = ctx.Guild.Members.ContainsKey(dbTag.OwnerId);
+            bool exists = ctx.Guild.Members.ContainsKey(dbTag.OwnerID);
 
             UserEntity? user  = await _mediator.Send(new GetUserRequest(ctx.Interaction.GuildId.Value, ctx.User.Id));
             bool        staff = user?.Flags.HasFlag(UserFlag.Staff) ?? false;
@@ -360,4 +361,4 @@ public class TagCommands : ApplicationCommandModule
 
         }
     }
-}
+}*/

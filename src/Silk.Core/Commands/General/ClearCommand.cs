@@ -1,4 +1,5 @@
-﻿using System;
+﻿//TODO: This
+/*using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -69,4 +70,4 @@ public class ClearCommand : BaseCommandModule
         GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(ctx.Guild.Id, StringConstants.DefaultCommandPrefix));
         return guild.ModConfig;
     }
-}
+}*/

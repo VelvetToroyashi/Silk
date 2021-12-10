@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds;
@@ -9,9 +10,9 @@ namespace Silk.Core.Data.MediatR.Guilds;
 /// <summary>
 ///     Request for retrieving or creating a <see cref="GuildEntity" />.
 /// </summary>
-/// <param name="GuildId">The Id of the Guild</param>
+/// <param name="GuildID">The Id of the Guild</param>
 /// <param name="Prefix">The prefix of the Guild</param>
-public record GetOrCreateGuildRequest(ulong GuildId, string Prefix) : IRequest<GuildEntity>;
+public record GetOrCreateGuildRequest(Snowflake GuildID, string Prefix) : IRequest<GuildEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="GetOrCreateGuildRequest" />.
@@ -33,12 +34,12 @@ public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, 
                                       .AsSplitQuery()
                                       .Include(g => g.Users)
                                       .Include(g => g.Infractions)
-                                      .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
+                                      .FirstOrDefaultAsync(g => g.Id == request.GuildID, cancellationToken);
 
         if (guild is not null)
             return guild;
 
-        guild = await _mediator.Send(new AddGuildRequest(request.GuildId, request.Prefix), cancellationToken);
+        guild = await _mediator.Send(new AddGuildRequest(request.GuildID, request.Prefix), cancellationToken);
 
         return guild;
     }

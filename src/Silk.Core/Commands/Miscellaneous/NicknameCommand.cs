@@ -13,7 +13,7 @@ using Silk.Core.Utilities.HelpFormatter;
 
 namespace Silk.Core.Commands.Miscellaneous;
 
-[RequireFlag(UserFlag.Staff)]
+
 [HelpCategory(Categories.Misc)]
 public class NicknameCommand : BaseCommandModule
 {

@@ -17,7 +17,7 @@ public class UpdateReminderHandler : IRequestHandler<UpdateReminderRequest, Remi
     public async Task<ReminderEntity> Handle(UpdateReminderRequest request, CancellationToken cancellationToken)
     {
         ReminderEntity reminder = await _db.Reminders.FirstAsync(r => r.Id == request.Reminder.Id, cancellationToken);
-        reminder.Expiration = request.Expiration;
+        reminder.ExpiresAt = request.Expiration;
         await _db.SaveChangesAsync(cancellationToken);
         return reminder;
     }

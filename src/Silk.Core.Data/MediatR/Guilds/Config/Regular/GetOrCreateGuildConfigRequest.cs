@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds;
@@ -8,9 +9,9 @@ namespace Silk.Core.Data.MediatR.Guilds;
 /// <summary>
 ///     Request for retrieving or creating a <see cref="GuildConfigEntity" />.
 /// </summary>
-/// <param name="GuildId">The Id of the Guild</param>
+/// <param name="GuildID">The Id of the Guild</param>
 /// <param name="Prefix">The prefix of the Guild</param>
-public record GetOrCreateGuildConfigRequest(ulong GuildId, string Prefix) : IRequest<GuildConfigEntity>;
+public record GetOrCreateGuildConfigRequest(Snowflake GuildID, string Prefix) : IRequest<GuildConfigEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="GetOrCreateGuildConfigRequest" />.
@@ -21,16 +22,15 @@ public class GetOrCreateGuildConfigHandler : IRequestHandler<GetOrCreateGuildCon
 
     public GetOrCreateGuildConfigHandler(IMediator mediator) => _mediator = mediator;
 
-    public async Task<GuildConfigEntity> Handle(GetOrCreateGuildConfigRequest configRequest, CancellationToken cancellationToken)
+    public async Task<GuildConfigEntity> Handle(GetOrCreateGuildConfigRequest request, CancellationToken cancellationToken)
     {
-        var                guildConfigRequest = new GetGuildConfigRequest(configRequest.GuildId);
+        var                guildConfigRequest = new GetGuildConfigRequest(request.GuildID);
         GuildConfigEntity? guildConfig        = await _mediator.Send(guildConfigRequest, cancellationToken);
 
         if (guildConfig is not null)
             return guildConfig;
-
-        var          request  = new GetOrCreateGuildRequest(configRequest.GuildId, configRequest.Prefix);
-        GuildEntity? response = await _mediator.Send(request, cancellationToken);
+        
+        GuildEntity? response = await _mediator.Send(new GetOrCreateGuildRequest(request.GuildID, request.Prefix), cancellationToken);
 
         guildConfig = response.Configuration;
 

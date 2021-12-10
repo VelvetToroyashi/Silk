@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags;
@@ -9,7 +10,7 @@ namespace Silk.Core.Data.MediatR.Tags;
 /// <summary>
 ///     Request to get a <see cref="TagEntity" />, or null if it doesn't exist.
 /// </summary>
-public record GetTagRequest(string Name, ulong GuildId) : IRequest<TagEntity?>;
+public record GetTagRequest(string Name, Snowflake GuildId) : IRequest<TagEntity?>;
 
 /// <summary>
 ///     The default handler for <see cref="GetTagRequest" />.
@@ -27,8 +28,8 @@ public class GetTagHandler : IRequestHandler<GetTagRequest, TagEntity?>
                                   .Include(t => t.Aliases)
                                   .AsSplitQuery()
                                   .FirstOrDefaultAsync(t =>
-                                                           t.Name.ToLower() == request.Name.ToLower()
-                                                        && t.GuildId        == request.GuildId, cancellationToken);
+                                                           EF.Functions.Like(t.Name.ToLower(), request.Name.ToLower() + '%') &&
+                                                           t.GuildID == request.GuildId, cancellationToken);
 
         return tag;
     }

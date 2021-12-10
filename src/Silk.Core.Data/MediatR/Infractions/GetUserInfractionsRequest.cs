@@ -5,11 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Infractions;
 
-public record GetUserInfractionsRequest(ulong GuildId, ulong UserId) : IRequest<IEnumerable<InfractionEntity>>;
+public record GetUserInfractionsRequest(Snowflake GuildID, Snowflake TargetID) : IRequest<IEnumerable<InfractionEntity>>;
 
 public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsRequest, IEnumerable<InfractionEntity>>
 {
@@ -21,7 +22,7 @@ public class GetUserInfractionsHandler : IRequestHandler<GetUserInfractionsReque
         UserEntity? user = await _db
                                 .Users
                                 .Include(u => u.Infractions)
-                                .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                                .FirstOrDefaultAsync(u => u.ID == request.TargetID && u.GuildID == request.GuildID, cancellationToken);
 
         return user?.Infractions ?? Array.Empty<InfractionEntity>().AsEnumerable();
     }

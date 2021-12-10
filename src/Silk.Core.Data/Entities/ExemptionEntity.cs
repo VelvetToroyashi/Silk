@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
@@ -44,11 +45,11 @@ public sealed class ExemptionEntity
 	///     The target of the exemption.
 	/// </summary>
 	[Column("target_id")]
-    public ulong TargetId { get; set; }
+    public Snowflake TargetID { get; set; }
 
 	/// <summary>
 	///     The guild this exemption applies to.
 	/// </summary>
 	[Column("guild_id")]
-    public ulong Guild { get; set; }
+    public Snowflake GuildID { get; set; }
 }

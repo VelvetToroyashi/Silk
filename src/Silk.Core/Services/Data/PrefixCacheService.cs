@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Shared.Types;
 
 namespace Silk.Core.Services.Data;
 
@@ -24,17 +26,17 @@ public sealed class PrefixCacheService : IPrefixCacheService
     }
 
     [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
-    public string RetrievePrefix(ulong? guildId)
+    public string RetrievePrefix(Snowflake? guildId)
     {
-        if (guildId is null or 0) return string.Empty;
-        if (_memoryCache.TryGetValue(GetGuildString(guildId.Value), out object? prefix)) return (string)prefix;
+        if (guildId is null) return string.Empty;
+        if (_memoryCache.TryGetValue(ConfigKeyHelper.GenerateGuildPrefixKey(guildId.Value), out object? prefix)) return (string)prefix;
         return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
     }
 
     // I don't know if updating a reference will update 
-    public void UpdatePrefix(ulong id, string prefix)
+    public void UpdatePrefix(Snowflake id, string prefix)
     {
-        string key = GetGuildString(id);
+        object key = ConfigKeyHelper.GenerateGuildPrefixKey(id);
 
         _memoryCache.TryGetValue(key, out string oldPrefix);
         _memoryCache.Set(key, prefix);
@@ -42,12 +44,10 @@ public sealed class PrefixCacheService : IPrefixCacheService
     }
 
 
-    private async Task<string> GetDatabasePrefixAsync(ulong guildId)
+    private async Task<string> GetDatabasePrefixAsync(Snowflake guildId)
     {
         GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(guildId, StringConstants.DefaultCommandPrefix));
-        _memoryCache.Set(GetGuildString(guildId), guild.Prefix);
+        _memoryCache.Set(ConfigKeyHelper.GenerateGuildPrefixKey(guildId), guild.Prefix);
         return guild.Prefix;
     }
-
-    private static string GetGuildString(ulong id) => $"GUILD_PREFIX_KEY_{id}";
 }

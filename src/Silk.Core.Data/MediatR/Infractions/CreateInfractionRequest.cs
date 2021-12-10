@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 
@@ -11,9 +12,9 @@ namespace Silk.Core.Data.MediatR.Infractions;
 
 public sealed record CreateInfractionRequest
     (
-        ulong          GuildID,
-        ulong          TargetID,
-        ulong          EnforcerID,
+        Snowflake      GuildID,
+        Snowflake      TargetID,
+        Snowflake      EnforcerID,
         string         Reason,
         InfractionType Type,
         DateTime?      Expiration      = null,
@@ -34,20 +35,20 @@ public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, 
     public async Task<InfractionEntity> Handle(CreateInfractionRequest request, CancellationToken cancellationToken)
     {
         int guildInfractionCount = await _db.Infractions
-                                            .Where(inf => inf.GuildId == request.GuildID)
+                                            .Where(inf => inf.GuildID == request.GuildID)
                                             .CountAsync(cancellationToken) + 1;
 
         var infraction = new InfractionEntity
         {
-            GuildId         = request.GuildID,
+            GuildID         = request.GuildID,
             CaseNumber      = guildInfractionCount,
-            Enforcer        = request.EnforcerID,
+            EnforcerID      = request.EnforcerID,
             Reason          = request.Reason,
-            HeldAgainstUser = request.HeldAgainstUser,
-            Expiration      = request.Expiration,
-            InfractionTime  = DateTime.UtcNow,
-            UserId          = request.TargetID,
-            InfractionType  = request.Type
+            AppliesToTarget = request.HeldAgainstUser,
+            ExpiresAt       = request.Expiration,
+            CreatedAt       = DateTime.UtcNow,
+            TargetID        = request.TargetID,
+            Type            = request.Type
         };
 
         _db.Infractions.Add(infraction);

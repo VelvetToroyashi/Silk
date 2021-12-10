@@ -42,7 +42,7 @@ public class BulkAddUserHandler : IRequestHandler<BulkAddUserRequest, IEnumerabl
         {
             _db.ChangeTracker.Clear();
 
-            List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildId == request.Users.First().Id).ToListAsync(cancellationToken);
+            List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildID == request.Users.First().ID).ToListAsync(cancellationToken);
             nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
 
             _db.Users.AddRange(nonAddedUsers);

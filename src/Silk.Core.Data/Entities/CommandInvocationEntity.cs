@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Silk.Core.Data.Entities;
 
@@ -14,11 +15,13 @@ public class CommandInvocationEntity
     ///     When the command was invoked.
     /// </summary>
     [Required]
+    [Column("used_at")]
     public DateTime InvocationTime { get; init; } = DateTime.UtcNow;
 
     /// <summary>
     ///     What command was invoked, without arguments.
     /// </summary>
     [Required]
+    [Column("command_name")]
     public string CommandName { get; init; }
 }

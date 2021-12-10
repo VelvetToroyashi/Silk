@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
+[Table("guild_configs")]
 public class GuildConfigEntity
 {
     // Database requisites. //
@@ -14,7 +17,8 @@ public class GuildConfigEntity
     /// <summary>
     ///     Requisite property to form a Foreign Key (FK)
     /// </summary>
-    public ulong GuildId { get; set; }
+    [Column("guild_id")]
+    public Snowflake GuildID { get; set; }
 
     /// <summary>
     ///     Requisite property to form a Foreign Key (FK)
@@ -45,7 +49,12 @@ public class GuildConfigEntity
     [Obsolete]
     public string GreetingText { get; set; }
 
+    /// <summary>
+    /// Greetings configured for this guild.
+    /// </summary>
+    [Column("greetings")]
     public List<GuildGreetingEntity> Greetings { get; set; }
+    
     /// <summary>
     ///     A list of disabled commands on this server
     /// </summary>

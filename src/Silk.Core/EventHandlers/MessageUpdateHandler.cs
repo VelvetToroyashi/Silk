@@ -1,4 +1,5 @@
-﻿using System;
+﻿//TODO: This
+/*using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -256,4 +257,4 @@ public sealed class MessageUpdateHandler
            .AddField("User ID:", e.Message.Author?.Id.ToString() ?? "I wasn't around at the time. Sorry!", true)
            .WithThumbnail(e.Message.Author?.AvatarUrl            ?? string.Empty)
            .WithColor(DiscordColor.Red);
-}
+}*/

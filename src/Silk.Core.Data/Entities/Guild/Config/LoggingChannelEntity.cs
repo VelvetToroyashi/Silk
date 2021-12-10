@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
@@ -16,13 +17,13 @@ public class LoggingChannelEntity
 	///     The guild this configuration belongs to.
 	/// </summary>
 	[Column("guild_id")]
-    public ulong GuildId { get; set; }
+    public Snowflake GuildId { get; set; }
 
 	/// <summary>
 	///     The ID of the webhook to use for logging, if configured.
 	/// </summary>
 	[Column("webhook_id")]
-    public ulong WebhookId { get; set; }
+    public Snowflake WebhookID { get; set; }
 
 	/// <summary>
 	///     The token of the webhook to use for logging, if configured.
@@ -34,5 +35,5 @@ public class LoggingChannelEntity
 	///     The channel to log to.
 	/// </summary>
 	[Column("channel_id")]
-    public ulong ChannelId { get; set; }
+    public Snowflake ChannelID { get; set; }
 }

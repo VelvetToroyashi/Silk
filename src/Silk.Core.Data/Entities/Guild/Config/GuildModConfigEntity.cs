@@ -1,38 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
+[Table("guild_moderation_config")]
 public class GuildModConfigEntity
 {
     public int         Id      { get; set; }
-    public ulong       GuildId { get; set; }
+    
+    /// <summary>
+    /// The ID of the guild this config belongs to.
+    /// </summary>
+    [Column("guild_id")]
+    public Snowflake   GuildID { get; set; }
+    
+    /// <summary>
+    /// The Guild this config belongs to.
+    /// </summary>
     public GuildEntity Guild   { get; set; }
 
     /// <summary>
     ///     Id of the role to apply when muting members.
     /// </summary>
-    public ulong MuteRoleId { get; set; }
+    [Column("mute_role")]
+    public Snowflake MuteRoleID { get; set; }
 
     /// <summary>
     ///     A list of whitelisted invites.
     /// </summary>
+    [Column("whitelisted_invites")]
     public List<InviteEntity> AllowedInvites { get; set; } = new();
 
     /// <summary>
     ///     The maximum amount of users that can be mentioned in a single message.
     /// </summary>
+    [Column("max_user_mentions")]
     public int MaxUserMentions { get; set; }
 
     /// <summary>
     ///     The maximum amount of roles that can be mentioned in a single role.
     /// </summary>
+    [Column("max_role_mentions")]
     public int MaxRoleMentions { get; set; }
 
     /// <summary>
     ///     Channel Id to log moderation/message changes to.
     /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.FallbackLoggingChannel)} instead.")]
+    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.FallbackChannelID)} instead.")]
     public ulong LoggingChannel { get; set; }
 
     /// <summary>
@@ -56,7 +72,8 @@ public class GuildModConfigEntity
     /// <summary>
     ///     Blacklist certain invites.
     /// </summary>
-    public bool BlacklistInvites { get; set; }
+    [Column("invite_whitelist_enabled")]
+    public bool WhitelistInvites { get; set; }
 
     /// <summary>
     ///     Blacklist certain words.
@@ -67,22 +84,25 @@ public class GuildModConfigEntity
     /// <summary>
     ///     Represents whether to add an infraction to the user after sending an invite.
     /// </summary>
-    public bool WarnOnMatchedInvite { get; set; }
+    [Column("infract_on_invite")]
+    public bool InfractOnMatchedInvite { get; set; }
 
     /// <summary>
     ///     Represents whether to delete a message containing an invite.
     /// </summary>
+    [Column("delete_invite_messages")]
     public bool DeleteMessageOnMatchedInvite { get; set; }
 
     /// <summary>
-    ///     Represents whether to match only discord.gg/ or all possible invite codes.
+    ///     Whether to match only discord.gg/ or all possible invite codes.
     /// </summary>
+    [Column("match_aggressively")]
     public bool UseAggressiveRegex { get; set; }
 
     /// <summary>
-    ///     Whether or not infractions will escalate based on the number of infractions a user has.
+    ///     Whether to use increasingly severe infractions when a user is automatically warned.
     /// </summary>
-    public bool AutoEscalateInfractions { get; set; }
+    public bool ProgressiveStriking { get; set; }
 
     /// <summary>
     ///     Whether to automatically de-hoist members.
@@ -93,22 +113,26 @@ public class GuildModConfigEntity
     /// <summary>
     ///     All active auto-mod exemptions on the guild.
     /// </summary>
+    [Column("exemptions")]
     public List<ExemptionEntity> Exemptions { get; set; } = new();
 
     /// <summary>
     ///     Whether or not to even scan for phishing links on a server.
     /// </summary>
+    [Column("detect_phishing")]
     public bool DetectPhishingLinks { get; set; }
 
     /// <summary>
     ///     Whether or not phishing links should be deleted.
     /// </summary>
+    [Column("delete_detected_phishing")]
     public bool DeletePhishingLinks { get; set; }
 
     /// <summary>
     ///     Whether to scan matched invites. Server must be premium and blacklist invites.
     /// </summary>
-    public bool ScanInvites { get; set; }
+   [Column("scan_invite_origin")]
+    public bool ScanInviteOrigin { get; set; }
 
     /// <summary>
     ///     Whether to use webhooks to log infractions.
@@ -119,7 +143,7 @@ public class GuildModConfigEntity
     /// <summary>
     ///     The id of the webhook to log with.
     /// </summary>
-    [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookId)} instead.")]
+    [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookID)} instead.")]
     public ulong WebhookLoggingId { get; set; }
 
     /// <summary>
@@ -143,6 +167,5 @@ public class GuildModConfigEntity
     ///     which may have different consequences than another. In the event a key is not found in this dictionary, it should be assumed the action would
     ///     result to <see cref="InfractionType.Strike" />.
     /// </summary>
-    [Obsolete("Soon to be replaced with a dedicated automod action object.")]
     public Dictionary<string, InfractionStepEntity> NamedInfractionSteps { get; set; } = new();
 }

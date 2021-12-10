@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users;
@@ -9,7 +10,7 @@ namespace Silk.Core.Data.MediatR.Users;
 /// <summary>
 ///     Request for updating a user in the database.
 /// </summary>
-public record UpdateUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<UserEntity>;
+public record UpdateUserRequest(Snowflake GuildID, Snowflake UserID, UserFlag? Flags = null) : IRequest<UserEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="UpdateUserRequest" />.
@@ -23,7 +24,7 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserRequest, UserEntity>
     public async Task<UserEntity> Handle(UpdateUserRequest request, CancellationToken cancellationToken)
     {
         UserEntity user = await _db.Users
-                                   .FirstAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                                   .FirstAsync(u => u.ID == request.UserID && u.GuildID == request.GuildID, cancellationToken);
 
         user.Flags = request.Flags ?? user.Flags;
         await _db.SaveChangesAsync(cancellationToken);

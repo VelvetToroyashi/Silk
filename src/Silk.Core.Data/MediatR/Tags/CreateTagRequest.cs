@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags;
@@ -9,7 +10,7 @@ namespace Silk.Core.Data.MediatR.Tags;
 /// <summary>
 ///     Request for creating a <see cref="TagEntity" />.
 /// </summary>
-public record CreateTagRequest(string Name, ulong GuildId, ulong OwnerId, string Content, TagEntity? OriginalTag) : IRequest<TagEntity>;
+public record CreateTagRequest(string Name, Snowflake GuildID, Snowflake OwnerID, string Content, TagEntity? OriginalTag) : IRequest<TagEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="CreateTagRequest" />
@@ -24,8 +25,8 @@ public class CreateTagHandler : IRequestHandler<CreateTagRequest, TagEntity>
     {
         TagEntity tag = new()
         {
-            OwnerId       = request.OwnerId,
-            GuildId       = request.GuildId,
+            OwnerID       = request.OwnerID,
+            GuildID       = request.GuildID,
             Name          = request.Name,
             OriginalTagId = request.OriginalTag?.Id,
             Content       = request.Content,

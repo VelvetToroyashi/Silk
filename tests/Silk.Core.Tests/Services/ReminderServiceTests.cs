@@ -66,7 +66,7 @@ public class ReminderServiceTests
                     .ReturnsAsync(() => new[]
                      {
                          new ReminderEntity
-                             { OwnerId = 69 }
+                             { OwnerID = new(69) }
                      });
 
         // Act
@@ -99,7 +99,7 @@ public class ReminderServiceTests
                     .ReturnsAsync(() => new[]
                      {
                          new ReminderEntity
-                             { OwnerId = 69, MessageId = 420 }
+                             { OwnerID = new(69), MessageID = new (420) }
                      });
 
         // Act
@@ -123,7 +123,7 @@ public class ReminderServiceTests
                .ReturnsAsync(Result<IChannel>.FromSuccess(Mock.Of<IChannel>()));
 
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
-                    .ReturnsAsync(new[] { new ReminderEntity { Expiration = DateTime.MinValue } });
+                    .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
         var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, Mock.Of<IDiscordRestChannelAPI>());
 
@@ -151,7 +151,7 @@ public class ReminderServiceTests
                .ReturnsAsync(Result<IChannel>.FromError(new NotFoundError()));
 
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
-                    .ReturnsAsync(new[] { new ReminderEntity { Expiration = DateTime.MinValue } });
+                    .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
         var reminderService = new ReminderService(loggerMock.Object, mediatorMock.Object, userAPI.Object, Mock.Of<IDiscordRestChannelAPI>());
 
@@ -194,7 +194,7 @@ public class ReminderServiceTests
                .ReturnsAsync(Result<IChannel>.FromSuccess(Mock.Of<IChannel>()));
 
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
-                    .ReturnsAsync(new[] { new ReminderEntity { Expiration = DateTime.MinValue } });
+                    .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
         var reminderService = new ReminderService(loggerMock.Object, mediatorMock.Object, userAPI.Object, channelAPI.Object);
 

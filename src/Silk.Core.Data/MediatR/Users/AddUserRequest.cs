@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users;
@@ -8,7 +9,7 @@ namespace Silk.Core.Data.MediatR.Users;
 /// <summary>
 ///     Request to add a user to the database.
 /// </summary>
-public record AddUserRequest(ulong GuildId, ulong UserId, UserFlag? Flags = null) : IRequest<UserEntity>;
+public record AddUserRequest(Snowflake GuildID, Snowflake UserID, UserFlag? Flags = null) : IRequest<UserEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="AddUserRequest" />.
@@ -22,8 +23,8 @@ public class AddUserHandler : IRequestHandler<AddUserRequest, UserEntity>
     {
         var user = new UserEntity
         {
-            Id      = request.UserId,
-            GuildId = request.GuildId,
+            ID      = request.UserID,
+            GuildID = request.GuildID,
             Flags   = request.Flags ?? UserFlag.None
         };
 

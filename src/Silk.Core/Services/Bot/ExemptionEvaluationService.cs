@@ -31,7 +31,7 @@ public class ExemptionEvaluationService
     /// <param name="channelID">The ID of the channel the exemption may apply to.</param>
     public async Task<Result<bool>> EvaluateExemptionAsync(ExemptionCoverage exemptionType, Snowflake guildID, Snowflake userID, Snowflake channelID)
     {
-        GuildModConfigEntity config = await _config.GetModConfigAsync(guildID.Value);
+        GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
 
         if (config.Exemptions.Any())
             return Result<bool>.FromSuccess(false); // No exemptions
@@ -49,15 +49,15 @@ public class ExemptionEvaluationService
                 continue;
 
             if (exemption.TargetType is ExemptionTarget.Channel)
-                if (channelID.Value == exemption.TargetId)
+                if (channelID == exemption.TargetID)
                     return Result<bool>.FromSuccess(true);
 
             if (exemption.TargetType is ExemptionTarget.Role)
-                if (guildMember.Roles.Any(r => r.Value == exemption.TargetId))
+                if (guildMember.Roles.Any(r => r == exemption.TargetID))
                     return Result<bool>.FromSuccess(true);
 
             if (exemption.TargetType is ExemptionTarget.User)
-                if (userID.Value == exemption.TargetId)
+                if (userID == exemption.TargetID)
                     return Result<bool>.FromSuccess(true);
         }
 

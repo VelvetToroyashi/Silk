@@ -12,10 +12,10 @@ namespace Silk.Core.Data.MediatR.Tags;
 ///     Request to update a <see cref="TagEntity" />.
 /// </summary>
 /// <param name="Name">The Name of the Tag</param>
-/// <param name="GuildId">The Id of the Guild</param>
-public record UpdateTagRequest(string Name, ulong GuildId) : IRequest<TagEntity>
+/// <param name="GuildID">The Id of the Guild</param>
+public record UpdateTagRequest(string Name, Snowflake GuildID) : IRequest<TagEntity>
 {
-    public Optional<ulong>           OwnerId { get; init; }
+    public Optional<Snowflake>       OwnerID { get; init; }
     public Optional<string>          NewName { get; init; }
     public Optional<int>             Uses    { get; init; }
     public Optional<string>          Content { get; init; }
@@ -34,7 +34,7 @@ public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, TagEnti
     {
         TagEntity tag = await _db.Tags
                                  .Include(t => t.Aliases)
-                                 .FirstAsync(t => t.Name == request.Name && t.GuildId == request.GuildId, cancellationToken);
+                                 .FirstAsync(t => t.Name == request.Name && t.GuildID == request.GuildID, cancellationToken);
 
         if (request.Uses.IsDefined(out int uses))
             tag.Uses = uses;
@@ -42,8 +42,8 @@ public sealed class UpdateTagHandler : IRequestHandler<UpdateTagRequest, TagEnti
         if (request.Content.IsDefined(out string? content))
             tag.Content = content;
 
-        if (request.OwnerId.IsDefined(out ulong ownerId))
-            tag.OwnerId = ownerId;
+        if (request.OwnerID.IsDefined(out Snowflake ownerId))
+            tag.OwnerID = ownerId;
 
         if (request.NewName.IsDefined(out string? newName))
         {

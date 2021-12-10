@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
 /// <summary>
 ///     Various bits of configuration related to logging.
 /// </summary>
+[Table("guild_logging_configs")]
 public class GuildLoggingConfigEntity
 {
 	/// <summary>
@@ -16,7 +18,7 @@ public class GuildLoggingConfigEntity
 	///     The guild this configuration is for.
 	/// </summary>
 	[Column("guild_id")]
-    public ulong GuildId { get; set; }
+    public Snowflake GuildID { get; set; }
 
 
 	/// <summary>
@@ -53,7 +55,7 @@ public class GuildLoggingConfigEntity
 	///     The fallback channel to use if it's not specified for a specific scope.
 	/// </summary>
 	[Column("fallback_logging_channel")]
-    public ulong? FallbackLoggingChannel { get; set; }
+    public Snowflake? FallbackChannelID { get; set; }
 
 	/// <summary>
 	///     Whether to use webhooks to log messages.
@@ -61,18 +63,33 @@ public class GuildLoggingConfigEntity
 	[Column("use_webhook_logging")]
     public bool UseWebhookLogging { get; set; }
 
+	/// <summary>
+	/// Information about the channel to log infractions to.
+	/// </summary>
     [Column("infractions_channel")]
     public LoggingChannelEntity? Infractions { get; set; }
 
+	/// <summary>
+	/// Information about the channel to log message edits to.
+	/// </summary>
     [Column("edits_channel")]
     public LoggingChannelEntity? MessageEdits { get; set; }
-
+	
+	/// <summary>
+	/// Information about the channel to log message deletes to.
+	/// </summary>
     [Column("deletes_channel")]
     public LoggingChannelEntity? MessageDeletes { get; set; }
 
+	/// <summary>
+	/// Information about the channel to log member joins to.
+	/// </summary>
     [Column("joins_channel")]
     public LoggingChannelEntity? MemberJoins { get; set; }
 
+	/// <summary>
+	/// Information about the channel to log member leaves to.
+	/// </summary>
     [Column("leaves_channel")]
     public LoggingChannelEntity? MemberLeaves { get; set; }
 }

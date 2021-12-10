@@ -2,11 +2,12 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds.Config;
 
-public sealed record GetGuildModConfigRequest(ulong guildId) : IRequest<GuildModConfigEntity?>;
+public sealed record GetGuildModConfigRequest(Snowflake GuildID) : IRequest<GuildModConfigEntity?>;
 
 public sealed class GetGuildModConfigHandler : IRequestHandler<GetGuildModConfigRequest, GuildModConfigEntity?>
 {
@@ -19,6 +20,6 @@ public sealed class GetGuildModConfigHandler : IRequestHandler<GetGuildModConfig
                   .Include(c => c.AllowedInvites)
                   .Include(c => c.InfractionSteps)
                   .Include(c => c.Exemptions)
-                  .FirstOrDefaultAsync(c => c.GuildId == request.guildId, cancellationToken)!;
+                  .FirstOrDefaultAsync(c => c.GuildID == request.GuildID, cancellationToken)!;
     }
 }

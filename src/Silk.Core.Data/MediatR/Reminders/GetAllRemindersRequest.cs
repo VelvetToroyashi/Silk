@@ -20,5 +20,6 @@ public sealed class GetAllRemindersHandler : IRequestHandler<GetAllRemindersRequ
     private readonly GuildContext _db;
     public GetAllRemindersHandler(GuildContext db) => _db = db;
 
-    public async Task<IEnumerable<ReminderEntity>> Handle(GetAllRemindersRequest request, CancellationToken cancellationToken) => await _db.Reminders.ToListAsync(cancellationToken);
+    public async Task<IEnumerable<ReminderEntity>> Handle(GetAllRemindersRequest request, CancellationToken cancellationToken) 
+        => await _db.Reminders.ToListAsync(cancellationToken);
 }

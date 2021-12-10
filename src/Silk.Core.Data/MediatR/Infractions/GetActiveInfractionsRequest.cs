@@ -18,9 +18,9 @@ public class GetCurrentInfractionsHandler : IRequestHandler<GetActiveInfractions
     public async Task<IEnumerable<InfractionEntity>> Handle(GetActiveInfractionsRequest request, CancellationToken cancellationToken)
     {
         List<InfractionEntity>? infractions = await _db.Infractions
-                                                       .Where(inf => !inf.Handled)
-                                                       .Where(inf => inf.HeldAgainstUser)
-                                                       .Where(inf => inf.Expiration.HasValue) // This is dangerous because it's not guaranteed to be of a correct type, but eh. //
+                                                       .Where(inf => !inf.Processed)
+                                                       .Where(inf => inf.AppliesToTarget)
+                                                       .Where(inf => inf.ExpiresAt.HasValue) // This is dangerous because it's not guaranteed to be of a correct type, but eh. //
                                                        .ToListAsync(cancellationToken);
 
         return infractions;

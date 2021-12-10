@@ -1,4 +1,5 @@
-﻿using System;
+﻿//TODO: This
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -22,7 +23,7 @@ public class ToggleCommandCommand : BaseCommandModule
 
     //[Command]
     [RequireGuild]
-    [RequireFlag(UserFlag.Staff)]
+    
     [Description("Reenable commands :)")]
     public async Task Enable(CommandContext ctx, [RemainingText] string? commands)
     {
@@ -76,4 +77,4 @@ public class ToggleCommandCommand : BaseCommandModule
         DiscordEmoji? thumbsUp = DiscordEmoji.FromUnicode("👍");
         await ctx.Message.CreateReactionAsync(thumbsUp);
     }
-}
+}*/

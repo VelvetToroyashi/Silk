@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿//TODO: This
+/*using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -78,7 +79,7 @@ public class TagCommand : BaseCommandModule
             return;
         }
 
-        DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerId);
+        DiscordUser tagOwner = await ctx.Client.GetUserAsync(dbTag.OwnerID);
         DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
                                      .WithColor(DiscordColor.Blurple)
                                      .WithAuthor(tagOwner.Username, iconUrl: tagOwner.AvatarUrl)
@@ -150,7 +151,7 @@ public class TagCommand : BaseCommandModule
         }
         UserEntity? user = await _mediator.Send(new GetUserRequest(ctx.Guild.Id, ctx.User.Id));
 
-        if (tag.OwnerId != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? false))
+        if (tag.OwnerID != ctx.User.Id && (!user?.Flags.Has(UserFlag.Staff) ?? false))
         {
             await ctx.RespondAsync("You either do not own this tag, or are not staff!");
             return;
@@ -202,7 +203,7 @@ public class TagCommand : BaseCommandModule
                                          {
                                              var s                              = $"`{t.Name}`";
                                              if (t.OriginalTagId is not null) s += $" → `{t.OriginalTag!.Name}`";
-                                             s += $" - <@{t.OwnerId}>";
+                                             s += $" - <@{t.OwnerID}>";
                                              return s;
                                          }));
         DiscordEmbedBuilder? builder = new DiscordEmbedBuilder()
@@ -332,4 +333,4 @@ public class TagsCommand : BaseCommandModule
     {
         await Tags(ctx, ctx.Member);
     }
-}
+}*/

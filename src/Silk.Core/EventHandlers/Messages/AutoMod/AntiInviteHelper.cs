@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿//TODO: This, and move this to /services
+/*using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -56,7 +57,7 @@ public sealed class AntiInviteHelper
 
         if (config is null) return false;
 
-        if (!config.BlacklistInvites) return false;
+        if (!config.WhitelistInvites) return false;
         if (message.Channel.IsPrivate) return false;
         if (message.Author.IsBot) return false;
 
@@ -78,7 +79,7 @@ public sealed class AntiInviteHelper
     public async Task<bool> IsBlacklistedInvite(DiscordMessage message, GuildModConfigEntity config, string invite)
     {
         if (config is null) return false;
-        if (!config.ScanInvites) return config.AllowedInvites.All(inv => inv.VanityURL != invite);
+        if (!config.ScanInviteOrigin) return config.AllowedInvites.All(inv => inv.VanityURL != invite);
 
         var blacklisted = true;
         try
@@ -124,4 +125,4 @@ public sealed class AntiInviteHelper
         //if (config.WarnOnMatchedInvite)
         //await _infractions.StrikeAsync(message.Author.Id, message.Channel.Guild.Id, message.GetClient().CurrentUser.Id, $"Posted an invite in {message.Channel.Mention}", config.AutoEscalateInfractions);
     }
-}
+}*/

@@ -64,7 +64,7 @@ public class PhishingDetectionService
         if (!message.GuildID.IsDefined(out Snowflake guildId))
             return Result.FromSuccess(); // DM channels are exmepted.
 
-        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildId.Value);
+        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildId);
 
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
@@ -114,7 +114,7 @@ public class PhishingDetectionService
         if (delete)
             await _channelApi.DeleteMessageAsync(channelID, messageID);
 
-        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildID.Value);
+        GuildModConfigEntity config = await _configService.GetModConfigAsync(guildID);
 
         if (!config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out InfractionStepEntity? step))
             return Result.FromError(new InvalidOperationError("Failed to get step for phishing link detected."));
@@ -131,7 +131,7 @@ public class PhishingDetectionService
             InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, Phishing),
             InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, Phishing),
             InfractionType.Strike => await _infractions.StrikeAsync(guildID, authorID, self.ID, Phishing),
-            InfractionType.Mute   => await _infractions.MuteAsync(guildID, authorID, self.ID, Phishing, step.Duration.Time == TimeSpan.Zero ? null : step.Duration.Time),
+            InfractionType.Mute   => await _infractions.MuteAsync(guildID, authorID, self.ID, Phishing, step.Duration == TimeSpan.Zero ? null : step.Duration),
             _                     => throw new InvalidOperationException("Invalid infraction type.")
         };
 

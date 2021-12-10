@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Users;
@@ -9,7 +10,7 @@ namespace Silk.Core.Data.MediatR.Users;
 /// <summary>
 ///     Request to get a user from the database, or null, if it does not exist.
 /// </summary>
-public record GetUserRequest(ulong GuildId, ulong UserId) : IRequest<UserEntity?>;
+public record GetUserRequest(Snowflake GuildID, Snowflake UserID) : IRequest<UserEntity?>;
 
 /// <summary>
 ///     The default handler associated with <see cref="GetUserRequest" />.
@@ -22,7 +23,9 @@ public class GetUserHandler : IRequestHandler<GetUserRequest, UserEntity?>
     public async Task<UserEntity?> Handle(GetUserRequest request, CancellationToken cancellationToken)
     {
         UserEntity? user = await _db.Users
-                                    .FirstOrDefaultAsync(u => u.Id == request.UserId && u.GuildId == request.GuildId, cancellationToken);
+                                    .FirstOrDefaultAsync(u => 
+                                                             u.ID == request.UserID && 
+                                                             u.GuildID == request.GuildID, cancellationToken);
         return user;
     }
 }

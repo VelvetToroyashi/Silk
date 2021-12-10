@@ -19,7 +19,7 @@ namespace Silk.Core.Commands.Moderation
         public UnMuteCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Un-mutes a member.")]
         public async Task UnmuteAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
         {

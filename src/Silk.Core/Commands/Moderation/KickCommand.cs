@@ -22,7 +22,7 @@ namespace Silk.Core.Commands.Moderation
 
 
         [Command]
-        [RequireFlag(UserFlag.Staff)]
+        
         [RequirePermissions(Permissions.KickMembers)]
         [Description("Boot someone from the guild!")]
         public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")

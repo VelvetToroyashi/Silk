@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Reminders;
@@ -41,28 +42,27 @@ public sealed class ReminderService : IHostedService
 
     public async Task CreateReminder
         (
-            DateTime expiry,
-            ulong    owner,
-            ulong    channel,
-            ulong    message,
-            ulong?   guild,
-            string?  conent,
-            bool     isReply      = false,
-            ulong?   reply        = null,
-            ulong?   replyAuthor  = null,
-            string?  replyContent = null
+            DateTime   expiry,
+            Snowflake  ownerID,
+            Snowflake  channelID,
+            Snowflake  messageID,
+            Snowflake? guildID,
+            string?    content,
+            string?    replyContent = null,
+            Snowflake? replyID       = null,
+            Snowflake? replyAuthorID = null
         )
     {
-        ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiry, owner, channel, message, guild, conent, isReply, reply, replyAuthor, replyContent));
+        ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
     }
 
     /// <summary>
     ///     Gets all reminders that are due for a certain user.
     /// </summary>
-    /// <param name="userId">The ID of the user to search reminders for.</param>
+    /// <param name="userID">The ID of the user to search reminders for.</param>
     /// <returns>The specified user's reminders.</returns>
-    public IEnumerable<ReminderEntity> GetRemindersAsync(ulong userId) => _reminders.Where(r => r.OwnerId == userId);
+    public IEnumerable<ReminderEntity> GetRemindersAsync(Snowflake userID) => _reminders.Where(r => r.OwnerID == userID);
 
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
@@ -73,7 +73,7 @@ public sealed class ReminderService : IHostedService
             return;
 
         DateTime                    now       = DateTime.UtcNow;
-        IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.Expiration <= now);
+        IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.ExpiresAt <= now);
 
         await Task.WhenAll(reminders.Select(DispatchReminderAsync));
     }
@@ -100,7 +100,7 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug(EventIds.Service, "Dispatching reminder");
 
-        if (reminder.MessageId is 0)
+        if (reminder.MessageID is null)
             return AttemptDispatchDMReminderAsync(reminder);
 
         return AttemptDispatchReminderAsync(reminder);
@@ -116,19 +116,21 @@ public sealed class ReminderService : IHostedService
         DateTimeOffset now         = DateTimeOffset.UtcNow;
         var            replyExists = false;
 
-        if (reminder.ReplyId is ulong reply)
+        if (reminder.ReplyID is not null)
         {
-            Result<IMessage> replyResult = await _channelApi.GetChannelMessageAsync(new(reminder.ChannelId), new(reply));
+            var reply = reminder.ReplyID.Value;
+            
+            Result<IMessage> replyResult = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reply);
             replyExists = replyResult.IsSuccess;
         }
 
-        Result<IMessage> reminderMessage = await _channelApi.GetChannelMessageAsync(new(reminder.ChannelId), new(reminder.MessageId));
+        Result<IMessage> reminderMessage = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reminder.MessageID.Value);
 
         bool originalMessageExists = reminderMessage.IsSuccess;
 
         var dispatchMessage = GetReminderMessageString(reminder, false, replyExists, originalMessageExists).ToString();
 
-        Result<IMessage> dispatchReuslt = await _channelApi.CreateMessageAsync(new(reminder.ChannelId), dispatchMessage);
+        Result<IMessage> dispatchReuslt = await _channelApi.CreateMessageAsync(reminder.ChannelID, dispatchMessage);
 
         if (dispatchReuslt.IsSuccess)
         {
@@ -165,7 +167,7 @@ public sealed class ReminderService : IHostedService
     {
         var dispatchMessage = new StringBuilder();
 
-        bool isReply = reminder.ReplyId is ulong;
+        bool isReply = reminder.ReplyID is not null;
 
         if (inDMs)
         {
@@ -174,12 +176,12 @@ public sealed class ReminderService : IHostedService
         }
         else if (isReply)
         {
-            dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerId}>! You asked me to remind you about this!");
+            dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerID}>! You asked me to remind you about this!");
 
             if (!replyExists)
                 dispatchMessage.AppendLine("I couldn't find the message I was supposed to reply to.")
                                .AppendLine("Here's what you replied to, when you set the reminder, though!")
-                               .AppendLine($"From <@{reminder.ReplyAuthorId}>:")
+                               .AppendLine($"From <@{reminder.ReplyAuthorID}>:")
                                .AppendLine("> " + reminder.ReplyMessageContent);
 
             if (!string.IsNullOrEmpty(reminder.MessageContent))
@@ -196,7 +198,7 @@ public sealed class ReminderService : IHostedService
             dispatchMessage.AppendLine(reminder.MessageContent);
         }
 
-        dispatchMessage.AppendLine($"This reminder was set <t:{((DateTimeOffset)reminder.CreationTime).ToUnixTimeSeconds()}:R> ago!");
+        dispatchMessage.AppendLine($"This reminder was set <t:{((DateTimeOffset)reminder.CreatedAt).ToUnixTimeSeconds()}:R> ago!");
         return dispatchMessage;
     }
 
@@ -213,11 +215,11 @@ public sealed class ReminderService : IHostedService
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        Result<IChannel> channelRes = await _userApi.CreateDMAsync(new(reminder.OwnerId));
+        Result<IChannel> channelRes = await _userApi.CreateDMAsync(reminder.OwnerID);
 
         if (!channelRes.IsSuccess)
         {
-            _logger.LogError(EventIds.Service, "Failed to create a DM channel with {Owner}", reminder.OwnerId);
+            _logger.LogError(EventIds.Service, "Failed to create a DM channel with {Owner}", reminder.OwnerID);
 
             return Result.FromError(channelRes.Error);
         }
@@ -226,7 +228,7 @@ public sealed class ReminderService : IHostedService
 
         if (!messageRes.IsSuccess)
         {
-            _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerId);
+            _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
         _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);

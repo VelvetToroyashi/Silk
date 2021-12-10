@@ -1,4 +1,5 @@
-﻿using System;
+﻿//TODO: This
+/*using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace Silk.Core.Commands;
 
 [RequireGuild]
 [Group("config")]
-[RequireFlag(UserFlag.Staff)]
+
 [Description("View and edit configuration for the current guild.")]
 public class ConfigModule : BaseCommandModule
 {
@@ -52,7 +53,7 @@ public class ConfigModule : BaseCommandModule
     public Task Default(CommandContext ctx) => ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
 
     [Group("view")]
-    [RequireFlag(UserFlag.Staff)]
+    
     [Description("View the current config, or specify a sub-command to see detailed information.")]
     public sealed class ViewConfigModule : BaseCommandModule
     {
@@ -62,7 +63,7 @@ public class ConfigModule : BaseCommandModule
         private string GetCountString(int count) => count is 0 ? "Not set/enabled" : count.ToString();
 
         [GroupCommand]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("View the current config.")]
         public async Task View(CommandContext ctx)
         {
@@ -93,8 +94,8 @@ public class ConfigModule : BaseCommandModule
                .AppendLine($"Max user mentions: {GetCountString(modConfig.MaxUserMentions)}")
                .AppendLine()
                .AppendLine("__Invites:__")
-               .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Warn on invite: <:_:{(modConfig.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInviteOrigin ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(modConfig.InfractOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
@@ -102,8 +103,8 @@ public class ConfigModule : BaseCommandModule
                .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
                .AppendLine()
                .AppendLine("__Infractions:__")
-               .AppendLine($"> Mute role: {(modConfig.MuteRoleId is 0 ? "Not set" : $"<@&{modConfig.MuteRoleId}>")}")
-               .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Mute role: {(modConfig.MuteRoleID is 0 ? "Not set" : $"<@&{modConfig.MuteRoleID}>")}")
+               .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.ProgressiveStriking ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
                .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See {ctx.Prefix}config view infractions]" : "Not configured")}")
                .AppendLine()
@@ -193,8 +194,8 @@ public class ConfigModule : BaseCommandModule
             contentBuilder
                .Clear()
                .AppendLine("__Invites:__")
-               .AppendLine($"> Scan invite: <:_:{(config.ScanInvites ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Warn on invite: <:_:{(config.WarnOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Scan invite: <:_:{(config.ScanInviteOrigin ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(config.InfractOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($@"> Use aggressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine()
@@ -226,7 +227,7 @@ public class ConfigModule : BaseCommandModule
                                            .AppendLine("__Infractions:__")
                                            .AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps" : "Not configured")}")
                                            .AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps" : "Not configured")}")
-                                           .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(config.AutoEscalateInfractions ? Emojis.ConfirmId : Emojis.DeclineId)}>");
+                                           .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(config.ProgressiveStriking ? Emojis.ConfirmId : Emojis.DeclineId)}>");
 
             if (config.InfractionSteps.Any())
             {
@@ -254,7 +255,7 @@ public class ConfigModule : BaseCommandModule
     }
 
     [Group("edit")]
-    [RequireFlag(UserFlag.Staff)]
+    
     [Description("Edit various settings through these commands:")]
     public sealed class EditConfigModule : BaseCommandModule
     {
@@ -274,7 +275,7 @@ public class ConfigModule : BaseCommandModule
 
 
         [Command]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Edit the mute role to give to members when muting. If this isn't configured, one will be generated as necessary.")]
         public async Task Mute(CommandContext ctx, DiscordRole role)
         {
@@ -498,7 +499,7 @@ public class ConfigModule : BaseCommandModule
 
         [Group("phishing")]
         [Aliases("phish", "psh")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Phishing-related settings.")]
         public sealed class EditPhishingModule : BaseCommandModule
         {
@@ -579,14 +580,14 @@ public class ConfigModule : BaseCommandModule
                     config.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = type };
 
 
-                await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
+                await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { NamedInfractionSteps = config.NamedInfractionSteps });
             }
         }
 
 
         [Group("invite")]
         [Aliases("invites", "inv")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Invite related settings.")]
         public sealed class EditInviteModule : BaseCommandModule
         {
@@ -650,7 +651,7 @@ public class ConfigModule : BaseCommandModule
             }
 
             [Group("whitelist")]
-            [RequireFlag(UserFlag.Staff)]
+            
             [Description("Invite whitelist related settings.")]
             public sealed class EditInviteWhitelistModule : BaseCommandModule
             {
@@ -804,7 +805,7 @@ public class ConfigModule : BaseCommandModule
         }
 
         [Group("log")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Logging related settings.")]
         public sealed class EditLogModule : BaseCommandModule
         {
@@ -873,7 +874,7 @@ public class ConfigModule : BaseCommandModule
         }
 
         [Group("infractions")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Aliases("infraction", "inf")]
         [Description("Infraction related settings.")]
         public sealed class EditInfractionModule : BaseCommandModule
@@ -933,7 +934,7 @@ public class ConfigModule : BaseCommandModule
                     };
                 }
 
-                await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
+                await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { NamedInfractionSteps = config.NamedInfractionSteps });
             }
 
 
@@ -956,7 +957,7 @@ public class ConfigModule : BaseCommandModule
                 GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
                 if (config.NamedInfractionSteps.Remove(option))
-                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AutoModActions = config.NamedInfractionSteps });
+                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { NamedInfractionSteps = config.NamedInfractionSteps });
             }
 
             [Group("steps")]
@@ -1047,4 +1048,4 @@ public class ConfigModule : BaseCommandModule
             }
         }
     }
-}
+}*/

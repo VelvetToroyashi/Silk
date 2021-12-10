@@ -8,6 +8,10 @@ public class TagEntityConfiguration : IEntityTypeConfiguration<TagEntity>
 {
     public void Configure(EntityTypeBuilder<TagEntity> builder)
     {
-        builder.Property(t => t.Id).ValueGeneratedOnAdd();
+        builder.Property(t => t.OwnerID)
+               .HasConversion<SnowflakeConverter>();
+        
+        builder.Property(t => t.GuildID)
+               .HasConversion<SnowflakeConverter>();
     }
 }

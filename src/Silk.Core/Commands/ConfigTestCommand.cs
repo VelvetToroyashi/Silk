@@ -63,7 +63,7 @@ public class ConfigTestCommand : CommandGroup
                 [Option("infractions")] [Description("Whether to log infractions.")]                  bool?     logInfractions     = null
             )
         {
-            GuildModConfigEntity? currentConfig = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value.Value));
+            GuildModConfigEntity? currentConfig = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value));
 
             GuildLoggingConfigEntity logging = currentConfig!.LoggingConfig;
 
@@ -83,7 +83,7 @@ public class ConfigTestCommand : CommandGroup
                 logging.LogInfractions = logInfractions.Value;
 
             if (fallbackChannel != null)
-                logging.FallbackLoggingChannel = fallbackChannel.ID.Value;
+                logging.FallbackChannelID = fallbackChannel.ID;
 
             if (infractionsChannel != null)
                 logging.Infractions = await CreateLoggingChannelAsync(useWebhooks, infractionsChannel);
@@ -100,7 +100,7 @@ public class ConfigTestCommand : CommandGroup
             if (leavesChannel != null)
                 logging.MemberLeaves = await CreateLoggingChannelAsync(useWebhooks, leavesChannel);
 
-            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value.Value)
+            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
             {
                 LoggingConfig = logging
             });
@@ -114,8 +114,8 @@ public class ConfigTestCommand : CommandGroup
             {
                 return new()
                 {
-                    ChannelId = channel.ID.Value,
-                    GuildId   = channel.GuildID.Value.Value
+                    ChannelID = channel.ID,
+                    GuildId   = channel.GuildID.Value
                 };
             }
             Result<IWebhook> whResult = await _webhookApi.CreateWebhookAsync(channel.ID, WebhookLoggingName, default);
@@ -124,17 +124,17 @@ public class ConfigTestCommand : CommandGroup
             {
                 return new()
                 {
-                    ChannelId = channel.ID.Value,
-                    GuildId   = channel.GuildID.Value.Value
+                    ChannelID = channel.ID,
+                    GuildId   = channel.GuildID.Value
                 };
             }
             IWebhook webhook = whResult.Entity;
             return new()
             {
-                WebhookId    = webhook.ID.Value,
+                WebhookID    = webhook.ID,
                 WebhookToken = webhook.Token.Value,
-                ChannelId    = channel.ID.Value,
-                GuildId      = channel.GuildID.Value.Value
+                ChannelID    = channel.ID,
+                GuildId      = channel.GuildID.Value
             };
         }
     }

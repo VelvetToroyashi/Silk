@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
 
@@ -11,18 +12,17 @@ namespace Silk.Core.Data.MediatR.Reminders;
 ///     Request for creating a <see cref="ReminderEntity" />.
 /// </summary>
 public record CreateReminderRequest
-    (
-        DateTime Expiration,
-        ulong    OwnerId,
-        ulong    ChannelId,
-        ulong?   MessageId,
-        ulong?   GuildId,
-        string?  MessageContent,
-        bool     WasReply,
-        ulong?   ReplyId             = null,
-        ulong?   ReplyAuthorId       = null,
-        string?  ReplyMessageContent = null
-    ) : IRequest<ReminderEntity>;
+(
+    DateTime   Expiration,
+    Snowflake  OwnerID,
+    Snowflake  ChannelID,
+    Snowflake? MessageID,
+    Snowflake? GuildID,
+    string?    MessageContent,
+    Snowflake? ReplyID             = null,
+    Snowflake? ReplyAuthorID       = null,
+    string?    ReplyMessageContent = null
+) : IRequest<ReminderEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="T:Silk.Core.Data.MediatR.Reminders.CreateReminderRequest" />.
@@ -30,31 +30,22 @@ public record CreateReminderRequest
 public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, ReminderEntity>
 {
     private readonly GuildContext _db;
-    private readonly IMediator    _mediator;
 
-    public CreateReminderHandler(IMediator mediator, GuildContext db)
-    {
-        _mediator = mediator;
-        _db       = db;
-    }
+    public CreateReminderHandler(GuildContext db) => _db = db;
 
     public async Task<ReminderEntity> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
     {
-        if (request.MessageId is not 0 or null)
-            await _mediator.Send(new GetOrCreateUserRequest(request.GuildId.Value, request.OwnerId), cancellationToken);
-
         ReminderEntity r = new()
         {
-            Expiration          = request.Expiration,
-            CreationTime        = DateTime.UtcNow,
-            OwnerId             = request.OwnerId,
-            ChannelId           = request.ChannelId,
-            MessageId           = request.MessageId ?? 0,
-            GuildId             = request.GuildId   ?? 0,
-            ReplyId             = request.ReplyId,
+            ExpiresAt           = request.Expiration,
+            CreatedAt           = DateTime.UtcNow,
+            OwnerID             = request.OwnerID,
+            ChannelID           = request.ChannelID,
+            MessageID           = request.MessageID,
+            GuildID             = request.GuildID,
+            ReplyID             = request.ReplyID,
             MessageContent      = request.MessageContent,
-            WasReply            = request.WasReply,
-            ReplyAuthorId       = request.ReplyAuthorId,
+            ReplyAuthorID       = request.ReplyAuthorID,
             ReplyMessageContent = request.ReplyMessageContent
         };
 

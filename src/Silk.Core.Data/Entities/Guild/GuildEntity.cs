@@ -1,18 +1,47 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
 public class GuildEntity
 {
-    public ulong Id { get; set; }
+    /// <summary>
+    /// The ID of the guild.
+    /// </summary>
+    public Snowflake Id { get; set; }
 
+    /// <summary>
+    /// The prefix on the guild.
+    /// </summary>
     [Required]
     [StringLength(5)]
-    public string Prefix { get;                        set; } = "";
+    [Column("prefix")]
+    public string Prefix                        { get; set; } = "";
+    
+    /// <summary>
+    /// Non-moderation related configuration.
+    /// </summary>
     public GuildConfigEntity      Configuration { get; set; } = new();
+    
+    /// <summary>
+    /// Moderation-related configuration.
+    /// </summary>
     public GuildModConfigEntity   ModConfig     { get; set; } = new();
+    
+    /// <summary>
+    /// Users that are a part of this guild.
+    /// </summary>
     public List<UserEntity>       Users         { get; set; } = new();
+    
+    /// <summary>
+    /// Infractions that are a part of this guild.
+    /// </summary>
     public List<InfractionEntity> Infractions   { get; set; } = new();
+    
+    /// <summary>
+    /// Tags on this guild.
+    /// </summary>
     public List<TagEntity>        Tags          { get; set; } = new();
 }

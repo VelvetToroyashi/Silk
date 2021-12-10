@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NpgsqlTypes;
 using Silk.Core.Data.Entities;
@@ -9,7 +10,8 @@ public class InfractionStepConfiguration : IEntityTypeConfiguration<InfractionSt
 {
     public void Configure(EntityTypeBuilder<InfractionStepEntity> builder)
     {
-        builder.Property(infs => infs.Duration)
-               .HasConversion(d => d.Ticks, d => NpgsqlTimeSpan.FromTicks(d));
+        builder.Property(ifs => ifs.Duration)
+               .HasConversion(d => NpgsqlTimeSpan.FromTicks(d.Ticks),
+                                              d => TimeSpan.FromTicks(d.Ticks));
     }
 }

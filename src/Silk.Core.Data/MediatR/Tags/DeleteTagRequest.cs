@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags;
@@ -10,7 +11,7 @@ namespace Silk.Core.Data.MediatR.Tags;
 /// <summary>
 ///     Request to delete a <see cref="TagEntity" />.
 /// </summary>
-public record DeleteTagRequest(string Name, ulong GuildId) : IRequest;
+public record DeleteTagRequest(string Name, Snowflake GuildID) : IRequest;
 
 /// <summary>
 ///     The default handler for <see cref="DeleteTagRequest" />.
@@ -29,7 +30,7 @@ public class DeleteTagHandler : IRequestHandler<DeleteTagRequest>
                              .AsSplitQuery()
                              .FirstOrDefaultAsync(t =>
                                                       t.Name.ToLower() == request.Name.ToLower() &&
-                                                      t.GuildId        == request.GuildId, cancellationToken);
+                                                      t.GuildID        == request.GuildID, cancellationToken);
 
         TagEntity[] aliasedTags = await _db
                                        .Tags

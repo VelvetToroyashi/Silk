@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds;
@@ -8,9 +9,9 @@ namespace Silk.Core.Data.MediatR.Guilds;
 /// <summary>
 ///     Request for adding a <see cref="GuildEntity" /> to the database.
 /// </summary>
-/// <param name="GuildId">The Id of the Guild</param>
+/// <param name="GuildID">The Id of the Guild</param>
 /// <param name="Prefix">The prefix for the Guild</param>
-public sealed record AddGuildRequest(ulong GuildId, string Prefix) : IRequest<GuildEntity>;
+public sealed record AddGuildRequest(Snowflake GuildID, string Prefix) : IRequest<GuildEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="AddGuildRequest" />.
@@ -24,10 +25,10 @@ public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, GuildEnti
     {
         GuildEntity guild = new()
         {
-            Id            = request.GuildId,
+            Id            = request.GuildID,
             Prefix        = request.Prefix,
-            Configuration = new() { GuildId = request.GuildId },
-            ModConfig     = new() { GuildId = request.GuildId },
+            Configuration = new() { GuildID = request.GuildID },
+            ModConfig     = new() { GuildID = request.GuildID },
         };
 
         _db.Guilds.Add(guild);

@@ -54,7 +54,7 @@ public class GuildGreetingService
         if (!memberRes.IsDefined(out IGuildMember? member))
             return Result.FromError(memberRes.Error!); // This is guaranteed to be an error.
 
-        GuildConfigEntity config = await _config.GetConfigAsync(guildID.Value);
+        GuildConfigEntity config = await _config.GetConfigAsync(guildID);
 
         if (!config.Greetings.Any())
             return Result.FromSuccess();
@@ -70,7 +70,7 @@ public class GuildGreetingService
 
             if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
             {
-                Result res = await GreetAsync(guildID, user.ID, new(greeting.ChannelId), greeting.Message);
+                Result res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
 
                 if (!res.IsSuccess)
                     return res;
@@ -80,9 +80,9 @@ public class GuildGreetingService
 
             if (greeting.Option is GreetingOption.GreetOnRole && option is GreetingOption.GreetOnRole)
             {
-                if (member.Roles.Any(r => r.Value == greeting.MetadataSnowflake))
+                if (member.Roles.Any(r => r == greeting.MetadataID))
                 {
-                    Result res = await GreetAsync(guildID, user.ID, new(greeting.ChannelId), greeting.Message);
+                    Result res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
 
                     if (!res.IsSuccess)
                         return res;
@@ -115,7 +115,7 @@ public class GuildGreetingService
         if (overwritesBefore.Count >= overwritesAfter.Count)
             return Result.FromSuccess();
         
-        GuildConfigEntity config = await _config.GetConfigAsync(guildID.Value);
+        GuildConfigEntity config = await _config.GetConfigAsync(guildID);
 
         if (!config.Greetings.Any())
             return Result.FromSuccess();
@@ -123,7 +123,7 @@ public class GuildGreetingService
         GuildGreetingEntity? greeting = config.Greetings
                                               .FirstOrDefault(greeting =>
                                                                   greeting.Option is GreetingOption.GreetOnChannelAccess &&
-                                                                  greeting.MetadataSnowflake == before.ID.Value);
+                                                                  greeting.MetadataID == before.ID);
 
         if (greeting is null)
             return Result.FromSuccess();
@@ -135,7 +135,7 @@ public class GuildGreetingService
             if (overwrite.Type is not PermissionOverwriteType.Member)
                 continue;
 
-            return await GreetAsync(guildID, overwrite.ID, new(greeting.MetadataSnowflake.Value), greeting.Message);
+            return await GreetAsync(guildID, overwrite.ID, greeting.MetadataID.Value, greeting.Message);
         }
 
         return Result.FromSuccess();

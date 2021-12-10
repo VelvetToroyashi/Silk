@@ -1,4 +1,5 @@
-﻿using Silk.Core.Data.Entities;
+﻿using Remora.Rest.Core;
+using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Services.Interfaces;
 
@@ -13,12 +14,12 @@ public interface IPrefixCacheService
 	/// </summary>
 	/// <param name="guildId">The Id of the guild to retrieve the prefix for.</param>
 	/// <returns>The prefix configured for the guild.</returns>
-	public string RetrievePrefix(ulong? guildId);
+	public string RetrievePrefix(Snowflake? guildId);
 
 	/// <summary>
 	///     Update a prefix for a <see cref="GuildEntity" />.
 	/// </summary>
 	/// <param name="guildId">The Id of the guild to update.</param>
 	/// <param name="prefix">The prefix to assign to the guild.</param>
-	public void UpdatePrefix(ulong guildId, string prefix);
+	public void UpdatePrefix(Snowflake guildId, string prefix);
 }

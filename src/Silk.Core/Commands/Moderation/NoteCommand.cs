@@ -18,7 +18,7 @@ namespace Silk.Core.Commands.Moderation
         public NoteCommand(IInfractionService infractionHelper) => _infractionHelper = infractionHelper;
 
         [Command]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Adds a moderation note to a user. Does not impact automatic infraction escalation.")]
         public async Task Note(CommandContext ctx, DiscordUser user, [RemainingText] string note)
         {

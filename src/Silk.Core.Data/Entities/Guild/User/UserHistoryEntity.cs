@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
@@ -12,26 +14,33 @@ public class UserHistoryEntity
     /// <summary>
     ///     The Id of the user this history is reflective of.
     /// </summary>
-    public ulong UserId { get; set; }
-
+    [Column("user_id")]
+    public Snowflake UserID { get; set; }
+    
+    [Column("user")]
     public UserEntity User { get; set; }
 
     /// <summary>
     ///     The guild this history is related to.
     /// </summary>
-    public ulong GuildId { get; set; }
+    [Column("guild_id")]
+    public Snowflake GuildID { get; set; }
 
     /// <summary>
     ///     When this user initially joined.
     /// </summary>
-    public DateTime JoinDate { get; set; }
+    [Column("initial_join_date")]
+    public DateTimeOffset JoinDate { get; set; }
+    
     /// <summary>
     ///     Times this user joined.
     /// </summary>
-    public List<DateTime> JoinDates { get; set; }
+    [Column("join_dates")]
+    public List<DateTimeOffset> JoinDates { get; set; }
 
     /// <summary>
     ///     Times this user left.
     /// </summary>
-    public List<DateTime> LeaveDates { get; set; }
+    [Column("leave_dates")]
+    public List<DateTimeOffset> LeaveDates { get; set; }
 }

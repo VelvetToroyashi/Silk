@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿//TODO: This
+/*using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -22,7 +23,7 @@ public class CasesCommand : BaseCommandModule
 
     [Command]
     [RequireGuild]
-    [RequireFlag(UserFlag.Staff)]
+    
     [Description("Check the cases of a user including notes.")]
     public async Task Cases(CommandContext ctx, DiscordUser user)
     {
@@ -44,8 +45,8 @@ public class CasesCommand : BaseCommandModule
             {
                 stringBuilder
                    .Append($"Case {currentInfraction.CaseNumber}: ")
-                   .Append($"`{currentInfraction.InfractionType.Humanize(LetterCasing.Title)}`\n");
-                if (currentInfraction.EscalatedFromStrike)
+                   .Append($"`{currentInfraction.Type.Humanize(LetterCasing.Title)}`\n");
+                if (currentInfraction.Escalated)
                     stringBuilder.AppendLine("\n[ESCALATED FROM STRIKE] ");
 
 
@@ -66,7 +67,7 @@ public class CasesCommand : BaseCommandModule
 
             /*
              * TODO: Pagination
-             */
+             #1#
         }
     }
-}
+}*/

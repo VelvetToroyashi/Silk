@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Guilds;
@@ -9,8 +10,8 @@ namespace Silk.Core.Data.MediatR.Guilds;
 /// <summary>
 ///     Request for retrieving a <see cref="GuildEntity" />.
 /// </summary>
-/// <param name="GuildId">The Id of the Guild</param>
-public record GetGuildRequest(ulong GuildId) : IRequest<GuildEntity>;
+/// <param name="GuildID">The Id of the Guild</param>
+public record GetGuildRequest(Snowflake GuildID) : IRequest<GuildEntity>;
 
 /// <summary>
 ///     The default handler for <see cref="GetGuildRequest" />.
@@ -29,7 +30,7 @@ public class GetGuildHandler : IRequestHandler<GetGuildRequest, GuildEntity>
                                       .Include(g => g.Users)
                                       .Include(g => g.Infractions)
                                       .Include(g => g.Configuration)
-                                      .FirstOrDefaultAsync(g => g.Id == request.GuildId, cancellationToken);
+                                      .FirstOrDefaultAsync(g => g.Id == request.GuildID, cancellationToken);
 
         return guild;
     }

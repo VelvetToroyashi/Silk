@@ -34,7 +34,7 @@ public class TagChoiceProvider : IAutocompleteProvider
         TagEntity[] tags;
         if (!_cache.TryGetValue($"guild_{ctx.Interaction.GuildId}_tags", out object? tagsObj))
         {
-            IEnumerable<TagEntity>? dbTags = await _tags.GetGuildTagsAsync(ctx.Interaction.Guild.Id);
+            IEnumerable<TagEntity>? dbTags = await _tags.GetGuildTagsAsync(new(ctx.Interaction.Guild.Id));
             tags = dbTags.ToArray();
 
             _cache.Set($"guild_{ctx.Interaction.GuildId}_tags", tags);

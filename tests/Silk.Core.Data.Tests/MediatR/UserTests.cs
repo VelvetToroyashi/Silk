@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using NUnit.Framework;
+using Remora.Rest.Core;
 using Remora.Results;
 using Respawn;
 using Silk.Core.Data.Entities;
@@ -15,8 +16,8 @@ namespace Silk.Core.Data.Tests.MediatR;
 
 public class UserTests
 {
-    private const    ulong              UserId           = 1234567890;
-    private const    ulong              GuildId          = 10;
+    private readonly Snowflake              UserId           = new(1234567890);
+    private readonly    Snowflake              GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
     private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
@@ -66,7 +67,7 @@ public class UserTests
 
         //Act
         await _mediator.Send(new AddUserRequest(GuildId, UserId));
-        result = await _context.Users.FirstOrDefaultAsync(u => u.Id == UserId && u.GuildId == GuildId);
+        result = await _context.Users.FirstOrDefaultAsync(u => u.ID == UserId && u.GuildID == GuildId);
 
         //Assert
         Assert.IsNotNull(result);
@@ -116,7 +117,7 @@ public class UserTests
         UserEntity after;
         before = await _mediator.Send(new AddUserRequest(GuildId, UserId));
         //Act
-        after = await _mediator.Send(new UpdateUserRequest(GuildId, UserId, UserFlag.Staff));
+        after = await _mediator.Send(new UpdateUserRequest(GuildId, UserId, UserFlag.WarnedPrior));
         //Assert
         Assert.AreNotEqual(before, after);
     }

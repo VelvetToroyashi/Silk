@@ -8,7 +8,9 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
 {
     public void Configure(EntityTypeBuilder<GuildEntity> builder)
     {
-        builder.Property(g => g.Id).ValueGeneratedNever();
+        builder.Property(g => g.Id)
+               .ValueGeneratedNever()
+               .HasConversion<SnowflakeConverter>();
 
         builder
            .HasMany(u => u.Users)
@@ -17,12 +19,12 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
         builder
            .HasOne(g => g.Configuration)
            .WithOne(g => g.Guild)
-           .HasForeignKey<GuildConfigEntity>(g => g.GuildId);
+           .HasForeignKey<GuildConfigEntity>(g => g.GuildID);
 
         builder
            .HasOne(g => g.ModConfig)
            .WithOne(g => g.Guild)
-           .HasForeignKey<GuildModConfigEntity>(g => g.GuildId);
+           .HasForeignKey<GuildModConfigEntity>(g => g.GuildID);
 
         builder.HasMany(u => u.Infractions).WithOne(i => i.Guild);
     }

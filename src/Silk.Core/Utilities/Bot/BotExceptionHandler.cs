@@ -60,7 +60,6 @@ public class BotExceptionHandler
             {
                 RequireOwnerAttribute             => $"My owners consist of: {owner}. {cf.Context.User.Username}#{cf.Context.User.Discriminator} doesn't look like any of those names!",
                 RequireNsfwAttribute              => "As much as I'd love to, I've gotta keep the hot stuff to the right channels.",
-                RequireFlagAttribute f            => $"Heh. You need to be {f.RequisiteUserFlag.Humanize(LetterCasing.Title)} for that.",
                 CooldownAttribute cd              => $"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!",
                 RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
                 RequireDirectMessageAttribute     => "Psst. You need to be in DMs to run this!",

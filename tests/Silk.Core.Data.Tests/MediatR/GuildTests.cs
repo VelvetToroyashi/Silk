@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using NUnit.Framework;
+using Remora.Rest.Core;
 using Respawn;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
@@ -13,7 +14,7 @@ namespace Silk.Core.Data.Tests.MediatR;
 
 public class GuildTests
 {
-    private const    ulong              GuildId          = 10;
+    private readonly Snowflake          GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
     private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();

@@ -18,7 +18,7 @@ namespace Silk.Core.Commands.Moderation
         public PardonCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command("pardon")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction auto-mod, or escalated strike.\nThis will not undo mutes or bans.")]
         public async Task PardonAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
         {

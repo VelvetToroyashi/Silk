@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using NUnit.Framework;
+using Remora.Rest.Core;
 using Respawn;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Users;
@@ -14,7 +15,7 @@ namespace Silk.Core.Data.Tests.MediatR;
 
 public class BulkUserTests
 {
-    private const    ulong              GuildId          = 10;
+    private readonly Snowflake          GuildId          = new (10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
     private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
@@ -62,8 +63,8 @@ public class BulkUserTests
         //Arrange
         List<UserEntity> users = new()
         {
-            new() { Id = 1, GuildId = GuildId },
-            new() { Id = 2, GuildId = GuildId }
+            new() { ID = new(1), GuildID = GuildId },
+            new() { ID = new(2), GuildID = GuildId }
         };
 
         int result;
@@ -78,11 +79,11 @@ public class BulkUserTests
     public async Task MediatR_BulkAdd_Skips_Users_When_User_Exists()
     {
         //Arrange
-        await _mediator.Send(new AddUserRequest(GuildId, 1));
+        await _mediator.Send(new AddUserRequest(GuildId, new(1)));
         List<UserEntity> users = new()
         {
-            new() { Id = 1, GuildId = GuildId },
-            new() { Id = 2, GuildId = GuildId }
+            new() { ID = new(1), GuildID = GuildId },
+            new() { ID = new(2), GuildID = GuildId }
         };
         int result;
 
@@ -100,8 +101,8 @@ public class BulkUserTests
         //Arrange
         List<UserEntity> users = new()
         {
-            new() { Id = 1, GuildId = GuildId },
-            new() { Id = 2 }
+            new() { ID = new(1), GuildID = GuildId },
+            new() { ID = new(2) }
         };
         int result;
 
@@ -121,15 +122,15 @@ public class BulkUserTests
         var updatedUsers = new UserEntity[2];
         List<UserEntity> users = new()
         {
-            new() { Id = 1, GuildId = GuildId },
-            new() { Id = 2, GuildId = GuildId }
+            new() { ID = new(1), GuildID = GuildId },
+            new() { ID = new(2), GuildID = GuildId }
         };
         users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
         //Act
         users.CopyTo(updatedUsers);
 
         foreach (UserEntity u in updatedUsers)
-            u.Flags = UserFlag.Staff;
+            u.Flags = UserFlag.WarnedPrior;
 
         await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
         updatedUsers = _context.Users.ToArray();
@@ -137,6 +138,6 @@ public class BulkUserTests
         Assert.AreNotEqual(users, updatedUsers);
 
         foreach (UserEntity user in updatedUsers)
-            Assert.AreEqual(UserFlag.Staff, user.Flags);
+            Assert.AreEqual(UserFlag.WarnedPrior, user.Flags);
     }
 }

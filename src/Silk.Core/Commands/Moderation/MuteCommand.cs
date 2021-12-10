@@ -23,7 +23,7 @@ namespace Silk.Core.Commands.Moderation
         public MuteCommand(IInfractionService infractions) => _infractions = infractions;
 
         [Command("mute")]
-        [RequireFlag(UserFlag.Staff)]
+        
         [RequirePermissions(Permissions.ManageRoles)]
         [Description("Mute a guild member!")]
         [Priority(0)]
@@ -68,7 +68,7 @@ namespace Silk.Core.Commands.Moderation
 
         [Priority(1)]
         [Command("mute")]
-        [RequireFlag(UserFlag.Staff)]
+        
         public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
         {
             DiscordMember bot = ctx.Guild.CurrentMember;

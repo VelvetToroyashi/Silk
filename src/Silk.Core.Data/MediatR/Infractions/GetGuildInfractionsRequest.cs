@@ -4,11 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Infractions;
 
-public sealed record GetGuildInfractionsRequest(ulong GuildId) : IRequest<IEnumerable<InfractionEntity>>;
+public sealed record GetGuildInfractionsRequest(Snowflake GuildID) : IRequest<IEnumerable<InfractionEntity>>;
 
 public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfractionsRequest, IEnumerable<InfractionEntity>>
 {
@@ -19,7 +20,7 @@ public sealed class GetGuildInfractionHandler : IRequestHandler<GetGuildInfracti
     {
         List<InfractionEntity>? infractions = await _db
                                                    .Infractions
-                                                   .Where(inf => inf.GuildId == request.GuildId)
+                                                   .Where(inf => inf.GuildID == request.GuildID)
                                                    .ToListAsync(cancellationToken);
 
         return infractions;

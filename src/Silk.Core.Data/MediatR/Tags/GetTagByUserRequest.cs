@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.MediatR.Tags;
@@ -11,9 +12,9 @@ namespace Silk.Core.Data.MediatR.Tags;
 /// <summary>
 ///     Request to get all <see cref="TagEntity" />'s created by a User in a Guild
 /// </summary>
-/// <param name="GuildId">The Id of the Guild</param>
-/// <param name="OwnerId">The Id of the User</param>
-public record GetTagByUserRequest(ulong GuildId, ulong OwnerId) : IRequest<IEnumerable<TagEntity>>;
+/// <param name="GuildID">The Id of the Guild</param>
+/// <param name="OwnerID">The Id of the User</param>
+public record GetTagByUserRequest(Snowflake GuildID, Snowflake OwnerID) : IRequest<IEnumerable<TagEntity>>;
 
 /// <summary>
 ///     The default handler for <see cref="GetTagByUserRequest" />.
@@ -29,7 +30,7 @@ public class GetTagByUserHandler : IRequestHandler<GetTagByUserRequest, IEnumera
                                 .Tags
                                 .Include(t => t.OriginalTag)
                                 .Include(t => t.Aliases)
-                                .Where(t => t.GuildId == request.GuildId && t.OwnerId == request.OwnerId)
+                                .Where(t => t.GuildID == request.GuildID && t.OwnerID == request.OwnerID)
                                 .ToArrayAsync(cancellationToken);
 
         return tags;

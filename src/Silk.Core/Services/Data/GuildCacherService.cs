@@ -156,7 +156,7 @@ public class GuildCacherService
         if (members.Count < 2) // Just us. Rip.
             return Result.FromSuccess();
 
-        await _mediator.Send(new GetOrCreateGuildRequest(guildID.Value, StringConstants.DefaultCommandPrefix));
+        await _mediator.Send(new GetOrCreateGuildRequest(guildID, StringConstants.DefaultCommandPrefix));
 
         return default;
     }
@@ -176,19 +176,7 @@ public class GuildCacherService
                 erroredMembers.Add(Result.FromError(new InvalidOperationError("Member did not have a defined user.")));
                 continue;
             }
-
-            if (user.IsBot.IsDefined(out bool bot) && bot)
-                continue;
-
-            bool eligible = member.Permissions.IsDefined(out IDiscordPermissionSet? permissions)
-                         && permissions.HasPermission(DiscordPermission.KickMembers)
-                         && permissions.HasPermission(DiscordPermission.ManageMessages);
-
-            if (!eligible) continue;
-
-            Result<UserEntity> result = await _mediator.Send(new GetOrCreateUserRequest(guildID.Value, user.ID.Value, UserFlag.InfractionExemption));
-
-
+            //TODO: FINISH THIS
         }
 
 

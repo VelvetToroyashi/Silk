@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
@@ -23,7 +24,7 @@ public class GuildConfigCacheService
         _mediator = mediator;
     }
 
-    public void PurgeCache(ulong guildId)
+    public void PurgeCache(Snowflake guildId)
     {
         object? guildCacheKey    = ConfigKeyHelper.GenerateGuildKey(guildId);
         object? guildModCacheKey = ConfigKeyHelper.GenerateGuildModKey(guildId);
@@ -32,7 +33,7 @@ public class GuildConfigCacheService
         _cache.Remove(guildModCacheKey);
     }
 
-    public async ValueTask<GuildConfigEntity> GetConfigAsync(ulong guildId)
+    public async ValueTask<GuildConfigEntity> GetConfigAsync(Snowflake guildId)
     {
         object cacheKey = ConfigKeyHelper.GenerateGuildKey(guildId);
         return _cache.TryGetValue(cacheKey, out GuildConfigEntity config)
@@ -40,14 +41,14 @@ public class GuildConfigCacheService
             : await GetConfigFromDatabaseAsync(guildId);
     }
 
-    public async ValueTask<GuildModConfigEntity> GetModConfigAsync(ulong guildId)
+    public async ValueTask<GuildModConfigEntity> GetModConfigAsync(Snowflake guildId)
     {
         object cacheKey = ConfigKeyHelper.GenerateGuildModKey(guildId);
         return _cache.TryGetValue(cacheKey, out GuildModConfigEntity config) ? config : await GetModConfigFromDatabaseAsync(guildId);
     }
 
 
-    private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(ulong guildId)
+    private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(Snowflake guildId)
     {
         GuildModConfigEntity? configuration = await _mediator.Send(new GetOrCreateGuildModConfigRequest(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
         object                cacheKey      = ConfigKeyHelper.GenerateGuildModKey(guildId);
@@ -55,7 +56,7 @@ public class GuildConfigCacheService
         return configuration;
     }
 
-    private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(ulong guildId)
+    private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(Snowflake guildId)
     {
         GuildConfigEntity configuration = await _mediator.Send(new GetOrCreateGuildConfigRequest(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
         object?           cacheKey      = ConfigKeyHelper.GenerateGuildKey(guildId);

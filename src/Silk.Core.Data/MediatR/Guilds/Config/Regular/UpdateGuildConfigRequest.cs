@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -14,9 +15,16 @@ namespace Silk.Core.Data.MediatR.Guilds;
 /// <param name="GuildId">The Id of the Guild</param>
 public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
 {
+    [Obsolete]
     public Optional<ulong>          GreetingChannelId  { get; init; }
+    
+    [Obsolete]
     public Optional<ulong>          VerificationRoleId { get; init; }
+    
+    [Obsolete]
     public Optional<GreetingOption> GreetingOption     { get; init; }
+    
+    [Obsolete]
     public Optional<string>         GreetingText       { get; init; }
 
     //TODO: Either remove this or actually implement it. It cannot remain in limbo, which it currently is.
@@ -36,7 +44,7 @@ public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest
     {
         GuildConfigEntity? config = await _db.GuildConfigs
                                              .AsSplitQuery()
-                                             .FirstOrDefaultAsync(g => g.GuildId == request.GuildId, cancellationToken);
+                                             .FirstOrDefaultAsync(g => g.GuildID.Value == request.GuildId, cancellationToken);
 
         if (request.GreetingOption.IsDefined(out GreetingOption greeting))
             config.GreetingOption = greeting;
