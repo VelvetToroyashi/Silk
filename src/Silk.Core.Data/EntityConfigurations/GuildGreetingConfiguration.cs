@@ -10,12 +10,12 @@ public class GuildGreetingConfiguration : IEntityTypeConfiguration<GuildGreeting
     public void Configure(EntityTypeBuilder<GuildGreetingEntity> builder)
     {
         builder.Property(gg => gg.ChannelID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
 
         builder.Property(gg => gg.GuildID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(gg => gg.MetadataID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
     }
 }

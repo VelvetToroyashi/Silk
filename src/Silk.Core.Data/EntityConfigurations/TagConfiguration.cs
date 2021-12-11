@@ -9,9 +9,9 @@ public class TagEntityConfiguration : IEntityTypeConfiguration<TagEntity>
     public void Configure(EntityTypeBuilder<TagEntity> builder)
     {
         builder.Property(t => t.OwnerID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(t => t.GuildID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
     }
 }

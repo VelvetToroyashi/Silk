@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data;
@@ -19,6 +21,7 @@ public class GuildContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
+        
         base.OnModelCreating(builder);
     }
 }

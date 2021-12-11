@@ -10,7 +10,7 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
     {
         builder.Property(g => g.Id)
                .ValueGeneratedNever()
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
 
         builder
            .HasMany(u => u.Users)

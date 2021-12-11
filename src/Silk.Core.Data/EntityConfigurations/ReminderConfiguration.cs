@@ -9,21 +9,21 @@ public class ReminderEntityConfiguration : IEntityTypeConfiguration<ReminderEnti
     public void Configure(EntityTypeBuilder<ReminderEntity> builder)
     {
         builder.Property(rmr => rmr.ChannelID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(rmr => rmr.OwnerID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
 
         builder.Property(rmr => rmr.MessageID)
-               .HasConversion<NullableSnowflakeConverter>();
+               .HasConversion(new NullableSnowflakeConverter());
         
         builder.Property(rmr => rmr.GuildID)
-               .HasConversion<NullableSnowflakeConverter>();
+               .HasConversion(new NullableSnowflakeConverter());
 
         builder.Property(rmr => rmr.ReplyAuthorID)
-               .HasConversion<NullableSnowflakeConverter>();
+               .HasConversion(new NullableSnowflakeConverter());
         
         builder.Property(rmr => rmr.ReplyID)
-               .HasConversion<NullableSnowflakeConverter>();
+               .HasConversion(new NullableSnowflakeConverter());
     }
 }

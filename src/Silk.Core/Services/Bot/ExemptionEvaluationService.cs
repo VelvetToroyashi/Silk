@@ -45,7 +45,7 @@ public class ExemptionEvaluationService
 
         foreach (ExemptionEntity exemption in config.Exemptions)
         {
-            if (!exemption.ExemptFrom.HasFlag(exemptionType))
+            if (!exemption.Exemption.HasFlag(exemptionType))
                 continue;
 
             if (exemption.TargetType is ExemptionTarget.Channel)

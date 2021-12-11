@@ -9,9 +9,9 @@ public class UserHistoryConfiguration : IEntityTypeConfiguration<UserHistoryEnti
     public void Configure(EntityTypeBuilder<UserHistoryEntity> builder)
     {
         builder.Property(uh => uh.GuildID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
 
         builder.Property(uh => uh.UserID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
     }
 }

@@ -10,9 +10,9 @@ public class GuildLoggingConfigConfiguration : IEntityTypeConfiguration<GuildLog
     public void Configure(EntityTypeBuilder<GuildLoggingConfigEntity> builder)
     {
         builder.Property(lc => lc.GuildID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
 
         builder.Property(lc => lc.FallbackChannelID)
-               .HasConversion<NullableSnowflakeConverter>();
+               .HasConversion(new NullableSnowflakeConverter());
     }
 }

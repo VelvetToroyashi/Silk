@@ -22,6 +22,7 @@ public enum ExemptionCoverage
     WordBlacklist
 }
 
+[Table("exemption_entity")]
 public sealed class ExemptionEntity
 {
 	/// <summary>
@@ -33,7 +34,7 @@ public sealed class ExemptionEntity
 	///     What this exemption covers.
 	/// </summary>
 	[Column("exempt_from")]
-    public ExemptionCoverage ExemptFrom { get; set; }
+    public ExemptionCoverage Exemption { get; set; }
 
 	/// <summary>
 	///     What type of exemption this is.

@@ -10,12 +10,12 @@ public class LoggingConfigConfiguration : IEntityTypeConfiguration<LoggingChanne
     public void Configure(EntityTypeBuilder<LoggingChannelEntity> builder)
     {
         builder.Property(lc => lc.ChannelID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(lc => lc.WebhookID)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(lc => lc.GuildId)
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
     }
 }

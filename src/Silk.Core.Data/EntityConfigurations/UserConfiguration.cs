@@ -12,11 +12,11 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 
         builder.Property(u => u.ID)
                .ValueGeneratedNever()
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.Property(u => u.GuildID)
                .ValueGeneratedNever()
-               .HasConversion<SnowflakeConverter>();
+               .HasConversion(new SnowflakeConverter());
         
         builder.HasOne(u => u.History)
                .WithOne(h => h.User)

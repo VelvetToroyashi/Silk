@@ -4,14 +4,15 @@ using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data.EntityConfigurations;
 
-public class ExemptionConfiguration : IEntityTypeConfiguration<ExemptionEntity>
+public class InviteConfig : IEntityTypeConfiguration<InviteEntity>
 {
-    public void Configure(EntityTypeBuilder<ExemptionEntity> builder)
-    {
-        builder.Property(ex => ex.GuildID)
-               .HasConversion(new SnowflakeConverter());
 
-        builder.Property(ex => ex.TargetID)
+    public void Configure(EntityTypeBuilder<InviteEntity> builder)
+    {
+        builder.Property(inv => inv.GuildId)
+               .HasConversion(new SnowflakeConverter());
+        
+        builder.Property(inv => inv.InviteGuildId)
                .HasConversion(new SnowflakeConverter());
     }
 }
