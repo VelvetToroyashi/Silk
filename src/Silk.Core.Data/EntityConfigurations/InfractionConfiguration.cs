@@ -9,15 +9,6 @@ public class InfractionEntityConfiguration : IEntityTypeConfiguration<Infraction
 {
     public void Configure(EntityTypeBuilder<InfractionEntity> builder)
     {
-        builder.Property(inf => inf.GuildID)
-               .HasConversion(new SnowflakeConverter());
-        
-        builder.Property(inf => inf.EnforcerID)
-               .HasConversion(new SnowflakeConverter());
-        
-        builder.Property(inf => inf.TargetID)
-               .HasConversion(new SnowflakeConverter());
-        
         builder.HasOne(inf => inf.Target)
                .WithMany(u => u.Infractions)
                .HasForeignKey(inf => new {

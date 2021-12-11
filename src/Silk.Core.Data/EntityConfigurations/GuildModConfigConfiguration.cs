@@ -10,11 +10,6 @@ public sealed class GuildModConfigEntityConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<GuildModConfigEntity> builder)
     {
-        builder.Property(mc => mc.GuildID)
-               .HasConversion(new SnowflakeConverter());
-
-        builder.Property(mc => mc.MuteRoleID)
-               .HasConversion(new SnowflakeConverter());
 
         builder.Property(b => b.NamedInfractionSteps)
                .HasConversion(b => JsonConvert.SerializeObject(b,

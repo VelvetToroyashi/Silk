@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Remora.Rest.Core;
 using Silk.Core.Data.Entities;
 
 namespace Silk.Core.Data;
@@ -23,5 +24,13 @@ public class GuildContext : DbContext
         builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
         
         base.OnModelCreating(builder);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+    {
+        base.ConfigureConventions(builder);
+
+        builder.Properties<Snowflake>().HaveConversion(typeof(SnowflakeConverter));
+        builder.Properties<Snowflake?>().HaveConversion(typeof(NullableSnowflakeConverter));
     }
 }

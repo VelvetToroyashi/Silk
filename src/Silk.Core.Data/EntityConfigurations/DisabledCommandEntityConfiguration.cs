@@ -10,8 +10,5 @@ public class DisabledCommandEntityConfiguration : IEntityTypeConfiguration<Disab
     {
         builder.HasIndex(c => new {
             GuildId = c.GuildID, c.CommandName }).IsUnique();
-
-        builder.Property(c => c.GuildID)
-               .HasConversion(new SnowflakeConverter());
     }
 }
