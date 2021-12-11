@@ -13,8 +13,7 @@ namespace Silk.Core.Services.Interfaces;
 public interface IInfractionService
 {
 	/// <summary>
-	///     Automatically determines the appropriate infraction type and applies it to a user based on their pre-existing infractions, taking exemptions into
-	///     account.
+	///     Automatically infracts a user based on the configured infractions.
 	/// </summary>
 	/// <param name="guildID">The ID of the guild the infraction occurred on.</param>
 	/// <param name="targetID">The ID of the target to infract.</param>
