@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Data.Entities;
@@ -27,7 +28,8 @@ public interface IInfractionService
 	/// <param name="infraction">The infraction to update.</param>
 	/// <param name="newReason">The new reason to apply to the infraction.</param>
 	/// <param name="newExpiration">The new expiration to apply to the infraction.</param>
-	public Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string? newReason = null, Optional<TimeSpan?> newExpiration = default);
+	/// <param name="updatedBy">The user that updated the infraction.</param>
+	public Task<Result> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default);
 
 	/// <summary>
 	///     Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.

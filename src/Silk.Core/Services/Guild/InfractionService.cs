@@ -93,16 +93,20 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => throw new NotImplementedException();
+    public async Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") 
+        => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public async Task<Result> UpdateInfractionAsync(InfractionEntity infraction, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
+    public async Task<Result> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
     {
         if (newExpiration.IsDefined(out TimeSpan? expiration))
             if (expiration.Value < TimeSpan.Zero)
                 return Result.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration cannot be negative."));
 
         await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTimeOffset.UtcNow + expiration, newReason ?? default(Optional<string>)));
+        
+        //TODO: Log updated infraction
+        
         return Result.FromSuccess();
     }
 
@@ -301,13 +305,16 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") => throw new NotImplementedException();
+    public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") 
+        => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public async Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) => throw new NotImplementedException();
+    public async Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) 
+        => throw new NotImplementedException();
 
     /// <inheritdoc />
-    public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int caseID, string reason = "Not Given.") => throw new NotImplementedException();
+    public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int caseID, string reason = "Not Given.")
+        => throw new NotImplementedException();
 
     /// <summary>
     ///     Loads all active infractions, and enqueues them for processing.
