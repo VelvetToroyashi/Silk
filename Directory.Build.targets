@@ -3,7 +3,7 @@
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
         <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01038"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01051"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01038"/>
         <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01038"/>
