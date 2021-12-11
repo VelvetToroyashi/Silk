@@ -26,4 +26,8 @@
         <PackageReference Include="Remora.Results" Version="7.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Migrations\SilkDbContextModelSnapshot.cs" />
+    </ItemGroup>
+
 </Project>

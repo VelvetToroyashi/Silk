@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace Silk.Core.Data.Migrations
 {
-    public partial class RemoraSnowflakeSupport : Migration
+    public partial class UnderTheHoodChanges : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -73,6 +75,10 @@ namespace Silk.Core.Data.Migrations
                 table: "InviteEntity");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_Tags_Guilds_GuildEntityId",
+                table: "Tags");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Tags_Tags_OriginalTagId",
                 table: "Tags");
 
@@ -88,6 +94,38 @@ namespace Silk.Core.Data.Migrations
                 name: "PK_Users",
                 table: "Users");
 
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Reminders",
+                table: "Reminders");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Infractions",
+                table: "Infractions");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Guilds",
+                table: "Guilds");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_UserHistoryEntity",
+                table: "UserHistoryEntity");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Tags",
+                table: "Tags");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_LoggingChannelEntity",
+                table: "LoggingChannelEntity");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_InviteEntity",
+                table: "InviteEntity");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_InfractionStepEntity",
+                table: "InfractionStepEntity");
+
             migrationBuilder.DropIndex(
                 name: "IX_InfractionStepEntity_ConfigId",
                 table: "InfractionStepEntity");
@@ -101,12 +139,24 @@ namespace Silk.Core.Data.Migrations
                 table: "GuildLoggingConfigEntity");
 
             migrationBuilder.DropPrimaryKey(
+                name: "PK_GuildGreetingEntity",
+                table: "GuildGreetingEntity");
+
+            migrationBuilder.DropPrimaryKey(
                 name: "PK_GuildConfigs",
                 table: "GuildConfigs");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_ExemptionEntity",
                 table: "ExemptionEntity");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_DisabledCommandEntity",
+                table: "DisabledCommandEntity");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_CommandInvocations",
+                table: "CommandInvocations");
 
             migrationBuilder.DropColumn(
                 name: "DatabaseId",
@@ -145,6 +195,38 @@ namespace Silk.Core.Data.Migrations
                 newName: "users");
 
             migrationBuilder.RenameTable(
+                name: "Reminders",
+                newName: "reminders");
+
+            migrationBuilder.RenameTable(
+                name: "Infractions",
+                newName: "infractions");
+
+            migrationBuilder.RenameTable(
+                name: "Guilds",
+                newName: "guilds");
+
+            migrationBuilder.RenameTable(
+                name: "UserHistoryEntity",
+                newName: "user_histories");
+
+            migrationBuilder.RenameTable(
+                name: "Tags",
+                newName: "guild_tags");
+
+            migrationBuilder.RenameTable(
+                name: "LoggingChannelEntity",
+                newName: "logging_channels");
+
+            migrationBuilder.RenameTable(
+                name: "InviteEntity",
+                newName: "invites");
+
+            migrationBuilder.RenameTable(
+                name: "InfractionStepEntity",
+                newName: "infraction_steps");
+
+            migrationBuilder.RenameTable(
                 name: "GuildModConfigs",
                 newName: "guild_moderation_config");
 
@@ -153,12 +235,24 @@ namespace Silk.Core.Data.Migrations
                 newName: "guild_logging_configs");
 
             migrationBuilder.RenameTable(
+                name: "GuildGreetingEntity",
+                newName: "guild_greetings");
+
+            migrationBuilder.RenameTable(
                 name: "GuildConfigs",
                 newName: "guild_configs");
 
             migrationBuilder.RenameTable(
                 name: "ExemptionEntity",
-                newName: "exemption_entity");
+                newName: "infraction_exemptions");
+
+            migrationBuilder.RenameTable(
+                name: "DisabledCommandEntity",
+                newName: "disbaled_commands");
+
+            migrationBuilder.RenameTable(
+                name: "CommandInvocations",
+                newName: "command_invocations");
 
             migrationBuilder.RenameColumn(
                 name: "Flags",
@@ -181,214 +275,214 @@ namespace Silk.Core.Data.Migrations
                 newName: "IX_users_guild_id");
 
             migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "UserHistoryEntity",
-                newName: "user_id");
-
-            migrationBuilder.RenameColumn(
-                name: "LeaveDates",
-                table: "UserHistoryEntity",
-                newName: "leave_dates");
-
-            migrationBuilder.RenameColumn(
-                name: "JoinDates",
-                table: "UserHistoryEntity",
-                newName: "join_dates");
-
-            migrationBuilder.RenameColumn(
-                name: "JoinDate",
-                table: "UserHistoryEntity",
-                newName: "initial_join_date");
-
-            migrationBuilder.RenameColumn(
-                name: "GuildId",
-                table: "UserHistoryEntity",
-                newName: "guild_id");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_UserHistoryEntity_UserId_GuildId",
-                table: "UserHistoryEntity",
-                newName: "IX_UserHistoryEntity_user_id_guild_id");
-
-            migrationBuilder.RenameColumn(
-                name: "Uses",
-                table: "Tags",
-                newName: "uses");
-
-            migrationBuilder.RenameColumn(
-                name: "Name",
-                table: "Tags",
-                newName: "name");
-
-            migrationBuilder.RenameColumn(
-                name: "Content",
-                table: "Tags",
-                newName: "content");
-
-            migrationBuilder.RenameColumn(
-                name: "OwnerId",
-                table: "Tags",
-                newName: "owner_id");
-
-            migrationBuilder.RenameColumn(
-                name: "OriginalTagId",
-                table: "Tags",
-                newName: "parent_id");
-
-            migrationBuilder.RenameColumn(
-                name: "GuildId",
-                table: "Tags",
-                newName: "guild_id");
-
-            migrationBuilder.RenameColumn(
-                name: "CreatedAt",
-                table: "Tags",
-                newName: "created_at");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Tags_OriginalTagId",
-                table: "Tags",
-                newName: "IX_Tags_parent_id");
-
-            migrationBuilder.RenameColumn(
                 name: "ReplyMessageContent",
-                table: "Reminders",
+                table: "reminders",
                 newName: "reply_content");
 
             migrationBuilder.RenameColumn(
                 name: "ReplyId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "reply_message_id");
 
             migrationBuilder.RenameColumn(
                 name: "ReplyAuthorId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "reply_author_id");
 
             migrationBuilder.RenameColumn(
                 name: "OwnerId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "owner_id");
 
             migrationBuilder.RenameColumn(
                 name: "MessageId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "message_id");
 
             migrationBuilder.RenameColumn(
                 name: "MessageContent",
-                table: "Reminders",
+                table: "reminders",
                 newName: "content");
 
             migrationBuilder.RenameColumn(
                 name: "GuildId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "guild_id");
 
             migrationBuilder.RenameColumn(
                 name: "ChannelId",
-                table: "Reminders",
+                table: "reminders",
                 newName: "channel_id");
 
             migrationBuilder.RenameColumn(
-                name: "Type",
-                table: "InfractionStepEntity",
-                newName: "infraction_type");
-
-            migrationBuilder.RenameColumn(
-                name: "Duration",
-                table: "InfractionStepEntity",
-                newName: "infraction_duration");
-
-            migrationBuilder.RenameColumn(
-                name: "ConfigId",
-                table: "InfractionStepEntity",
-                newName: "config_id");
-
-            migrationBuilder.RenameColumn(
                 name: "Reason",
-                table: "Infractions",
+                table: "infractions",
                 newName: "reason");
 
             migrationBuilder.RenameColumn(
                 name: "GuildId",
-                table: "Infractions",
+                table: "infractions",
                 newName: "guild_id");
 
             migrationBuilder.RenameColumn(
                 name: "CaseNumber",
-                table: "Infractions",
+                table: "infractions",
                 newName: "case_id");
 
             migrationBuilder.RenameColumn(
                 name: "UserId",
-                table: "Infractions",
+                table: "infractions",
                 newName: "target_id");
 
             migrationBuilder.RenameColumn(
                 name: "InfractionType",
-                table: "Infractions",
+                table: "infractions",
                 newName: "type");
 
             migrationBuilder.RenameColumn(
                 name: "HeldAgainstUser",
-                table: "Infractions",
+                table: "infractions",
                 newName: "processed");
 
             migrationBuilder.RenameColumn(
                 name: "Handled",
-                table: "Infractions",
+                table: "infractions",
                 newName: "escalated");
 
             migrationBuilder.RenameColumn(
                 name: "EscalatedFromStrike",
-                table: "Infractions",
+                table: "infractions",
                 newName: "active");
 
             migrationBuilder.RenameColumn(
                 name: "Enforcer",
-                table: "Infractions",
+                table: "infractions",
                 newName: "enforcer_id");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Infractions_UserId_GuildId",
-                table: "Infractions",
-                newName: "IX_Infractions_target_id_guild_id");
+                table: "infractions",
+                newName: "IX_infractions_target_id_guild_id");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Infractions_GuildId",
-                table: "Infractions",
-                newName: "IX_Infractions_guild_id");
+                table: "infractions",
+                newName: "IX_infractions_guild_id");
 
             migrationBuilder.RenameColumn(
                 name: "Prefix",
-                table: "Guilds",
+                table: "guilds",
                 newName: "prefix");
 
             migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "user_histories",
+                newName: "user_id");
+
+            migrationBuilder.RenameColumn(
+                name: "LeaveDates",
+                table: "user_histories",
+                newName: "leave_dates");
+
+            migrationBuilder.RenameColumn(
+                name: "JoinDates",
+                table: "user_histories",
+                newName: "join_dates");
+
+            migrationBuilder.RenameColumn(
+                name: "JoinDate",
+                table: "user_histories",
+                newName: "initial_join_date");
+
+            migrationBuilder.RenameColumn(
                 name: "GuildId",
-                table: "GuildGreetingEntity",
-                newName: "GuildID");
+                table: "user_histories",
+                newName: "guild_id");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_UserHistoryEntity_UserId_GuildId",
+                table: "user_histories",
+                newName: "IX_user_histories_user_id_guild_id");
 
             migrationBuilder.RenameColumn(
-                name: "ChannelId",
-                table: "GuildGreetingEntity",
-                newName: "ChannelID");
+                name: "Uses",
+                table: "guild_tags",
+                newName: "uses");
 
             migrationBuilder.RenameColumn(
-                name: "MetadataSnowflake",
-                table: "GuildGreetingEntity",
-                newName: "MetadataID");
+                name: "Name",
+                table: "guild_tags",
+                newName: "name");
 
             migrationBuilder.RenameColumn(
-                name: "InvocationTime",
-                table: "CommandInvocations",
-                newName: "used_at");
+                name: "Content",
+                table: "guild_tags",
+                newName: "content");
 
             migrationBuilder.RenameColumn(
-                name: "CommandName",
-                table: "CommandInvocations",
-                newName: "command_name");
+                name: "OwnerId",
+                table: "guild_tags",
+                newName: "owner_id");
+
+            migrationBuilder.RenameColumn(
+                name: "OriginalTagId",
+                table: "guild_tags",
+                newName: "parent_id");
+
+            migrationBuilder.RenameColumn(
+                name: "GuildId",
+                table: "guild_tags",
+                newName: "guild_id");
+
+            migrationBuilder.RenameColumn(
+                name: "CreatedAt",
+                table: "guild_tags",
+                newName: "created_at");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Tags_OriginalTagId",
+                table: "guild_tags",
+                newName: "IX_guild_tags_parent_id");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Tags_GuildEntityId",
+                table: "guild_tags",
+                newName: "IX_guild_tags_GuildEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "VanityURL",
+                table: "invites",
+                newName: "invite_code");
+
+            migrationBuilder.RenameColumn(
+                name: "InviteGuildId",
+                table: "invites",
+                newName: "invite_guild_id");
+
+            migrationBuilder.RenameColumn(
+                name: "GuildId",
+                table: "invites",
+                newName: "guild_id");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_InviteEntity_GuildModConfigEntityId",
+                table: "invites",
+                newName: "IX_invites_GuildModConfigEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "Type",
+                table: "infraction_steps",
+                newName: "infraction_type");
+
+            migrationBuilder.RenameColumn(
+                name: "Duration",
+                table: "infraction_steps",
+                newName: "infraction_duration");
+
+            migrationBuilder.RenameColumn(
+                name: "ConfigId",
+                table: "infraction_steps",
+                newName: "config_id");
 
             migrationBuilder.RenameColumn(
                 name: "UseAggressiveRegex",
@@ -438,17 +532,17 @@ namespace Silk.Core.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "ScanInvites",
                 table: "guild_moderation_config",
-                newName: "invite_whitelist_enabled");
+                newName: "progressive_infractions");
 
             migrationBuilder.RenameColumn(
                 name: "BlacklistInvites",
                 table: "guild_moderation_config",
-                newName: "infract_on_invite");
+                newName: "invite_whitelist_enabled");
 
             migrationBuilder.RenameColumn(
                 name: "AutoEscalateInfractions",
                 table: "guild_moderation_config",
-                newName: "ProgressiveStriking");
+                newName: "infract_on_invite");
 
             migrationBuilder.RenameIndex(
                 name: "IX_GuildModConfigs_LoggingConfigId",
@@ -487,6 +581,26 @@ namespace Silk.Core.Data.Migrations
 
             migrationBuilder.RenameColumn(
                 name: "GuildId",
+                table: "guild_greetings",
+                newName: "GuildID");
+
+            migrationBuilder.RenameColumn(
+                name: "ChannelId",
+                table: "guild_greetings",
+                newName: "ChannelID");
+
+            migrationBuilder.RenameColumn(
+                name: "MetadataSnowflake",
+                table: "guild_greetings",
+                newName: "MetadataID");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_GuildGreetingEntity_GuildConfigEntityId",
+                table: "guild_greetings",
+                newName: "IX_guild_greetings_GuildConfigEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "GuildId",
                 table: "guild_configs",
                 newName: "guild_id");
 
@@ -497,44 +611,37 @@ namespace Silk.Core.Data.Migrations
 
             migrationBuilder.RenameIndex(
                 name: "IX_ExemptionEntity_GuildModConfigEntityId",
-                table: "exemption_entity",
-                newName: "IX_exemption_entity_GuildModConfigEntityId");
+                table: "infraction_exemptions",
+                newName: "IX_infraction_exemptions_GuildModConfigEntityId");
 
-            migrationBuilder.AlterColumn<List<DateTimeOffset>>(
-                name: "leave_dates",
-                table: "UserHistoryEntity",
-                type: "timestamp with time zone[]",
-                nullable: false,
-                oldClrType: typeof(List<DateTime>),
-                oldType: "timestamp without time zone[]");
+            migrationBuilder.RenameColumn(
+                name: "GuildId",
+                table: "disbaled_commands",
+                newName: "GuildID");
 
-            migrationBuilder.AlterColumn<List<DateTimeOffset>>(
-                name: "join_dates",
-                table: "UserHistoryEntity",
-                type: "timestamp with time zone[]",
-                nullable: false,
-                oldClrType: typeof(List<DateTime>),
-                oldType: "timestamp without time zone[]");
+            migrationBuilder.RenameIndex(
+                name: "IX_DisabledCommandEntity_GuildId_CommandName",
+                table: "disbaled_commands",
+                newName: "IX_disbaled_commands_GuildID_CommandName");
 
-            migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "initial_join_date",
-                table: "UserHistoryEntity",
-                type: "timestamp with time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp without time zone");
+            migrationBuilder.RenameIndex(
+                name: "IX_DisabledCommandEntity_GuildConfigEntityId",
+                table: "disbaled_commands",
+                newName: "IX_disbaled_commands_GuildConfigEntityId");
 
-            migrationBuilder.AlterColumn<DateTimeOffset>(
-                name: "created_at",
-                table: "Tags",
-                type: "timestamp with time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp without time zone");
+            migrationBuilder.RenameColumn(
+                name: "InvocationTime",
+                table: "command_invocations",
+                newName: "used_at");
+
+            migrationBuilder.RenameColumn(
+                name: "CommandName",
+                table: "command_invocations",
+                newName: "command_name");
 
             migrationBuilder.AlterColumn<ulong>(
                 name: "message_id",
-                table: "Reminders",
+                table: "reminders",
                 type: "numeric(20,0)",
                 nullable: true,
                 oldClrType: typeof(decimal),
@@ -542,51 +649,96 @@ namespace Silk.Core.Data.Migrations
 
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "created_at",
-                table: "Reminders",
+                table: "reminders",
                 type: "timestamp with time zone",
                 nullable: false,
                 defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
 
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "expires_at",
-                table: "Reminders",
+                table: "reminders",
                 type: "timestamp with time zone",
                 nullable: false,
                 defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
 
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "created_at",
+                table: "infractions",
+                type: "timestamp with time zone",
+                nullable: false,
+                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "expires_at",
+                table: "infractions",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.AlterColumn<List<DateTimeOffset>>(
+                name: "leave_dates",
+                table: "user_histories",
+                type: "timestamp with time zone[]",
+                nullable: false,
+                oldClrType: typeof(List<DateTime>),
+                oldType: "timestamp without time zone[]");
+
+            migrationBuilder.AlterColumn<List<DateTimeOffset>>(
+                name: "join_dates",
+                table: "user_histories",
+                type: "timestamp with time zone[]",
+                nullable: false,
+                oldClrType: typeof(List<DateTime>),
+                oldType: "timestamp without time zone[]");
+
+            migrationBuilder.AlterColumn<DateTimeOffset>(
+                name: "initial_join_date",
+                table: "user_histories",
+                type: "timestamp with time zone",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp without time zone");
+
+            migrationBuilder.AlterColumn<DateTimeOffset>(
+                name: "created_at",
+                table: "guild_tags",
+                type: "timestamp with time zone",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp without time zone");
+
             migrationBuilder.AddColumn<int>(
                 name: "GuildModConfigEntityId",
-                table: "InfractionStepEntity",
+                table: "infraction_steps",
                 type: "integer",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "infraction_count",
-                table: "InfractionStepEntity",
+                table: "infraction_steps",
                 type: "integer",
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "created_at",
-                table: "Infractions",
+            migrationBuilder.AlterColumn<int>(
+                name: "LoggingConfigId",
+                table: "guild_moderation_config",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
+
+            migrationBuilder.Sql("ALTER TABLE \"infraction_exemptions\" ALTER COLUMN \"exempt_from\" TYPE integer USING (\"exempt_from\"::integer)");
+
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "used_at",
+                table: "command_invocations",
                 type: "timestamp with time zone",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "expires_at",
-                table: "Infractions",
-                type: "timestamp with time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "GuildId1",
-                table: "DisabledCommandEntity",
-                type: "numeric(20,0)",
-                nullable: true);
-
-            migrationBuilder.Sql("ALTER TABLE exemption_entity ALTER COLUMN exempt_from SET DATA TYPE integer USING exempt_from::integer");
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp without time zone");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_users",
@@ -594,6 +746,46 @@ namespace Silk.Core.Data.Migrations
                 columns: new[] { "id", "guild_id" });
 
             migrationBuilder.AddPrimaryKey(
+                name: "PK_reminders",
+                table: "reminders",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_infractions",
+                table: "infractions",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_guilds",
+                table: "guilds",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_user_histories",
+                table: "user_histories",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_guild_tags",
+                table: "guild_tags",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_logging_channels",
+                table: "logging_channels",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_invites",
+                table: "invites",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_infraction_steps",
+                table: "infraction_steps",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
                 name: "PK_guild_moderation_config",
                 table: "guild_moderation_config",
                 column: "Id");
@@ -604,96 +796,99 @@ namespace Silk.Core.Data.Migrations
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(
+                name: "PK_guild_greetings",
+                table: "guild_greetings",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
                 name: "PK_guild_configs",
                 table: "guild_configs",
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_exemption_entity",
-                table: "exemption_entity",
+                name: "PK_infraction_exemptions",
+                table: "infraction_exemptions",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_disbaled_commands",
+                table: "disbaled_commands",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_command_invocations",
+                table: "command_invocations",
                 column: "Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InfractionStepEntity_GuildModConfigEntityId",
-                table: "InfractionStepEntity",
+                name: "IX_infraction_steps_GuildModConfigEntityId",
+                table: "infraction_steps",
                 column: "GuildModConfigEntityId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_DisabledCommandEntity_GuildId1",
-                table: "DisabledCommandEntity",
-                column: "GuildId1");
-
             migrationBuilder.AddForeignKey(
-                name: "FK_DisabledCommandEntity_guild_configs_GuildConfigEntityId",
-                table: "DisabledCommandEntity",
+                name: "FK_disbaled_commands_guild_configs_GuildConfigEntityId",
+                table: "disbaled_commands",
                 column: "GuildConfigEntityId",
                 principalTable: "guild_configs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_DisabledCommandEntity_Guilds_GuildId1",
-                table: "DisabledCommandEntity",
-                column: "GuildId1",
-                principalTable: "Guilds",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_exemption_entity_guild_moderation_config_GuildModConfigEnti~",
-                table: "exemption_entity",
-                column: "GuildModConfigEntityId",
-                principalTable: "guild_moderation_config",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_guild_configs_Guilds_guild_id",
-                table: "guild_configs",
-                column: "guild_id",
-                principalTable: "Guilds",
+                name: "FK_disbaled_commands_guilds_GuildID",
+                table: "disbaled_commands",
+                column: "GuildID",
+                principalTable: "guilds",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_InfractionsId",
+                name: "FK_guild_configs_guilds_guild_id",
+                table: "guild_configs",
+                column: "guild_id",
+                principalTable: "guilds",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_guild_greetings_guild_configs_GuildConfigEntityId",
+                table: "guild_greetings",
+                column: "GuildConfigEntityId",
+                principalTable: "guild_configs",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_guild_logging_configs_logging_channels_InfractionsId",
                 table: "guild_logging_configs",
                 column: "InfractionsId",
-                principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalTable: "logging_channels",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MemberJoinsId",
+                name: "FK_guild_logging_configs_logging_channels_MemberJoinsId",
                 table: "guild_logging_configs",
                 column: "MemberJoinsId",
-                principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalTable: "logging_channels",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MemberLeavesId",
+                name: "FK_guild_logging_configs_logging_channels_MemberLeavesId",
                 table: "guild_logging_configs",
                 column: "MemberLeavesId",
-                principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalTable: "logging_channels",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MessageDeletesId",
+                name: "FK_guild_logging_configs_logging_channels_MessageDeletesId",
                 table: "guild_logging_configs",
                 column: "MessageDeletesId",
-                principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalTable: "logging_channels",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MessageEditsId",
+                name: "FK_guild_logging_configs_logging_channels_MessageEditsId",
                 table: "guild_logging_configs",
                 column: "MessageEditsId",
-                principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalTable: "logging_channels",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_guild_moderation_config_guild_logging_configs_LoggingConfig~",
@@ -701,77 +896,80 @@ namespace Silk.Core.Data.Migrations
                 column: "LoggingConfigId",
                 principalTable: "guild_logging_configs",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_guild_moderation_config_Guilds_guild_id",
+                name: "FK_guild_moderation_config_guilds_guild_id",
                 table: "guild_moderation_config",
                 column: "guild_id",
-                principalTable: "Guilds",
+                principalTable: "guilds",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_GuildGreetingEntity_guild_configs_GuildConfigEntityId",
-                table: "GuildGreetingEntity",
-                column: "GuildConfigEntityId",
-                principalTable: "guild_configs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                name: "FK_guild_tags_guild_tags_parent_id",
+                table: "guild_tags",
+                column: "parent_id",
+                principalTable: "guild_tags",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Infractions_Guilds_guild_id",
-                table: "Infractions",
+                name: "FK_guild_tags_guilds_GuildEntityId",
+                table: "guild_tags",
+                column: "GuildEntityId",
+                principalTable: "guilds",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_infraction_exemptions_guild_moderation_config_GuildModConfi~",
+                table: "infraction_exemptions",
+                column: "GuildModConfigEntityId",
+                principalTable: "guild_moderation_config",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_infraction_steps_guild_moderation_config_GuildModConfigEnti~",
+                table: "infraction_steps",
+                column: "GuildModConfigEntityId",
+                principalTable: "guild_moderation_config",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_infractions_guilds_guild_id",
+                table: "infractions",
                 column: "guild_id",
-                principalTable: "Guilds",
+                principalTable: "guilds",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Infractions_users_target_id_guild_id",
-                table: "Infractions",
+                name: "FK_infractions_users_target_id_guild_id",
+                table: "infractions",
                 columns: new[] { "target_id", "guild_id" },
                 principalTable: "users",
                 principalColumns: new[] { "id", "guild_id" },
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_InfractionStepEntity_guild_moderation_config_GuildModConfig~",
-                table: "InfractionStepEntity",
+                name: "FK_invites_guild_moderation_config_GuildModConfigEntityId",
+                table: "invites",
                 column: "GuildModConfigEntityId",
                 principalTable: "guild_moderation_config",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_InviteEntity_guild_moderation_config_GuildModConfigEntityId",
-                table: "InviteEntity",
-                column: "GuildModConfigEntityId",
-                principalTable: "guild_moderation_config",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Tags_Tags_parent_id",
-                table: "Tags",
-                column: "parent_id",
-                principalTable: "Tags",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_UserHistoryEntity_users_user_id_guild_id",
-                table: "UserHistoryEntity",
+                name: "FK_user_histories_users_user_id_guild_id",
+                table: "user_histories",
                 columns: new[] { "user_id", "guild_id" },
                 principalTable: "users",
                 principalColumns: new[] { "id", "guild_id" },
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_users_Guilds_guild_id",
+                name: "FK_users_guilds_guild_id",
                 table: "users",
                 column: "guild_id",
-                principalTable: "Guilds",
+                principalTable: "guilds",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -779,39 +977,39 @@ namespace Silk.Core.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_DisabledCommandEntity_guild_configs_GuildConfigEntityId",
-                table: "DisabledCommandEntity");
+                name: "FK_disbaled_commands_guild_configs_GuildConfigEntityId",
+                table: "disbaled_commands");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_DisabledCommandEntity_Guilds_GuildId1",
-                table: "DisabledCommandEntity");
+                name: "FK_disbaled_commands_guilds_GuildID",
+                table: "disbaled_commands");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_exemption_entity_guild_moderation_config_GuildModConfigEnti~",
-                table: "exemption_entity");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_guild_configs_Guilds_guild_id",
+                name: "FK_guild_configs_guilds_guild_id",
                 table: "guild_configs");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_InfractionsId",
+                name: "FK_guild_greetings_guild_configs_GuildConfigEntityId",
+                table: "guild_greetings");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_guild_logging_configs_logging_channels_InfractionsId",
                 table: "guild_logging_configs");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MemberJoinsId",
+                name: "FK_guild_logging_configs_logging_channels_MemberJoinsId",
                 table: "guild_logging_configs");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MemberLeavesId",
+                name: "FK_guild_logging_configs_logging_channels_MemberLeavesId",
                 table: "guild_logging_configs");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MessageDeletesId",
+                name: "FK_guild_logging_configs_logging_channels_MessageDeletesId",
                 table: "guild_logging_configs");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_logging_configs_LoggingChannelEntity_MessageEditsId",
+                name: "FK_guild_logging_configs_logging_channels_MessageEditsId",
                 table: "guild_logging_configs");
 
             migrationBuilder.DropForeignKey(
@@ -819,52 +1017,88 @@ namespace Silk.Core.Data.Migrations
                 table: "guild_moderation_config");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_guild_moderation_config_Guilds_guild_id",
+                name: "FK_guild_moderation_config_guilds_guild_id",
                 table: "guild_moderation_config");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_GuildGreetingEntity_guild_configs_GuildConfigEntityId",
-                table: "GuildGreetingEntity");
+                name: "FK_guild_tags_guild_tags_parent_id",
+                table: "guild_tags");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Infractions_Guilds_guild_id",
-                table: "Infractions");
+                name: "FK_guild_tags_guilds_GuildEntityId",
+                table: "guild_tags");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Infractions_users_target_id_guild_id",
-                table: "Infractions");
+                name: "FK_infraction_exemptions_guild_moderation_config_GuildModConfi~",
+                table: "infraction_exemptions");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_InfractionStepEntity_guild_moderation_config_GuildModConfig~",
-                table: "InfractionStepEntity");
+                name: "FK_infraction_steps_guild_moderation_config_GuildModConfigEnti~",
+                table: "infraction_steps");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_InviteEntity_guild_moderation_config_GuildModConfigEntityId",
-                table: "InviteEntity");
+                name: "FK_infractions_guilds_guild_id",
+                table: "infractions");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Tags_Tags_parent_id",
-                table: "Tags");
+                name: "FK_infractions_users_target_id_guild_id",
+                table: "infractions");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_UserHistoryEntity_users_user_id_guild_id",
-                table: "UserHistoryEntity");
+                name: "FK_invites_guild_moderation_config_GuildModConfigEntityId",
+                table: "invites");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_users_Guilds_guild_id",
+                name: "FK_user_histories_users_user_id_guild_id",
+                table: "user_histories");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_users_guilds_guild_id",
                 table: "users");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_users",
                 table: "users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_InfractionStepEntity_GuildModConfigEntityId",
-                table: "InfractionStepEntity");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_reminders",
+                table: "reminders");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_infractions",
+                table: "infractions");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_guilds",
+                table: "guilds");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_user_histories",
+                table: "user_histories");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_logging_channels",
+                table: "logging_channels");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_invites",
+                table: "invites");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_infraction_steps",
+                table: "infraction_steps");
 
             migrationBuilder.DropIndex(
-                name: "IX_DisabledCommandEntity_GuildId1",
-                table: "DisabledCommandEntity");
+                name: "IX_infraction_steps_GuildModConfigEntityId",
+                table: "infraction_steps");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_infraction_exemptions",
+                table: "infraction_exemptions");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_guild_tags",
+                table: "guild_tags");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_guild_moderation_config",
@@ -875,44 +1109,84 @@ namespace Silk.Core.Data.Migrations
                 table: "guild_logging_configs");
 
             migrationBuilder.DropPrimaryKey(
+                name: "PK_guild_greetings",
+                table: "guild_greetings");
+
+            migrationBuilder.DropPrimaryKey(
                 name: "PK_guild_configs",
                 table: "guild_configs");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_exemption_entity",
-                table: "exemption_entity");
+                name: "PK_disbaled_commands",
+                table: "disbaled_commands");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_command_invocations",
+                table: "command_invocations");
 
             migrationBuilder.DropColumn(
                 name: "created_at",
-                table: "Reminders");
+                table: "reminders");
 
             migrationBuilder.DropColumn(
                 name: "expires_at",
-                table: "Reminders");
+                table: "reminders");
+
+            migrationBuilder.DropColumn(
+                name: "created_at",
+                table: "infractions");
+
+            migrationBuilder.DropColumn(
+                name: "expires_at",
+                table: "infractions");
 
             migrationBuilder.DropColumn(
                 name: "GuildModConfigEntityId",
-                table: "InfractionStepEntity");
+                table: "infraction_steps");
 
             migrationBuilder.DropColumn(
                 name: "infraction_count",
-                table: "InfractionStepEntity");
-
-            migrationBuilder.DropColumn(
-                name: "created_at",
-                table: "Infractions");
-
-            migrationBuilder.DropColumn(
-                name: "expires_at",
-                table: "Infractions");
-
-            migrationBuilder.DropColumn(
-                name: "GuildId1",
-                table: "DisabledCommandEntity");
+                table: "infraction_steps");
 
             migrationBuilder.RenameTable(
                 name: "users",
                 newName: "Users");
+
+            migrationBuilder.RenameTable(
+                name: "reminders",
+                newName: "Reminders");
+
+            migrationBuilder.RenameTable(
+                name: "infractions",
+                newName: "Infractions");
+
+            migrationBuilder.RenameTable(
+                name: "guilds",
+                newName: "Guilds");
+
+            migrationBuilder.RenameTable(
+                name: "user_histories",
+                newName: "UserHistoryEntity");
+
+            migrationBuilder.RenameTable(
+                name: "logging_channels",
+                newName: "LoggingChannelEntity");
+
+            migrationBuilder.RenameTable(
+                name: "invites",
+                newName: "InviteEntity");
+
+            migrationBuilder.RenameTable(
+                name: "infraction_steps",
+                newName: "InfractionStepEntity");
+
+            migrationBuilder.RenameTable(
+                name: "infraction_exemptions",
+                newName: "ExemptionEntity");
+
+            migrationBuilder.RenameTable(
+                name: "guild_tags",
+                newName: "Tags");
 
             migrationBuilder.RenameTable(
                 name: "guild_moderation_config",
@@ -923,12 +1197,20 @@ namespace Silk.Core.Data.Migrations
                 newName: "GuildLoggingConfigEntity");
 
             migrationBuilder.RenameTable(
+                name: "guild_greetings",
+                newName: "GuildGreetingEntity");
+
+            migrationBuilder.RenameTable(
                 name: "guild_configs",
                 newName: "GuildConfigs");
 
             migrationBuilder.RenameTable(
-                name: "exemption_entity",
-                newName: "ExemptionEntity");
+                name: "disbaled_commands",
+                newName: "DisabledCommandEntity");
+
+            migrationBuilder.RenameTable(
+                name: "command_invocations",
+                newName: "CommandInvocations");
 
             migrationBuilder.RenameColumn(
                 name: "flags",
@@ -949,76 +1231,6 @@ namespace Silk.Core.Data.Migrations
                 name: "IX_users_guild_id",
                 table: "Users",
                 newName: "IX_Users_GuildId");
-
-            migrationBuilder.RenameColumn(
-                name: "user_id",
-                table: "UserHistoryEntity",
-                newName: "UserId");
-
-            migrationBuilder.RenameColumn(
-                name: "leave_dates",
-                table: "UserHistoryEntity",
-                newName: "LeaveDates");
-
-            migrationBuilder.RenameColumn(
-                name: "join_dates",
-                table: "UserHistoryEntity",
-                newName: "JoinDates");
-
-            migrationBuilder.RenameColumn(
-                name: "initial_join_date",
-                table: "UserHistoryEntity",
-                newName: "JoinDate");
-
-            migrationBuilder.RenameColumn(
-                name: "guild_id",
-                table: "UserHistoryEntity",
-                newName: "GuildId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_UserHistoryEntity_user_id_guild_id",
-                table: "UserHistoryEntity",
-                newName: "IX_UserHistoryEntity_UserId_GuildId");
-
-            migrationBuilder.RenameColumn(
-                name: "uses",
-                table: "Tags",
-                newName: "Uses");
-
-            migrationBuilder.RenameColumn(
-                name: "name",
-                table: "Tags",
-                newName: "Name");
-
-            migrationBuilder.RenameColumn(
-                name: "content",
-                table: "Tags",
-                newName: "Content");
-
-            migrationBuilder.RenameColumn(
-                name: "parent_id",
-                table: "Tags",
-                newName: "OriginalTagId");
-
-            migrationBuilder.RenameColumn(
-                name: "owner_id",
-                table: "Tags",
-                newName: "OwnerId");
-
-            migrationBuilder.RenameColumn(
-                name: "guild_id",
-                table: "Tags",
-                newName: "GuildId");
-
-            migrationBuilder.RenameColumn(
-                name: "created_at",
-                table: "Tags",
-                newName: "CreatedAt");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Tags_parent_id",
-                table: "Tags",
-                newName: "IX_Tags_OriginalTagId");
 
             migrationBuilder.RenameColumn(
                 name: "reply_message_id",
@@ -1059,21 +1271,6 @@ namespace Silk.Core.Data.Migrations
                 name: "channel_id",
                 table: "Reminders",
                 newName: "ChannelId");
-
-            migrationBuilder.RenameColumn(
-                name: "infraction_type",
-                table: "InfractionStepEntity",
-                newName: "Type");
-
-            migrationBuilder.RenameColumn(
-                name: "infraction_duration",
-                table: "InfractionStepEntity",
-                newName: "Duration");
-
-            migrationBuilder.RenameColumn(
-                name: "config_id",
-                table: "InfractionStepEntity",
-                newName: "ConfigId");
 
             migrationBuilder.RenameColumn(
                 name: "reason",
@@ -1121,12 +1318,12 @@ namespace Silk.Core.Data.Migrations
                 newName: "EscalatedFromStrike");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Infractions_target_id_guild_id",
+                name: "IX_infractions_target_id_guild_id",
                 table: "Infractions",
                 newName: "IX_Infractions_UserId_GuildId");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Infractions_guild_id",
+                name: "IX_infractions_guild_id",
                 table: "Infractions",
                 newName: "IX_Infractions_GuildId");
 
@@ -1136,29 +1333,119 @@ namespace Silk.Core.Data.Migrations
                 newName: "Prefix");
 
             migrationBuilder.RenameColumn(
-                name: "GuildID",
-                table: "GuildGreetingEntity",
+                name: "user_id",
+                table: "UserHistoryEntity",
+                newName: "UserId");
+
+            migrationBuilder.RenameColumn(
+                name: "leave_dates",
+                table: "UserHistoryEntity",
+                newName: "LeaveDates");
+
+            migrationBuilder.RenameColumn(
+                name: "join_dates",
+                table: "UserHistoryEntity",
+                newName: "JoinDates");
+
+            migrationBuilder.RenameColumn(
+                name: "initial_join_date",
+                table: "UserHistoryEntity",
+                newName: "JoinDate");
+
+            migrationBuilder.RenameColumn(
+                name: "guild_id",
+                table: "UserHistoryEntity",
+                newName: "GuildId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_user_histories_user_id_guild_id",
+                table: "UserHistoryEntity",
+                newName: "IX_UserHistoryEntity_UserId_GuildId");
+
+            migrationBuilder.RenameColumn(
+                name: "invite_guild_id",
+                table: "InviteEntity",
+                newName: "InviteGuildId");
+
+            migrationBuilder.RenameColumn(
+                name: "invite_code",
+                table: "InviteEntity",
+                newName: "VanityURL");
+
+            migrationBuilder.RenameColumn(
+                name: "guild_id",
+                table: "InviteEntity",
+                newName: "GuildId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_invites_GuildModConfigEntityId",
+                table: "InviteEntity",
+                newName: "IX_InviteEntity_GuildModConfigEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "infraction_type",
+                table: "InfractionStepEntity",
+                newName: "Type");
+
+            migrationBuilder.RenameColumn(
+                name: "infraction_duration",
+                table: "InfractionStepEntity",
+                newName: "Duration");
+
+            migrationBuilder.RenameColumn(
+                name: "config_id",
+                table: "InfractionStepEntity",
+                newName: "ConfigId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_infraction_exemptions_GuildModConfigEntityId",
+                table: "ExemptionEntity",
+                newName: "IX_ExemptionEntity_GuildModConfigEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "uses",
+                table: "Tags",
+                newName: "Uses");
+
+            migrationBuilder.RenameColumn(
+                name: "name",
+                table: "Tags",
+                newName: "Name");
+
+            migrationBuilder.RenameColumn(
+                name: "content",
+                table: "Tags",
+                newName: "Content");
+
+            migrationBuilder.RenameColumn(
+                name: "parent_id",
+                table: "Tags",
+                newName: "OriginalTagId");
+
+            migrationBuilder.RenameColumn(
+                name: "owner_id",
+                table: "Tags",
+                newName: "OwnerId");
+
+            migrationBuilder.RenameColumn(
+                name: "guild_id",
+                table: "Tags",
                 newName: "GuildId");
 
             migrationBuilder.RenameColumn(
-                name: "ChannelID",
-                table: "GuildGreetingEntity",
-                newName: "ChannelId");
+                name: "created_at",
+                table: "Tags",
+                newName: "CreatedAt");
 
-            migrationBuilder.RenameColumn(
-                name: "MetadataID",
-                table: "GuildGreetingEntity",
-                newName: "MetadataSnowflake");
+            migrationBuilder.RenameIndex(
+                name: "IX_guild_tags_parent_id",
+                table: "Tags",
+                newName: "IX_Tags_OriginalTagId");
 
-            migrationBuilder.RenameColumn(
-                name: "used_at",
-                table: "CommandInvocations",
-                newName: "InvocationTime");
-
-            migrationBuilder.RenameColumn(
-                name: "command_name",
-                table: "CommandInvocations",
-                newName: "CommandName");
+            migrationBuilder.RenameIndex(
+                name: "IX_guild_tags_GuildEntityId",
+                table: "Tags",
+                newName: "IX_Tags_GuildEntityId");
 
             migrationBuilder.RenameColumn(
                 name: "mute_role",
@@ -1206,17 +1493,17 @@ namespace Silk.Core.Data.Migrations
                 newName: "WarnOnMatchedInvite");
 
             migrationBuilder.RenameColumn(
-                name: "invite_whitelist_enabled",
+                name: "progressive_infractions",
                 table: "GuildModConfigs",
                 newName: "ScanInvites");
 
             migrationBuilder.RenameColumn(
-                name: "infract_on_invite",
+                name: "invite_whitelist_enabled",
                 table: "GuildModConfigs",
                 newName: "BlacklistInvites");
 
             migrationBuilder.RenameColumn(
-                name: "ProgressiveStriking",
+                name: "infract_on_invite",
                 table: "GuildModConfigs",
                 newName: "AutoEscalateInfractions");
 
@@ -1256,6 +1543,26 @@ namespace Silk.Core.Data.Migrations
                 newName: "IX_GuildLoggingConfigEntity_InfractionsId");
 
             migrationBuilder.RenameColumn(
+                name: "GuildID",
+                table: "GuildGreetingEntity",
+                newName: "GuildId");
+
+            migrationBuilder.RenameColumn(
+                name: "ChannelID",
+                table: "GuildGreetingEntity",
+                newName: "ChannelId");
+
+            migrationBuilder.RenameColumn(
+                name: "MetadataID",
+                table: "GuildGreetingEntity",
+                newName: "MetadataSnowflake");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_guild_greetings_GuildConfigEntityId",
+                table: "GuildGreetingEntity",
+                newName: "IX_GuildGreetingEntity_GuildConfigEntityId");
+
+            migrationBuilder.RenameColumn(
                 name: "guild_id",
                 table: "GuildConfigs",
                 newName: "GuildId");
@@ -1265,10 +1572,30 @@ namespace Silk.Core.Data.Migrations
                 table: "GuildConfigs",
                 newName: "IX_GuildConfigs_GuildId");
 
+            migrationBuilder.RenameColumn(
+                name: "GuildID",
+                table: "DisabledCommandEntity",
+                newName: "GuildId");
+
             migrationBuilder.RenameIndex(
-                name: "IX_exemption_entity_GuildModConfigEntityId",
-                table: "ExemptionEntity",
-                newName: "IX_ExemptionEntity_GuildModConfigEntityId");
+                name: "IX_disbaled_commands_GuildID_CommandName",
+                table: "DisabledCommandEntity",
+                newName: "IX_DisabledCommandEntity_GuildId_CommandName");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_disbaled_commands_GuildConfigEntityId",
+                table: "DisabledCommandEntity",
+                newName: "IX_DisabledCommandEntity_GuildConfigEntityId");
+
+            migrationBuilder.RenameColumn(
+                name: "used_at",
+                table: "CommandInvocations",
+                newName: "InvocationTime");
+
+            migrationBuilder.RenameColumn(
+                name: "command_name",
+                table: "CommandInvocations",
+                newName: "CommandName");
 
             migrationBuilder.AddColumn<long>(
                 name: "DatabaseId",
@@ -1283,38 +1610,6 @@ namespace Silk.Core.Data.Migrations
                 type: "timestamp without time zone",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AlterColumn<List<DateTime>>(
-                name: "LeaveDates",
-                table: "UserHistoryEntity",
-                type: "timestamp without time zone[]",
-                nullable: false,
-                oldClrType: typeof(List<DateTimeOffset>),
-                oldType: "timestamp with time zone[]");
-
-            migrationBuilder.AlterColumn<List<DateTime>>(
-                name: "JoinDates",
-                table: "UserHistoryEntity",
-                type: "timestamp without time zone[]",
-                nullable: false,
-                oldClrType: typeof(List<DateTimeOffset>),
-                oldType: "timestamp with time zone[]");
-
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "JoinDate",
-                table: "UserHistoryEntity",
-                type: "timestamp without time zone",
-                nullable: false,
-                oldClrType: typeof(DateTimeOffset),
-                oldType: "timestamp with time zone");
-
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Tags",
-                type: "timestamp without time zone",
-                nullable: false,
-                oldClrType: typeof(DateTimeOffset),
-                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "MessageId",
@@ -1366,6 +1661,30 @@ namespace Silk.Core.Data.Migrations
                 type: "timestamp without time zone",
                 nullable: true);
 
+            migrationBuilder.AlterColumn<List<DateTime>>(
+                name: "LeaveDates",
+                table: "UserHistoryEntity",
+                type: "timestamp without time zone[]",
+                nullable: false,
+                oldClrType: typeof(List<DateTimeOffset>),
+                oldType: "timestamp with time zone[]");
+
+            migrationBuilder.AlterColumn<List<DateTime>>(
+                name: "JoinDates",
+                table: "UserHistoryEntity",
+                type: "timestamp without time zone[]",
+                nullable: false,
+                oldClrType: typeof(List<DateTimeOffset>),
+                oldType: "timestamp with time zone[]");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "JoinDate",
+                table: "UserHistoryEntity",
+                type: "timestamp without time zone",
+                nullable: false,
+                oldClrType: typeof(DateTimeOffset),
+                oldType: "timestamp with time zone");
+
             migrationBuilder.AlterColumn<string>(
                 name: "exempt_from",
                 table: "ExemptionEntity",
@@ -1374,10 +1693,79 @@ namespace Silk.Core.Data.Migrations
                 oldClrType: typeof(int),
                 oldType: "integer");
 
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "Tags",
+                type: "timestamp without time zone",
+                nullable: false,
+                oldClrType: typeof(DateTimeOffset),
+                oldType: "timestamp with time zone");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "LoggingConfigId",
+                table: "GuildModConfigs",
+                type: "integer",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "integer");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "InvocationTime",
+                table: "CommandInvocations",
+                type: "timestamp without time zone",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "timestamp with time zone");
+
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Users",
                 table: "Users",
                 columns: new[] { "Id", "GuildId" });
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Reminders",
+                table: "Reminders",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Infractions",
+                table: "Infractions",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Guilds",
+                table: "Guilds",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_UserHistoryEntity",
+                table: "UserHistoryEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_LoggingChannelEntity",
+                table: "LoggingChannelEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_InviteEntity",
+                table: "InviteEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_InfractionStepEntity",
+                table: "InfractionStepEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_ExemptionEntity",
+                table: "ExemptionEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Tags",
+                table: "Tags",
+                column: "Id");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_GuildModConfigs",
@@ -1390,13 +1778,23 @@ namespace Silk.Core.Data.Migrations
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(
+                name: "PK_GuildGreetingEntity",
+                table: "GuildGreetingEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
                 name: "PK_GuildConfigs",
                 table: "GuildConfigs",
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_ExemptionEntity",
-                table: "ExemptionEntity",
+                name: "PK_DisabledCommandEntity",
+                table: "DisabledCommandEntity",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_CommandInvocations",
+                table: "CommandInvocations",
                 column: "Id");
 
             migrationBuilder.CreateIndex(
@@ -1409,8 +1807,7 @@ namespace Silk.Core.Data.Migrations
                 table: "DisabledCommandEntity",
                 column: "GuildConfigEntityId",
                 principalTable: "GuildConfigs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DisabledCommandEntity_Guilds_GuildId",
@@ -1425,8 +1822,7 @@ namespace Silk.Core.Data.Migrations
                 table: "ExemptionEntity",
                 column: "GuildModConfigEntityId",
                 principalTable: "GuildModConfigs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildConfigs_Guilds_GuildId",
@@ -1441,56 +1837,49 @@ namespace Silk.Core.Data.Migrations
                 table: "GuildGreetingEntity",
                 column: "GuildConfigEntityId",
                 principalTable: "GuildConfigs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildLoggingConfigEntity_LoggingChannelEntity_InfractionsId",
                 table: "GuildLoggingConfigEntity",
                 column: "InfractionsId",
                 principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildLoggingConfigEntity_LoggingChannelEntity_MemberJoinsId",
                 table: "GuildLoggingConfigEntity",
                 column: "MemberJoinsId",
                 principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildLoggingConfigEntity_LoggingChannelEntity_MemberLeavesId",
                 table: "GuildLoggingConfigEntity",
                 column: "MemberLeavesId",
                 principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildLoggingConfigEntity_LoggingChannelEntity_MessageDelete~",
                 table: "GuildLoggingConfigEntity",
                 column: "MessageDeletesId",
                 principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildLoggingConfigEntity_LoggingChannelEntity_MessageEditsId",
                 table: "GuildLoggingConfigEntity",
                 column: "MessageEditsId",
                 principalTable: "LoggingChannelEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildModConfigs_GuildLoggingConfigEntity_LoggingConfigId",
                 table: "GuildModConfigs",
                 column: "LoggingConfigId",
                 principalTable: "GuildLoggingConfigEntity",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_GuildModConfigs_Guilds_GuildId",
@@ -1529,16 +1918,21 @@ namespace Silk.Core.Data.Migrations
                 table: "InviteEntity",
                 column: "GuildModConfigEntityId",
                 principalTable: "GuildModConfigs",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Tags_Guilds_GuildEntityId",
+                table: "Tags",
+                column: "GuildEntityId",
+                principalTable: "Guilds",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Tags_Tags_OriginalTagId",
                 table: "Tags",
                 column: "OriginalTagId",
                 principalTable: "Tags",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserHistoryEntity_Users_UserId_GuildId",

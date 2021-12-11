@@ -8,6 +8,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 ///     General history of a user.
 /// </summary>
+[Table("user_histories")]
 public class UserHistoryEntity
 {
     public int Id { get; set; }

@@ -7,6 +7,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 ///     Represents an invocation of any of Silk's commands.
 /// </summary>
+[Table("command_invocations")]
 public class CommandInvocationEntity
 {
     public long Id { get; set; }

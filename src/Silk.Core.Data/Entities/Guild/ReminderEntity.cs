@@ -7,6 +7,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 ///     A reminder that is sent to a user at a later time.
 /// </summary>
+[Table("reminders")]
 public class ReminderEntity
 {
     public int Id { get; set; }

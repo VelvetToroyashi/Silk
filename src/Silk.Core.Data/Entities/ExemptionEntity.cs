@@ -22,7 +22,7 @@ public enum ExemptionCoverage
     WordBlacklist
 }
 
-[Table("exemption_entity")]
+[Table("infraction_exemptions")]
 public sealed class ExemptionEntity
 {
 	/// <summary>

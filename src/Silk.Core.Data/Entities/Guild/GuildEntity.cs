@@ -5,6 +5,7 @@ using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
+[Table("guilds")]
 public class GuildEntity
 {
     /// <summary>

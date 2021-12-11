@@ -8,6 +8,10 @@ public class DisabledCommandEntityConfiguration : IEntityTypeConfiguration<Disab
 {
     public void Configure(EntityTypeBuilder<DisabledCommandEntity> builder)
     {
-        builder.HasIndex(c => new { c.GuildId, c.CommandName }).IsUnique();
+        builder.HasIndex(c => new {
+            GuildId = c.GuildID, c.CommandName }).IsUnique();
+
+        builder.Property(c => c.GuildID)
+               .HasConversion(new SnowflakeConverter());
     }
 }

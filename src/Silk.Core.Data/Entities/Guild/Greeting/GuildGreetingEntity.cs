@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
@@ -5,6 +6,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 ///     Represents data for a greeting.
 /// </summary>
+[Table("guild_greetings")]
 public class GuildGreetingEntity
 {
     /// <summary>

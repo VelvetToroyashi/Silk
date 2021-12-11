@@ -18,17 +18,17 @@
         <PackageReference Update="Unity" Version="5.11.10" />
         <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
 
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.1" />
 
         <PackageReference Update="Serilog.Sinks.Console" Version="3.1.1" />
 
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.11" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="5.0.11" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.0" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3" />
 
         <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />

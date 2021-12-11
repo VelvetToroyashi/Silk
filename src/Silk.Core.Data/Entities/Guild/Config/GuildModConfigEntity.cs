@@ -102,6 +102,7 @@ public class GuildModConfigEntity
     /// <summary>
     ///     Whether to use increasingly severe infractions when a user is automatically warned.
     /// </summary>
+    [Column("progressive_infractions")]
     public bool ProgressiveStriking { get; set; }
 
     /// <summary>

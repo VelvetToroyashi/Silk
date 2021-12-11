@@ -6,6 +6,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 ///     Represents the configureation for specific logging. e.g: Message edits, Message deletes, etc.
 /// </summary>
+[Table("logging_channels")]
 public class LoggingChannelEntity
 {
 	/// <summary>

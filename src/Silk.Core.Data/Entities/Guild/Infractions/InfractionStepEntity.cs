@@ -7,6 +7,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 /// Represents an infraction action to take depending on how many infractions a user has.
 /// </summary>
+[Table("infraction_steps")]
 public class InfractionStepEntity
 {
     /// <summary>

@@ -4,6 +4,7 @@ using Remora.Rest.Core;
 
 namespace Silk.Core.Data.Entities;
 
+[Table("infractions")]
 public class InfractionEntity
 {
     public int Id { get; set; } //Requisite Id for DB purposes

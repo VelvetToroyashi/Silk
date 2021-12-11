@@ -8,6 +8,7 @@ namespace Silk.Core.Data.Entities;
 /// <summary>
 /// A Tag that can be used to display pre-defined text.
 /// </summary>
+[Table("guild_tags")]
 public class TagEntity
 {
     /// <summary>

@@ -47,7 +47,7 @@ public class GuildConfigEntity
     ///     The text that will be used to greet new members.
     /// </summary>
     [Obsolete]
-    public string GreetingText { get; set; }
+    public string GreetingText { get; set; } = "";
 
     /// <summary>
     /// Greetings configured for this guild.
