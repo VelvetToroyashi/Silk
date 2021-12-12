@@ -25,7 +25,6 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Core.Utilities.HelpFormatter;
-using Silk.Extensions;
 using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 
 namespace Silk.Core.Commands.Bot;
@@ -55,7 +54,9 @@ public class EvalCommand : CommandGroup
         _events = events;
     }
 
+    [RequireOwner]
     [Command("eval")]
+    [Description("Evaluates code.")]
     public async Task<Result> EvalCS([Greedy] string code)
     {
         var cs = Regex.Replace(code, @"\`\`\`(?:cs(?:harp)?)?\n?(?<code>[\s\S]+)\n?\`\`\`", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript);
@@ -171,7 +172,7 @@ public class EvalCommand : CommandGroup
                            $"\tEntity: {GetHumanFriendlyResultString(entity)}\n" + // Just in case the entity itself is a result or a collection
                            $"\tError: {error}";
         }
-        else if (type.IsAssignableTo(typeof(IEnumerable)))
+        else if (type.IsAssignableTo(typeof(IList)))
         {
             returnResult = "{ " + typeof(CollectionExtensions)
                                  .GetMethod("Join", BindingFlags.Static | BindingFlags.Public)!

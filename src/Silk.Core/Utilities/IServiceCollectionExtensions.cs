@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
@@ -12,6 +13,7 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
+using Remora.Extensions.Options.Immutable;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
@@ -73,7 +75,8 @@ public static class IServiceCollectionExtensions
             {
                 cs.SetAbsoluteExpiration<IChannel>(null)
                   .SetAbsoluteExpiration<IMessage>(null);
-            });
+            })
+           .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true });
 
         return services;
     }
