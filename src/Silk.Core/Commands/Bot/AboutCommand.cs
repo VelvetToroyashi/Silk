@@ -1,50 +1,97 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
+using Remora.Commands.Attributes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Gateway;
+using Remora.Discord.Rest.Extensions;
+using Remora.Rest;
+using Remora.Results;
 using Silk.Core.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Shared.Constants;
+using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
 namespace Silk.Core.Commands.Bot;
 
 [HelpCategory(Categories.Bot)]
-public class AboutCommand : BaseCommandModule
+public class AboutCommand : CommandGroup
 {
-    private readonly DiscordClient _client;
-    public AboutCommand(DiscordClient client) => _client = client;
-
+    private readonly IDiscordRestChannelAPI _channelApi;
+    private readonly IDiscordRestOAuth2API  _oauthApi;
+    private readonly ICommandContext        _context;
+    private readonly IRestHttpClient        _restClient;
+    
+    public AboutCommand(IDiscordRestChannelAPI channelApi, IDiscordRestOAuth2API oauthApi, ICommandContext context, IRestHttpClient restClient)
+    {
+        _channelApi = channelApi;
+        _oauthApi   = oauthApi;
+        _context    = context;
+        _restClient = restClient;
+    }
+    
     [Command("about")]
     [Description("Shows relevant information, data and links about Silk!")]
-    public async Task SendBotInfo(CommandContext ctx)
+    public async Task<Result> SendBotInfo()
     {
-        DiscordApplication? app = await ctx.Client.GetCurrentApplicationAsync();
-        Version?            dsp = typeof(DiscordClient).Assembly.GetName().Version;
+        var appResult = await _oauthApi.GetCurrentBotApplicationInformationAsync();
+        
+        if (!appResult.IsDefined(out var app))
+            return Result.FromError(appResult.Error!);
 
-        int guilds = _client.Guilds.Count;
+        Version? remora = typeof(DiscordGatewayClient).Assembly.GetName().Version;
 
-        DiscordEmbedBuilder? embed = new DiscordEmbedBuilder()
-                                    .WithTitle("About Silk!")
-                                    .WithColor(DiscordColor.Gold)
-                                    .AddField("Total guilds", $"{guilds}", true)
-                                    .AddField("Owner(s)", app.Owners.Select(x => x.Username).Join(", "), true)
-                                    .AddField("Bot version", StringConstants.Version, true)
-                                    .AddField("Library", $"DSharpPlus {dsp!.Major}.{dsp.Minor}-{dsp.Revision}", true);
+        var guilds = await _restClient
+           .GetAsync<IReadOnlyList<IPartialGuild>>(
+                                                   "users/@me/guilds",
+                                                   b =>
+                                                   {
+                                                       b.WithRateLimitContext();
+                                                       b.AddQueryParameter("with_counts", "true");
+                                                   });
+        
+        if (!guilds.IsDefined(out var guildsList))
+            return Result.FromError(guilds.Error!);
 
-        string invite = $"https://discord.com/api/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=972418070&scope=bot%20applications.commands";
-        DiscordMessageBuilder? builder = new DiscordMessageBuilder()
-                                        .WithEmbed(embed)
-                                        .AddComponents(
-                                                       new DiscordLinkButtonComponent(invite, "Invite Me!"),
-                                                       new DiscordLinkButtonComponent("https://github.com/VelvetThePanda/Silk", "Source Code!"),
-                                                       new DiscordLinkButtonComponent("https://discord.gg/HZfZb95", "Support Server!"))
-                                        .AddComponents(
-                                                       new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/projects/dc41e8bf-975b-4108-ba22-25a04cd2f120", "Issue Tracker"),
-                                                       new DiscordLinkButtonComponent("https://youtrack.velvetthepanda.dev/issue/SBP-4", "Feature Requests"),
-                                                       new DiscordLinkButtonComponent("https://ko-fi.com/velvetthepanda", "Ko-Fi! (Donations)"));
-        await ctx.RespondAsync(builder);
+        IEmbed? embed = new Embed()
+        {
+            Title  = "About Silk!",
+            Colour = Color.Gold,
+            Fields = new IEmbedField[]
+            {
+                new EmbedField("Guild Count:", guildsList.Count.ToString(), true),
+                new EmbedField("Owners:", app.Owner?.Username.Value  ?? app.Team?.Members.Select(t => t.User.Username.Value).Join(", ") ?? "Unknown", true),
+                new EmbedField("Remora Version:", remora?.ToString() ?? "Unknown", true),
+                new EmbedField("Silk! Core:", StringConstants.Version, true)
+            }
+        };
+        
+        var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=972418070&scope=bot%20applications.commands";
+
+
+        var res = await _channelApi
+           .CreateMessageAsync(
+                               _context.ChannelID,
+                               embeds: new[] { embed },
+                               components: new IMessageComponent[]
+                               {
+                                   new ActionRowComponent(new IMessageComponent[]
+                                   {
+                                       new ButtonComponent(ButtonComponentStyle.Link, "Invite", URL: invite),
+                                       new ButtonComponent(ButtonComponentStyle.Link, "Source", URL: "https://velvetthepanda.dev/vtd/Silk"),
+                                       new ButtonComponent(ButtonComponentStyle.Link, "Support", URL: "https://discord.gg/HZfZb95"),
+                                       new ButtonComponent(ButtonComponentStyle.Link, "Donate", URL: "https://paypal.me/MarshmallowSerg/5")
+                                   })
+                               });
+        
+       return res.IsSuccess 
+           ? Result.FromSuccess() 
+           : Result.FromError(res.Error!);
     }
 }

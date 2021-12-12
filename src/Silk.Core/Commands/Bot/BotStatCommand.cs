@@ -1,15 +1,25 @@
 #pragma warning disable CA1822 // Mark members as static
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Humanizer;
 using Humanizer.Localisation;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Gateway;
+using Remora.Discord.Rest.Extensions;
+using Remora.Rest;
+using Remora.Results;
 using Silk.Core.Utilities.HelpFormatter;
 
 #pragma warning disable 1591
@@ -17,30 +27,72 @@ using Silk.Core.Utilities.HelpFormatter;
 namespace Silk.Core.Commands.Bot;
 
 [HelpCategory(Categories.Bot)]
-public class BotStatCommand : BaseCommandModule
+public class BotStatCommand : CommandGroup
 {
-    [Command("botstats")]
-    [Aliases("botinfo")]
+    private readonly ICommandContext        _context;
+    private readonly IRestHttpClient        _restClient;
+    private readonly IDiscordRestChannelAPI _channelApi;
+
+    private readonly DiscordGatewayClient _gateway;
+    
+    public BotStatCommand(
+        ICommandContext context,
+        IRestHttpClient restClient,
+        IDiscordRestChannelAPI channelApi,
+        DiscordGatewayClient gateway)
+    {
+        _context      = context;
+        _restClient   = restClient;
+        _channelApi   = channelApi;
+        _gateway = gateway;
+    }
+
+    [Command("botstats", "bs", "botinfo")]
     [Description("Get the current stats for Silk")]
-    public async Task BotStat(CommandContext ctx)
+    public async Task<Result> GetBotStatsAsync()
     {
         using var process     = Process.GetCurrentProcess();
-        int       guildCount  = ctx.Client.Guilds.Count;
-        int       memberCount = ctx.Client.Guilds.Values.SelectMany(g => g.Members.Keys).Count();
+        
+        var guildsResult = await _restClient
+           .GetAsync<IReadOnlyList<IPartialGuild>>("users/@me/guilds",
+                                                   b => b
+                                                       .AddQueryParameter("with_counts", "true")
+                                                       .WithRateLimitContext());
+        
+        if (!guildsResult.IsDefined(out var guilds))
+            return Result.FromError(guildsResult.Error!);
+        
+        int guildCount  = guilds.Count;
+        int memberCount = guilds.Aggregate(0, (current, guild) => current + (guild.ApproximateMemberCount.IsDefined(out var count) ? count : 0));
+        
         GC.Collect(2, GCCollectionMode.Forced, true, true);
         GC.WaitForPendingFinalizers();
         GC.Collect(2, GCCollectionMode.Forced, true, true);
-        DiscordEmbedBuilder embed = new();
-        embed
-           .WithTitle("Stats for Silk!")
-           .WithColor(DiscordColor.Gold)
-           .AddField("Latency", $"{ctx.Client.Ping} ms", true)
-           .AddField("Total Guilds", $"{guildCount}", true)
-           .AddField("Total Members", $"{memberCount}", true)
-           .AddField("Shards", $"{ctx.Client.ShardCount}", true)
-           .AddField("Memory", $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB", true)
-           .AddField("Threads", $"{ThreadPool.ThreadCount}", true)
-           .AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
-        await ctx.RespondAsync(embed);
+
+        var heapMemory = $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB (heap)\n";
+        
+        var processMemory = $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB (process)";
+        
+        
+        var embed = new Embed()
+        {
+            Title = "Shard stats:",
+            Colour = Color.Gold,
+            Fields = new EmbedField[]
+            {
+                new("Latency:", $"{_gateway.Latency.TotalMilliseconds:n0}ms", true),
+                new("Guilds:", guildCount.ToString(), true),
+                new("Members:", memberCount.ToString(), true),
+                new("Memory:", heapMemory + processMemory, true),
+                new("Threads:", $"{ThreadPool.ThreadCount}", true),
+                new("Uptime:", $"{DateTimeOffset.UtcNow.Subtract(process.StartTime).Humanize(2, minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day)}", true)
+            }
+        };
+        
+        var res = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        
+        return res.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(res.Error);
     }
 }

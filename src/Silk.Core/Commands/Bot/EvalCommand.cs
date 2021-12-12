@@ -5,142 +5,203 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Rest.Core;
+using Remora.Results;
 using Silk.Core.Utilities.HelpFormatter;
+using Silk.Extensions;
+using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 
 namespace Silk.Core.Commands.Bot;
 
 // THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
 [HelpCategory(Categories.Bot)]
-public class EvalCommand : BaseCommandModule
+public class EvalCommand : CommandGroup
 {
-    [Command("eval")]
-    [Description("Evaluates C# code.")]
-    [Hidden]
-    [RequireOwner]
-    [Priority(1)]
-    public async Task EvalCS(CommandContext ctx)
-    {
-        if (ctx.Message.ReferencedMessage is null && ctx.Message.Content.Length > ctx.Prefix.Length + 4)
-            await EvalCS(ctx, ctx.RawArgumentString);
-        else
-        {
-            string? code = ctx.Message.ReferencedMessage?.Content ?? ctx.Message.Content;
-            if (code?.Contains(ctx.Prefix) ?? false)
-            {
-                int index = code.IndexOf(' ');
-                code = code[++index..];
-            }
+    private readonly ICommandContext _context;
+    
+    private readonly IDiscordRestUserAPI                _users;
+    private readonly IDiscordRestGuildAPI               _guilds;
+    private readonly IDiscordRestChannelAPI             _channels;
+    private readonly IDiscordRestGuildScheduledEventAPI _events;
 
-            await EvalCS(ctx, code);
-        }
+    private static readonly IEmbed _evaluatingEmbed = new Embed
+    {
+        Title  = "Evaluating. Please wait.",
+        Colour = Color.HotPink
+    };
+    public EvalCommand(ICommandContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events)
+    {
+        _context     = context;
+        _channels    = channels;
+        _users       = users;
+        _guilds      = guilds;
+        _events = events;
     }
 
-
     [Command("eval")]
-    [Priority(0)]
-    public async Task EvalCS(CommandContext ctx, [RemainingText] string code)
+    public async Task<Result> EvalCS([Greedy] string code)
     {
-        DiscordMessage msg;
-
-        int cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
-        cs1 = code.IndexOf('\n', cs1) + 1;
-        int cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
-
-        if (cs1 is -1 || cs2 is -1)
-        {
-            cs1 = 0;
-            cs2 = code.Length;
-        }
-
-        string cs = code.Substring(cs1, cs2 - cs1);
-
-        msg = await ctx.RespondAsync("", new DiscordEmbedBuilder()
-                                        .WithColor(new("#FF007F"))
-                                        .WithDescription("Evaluating...")
-                                        .Build())
-                       .ConfigureAwait(false);
+        var cs = Regex.Replace(code, @"\`\`\`(?:cs(?:harp)?)?\n?(?<code>[\s\S]+)\n?\`\`\`", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript);
+        
+        var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {_evaluatingEmbed});
+        
+        if (!messageResult.IsDefined(out IMessage? msg))
+            return Result.FromError(messageResult.Error!);
 
         try
         {
-            var globals = new TestVariables(ctx.Message, ctx.Client, ctx);
+            var context = (MessageContext)_context;
+            
+            var globals = new EvalVariables
+            {
+                UserID         = context.User.ID,
+                GuildID        = context.GuildID.IsDefined(out var guildID) ? guildID : default,
+                ChannelID      = context.ChannelID,
+                MessageID      = context.MessageID,
+                ReplyMessageID = context.Message.ReferencedMessage.IsDefined(out var reply) ? reply.ID : default,
+                
+                Users           = _users,
+                Guilds          = _guilds,
+                Channels        = _channels,
+                ScheduledEvents = _events,
+            };
 
             var sopts = ScriptOptions.Default;
-            sopts = sopts.WithImports("System", "System.Collections.Generic", "System.Linq", "System.Text",
-                                      "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.Entities", "Silk.Core", "Silk.Extensions",
-                                      "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity",
+            sopts = sopts.WithImports("System",
+                                      "System.Collections.Generic",
+                                      "System.Linq",
+                                      "System.Text",
+                                      "System.Threading.Tasks",
+                                      "Silk.Core",
+                                      "Silk.Extensions",
                                       "Microsoft.Extensions.Logging");
-            IEnumerable<Assembly> asm = AppDomain.CurrentDomain.GetAssemblies()
-                                                 .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location));
-
-
+            IEnumerable<Assembly> asm = AppDomain.CurrentDomain
+                                                 .GetAssemblies()
+                                                 .Where(xa => 
+                                                            !xa.IsDynamic &&
+                                                            !string.IsNullOrWhiteSpace(xa.Location));
+            
             sopts = sopts.WithReferences(asm);
 
-            Script<object> script = CSharpScript.Create(cs, sopts, typeof(TestVariables));
+            Script<object> script = CSharpScript.Create(cs, sopts, typeof(EvalVariables));
             script.Compile();
 
-            ScriptState<object> result = await script.RunAsync(globals).ConfigureAwait(false);
-            if (result?.ReturnValue is (DiscordEmbedBuilder or DiscordEmbed))
-                await msg.ModifyAsync(m => m.WithEmbed(result.ReturnValue as DiscordEmbedBuilder ?? result.ReturnValue as DiscordEmbed));
-            else if (result?.ReturnValue is not null && !string.IsNullOrWhiteSpace(result.ReturnValue.ToString()))
-                await msg.ModifyAsync(new DiscordEmbedBuilder
-                          {
-                              Title = "Evaluation Result", Description = result.ReturnValue.ToString(),
-                              Color = new DiscordColor("#007FFF")
-                          }.Build())
-                         .ConfigureAwait(false);
-            else
-                await msg.ModifyAsync(new DiscordEmbedBuilder
-                          {
-                              Title = "Evaluation Successful", Description = "No result was returned.",
-                              Color = new DiscordColor("#007FFF")
-                          }.Build())
-                         .ConfigureAwait(false);
+            ScriptState<object> evalResult = await script.RunAsync(globals);
+
+            if (string.IsNullOrEmpty(evalResult.ReturnValue?.ToString()))
+            {
+                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evlaution returned null or void.");
+                return Result.FromSuccess();
+            }
+            
+            if (evalResult.ReturnValue is IEmbed embed)
+            {
+                var edit = await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { embed });
+
+                if (!edit.IsSuccess)
+                {
+                    await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "Failed to edit message.\n" + edit.Error.Message);
+                }
+            }
+
+            var returnResult = GetHumanFriendlyResultString(evalResult.ReturnValue);
+            
+            var returnEmbed = new Embed()
+            {
+                Title = "Evaluation Result",
+                Description = returnResult ?? "Something went horribly wrong help",
+                Colour = Color.MidnightBlue
+            };
+            
+            await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { returnEmbed });
         }
         catch (Exception ex)
         {
-            await msg.ModifyAsync(new DiscordEmbedBuilder
-                      {
-                          Title       = "Evaluation Failure",
-                          Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')[0]}",
-                          Color       = new DiscordColor("#FF0000")
-                      }.Build())
-                     .ConfigureAwait(false);
+            var exEmbed = new Embed()
+            {
+                Title       = "Eval Error!",
+                Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')[0]}",
+                Colour      = Color.Firebrick
+            };
+            
+            await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { exEmbed });
         }
-
+        
+        return Result.FromSuccess();
     }
 
-    public record TestVariables
+    private string GetHumanFriendlyResultString(object result)
     {
-        public TestVariables(DiscordMessage msg, DiscordClient client, CommandContext ctx)
+        var type = result.GetType();
+
+        string? returnResult = result.ToString();
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() is { } gt && (gt.IsAssignableTo(typeof(IEnumerable<>)) || gt.IsAssignableTo(typeof(IList))))
         {
-            Client  = client;
-            Context = ctx;
-            Message = msg;
-            Channel = msg.Channel;
-            Guild   = Channel.Guild;
-            User    = Message.Author;
-            Reply   = Message.ReferencedMessage;
-
-            if (Guild != null) Member = Guild.GetMemberAsync(User.Id).ConfigureAwait(false).GetAwaiter().GetResult();
+            returnResult = "{ " + typeof(CollectionExtensions)
+                          .GetMethod("Join", BindingFlags.Static | BindingFlags.Public)!
+                          .MakeGenericMethod(type.GetGenericArguments()[0])
+                          .Invoke(null, new [] { result, ", " }) + " }";
         }
-        public DiscordMessage Message { get; }
-        public DiscordMessage Reply   { get; }
-        public DiscordChannel Channel { get; }
-        public DiscordGuild   Guild   { get; }
-        public DiscordUser    User    { get; }
-        public DiscordMember  Member  { get; }
-        public CommandContext Context { get; }
+        else if (type.IsGenericType && type.GetGenericTypeDefinition().IsAssignableTo(typeof(Result<>)))
+        {
+            var success = type.GetProperty(nameof(Result.IsSuccess), BindingFlags.Public      | BindingFlags.Instance)!.GetValue(result)!;
+            var error   = type.GetProperty(nameof(Result.Error), BindingFlags.Public          | BindingFlags.Instance)!.GetValue(result)!;
+            var entity  = type.GetProperty(nameof(Result<object>.Entity), BindingFlags.Public | BindingFlags.Instance)!.GetValue(result)!;
+            
+            returnResult = $"Result<{entity.GetType().Name}>:\n" +
+                           $"\tIsSuccess: {success}\n" +
+                           $"\tEntity: {GetHumanFriendlyResultString(entity)}\n" + // Just in case the entity itself is a result or a collection
+                           $"\tError: {error}";
+        }
+        else if (type.IsAssignableTo(typeof(IEnumerable)))
+        {
+            returnResult = "{ " + typeof(CollectionExtensions)
+                                 .GetMethod("Join", BindingFlags.Static | BindingFlags.Public)!
+                                 .MakeGenericMethod(type.GetElementType()!)
+                                 .Invoke(null, new [] {result, ", " })! + " }";
+        }
+        else if (type.IsAssignableTo(typeof(IResult)))
+        {
+            var res = (IResult)result;
+            
+            returnResult = $"Result ({type.Name}):\n" +
+                           $"\tIsSuccess: {res.IsSuccess}\n" +
+                           $"\tError: {res.Error}";
+        }
+        
+        return returnResult;
+    }
 
-        public DiscordClient Client { get; }
+    public record EvalVariables
+    {
+        public Snowflake UserID         { get; init; }
+        public Snowflake GuildID        { get; init; }
+        public Snowflake ChannelID      { get; init; }
+        public Snowflake MessageID      { get; init; }
+        public Snowflake ReplyMessageID { get; init; }
+        
+        
+        public IDiscordRestUserAPI                Users           { get; init; }
+        public IDiscordRestGuildAPI               Guilds          { get; init; }
+        public IDiscordRestChannelAPI             Channels        { get; init; }
+        public IDiscordRestGuildScheduledEventAPI ScheduledEvents { get; init; }
     }
 }
