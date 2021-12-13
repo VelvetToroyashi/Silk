@@ -32,16 +32,16 @@ public class UserHistoryEntity
     /// </summary>
     [Column("initial_join_date")]
     public DateTimeOffset JoinDate { get; set; }
-    
+
     /// <summary>
     ///     Times this user joined.
     /// </summary>
     [Column("join_dates")]
-    public List<DateTimeOffset> JoinDates { get; set; }
+    public List<DateTimeOffset> JoinDates { get; set; } = new();
 
     /// <summary>
     ///     Times this user left.
     /// </summary>
     [Column("leave_dates")]
-    public List<DateTimeOffset> LeaveDates { get; set; }
+    public List<DateTimeOffset> LeaveDates { get; set; } = new();
 }
