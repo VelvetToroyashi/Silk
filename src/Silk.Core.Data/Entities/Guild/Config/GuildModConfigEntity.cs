@@ -156,7 +156,7 @@ public class GuildModConfigEntity
     /// <summary>
     ///     Gets various logging-related settings.
     /// </summary>
-    public GuildLoggingConfigEntity LoggingConfig { get; set; } = new();
+    public GuildLoggingConfigEntity LoggingConfig { get; set; }
 
     /// <summary>
     ///     A list of steps depending on the number of infractions a <see cref="UserEntity" /> has.
