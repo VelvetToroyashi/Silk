@@ -23,8 +23,7 @@ public class GetOrCreateGuildModConfigHandler : IRequestHandler<GetOrCreateGuild
 
     public async Task<GuildModConfigEntity> Handle(GetOrCreateGuildModConfigRequest configRequest, CancellationToken cancellationToken)
     {
-        var                   guildModConfigRequest = new GetGuildModConfigRequest(configRequest.GuildID);
-        GuildModConfigEntity? guildModConfig        = await _mediator.Send(guildModConfigRequest, cancellationToken);
+        GuildModConfigEntity? guildModConfig = await _mediator.Send(new GetGuildModConfigRequest(configRequest.GuildID), cancellationToken);
 
         if (guildModConfig is not null)
             return guildModConfig;

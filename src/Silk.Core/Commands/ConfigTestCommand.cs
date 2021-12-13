@@ -115,7 +115,7 @@ public class ConfigTestCommand : CommandGroup
                 return new()
                 {
                     ChannelID = channel.ID,
-                    GuildId   = channel.GuildID.Value
+                    GuildID   = channel.GuildID.Value
                 };
             }
             Result<IWebhook> whResult = await _webhookApi.CreateWebhookAsync(channel.ID, WebhookLoggingName, default);
@@ -125,7 +125,7 @@ public class ConfigTestCommand : CommandGroup
                 return new()
                 {
                     ChannelID = channel.ID,
-                    GuildId   = channel.GuildID.Value
+                    GuildID   = channel.GuildID.Value
                 };
             }
             IWebhook webhook = whResult.Entity;
@@ -134,7 +134,7 @@ public class ConfigTestCommand : CommandGroup
                 WebhookID    = webhook.ID,
                 WebhookToken = webhook.Token.Value,
                 ChannelID    = channel.ID,
-                GuildId      = channel.GuildID.Value
+                GuildID      = channel.GuildID.Value
             };
         }
     }
