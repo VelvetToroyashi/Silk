@@ -20,6 +20,11 @@ public sealed class GetGuildModConfigHandler : IRequestHandler<GetGuildModConfig
                   .Include(c => c.AllowedInvites)
                   .Include(c => c.InfractionSteps)
                   .Include(c => c.Exemptions)
+                  .Include(c => c.LoggingConfig)
+                  .Include(c => c.LoggingConfig.MemberJoins)
+                  .Include(c => c.LoggingConfig.MemberLeaves)
+                  .Include(c => c.LoggingConfig.MessageDeletes)
+                  .Include(c => c.LoggingConfig.MessageEdits)
                   .FirstOrDefaultAsync(c => c.GuildID == request.GuildID, cancellationToken)!;
     }
 }

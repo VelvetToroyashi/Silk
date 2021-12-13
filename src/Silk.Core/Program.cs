@@ -16,6 +16,7 @@ using Serilog;
 using Silk.Core.Commands.Conditions.cs;
 using Silk.Core.Data;
 using Silk.Core.Responders;
+using Silk.Core.Services.Bot;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Services.Server;
@@ -103,6 +104,9 @@ public class Program
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
+
+                services.AddSingleton<ChannelLoggingService>();
+                services.AddSingleton<MemberLoggerService>();
                 services.AddSingleton<GuildConfigCacheService>();
                 services.AddSingleton<GuildCacherService>();
 
