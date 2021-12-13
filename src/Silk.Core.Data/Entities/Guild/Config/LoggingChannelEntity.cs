@@ -18,7 +18,7 @@ public class LoggingChannelEntity
 	///     The guild this configuration belongs to.
 	/// </summary>
 	[Column("guild_id")]
-    public Snowflake GuildId { get; set; }
+    public Snowflake GuildID { get; set; }
 
 	/// <summary>
 	///     The ID of the webhook to use for logging, if configured.
