@@ -28,6 +28,7 @@ using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
 
 namespace Silk.Core.Services.Server;
@@ -50,9 +51,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IDiscordRestWebhookAPI _webhooks;
 
-    private readonly ConcurrentBag<InfractionEntity> _queue = new();
+    private readonly List<InfractionEntity> _queue = new();
     public InfractionService
-        (
+    (
             ILogger<InfractionService> logger,
             IMediator                  mediator,
             GuildConfigCacheService    config,
@@ -60,7 +61,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             IDiscordRestGuildAPI       guilds,
             IDiscordRestChannelAPI     channels,
             IDiscordRestWebhookAPI     webhooks
-        )
+    )
     {
         _logger   = logger;
         _mediator = mediator;
@@ -91,10 +92,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _queue.Clear();
         _logger.LogInformation("Infraction service stopped.");
     }
-
-    /// <inheritdoc />
-    public async Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") 
-        => throw new NotImplementedException();
 
     /// <inheritdoc />
     public async Task<Result> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
@@ -230,9 +227,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         bool Predicate(InfractionEntity inf) 
             => inf.Type is InfractionType.Mute 
-                                  or InfractionType.AutoModMute && 
+                        or InfractionType.AutoModMute && 
                inf.GuildID == guildID && 
-               inf.TargetID == targetID;
+               inf.TargetID == targetID &&
+               !inf.Processed;
 
         var inMemory = _queue.Any(Predicate);
 
@@ -269,12 +267,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
         
-        if (config.MuteRoleID.Value is 0)
+        if (config!.MuteRoleID.Value is 0)
         {
-            return Result.FromSuccess(); // TODO: Generate mute role? Probs.
+            var muteResult = await TryCreateMuteRoleAsync(guildID);
+            
+            if (!muteResult.IsSuccess)
+                return Result.FromError(muteResult.Error);
+            
+            config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
         }
 
-        var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config.MuteRoleID, reason);
+        var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
         
         if (!roleResult.IsSuccess)
             return GetActionFailedErrorMessage(roleResult, "mute");
@@ -290,12 +293,13 @@ public sealed class InfractionService : IHostedService, IInfractionService
                   targetID,
                   enforcerID, 
                   reason,
-                  InfractionType.Mute,
+                  enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute,
                   expirationRelativeToNow.HasValue 
                       ? DateTimeOffset.UtcNow + expirationRelativeToNow
                       : null)
             );
             
+        _queue.Add(infraction);
         var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
         return returnResult.IsSuccess
@@ -305,8 +309,48 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.") 
-        => throw new NotImplementedException();
+    public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    {
+        IUser target;
+        IUser enforcer;
+        
+        var canUmute = await EnsureHasPermissionsAsync(guildID, enforcerID, DiscordPermission.ManageRoles);
+        
+        if (!canUmute.IsSuccess)
+            return Result.FromError(canUmute.Error);
+        
+        if (!await IsMutedAsync(guildID, targetID))
+            return Result.FromSuccess();
+        
+        var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+        
+        if (!hierarchyResult.IsSuccess)
+            return Result.FromError(hierarchyResult.Error);
+        
+        (target, enforcer) = hierarchyResult.Entity;
+        
+        var mute = _queue.FirstOrDefault(inf => inf.GuildID == guildID && inf.TargetID == targetID && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
+
+        if (mute is null)
+        {
+            _logger.LogError("Attempted to unmute {Target} but the mute was not present in memory.", targetID);
+            return Result.FromError(new InvalidOperationError("Catostrophic error. Mute was not present in memory."));
+        }
+        
+        _queue.Remove(mute);
+
+        await _mediator.Send(new UpdateInfractionRequest(mute.Id, Processed: true));
+        
+        var config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
+
+        await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+        
+        var infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Unmute));
+
+        await LogInfractionAsync(infraction, target, enforcer);
+        
+        return Result.FromSuccess();
+    }
 
     /// <inheritdoc />
     public async Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) 
@@ -340,6 +384,47 @@ public sealed class InfractionService : IHostedService, IInfractionService
             _queue.Add(infraction);
     }
 
+    /// <summary>
+    /// Attempts to create a mute role for a guild.
+    /// </summary>
+    /// <param name="guildID">The ID of the guild to generate a mute role for.</param>
+    private async Task<Result> TryCreateMuteRoleAsync(Snowflake guildID)
+    {
+        var selfResult = await _guilds.GetCurrentGuildMemberAsync(_users, guildID);
+        
+        if (!selfResult.IsSuccess)
+            return Result.FromError(selfResult.Error);
+        
+        var guildRolesResult = await _guilds.GetGuildRolesAsync(guildID);
+        
+        if (!guildRolesResult.IsSuccess)
+            return Result.FromError(guildRolesResult.Error);
+
+        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID));
+        
+        var roleResult = await _guilds.CreateGuildRoleAsync(
+                                                            guildID, 
+                                                            "Muted",
+                                                            DiscordPermissionSet.Empty,
+                                                            isMentionable: false,
+                                                            reason: "Mute role created by AutoMod.");
+        
+        if (!roleResult.IsSuccess)
+            return Result.FromError(new PermissionError("Unable to create mute role."));
+
+        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botRoles.OrderByDescending(r => r.Position).Skip(1).First().Position)) });
+
+        if (!modResult.IsSuccess)
+            return Result.FromError(new PermissionError("Unable to modify mute role position."));
+
+        await _mediator.Send(new UpdateGuildModConfigRequest(guildID)
+        {
+            MuteRoleId = roleResult.Entity.ID
+        });
+
+        _config.PurgeCache(guildID);
+        return Result.FromSuccess();
+    }
 
     /// <summary>
     ///     Gets a user-friendly error message for REST errors.

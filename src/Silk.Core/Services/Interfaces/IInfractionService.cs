@@ -13,15 +13,6 @@ namespace Silk.Core.Services.Interfaces;
 public interface IInfractionService
 {
 	/// <summary>
-	///     Automatically infracts a user based on the configured infractions.
-	/// </summary>
-	/// <param name="guildID">The ID of the guild the infraction occurred on.</param>
-	/// <param name="targetID">The ID of the target to infract.</param>
-	/// <param name="enforcerID">The ID of the enforcer that invoked this.</param>
-	/// <param name="reason">The reason the infraction is being given.</param>
-	public Task<Result> AutoInfractAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
-
-	/// <summary>
 	///     Updates an existing infraction with a new reason or expiration.
 	/// </summary>
 	/// <param name="infraction">The infraction to update.</param>
