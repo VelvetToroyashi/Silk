@@ -36,6 +36,8 @@ In most instances, this information is easily and user-accessible, and is remove
 
 Any information that is overridden also follows this rule, and the previous content is inaccessible from that point on.
 
+Discord Snowflakes are also used for diagnostic purposes, and help link issues with specific users or guilds.
+
 ## 3. How do we collect this information?
 
 Your discord ID is provided by Discord's [API](https://discord.dev).
@@ -53,6 +55,12 @@ Alternatively some services provided by Silk! accessible to non-moderators may s
 Information stored by Silk! is only used for the purposes stated by the related service it is used for. This information is never shared with third parties, and only leaves the confines of the service when it is required by a first-party entity.
 
 Some of Silk!'s services use persistently stored data to be sent back to the user at a later time.
+
+Furthermore, storing Discord identifiers (IDs, Snowflakes) allows for robust error analysis that would otherwise be inacessible or otherwise infeasible.
+
+By storing this information, it enables us to not only improve upon the product being offered to the end user posthaste, but contact users and/or server owners if necessary.
+
+It also allows users to contact us in regards to issues that may occur with Silk!, so that they may be linked with a corresponding log or metric recorded by Silk for these diagnostic purposes.
 
 ## 5. How to be informed when this policy updates:
 
