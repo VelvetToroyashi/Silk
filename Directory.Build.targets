@@ -4,7 +4,7 @@
 
         <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01053"/>
-        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034"/>
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
