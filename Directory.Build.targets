@@ -3,7 +3,7 @@
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
 
         <PackageReference Update="DSharpPlus" Version="4.2.0-nightly-01038"/>
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01038"/>
+        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01034"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01038"/>
         <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01038"/>
@@ -52,7 +52,7 @@
         <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 
-        <PackageReference Update="Swashbuckle.AspNetCore" Version="5.6.3" />
+        <PackageReference Update="Swashbuckle.AspNetCore" Version="6.2.3" />
         <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.14.0" />
         <PackageReference Update="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
         <PackageReference Update="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.11" />
