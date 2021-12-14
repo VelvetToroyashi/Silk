@@ -14,6 +14,7 @@ public sealed record UpdateInfractionRequest
         Optional<DateTimeOffset?> Expiration      = default,
         Optional<string>          Reason          = default,
         Optional<bool>            AppliesToTarget = default,
+        Optional<bool>            Processed         = default,
         Optional<bool>            Esclated        = default
     ) : IRequest<InfractionEntity>;
 
@@ -35,6 +36,9 @@ public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRe
 
         if (request.AppliesToTarget.HasValue)
             infraction.AppliesToTarget = !request.AppliesToTarget.Value;
+        
+        if (request.Processed.HasValue)
+            infraction.Processed = request.Processed.Value;
 
         if (request.Esclated.HasValue)
             infraction.Escalated = request.Esclated.Value;
