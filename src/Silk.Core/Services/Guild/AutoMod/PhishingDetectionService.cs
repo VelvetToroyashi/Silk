@@ -126,7 +126,7 @@ public class PhishingDetectionService
 
         IUser self = selfResult.Entity;
 
-        Result infractionResult = step.Type switch
+        var infractionResult = step.Type switch
         {
             InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, Phishing),
             InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, Phishing),
@@ -135,7 +135,9 @@ public class PhishingDetectionService
             _                     => throw new InvalidOperationException("Invalid infraction type.")
         };
 
-        return infractionResult;
+        return infractionResult.IsSuccess 
+            ? Result.FromSuccess() 
+            : Result.FromError(infractionResult.Error);
     }
 
 }

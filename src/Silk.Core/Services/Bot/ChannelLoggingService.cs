@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -39,12 +40,12 @@ public class ChannelLoggingService
     /// <param name="useWebhook">Whether to log the message via a webhook.</param>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, OneOf<string, IEmbed> content)
+    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString, IEmbed? embedContent)
     {
         if (useWebhook)
-            return LogWebhookAsync(loggingData, content);
+            return LogWebhookAsync(loggingData, contentString, embedContent);
         else 
-            return LogChannelAsync(loggingData, content);
+            return LogChannelAsync(loggingData, contentString, embedContent);
     }
     
     /// <summary>
@@ -52,7 +53,7 @@ public class ChannelLoggingService
     /// </summary>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, OneOf<string, IEmbed> content)
+    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed? embedContent)
     {
         var channel = await _channels.GetChannelAsync(loggingData.ChannelID);
         
@@ -65,13 +66,10 @@ public class ChannelLoggingService
         var result = await _channels
            .CreateMessageAsync(
                                loggingData.ChannelID, 
-                               content.IsT0 
-                                   ? content.AsT0 
-                                   : default(Optional<string>), 
-                               embeds: content.IsT1 
-                                   ? new[] {content.AsT1 }
-                                   : default(Optional<IReadOnlyList<IEmbed>>)
-                               );
+                               stringContent, 
+                               embeds: embedContent is null 
+                                   ? default(Optional<IReadOnlyList<IEmbed>>) : new[] { embedContent }
+                              );
 
 
         if (!result.IsSuccess)
@@ -88,14 +86,12 @@ public class ChannelLoggingService
     /// </summary>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, OneOf<string, IEmbed> content)
+    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed? embedContent)
     {
         var result = await _webhooks.ExecuteWebhookAsync(loggingData.WebhookID, loggingData.WebhookToken, true,
-                                                         content.IsT0 
-                                                             ? content.AsT0 
-                                                             : default(Optional<string>), 
-                                                         embeds: content.IsT1 
-                                                             ? new[] {content.AsT1 }
+                                                         stringContent ?? default(Optional<string>), 
+                                                         embeds: embedContent is not null
+                                                             ? new[] { embedContent }
                                                              : default(Optional<IReadOnlyList<IEmbed>>),
                                                          username: "Silk! Logging");
 

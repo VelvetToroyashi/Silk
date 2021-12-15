@@ -88,6 +88,6 @@ public class MemberLoggerService
             Fields      = userFields.ToArray()
         };
         
-        return await _channelLogger.LogAsync(config.LoggingConfig.UseWebhookLogging, channel, embed);
+        return await _channelLogger.LogAsync(config.LoggingConfig.UseWebhookLogging, channel, null, embed);
     }
 }
