@@ -24,6 +24,7 @@ using Silk.Core.Data.MediatR.Guilds;
 using Silk.Core.Data.MediatR.Guilds.Config;
 using Silk.Core.Data.MediatR.Infractions;
 using Silk.Core.Errors;
+using Silk.Core.Services.Bot;
 using Silk.Core.Services.Data;
 using Silk.Core.Services.Interfaces;
 using Silk.Core.Types;
@@ -50,6 +51,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly IDiscordRestGuildAPI   _guilds;
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IDiscordRestWebhookAPI _webhooks;
+    
+    private readonly ChannelLoggingService _channelLogger;
 
     private readonly List<InfractionEntity> _queue = new();
     public InfractionService
@@ -60,16 +63,20 @@ public sealed class InfractionService : IHostedService, IInfractionService
             IDiscordRestUserAPI        users,
             IDiscordRestGuildAPI       guilds,
             IDiscordRestChannelAPI     channels,
-            IDiscordRestWebhookAPI     webhooks
+            IDiscordRestWebhookAPI     webhooks, 
+            ChannelLoggingService channelLogger
     )
     {
-        _logger   = logger;
-        _mediator = mediator;
-        _config   = config;
-        _users    = users;
-        _guilds   = guilds;
-        _channels = channels;
-        _webhooks = webhooks;
+        _logger        = logger;
+        _mediator      = mediator;
+        _config        = config;
+        _users         = users;
+        _guilds        = guilds;
+        _channels      = channels;
+        _webhooks      = webhooks;
+        _channelLogger = channelLogger;
+
+        _queueTimer = new(ProccessQueueAsync, TimeSpan.FromSeconds(5));
     }
 
     /// <inheritdoc />
@@ -93,22 +100,72 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _logger.LogInformation("Infraction service stopped.");
     }
 
+    private async Task ProccessQueueAsync()
+    {
+        for (var i = _queue.Count; i >= 0; i--)
+        {
+            var infraction = _queue[i];
+            
+            if (!infraction.ExpiresAt.HasValue)
+                continue;
+
+            if (infraction.ExpiresAt.Value < DateTimeOffset.UtcNow)
+                continue;
+            
+            _queue.RemoveAt(i);
+            _logger.LogDebug("Removed infraction {InfractionID} from queue.", infraction.Id);
+            
+            _logger.LogInformation("Proccessing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
+        }
+    }
+    
     /// <inheritdoc />
-    public async Task<Result> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
+    public async Task<Result<InfractionEntity>> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
     {
         if (newExpiration.IsDefined(out TimeSpan? expiration))
             if (expiration.Value < TimeSpan.Zero)
-                return Result.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration cannot be negative."));
+                return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration cannot be negative."));
+        
+        if (infraction.Type is not (InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute) && newExpiration.HasValue)
+            return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration is only valid for soft bans, auto mod mutes, and mutes."));
+        
+        var newInfraction = await _mediator.Send(new UpdateInfractionRequest(
+                                                                             infraction.Id,
+                                                                             newExpiration.HasValue 
+                                                                                 ? newExpiration.Value is null 
+                                                                                     ? null 
+                                                                                     : DateTimeOffset.UtcNow + expiration 
+                                                                                 : default(Optional<DateTimeOffset?>), 
+                                                                             newReason ?? default(Optional<string>)));
 
-        await _mediator.Send(new UpdateInfractionRequest(infraction.Id, DateTimeOffset.UtcNow + expiration, newReason ?? default(Optional<string>)));
+        if (infraction.Type is InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute)
+        {
+            var cachedInfraction = _queue.FirstOrDefault(i => i.Id == infraction.Id);
+
+            if (cachedInfraction is not null)
+                _queue.Remove(cachedInfraction);
+            
+            _queue.Add(infraction);
+        }
         
-        //TODO: Log updated infraction
+        var enforcerResult = await _users.GetUserAsync(newInfraction.EnforcerID);
+        var targetResult   = await _users.GetUserAsync(newInfraction.TargetID);
         
-        return Result.FromSuccess();
+        if (!enforcerResult.IsSuccess)
+            return Result<InfractionEntity>.FromError(enforcerResult.Error);
+        
+        if (!targetResult.IsSuccess)
+            return Result<InfractionEntity>.FromError(targetResult.Error);
+        
+        var logResult = await LogInfractionUpdateAsync(newInfraction, updatedBy, enforcerResult.Entity, targetResult.Entity, DateTimeOffset.UtcNow);
+        
+        return logResult.IsSuccess 
+            ? Result<InfractionEntity>.FromSuccess(newInfraction)
+            : Result<InfractionEntity>.FromError(logResult.Error);
     }
 
     /// <inheritdoc />
-    public async Task<Result> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    public async Task<Result<InfractionEntity>> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
         IUser target;
         IUser enforcer;
@@ -116,7 +173,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result<(IUser target, IUser enforcer)> canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
         if (!canInfractResult.IsSuccess)
-            return Result.FromError(canInfractResult.Error);
+            return Result<InfractionEntity>.FromError(canInfractResult.Error);
 
         (target, enforcer) = canInfractResult.Entity;
 
@@ -128,12 +185,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
         return returnResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(new AggregateError(SemiSuccessfulAction, returnResult));
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new AggregateError(SemiSuccessfulAction, returnResult));
     }
 
     /// <inheritdoc />
-    public async Task<Result> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    public async Task<Result<InfractionEntity>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
         IUser target;
         IUser enforcer;
@@ -141,7 +198,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result<(IUser target, IUser enforcer)> canInfractResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
         if (!canInfractResult.IsSuccess)
-            return Result.FromError(canInfractResult.Error);
+            return Result<InfractionEntity>.FromError(canInfractResult.Error);
 
         (target, enforcer) = canInfractResult.Entity;
 
@@ -152,17 +209,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
         if (!kickResult.IsSuccess)
-            return GetActionFailedErrorMessage(kickResult, "kick");
+            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(kickResult, "kick"));
 
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
         return returnResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
     }
 
     /// <inheritdoc />
-    public async Task<Result> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
     {
         IUser target;
         IUser enforcer;
@@ -170,12 +227,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result permissionResult = await EnsureHasPermissionsAsync(guildID, enforcerID, DiscordPermission.BanMembers);
 
         if (!permissionResult.IsSuccess)
-            return Result.FromError(permissionResult.Error);
+            return Result<InfractionEntity>.FromError(permissionResult.Error);
 
         Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
         if (!hierarchyResult.IsSuccess)
-            return Result.FromError(hierarchyResult.Error);
+            return Result<InfractionEntity>.FromError(hierarchyResult.Error);
 
         (target, enforcer) = hierarchyResult.Entity;
 
@@ -186,17 +243,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
         if (!banResult.IsSuccess)
-            return GetActionFailedErrorMessage(banResult, "ban");
+            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(banResult, "ban"));
 
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
         return returnResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
     }
 
     /// <inheritdoc />
-    public async Task<Result> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    public async Task<Result<InfractionEntity>> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
         IUser target;
         IUser enforcer;
@@ -204,22 +261,22 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result banResult = await _guilds.RemoveGuildBanAsync(guildID, targetID, reason);
 
         if (!banResult.IsSuccess)
-            return GetActionFailedErrorMessage(banResult, "ban (required for unbanning)");
+            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(banResult, "ban (required for unbanning)"));
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Unban));
 
         Result<(IUser target, IUser enforcer)> targetEnforcerResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
         if (!targetEnforcerResult.IsSuccess)
-            return Result.FromError(targetEnforcerResult.Error);
+            return Result<InfractionEntity>.FromError(targetEnforcerResult.Error);
 
         (target, enforcer) = targetEnforcerResult.Entity;
 
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
         return returnResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
     }
 
     /// <inheritdoc />
@@ -248,7 +305,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+    public async Task<Result<InfractionEntity>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
     {
         IUser target;
         IUser enforcer;
@@ -256,12 +313,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result permissionResult = await EnsureHasPermissionsAsync(guildID, enforcerID, DiscordPermission.ManageRoles);
         
         if (!permissionResult.IsSuccess)
-            return Result.FromError(permissionResult.Error);
+            return Result<InfractionEntity>.FromError(permissionResult.Error);
         
         var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
         
         if (!hierarchyResult.IsSuccess)
-            return Result.FromError(hierarchyResult.Error);
+            return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
 
@@ -272,18 +329,18 @@ public sealed class InfractionService : IHostedService, IInfractionService
             var muteResult = await TryCreateMuteRoleAsync(guildID);
             
             if (!muteResult.IsSuccess)
-                return Result.FromError(muteResult.Error);
+                return Result<InfractionEntity>.FromError(muteResult.Error);
             
             config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
         }
 
         var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
-        
-        if (!roleResult.IsSuccess)
-            return GetActionFailedErrorMessage(roleResult, "mute");
 
-        if (await IsMutedAsync(guildID, targetID))
-            return Result.FromSuccess();
+        if (!roleResult.IsSuccess)
+            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
+
+        if (await IsMutedAsync(guildID, targetID)) //TODO: Call UpdateInfractionAsync
+            return Result<InfractionEntity>.FromError(new InvalidOperationError("Target is already muted."));
         
         var infraction = await _mediator.Send
             (
@@ -303,13 +360,13 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
         return returnResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, returnResult));
 
     }
 
     /// <inheritdoc />
-    public async Task<Result> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    public async Task<Result<InfractionEntity>> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
         IUser target;
         IUser enforcer;
@@ -317,15 +374,16 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var canUmute = await EnsureHasPermissionsAsync(guildID, enforcerID, DiscordPermission.ManageRoles);
         
         if (!canUmute.IsSuccess)
-            return Result.FromError(canUmute.Error);
+            return Result<InfractionEntity>.FromError(canUmute.Error);
         
         if (!await IsMutedAsync(guildID, targetID))
-            return Result.FromSuccess();
+            return Result<InfractionEntity>.FromError(new InvalidOperationError("Target is not muted."));
+        
         
         var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
         
         if (!hierarchyResult.IsSuccess)
-            return Result.FromError(hierarchyResult.Error);
+            return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
         
@@ -334,7 +392,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (mute is null)
         {
             _logger.LogError("Attempted to unmute {Target} but the mute was not present in memory.", targetID);
-            return Result.FromError(new InvalidOperationError("Catostrophic error. Mute was not present in memory."));
+            return Result<InfractionEntity>.FromError(new InvalidOperationError("Catostrophic error. Mute was not present in memory."));
         }
         
         _queue.Remove(mute);
@@ -349,11 +407,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         await LogInfractionAsync(infraction, target, enforcer);
         
-        return Result.FromSuccess();
+        return Result<InfractionEntity>.FromSuccess(infraction);
     }
 
     /// <inheritdoc />
-    public async Task<Result> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) 
+    public async Task<Result<InfractionEntity>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) 
         => throw new NotImplementedException();
 
     /// <inheritdoc />
@@ -383,6 +441,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
         foreach (InfractionEntity infraction in infractions)
             _queue.Add(infraction);
     }
+
+
 
     /// <summary>
     /// Attempts to create a mute role for a guild.
@@ -431,17 +491,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// </summary>
     /// <param name="result">The result from a REST request</param>
     /// <param name="actionName">The infraction action what was being performed. </param>
-    private Result GetActionFailedErrorMessage(Result result, string actionName)
+    private IResultError GetActionFailedErrorMessage(Result result, string actionName)
     {
         if (result.Error is not RestResultError<RestError> re)
-            return result;
+            return result.Error!;
 
         return re.Error.Code switch
         {
-            DiscordError.MissingAccess => Result.FromError(new PermissionError($"I don't have permission to {actionName} people!")),
-            DiscordError.UnknownUser   => Result.FromError(new NotFoundError("That user doesn't seem to exist! Are you sure you typed their ID correctly?")),
-            DiscordError.UnknownBan    => Result.FromError(new NotFoundError("That ban doesn't seem to exist! Are you sure you typed their ID correctly?")),
-            _                          => result
+            DiscordError.MissingAccess => new PermissionError($"I don't have permission to {actionName} people!"),
+            DiscordError.UnknownUser   => new NotFoundError("That user doesn't seem to exist! Are you sure you typed their ID correctly?"),
+            DiscordError.UnknownBan    => new NotFoundError("That ban doesn't seem to exist! Are you sure you typed their ID correctly?"),
+            _                          => result.Error
         };
     }
 
@@ -607,6 +667,49 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         await _channels.CreateMessageAsync(channel.ID, $"You have been **{action}** from **{guild.Name}**.", embeds: new[] { embed });
     }
+    
+    /// <summary>
+    /// Logs an updated infraction, and who updated it.
+    /// </summary>
+    /// <param name="infraction">The infraction to update</param>
+    /// <param name="updatedBy">Who the infraction was updated by.</param>
+    /// <param name="infractionTarget">Who the infraction was toward.</param>
+    /// <param name="infractionEnforcer">Who the infraction was enforced by.</param>
+    /// <param name="updatedAt">When the infraction was updated.</param>
+    private async Task<Result> LogInfractionUpdateAsync(InfractionEntity infraction, IUser updatedBy, IUser infractionTarget, IUser infractionEnforcer, DateTimeOffset updatedAt)
+    {
+        GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
+
+        if (!config.LoggingConfig.LogInfractions || config.LoggingConfig.Infractions is null)
+            return Result.FromSuccess();
+
+        Result channelExists = await EnsureLoggingChannelExistsAsync(infraction.GuildID);
+
+        if (!channelExists.IsSuccess)
+            return Result.FromError(new NotFoundError());
+
+        bool useWebhook = config.LoggingConfig.UseWebhookLogging;
+
+        var embed = new Embed
+        {
+            Title       = "Infraction #" + infraction.CaseNumber,
+            Author      = new EmbedAuthor($"{infractionTarget.Username}#{infractionTarget.Discriminator}", CDN.GetUserAvatarUrl(infractionTarget, imageSize: 1024).Entity.ToString()),
+            Description = infraction.Reason,
+            Colour      = Color.Goldenrod,
+            Fields = new IEmbedField[]
+            {
+                new EmbedField("Type:", infraction.Type.ToString(), true),
+                new EmbedField("Infracted at:", $"<t:{(infraction.CreatedAt).ToUnixTimeSeconds()}:F>", true),
+                new EmbedField("Expires:", !infraction.ExpiresAt.HasValue ? "Never" : $"<t:{infraction.ExpiresAt.Value.ToUnixTimeSeconds()}:F>", true),
+
+                new EmbedField("Moderator:", $"**{infractionEnforcer.Username}#{infractionEnforcer.Discriminator}**\n(`{infractionEnforcer.ID}`)", true),
+                new EmbedField("Offender:", $"**{infractionTarget.Username}#{infractionTarget.Discriminator}**\n(`{infractionTarget.ID}`)", true),
+
+            }
+        };
+        
+        return await _channelLogger.LogAsync(useWebhook, config.LoggingConfig.Infractions, $"📝 Case #{infraction.CaseNumber} was updated by **{updatedBy.Username}**", embed);
+    }
 
     /// <summary>
     ///     Logs a given infraction to the designated logging channel, using a webhook if configured.
@@ -618,7 +721,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
 
-        if (!config.LoggingConfig.LogInfractions)
+        if (!config.LoggingConfig.LogInfractions || config.LoggingConfig.Infractions is null)
             return Result.FromSuccess();
 
         Result channelExists = await EnsureLoggingChannelExistsAsync(infraction.GuildID);
@@ -646,19 +749,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             }
         };
 
-        Result<IMessage> logResult;
-
-        if (useWebhook)
-        {
-            logResult = (await _webhooks.ExecuteWebhookAsync(
-                                                             config.LoggingConfig.Infractions!.WebhookID,
-                                                             config.LoggingConfig.Infractions.WebhookToken,
-                                                             embeds: new[] { embed }))!;
-        }
-        else
-        {
-            logResult = await _channels.CreateMessageAsync(config.LoggingConfig.Infractions!.ChannelID, embeds: new[] { embed });
-        }
+        var logResult = await _channelLogger.LogAsync(useWebhook, config.LoggingConfig.Infractions!, null, embed);
 
         if (!logResult.IsSuccess)
         {
