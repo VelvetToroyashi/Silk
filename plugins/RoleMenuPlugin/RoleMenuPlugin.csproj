@@ -36,10 +36,10 @@
             <!-- Update 'RootPath' if solution file is renamed -->
             <RootPath >$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath >
 
-            <!-- Update if project 'Silk.Core' is renamed -->
-            <SilkCoreProjectName >Silk.Core</SilkCoreProjectName >
+            <!-- Update if project 'Silk' is renamed -->
+            <SilkCoreProjectName >Silk</SilkCoreProjectName >
 
-            <!-- By default uses current project framework; update if 'Silk.Core' project framework changes -->
+            <!-- By default uses current project framework; update if 'Silk' project framework changes -->
             <SilkCoreProjectFramework >$(TargetFramework)</SilkCoreProjectFramework >
 
             <PluginOutputDir >$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir >

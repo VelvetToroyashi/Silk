@@ -1,18 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk" >
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup >
-        <OutputType >Exe</OutputType >
-        <TargetFramework >net6.0</TargetFramework >
-        <AllowUnsafeBlocks >true</AllowUnsafeBlocks >
-    </PropertyGroup >
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-    <ItemGroup >
+    <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
         <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" />
-    </ItemGroup >
+    </ItemGroup>
 
-    <ItemGroup >
-        <ProjectReference Include="..\..\src\Silk.Core\Silk.Core.csproj" />
-    </ItemGroup >
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Silk\Silk.csproj" />
+    </ItemGroup>
 
-</Project >
+</Project>

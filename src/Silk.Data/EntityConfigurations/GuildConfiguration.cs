@@ -1,0 +1,28 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Silk.Data.Entities;
+
+namespace Silk.Data.EntityConfigurations;
+
+public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
+{
+    public void Configure(EntityTypeBuilder<GuildEntity> builder)
+    {
+        builder
+           .HasMany(u => u.Users)
+           .WithOne(u => u.Guild);
+
+        builder
+           .HasOne(g => g.Configuration)
+           .WithOne(g => g.Guild)
+           .HasForeignKey<GuildConfigEntity>(g => g.GuildID);
+
+        builder
+           .HasOne(g => g.ModConfig)
+           .WithOne(g => g.Guild)
+           .HasForeignKey<GuildModConfigEntity>(g => g.GuildID);
+
+        builder.HasMany(u => u.Infractions)
+               .WithOne(i => i.Guild);
+    }
+}

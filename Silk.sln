@@ -13,9 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core", "src\Silk.Core\Silk.Core.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk", "src\Silk\Silk.csproj", "{B3A34F01-C1B1-4081-B19A-E24821105683}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Tests", "tests\Silk.Core.Tests\Silk.Core.Tests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Tests", "tests\Silk.Tests\Silk.Tests.csproj", "{C8175039-89F8-4798-9282-98BDF91FD0C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FE9BF140-0795-4CBE-A5A1-E37A36081587}"
 EndProject
@@ -25,9 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Benchmarks", "tests\Si
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Extensions.Tests", "tests\Silk.Extensions.Tests\Silk.Extensions.Tests.csproj", "{832DCD90-034E-4282-B6A7-627D7FC51EB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Data", "src\Silk.Core.Data\Silk.Core.Data.csproj", "{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Data", "src\Silk.Data\Silk.Data.csproj", "{A75A61EE-D0BD-4536-B6C6-26A26D8062F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Core.Data.Tests", "tests\Silk.Core.Data.Tests\Silk.Core.Data.Tests.csproj", "{F1BC2CDC-1423-4E14-AD38-5B6E0ACC06BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Data.Tests", "tests\Silk.Data.Tests\Silk.Data.Tests.csproj", "{F1BC2CDC-1423-4E14-AD38-5B6E0ACC06BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Shared", "src\Silk.Shared\Silk.Shared.csproj", "{D9EBB59E-3DC5-4ACD-8CF1-CAF7FAE910A8}"
 EndProject

@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
-using Silk.Core.Types;
+using Silk.Shared.Types;
+using Silk.Types;
 
 namespace Silk.Benchmarks;
 

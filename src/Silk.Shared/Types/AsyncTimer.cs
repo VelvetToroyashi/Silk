@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace Silk.Core.Types;
+namespace Silk.Shared.Types;
 
 public delegate Task AsyncTimerDelegate();
 
