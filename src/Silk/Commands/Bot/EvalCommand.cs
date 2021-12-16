@@ -54,7 +54,7 @@ public class EvalCommand : CommandGroup
         _events = events;
     }
 
-    [RequireOwner]
+    [RequireOwner] //TODO: RequireOwnerOrTeamAdminAttribute + Condition
     [Command("eval")]
     [Description("Evaluates code.")]
     public async Task<Result> EvalCS([Greedy] string code)
@@ -119,6 +119,7 @@ public class EvalCommand : CommandGroup
                 if (!edit.IsSuccess)
                 {
                     await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "Failed to edit message.\n" + edit.Error.Message);
+                    return Result.FromError(edit.Error);
                 }
             }
 
