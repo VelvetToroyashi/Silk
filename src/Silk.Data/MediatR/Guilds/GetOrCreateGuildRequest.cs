@@ -34,7 +34,7 @@ public class GetOrCreateGuildHandler : IRequestHandler<GetOrCreateGuildRequest, 
                                       .AsSplitQuery()
                                       .Include(g => g.Users)
                                       .Include(g => g.Infractions)
-                                      .FirstOrDefaultAsync(g => g.Id == request.GuildID, cancellationToken);
+                                      .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
         if (guild is not null)
             return guild;

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
+using Remora.Results;
 using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Guilds;
@@ -13,20 +14,8 @@ namespace Silk.Data.MediatR.Guilds;
 ///     Request for updating a <see cref="GuildConfigEntity" /> for a Guild.
 /// </summary>
 /// <param name="GuildId">The Id of the Guild</param>
-public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEntity?>
+public record UpdateGuildConfigRequest(Snowflake GuildId) : IRequest<Result>
 {
-    [Obsolete]
-    public Optional<ulong>          GreetingChannelId  { get; init; }
-    
-    [Obsolete]
-    public Optional<ulong>          VerificationRoleId { get; init; }
-    
-    [Obsolete]
-    public Optional<GreetingOption> GreetingOption     { get; init; }
-    
-    [Obsolete]
-    public Optional<string>         GreetingText       { get; init; }
-
     //TODO: Either remove this or actually implement it. It cannot remain in limbo, which it currently is.
     public List<DisabledCommandEntity>? DisabledCommands { get; init; }
 }
@@ -34,34 +23,24 @@ public record UpdateGuildConfigRequest(ulong GuildId) : IRequest<GuildConfigEnti
 /// <summary>
 ///     The default handler for <see cref="UpdateGuildConfigRequest" />.
 /// </summary>
-public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, GuildConfigEntity?>
+public class UpdateGuildConfigHandler : IRequestHandler<UpdateGuildConfigRequest, Result>
 {
     private readonly GuildContext _db;
 
     public UpdateGuildConfigHandler(GuildContext db) => _db = db;
 
-    public async Task<GuildConfigEntity?> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateGuildConfigRequest request, CancellationToken cancellationToken)
     {
         GuildConfigEntity? config = await _db.GuildConfigs
                                              .AsSplitQuery()
-                                             .FirstOrDefaultAsync(g => g.GuildID.Value == request.GuildId, cancellationToken);
-
-        if (request.GreetingOption.IsDefined(out GreetingOption greeting))
-            config.GreetingOption = greeting;
-
-        if (request.GreetingChannelId.IsDefined(out ulong channel))
-            config.GreetingChannel = channel;
-
-        if (request.VerificationRoleId.IsDefined(out ulong role))
-            config.VerificationRole = role;
-
-        if (request.GreetingText.IsDefined(out string? text))
-            config.GreetingText = text;
+                                             .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
+        if (config is null)
+            return Result.FromError(new NotFoundError());
 
         config.DisabledCommands = request.DisabledCommands ?? config.DisabledCommands;
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return config;
+        return Result.FromSuccess();
     }
 }

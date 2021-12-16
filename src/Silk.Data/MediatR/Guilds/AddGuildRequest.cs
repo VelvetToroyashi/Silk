@@ -25,7 +25,7 @@ public sealed class AddGuildHandler : IRequestHandler<AddGuildRequest, GuildEnti
     {
         GuildEntity guild = new()
         {
-            Id            = request.GuildID,
+            ID            = request.GuildID,
             Prefix        = request.Prefix,
             Configuration = new() { GuildID = request.GuildID },
             ModConfig     = new() { GuildID = request.GuildID },

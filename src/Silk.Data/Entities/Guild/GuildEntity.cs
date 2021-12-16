@@ -11,7 +11,8 @@ public class GuildEntity
     /// <summary>
     /// The ID of the guild.
     /// </summary>
-    public Snowflake Id { get; set; }
+    [Column("Id")] // Backwards compatibility?
+    public Snowflake ID { get; set; }
 
     /// <summary>
     /// The prefix on the guild.

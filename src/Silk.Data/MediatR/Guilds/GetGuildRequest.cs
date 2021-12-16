@@ -30,7 +30,7 @@ public class GetGuildHandler : IRequestHandler<GetGuildRequest, GuildEntity>
                                       .Include(g => g.Users)
                                       .Include(g => g.Infractions)
                                       .Include(g => g.Configuration)
-                                      .FirstOrDefaultAsync(g => g.Id == request.GuildID, cancellationToken);
+                                      .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
         return guild;
     }
