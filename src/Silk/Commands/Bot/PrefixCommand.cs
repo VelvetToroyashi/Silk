@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MediatR;
@@ -10,14 +9,10 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
-using Silk.Data;
-using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
-using Silk.Extensions;
 using Silk.Extensions.Remora;
-using Silk.Shared.Constants;
 
 namespace Silk.Commands.Bot;
 

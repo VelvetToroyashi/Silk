@@ -10,9 +10,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
 
 namespace Silk.Services.Data;
