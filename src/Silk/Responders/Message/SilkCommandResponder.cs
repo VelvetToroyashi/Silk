@@ -17,6 +17,15 @@ using Silk.Services.Interfaces;
 
 namespace Silk.Core.Remora.Services;
 
+/*
+ * I'm not entirely sure if this is worth breaking out into a "service".
+ *
+ * Sure, some responders are literally pass-throughs to some of Silk's services,
+ * but this is is just a command responder, and pretty innocuous.
+ *
+ * The benefit of breaking this apart is likely no-existent, and will only hinder
+ * readability.
+ */
 public class SilkCommandResponder : CommandResponder
 {
 	private readonly IPrefixCacheService _prefixCacheService;
