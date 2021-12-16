@@ -58,7 +58,7 @@ public static class IServiceCollectionExtensions
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
 
         services
-           .AddDiscordCommands()
+           .AddDiscordCommands(useDefaultCommandResponder: false)
            .AddDiscordCaching();
 
         services
