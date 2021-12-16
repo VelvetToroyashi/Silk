@@ -149,7 +149,7 @@ public class EvalCommand : CommandGroup
         return Result.FromSuccess();
     }
 
-    private string GetHumanFriendlyResultString(object result)
+    private string? GetHumanFriendlyResultString(object result)
     {
         var type = result.GetType();
 
