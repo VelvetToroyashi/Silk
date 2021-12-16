@@ -35,7 +35,7 @@ public class UserTests
 
         _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();
         await _context.Database.MigrateAsync();
-        _context.Guilds.Add(new() { Id = GuildId });
+        _context.Guilds.Add(new() { ID = GuildId });
         await _context.SaveChangesAsync();
     }
 
