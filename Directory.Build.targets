@@ -9,7 +9,7 @@
         <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01053"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
 
-        <PackageReference Update="Humanizer" Version="2.11.10" />
+        <PackageReference Update="Humanizer" Version="2.13.14" />
         <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
 
         <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
