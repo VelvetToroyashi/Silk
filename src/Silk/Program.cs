@@ -101,6 +101,7 @@ public class Program
                 services.AddSilkLogging(context);
 
                 services.AddCondition<RequireNSFWCondition>();
+                services.AddCondition<RequireTeamOrOwnerCondition>();
 
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
