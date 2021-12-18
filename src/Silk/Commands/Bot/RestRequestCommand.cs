@@ -1,43 +1,62 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Humanizer;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OneOf;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Extensions;
 using Silk.Shared.Configuration;
 
 namespace Silk.Commands.Bot;
 
-[Hidden]
-public class RestRequestCommand : BaseCommandModule
+
+public class RestRequestCommand : CommandGroup
 {
     private const    string                   baseUri = "https://discord.com/api/v9";
-    private readonly IHttpClientFactory       _clientFactory;
+    
+    private readonly HttpClient               _client;
+    private readonly ICommandContext          _context;
+    private readonly IDiscordRestChannelAPI   _channels;
     private readonly SilkConfigurationOptions _silkConfiguration;
-
-    public RestRequestCommand(IHttpClientFactory clientFactory, IOptions<SilkConfigurationOptions> options)
+    public RestRequestCommand
+    (
+            HttpClient client,
+            ICommandContext context,
+            IDiscordRestChannelAPI channels,
+            IOptions<SilkConfigurationOptions> silkConfiguration
+    )
     {
-        _clientFactory     = clientFactory;
-        _silkConfiguration = options.Value;
+        _client            = client;
+        _context           = context;
+        _channels          = channels;
+        _silkConfiguration = silkConfiguration.Value;
     }
 
-    [Command]
-    public async Task Rest(CommandContext ctx, string method, string uri, [RemainingText] string? json = null)
+    [RequireTeamOrOwner]
+    [Command("rest")]
+    [Description("Performs a REST request.")]
+    public async Task<Result<IMessage>> DoRestAsync(string method, string uri, [Greedy] string? json = null)
     {
         if (json?.StartsWith("```json") ?? false)
             json = json[8..^3];
         else if (json?.StartsWith("```") ?? false)
             json = json[4..^3];
-
-        HttpClient? client = _clientFactory.CreateClient();
-        HttpMethod? httpMethod = method.ToUpperInvariant() switch
+        
+        HttpMethod httpMethod = method.ToUpperInvariant() switch
         {
             "GET"    => HttpMethod.Get,
             "PUT"    => HttpMethod.Put,
@@ -52,26 +71,39 @@ public class RestRequestCommand : BaseCommandModule
             RequestUri = new(baseUri + uri),
             Method     = httpMethod,
             Content    = new StringContent(json ?? "", Encoding.UTF8, "application/json"),
+            Headers =
+            {
+                Accept = { new MediaTypeWithQualityHeaderValue("application/json") },
+                Authorization = new("Bot", _silkConfiguration.Discord.BotToken),
+            }
         };
+        
+        var res = await _client.SendAsync(message);
+        var jsn = JToken.Parse(await res.Content.ReadAsStringAsync()).ToString(Formatting.Indented);
 
-        client.DefaultRequestHeaders.Add("Authorization", $"Bot {_silkConfiguration.Discord.BotToken}");
-        client.DefaultRequestHeaders.Add("Accept", "application/json");
-
-        HttpResponseMessage? res = await client.SendAsync(message);
-        var                  jsn = JToken.Parse(await res.Content.ReadAsStringAsync() ?? "{}").ToString(Formatting.Indented);
-
-        if (jsn.Length > 1000)
+        if (jsn.Length <= 1000)
         {
-            await new DiscordMessageBuilder()
-                 .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n(Response was > 1000 characters. I've attached the output to a file for you)")
-                 .WithFile("response.json", jsn.AsStream())
-                 .SendAsync(ctx.Channel);
+            var embed = new Embed()
+            {
+                Title = $"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.Title)}",
+                Colour =
+                    (int)res.StatusCode is > 199 and < 400 ? Color.ForestGreen :
+                    (int)res.StatusCode is > 399 and < 500 ? Color.DarkOrange : Color.DarkRed,
+
+                Description = "```json\n" + jsn + "\n```"
+            };
+            
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
         }
         else
         {
-            await new DiscordMessageBuilder()
-                 .WithContent($"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n {(jsn == "{}" ? "Request returned empty response." : Formatter.BlockCode(jsn, "json"))}")
-                 .SendAsync(ctx.Channel);
+            return await _channels.CreateMessageAsync(_context.ChannelID,
+                                                      $"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n" +
+                                                      " The response is too long to Display, so I've sent it as a file~!",
+                                                      attachments: new OneOf<FileData, IPartialAttachment>[]
+                                                      {
+                                                          new FileData("response.json", jsn.AsStream())
+                                                      });
         }
     }
 }
