@@ -57,6 +57,9 @@ public static class IServiceCollectionExtensions
            .AddCommands();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
 
+
+        services.AddParser<EmojiParser>();
+        
         services
            .AddDiscordCommands(useDefaultCommandResponder: false)
            .AddDiscordCaching();
