@@ -24,6 +24,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Utilities.HelpFormatter;
 using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 
@@ -53,9 +54,9 @@ public class EvalCommand : CommandGroup
         _guilds      = guilds;
         _events = events;
     }
-
-    [RequireOwner] //TODO: RequireOwnerOrTeamAdminAttribute + Condition
+    
     [Command("eval")]
+    [RequireTeamOrOwner]
     [Description("Evaluates code.")]
     public async Task<Result> EvalCS([Greedy] string code)
     {
