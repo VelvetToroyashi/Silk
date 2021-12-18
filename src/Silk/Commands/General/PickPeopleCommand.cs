@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Remora.Discord.Commands.Attributes;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.General)]
 public class PickPeopleCommand : BaseCommandModule
 {

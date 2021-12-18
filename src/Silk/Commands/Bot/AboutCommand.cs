@@ -8,7 +8,9 @@ using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
+using Remora.Commands.Groups;
 using Remora.Discord.Gateway;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
@@ -16,10 +18,10 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
-using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
 namespace Silk.Commands.Bot;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Bot)]
 public class AboutCommand : CommandGroup
 {

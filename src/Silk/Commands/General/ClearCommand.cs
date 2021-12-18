@@ -9,6 +9,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
@@ -17,6 +18,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Mod)]
 public class ClearCommand : CommandGroup
 {
@@ -59,6 +61,8 @@ public class ClearCommand : CommandGroup
         [Option('a', "around")]
         [Description("Delete messages around the specified message.")]
         IMessage? message = null
+        
+        //TODO: Images
     )
     {
         if (skip is not null && message is not null)

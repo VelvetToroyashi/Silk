@@ -17,6 +17,7 @@ using Remora.Extensions.Options.Immutable;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
+using Silk.Commands.General;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Shared;
@@ -52,18 +53,18 @@ public static class IServiceCollectionExtensions
            .AddScoped<IHelpFormatter, HelpFormatter.HelpFormatter>();
 
         services
-            //.AddPostExecutionEvent<FailedCommandResponder>()
-           .AddCommands(asm) // Register types
-           .AddCommands();   // Register commands
-        //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
-
-
-        services.AddParser<EmojiParser>();
+           .AddDiscordCommands(enableSlash: true, useDefaultCommandResponder: false)
+           .AddDiscordCaching();
         
         services
-           .AddDiscordCommands(useDefaultCommandResponder: false)
-           .AddDiscordCaching();
-
+            //.AddPostExecutionEvent<FailedCommandResponder>()
+           .AddCommands(asm) // Register types
+           .AddCommandGroup<AvatarCommand>()
+           .AddCommands();   // Register commands
+        //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
+        
+        services.AddParser<EmojiParser>();
+        
         services
            .Configure<DiscordGatewayClientOptions>(gw =>
             {

@@ -1,74 +1,111 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Silk.Extensions.DSharpPlus;
+﻿using System.ComponentModel;
+using System.Drawing;
+using System.Threading.Tasks;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 namespace Silk.Commands.General;
 
-public enum AvatarOption
+public class AvatarSlashCommands : CommandGroup
 {
-    [ChoiceName("guild-specific")]
-    Guild,
-    [ChoiceName("user-specific")]
-    User
-}
-
-public class AvatarCommands : ApplicationCommandModule
-{
-    [SlashCommand("avatar", "View someone's avatar!")]
-    public async Task Avatar(
-        InteractionContext                                                             ctx,
-        [Option("user", "Who's avatar do you want to see")]               DiscordUser? user         = null,
-        [Option("type", "What avatar should I pull?")]                    AvatarOption avatarOption = AvatarOption.User,
-        [Option("visibility", "Do you want others to see this command?")] bool         asEphemeral  = true)
+    private readonly ICommandContext            _context;
+    private readonly IDiscordRestGuildAPI       _guilds;
+    private readonly IDiscordRestInteractionAPI _interactions;
+    public AvatarSlashCommands(
+        ICommandContext context,
+        IDiscordRestGuildAPI guilds,
+        IDiscordRestInteractionAPI interactions
+        )
     {
-        await ctx.CreateThinkingResponseAsync(!asEphemeral);
-        user ??= ctx.Member ?? ctx.User;
+        _context      = context;
+        _guilds       = guilds;
+        _interactions = interactions;
+    }
 
-        switch (avatarOption)
+    [Command("avatar_slash")]
+    [CommandType(ApplicationCommandType.ChatInput)]
+    [Description("Get the avatar of a user, including yourself!")]
+    public async Task<Result> Avatar
+        (
+            [Description("The user to get the avatar of.")]
+            IUser? user = null,
+            [Description("Whether to get the user's guild avatar.")]
+            bool showGuildAvatar = false,
+            [Description("Whether to show the user's avatar privately.")]
+            bool showPrivately = false
+        )
+    {
+        if (_context is not InteractionContext ic)
+            return Result.FromSuccess();
+
+        user ??= ic.User;
+        
+        var responseResult = await _interactions
+           .CreateInteractionResponseAsync(
+                                            ic.ID,
+                                            ic.Token,
+                                            new InteractionResponse(
+                                                                    InteractionCallbackType.DeferredChannelMessageWithSource,
+                                                                    new InteractionCallbackData(Flags: showPrivately
+                                                                                                    ? InteractionCallbackDataFlags.Ephemeral
+                                                                                                    : default)
+                                                                    )
+                                           );
+
+        if (!responseResult.IsSuccess)
+            return Result.FromError(responseResult.Error);
+
+        IEmbed embed;
+
+        if (!showGuildAvatar)
         {
-            case AvatarOption.Guild when ctx.Interaction.GuildId is null:
-                await ctx.EditResponseAsync(new() { Content = "I can't get someone's guild-avatar from DMs, silly!" });
-                return;
-            case AvatarOption.Guild when ctx.Guild is null:
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                                           .WithContent("Sorry, but I need to be authed with the bot scope to retrieve guild-specific avatars!")
-                                           .AddComponents(new DiscordLinkButtonComponent($"https://discord.com/oauth2/authorize?client_id={ctx.Client.CurrentApplication.Id}&permissions=502656214&scope=bot%20applications.commands", "Invite with bot scope")));
-                return;
-            case AvatarOption.Guild when ctx.Guild.Members.ContainsKey(user.Id):
+            var avatarURLResult = user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user, imageSize: 4096) : CDN.GetUserAvatarUrl(user, imageSize: 4096);
+
+            if (!avatarURLResult.IsSuccess)
+                return Result.FromError(avatarURLResult.Error);
+
+            embed = new Embed
             {
-                if (ctx.Guild.Members[user.Id].GuildAvatarHash != user.AvatarHash)
-                    await SendGuildAvatar();
-                else await SendNoAvatarMessage();
-                break;
-            }
-            case AvatarOption.Guild:
-                await SendNonMemberMessage();
-                break;
-            default:
-                await SendUserAvatar();
-                break;
+                Colour = Color.DodgerBlue,
+                Title  = $"{user.Username}'s Avatar",
+                Image  = new EmbedImage(avatarURLResult.Entity.ToString())
+            };
         }
+        else
+        {
+            if (!ic.GuildID.IsDefined(out var guildID))
+                return Result.FromError(new InvalidOperationError("Getting guild avatars requires being on a guild!"));
 
-        Task SendNoAvatarMessage() => ctx.EditResponseAsync(new() { Content = "Sorry, but that user doesn't exist on the server!" });
+            var member = await _guilds.GetGuildMemberAsync(guildID, user.ID);
 
-        Task SendNonMemberMessage() => ctx.EditResponseAsync(new() { Content = "Sorry, but that user doesn't exist on the server!" });
+            if (!member.IsSuccess)
+                return Result.FromError(new NotFoundError("It appears the user is not in this guild!"));
 
-        Task SendUserAvatar() =>
-            ctx.EditResponseAsync(new
-                                          DiscordWebhookBuilder()
-                                     .AddEmbed(new DiscordEmbedBuilder()
-                                              .WithColor(DiscordColor.CornflowerBlue)
-                                              .WithTitle($"{user!.Username}'s Avatar:")
-                                              .WithImageUrl(user.AvatarUrl)));
+            if (!member.Entity.Avatar.IsDefined(out var guildAvatar))
+                return Result.FromError(new NotFoundError("It appears the user has no guild avatar!"));
 
-        Task SendGuildAvatar() =>
-            ctx.EditResponseAsync(new
-                                          DiscordWebhookBuilder()
-                                     .AddEmbed(new DiscordEmbedBuilder()
-                                              .WithColor(DiscordColor.CornflowerBlue)
-                                              .WithTitle($"{user.Username}'s Guild-Specific Avatar:")
-                                              .WithAuthor(((DiscordMember)user).DisplayName, iconUrl: user.AvatarUrl)
-                                              .WithImageUrl(((DiscordMember)user).GuildAvatarUrl)));
+            var avatarURLResult = CDN.GetGuildMemberAvatarUrl(guildID, user.ID, guildAvatar, imageSize: 4096);
+
+            if (!avatarURLResult.IsSuccess)
+                return Result.FromError(avatarURLResult.Error);
+
+            embed = new Embed
+            {
+                Colour = Color.DodgerBlue,
+                Title  = $"{user.Username}'s Guild Avatar",
+                Image  = new EmbedImage(avatarURLResult.Entity.ToString())
+            };
+        }
+        
+        await _interactions.EditOriginalInteractionResponseAsync(ic.ApplicationID, ic.Token, embeds: new[] { embed });
+        
+        return Result.FromSuccess();
     }
 }

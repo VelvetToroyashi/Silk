@@ -11,7 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Rest.Core;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -21,7 +23,9 @@ using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
 using Silk.Shared.Configuration;
+using Silk.Shared.Constants;
 using Silk.Utilities;
+using ILogger = Serilog.ILogger;
 
 namespace Silk;
 
@@ -43,6 +47,27 @@ public class Program
         ConfigureServices(hostBuilder);
 
         IHost? host = hostBuilder.Build();
+
+        var slash       = host.Services.GetRequiredService<SlashService>();
+        var slashLogger = host.Services.GetRequiredService<ILogger<SlashService>>();
+        
+        
+        var supportsSlash = slash.SupportsSlashCommands();
+        
+        if (!supportsSlash.IsSuccess)
+        {
+            slashLogger.LogWarning(EventIds.Service, "Slash commands are not enabled. {Error}", supportsSlash.Error);
+        }
+        else
+        {
+            //TODO: Fetch from config
+            //TODO: x2, push this into a service/helper class
+            var updateResult = await slash.UpdateSlashCommandsAsync(new Snowflake(721518523704410202)); 
+            
+            if (!updateResult.IsSuccess)
+                slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {Error}", updateResult.Error);
+        }
+
 
         await EnsureDatabaseCreatedAndApplyMigrations(host);
 

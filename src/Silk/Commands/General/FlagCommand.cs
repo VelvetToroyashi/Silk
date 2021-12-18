@@ -2,10 +2,12 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Remora.Discord.Commands.Attributes;
 using Silk.Services.Bot;
 
 namespace Silk.Commands.General;
 
+[ExcludeFromSlashCommands]
 public class FlagCommand : BaseCommandModule
 {
     private readonly FlagOverlayService _flags;
@@ -13,7 +15,7 @@ public class FlagCommand : BaseCommandModule
 
     [Command]
     [Priority(0)]
-    [Cooldown(15, 15, CooldownBucketType.User)]
+    //[Cooldown(15, 15, CooldownBucketType.User)]
     [Description("Add a flag overlay to an image! Upload an image, emoji, or URL.\n\n"      +
                  "Valid flags are: \n"                                                      +
                  "`bi[sexual]`\n"                                                           +

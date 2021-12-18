@@ -31,7 +31,7 @@ public static class RemoraIServiceCollectionExtensions
 
         foreach (Type type in types)
             collection.AddCommandGroup(type);
-
+        
         return collection;
     }
 }

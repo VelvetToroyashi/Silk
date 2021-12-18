@@ -6,11 +6,13 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Commands.Attributes;
 using Silk.Data;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Misc)]
 public class PingCommand : BaseCommandModule
 {

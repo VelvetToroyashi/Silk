@@ -22,6 +22,7 @@ namespace Silk.Commands.Server;
 
 [RequireGuild]
 [Group("tag")]
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Server)]
 public class TagCommand : BaseCommandModule
 {

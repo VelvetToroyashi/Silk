@@ -16,6 +16,7 @@ using Silk.Extensions;
 
 namespace Silk.Commands.General
 {
+    [ExcludeFromSlashCommands]
     [HelpCategory(Categories.General)]
     public class RemindersCommand : BaseCommandModule
     {

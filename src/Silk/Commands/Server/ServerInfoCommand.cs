@@ -8,12 +8,14 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
+using Remora.Discord.Commands.Attributes;
 using Silk.Data;
 using Silk.Extensions;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Server;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Server)]
 public class ServerInfoCommand : BaseCommandModule
 {
