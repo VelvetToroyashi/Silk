@@ -20,6 +20,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
@@ -31,6 +32,7 @@ using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 namespace Silk.Commands.Bot;
 
 // THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Bot)]
 public class EvalCommand : CommandGroup
 {

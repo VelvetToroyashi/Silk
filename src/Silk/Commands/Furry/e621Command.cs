@@ -10,6 +10,7 @@ using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Commands.Conditions;
@@ -19,6 +20,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Furry;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Misc)]
 //[ModuleLifespan(ModuleLifespan.Transient)]
 //[Cooldown(1, 10, CooldownBucketType.User)]

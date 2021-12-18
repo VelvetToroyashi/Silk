@@ -11,6 +11,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation
 {
+    [ExcludeFromSlashCommands]
     [HelpCategory(Categories.Mod)]
     public class NoteCommand : BaseCommandModule
     {

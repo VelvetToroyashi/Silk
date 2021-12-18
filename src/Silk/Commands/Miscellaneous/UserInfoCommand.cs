@@ -13,6 +13,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Humanizer;
+using Remora.Discord.Commands.Attributes;
 using Silk.Extensions;
 using Silk.Extensions.DSharpPlus;
 using Silk.Shared.Constants;
@@ -22,6 +23,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace Silk.Commands.Miscellaneous;
 
+[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Misc)]
 public class UserInfo : BaseCommandModule
 {
