@@ -59,11 +59,13 @@ public static class IServiceCollectionExtensions
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
-           .AddCommandGroup<AvatarCommand>()
+           .AddCommandGroup<AvatarCommand>() //TODO: Automatically register these?
            .AddCommands();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>();
+
+        services.AddPostExecutionEvent<AfterSlashHandler>();
         
         services
            .Configure<DiscordGatewayClientOptions>(gw =>

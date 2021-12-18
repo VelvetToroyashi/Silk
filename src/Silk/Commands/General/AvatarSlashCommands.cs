@@ -29,7 +29,9 @@ public class AvatarSlashCommands : CommandGroup
         _interactions = interactions;
     }
 
-    [Command("avatar_slash")]
+    
+    [Ephemeral]
+    [Command("avatar-display")]
     [CommandType(ApplicationCommandType.ChatInput)]
     [Description("Get the avatar of a user, including yourself!")]
     public async Task<Result> Avatar
@@ -37,9 +39,7 @@ public class AvatarSlashCommands : CommandGroup
             [Description("The user to get the avatar of.")]
             IUser? user = null,
             [Description("Whether to get the user's guild avatar.")]
-            bool showGuildAvatar = false,
-            [Description("Whether to show the user's avatar privately.")]
-            bool showPrivately = false
+            bool guild = false
         )
     {
         if (_context is not InteractionContext ic)
@@ -47,24 +47,9 @@ public class AvatarSlashCommands : CommandGroup
 
         user ??= ic.User;
         
-        var responseResult = await _interactions
-           .CreateInteractionResponseAsync(
-                                            ic.ID,
-                                            ic.Token,
-                                            new InteractionResponse(
-                                                                    InteractionCallbackType.DeferredChannelMessageWithSource,
-                                                                    new InteractionCallbackData(Flags: showPrivately
-                                                                                                    ? InteractionCallbackDataFlags.Ephemeral
-                                                                                                    : default)
-                                                                    )
-                                           );
-
-        if (!responseResult.IsSuccess)
-            return Result.FromError(responseResult.Error);
-
         IEmbed embed;
 
-        if (!showGuildAvatar)
+        if (!guild)
         {
             var avatarURLResult = user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user, imageSize: 4096) : CDN.GetUserAvatarUrl(user, imageSize: 4096);
 
