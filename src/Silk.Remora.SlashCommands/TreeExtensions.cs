@@ -93,9 +93,23 @@ internal static class TreeExtensions
 
             foreach (var option in options)
             {
+                var subCommands = MapOptions(commandTree.Root, new() { command.Name }, option);
                 
+                if (!mapping.TryGetValue(new (command.GuildID, command.ID), out var value))
+                {
+                    var subMap = new Dictionary<string, CommandNode>();
+                    mapping.Add(new(command.GuildID, command.ID), subMap);
+                    value = subMap;
+                }
+
+                var groupMapping = value.AsT1;
+                
+                foreach (var (path, subOption) in subCommands)
+                    groupMapping.Add(string.Join("::", path), subOption);
             }
         }
+
+        return mapping;
     }
     
 
@@ -106,7 +120,51 @@ internal static class TreeExtensions
             IApplicationCommandOption option
         )
     {
+        //Regardless of the type we essentially traverse the tree.
+        if (option.Type is SubCommand)
+        {
+            var path  = outerPath[0];
+            var depth = 0;
+
+            var current = parent;
+            
+            // Keep traversing until we've found the 'leaf' node.
+            while (true)
+            {
+                var pathFoundNode = current.Children.FirstOrDefault(c => c.Key.Equals(path ?? option.Name, StringComparison.OrdinalIgnoreCase));
+                
+                if (pathFoundNode is null)
+                    throw new InvalidOperationException("A sub-command was not present in the command tree, but was present in the options list, and cannot be mapped.");
+
+                if (pathFoundNode is IParentNode group)
+                {
+                    ++depth;
+
+                    path    = outerPath.Skip(depth).FirstOrDefault();
+                    current = group;
+                    continue;
+                }
+                
+                if (pathFoundNode is not CommandNode command)
+                    throw new InvalidOperationException($"A command node must be of type {nameof(CommandNode)} or a group of type {nameof(IParentNode)}.");
+                
+                outerPath.Add(command.Key);
+
+                yield return (outerPath, command);
+                yield break;
+            }
+        }
         
+        if (option.Type is not SubCommandGroup)
+            throw new InvalidOperationException($"A command option must be of type {nameof(SubCommand)} or {nameof(SubCommandGroup)}.");
+
+        outerPath.Add(option.Name);
+        
+        var subcommands = option.Options.Value
+                                       .Select(opt => MapOptions(parent, outerPath, opt));
+        
+        foreach (var subcommand in subcommands.SelectMany(sc => sc))
+            yield return subcommand;
     }
 
 
