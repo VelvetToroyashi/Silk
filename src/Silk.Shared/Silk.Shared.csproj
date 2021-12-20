@@ -8,7 +8,7 @@
     <ItemGroup>
         <PackageReference Include="DSharpPlus" />
         <PackageReference Include="DSharpPlus.CommandsNext" />
-        <PackageReference Include="Serilog.Expressions" Version="3.2.1-dev-00071" />
+        <PackageReference Include="Serilog.Expressions" Version="3.2.1" />
         <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
 
