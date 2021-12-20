@@ -10,6 +10,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Results;
+using Remora.Rest.Core;
 using Remora.Rest.Extensions;
 using Remora.Results;
 using static Remora.Discord.API.Abstractions.Objects.ApplicationCommandOptionType;
@@ -53,7 +54,7 @@ internal static class TreeExtensions
 
     private static readonly Regex SlashRegex = new(NameRegexPattern, RegexOptions.Compiled);
 
-    public static Dictionary<SlashCommandIdentifier, OneOf<CommandNode, Dictionary<string, CommandNode>>> 
+    public static Dictionary<SlashCommandIdentifier, OneOf<CommandNode, IReadOnlyDictionary<string, CommandNode>>> 
         MapApplicationCommands
         (
             this CommandTree                   commandTree,
@@ -117,14 +118,24 @@ internal static class TreeExtensions
             }
         }
 
-        return mapping;
+        return mapping.ToDictionary
+            (
+             kvp => kvp.Key,
+             kvp =>
+             {
+                 var (_, value) = kvp;
+                 return value.IsT0
+                     ? OneOf<CommandNode, IReadOnlyDictionary<string, CommandNode>>.FromT0(value.AsT0)
+                     : OneOf<CommandNode, IReadOnlyDictionary<string, CommandNode>>.FromT1(value.AsT1);
+             }
+            );
     }
 
 
     public static Result<IReadOnlyList<IBulkApplicationCommandData>> CreateApplicationCommands
-        (
-            this CommandTree tree
-        )
+    (
+        this CommandTree tree
+    )
     {
         var commands     = new List<BulkApplicationCommandData>();
         var commandNames = new Dictionary<int, HashSet<string>>();
@@ -152,7 +163,7 @@ internal static class TreeExtensions
             
             var commandStringLength = (int)typeof(CommandTreeExtensions)
                                           .GetMethod("GetCommandStringifiedLength", BindingFlags.NonPublic | BindingFlags.Static)?
-                                          .Invoke(null, new object[] { node })!;
+                                          .Invoke(null, new object[] { option })!;
             
             if (commandStringLength > MaxCommandStringifiedLength)
                 return Result<IReadOnlyList<IBulkApplicationCommandData>>
@@ -160,10 +171,75 @@ internal static class TreeExtensions
                               new UnsupportedFeatureError("One or more commands is too long (combined length of name," +
                                                           $" description, and value properties), max {MaxCommandStringifiedLength}).", node));
             
-            
-            
+            Optional<ApplicationCommandType> commandType = default;
+            Optional<bool> defaultPermission = default;
+            switch (node)
+            {
+                case GroupNode groupNode:
+                {
+                    var defaultPermissionAttributes = groupNode.GroupTypes.Select
+                        (
+                            t => t.GetCustomAttribute<DiscordDefaultPermissionAttribute>()
+                        )
+                        .ToList();
+
+                    if (defaultPermissionAttributes.Count > 1)
+                    {
+                        return new UnsupportedFeatureError
+                        (
+                            "In a set of groups with the same name, only one may be marked with a default " +
+                            $"permission attribute (had {defaultPermissionAttributes.Count})."
+                        );
+                    }
+
+                    var permissionAttribute = defaultPermissionAttributes.SingleOrDefault();
+                    if (permissionAttribute is not null)
+                    {
+                        defaultPermission = permissionAttribute.DefaultPermission;
+                    }
+
+                    break;
+                }
+                case CommandNode commandNode:
+                {
+                    commandType = commandNode.GetCommandType();
+
+                    // Top-level command outside of a group
+                    var permissionAttribute = commandNode.GroupType
+                        .GetCustomAttribute<DiscordDefaultPermissionAttribute>();
+
+                    if (permissionAttribute is not null)
+                    {
+                        defaultPermission = permissionAttribute.DefaultPermission;
+                    }
+
+                    break;
+                }
+            }
+
+            commands.Add
+            (
+                new BulkApplicationCommandData
+                (
+                    option.Name,
+                    option.Description,
+                    option.Options,
+                    defaultPermission,
+                    commandType
+                )
+            );
         }
 
+        // Perform validations
+        if (commands.Count > MaxRootCommandsOrGroups)
+        {
+            return new UnsupportedFeatureError
+            (
+                $"Too many root-level commands or groups (had {commands.Count}, max {MaxRootCommandsOrGroups})."
+            );
+        }
+
+        return commands;
     }
 
 
@@ -176,6 +252,11 @@ internal static class TreeExtensions
         {
             case CommandNode command:
             {
+                var commandType = CustomAttributeProviderExtensions.GetCustomAttribute<CommandTypeAttribute>(command.CommandMethod)?.Type;
+
+                if (commandType is null) // If it isn't explicitly marked, it's not a slash command.
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
+                
                 if (CustomAttributeProviderExtensions.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>(command.GroupType) is not null)
                     return Result<IApplicationCommandOption?>.FromSuccess(null);
 
@@ -192,10 +273,6 @@ internal static class TreeExtensions
                 if (!validateDescriptionResult.IsSuccess)
                     return Result<IApplicationCommandOption?>.FromError(validateDescriptionResult);
 
-                var commandType = CustomAttributeProviderExtensions.GetCustomAttribute<CommandTypeAttribute>(command.CommandMethod)?.Type;
-
-                if (commandType is null) // If it isn't explicitly marked, it's not a slash command.
-                    return Result<IApplicationCommandOption?>.FromSuccess(null);
 
                 if (commandType is not ApplicationCommandType.ChatInput)
                 {
