@@ -1,9 +1,16 @@
 using System.Text.RegularExpressions;
 using OneOf;
+using Remora.Commands.Extensions;
+using Remora.Commands.Signatures;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Results;
+using Remora.Rest.Extensions;
+using Remora.Results;
 using static Remora.Discord.API.Abstractions.Objects.ApplicationCommandOptionType;
 
 namespace Silk.Remora.SlashCommands;
@@ -111,8 +118,114 @@ internal static class TreeExtensions
 
         return mapping;
     }
-    
 
+
+    public static Result<IReadOnlyList<IBulkApplicationCommandData>> CreateApplicationCommands
+        (
+            this CommandTree tree
+        )
+    {
+        var commands     = new List<BulkApplicationCommandData>();
+        var commandNames = new Dictionary<int, HashSet<string>>();
+
+        foreach (var node in tree.Root.Children)
+        {
+            
+        }
+
+    }
+
+
+    private static Result<IApplicationCommandOption?> GetCommandOptionFromNode(IChildNode node, int treeDepth)
+    {
+        if (treeDepth > MaxTreeDepth)
+            return new ArgumentOutOfRangeError($"A sub-command or group was nested too deeply. Max: {MaxTreeDepth}, Current: {treeDepth}");
+
+        switch (node)
+        {
+                case CommandNode command:
+                    if (command.GroupType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
+                        return Result<IApplicationCommandOption?>.FromSuccess(null);
+                    
+                    if (command.CommandMethod.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
+                        return Result<IApplicationCommandOption?>.FromSuccess(null);
+                    
+                    // var validateNameResult = ValidateNodeName(command.Key, command);
+                    // if (!validateNameResult.IsSuccess)
+                    // {
+                    //     return Result<IApplicationCommandOption?>.FromError(validateNameResult);
+                    // }
+                    //
+                    // var validateDescriptionResult = ValidateNodeDescription(command.Shape.Description, command);
+                    // if (!validateDescriptionResult.IsSuccess)
+                    // {
+                    //     return Result<IApplicationCommandOption?>.FromError(validateDescriptionResult);
+                    // }
+
+                    var commandType = command.CommandMethod.GetCustomAttribute<CommandTypeAttribute>();
+                    
+                    if (commandType is null) // If it isn't explicitly marked, it's not a slash command.
+                        return Result<IApplicationCommandOption?>.FromSuccess(null);
+
+                    if (commandType.Type is not ApplicationCommandType.ChatInput)
+                    {
+                        if (treeDepth > RootDepth)
+                            return new UnsupportedFeatureError("Context-Menus may not be nested.", command);
+                        
+                        if (command.CommandMethod.GetParameters().Any())
+                            return new UnsupportedFeatureError("Context-Menus may not have parameters.", command);
+                        
+                        
+                    }
+                    
+                    
+                    break;
+        }
+    }
+
+    internal static Result<IReadOnlyList<IApplicationCommandOption>> CreateCommandParameterOptions(CommandNode command)
+    {
+        var parameterOptions = new List<IApplicationCommandOption>();
+
+        foreach (var parameter in command.Shape.Parameters)
+        {
+          /*
+            var validateDescriptionResult = ValidateNodeDescription(parameter.Description, command);
+            if (!validateDescriptionResult.IsSuccess)
+            {
+                return Result<IReadOnlyList<IApplicationCommandOption>>.FromError(validateDescriptionResult);
+            }
+           */
+
+          if (parameter is SwitchParameterShape)
+              return new UnsupportedParameterFeatureError("Switch paremeters are not supported.", command, parameter);
+          
+          if (parameter is NamedCollectionParameterShape or PositionalCollectionParameterShape)
+              return new UnsupportedParameterFeatureError("Collection parameters are not supported.", command, parameter);
+          
+          
+        }
+    }
+    
+    
+    private static ApplicationCommandOptionType ToApplicationCommandOptionType(Type parameterType)
+    {
+        var discordType = parameterType switch
+        {
+            var t when t == typeof(bool)         => ApplicationCommandOptionType.Boolean,
+            var t when t == typeof(IRole)        => ApplicationCommandOptionType.Role,
+            var t when t == typeof(IUser)        => ApplicationCommandOptionType.User,
+            var t when t == typeof(IGuildMember) => ApplicationCommandOptionType.User,
+            var t when t == typeof(IChannel)     => ApplicationCommandOptionType.Channel,
+            var t when t.IsInteger()             => Integer,
+            var t when t.IsFloatingPoint()       => Number,
+            //var t when t == typeof(IAttachment)  => ApplicationCommandOptionType.Attachment,
+            _                                    => ApplicationCommandOptionType.String
+        };
+
+        return discordType;
+    }
+    
     internal static IEnumerable<(List<string> Path, CommandNode Node)> MapOptions
         (
             IParentNode               parent,
@@ -166,6 +279,4 @@ internal static class TreeExtensions
         foreach (var subcommand in subcommands.SelectMany(sc => sc))
             yield return subcommand;
     }
-
-
 }
