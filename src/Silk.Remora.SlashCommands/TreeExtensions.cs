@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using OneOf;
 using Remora.Commands.Extensions;
@@ -130,6 +131,36 @@ internal static class TreeExtensions
 
         foreach (var node in tree.Root.Children)
         {
+            var optionResult = GetCommandOptionFromNode(node, RootDepth);
+            
+            if (!optionResult.IsSuccess)
+                return Result<IReadOnlyList<IBulkApplicationCommandData>>.FromError(optionResult.Error);
+
+            if (!optionResult.IsDefined(out var option))
+                continue;
+            
+            //NOTE: This is safe to do here becasue we've already validated that the node is a command that has been explicitly defined as one.
+            var type = node is CommandNode command ? (int)command.GetCommandType() : -1;
+            if (!commandNames.TryGetValue(type, out var names))
+            {
+                names = new HashSet<string>();
+                commandNames.Add(type, names);
+            }
+            
+            if (!names.Add(option.Name))
+                return Result<IReadOnlyList<IBulkApplicationCommandData>>.FromError(new UnsupportedFeatureError("[Sub-]command [groups] do not support overloads.", node));
+            
+            var commandStringLength = (int)typeof(CommandTreeExtensions)
+                                          .GetMethod("GetCommandStringifiedLength", BindingFlags.NonPublic | BindingFlags.Static)?
+                                          .Invoke(null, new object[] { node })!;
+            
+            if (commandStringLength > MaxCommandStringifiedLength)
+                return Result<IReadOnlyList<IBulkApplicationCommandData>>
+                   .FromError(
+                              new UnsupportedFeatureError("One or more commands is too long (combined length of name," +
+                                                          $" description, and value properties), max {MaxCommandStringifiedLength}).", node));
+            
+            
             
         }
 
@@ -143,70 +174,112 @@ internal static class TreeExtensions
 
         switch (node)
         {
-                case CommandNode command:
-                    if (command.GroupType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
-                        return Result<IApplicationCommandOption?>.FromSuccess(null);
-                    
-                    if (command.CommandMethod.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
-                        return Result<IApplicationCommandOption?>.FromSuccess(null);
-                    
-                    // var validateNameResult = ValidateNodeName(command.Key, command);
-                    // if (!validateNameResult.IsSuccess)
-                    // {
-                    //     return Result<IApplicationCommandOption?>.FromError(validateNameResult);
-                    // }
-                    //
-                    // var validateDescriptionResult = ValidateNodeDescription(command.Shape.Description, command);
-                    // if (!validateDescriptionResult.IsSuccess)
-                    // {
-                    //     return Result<IApplicationCommandOption?>.FromError(validateDescriptionResult);
-                    // }
-
-                    var commandType = command.CommandMethod.GetCustomAttribute<CommandTypeAttribute>();
-                    
-                    if (commandType is null) // If it isn't explicitly marked, it's not a slash command.
-                        return Result<IApplicationCommandOption?>.FromSuccess(null);
-
-                    if (commandType.Type is not ApplicationCommandType.ChatInput)
-                    {
-                        if (treeDepth > RootDepth)
-                            return new UnsupportedFeatureError("Context-Menus may not be nested.", command);
-                        
-                        if (command.CommandMethod.GetParameters().Any())
-                            return new UnsupportedFeatureError("Context-Menus may not have parameters.", command);
-                        
-                        
-                    }
-                    
-                    
-                    break;
-        }
-    }
-
-    internal static Result<IReadOnlyList<IApplicationCommandOption>> CreateCommandParameterOptions(CommandNode command)
-    {
-        var parameterOptions = new List<IApplicationCommandOption>();
-
-        foreach (var parameter in command.Shape.Parameters)
-        {
-          /*
-            var validateDescriptionResult = ValidateNodeDescription(parameter.Description, command);
-            if (!validateDescriptionResult.IsSuccess)
+            case CommandNode command:
             {
-                return Result<IReadOnlyList<IApplicationCommandOption>>.FromError(validateDescriptionResult);
-            }
-           */
+                if (CustomAttributeProviderExtensions.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>(command.GroupType) is not null)
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
 
-          if (parameter is SwitchParameterShape)
-              return new UnsupportedParameterFeatureError("Switch paremeters are not supported.", command, parameter);
-          
-          if (parameter is NamedCollectionParameterShape or PositionalCollectionParameterShape)
-              return new UnsupportedParameterFeatureError("Collection parameters are not supported.", command, parameter);
-          
-          
+                if (CustomAttributeProviderExtensions.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>(command.CommandMethod) is not null)
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
+
+                var validateNameResult = (Result)typeof(CommandTreeExtensions).GetMethod("ValidateNodeName", BindingFlags.Static | BindingFlags.NonPublic)!
+                                                                              .Invoke(null, new object[] { command.Key, command })!;
+                if (!validateNameResult.IsSuccess)
+                    return Result<IApplicationCommandOption?>.FromError(validateNameResult);
+
+                var validateDescriptionResult = (Result)typeof(CommandTreeExtensions).GetMethod("ValidateNodeDescription", BindingFlags.Static | BindingFlags.NonPublic)!
+                                                                                     .Invoke(null, new object[] { command.Shape.Description, command })!;
+                if (!validateDescriptionResult.IsSuccess)
+                    return Result<IApplicationCommandOption?>.FromError(validateDescriptionResult);
+
+                var commandType = CustomAttributeProviderExtensions.GetCustomAttribute<CommandTypeAttribute>(command.CommandMethod)?.Type;
+
+                if (commandType is null) // If it isn't explicitly marked, it's not a slash command.
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
+
+                if (commandType is not ApplicationCommandType.ChatInput)
+                {
+                    if (treeDepth > RootDepth)
+                        return new UnsupportedFeatureError("Context-Menus may not be nested.", command);
+
+                    if (command.CommandMethod.GetParameters().Any())
+                        return new UnsupportedFeatureError("Context-Menus may not have parameters.", command);
+                }
+
+                var buildOptionsResult = (Result<IReadOnlyList<IApplicationCommandOption>>)typeof(CommandTreeExtensions).GetMethod("CreateCommandParameterOptions", BindingFlags.Static | BindingFlags.NonPublic)!
+                                                                                                                        .Invoke(null, new object[] { command })!;
+
+                if (!buildOptionsResult.IsSuccess)
+                    return Result<IApplicationCommandOption?>.FromError(buildOptionsResult.Error);
+
+                var key = commandType is not ApplicationCommandType.ChatInput
+                    ? command.Key
+                    : command.Key.ToLowerInvariant();
+
+                return new ApplicationCommandOption
+                    (
+                     SubCommand, // Might not actually be a sub-command, but the caller will handle that
+                     key,
+                     command.Shape.Description,
+                     Options: new(buildOptionsResult.Entity)
+                    );
+            }
+            case GroupNode group:
+            {
+                var validateNameResult = (Result)typeof(CommandTreeExtensions).GetMethod("ValidateNodeName", BindingFlags.Static | BindingFlags.NonPublic)!
+                                                                              .Invoke(null, new object[] { group.Key, group })!;
+
+                if (!validateNameResult.IsSuccess)
+                    return Result<IApplicationCommandOption?>.FromError(validateNameResult);
+
+                var validateDescriptionResult = (Result)typeof(CommandTreeExtensions).GetMethod("ValidateNodeDescription", BindingFlags.Static | BindingFlags.NonPublic)!
+                                                                                     .Invoke(null, new object[] { group.Description, group })!;
+
+                if (!validateDescriptionResult.IsSuccess)
+                    return Result<IApplicationCommandOption?>.FromError(validateDescriptionResult);
+
+                var groupOptions     = new List<IApplicationCommandOption>();
+                var groupOptionNames = new HashSet<string>();
+                var subcommands      = 0;
+
+                foreach (var child in group.Children)
+                {
+                    var optionResult = GetCommandOptionFromNode(child, treeDepth + 1);
+
+                    if (!optionResult.IsSuccess)
+                        return Result<IApplicationCommandOption?>.FromError(optionResult.Error);
+
+                    if (!optionResult.IsDefined(out var option))
+                        continue;
+
+                    if (option.Type is SubCommand)
+                        ++subcommands;
+
+                    if (!groupOptionNames.Add(option.Name))
+                        return new UnsupportedFeatureError("A group may not contain multiple options with the same name.", group);
+
+                    groupOptions.Add(option);
+                }
+
+                if (!groupOptions.Any())
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
+
+                if (subcommands > MaxGroupCommands)
+                    return new UnsupportedFeatureError($"Subcommands ({subcommands}) in group exceeded maximum of {MaxGroupCommands}.");
+
+
+                return new ApplicationCommandOption
+                    (
+                     SubCommandGroup,
+                     group.Key.ToLowerInvariant(),
+                     group.Description,
+                     Options: new(groupOptions)
+                    );
+            }
+            default:
+                throw new InvalidOperationException($"Unable to trnaslate node of {node.GetType().Name} into an application command.");
         }
     }
-    
     
     private static ApplicationCommandOptionType ToApplicationCommandOptionType(Type parameterType)
     {
@@ -219,7 +292,7 @@ internal static class TreeExtensions
             var t when t == typeof(IChannel)     => ApplicationCommandOptionType.Channel,
             var t when t.IsInteger()             => Integer,
             var t when t.IsFloatingPoint()       => Number,
-            //var t when t == typeof(IAttachment)  => ApplicationCommandOptionType.Attachment,
+            var t when t == typeof(IAttachment)  => (ApplicationCommandOptionType)11, //Attachment,
             _                                    => ApplicationCommandOptionType.String
         };
 
