@@ -13,8 +13,9 @@ public interface IHelpFormatter
 	///     Used to format a message representing a single command.
 	/// </summary>
 	/// <param name="command">The command to show a help message for.</param>
+	/// <param name="overloads">Any overloads the command has, or null if it has none.</param>
 	/// <returns>An embed displaying help for a single command.</returns>
-	public IEmbed GetHelpEmbed(CommandNode command);
+	public IEmbed GetHelpEmbed(CommandNode command, IEnumerable<CommandNode>? overloads = null);
 
 	/// <summary>
 	///     Used to format a message representing a group of commands. Any of the nodes passed to the method may be a group node.

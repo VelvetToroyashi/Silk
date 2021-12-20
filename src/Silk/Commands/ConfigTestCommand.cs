@@ -14,6 +14,16 @@ using Silk.Data.MediatR.Guilds.Config;
 
 namespace Silk.Commands;
 
+public class A : CommandGroup
+{
+    [Command(nameof(A1))]
+    public async Task<Result> A1() => Result.FromSuccess();
+    
+    [Command(nameof(A1))]
+    public async Task<Result> A1(IUser user) => Result.FromSuccess();
+    
+}
+
 [Group("config")]
 [Description("Configure various settings for your guild!")]
 //[RequireDiscordPermission(DiscordPermission.ManageGuild)]

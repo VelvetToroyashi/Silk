@@ -65,7 +65,7 @@ public class Program
             var updateResult = await slash.UpdateSlashCommandsAsync(new Snowflake(721518523704410202)); 
             
             if (!updateResult.IsSuccess)
-                slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {Error}", updateResult.Error);
+                slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {@Error}", updateResult.Error);
         }
 
 
