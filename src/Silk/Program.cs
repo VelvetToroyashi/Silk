@@ -17,6 +17,7 @@ using Remora.Rest.Core;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
+using Silk.Remora.SlashCommands;
 using Silk.Responders;
 using Silk.Services.Bot;
 using Silk.Services.Data;
@@ -48,27 +49,16 @@ public class Program
 
         IHost? host = hostBuilder.Build();
 
-        var slash       = host.Services.GetRequiredService<SlashService>();
-        var slashLogger = host.Services.GetRequiredService<ILogger<SlashService>>();
+        var slash       = host.Services.GetRequiredService<SlashCommandService>();
+        var slashLogger = host.Services.GetRequiredService<ILogger<SlashCommandService>>();
         
+        //TODO: Fetch from config
+        //TODO: x2, push this into a service/helper class
+        var updateResult = await slash.UpdateSlashCommandsAsync(new Snowflake(721518523704410202)); 
         
-        var supportsSlash = slash.SupportsSlashCommands();
+        if (!updateResult.IsSuccess)
+            slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {@Error}", updateResult.Error);
         
-        if (!supportsSlash.IsSuccess)
-        {
-            slashLogger.LogWarning(EventIds.Service, "Slash commands are not enabled. {Error}", supportsSlash.Error);
-        }
-        else
-        {
-            //TODO: Fetch from config
-            //TODO: x2, push this into a service/helper class
-            var updateResult = await slash.UpdateSlashCommandsAsync(new Snowflake(721518523704410202)); 
-            
-            if (!updateResult.IsSuccess)
-                slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {@Error}", updateResult.Error);
-        }
-
-
         await EnsureDatabaseCreatedAndApplyMigrations(host);
 
         await host.RunAsync();
@@ -124,6 +114,8 @@ public class Program
 
                 services.AddRemoraServices();
                 services.AddSilkLogging(context);
+
+                services.AddSingleton<SlashCommandService>();
 
                 services.AddCondition<RequireNSFWCondition>();
                 services.AddCondition<RequireTeamOrOwnerCondition>();

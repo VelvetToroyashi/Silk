@@ -96,6 +96,7 @@
         <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj" />
         <ProjectReference Include="..\Silk.Data\Silk.Data.csproj" />
         <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
+        <ProjectReference Include="..\Silk.Remora.SlashCommands\Silk.Remora.SlashCommands.csproj" />
         <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
     </ItemGroup>
 
