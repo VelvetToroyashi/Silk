@@ -7,6 +7,7 @@ using Remora.Commands.Signatures;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Silk.Extensions;
 
 namespace Silk.Utilities.HelpFormatter;
@@ -14,7 +15,7 @@ namespace Silk.Utilities.HelpFormatter;
 public class HelpFormatter : IHelpFormatter
 {
     /// <inheritdoc />
-    public IEmbed GetHelpEmbed(CommandNode command)
+    public IEmbed GetHelpEmbed(CommandNode command, IEnumerable<CommandNode>? overloads = null)
     {
         string aliases = command.Aliases.Any() ? string.Join(", ", command.Aliases) + '\n' : "None";
 
@@ -50,12 +51,13 @@ public class HelpFormatter : IHelpFormatter
             var fields = new List<IEmbedField>();
 
             IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
-                                                                            .GroupBy(x => x is CommandNode cn
-                                                                                         ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
-                                                                                         : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
-                                                                                          .GroupType.GetCustomAttribute<HelpCategoryAttribute>()
-                                                                                         ?.Name)
-                                                                            .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
+                .Where(IsTextCommand)
+                .GroupBy(x => x is CommandNode cn
+                             ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
+                             : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
+                              .GroupType.GetCustomAttribute<HelpCategoryAttribute>()
+                             ?.Name)
+                .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
 
             fields
                .AddRange(categories
@@ -123,5 +125,25 @@ public class HelpFormatter : IHelpFormatter
         }
 
         return param.IsOmissible() ? $"[{param.HintName}]" : $"<{param.HintName}>";
+    }
+
+    private bool IsTextCommand(IChildNode node)
+    {
+        if (node is IParentNode pn)
+        {
+            var pnt = pn.GetType();
+
+            return pnt.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null;
+        }
+        
+        var nodeType = node.GetType();
+        
+        if (nodeType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
+            return true;
+
+        if ((node as CommandNode)?.GroupType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
+            return true;
+
+        return (node as CommandNode)?.CommandMethod.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null;
     }
 }
