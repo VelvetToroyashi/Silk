@@ -871,7 +871,7 @@ namespace RoleMenuPlugin
 					                            DiscordChannel? chn = ctx.Guild.GetChannel(s.ChannelId);
 
 					                            var option =
-						                            new DiscordSelectComponentOption("Role Menu in #" + chn is null!
+						                            new DiscordSelectComponentOption("Role Menu in #" + chn is null
 							                                                             ? "deleted channel"
 							                                                             : chn?.Name,
 						                                                             s.MessageId.ToString(),
