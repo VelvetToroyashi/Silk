@@ -6,6 +6,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -27,6 +28,7 @@ public class A : CommandGroup
 [Group("config")]
 [Description("Configure various settings for your guild!")]
 //[RequireDiscordPermission(DiscordPermission.ManageGuild)]
+
 public class ConfigTestCommand : CommandGroup
 {
     [Group("edit")]
@@ -55,6 +57,7 @@ public class ConfigTestCommand : CommandGroup
         }
 
         [Command("logging")]
+        [CommandType(ApplicationCommandType.ChatInput)]
         [Description("Edit the logging settings for your guild!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Too many parameters")]
         public async Task<Result> EditLogging

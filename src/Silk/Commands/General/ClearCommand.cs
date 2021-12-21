@@ -71,7 +71,7 @@ public class ClearCommand : CommandGroup
         if (message?.ID.Timestamp.AddDays(14) < DateTimeOffset.UtcNow)
             return await _channels.CreateMessageAsync(_context.ChannelID, "You can specify messages up to two weeks old.");
         
-        var messageResult = await GetMessagesAsync(_context.ChannelID, message?.ID ?? default(Remora.Rest.Core.Optional<Snowflake>), messageCount + (skip + 1 ?? 1)); 
+        var messageResult = await GetMessagesAsync(_context.ChannelID, message?.ID ?? default(Optional<Snowflake>), messageCount + (skip + 1 ?? 1)); 
             
         if (!messageResult.IsSuccess)
             return Result<IMessage>.FromError(messageResult.Error);
@@ -116,7 +116,7 @@ public class ClearCommand : CommandGroup
     /// <param name="around">The ID of the message to fetch messages around</param>
     /// <param name="limit">The limit of messages. If around is not specified, and this is greater than 100, the request will be paginated.</param>
     /// <returns></returns>
-    private async Task<Result<IReadOnlyList<IMessage>>> GetMessagesAsync(Snowflake channelID, Remora.Rest.Core.Optional<Snowflake> around, int limit)
+    private async Task<Result<IReadOnlyList<IMessage>>> GetMessagesAsync(Snowflake channelID, Optional<Snowflake> around, int limit)
     {
         if (limit <= 100 || around.HasValue)
             return await _channels.GetChannelMessagesAsync(channelID, around, limit: limit);
@@ -124,7 +124,7 @@ public class ClearCommand : CommandGroup
         var messages = new List<IMessage>();
         
         var remaining = limit;
-        var before    = default(Remora.Rest.Core.Optional<Snowflake>);
+        var before    = default(Optional<Snowflake>);
 
         while (remaining > 0)
         {
