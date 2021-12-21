@@ -45,9 +45,8 @@ public class RestRequestCommand : CommandGroup
         _channels          = channels;
         _silkConfiguration = silkConfiguration.Value;
     }
-
-    [RequireTeamOrOwner]
     [Command("rest")]
+    [RequireTeamOrOwner]
     [Description("Performs a REST request.")]
     public async Task<Result<IMessage>> DoRestAsync(string method, string uri, [Greedy] string? json = null)
     {
