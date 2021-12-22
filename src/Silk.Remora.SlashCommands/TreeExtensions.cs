@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using OneOf;
 using Remora.Commands.Extensions;
 using Remora.Commands.Signatures;
@@ -13,6 +14,7 @@ using Remora.Discord.Commands.Results;
 using Remora.Rest.Core;
 using Remora.Rest.Extensions;
 using Remora.Results;
+using Serilog;
 using static Remora.Discord.API.Abstractions.Objects.ApplicationCommandOptionType;
 
 namespace Silk.Remora.SlashCommands;
@@ -92,7 +94,8 @@ internal static class TreeExtensions
                 if (commandNode is null)
                     throw new InvalidOperationException("A command was not present in the command tree, but was present in the commands list, and cannot be mapped.");
                 
-                mapping.Add(new(command.GuildID, command.ID), commandNode);
+                if (commandNode.CommandMethod.GetCustomAttribute<CommandTypeAttribute>() is not null)
+                    mapping.Add(new(command.GuildID, command.ID), commandNode);
                 
                 continue;
             }
@@ -146,7 +149,7 @@ internal static class TreeExtensions
             
             if (!optionResult.IsSuccess)
                 return Result<IReadOnlyList<IBulkApplicationCommandData>>.FromError(optionResult.Error);
-
+            
             if (!optionResult.IsDefined(out var option))
                 continue;
             
@@ -303,6 +306,9 @@ internal static class TreeExtensions
             }
             case GroupNode group:
             {
+                if (group.Children.All(c => (c as CommandNode)?.CommandMethod.GetCustomAttribute<CommandTypeAttribute>() is null))
+                    return Result<IApplicationCommandOption?>.FromSuccess(null);
+                
                 var validateNameResult = (Result)typeof(CommandTreeExtensions).GetMethod("ValidateNodeName", BindingFlags.Static | BindingFlags.NonPublic)!
                                                                               .Invoke(null, new object[] { group.Key, group })!;
 
