@@ -131,7 +131,9 @@ public class Program
 
                 services.AddSingleton<GuildGreetingService>();
                 //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
-
+                
+                services.AddSingleton<FlagOverlayService>();
+                
                 services.AddResponder<MemberGreetingResponder>();
 
                 services.AddMediatR(typeof(Program));
