@@ -157,8 +157,8 @@ public sealed class FlagOverlayService
 
     private static Result<Uri> GetImageUri(string imageUrl)
     {
-        if (imageUrl is null)
-            throw new ArgumentNullException(nameof(imageUrl));
+        if (string.IsNullOrEmpty(imageUrl))
+            return Result<Uri>.FromError(new ArgumentInvalidError(nameof(imageUrl), "The image URL cannot be null or empty."));
 
         if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
             return Result<Uri>.FromError(new ArgumentInvalidError(nameof(imageUrl), "The specified image URL is not a valid link."));
