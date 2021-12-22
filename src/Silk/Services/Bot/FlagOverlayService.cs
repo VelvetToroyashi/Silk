@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Remora.Results;
 using Silk.Shared.Constants;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -71,20 +72,25 @@ public sealed class FlagOverlayService
     ///     A result type that defines whether the operation succeeded, why it did not succeed, and a stream containing the content of the generated
     ///     image.
     /// </returns>
-    public async Task<FlagResult> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
+    public async Task<Result<Stream>> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
     {
-        OverlayGuard.ValidIntensity(intensity);
+        if (intensity is < 0 or > 1)
+            return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(intensity), "Intensity must be between 0 and 1"));
 
-        OverlayGuard.ValidFlagOverlay(overlay);
+        if (!Enum.IsDefined(typeof(FlagOverlay), overlay))
+            return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(overlay), $"Overlay must be specified in {nameof(FlagOverlay)}"));
 
-        OverlayGuard.ValidImageUrl(imageUrl, out Uri? imageUri);
+        var getImage = GetImageUri(imageUrl);
+
+        if (!getImage.IsDefined(out var imageUri))
+            return Result<Stream>.FromError(getImage);
 
         try
         {
             if (!await ValidateImageSizeAsync(imageUrl))
-                return new(false, FlagResultType.FileSizeTooLarge, null);
+                return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(imageUrl), "The image's file size exceeds the 2MB limit."));
         }
-        catch { return new(false, FlagResultType.FileNotFound, null); }
+        catch { return Result<Stream>.FromError(new NotFoundError("The specified image could not be found.")); }
 
         _logger.LogDebug(EventIds.Service, "Processing overlay: {OverlayType}", overlay);
 
@@ -95,15 +101,15 @@ public sealed class FlagOverlayService
         using Image? image = await Image.LoadAsync(imageStream);
 
         if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
-            return new(false, FlagResultType.FileDimensionsTooLarge, null);
+            return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(imageUrl), "The image's dimensions exceed the 3000x3000 limit. Considere resizing the image."));
 
-        Stream? overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
+        Stream overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
 
         DateTime after = DateTime.UtcNow;
 
         _logger.LogDebug(EventIds.Service, "Processed overlay in {Time:N1}ms", (after - before).TotalMilliseconds);
 
-        return new(true, FlagResultType.Succeeded, overlayImage);
+        return Result<Stream>.FromSuccess(overlayImage);
     }
 
     private static async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
@@ -151,36 +157,23 @@ public sealed class FlagOverlayService
 
     private async Task<MemoryStream> GetImageAsync(Uri imageUri) => new(await _httpClient.GetByteArrayAsync(imageUri));
 
-    private static class OverlayGuard
+    private static Result<Uri> GetImageUri(string imageUrl)
     {
-        public static void ValidImageUrl(string imageUrl, out Uri? uri)
-        {
-            if (imageUrl is null)
-                throw new ArgumentNullException(nameof(imageUrl));
+        if (imageUrl is null)
+            throw new ArgumentNullException(nameof(imageUrl));
 
-            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out uri))
-                throw new ArgumentException("Invalid image url", nameof(imageUrl));
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+            return Result<Uri>.FromError(new ArgumentInvalidError(nameof(imageUrl), "The specified image URL is not a valid link."));
 
-            if (uri.Scheme != "http" && uri.Scheme != "https")
-                throw new ArgumentException("Invalid image uri scheme", nameof(imageUrl));
+        if (uri.Scheme != "http" && uri.Scheme != "https")
+            return Result<Uri>.FromError(new ArgumentInvalidError(nameof(imageUrl), "The specified image URL is not a valid link."));
 
-            //check that the image ends with an image extension
-            if (!imageUrl.Contains(".png", StringComparison.OrdinalIgnoreCase) &&
-                !imageUrl.Contains(".jpg", StringComparison.OrdinalIgnoreCase) &&
-                !imageUrl.Contains(".jpeg", StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException("Invalid image url", nameof(imageUrl));
-        }
-
-        public static void ValidIntensity(float intensity)
-        {
-            if (intensity < 0 || intensity > 1)
-                throw new ArgumentOutOfRangeException(nameof(intensity));
-        }
-
-        public static void ValidFlagOverlay(FlagOverlay overlay)
-        {
-            if (!Enum.IsDefined(typeof(FlagOverlay), overlay))
-                throw new ArgumentOutOfRangeException(nameof(overlay));
-        }
+        //check that the image ends with an image extension
+        if (!imageUrl.Contains(".png", StringComparison.OrdinalIgnoreCase) &&
+            !imageUrl.Contains(".jpg", StringComparison.OrdinalIgnoreCase) &&
+            !imageUrl.Contains(".jpeg", StringComparison.OrdinalIgnoreCase))
+            return Result<Uri>.FromError(new ArgumentInvalidError(nameof(imageUrl), "The specified image URL does not point to an image."));
+        
+        return Result<Uri>.FromSuccess(uri);
     }
 }
