@@ -12,8 +12,6 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Silk.Services.Bot;
 
-public sealed record FlagResult(bool Succeeded, FlagResultType Reason, Stream? Image);
-
 public enum FlagResultType
 {
     FileDimensionsTooLarge,
@@ -101,7 +99,7 @@ public sealed class FlagOverlayService
         using Image? image = await Image.LoadAsync(imageStream);
 
         if (image.Width > MaxImageDimension || image.Height > MaxImageDimension)
-            return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(imageUrl), "The image's dimensions exceed the 3000x3000 limit. Considere resizing the image."));
+            return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(imageUrl), "The image's dimensions exceed the 3000x3000 limit. Consider resizing the image."));
 
         Stream overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
 
