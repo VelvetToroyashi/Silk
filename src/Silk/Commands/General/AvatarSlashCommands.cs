@@ -13,7 +13,7 @@ using Remora.Results;
 
 namespace Silk.Commands.General;
 
-public class AvatarSlashCommands : CommandGroup
+public class AvatarSlashCommands //: CommandGroup
 {
     private readonly ICommandContext            _context;
     private readonly IDiscordRestGuildAPI       _guilds;

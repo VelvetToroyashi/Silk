@@ -53,7 +53,7 @@ public static class IServiceCollectionExtensions
            .AddScoped<IHelpFormatter, HelpFormatter.HelpFormatter>();
 
         services
-           .AddDiscordCommands(enableSlash: true, useDefaultCommandResponder: false)
+           .AddDiscordCommands(useDefaultCommandResponder: false)
            .AddDiscordCaching();
         
         services
