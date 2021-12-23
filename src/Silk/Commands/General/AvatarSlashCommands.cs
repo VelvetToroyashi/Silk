@@ -31,7 +31,7 @@ public class AvatarSlashCommands : CommandGroup
 
     
     [Ephemeral]
-    [Command("avatar-display")]
+    [Command("avatar")]
     [CommandType(ApplicationCommandType.ChatInput)]
     [Description("Get the avatar of a user, including yourself!")]
     public async Task<Result> Avatar
@@ -73,10 +73,10 @@ public class AvatarSlashCommands : CommandGroup
             if (!member.IsSuccess)
                 return Result.FromError(new NotFoundError("It appears the user is not in this guild!"));
 
-            if (!member.Entity.Avatar.IsDefined(out var guildAvatar))
+            if (!member.Entity.Avatar.IsDefined())
                 return Result.FromError(new NotFoundError("It appears the user has no guild avatar!"));
 
-            var avatarURLResult = CDN.GetGuildMemberAvatarUrl(guildID, user.ID, guildAvatar, imageSize: 4096);
+            var avatarURLResult = CDN.GetGuildMemberAvatarUrl(guildID, member.Entity, imageSize: 4096);
 
             if (!avatarURLResult.IsSuccess)
                 return Result.FromError(avatarURLResult.Error);

@@ -36,23 +36,21 @@ public class AvatarCommand : CommandGroup
     }
     
     [Command("avatar", "av")]
-    [ExcludeFromSlashCommands]
     [Description("Show your, or someone else's avatar!")]
-    public async Task<Result<IMessage>> GetAvatarAsync(IUser? user = null, [Switch("guild")] bool guild = false)
+    public async Task<Result<IMessage>> GetAvatarAsync(IUser user, [Switch("guild")] bool guild = false)
     {
-        var target = user ?? _context.User;
-        
+
         if (!guild)
         {
-            var avatarURL = CDN.GetUserAvatarUrl(target, imageSize: 4096);
+            var avatarURL = CDN.GetUserAvatarUrl(user, imageSize: 4096);
             
             if (!avatarURL.IsSuccess)
-                avatarURL = CDN.GetDefaultUserAvatarUrl(target, imageSize: 4096);
+                avatarURL = CDN.GetDefaultUserAvatarUrl(user, imageSize: 4096);
             
             if (!avatarURL.IsSuccess)
                 return Result<IMessage>.FromError(avatarURL.Error);
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(target, avatarURL.Entity, user is null, guild));
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(user, avatarURL.Entity, user.ID == _context.User.ID, guild));
         }
         else
         {
@@ -62,7 +60,7 @@ public class AvatarCommand : CommandGroup
                 return returnResult;
             }
 
-            var memberResult = await _guilds.GetGuildMemberAsync(guildID, target.ID);
+            var memberResult = await _guilds.GetGuildMemberAsync(guildID, user.ID);
             
             if (!memberResult.IsSuccess)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't find that user in this server!");
@@ -77,7 +75,7 @@ public class AvatarCommand : CommandGroup
             if (!avatarURL.IsSuccess)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "Something went wrong while getting that user's guild avatar!");
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(target, avatarURL.Entity, user is null, guild));
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(user, avatarURL.Entity, user is null, guild));
         }
     }
     
