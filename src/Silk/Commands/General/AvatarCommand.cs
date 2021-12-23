@@ -37,7 +37,12 @@ public class AvatarCommand : CommandGroup
     
     [Command("avatar", "av")]
     [Description("Show your, or someone else's avatar!")]
-    public async Task<Result<IMessage>> GetAvatarAsync(IUser? user = null, [Switch("guild")] bool guild = false)
+    public async Task<Result<IMessage>> GetAvatarAsync(
+        [Description("The user to get the avatar of. This can be left blank if you wish to get your own avatar.")]
+        IUser? user = null, 
+        [Switch("guild")] 
+        [Description("Get the guild avatar instead of the global avatar.")]
+        bool guild = false)
     {
         user ??= _context.User;
         
