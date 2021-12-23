@@ -37,9 +37,10 @@ public class AvatarCommand : CommandGroup
     
     [Command("avatar", "av")]
     [Description("Show your, or someone else's avatar!")]
-    public async Task<Result<IMessage>> GetAvatarAsync(IUser user, [Switch("guild")] bool guild = false)
+    public async Task<Result<IMessage>> GetAvatarAsync(IUser? user = null, [Switch("guild")] bool guild = false)
     {
-
+        user ??= _context.User;
+        
         if (!guild)
         {
             var avatarURL = CDN.GetUserAvatarUrl(user, imageSize: 4096);
