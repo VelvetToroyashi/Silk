@@ -1,9 +1,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 using OneOf;
 using Remora.Commands.Extensions;
-using Remora.Commands.Signatures;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
@@ -14,7 +12,6 @@ using Remora.Discord.Commands.Results;
 using Remora.Rest.Core;
 using Remora.Rest.Extensions;
 using Remora.Results;
-using Serilog;
 using static Remora.Discord.API.Abstractions.Objects.ApplicationCommandOptionType;
 
 namespace Silk.Remora.SlashCommands;
@@ -79,6 +76,9 @@ internal static class TreeExtensions
                                                   if (!c.Key.Equals(command.Name, StringComparison.OrdinalIgnoreCase))
                                                       return false;
 
+                                                  if (c.CommandMethod.GetCustomAttribute<CommandTypeAttribute>() is null)
+                                                      return false;
+                                                  
                                                   if (!command.Options.IsDefined(out var options))
                                                       return true;
 
