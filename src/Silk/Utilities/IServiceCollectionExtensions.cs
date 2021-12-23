@@ -59,7 +59,6 @@ public static class IServiceCollectionExtensions
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
-           .AddCommandGroup<AvatarCommand>() //TODO: Automatically register these?
            .AddCommands();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
@@ -74,6 +73,7 @@ public static class IServiceCollectionExtensions
                     GatewayIntents.GuildMembers   |
                     GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
+                    GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages;
             })
            .Configure<CacheSettings>(cs =>
