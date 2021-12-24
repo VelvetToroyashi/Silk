@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Emzi0767.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Conditions;
 using Remora.Commands.Trees;
@@ -35,7 +36,7 @@ public class CommandHelpViewer
         if (formatter is null)
             return Result<IMessage>.FromError(new InvalidOperationError("No help formatter was registered with the container."));
 
-        IEmbed embed;
+        IEnumerable<IEmbed> embeds;
 
         if (command is null)
         {
@@ -44,47 +45,69 @@ public class CommandHelpViewer
             if (!commands.Any())
                 return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
 
-            embed = formatter.GetHelpEmbed(commands);
+            commands = commands.DistinctBy(c => c.Key, StringComparer.OrdinalIgnoreCase);
+            
+            embeds = new [] { formatter.GetSubcommandHelpEmbed(commands) };
         }
         else
         {
-            IChildNode? node = GetCommands(command, _tree.Root);
+            var nodes = SearchCommands(command, _tree.Root);
 
-            if (node is null) //TODO: Change this message to "No command was found with the name '<name>'."
-                return Result<IMessage>.FromError(new NotFoundError("The specified command does not exist."));
+            if (!nodes.Any()) //TODO: Change this message to "No command was found with the name '<name>'."
+                return Result<IMessage>.FromError(new NotFoundError($"No command was found with the name '{command}'."));
 
-            IEnumerable<IChildNode> childCommands = await GetApplicableCommandsAsync(_services, node is IParentNode parent ? parent.Children : new[] { node });
+            IEnumerable<IChildNode> viewableCommands = await GetApplicableCommandsAsync(_services, nodes);
 
-            if (!childCommands.Any())
+            if (!viewableCommands.Any())
                 return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
 
-            embed = node is IParentNode
-                ? formatter.GetHelpEmbed(childCommands)
-                : formatter.GetHelpEmbed((CommandNode)node);
+            embeds = nodes.First() is IParentNode
+                ? new [] { formatter.GetSubcommandHelpEmbed(viewableCommands.Skip(1)) }
+                : formatter.GetCommandHelpEmbeds(viewableCommands.Count() > 1 
+                                                     ? viewableCommands.Cast<CommandNode>().ToArray() 
+                                                     : viewableCommands.Cast<CommandNode>().First());
         }
 
-        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: new[] { embed });
+        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: embeds.ToArray());
 
         return res;
     }
 
-    public IChildNode? GetCommands(string command, IParentNode parent)
+    public IEnumerable<IChildNode> SearchCommands(string command, IParentNode parent)
     {
-        if (!command.Contains(' ')) // Top level command, only search the immediate children
-            return parent.Children.FirstOrDefault(x => command.Equals(x.Key, StringComparison.OrdinalIgnoreCase) ||
-                                                       x.Aliases.Contains(command, StringComparer.OrdinalIgnoreCase));
-        string[]? commandRoute = command.Split(' ');
+        string[] commandRoute = command.Split(' ');
 
-        foreach (string token in commandRoute)
-            foreach (IChildNode child in parent.Children)
-                if (token.Equals(child.Key) || child.Aliases.Contains(token, StringComparer.OrdinalIgnoreCase))
-                    if (child is IParentNode pn)
-                        return GetCommands(string.Join(" ", commandRoute.Skip(1)), pn) ?? child;
-                    else return child;
+        var currentToken = commandRoute[0];
 
-        return null;
+        foreach (var child in parent.Children)
+        {
+            if (string.Equals(child.Key, currentToken, StringComparison.OrdinalIgnoreCase) ||
+                child.Aliases.Contains(currentToken, StringComparer.OrdinalIgnoreCase))
+            {
+                if (child is not IParentNode pn)
+                {
+                    yield return child;
+                }
+                else
+                {
+                    if (commandRoute.Length is 1)
+                    {
+                        yield return child;
+                        
+                        foreach (var subcommand in pn.Children)
+                            yield return subcommand;
+
+                        yield break;
+                    }
+
+                    var commands = SearchCommands(string.Join(' ', commandRoute.Skip(1)), pn);
+                    foreach (var subCommand in commands)
+                        yield return subCommand;
+                }
+            }
+        }
     }
-
+    
     public async Task<IEnumerable<IChildNode>> GetApplicableCommandsAsync
         (
             IServiceProvider        services,

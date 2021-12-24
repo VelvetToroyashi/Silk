@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using OneOf;
 using Remora.Commands.Attributes;
 using Remora.Commands.Signatures;
 using Remora.Commands.Trees.Nodes;
@@ -15,31 +17,66 @@ namespace Silk.Utilities.HelpFormatter;
 public class HelpFormatter : IHelpFormatter
 {
     /// <inheritdoc />
-    public IEmbed GetHelpEmbed(CommandNode command, IEnumerable<CommandNode>? overloads = null)
+    public IEnumerable<IEmbed> GetCommandHelpEmbeds(OneOf<CommandNode, IReadOnlyList<CommandNode>> command)
     {
-        string aliases = command.Aliases.Any() ? string.Join(", ", command.Aliases) + '\n' : "None";
-
-        string parameterHelp =
-            string.Join('\n', command
-                             .Shape
-                             .Parameters
-                             .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
-
-        var embed = new Embed
+        if (command.TryPickT0(out var standalone, out var overloads))
         {
-            //Title = command.Key,
-            Description = $"**Command** - {command.Key}\n"   +
-                          $"**Aliases** - {aliases}\n"       +
-                          $"**Usage**\n {parameterHelp}\n\n" +
-                          $"**Description** - {command.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
-            Colour = Color.DodgerBlue
-        };
+            string aliases = standalone.Aliases.Any() ? string.Join(", ", standalone.Aliases) + '\n' : "None";
 
-        return embed;
+            var embed = new Embed
+            {
+                //Title = command.Key,
+                Description = $"**Command** - {standalone.Key}\n"                  +
+                              $"**Aliases** - {aliases}\n"                         +
+                              $"**Usage**\n {GetParameterHelp(standalone)}\n\n" +
+                              $"**Description** - {standalone.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
+                Colour = Color.DodgerBlue
+            };
+
+            yield return embed;
+        }
+        else
+        {
+            var    overloadIndex = 0;
+            var    firstOverload = overloads.First();
+            string aliases       = firstOverload.Aliases.Any() ? string.Join(", ", firstOverload.Aliases) + '\n' : "None";
+            
+            yield return new Embed
+            {
+                Title = "This command has several ways to use it:",
+                Description = $"**Command** - {firstOverload.Key}\n" +
+                              $"**Aliases** - {aliases}\n",                         
+                              Colour = Color.DodgerBlue
+            };
+
+            foreach (var overload in overloads)
+            {
+                yield return new Embed
+                {
+                    Title = $"Option {++overloadIndex}/{overloads.Count}",
+                    Description = $"**Usage**\n {GetParameterHelp(overload)}\n\n" +
+                                  $"**Description** - {overload.Shape.Description}",
+                    Colour = Color.DodgerBlue
+                };
+            }
+        }
     }
+    
+    /// <summary>
+    /// Formats a given command's parameters into a man-pages style string.
+    /// </summary>
+    /// <param name="command">The command to format.</param>
+    /// <returns>A string styled akin to man-pages, using &lt;&gt; and [] to denote optional and required parameters.</returns>
+    private string GetParameterHelp(CommandNode command)
+        => !command.Shape.Parameters.Any() 
+            ? "This command can be used without parameters!"
+            : string.Join('\n', command
+                            .Shape
+                            .Parameters
+                            .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
 
     /// <inheritdoc />
-    public IEmbed GetHelpEmbed(IEnumerable<IChildNode> subcommands)
+    public IEmbed GetSubcommandHelpEmbed(IEnumerable<IChildNode> subcommands)
     {
         IEmbed  embed;
         string? commandString = string.Join('\n', subcommands.Select(c => '`' + c.Key + '`'));
@@ -51,7 +88,6 @@ public class HelpFormatter : IHelpFormatter
             var fields = new List<IEmbedField>();
 
             IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
-                .Where(IsTextCommand)
                 .GroupBy(x => x is CommandNode cn
                              ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
                              : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
@@ -125,25 +161,5 @@ public class HelpFormatter : IHelpFormatter
         }
 
         return param.IsOmissible() ? $"[{param.HintName}]" : $"<{param.HintName}>";
-    }
-
-    private bool IsTextCommand(IChildNode node)
-    {
-        if (node is IParentNode pn)
-        {
-            var pnt = pn.GetType();
-
-            return pnt.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null;
-        }
-        
-        var nodeType = node.GetType();
-        
-        if (nodeType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
-            return true;
-
-        if ((node as CommandNode)?.GroupType.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null)
-            return true;
-
-        return (node as CommandNode)?.CommandMethod.GetCustomAttribute<ExcludeFromSlashCommandsAttribute>() is not null;
     }
 }

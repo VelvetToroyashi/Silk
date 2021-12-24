@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using OneOf;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 
@@ -13,14 +14,13 @@ public interface IHelpFormatter
 	///     Used to format a message representing a single command.
 	/// </summary>
 	/// <param name="command">The command to show a help message for.</param>
-	/// <param name="overloads">Any overloads the command has, or null if it has none.</param>
 	/// <returns>An embed displaying help for a single command.</returns>
-	public IEmbed GetHelpEmbed(CommandNode command, IEnumerable<CommandNode>? overloads = null);
+	public IEnumerable<IEmbed> GetCommandHelpEmbeds(OneOf<CommandNode, IReadOnlyList<CommandNode>> command);
 
 	/// <summary>
 	///     Used to format a message representing a group of commands. Any of the nodes passed to the method may be a group node.
 	/// </summary>
 	/// <param name="subcommands">The subcommands of the parent.</param>
 	/// <returns>An embed displaying help for a group of commands.</returns>
-	public IEmbed GetHelpEmbed(IEnumerable<IChildNode> subcommands);
+	public IEmbed GetSubcommandHelpEmbed(IEnumerable<IChildNode> subcommands);
 }
