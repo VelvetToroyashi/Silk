@@ -1,78 +1,99 @@
-﻿using System;
+﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Gateway;
+using Remora.Results;
 using Silk.Data;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
-[ExcludeFromSlashCommands]
 [HelpCategory(Categories.Misc)]
-public class PingCommand : BaseCommandModule
+public class PingCommand : CommandGroup
 {
-    private readonly HttpClient   _client;
-    private readonly GuildContext _dbFactory;
+    
+    private readonly HttpClient           _client;
+    private readonly GuildContext         _db;
+    private readonly ICommandContext      _context;
+    private readonly DiscordGatewayClient _gateway;
+    
 
-    public PingCommand(GuildContext dbFactory, HttpClient client)
+    private readonly IDiscordRestChannelAPI _channels;
+
+    public PingCommand(GuildContext db, HttpClient client, ICommandContext context, DiscordGatewayClient gateway, IDiscordRestChannelAPI channels)
     {
-        _dbFactory = dbFactory;
-        _client    = client;
+        _db       = db;
+        _client   = client;
+        _context  = context;
+        _gateway  = gateway;
+        _channels = channels;
     }
 
     [Command("ping")]
-    [Aliases("pong")]
-    [Description("Check the responsiveness of Silk")]
-    public async Task Ping(CommandContext ctx)
+    [Description("Pong! This is the latency of Silk!; if something seems slow, it's probably because of high latency!")]
+    public async Task<Result<IMessage>> Ping()
     {
-        DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                   .WithColor(DiscordColor.Blue)
-                                   .AddField("→ Message Latency ←", "```cs\n"   + "Calculating..".PadLeft(15, '⠀')         + "```", true)
-                                   .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀') + "```", true)
-                                   .AddField("→ Silk! API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀')         + "```", true)
-                                    // Make the databse latency centered. //
-                                   .AddField("→ Database Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true)
-                                   .AddField("​", "​", true)
-                                   .AddField("→ Discord API Latency ←", "```cs\n" + "Calculating..".PadLeft(15, '⠀') + "```", true);
+        var embed = new Embed
+        {
+            Colour = Color.DodgerBlue,
+            Fields = new EmbedField[]
+            {
+                new("→ Message Latency ←", "```cs\n" + "Fetching..".PadLeft(15, '⠀') + "```", true),
+                new("​", "​", true),
+                new("→ Websocket latency ←", "```cs\n" + $"{_gateway.Latency.TotalMilliseconds:N0} ms".PadLeft(10, '⠀') + "```", true),
 
-        DiscordMessage message = await ctx.RespondAsync(embed);
+                new("→ Database Latency ←", "```cs\n" + "Fetching..".PadLeft(15, '⠀') + "```", true),
+                new("​", "​", true),
+                new("→ Discord API Latency ←", "```cs\n" + "Fetching..".PadLeft(15, '⠀') + "```", true)
+            }
+        };
 
-        DateTime now = DateTime.UtcNow;
-        await ctx.Channel.TriggerTypingAsync();
+        var message = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
 
-        var apiLat = (DateTime.UtcNow - now).TotalMilliseconds.ToString("N0");
-        await Task.Delay(200);
+        if (!message.IsSuccess)
+            return message;
 
         var sw = Stopwatch.StartNew();
-        await _client.SendAsync(new(HttpMethod.Head, "https://api.velvetthepanda.dev/v1/authentication/ping"), HttpCompletionOption.ResponseHeadersRead);
+        
+        var typing = await _channels.TriggerTypingIndicatorAsync(_context.ChannelID);
+        
         sw.Stop();
+        
+        if (!typing.IsSuccess)
+            return Result<IMessage>.FromError(typing.Error);
+        
+        var apiLat = sw.ElapsedMilliseconds.ToString("N0");
 
-        embed
-           .ClearFields()
-           .AddField("→ Message Latency ←", "```cs\n"   + $"{(message.CreationTimestamp - ctx.Message.CreationTimestamp).Milliseconds} ms".PadLeft(10, '⠀') + "```", true)
-           .AddField("→ Websocket latency ←", "```cs\n" + $"{ctx.Client.Ping} ms".PadLeft(10, '⠀')                                                          + "```", true)
-           .AddField("→ Silk! API Latency ←", "```cs\n" + $"{sw.ElapsedMilliseconds} ms".PadLeft(10, '⠀')                                                   + "```", true)
-            // Make the databse latency centered. //
-           .AddField("→ Database Latency ←", "```cs\n" + $"{GetDbLatency()} ms".PadLeft(10, '⠀') + "```", true)
-           .AddField("​", "​", true)
-           .AddField("→ Discord API Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(12) + "```", true)
-           .WithFooter($"Silk! | Requested by {ctx.User.Id}", ctx.User.AvatarUrl);
-
-        await message.ModifyAsync(embed.Build());
+        embed = embed with
+        {
+            Fields = new EmbedField[]
+            {
+                (embed.Fields.Value[0] as EmbedField)! with { Value = $"```cs\n" + $"{(message.Entity.Timestamp - (_context as MessageContext)!.MessageID.Timestamp).TotalMilliseconds:N0} ms".PadLeft(10) + "```" },
+                (embed.Fields.Value[1] as EmbedField)!,
+                (embed.Fields.Value[2] as EmbedField)!,
+                (embed.Fields.Value[3] as EmbedField)! with { Value = $"```cs\n" + $"{GetDbLatency()}".PadLeft(7) + " ms```" },
+                (embed.Fields.Value[4] as EmbedField)!,
+                (embed.Fields.Value[5] as EmbedField)! with { Value = $"```cs\n" + $"{apiLat} ms".PadLeft(11) + "```" },
+            }
+        };
+        
+        return await _channels.EditMessageAsync(_context.ChannelID, message.Entity.ID, embeds: new[] { embed });
     }
 
     private int GetDbLatency()
     {
-        GuildContext db = _dbFactory;
-        //_ = db.Guilds.First(_ => _.DiscordGuildId == guildId);
-        //db.Database.BeginTransaction();
         var sw = Stopwatch.StartNew();
-        db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"Guilds\"");
+        _db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"guilds\"");
         sw.Stop();
         return (int)sw.ElapsedMilliseconds;
     }
