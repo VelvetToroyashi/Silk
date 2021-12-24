@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Silk.Shared.Types;
-using Silk.Types;
 
 namespace Silk.Benchmarks;
 

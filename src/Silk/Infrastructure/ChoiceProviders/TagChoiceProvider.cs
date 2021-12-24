@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Silk.Data.Entities;
 using Silk.Services.Guild;
 
-namespace Silk.Utilities.ChoiceProviders;
+namespace Silk.Infrastructure.ChoiceProviders;
 
 public class TagChoiceProvider : IAutocompleteProvider
 {
@@ -45,4 +45,4 @@ public class TagChoiceProvider : IAutocompleteProvider
         }
         return tags;
     }
-}
+}*/

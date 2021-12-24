@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -121,4 +121,4 @@ public sealed class TagService
     /// <param name="guildID">The Id of the guild.</param>
     /// <returns>A collection of tags in the guild, or null if there are none.</returns>
     public Task<IEnumerable<TagEntity>> GetGuildTagsAsync(Snowflake guildID) => _mediator.Send(new GetTagByGuildRequest(guildID));
-}
+}*/

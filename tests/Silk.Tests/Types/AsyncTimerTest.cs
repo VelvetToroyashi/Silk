@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Silk.Shared.Types;
-using Silk.Types;
 
 namespace Silk.Tests.Types;
 
