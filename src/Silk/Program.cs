@@ -48,16 +48,6 @@ public class Program
         ConfigureServices(hostBuilder);
 
         IHost? host = hostBuilder.Build();
-
-        var slash       = host.Services.GetRequiredService<SlashCommandService>();
-        var slashLogger = host.Services.GetRequiredService<ILogger<SlashCommandService>>();
-        
-        //TODO: Fetch from config
-        //TODO: x2, push this into a service/helper class
-        var updateResult = await slash.UpdateSlashCommandsAsync(new Snowflake(721518523704410202)); 
-        
-        if (!updateResult.IsSuccess)
-            slashLogger.LogWarning(EventIds.Service, "Failed to update slash commands.\n {Error}", updateResult.Error.Message);
         
         await EnsureDatabaseCreatedAndApplyMigrations(host);
 
