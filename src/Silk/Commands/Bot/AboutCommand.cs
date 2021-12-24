@@ -21,7 +21,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Bot;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Bot)]
 public class AboutCommand : CommandGroup
 {

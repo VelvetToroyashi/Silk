@@ -15,7 +15,7 @@ using Silk.Extensions.DSharpPlus;
 
 namespace Silk.Commands.Moderation
 {
-    [ExcludeFromSlashCommands]
+    
     [HelpCategory(Categories.Mod)]
     public class MuteCommand : BaseCommandModule
     {

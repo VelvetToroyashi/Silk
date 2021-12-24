@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.General)]
 public class PickPeopleCommand : BaseCommandModule
 {
@@ -45,4 +45,4 @@ public class PickPeopleCommand : BaseCommandModule
                                     .WithFooter($"RNG Seed: {seed}");
         await ctx.RespondAsync(embed);
     }
-}
+}*/

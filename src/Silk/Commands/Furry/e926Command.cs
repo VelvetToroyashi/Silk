@@ -19,7 +19,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Furry;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Misc)]
 public class e926Command : eBooruBaseCommand
 {

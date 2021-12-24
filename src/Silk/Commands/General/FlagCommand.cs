@@ -13,7 +13,7 @@ using Silk.Services.Bot;
 
 namespace Silk.Commands.General;
 
-[ExcludeFromSlashCommands]
+
 public class FlagCommand : CommandGroup
 {
     private readonly FlagOverlayService _flags;

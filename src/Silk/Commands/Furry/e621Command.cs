@@ -20,7 +20,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Furry;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Misc)]
 //[ModuleLifespan(ModuleLifespan.Transient)]
 //[Cooldown(1, 10, CooldownBucketType.User)]

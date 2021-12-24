@@ -15,7 +15,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Server;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Server)]
 public class ServerInfoCommand : BaseCommandModule
 {

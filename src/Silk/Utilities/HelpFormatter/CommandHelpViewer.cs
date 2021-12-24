@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Emzi0767.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Conditions;
 using Remora.Commands.Trees;

@@ -15,7 +15,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Mod)]
 public class CasesCommand : BaseCommandModule
 {

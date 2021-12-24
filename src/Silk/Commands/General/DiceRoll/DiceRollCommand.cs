@@ -16,7 +16,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General.DiceRoll;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.General)]
 public class DiceRollCommand : CommandGroup
 {

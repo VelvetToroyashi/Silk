@@ -18,7 +18,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Mod)]
 public class ClearCommand : CommandGroup
 {

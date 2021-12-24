@@ -1,4 +1,4 @@
-#pragma warning disable CA1822 // Mark members as static
+/*#pragma warning disable CA1822 // Mark members as static
 
 using System;
 using System.Collections.Concurrent;
@@ -23,7 +23,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace Silk.Commands.Miscellaneous;
 
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Misc)]
 public class UserInfo : BaseCommandModule
 {
@@ -226,4 +226,4 @@ public class UserInfo : BaseCommandModule
                 return DiscordEmoji.TryFromGuildEmote(client, Emojis.OfflineId, out emoji) ? emoji : DiscordEmoji.FromUnicode("⚫");
         }
     }
-}
+}*/

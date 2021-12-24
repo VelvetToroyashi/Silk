@@ -32,7 +32,7 @@ using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 namespace Silk.Commands.Bot;
 
 // THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
-[ExcludeFromSlashCommands]
+
 [HelpCategory(Categories.Bot)]
 public class EvalCommand : CommandGroup
 {
