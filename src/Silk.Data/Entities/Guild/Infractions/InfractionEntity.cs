@@ -49,7 +49,13 @@ public class InfractionEntity
     /// </summary>
     [Column("reason")]
     public string Reason { get; set; } = "Not given."; // Why was this infraction given
-
+    
+    /// <summary>
+    /// Gets whether the user was notified of the infraction, i.e. "Was the user DM'd?".
+    /// </summary>
+    [Column("user_notified")]
+    public bool UserNotified { get; set; } = false; //Has the user been notified of this infraction?
+    
     /// <summary>
     ///     Whether this infraction has been processed.
     /// </summary>
