@@ -14,8 +14,9 @@ public sealed record UpdateInfractionRequest
         Optional<DateTimeOffset?> Expiration      = default,
         Optional<string>          Reason          = default,
         Optional<bool>            AppliesToTarget = default,
-        Optional<bool>            Processed         = default,
-        Optional<bool>            Esclated        = default
+        Optional<bool>            Processed       = default,
+        Optional<bool>            Esclated        = default,
+        Optional<bool>            Notified        = default
     ) : IRequest<InfractionEntity>;
 
 public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRequest, InfractionEntity>
@@ -25,7 +26,7 @@ public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRe
 
     public async Task<InfractionEntity> Handle(UpdateInfractionRequest request, CancellationToken cancellationToken)
     {
-        InfractionEntity? infraction = await _db.Infractions
+        var infraction = await _db.Infractions
                                                 .FirstAsync(inf => inf.Id == request.InfractionId, cancellationToken);
 
         if (request.Expiration.HasValue)
@@ -42,6 +43,9 @@ public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRe
 
         if (request.Esclated.HasValue)
             infraction.Escalated = request.Esclated.Value;
+
+        if (request.Notified.HasValue)
+            infraction.UserNotified = request.Esclated.Value;
 
         await _db.SaveChangesAsync(cancellationToken);
         return infraction;
