@@ -12,13 +12,12 @@ namespace Silk.Data.MediatR.Infractions;
 
 public sealed record CreateInfractionRequest
     (
-        Snowflake      GuildID,
-        Snowflake      TargetID,
-        Snowflake      EnforcerID,
-        string         Reason,
-        InfractionType Type,
-        DateTimeOffset?      Expiration      = null,
-        bool           HeldAgainstUser = true
+        Snowflake       GuildID,
+        Snowflake       TargetID,
+        Snowflake       EnforcerID,
+        string          Reason,
+        InfractionType  Type,
+        DateTimeOffset? Expiration      = null
     ) : IRequest<InfractionEntity>;
 
 public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, InfractionEntity>
@@ -40,15 +39,14 @@ public class CreateInfractionHandler : IRequestHandler<CreateInfractionRequest, 
 
         var infraction = new InfractionEntity
         {
-            GuildID         = request.GuildID,
-            CaseNumber      = guildInfractionCount,
-            EnforcerID      = request.EnforcerID,
-            Reason          = request.Reason,
-            AppliesToTarget = request.HeldAgainstUser,
-            ExpiresAt       = request.Expiration,
-            CreatedAt       = DateTime.UtcNow,
-            TargetID        = request.TargetID,
-            Type            = request.Type
+            GuildID    = request.GuildID,
+            CaseNumber = guildInfractionCount,
+            EnforcerID = request.EnforcerID,
+            Reason     = request.Reason,
+            ExpiresAt  = request.Expiration,
+            CreatedAt  = DateTime.UtcNow,
+            TargetID   = request.TargetID,
+            Type       = request.Type
         };
 
         _db.Infractions.Add(infraction);
