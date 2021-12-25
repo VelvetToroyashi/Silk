@@ -624,14 +624,14 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="infraction">The infraction to log.</param>
     /// <param name="enforcer">The enforcer responsible for the infraction.</param>
     /// <param name="guildID">The ID of the guild the infraction took place on.</param>
-    private async Task TryInformTargetAsync(InfractionEntity infraction, IUser enforcer, Snowflake guildID)
+    private async Task<Result<bool>> TryInformTargetAsync(InfractionEntity infraction, IUser enforcer, Snowflake guildID)
     {
         Result<IGuild> guildResult = await _guilds.GetGuildAsync(guildID);
 
         if (!guildResult.IsDefined(out IGuild? guild))
         {
             _logger.LogError("Failed to fetch guild {GuildID} for infraction {InfractionID}.", guildID, infraction.Id);
-            return;
+            return false;
         }
 
         string action = infraction.Type switch
@@ -661,10 +661,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!channelResult.IsDefined(out IChannel? channel))
         {
             _logger.LogError("Failed to create DM channel for user {UserID} for infraction {InfractionID}.", infraction.TargetID, infraction.Id);
-            return;
+            return false;
         }
 
-        await _channels.CreateMessageAsync(channel.ID, $"You have been **{action}** from **{guild.Name}**.", embeds: new[] { embed });
+        var notificationResult = await _channels.CreateMessageAsync(channel.ID, $"You have been **{action}** from **{guild.Name}**.", embeds: new[] { embed });
+
+        return notificationResult.IsSuccess;
     }
     
     /// <summary>
