@@ -178,9 +178,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Strike));
 
-        await TryInformTargetAsync(infraction, enforcer, guildID);
+        var informResult = await TryInformTargetAsync(infraction, target, guildID);
 
-
+        if (informResult.IsSuccess && informResult.Entity)
+            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+        
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
         return returnResult.IsSuccess
@@ -203,7 +205,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Kick));
 
-        await TryInformTargetAsync(infraction, target, guildID);
+        var informResult = await TryInformTargetAsync(infraction, target, guildID);
+
+        if (informResult.IsSuccess && informResult.Entity)
+            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
 
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
@@ -237,8 +242,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
-        await TryInformTargetAsync(infraction, target, guildID);
+        var informResult = await TryInformTargetAsync(infraction, target, guildID);
 
+        if (informResult.IsSuccess && informResult.Entity)
+            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+        
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
         if (!banResult.IsSuccess)
