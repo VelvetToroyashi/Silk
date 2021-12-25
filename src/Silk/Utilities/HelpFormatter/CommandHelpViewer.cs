@@ -50,7 +50,7 @@ public class CommandHelpViewer
         }
         else
         {
-            var nodes = SearchCommands(command, _tree.Root);
+            var nodes = SearchCommands(command, _tree.Root).ToArray();
 
             if (!nodes.Any()) //TODO: Change this message to "No command was found with the name '<name>'."
                 return Result<IMessage>.FromError(new NotFoundError($"No command was found with the name '{command}'."));
@@ -59,7 +59,7 @@ public class CommandHelpViewer
 
             if (!viewableCommands.Any())
                 return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
-
+            
             embeds = nodes.First() is IParentNode
                 ? new [] { formatter.GetSubcommandHelpEmbed(viewableCommands.Skip(1)) }
                 : formatter.GetCommandHelpEmbeds(viewableCommands.Count() > 1 
@@ -145,6 +145,7 @@ public class CommandHelpViewer
                 conditionsToEvaluate.AddRange(commandAttributes);
             }
 
+            var add = true;
             foreach (ConditionAttribute conditionToEvaluate in conditionsToEvaluate)
             {
                 Type conditionType = typeof(ICondition<>).MakeGenericType(conditionToEvaluate.GetType());
@@ -157,8 +158,7 @@ public class CommandHelpViewer
 
                 if (!conditionServices.Any())
                     throw new InvalidOperationException($"Command was marked with {conditionToEvaluate.GetType().Name}, but no service was registered to handle it.");
-
-                var add = true;
+                
                 foreach (ICondition? condition in conditionServices)
                 {
                     MethodInfo? method = typeof(ICondition<>).MakeGenericType(conditionToEvaluate.GetType()).GetMethod(nameof(ICondition<ConditionAttribute>.CheckAsync));
@@ -170,9 +170,10 @@ public class CommandHelpViewer
                         break;
                     }
                 }
-
-                if (add) commands.Add(node);
             }
+            
+            if (add)
+                commands.Add(node);
         }
 
         return commands;
