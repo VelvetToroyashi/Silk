@@ -13,14 +13,14 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    [Migration("20211211110941_UnderTheHoodChanges")]
-    partial class UnderTheHoodChanges
+    [Migration("20211224232203_Attempt2")]
+    partial class SnowflakeIDsConversion
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -124,10 +124,10 @@ namespace Silk.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("GreetingText")
-                     .IsRequired(false)
-                     .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<decimal>("GuildID")
+                    b.Property<ulong>("GuildID")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
@@ -144,8 +144,9 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Entities.GuildEntity", b =>
                 {
-                    b.Property<ulong>("Id")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<ulong>("ID")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("Id");
 
                     b.Property<string>("Prefix")
                         .IsRequired()
@@ -153,7 +154,7 @@ namespace Silk.Data.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("prefix");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.ToTable("guilds");
                 });
@@ -501,7 +502,7 @@ namespace Silk.Data.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("channel_id");
 
-                    b.Property<ulong>("GuildId")
+                    b.Property<ulong>("GuildID")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
@@ -589,7 +590,7 @@ namespace Silk.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<decimal?>("GuildEntityId")
+                    b.Property<ulong?>("GuildEntityID")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<ulong>("GuildID")
@@ -615,7 +616,7 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildEntityId");
+                    b.HasIndex("GuildEntityID");
 
                     b.HasIndex("OriginalTagId");
 
@@ -810,7 +811,7 @@ namespace Silk.Data.Migrations
                 {
                     b.HasOne("Silk.Data.Entities.GuildEntity", null)
                         .WithMany("Tags")
-                        .HasForeignKey("GuildEntityId");
+                        .HasForeignKey("GuildEntityID");
 
                     b.HasOne("Silk.Data.Entities.TagEntity", "OriginalTag")
                         .WithMany("Aliases")
