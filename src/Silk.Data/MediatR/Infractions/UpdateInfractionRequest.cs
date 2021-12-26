@@ -45,7 +45,7 @@ public sealed class UpdateInfractionHandler : IRequestHandler<UpdateInfractionRe
             infraction.Escalated = request.Esclated.Value;
 
         if (request.Notified.HasValue)
-            infraction.UserNotified = request.Esclated.Value;
+            infraction.UserNotified = request.Notified.Value;
 
         await _db.SaveChangesAsync(cancellationToken);
         return infraction;
