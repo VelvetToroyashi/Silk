@@ -242,6 +242,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
+        //TODO: Don't attempt to inform the user if they're not present on the guild.
         var informResult = await TryInformTargetAsync(infraction, target, guildID);
 
         if (informResult.IsSuccess && informResult.Entity)
@@ -303,11 +304,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var inDatabase = await _mediator.Send(new GetUserInfractionsRequest(guildID, targetID));
 
-        if (inDatabase.Any(Predicate))
+        if (inDatabase.FirstOrDefault(Predicate) is {} inf)
         {
-            _logger.LogWarning("Mute was found in database but not in memory. ({GuildID} {TargetID})", guildID, targetID);
+            _logger.LogWarning("A mute for {Target} created by {Enforcer} on {Guild} was found in database but not in memory.", targetID, inf.EnforcerID, guildID);
             return true;
         }
+        
         return false;
     }
 
@@ -418,8 +420,23 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result<InfractionEntity>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note) 
-        => throw new NotImplementedException();
+    public async Task<Result<InfractionEntity>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note)
+    {
+        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, note, InfractionType.Note));
+        
+        Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+
+        if (!hierarchyResult.IsSuccess)
+            return Result<InfractionEntity>.FromError(hierarchyResult.Error);
+
+        var (target, enforcer) = hierarchyResult.Entity;
+        
+        var logResult = await LogInfractionAsync(infraction, target, enforcer);
+        
+        return logResult.IsSuccess
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, logResult));
+    }
 
     /// <inheritdoc />
     public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int caseID, string reason = "Not Given.")
@@ -448,9 +465,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         foreach (InfractionEntity infraction in infractions)
             _queue.Add(infraction);
     }
-
-
-
+    
     /// <summary>
     /// Attempts to create a mute role for a guild.
     /// </summary>
@@ -638,27 +653,28 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         if (!guildResult.IsDefined(out IGuild? guild))
         {
-            _logger.LogError("Failed to fetch guild {GuildID} for infraction {InfractionID}.", guildID, infraction.Id);
+            _logger.LogError("{Enforcer} attempted to infract {Target} on {Guild} but the guild is not available.", enforcer.ID, infraction.TargetID, guildID);
             return false;
         }
 
         string action = infraction.Type switch
         {
-            InfractionType.Mute or InfractionType.AutoModMute => "muted",
-            InfractionType.Kick                               => "kicked",
-            InfractionType.Ban                                => "banned",
-            InfractionType.SoftBan                            => "temporarily banned",
-            InfractionType.Strike                             => "warned",
-            InfractionType.Pardon                             => "pardoned",
-            InfractionType.Unban                              => "unbanned",
-            InfractionType.Unmute                             => "unmuted",
-
+            InfractionType.Kick    => "kicked",
+            InfractionType.Ban     => "banned",
+            InfractionType.SoftBan => "temporarily banned",
+            InfractionType.Strike  => "warned",
+            InfractionType.Pardon  => "pardoned",
+            InfractionType.Unban   => "unbanned",
+            InfractionType.Unmute  => "unmuted",
+            InfractionType.Mute or 
+                InfractionType.AutoModMute => "muted",
+            
             _ => infraction.Type.ToString()
         };
 
         var embed = new Embed
         {
-            Title       = "Infraction:",
+            Title       = "Action Reason:",
             Author      = new EmbedAuthor($"{enforcer.Username}#{enforcer.Discriminator}"),
             Description = infraction.Reason,
             Colour      = Color.Firebrick
@@ -797,8 +813,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             _logger.LogCritical("Failed to fetch self from guild.");
             return Result.FromError(currentMemberResult.Error!);
         }
-
-
+        
         if (config.LoggingConfig.Infractions is not LoggingChannelEntity ilc)
         {
             return Result.FromSuccess();
