@@ -79,7 +79,9 @@ public static class IServiceCollectionExtensions
            .Configure<CacheSettings>(cs =>
             {
                 cs.SetAbsoluteExpiration<IChannel>(null)
-                  .SetAbsoluteExpiration<IMessage>(null);
+                  .SetAbsoluteExpiration<IMessage>(null)
+                  .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
+                  .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromMinutes(5));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true });
 
