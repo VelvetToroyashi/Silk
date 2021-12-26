@@ -21,7 +21,7 @@
         </PackageReference>
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-        <PackageReference Include="Remora.Discord" Version="4.0.3" />
+        <PackageReference Include="Remora.Discord" Version="4.0.8" />
         <PackageReference Include="Remora.Rest.Core" Version="2.0.0" />
         <PackageReference Include="Remora.Results" Version="7.1.0" />
     </ItemGroup>

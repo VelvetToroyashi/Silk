@@ -68,10 +68,10 @@
         <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
         <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-        <PackageReference Include="Remora.Discord.Caching" Version="17.0.1" />
-        <PackageReference Include="Remora.Discord.Commands" Version="14.0.3" />
+        <PackageReference Include="Remora.Discord.Caching" Version="18.0.4" />
+        <PackageReference Include="Remora.Discord.Commands" Version="16.0.2" />
         <PackageReference Include="Remora.Discord.Extensions" Version="1.0.1" />
-        <PackageReference Include="Remora.Discord.Hosting" Version="4.0.3" />
+        <PackageReference Include="Remora.Discord.Hosting" Version="4.0.7" />
         <PackageReference Include="Remora.Results" Version="7.1.0" />
         <PackageReference Include="Serilog" Version="2.10.1-dev-01366" />
         <PackageReference Include="Serilog.Expressions" Version="3.2.1" />
