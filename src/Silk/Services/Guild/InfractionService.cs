@@ -178,7 +178,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Strike));
 
-        var informResult = await TryInformTargetAsync(infraction, target, guildID);
+        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsSuccess && informResult.Entity)
             infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
@@ -205,7 +205,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Kick));
 
-        var informResult = await TryInformTargetAsync(infraction, target, guildID);
+        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsSuccess && informResult.Entity)
             infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
@@ -243,7 +243,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
         //TODO: Don't attempt to inform the user if they're not present on the guild.
-        var informResult = await TryInformTargetAsync(infraction, target, guildID);
+        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsSuccess && informResult.Entity)
             infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
@@ -672,10 +672,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             _ => infraction.Type.ToString()
         };
 
+        var avatar = CDN.GetUserAvatarUrl(enforcer, imageSize: 4096);
+        
         var embed = new Embed
         {
             Title       = "Action Reason:",
-            Author      = new EmbedAuthor($"{enforcer.Username}#{enforcer.Discriminator}"),
+            Author      = new EmbedAuthor($"{enforcer.Username}#{enforcer.Discriminator}", IconUrl: avatar.Entity?.ToString() ?? default(Optional<string>)),
             Description = infraction.Reason,
             Colour      = Color.Firebrick
         };
