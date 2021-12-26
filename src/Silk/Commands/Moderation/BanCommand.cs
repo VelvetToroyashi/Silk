@@ -45,7 +45,7 @@ namespace Silk.Commands.Moderation
         {
             var self = await _users.GetCurrentUserAsync();
 
-            if (self.IsSuccess)
+            if (!self.IsSuccess)
                 return Result<IMessage>.FromError(self);
             
             if (user.ID == self.Entity.ID)
@@ -57,16 +57,16 @@ namespace Silk.Commands.Moderation
             var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, 0, reason);
 
             return infractionResult.IsSuccess
-                ? await _channels.CreateMessageAsync(_context.ChannelID, $"Successfully banned <@{user.ID}>!")
+                ? await _channels.CreateMessageAsync(_context.ChannelID, $"Successfully banned <@{user.ID}>{(infractionResult.Entity.UserNotified ? "(User notified with DM)" : null)}!")
                 : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
         }
 
 
-        [Command("ban")]
+        //[Command("ban")]
         [RequireContext(ChannelContext.Guild)]
         [RequireDiscordPermission(DiscordPermission.BanMembers)]
         [Description("Temporarily ban someone from the server!")]
-        public async Task TempBanAsync(CommandContext ctx, IUser user, TimeSpan duration, [Greedy] string reason = "Not Given.")
+        public async Task<Result<IMessage>> TempBanAsync(CommandContext ctx, IUser user, TimeSpan duration, [Greedy] string reason = "Not Given.")
         {
             /*if (user == ctx.Guild.CurrentMember)
             {
@@ -91,6 +91,7 @@ namespace Silk.Commands.Moderation
             };
 
             await ctx.RespondAsync(message);*/
+            return default;
         }
     }
 }
