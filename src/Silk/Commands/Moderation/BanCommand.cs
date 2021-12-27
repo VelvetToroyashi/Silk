@@ -41,15 +41,18 @@ namespace Silk.Commands.Moderation
         [Command("ban")]
         [RequireContext(ChannelContext.Guild)]
         [RequireDiscordPermission(DiscordPermission.BanMembers)]
-        [Description("Permanently ban someone from the server!")]
+        [Description("Permanently or temporarily ban someone from the server!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         public async Task<Result<IMessage>> BanAsync
         (
             [Description("The user to ban.")]
             IUser user, 
             
+            [Option('f', "for")]
+            [Description("How long to ban the user for.")]
+            TimeSpan? banDuration = null,
+            
             [Option('d', "days")]
-            [MinValue(0d), MaxValue(7d)]
             [Description("The number days to clear messages from. Range: 0-7")]
             int days = 0, 
             
@@ -69,46 +72,7 @@ namespace Silk.Commands.Moderation
             if (user.ID == _context.User.ID)
                 return await _channels.CreateMessageAsync(_context.ChannelID,"The ban hammer must swing upon someone else!");
 
-            var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason);
-
-            return infractionResult.IsSuccess
-                ? await _channels.CreateMessageAsync(_context.ChannelID, $"Successfully banned <@{user.ID}>! " + (infractionResult.Entity.UserNotified ? "(User notified with DM)" : "(Failed to DM user)"))
-                : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
-        }
-
-
-        //[Command("ban")]
-        [RequireContext(ChannelContext.Guild)]
-        [RequireDiscordPermission(DiscordPermission.BanMembers)]
-        [Description("Temporarily ban someone from the server!")]
-        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
-        public async Task<Result<IMessage>> TempBanAsync(
-            [Description("The user to ban.")]
-            IUser user,
-            
-            [Description("The duration of the ban.")]
-            TimeSpan duration,
-            
-            [Option('d', "days")]
-            [Description("The number days to clear messages from. Range: 0-7")]
-            int deleteDays = 0,
-            
-            [Greedy] 
-            [Description("The reason for the ban.")]
-            string reason = "Not Given.")
-        {
-            var self = await _users.GetCurrentUserAsync();
-
-            if (!self.IsSuccess)
-                return Result<IMessage>.FromError(self);
-            
-            if (user.ID == self.Entity.ID)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "As much as I'm happy to serve, I can't ban myself!");
-
-            if (user.ID == _context.User.ID)
-                return await _channels.CreateMessageAsync(_context.ChannelID,"The ban hammer must swing upon someone else!");
-
-            var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, deleteDays, reason, duration);
+            var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason, banDuration);
 
             return infractionResult.IsSuccess
                 ? await _channels.CreateMessageAsync(_context.ChannelID, $"Successfully banned <@{user.ID}>! " + (infractionResult.Entity.UserNotified ? "(User notified with DM)" : "(Failed to DM user)"))
