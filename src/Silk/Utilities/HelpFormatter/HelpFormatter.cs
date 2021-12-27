@@ -132,14 +132,7 @@ public class HelpFormatter : IHelpFormatter
 
         return embed;
     }
-
-    /// <summary>
-    ///     Gets the 'usage' of a command, formatting it's paremeters
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    private string GetUsage(CommandNode command) => string.Join('\n', command.Shape.Parameters.Select(GetHumanFriendlyParemeterName));
-
+    
     /// <summary>
     ///     Gets a neatly formatted parameter name for the help embed.
     /// </summary>
@@ -147,19 +140,27 @@ public class HelpFormatter : IHelpFormatter
     /// <returns>The paremeter name, formatted to respect switches and options, if applicable.</returns>
     private string GetHumanFriendlyParemeterName(IParameterShape param)
     {
-        IEnumerable<CustomAttributeData> attributes = param.Parameter.CustomAttributes;
+        return param.Parameter.GetCustomAttribute<OptionAttribute>() is { } oa 
+            ? param.IsOmissible() 
+                ? $"[{GetOptionString(oa)} <{param.Parameter.Name}>]" 
+                : $"<{GetOptionString(oa)} <{param.Parameter.Name}>>" 
+            : param.IsOmissible()
+                ? $"[{param.HintName}]" 
+                : $"<{param.HintName}>";
+    }
 
-        string hintName = param.HintName.Length > 1 ? "--" + param.HintName : "-" + param.HintName;
-
-        if (attributes.Any(a => a.AttributeType == typeof(SwitchAttribute)))
+    private string GetOptionString(OptionAttribute option)
+    {
+        return option switch
         {
-            return param.IsOmissible() ? $"[{hintName}]" : $"<--{hintName}>";
-        }
-        if (attributes.Any(a => a.AttributeType == typeof(OptionAttribute)))
-        {
-            return param.IsOmissible() ? $"[--{param.HintName} <{param.Parameter.Name}>]" : $"<--{param.HintName} <{param.Parameter.Name}>>";
-        }
+            _ when option.ShortName is not null &&
+                   option.LongName is not null => $"-{option.ShortName} OR --{option.LongName}",
 
-        return param.IsOmissible() ? $"[{param.HintName}]" : $"<{param.HintName}>";
+            _ when option.ShortName is not null => $"-{option.ShortName}",
+
+            _ when option.LongName is not null => $"--{option.LongName}",
+            
+            _ => throw new InvalidOperationException("Option must have a name!")
+        };
     }
 }
