@@ -677,7 +677,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var embed = new Embed
         {
             Title       = "Action Reason:",
-            Author      = new EmbedAuthor($"{enforcer.Username}#{enforcer.Discriminator}", IconUrl: avatar.Entity?.ToString() ?? default(Optional<string>)),
+            Footer      = new EmbedFooter($"{enforcer.Username}#{enforcer.Discriminator:0000}", IconUrl: avatar.Entity?.ToString() ?? default(Optional<string>)),
             Description = infraction.Reason,
             Colour      = Color.Firebrick
         };
