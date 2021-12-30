@@ -11,9 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
-using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Extensions;
-using Remora.Rest.Core;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -24,9 +22,7 @@ using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
 using Silk.Shared.Configuration;
-using Silk.Shared.Constants;
 using Silk.Utilities;
-using ILogger = Serilog.ILogger;
 
 namespace Silk;
 
@@ -111,7 +107,6 @@ public class Program
                 services.AddCondition<RequireTeamOrOwnerCondition>();
 
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
-                services.AddSingleton<ICacheUpdaterService, CacheUpdaterService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
 
                 services.AddSingleton<ChannelLoggingService>();
