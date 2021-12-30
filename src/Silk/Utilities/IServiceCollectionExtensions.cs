@@ -17,9 +17,11 @@ using Remora.Extensions.Options.Immutable;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
+using Silk.Commands.Conditions;
 using Silk.Commands.General;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Interactivity;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -52,6 +54,9 @@ public static class IServiceCollectionExtensions
            .AddScoped<CommandHelpViewer>()
            .AddScoped<IHelpFormatter, HelpFormatter.HelpFormatter>();
 
+        services.AddCondition<NonSelfActionableCondition>()
+                .AddCondition<RequireNSFWCondition>();
+        
         services
            .AddDiscordCommands(useDefaultCommandResponder: false)
            .AddDiscordCaching();
@@ -65,7 +70,7 @@ public static class IServiceCollectionExtensions
         services.AddParser<EmojiParser>();
 
         services.AddPostExecutionEvent<AfterSlashHandler>();
-        
+
         services
            .Configure<DiscordGatewayClientOptions>(gw =>
             {
