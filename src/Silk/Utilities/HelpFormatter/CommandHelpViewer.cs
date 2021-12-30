@@ -37,7 +37,7 @@ public class CommandHelpViewer
 
         IEnumerable<IEmbed> embeds;
 
-        if (command is null)
+        if (string.IsNullOrEmpty(command))
         {
             IEnumerable<IChildNode> commands = await GetApplicableCommandsAsync(_services, _tree.Root.Children);
 
@@ -92,7 +92,6 @@ public class CommandHelpViewer
                     if (commandRoute.Length is 1)
                     {
                         yield return child;
-                        
                         foreach (var subcommand in pn.Children)
                             yield return subcommand;
 
