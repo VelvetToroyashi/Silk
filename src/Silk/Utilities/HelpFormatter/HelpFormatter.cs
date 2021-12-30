@@ -70,7 +70,7 @@ public class HelpFormatter : IHelpFormatter
     private string GetParameterHelp(CommandNode command)
         => !command.Shape.Parameters.Any() 
             ? "This command can be used without parameters!"
-            : string.Join('\n', command
+            : string.Join("\n\n", command
                             .Shape
                             .Parameters
                             .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
@@ -142,8 +142,8 @@ public class HelpFormatter : IHelpFormatter
     {
         return param.Parameter.GetCustomAttribute<OptionAttribute>() is { } oa 
             ? param.IsOmissible() 
-                ? $"[{GetOptionString(oa)} <{param.Parameter.Name}>]" 
-                : $"<{GetOptionString(oa)} <{param.Parameter.Name}>>" 
+                ? $"[{GetOptionString(oa)}{(oa is not SwitchAttribute ? $" <{param.Parameter.Name}>" : null)}]" 
+                : $"<{GetOptionString(oa)}{(oa is not SwitchAttribute ? $" <{param.Parameter.Name}>" : null)}>" 
             : param.IsOmissible()
                 ? $"[{param.HintName}]" 
                 : $"<{param.HintName}>";
