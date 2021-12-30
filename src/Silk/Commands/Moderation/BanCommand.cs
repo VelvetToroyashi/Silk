@@ -10,6 +10,7 @@ using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 
@@ -45,6 +46,7 @@ namespace Silk.Commands.Moderation
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         public async Task<Result<IMessage>> BanAsync
         (
+            [NonSelfActionable]
             [Description("The user to ban.")]
             IUser user, 
             
@@ -61,17 +63,6 @@ namespace Silk.Commands.Moderation
             string reason = "Not Given."
         )
         {
-            var self = await _users.GetCurrentUserAsync();
-
-            if (!self.IsSuccess)
-                return Result<IMessage>.FromError(self);
-            
-            if (user.ID == self.Entity.ID)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "As much as I'm happy to serve, I can't ban myself!");
-
-            if (user.ID == _context.User.ID)
-                return await _channels.CreateMessageAsync(_context.ChannelID,"The ban hammer must swing upon someone else!");
-
             var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason, banDuration);
 
             return infractionResult.IsSuccess
