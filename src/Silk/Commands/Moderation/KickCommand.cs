@@ -1,77 +1,56 @@
-﻿/*using System.Linq;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Silk.Data.Entities;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
-using Silk.Extensions;
-using Silk.Extensions.DSharpPlus;
+using Silk.Extensions.Remora;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class KickCommand : CommandGroup
 {
-    
-    [HelpCategory(Categories.Mod)]
-    public class KickCommand : BaseCommandModule
-    {
-        private readonly IInfractionService _infractionService;
-        public KickCommand(IInfractionService infractionService) => _infractionService = infractionService;
-
-
-        [Command]
+    private readonly ICommandContext        _context;
+    private readonly IInfractionService     _infractions;
+    private readonly IDiscordRestUserAPI    _users;
+    private readonly IDiscordRestGuildAPI   _guilds;
+    private readonly IDiscordRestChannelAPI _channels;
         
-        [RequirePermissions(Permissions.KickMembers)]
-        [Description("Boot someone from the guild!")]
-        public async Task Kick(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not given.")
-        {
-            DiscordMember bot = ctx.Guild.CurrentMember;
-
-            if (!user.IsAbove(bot) && !user.IsAbove(ctx.Member) && ctx.User != user)
-            {
-                InfractionResult response = await _infractionService.KickAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-                string? message = response switch
-                {
-                    InfractionResult.FailedGuildHeirarchy         => "I can't kick that person due to role hierarchy!",
-                    InfractionResult.FailedSelfPermissions        => "I don't have permission to kick members!", /* In retrospect, these should never happen, but. #1#
-                    InfractionResult.SucceededWithNotification    => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")}  (Notified with direct message).",
-                    InfractionResult.SucceededWithoutNotification => $"Kicked {Formatter.Bold($"{user.Username}#{user.Discriminator}")} (Unable to notify with Direct Message).",
-                    _                                             => $"Unexpected response: {response}"
-                };
-
-                await ctx.RespondAsync(message);
-            }
-            else
-            {
-                DiscordEmbed embed = await CreateHierarchyEmbedAsync(ctx, bot, user);
-                await ctx.RespondAsync(embed);
-            }
-        }
-
-        private static async Task<DiscordEmbedBuilder> CreateHierarchyEmbedAsync(CommandContext ctx, DiscordMember bot, DiscordMember user)
-        {
-            bool isBot = user   == bot;
-            bool isOwner = user == ctx.Guild.Owner;
-            bool isMod = user.HasPermission(Permissions.KickMembers);
-            bool isAdmin = user.HasPermission(Permissions.Administrator);
-            bool isCurrent = ctx.User == user;
-            string errorReason = user.IsAbove(bot) switch
-            {
-                _ when isBot     => "I wish I could kick myself, but I sadly cannot.",
-                _ when isOwner   => $"I can't kick the owner ({user.Mention}) out of their own server!",
-                _ when isMod     => $"I can't kick {user.Mention}! They're a staff! ({user.Roles.Last().Mention})",
-                _ when isAdmin   => $"I can't kick {user.Mention}! They're staff! ({user.Roles.Last().Mention})",
-                _ when isCurrent => "Very funny, I like you, but no, you can't kick yourself.",
-                _                => "Something has gone really wrong, and I don't know what *:(*"
-            };
-
-            return new DiscordEmbedBuilder()
-                  .WithAuthor(ctx.Member.Username, ctx.Member.GetUrl(), ctx.Member.AvatarUrl)
-                  .WithDescription(errorReason)
-                  .WithColor(DiscordColor.Red);
-        }
+    public KickCommand
+        (
+            IInfractionService     infractions,
+            ICommandContext        context,
+            IDiscordRestUserAPI    users,
+            IDiscordRestGuildAPI   guilds,
+            IDiscordRestChannelAPI channels
+        )
+    {
+        _context     = context;
+        _infractions = infractions;
+        _users       = users;
+        _guilds      = guilds;
+        _channels    = channels;
     }
-}*/
+
+
+    [Command("kick")]
+    [RequireContext(ChannelContext.Guild)]
+    [Description("Boot someone from the guild!")]
+    [RequireDiscordPermission(DiscordPermission.KickMembers)]
+    public async Task<IResult> Kick([NonSelfActionable] IUser user, [Greedy] string reason = "Not given.")
+    {
+        var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+
+        return infractionResult.IsSuccess
+            ? await _channels.CreateMessageAsync(_context.ChannelID, $"{user.Mention()} has been kicked from the guild !")
+            : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
+
+    }
+}
