@@ -18,7 +18,7 @@ public sealed class PrefixCacheService : IPrefixCacheService
     private readonly ILogger<PrefixCacheService> _logger;
     private readonly IMediator                   _mediator;
     private readonly IMemoryCache                _memoryCache;
-    public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, ICacheUpdaterService cacheUpdater, IMediator mediator)
+    public PrefixCacheService(ILogger<PrefixCacheService> logger, IMemoryCache memoryCache, IMediator mediator)
     {
         _logger      = logger;
         _memoryCache = memoryCache;
