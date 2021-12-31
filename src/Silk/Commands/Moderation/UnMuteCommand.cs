@@ -1,45 +1,55 @@
-﻿/*using System;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Silk.Data.Entities;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
-using Silk.Extensions.DSharpPlus;
+using Silk.Extensions.Remora;
+using Silk.Shared.Constants;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class UnMuteCommand : CommandGroup
 {
-    
-    [HelpCategory(Categories.Mod)]
-    public class UnMuteCommand : BaseCommandModule
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IInfractionService     _infractions;
+    public UnMuteCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
-        private readonly IInfractionService _infractions;
-        public UnMuteCommand(IInfractionService infractions) => _infractions = infractions;
-
-        [Command]
-        
-        [Description("Un-mutes a member.")]
-        public async Task UnmuteAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
-        {
-            if (user == ctx.User)
-            {
-                await ctx.RespondAsync("Sorry, but even if you were muted, I couldn't let you do that!");
-                return;
-            }
-
-            InfractionResult res = await _infractions.UnMuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-
-            string? message = res switch
-            {
-                InfractionResult.FailedGenericRequirementsNotFulfilled => "That person isn't muted!",
-                InfractionResult.SucceededWithNotification             => $"Un-muted **{user.ToDiscordName()}**! (User notified with Direct Message).",
-                _                                                      => throw new ArgumentOutOfRangeException()
-            };
-
-            await ctx.RespondAsync(message);
-        }
+        _context     = context;
+        _channels    = channels;
+        _infractions = infractions;
     }
-}*/
+
+    [Command("unmute")]
+    [RequireContext(ChannelContext.Guild)]
+    [Description("Un-mutes a muted user!")]
+    [RequireDiscordPermission(DiscordPermission.ManageMessages)]
+    [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+    public async Task<IResult> UnmuteAsync
+    (
+        [NonSelfActionable]
+        [Description("The user to un-mute.")]
+        IUser user,
+        
+        [Greedy]
+        [Description("The reason for un-muting the user.")]
+        string reason = "Not Given."
+    )
+    {
+        var infractionResult = await _infractions.UnMuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+
+        return await _channels.CreateMessageAsync(_context.ChannelID,
+                                                  !infractionResult.IsSuccess
+                                                      ? infractionResult.Error.Message
+                                                      : $"<:check:{Emojis.ConfirmId}> Successfully unmuted **{user.ToDiscordTag()}**!");
+    }
+}
