@@ -34,17 +34,17 @@ public class MuteCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [Description("Mutes a user either temporarily or indefinitely. Muting an already muted member will update the mute time.")]
     public async Task<IResult> MuteAsync
-        (
-            [NonSelfActionable]
-            IUser user,
-            
-            [Description("The amount of time to mute the user for. Leave blank to mute indefinitely.")]
-            TimeSpan? duration = null,
-            
-            [Greedy] 
-            [Description("The reason for the mute.")]
-            string reason = "Not Given."
-        )
+    (
+        [NonSelfActionable]
+        IUser user,
+        
+        [Description("The amount of time to mute the user for. Leave blank to mute indefinitely.")]
+        TimeSpan? duration = null,
+        
+        [Greedy] 
+        [Description("The reason for the mute.")]
+        string reason = "Not Given."
+    )
     {
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
 
