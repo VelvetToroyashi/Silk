@@ -1,36 +1,56 @@
-﻿/*using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Humanizer;
-using Silk.Data.Entities;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
+using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using CommandContext = DSharpPlus.CommandsNext.CommandContext;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class NoteCommand : CommandGroup
 {
-    
-    [HelpCategory(Categories.Mod)]
-    public class NoteCommand : BaseCommandModule
+    private readonly ICommandContext     _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IInfractionService  _infractions;
+    public NoteCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
-        private readonly IInfractionService _infractionHelper;
-        public NoteCommand(IInfractionService infractionHelper) => _infractionHelper = infractionHelper;
-
-        [Command]
-        
-        [Description("Adds a moderation note to a user. Does not impact automatic infraction escalation.")]
-        public async Task Note(CommandContext ctx, DiscordUser user, [RemainingText] string note)
-        {
-            InfractionResult res = await _infractionHelper.AddNoteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, note);
-            string response = res switch
-            {
-                InfractionResult.SucceededDoesNotNotify => "Successfully added note!",
-                _                                       => $"An unexpected response was returned, but the note was added. This is probably safe to ignore! {res.Humanize(LetterCasing.Title)}"
-            };
-
-            await ctx.RespondAsync(response);
-        }
+        _context     = context;
+        _channels    = channels;
+        _infractions = infractions;
     }
-}*/
+
+    [Command("note")]
+    [RequireContext(ChannelContext.Guild)]
+    [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+    [Description("Add a note to a user's case history. These do not affect automod actions.")]
+    public async Task<IResult> NoteAsync
+    (
+        [NonSelfActionable]
+        [Description("The user to add a note to.")]
+        IUser user, 
+    
+        [Greedy]
+        [Description("The note to add.")]
+        string note
+    )
+    {
+        var infractionResult = await _infractions.AddNoteAsync(_context.GuildID.Value, user.ID, _context.User.ID, note);
+
+        return await _channels.CreateMessageAsync(_context.ChannelID,
+                                                  !infractionResult.IsSuccess
+                                                      ? infractionResult.Error.Message
+                                                      : $"<:check:{Emojis.ConfirmId}> Successfully added note to **{user.ToDiscordTag()}**!");
+    }
+}
