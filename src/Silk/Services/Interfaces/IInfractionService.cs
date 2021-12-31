@@ -103,7 +103,7 @@ public interface IInfractionService
 	/// <param name="guildID">The ID of the guild the infraction occured on.</param>
 	/// <param name="targetID">The ID of the target to be pardoned.</param>
 	/// <param name="enforcerID">The ID of the entity pardoning the target.</param>
-	/// <param name="caseID">The ID of the case to pardon the target from.</param>
+	/// <param name="caseID">The ID of the case to pardon the target from. Null should be specified to pardon the last applicable infraction.</param>
 	/// <param name="reason">The reason the pardon is being given.</param>
-	public Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int caseID, string reason = "Not Given.");
+	public Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int? caseID, string reason = "Not Given.");
 }
