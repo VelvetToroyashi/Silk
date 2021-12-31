@@ -35,9 +35,9 @@ public class CasesCommand : CommandGroup
     
     public CasesCommand(IMediator mediator, ICommandContext context, IDiscordRestChannelAPI channels, InteractivityExtension interactivity)
     {
-        _mediator           = mediator;
-        _context            = context;
-        _channels           = channels;
+        _mediator      = mediator;
+        _context       = context;
+        _channels      = channels;
         _interactivity = interactivity;
     }
 
