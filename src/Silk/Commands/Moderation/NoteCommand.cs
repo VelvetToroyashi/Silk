@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using Humanizer;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -14,7 +13,6 @@ using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
-using CommandContext = DSharpPlus.CommandsNext.CommandContext;
 
 namespace Silk.Commands.Moderation;
 

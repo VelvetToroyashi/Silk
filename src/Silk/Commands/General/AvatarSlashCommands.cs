@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using Remora.Commands.Attributes;
-using Remora.Commands.Groups;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;

@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
@@ -15,10 +14,8 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
-using Silk.Data.MediatR.Users;
 using Silk.Extensions;
 using Silk.Interactivity;
-using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
