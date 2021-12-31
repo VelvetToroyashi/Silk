@@ -522,7 +522,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         {
             DiscordError.MissingAccess => new PermissionError($"I don't have permission to {actionName} people!"),
             DiscordError.UnknownUser   => new NotFoundError("That user doesn't seem to exist! Are you sure you typed their ID correctly?"),
-            DiscordError.UnknownBan    => new NotFoundError("That ban doesn't seem to exist! Are you sure you typed their ID correctly?"),
+            DiscordError.UnknownBan    => new NotFoundError("That user doesn't appear to be banned!"),
             _                          => result.Error
         };
     }
