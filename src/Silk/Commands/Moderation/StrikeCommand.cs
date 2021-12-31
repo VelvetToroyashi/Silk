@@ -1,102 +1,57 @@
-﻿/*using System.Collections.Generic;
-using System.Linq;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
-using Humanizer;
-using MediatR;
-using Silk.Data.Entities;
-using Silk.Data.MediatR.Infractions;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
+using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class StrikeCommand : CommandGroup
 {
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IInfractionService     _infractions;
     
-    [HelpCategory(Categories.Mod)]
-    public class StrikeCommand : BaseCommandModule
+    public StrikeCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
-        private readonly IInfractionService _infractionHelper;
-        private readonly IMediator          _mediator;
-        public StrikeCommand(IInfractionService infractionHelper, IMediator mediator)
-        {
-            _infractionHelper = infractionHelper;
-            _mediator = mediator;
-        }
-
-        [Command("strike")]
-        
-        [Aliases("warn", "w", "bonk")]
-        [Description("Strike a user and add it to their moderation history.")]
-        public async Task Strike(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
-        {
-            (bool, InfractionType) escalated = await CheckForEscalationAsync(ctx, user, reason);
-            InfractionResult result = await _infractionHelper.StrikeAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, escalated.Item1);
-            var response = "";
-
-            if (escalated.Item1)
-            {
-                response = result switch
-                {
-                    InfractionResult.SucceededWithNotification    => $"Successfully {escalated.Item2} (Notified with Direct Message)",
-                    InfractionResult.SucceededWithoutNotification => $"Successfully {escalated.Item2} user (Failed to Direct Message)",
-                    InfractionResult.FailedLogPermissions         => $"Successfully {escalated.Item2} user (Failed to Log).",
-                    _                                             => $"I attempted to {escalated.Item2} {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
-                };
-            }
-            else
-            {
-                response = result switch
-                {
-                    InfractionResult.SucceededWithNotification    => "Successfully warned user (Notified with Direct Message)",
-                    InfractionResult.SucceededWithoutNotification => "Successfully warned user (Failed to Direct Message)",
-                    InfractionResult.FailedLogPermissions         => "Successfully warned user (Failed to Log).",
-                    _                                             => $"I attempted to warn {user.Username} but the response was: `{result.Humanize(LetterCasing.Title)}`. \nThis is probably safe to ignore!"
-                };
-            }
-
-            await ctx.RespondAsync(response);
-        }
-
-        private async Task<(bool, InfractionType)> CheckForEscalationAsync(CommandContext ctx, DiscordUser user, string reason)
-        {
-            IEnumerable<InfractionEntity>? infractions = await _mediator.Send(new GetUserInfractionsRequest(ctx.Guild.Id, user.Id));
-            InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
-
-            if (infractions.Count(inf => inf?.InfractionType != InfractionType.Note) < 6)
-                return (false, default);
-
-            InfractionStepEntity? currentStep = await _infractionHelper.GetCurrentInfractionStepAsync(ctx.Guild.Id, infractions);
-            InfractionType currentStepType = currentStep.Type is InfractionType.Ignore ? InfractionType.Ban : currentStep.Type;
-            DiscordMessageBuilder? builder = new DiscordMessageBuilder()
-                                            .WithContent("User has 5 or more infractions on record. Would you like to escalate?")
-                                            .AddComponents(
-                                                           new DiscordButtonComponent(ButtonStyle.Success, $"escalate_{ctx.Message.Id}", $"Escalate to {currentStepType.Humanize(LetterCasing.Sentence)}", emoji: new(834860005685198938)),
-                                                           new DiscordButtonComponent(ButtonStyle.Danger, $"do_not_escalate_{ctx.Message.Id}", "Do not escalate", emoji: new(834860005584666644)));
-
-            DiscordMessage? msg = await ctx.RespondAsync(builder);
-            InteractivityResult<ComponentInteractionCreateEventArgs> res = await interactivity.WaitForButtonAsync(msg, ctx.User);
-
-            if (res.TimedOut)
-                return (false, default);
-
-            bool escalated = res.Result.Id.StartsWith("escalate");
-            await res.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new() { Content = escalated ? "Got it." : "Proceeding with strike." });
-            _ = TimedDelete();
-            return (escalated, currentStepType);
-
-            async Task TimedDelete()
-            {
-                await Task.Delay(3000);
-                await msg!.DeleteAsync();
-            }
-        }
+        _context     = context;
+        _channels    = channels;
+        _infractions = infractions;
     }
-}*/
+
+    [Command("strike", "warn", "bonk")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequireDiscordPermission(DiscordPermission.ManageMessages)]
+    [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+    [Description("Applies a strike to a user's infraction history. Until pardoned, the strike will be taken into account when evaluating automod actions.")]
+    public async Task<IResult> StrikeAsync
+    (
+        [NonSelfActionable]
+        [Description("The user to apply the strike to.")]
+        IUser user,
+        
+        //TODO: --escalate
+        [Greedy]
+        [Description("The reason for the strike.")]
+        string reason = "Not Given."
+    )
+    {
+        var infractionResult = await _infractions.StrikeAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+
+        return await _channels.CreateMessageAsync(_context.ChannelID, !infractionResult.IsSuccess
+                                                      ? infractionResult.Error.Message
+                                                      : $"<:check:{Emojis.ConfirmId}> Successfully warned **{user.ToDiscordTag()}**! " +
+                                                        $"({(infractionResult.Entity.UserNotified ? "User notified with DM." : "Unable to DM.")})");
+    }
+}

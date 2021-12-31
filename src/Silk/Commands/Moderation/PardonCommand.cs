@@ -1,39 +1,66 @@
-﻿/*using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Silk.Data.Entities;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
-using Silk.Extensions.DSharpPlus;
+using Silk.Extensions.Remora;
+using Silk.Shared.Constants;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class PardonCommand : CommandGroup
 {
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IInfractionService     _infractions;
     
-    [HelpCategory(Categories.Mod)]
-    public class PardonCommand : BaseCommandModule
+    public PardonCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
-        private readonly IInfractionService _infractions;
-        public PardonCommand(IInfractionService infractions) => _infractions = infractions;
-
-        [Command("pardon")]
-        
-        [Description("Pardon's a user from their last applicable infraction. \nThis will de-escalate the next infraction auto-mod, or escalated strike.\nThis will not undo mutes or bans.")]
-        public async Task PardonAsync(CommandContext ctx, DiscordUser user, [RemainingText] string reason = "Not Given.")
-        {
-            if (ctx.User == user)
-            {
-                await ctx.RespondAsync("As much as I'd love to, I can't let you pardon yourself! Good manners though *:)*");
-                return;
-            }
-            InfractionResult res = await _infractions.PardonAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-
-            if (res is InfractionResult.FailedGenericRequirementsNotFulfilled)
-                await ctx.RespondAsync("Hmm. Seems that user doesn't have any infractions to be pardoned from! They should keep it up.");
-            else
-                await ctx.RespondAsync($"🚩 Pardoned **{user.ToDiscordName()}**. {(res is InfractionResult.SucceededWithNotification ? "(User notified with direct message)" : "(Failed to DM)")}");
-        }
+        _context     = context;
+        _channels    = channels;
+        _infractions = infractions;
     }
-}*/
+
+    [Command("pardon")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequireDiscordPermission(DiscordPermission.ManageRoles)]
+    [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+    [Description("Pardons a user from an administered infraction. If a case ID is specified, the case must refer to a strike or esclated strike.")]
+    public async Task<IResult> PardonAsync
+    (
+        [NonSelfActionable]
+        [Description("The user to pardon.")]
+        IUser user, 
+        
+        [Option('c', "case")]
+        [Description("The infraction case to pardon. If not specified, the last applicable infraction will be pardoned.")]
+        int? caseID = null,
+        
+        [Greedy]
+        [Description("The reason the user is being pardoned.")]
+        string reason = "Not Given."
+    )
+    {
+        var infractionResult = await _infractions.PardonAsync(_context.GuildID.Value, user.ID, _context.User.ID, caseID, reason);
+
+        return await _channels.CreateMessageAsync(_context.ChannelID,
+                                                  !infractionResult.IsSuccess
+                                                      ? infractionResult.Error.Message
+                                                      : $"<:check:{Emojis.ConfirmId}> " + 
+                                                        (
+                                                          caseID is null 
+                                                            ? $"Pardoned **{user.ToDiscordTag()}** from their last applicable infraction!"
+                                                            : $"Pardoned **{user.ToDiscordTag()}** from case **#{caseID}**!"
+                                                        )
+                                                 );
+    }
+}
