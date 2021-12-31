@@ -107,19 +107,26 @@ public class CommandHelpViewer
     }
     
     public async Task<IEnumerable<IChildNode>> GetApplicableCommandsAsync
-        (
-            IServiceProvider        services,
-            IEnumerable<IChildNode> nodes
-        )
+    (
+        IServiceProvider        services,
+        IEnumerable<IChildNode> nodes
+    )
     {
         var commands = new List<IChildNode>();
 
         foreach (IChildNode node in nodes)
         {
             var conditionsToEvaluate = new List<ConditionAttribute>();
+            
+            // Bug: Groups' parent's conditions are not evaluated. 
+            // This method does not reverse-walk the tree to find the parent's conditions.
+            // If your name is Jax, or you happen to know the best way to fix this, please PR it.
+            // If you're having an issue with groups being exposed, but not executable, it's likely
+            // that you need to add a condition on the nested group. Adding it on the parent has no 
+            // effect on it's childen.
             if (node is GroupNode gn)
             {
-                IEnumerable<ConditionAttribute> groupAttributes = gn.GetType().GetCustomAttributes<ConditionAttribute>(false);
+                IEnumerable<ConditionAttribute> groupAttributes = gn.GroupTypes.SelectMany(gt => gt.GetCustomAttributes<ConditionAttribute>(true));
 
                 if (!groupAttributes.Any())
                 {
