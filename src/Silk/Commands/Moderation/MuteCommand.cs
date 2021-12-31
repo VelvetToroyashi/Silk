@@ -32,14 +32,14 @@ public class MuteCommand : CommandGroup
     [Command("mute")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
-    [Description("Mutes a user either temporarily or indefinitely. Muting an already muted member will update the mute time.")]
+    [Description("Mutes a user either temporarily. Muting an already muted member will update the mute time.")]
     public async Task<IResult> MuteAsync
     (
         [NonSelfActionable]
         IUser user,
         
-        [Description("The amount of time to mute the user for. Leave blank to mute indefinitely.")]
-        TimeSpan? duration = null,
+        [Description("The amount of time to mute the user for.")]
+        TimeSpan? duration,
         
         [Greedy] 
         [Description("The reason for the mute.")]
@@ -50,8 +50,7 @@ public class MuteCommand : CommandGroup
 
         return infractionResult.IsSuccess
             ? await _channels.CreateMessageAsync(_context.ChannelID,
-                                                 $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}" +
-                                                 (duration is null ? " indefinitely! " : "! ")                           +
+                                                 $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}!")                           +
                                                  (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"))
             : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
     }
