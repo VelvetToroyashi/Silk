@@ -48,10 +48,12 @@ public class MuteCommand : CommandGroup
     {
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
 
-        return infractionResult.IsSuccess
-            ? await _channels.CreateMessageAsync(_context.ChannelID,
-                                                 $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}!")                           +
-                                                 (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"))
-            : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
+        return
+            await _channels.CreateMessageAsync(_context.ChannelID,
+                                               !infractionResult.IsSuccess
+                                                   ? infractionResult.Error.Message
+                                                   : $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}!" +
+            (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"));
+        ;
     }
 }

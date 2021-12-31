@@ -12,6 +12,7 @@ using Remora.Discord.Commands.Attributes;
 using Silk.Data;
 using Silk.Extensions;
 using Silk.Utilities.HelpFormatter;
+using TimestampFormat = DSharpPlus.TimestampFormat;
 
 namespace Silk.Commands.Server;
 
@@ -92,7 +93,7 @@ public class ServerInfoCommand : BaseCommandModule
         stringBuilder.Clear();
 
 
-        var creation = $"{Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDateTime)} ({Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow)})";
+        var creation = $"{Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDate)} ({Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow)})";
         embed.AddField("Server Owner:", guild.Owner.Mention, true)
              .AddField("Most recent member:", guild.Members.OrderBy(m => m.Value.JoinedAt).Last().Value.Mention, true)
              .AddField("Creation date:", creation);
