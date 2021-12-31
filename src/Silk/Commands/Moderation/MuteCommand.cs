@@ -1,112 +1,58 @@
-﻿/*using System;
-using System.Linq;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Silk.Data.Entities;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
-using Silk.Types;
-using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
-using Silk.Extensions;
-using Silk.Extensions.DSharpPlus;
+using Silk.Extensions.Remora;
+using Silk.Shared.Constants;
 
-namespace Silk.Commands.Moderation
+namespace Silk.Commands.Moderation;
+
+[HelpCategory(Categories.Mod)]
+public class MuteCommand : CommandGroup
 {
-    
-    [HelpCategory(Categories.Mod)]
-    public class MuteCommand : BaseCommandModule
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IInfractionService     _infractions;
+    public MuteCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
-        private readonly IInfractionService _infractions;
-
-        public MuteCommand(IInfractionService infractions) => _infractions = infractions;
-
-        [Command("mute")]
-        
-        [RequirePermissions(Permissions.ManageRoles)]
-        [Description("Mute a guild member!")]
-        [Priority(0)]
-        public async Task Mute(CommandContext ctx, DiscordMember user, [RemainingText] string reason = "Not Given.")
-        {
-            DiscordMember bot = ctx.Guild.CurrentMember;
-
-            if (user.IsAbove(bot))
-            {
-                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
-
-                string? message = roleDiff is not 0 ?
-                    $"I can't do that! They're {roleDiff} role(s) above me!" :
-                    "We have the same top role! I can't add roles to this person.";
-
-                await ctx.RespondAsync(message);
-                return;
-            }
-
-            if (user.IsAbove(ctx.Member))
-            {
-                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
-
-                string? message = roleDiff is not 0 ?
-                    $"I can't do that! They're {roleDiff} role(s) above you!" :
-                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
-
-                await ctx.RespondAsync(message);
-                return;
-            }
-
-            InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason);
-            string? msg = res switch
-            {
-                InfractionResult.SucceededWithNotification    => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (User notified with Direct Message).",
-                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Failed to DM).",
-                InfractionResult.FailedGuildMemberCache       => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Member left server).",
-                InfractionResult.SucceededDoesNotNotify       => $"🔇 Muted **{user.ToDiscordName()}** indefinitely! (Updating active mute does not notify)."
-            };
-            await ctx.RespondAsync(msg);
-        }
-
-        [Priority(1)]
-        [Command("mute")]
-        
-        public async Task TempMute(CommandContext ctx, DiscordMember user, TimeSpan duration, [RemainingText] string reason = "Not Given.")
-        {
-            DiscordMember bot = ctx.Guild.CurrentMember;
-
-            if (user.IsAbove(bot))
-            {
-                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Guild.CurrentMember.Roles.Max(r => r.Position);
-
-                string? message = roleDiff is not 0 ?
-                    $"I can't do that! They're {roleDiff} role(s) above me!" :
-                    "We have the same top role! I can't add roles to this person.";
-
-                await ctx.RespondAsync(message);
-                return;
-            }
-
-            if (user.IsAbove(ctx.Member))
-            {
-                int roleDiff = user.Roles.Max(r => r.Position) - ctx.Member.Roles.Max(r => r.Position);
-
-                string? message = roleDiff is not 0 ?
-                    $"I can't do that! They're {roleDiff} role(s) above you!" :
-                    "You two see eye to eye! c: I can't mute someone with the same role as you.";
-
-                await ctx.RespondAsync(message);
-                return;
-            }
-
-            InfractionResult res = await _infractions.MuteAsync(user.Id, ctx.Guild.Id, ctx.User.Id, reason, DateTime.UtcNow + duration);
-            string? msg = res switch
-            {
-                InfractionResult.SucceededWithNotification    => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (User notified with Direct Message).",
-                InfractionResult.SucceededWithoutNotification => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Failed to DM).",
-                InfractionResult.FailedGuildMemberCache       => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Member left server).",
-                InfractionResult.SucceededDoesNotNotify       => $"🔇 Muted **{user.ToDiscordName()}**! Mute expires {Formatter.Timestamp(duration)} (Updating active mute does not notify)."
-            };
-            await ctx.RespondAsync(msg);
-        }
+        _context     = context;
+        _channels    = channels;
+        _infractions = infractions;
     }
-}*/
+
+    [Command("mute")]
+    [RequireContext(ChannelContext.Guild)]
+    [RequireDiscordPermission(DiscordPermission.ManageRoles)]
+    [Description("Mutes a user either temporarily or indefinitely. Muting an already muted member will update the mute time.")]
+    public async Task<IResult> MuteAsync
+        (
+            [NonSelfActionable]
+            IUser user,
+            
+            [Description("The amount of time to mute the user for. Leave blank to mute indefinitely.")]
+            TimeSpan? duration = null,
+            
+            [Greedy] 
+            [Description("The reason for the mute.")]
+            string reason = "Not Given."
+        )
+    {
+        var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
+
+        return infractionResult.IsSuccess
+            ? await _channels.CreateMessageAsync(_context.ChannelID,
+                                                 $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}" +
+                                                 (duration is null ? " indefinitely! " : "! ")                           +
+                                                 (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"))
+            : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
+    }
+}
