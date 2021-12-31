@@ -349,7 +349,15 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
 
         if (await IsMutedAsync(guildID, targetID)) //TODO: Call UpdateInfractionAsync
-            return Result<InfractionEntity>.FromError(new InvalidOperationError("Target is already muted."));
+            return await UpdateInfractionAsync(_queue.First(inf => 
+                                                                inf.GuildID == guildID && 
+                                                                inf.TargetID == targetID && 
+                                                                inf.Type is InfractionType.Mute or
+                                                                            InfractionType.AutoModMute),
+                                               enforcer, 
+                                               reason,
+                                               expirationRelativeToNow
+                                               );
         
         var infraction = await _mediator.Send
             (
@@ -386,7 +394,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(canUmute.Error);
         
         if (!await IsMutedAsync(guildID, targetID))
-            return Result<InfractionEntity>.FromError(new InvalidOperationError("Target is not muted."));
+            return Result<InfractionEntity>.FromError(new InvalidOperationError("That user isn't muted!"));
         
         
         var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
@@ -567,7 +575,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             Result<IUser> targetResult = await _users.GetUserAsync(targetID);
 
             if (!targetResult.IsDefined(out IUser? targetUser))
-                return Result<(IUser target, IUser enforcer)>.FromError(new NotFoundError("Target does not exist."));
+                return Result<(IUser target, IUser enforcer)>.FromError(new NotFoundError("That user doesn't seem to exist!"));
 
             target = targetUser;
         }
