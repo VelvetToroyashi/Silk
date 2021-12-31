@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
+using Microsoft.Extensions.Options;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -33,25 +34,28 @@ public class BotStatCommand : CommandGroup
     private readonly IRestHttpClient        _restClient;
     private readonly IDiscordRestChannelAPI _channelApi;
 
-    private readonly DiscordGatewayClient _gateway;
+    private readonly DiscordGatewayClient        _gateway;
+    private readonly DiscordGatewayClientOptions _gatewayOptions;
     
     public BotStatCommand(
-        ICommandContext context,
-        IRestHttpClient restClient,
-        IDiscordRestChannelAPI channelApi,
-        DiscordGatewayClient gateway)
+        ICommandContext                       context,
+        IRestHttpClient                       restClient,
+        IDiscordRestChannelAPI                channelApi,
+        DiscordGatewayClient                  gateway, 
+        IOptions<DiscordGatewayClientOptions> gatewayOptions)
     {
-        _context      = context;
-        _restClient   = restClient;
-        _channelApi   = channelApi;
-        _gateway = gateway;
+        _context             = context;
+        _restClient          = restClient;
+        _channelApi          = channelApi;
+        _gateway             = gateway;
+        _gatewayOptions = gatewayOptions.Value;
     }
 
     [Command("botstats", "bs", "botinfo")]
     [Description("Get the current stats for Silk")]
     public async Task<Result> GetBotStatsAsync()
     {
-        using var process     = Process.GetCurrentProcess();
+        using var process  = Process.GetCurrentProcess();
         
         var guildsResult = await _restClient
            .GetAsync<IReadOnlyList<IPartialGuild>>("users/@me/guilds",
@@ -69,21 +73,18 @@ public class BotStatCommand : CommandGroup
         GC.WaitForPendingFinalizers();
         GC.Collect(2, GCCollectionMode.Forced, true, true);
 
-        var heapMemory = $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB (heap)\n";
-        
-        var processMemory = $"{process.PrivateMemorySize64 / 1024 / 1024:n2} MB (process)";
-        
+        var heapMemory = $"{GC.GetTotalMemory(true) / 1024 / 1024:n0} MB";
         
         var embed = new Embed()
         {
-            Title = "Shard stats:",
+            Title  = $"Stats (Shard {(_gatewayOptions.ShardIdentification is {} si ? si.ShardID + 1 : 1)}):",
             Colour = Color.Gold,
             Fields = new EmbedField[]
             {
-                new("Latency:", $"{_gateway.Latency.TotalMilliseconds:n0}ms", true),
+                new("Latency:", $"{_gateway.Latency.TotalMilliseconds:n0} ms", true),
                 new("Guilds:", guildCount.ToString(), true),
                 new("Members:", memberCount.ToString(), true),
-                new("Memory:", heapMemory + processMemory, true),
+                new("Memory:", heapMemory, true),
                 new("Threads:", $"{ThreadPool.ThreadCount}", true),
                 new("Uptime:", $"{DateTimeOffset.UtcNow.Subtract(process.StartTime).Humanize(2, minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day)}", true)
             }
