@@ -602,10 +602,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         Result<IUser> selfUserResult = await _users.GetCurrentUserAsync();
 
-        if (!selfUserResult.IsSuccess)
-            return Result.FromError(selfUserResult.Error);
+        if (!selfUserResult.IsDefined(out var selfUser))
+            return Result.FromError(selfUserResult.Error!);
 
-        Result<IGuildMember> selfResult = await _guilds.GetGuildMemberAsync(guildID, selfUserResult.Entity.ID);
+        Result<IGuildMember> selfResult = await _guilds.GetGuildMemberAsync(guildID, selfUser.ID);
 
         if (!selfResult.IsSuccess)
             return Result.FromError(selfResult.Error);
@@ -626,11 +626,14 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         IReadOnlyList<IRole> roles = rolesResult.Entity;
 
-        IEnumerable<IRole> enforcerRoles = roles.Where(r => enforcer.Roles.Contains(r.ID));
-        IEnumerable<IRole> selfRoles     = roles.Where(r => self.Roles.Contains(r.ID));
+        IRole[] enforcerRoles = roles.Where(r => enforcer.Roles.Contains(r.ID)).ToArray();
+        IRole[] selfRoles     = roles.Where(r => self.Roles.Contains(r.ID)).ToArray();
 
-        bool enforcerCanAct = enforcerRoles.Any(r => r.Permissions.HasPermission(permission));
-        bool selfCanAct     = selfRoles.Any(r => r.Permissions.HasPermission(permission));
+        var enforcerPermissions = DiscordPermissionSet.ComputePermissions(enforcerID, roles.First(r => r.ID == guildID), enforcerRoles);
+        var selfPermissions     = DiscordPermissionSet.ComputePermissions(selfUser.ID, roles.First(r => r.ID == guildID), selfRoles);
+
+        bool enforcerCanAct = enforcerPermissions.HasPermission(permission) || enforcerPermissions.HasPermission(DiscordPermission.Administrator);
+        bool selfCanAct     = selfPermissions.HasPermission(permission) || selfPermissions.HasPermission(DiscordPermission.Administrator);
 
         if (!enforcerCanAct)
             return Result.FromError(new PermissionError($"You don't have permission to {permission.Humanize(LetterCasing.LowerCase)}!"));
