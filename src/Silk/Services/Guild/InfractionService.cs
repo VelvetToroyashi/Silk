@@ -207,8 +207,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
-        if (informResult.IsSuccess && informResult.Entity)
-            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+        if (informResult.IsDefined(out var informed) && informed)
+            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
 
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
@@ -245,8 +245,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
         //TODO: Don't attempt to inform the user if they're not present on the guild.
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
-        if (informResult.IsSuccess && informResult.Entity)
-            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+        if (informResult.IsDefined(out var informed) && informed)
+            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
@@ -374,6 +374,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             );
             
         _queue.Add(infraction);
+
+        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+
+        if (informResult.IsDefined(out var informed) && informed)
+            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+        
         var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
         return returnResult.IsSuccess
