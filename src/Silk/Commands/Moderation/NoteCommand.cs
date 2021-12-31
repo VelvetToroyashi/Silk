@@ -33,6 +33,7 @@ public class NoteCommand : CommandGroup
 
     [Command("note")]
     [RequireContext(ChannelContext.Guild)]
+    [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
     [Description("Add a note to a user's case history. These do not affect automod actions.")]
     public async Task<IResult> NoteAsync
