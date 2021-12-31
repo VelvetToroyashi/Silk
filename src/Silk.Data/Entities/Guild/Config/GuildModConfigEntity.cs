@@ -26,6 +26,14 @@ public class GuildModConfigEntity
     /// </summary>
     [Column("mute_role")]
     public Snowflake MuteRoleID { get; set; }
+    
+    // /// <summary>
+    // /// Whether to use "native mutes" (Timeouts) when muting members.
+    // ///
+    // /// This is only applicable if the mute lasts for four weeks or less.
+    // /// </summary>
+    // [Column("use_native_mute")]
+    // public bool UseNativeMute { get; set; }
 
     /// <summary>
     ///     A list of whitelisted invites.

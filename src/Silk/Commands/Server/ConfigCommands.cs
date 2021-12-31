@@ -1,4 +1,154 @@
 ﻿//TODO: This
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
+using MediatR;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Rest.Core;
+using Remora.Results;
+using Silk.Data.MediatR.Guilds;
+using Silk.Extensions.Remora;
+using Silk.Services.Data;
+using Silk.Shared.Constants;
+using Silk.Utilities.HelpFormatter;
+
+namespace Silk.Commands;
+
+[Group("config")]
+[HelpCategory(Categories.Server)]
+[RequireContext(ChannelContext.Guild)]
+[Description("Configure various settings for your server!")]
+[RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.Or)]
+public class ConfigCommands : CommandGroup
+{
+    
+    private readonly ICommandContext         _context;
+    private readonly GuildConfigCacheService _configCache;
+    private readonly IDiscordRestChannelAPI  _channels;
+
+    public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels)
+    {
+        _context  = context;
+        _configCache = configCache;
+        _channels = channels;
+    }
+
+    [Command("reload")]
+    [Description("Reloads the configuration for your server.")]
+    public async Task<Result<IMessage>> ReloadConfigAsync()
+    {
+        _configCache.PurgeCache(_context.GuildID.Value);
+        
+        // If this fails it doesn't matter. Don't even await it.
+        _ = _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+        
+        return await _channels.CreateMessageAsync(_context.ChannelID, "Done! Changes should take effect immediately.");
+    }
+    
+    [Group("view")]
+    [Description("View the settings for your server.")]
+    public class ViewConfigCommands : CommandGroup
+    {
+        
+    }
+
+    [Group("edit")]
+    [Description("Edit the settings for your server.")]
+    public class EditConfigCommands : CommandGroup
+    {
+        private readonly IDiscordPermissionSet _mutePermissions = new DiscordPermissionSet(DiscordPermission.SendMessages);
+        
+        private readonly IMediator              _mediator;
+        private readonly ICommandContext        _context;
+        private readonly IDiscordRestGuildAPI   _guilds;
+        private readonly IDiscordRestUserAPI    _users;
+        private readonly IDiscordRestChannelAPI _channels;
+        public EditConfigCommands
+        (
+            IMediator              mediator,
+            ICommandContext        context,
+            IDiscordRestGuildAPI   guilds,
+            IDiscordRestUserAPI    users,
+            IDiscordRestChannelAPI channels)
+        {
+            _mediator = mediator;
+            _context  = context;
+            _guilds   = guilds;
+            _users    = users;
+            _channels = channels;
+        }
+
+
+        [Command("mute")]
+        [Description("Adjust the configured mute role, or setup native mutes (powered by Discord's Timeout feature).")]
+        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+        public async Task<IResult> MuteAsync
+        (
+            [Description("The role to mute users with.")]
+            IRole? mute,
+            
+            [Switch("native")]                            
+            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission.")]
+            bool useNativeMutes = false
+        )
+        {
+            
+            var selfResult = await _guilds.GetCurrentGuildMemberAsync(_users, _context.GuildID.Value);
+                
+            if (!selfResult.IsDefined(out var self))
+                return selfResult;
+                
+            var guildRoles = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
+                
+            if (!guildRoles.IsDefined(out var roles))
+                return guildRoles;
+
+            var selfRoles = roles.Where(r => self.Roles.Contains(r.ID)).ToArray();
+
+            var selfPerms = DiscordPermissionSet.ComputePermissions(self.User.Value.ID, roles.First(r => r.ID == _context.GuildID), selfRoles);
+            
+            if (useNativeMutes && !selfPerms.HasPermission(DiscordPermission.ModerateMembers)) 
+                return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to timeout members!");
+            
+            if (mute is not null)
+            {
+                if (!selfPerms.HasPermission(DiscordPermission.ManageRoles))
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to assign roles!");
+                
+                if (mute.ID == _context.GuildID)
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "You can't assign the everyone role as a mute role!");
+                
+                if (mute.Position >= selfRoles.Max(r => r.Position))
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "This role is above my highest role! I can't assign it.");
+                
+                if (mute.Permissions.HasPermission(DiscordPermission.SendMessages))
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "This role can send messages. It's not a good idea to assign it to a mute role.");
+            }
+            
+            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            {
+                MuteRoleId = mute?.ID ?? default(Optional<Snowflake>)
+                //TODO: UseNativeMute
+            });
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+        }
+            
+    }
+}
+
+
+
 /*using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
