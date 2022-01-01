@@ -9,8 +9,10 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 
@@ -27,8 +29,8 @@ public class MemberLoggerService
     
     public MemberLoggerService(IMediator mediator, GuildConfigCacheService configService, ChannelLoggingService channelLogger)
     {
-        _mediator           = mediator;
-        _configService      = configService;
+        _mediator      = mediator;
+        _configService = configService;
         _channelLogger = channelLogger;
     }
 
@@ -54,9 +56,9 @@ public class MemberLoggerService
 
         var userFields = new List<EmbedField>()
         {
-            new("Username:", $"{user.Username}#{user.Discriminator}", true),
+            new("Username:", user.ToDiscordTag(), true),
             new("User ID:", user.ID.ToString(), true),
-            new("User Created:", $"<t:{user.ID.Timestamp.ToUnixTimeSeconds()}:F>", true),
+            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime), true),
         };
         
         var sb = new StringBuilder();
@@ -73,7 +75,20 @@ public class MemberLoggerService
                                               .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
                                               .Join("\n"), true));
         }
+
         
+        var userInfractionJoinBuffer = userData.Infractions.Count(inf => inf.Type is
+                                                                      InfractionType.Kick or
+                                                                      InfractionType.Ban or
+                                                                      InfractionType.SoftBan) + 4;
+        
+        if (userData.History.JoinDates.Count > userInfractionJoinBuffer)
+            sb.AppendLine("Account has joined more than four times excluding removals by infractions.");
+        
+        if (userData.History.JoinDates.Count(jd => jd.AddDays(14) > DateTimeOffset.UtcNow) > 3)
+            sb.AppendLine("Account has joined more than three times in the last two weeks.");
+
+
         if (twoDaysOld)
             sb.AppendLine("Account is only 2 days old");
         else if (twoWeeksOld)
