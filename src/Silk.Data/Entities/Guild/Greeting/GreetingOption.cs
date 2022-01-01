@@ -20,6 +20,7 @@ public enum GreetingOption
     /// </summary>
     GreetOnJoin,
 
+    //TODO: Deprecate or implement.
     /// <summary>
     ///     Members should be greeted when they pass guild member verification.
     /// </summary>

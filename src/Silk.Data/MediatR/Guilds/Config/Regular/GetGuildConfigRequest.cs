@@ -25,7 +25,6 @@ public class GetGuildConfigHandler : IRequestHandler<GetGuildConfigRequest, Guil
     {
         GuildConfigEntity? config = await _db.GuildConfigs
                                              .Include(g => g.Greetings)
-                                             .Include(c => c.DisabledCommands)
                                               //.Include(c => c.BlackListedWords)
                                              .AsSplitQuery()
                                              .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);

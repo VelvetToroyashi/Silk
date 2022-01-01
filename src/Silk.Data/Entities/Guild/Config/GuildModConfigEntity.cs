@@ -52,42 +52,13 @@ public class GuildModConfigEntity
     /// </summary>
     [Column("max_role_mentions")]
     public int MaxRoleMentions { get; set; }
-
-    /// <summary>
-    ///     Channel Id to log moderation/message changes to.
-    /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.FallbackChannelID)} instead.")]
-    public ulong LoggingChannel { get; set; }
-
-    /// <summary>
-    ///     Whether to log when messages are edited/deleted.
-    /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMessageEdits)} instead.")]
-    public bool LogMessageChanges { get; set; }
-
-    /// <summary>
-    ///     Whether to log members joining or not.
-    /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMemberJoins)} instead.")]
-    public bool LogMemberJoins { get; set; }
-
-    /// <summary>
-    ///     Whether to log members leaving or not.
-    /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.LogMemberLeaves)} instead.")]
-    public bool LogMemberLeaves { get; set; }
-
+    
     /// <summary>
     ///     Blacklist certain invites.
     /// </summary>
     [Column("invite_whitelist_enabled")]
     public bool WhitelistInvites { get; set; }
-
-    /// <summary>
-    ///     Blacklist certain words.
-    /// </summary>
-    [Obsolete]
-    public bool BlacklistWords { get; set; }
+    
 
     /// <summary>
     ///     Represents whether to add an infraction to the user after sending an invite.
@@ -112,13 +83,7 @@ public class GuildModConfigEntity
     /// </summary>
     [Column("progressive_infractions")]
     public bool ProgressiveStriking { get; set; }
-
-    /// <summary>
-    ///     Whether to automatically de-hoist members.
-    /// </summary>
-    [Obsolete]
-    public bool AutoDehoist { get; set; }
-
+    
     /// <summary>
     ///     All active auto-mod exemptions on the guild.
     /// </summary>
@@ -142,24 +107,6 @@ public class GuildModConfigEntity
     /// </summary>
    [Column("scan_invite_origin")]
     public bool ScanInviteOrigin { get; set; }
-
-    /// <summary>
-    ///     Whether to use webhooks to log infractions.
-    /// </summary>
-    [Obsolete($"Use {nameof(GuildLoggingConfigEntity.UseWebhookLogging)} instead.")]
-    public bool UseWebhookLogging { get; set; }
-
-    /// <summary>
-    ///     The id of the webhook to log with.
-    /// </summary>
-    [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookID)} instead.")]
-    public ulong WebhookLoggingId { get; set; }
-
-    /// <summary>
-    ///     The url of the webhook to log with, if applicable.
-    /// </summary>
-    [Obsolete($"Use {nameof(LoggingChannelEntity.WebhookToken)} instead.")]
-    public string? LoggingWebhookUrl { get; set; }
 
     /// <summary>
     ///     Gets various logging-related settings.

@@ -15,31 +15,16 @@ public record UpdateGuildModConfigRequest(Snowflake GuildId) : IRequest<GuildMod
 {
     public Optional<bool>      ScanInvites           { get; init; }
     public Optional<Snowflake> MuteRoleId            { get; init; }
-    
-    [Obsolete]
-    public Optional<ulong>     LoggingChannel        { get; init; }
     public Optional<int>       MaxUserMentions       { get; init; }
     public Optional<int>       MaxRoleMentions       { get; init; }
     public Optional<bool>      BlacklistInvites      { get; init; }
     public Optional<bool>      LogMembersJoining     { get; init; }
     public Optional<bool>      LogMembersLeaving     { get; init; }
-    
-    [Obsolete]
-    public Optional<bool>      LogMessageChanges     { get; init; }
-    
-    [Obsolete]
-    public Optional<bool>      UseWebhookLogging     { get; init; }
-    
-    [Obsolete]
-    public Optional<ulong>     WebhookLoggingId      { get; init; }
     public Optional<bool>      UseAggressiveRegex    { get; init; }
     public Optional<bool>      EscalateInfractions   { get; init; }
     public Optional<bool>      WarnOnMatchedInvite   { get; init; }
     public Optional<bool>      DetectPhishingLinks   { get; init; }
     public Optional<bool>      DeletePhishingLinks   { get; init; }
-    
-    [Obsolete]
-    public Optional<string>    WebhookLoggingUrl     { get; init; }
     public Optional<bool>      DeleteOnMatchedInvite { get; init; }
 
     public Optional<GuildLoggingConfigEntity> LoggingConfig { get; init; }
@@ -57,7 +42,7 @@ public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildMod
 
     public async Task<GuildModConfigEntity?> Handle(UpdateGuildModConfigRequest request, CancellationToken cancellationToken)
     {
-        GuildModConfigEntity? config = await _db.GuildModConfigs
+        GuildModConfigEntity config = await _db.GuildModConfigs
                                                 .AsNoTracking()
                                                 .Include(c => c.InfractionSteps)
                                                 .Include(c => c.AllowedInvites)
@@ -69,9 +54,6 @@ public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildMod
 
         if (request.EscalateInfractions.IsDefined(out bool escalate))
             config.ProgressiveStriking = escalate;
-
-        if (request.LogMessageChanges.IsDefined(out bool messageChanges))
-            config.LogMessageChanges = messageChanges;
 
         if (request.MaxUserMentions.IsDefined(out int maxUserMentions))
             config.MaxUserMentions = maxUserMentions;
@@ -99,12 +81,12 @@ public sealed class UpdateGuildModConfigHandler : IRequestHandler<UpdateGuildMod
 
         if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
             config.DeleteMessageOnMatchedInvite = deleteOnMatchedInvite;
-
+        
         if (request.LogMembersJoining.IsDefined(out bool logMembersJoining))
-            config.LogMemberJoins = logMembersJoining;
-
+            config.LoggingConfig.LogMemberJoins = logMembersJoining;
+        
         if (request.LogMembersLeaving.IsDefined(out bool logMembersLeaving))
-            config.LogMemberLeaves = logMembersLeaving;
+            config.LoggingConfig.LogMemberLeaves = logMembersLeaving;
 
         if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
             config.Exemptions = exemptions;

@@ -15,13 +15,9 @@ using TimestampFormat = DSharpPlus.TimestampFormat;
 
 namespace Silk.Commands.Server;
 
-
 [HelpCategory(Categories.Server)]
 public class ServerInfoCommand : BaseCommandModule
 {
-    private readonly GuildContext _db;
-
-    public ServerInfoCommand(GuildContext _db) => this._db = _db;
 
     [Command]
     [Description("Get info about the current Guild")]
