@@ -72,7 +72,7 @@ public class SilkCommandResponder : CommandResponder
 		
 		var self = selfResult.Entity;
 		
-		if (gatewayEvent.Content.StartsWith("<@") && gatewayEvent.Mentions.First().ID == self.ID)
+		if (gatewayEvent.Content.StartsWith("<@") && gatewayEvent.Mentions.FirstOrDefault()?.ID == self.ID)
 		{
 			// In case a nickname is set, 
 			prefix = gatewayEvent.Content.Substring(0, gatewayEvent.Content.IndexOf('>') + 1);
