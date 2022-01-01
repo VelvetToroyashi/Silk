@@ -41,7 +41,7 @@
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
 
         <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="6.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0-preview.6.21352.12"/>
+        <PackageReference Update="Microsoft.Extensions.Configuration" Version="6.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0-preview.6.21352.12" />
