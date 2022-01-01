@@ -49,7 +49,7 @@
         <PackageReference Update="Microsoft.Extensions.Hosting" Version="5.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Http" Version="5.0.0"/>
-        <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.Logging" Version="6.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 
         <PackageReference Update="Swashbuckle.AspNetCore" Version="6.2.3" />
