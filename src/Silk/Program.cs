@@ -109,7 +109,7 @@ public class Program
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
 
-                services.AddSingleton<ChannelLoggingService>();
+                services.AddSingleton<IChannelLoggingService, ChannelLoggingService>();
                 services.AddSingleton<MemberLoggerService>();
                 services.AddSingleton<GuildConfigCacheService>();
                 services.AddSingleton<GuildCacherService>();

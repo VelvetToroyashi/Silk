@@ -10,10 +10,11 @@ using Remora.Rest.Core;
 using Remora.Rest.Results;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Services.Interfaces;
 
 namespace Silk.Services.Bot;
 
-public class ChannelLoggingService
+public class ChannelLoggingService : IChannelLoggingService
 {
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IDiscordRestWebhookAPI _webhooks;

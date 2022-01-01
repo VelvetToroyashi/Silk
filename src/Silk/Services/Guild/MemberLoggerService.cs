@@ -15,6 +15,7 @@ using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Bot;
 using Silk.Services.Data;
+using Silk.Services.Interfaces;
 
 namespace Silk.Services.Guild;
 
@@ -25,9 +26,9 @@ public class MemberLoggerService
 {
     private readonly IMediator               _mediator;
     private readonly GuildConfigCacheService _configService;
-    private readonly ChannelLoggingService   _channelLogger;
+    private readonly IChannelLoggingService   _channelLogger;
     
-    public MemberLoggerService(IMediator mediator, GuildConfigCacheService configService, ChannelLoggingService channelLogger)
+    public MemberLoggerService(IMediator mediator, GuildConfigCacheService configService, IChannelLoggingService channelLogger)
     {
         _mediator      = mediator;
         _configService = configService;
