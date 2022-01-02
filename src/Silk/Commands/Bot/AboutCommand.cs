@@ -73,7 +73,7 @@ public class AboutCommand : CommandGroup
             }
         };
         
-        var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=972418070&scope=bot%20applications.commands";
+        var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=1100484045846&scope=bot%20applications.commands";
 
 
         var res = await _channelApi
