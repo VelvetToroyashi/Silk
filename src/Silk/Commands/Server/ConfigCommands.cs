@@ -66,8 +66,6 @@ public class ConfigCommands : CommandGroup
     [Description("Edit the settings for your server.")]
     public class EditConfigCommands : CommandGroup
     {
-        private readonly IDiscordPermissionSet _mutePermissions = new DiscordPermissionSet(DiscordPermission.SendMessages);
-        
         private readonly IMediator              _mediator;
         private readonly ICommandContext        _context;
         private readonly IDiscordRestGuildAPI   _guilds;
@@ -136,6 +134,45 @@ public class ConfigCommands : CommandGroup
             return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
         }
         
+        //TODO: Infraction config (stepped, not named)
+
+        [Command("invites")]
+        [Description("Adjust the settings for invite detection.")]
+        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+        public async Task<IResult> Invites
+        (
+            [Option('d', "delete")]
+            [Description("Whether to delete non-whitelisted invites.")]
+            bool? delete = null,
+            
+            [Option('a', "aggressive")]
+            [Description("Whether to use a more aggressive invite detection algorithm.")]
+            bool? aggressive = null,
+            
+            [Option('s', "scan")]
+            [Description("Whether the origin of the invite should be scanned prior to actioning against it. " +
+                         "This is necessary if the server does not have a vanity invite.")]
+            bool? scanOrigin = null,
+            
+            [Option('w', "warn")]
+            [Description("Whether to warn the user when an invite is detected.")]
+            bool? warnOnMatch = null
+        )
+        {
+            if ((delete ?? aggressive ?? scanOrigin ?? warnOnMatch) is null)
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify at least one option.");
+            
+            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            {
+                DeleteOnMatchedInvite = delete      ?? default(Optional<bool>),
+                UseAggressiveRegex    = aggressive  ?? default(Optional<bool>),
+                ScanInvites           = scanOrigin  ?? default(Optional<bool>),
+                WarnOnMatchedInvite   = warnOnMatch ?? default(Optional<bool>)
+            });
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+        }
+        
         [Command("mute")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         [Description("Adjust the configured mute role, or setup native mutes (powered by Discord's Timeout feature).")]
@@ -147,6 +184,8 @@ public class ConfigCommands : CommandGroup
             [Option("native")]                            
             [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission. (This is currently unimplemented)")]
             bool? useNativeMutes = null
+            //It's worth noting that there WAS an option here to have Silk automatically configure the role,
+            // but between ratelimits and the fact that permissions suck, it was removed.
         )
         {
             
