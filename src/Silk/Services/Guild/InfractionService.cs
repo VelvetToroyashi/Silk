@@ -454,7 +454,35 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     /// <inheritdoc />
     public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int? caseID, string reason = "Not Given.")
-        => throw new NotImplementedException();
+    {
+        InfractionEntity pardon = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Pardon));
+        
+        Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
+        
+        if (!hierarchyResult.IsSuccess)
+            return Result.FromError(hierarchyResult.Error);
+        
+        var (target, enforcer) = hierarchyResult.Entity;
+        
+        var infraction = await _mediator.Send(new GetUserInfractionRequest(targetID, guildID, InfractionType.Strike, caseID));
+        
+        if (infraction is null)
+            if (caseID is null)
+                return Result.FromError(new NotFoundError("That user has no infractions to be pardoned from!"));
+            else
+                return Result.FromError(new NotFoundError("Either that infraction doesn't exist, or it doesn't apply to this user, are you sure you have the right ID?"));
+        
+        await _mediator.Send(new UpdateInfractionRequest(infraction.Id, AppliesToTarget: false));
+        
+        if (_queue.FirstOrDefault(inf => inf.Id == infraction.Id) is {} inf)
+            _queue.Remove(inf);
+
+        var logResult = await LogInfractionAsync(pardon, target, enforcer);
+        
+        return logResult.IsSuccess
+            ? Result.FromSuccess()
+            : Result.FromError(new InfractionError(SemiSuccessfulAction, logResult));
+    }
 
     /// <summary>
     ///     Loads all active infractions, and enqueues them for processing.
