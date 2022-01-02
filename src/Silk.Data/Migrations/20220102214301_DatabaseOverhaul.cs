@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Silk.Data.Migrations
 {
-    public partial class SnowflakeIDsConversion : Migration
+    public partial class DatabaseOverhaul : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -81,11 +81,7 @@ namespace Silk.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    guild_id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    GreetingOption = table.Column<int>(type: "integer", nullable: false),
-                    VerificationRole = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GreetingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    GreetingText = table.Column<string>(type: "text", nullable: false)
+                    guild_id = table.Column<ulong>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,32 +194,6 @@ namespace Silk.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "disbaled_commands",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CommandName = table.Column<string>(type: "text", nullable: false),
-                    GuildID = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
-                    GuildConfigEntityId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_disbaled_commands", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_disbaled_commands_guild_configs_GuildConfigEntityId",
-                        column: x => x.GuildConfigEntityId,
-                        principalTable: "guild_configs",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_disbaled_commands_guilds_GuildID",
-                        column: x => x.GuildID,
-                        principalTable: "guilds",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "guild_greetings",
                 columns: table => new
                 {
@@ -257,6 +227,7 @@ namespace Silk.Data.Migrations
                     guild_id = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     case_id = table.Column<int>(type: "integer", nullable: false),
                     reason = table.Column<string>(type: "text", nullable: false),
+                    user_notified = table.Column<bool>(type: "boolean", nullable: false),
                     processed = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     type = table.Column<int>(type: "integer", nullable: false),
@@ -314,23 +285,14 @@ namespace Silk.Data.Migrations
                     mute_role = table.Column<ulong>(type: "numeric(20,0)", nullable: false),
                     max_user_mentions = table.Column<int>(type: "integer", nullable: false),
                     max_role_mentions = table.Column<int>(type: "integer", nullable: false),
-                    LoggingChannel = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    LogMessageChanges = table.Column<bool>(type: "boolean", nullable: false),
-                    LogMemberJoins = table.Column<bool>(type: "boolean", nullable: false),
-                    LogMemberLeaves = table.Column<bool>(type: "boolean", nullable: false),
                     invite_whitelist_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    BlacklistWords = table.Column<bool>(type: "boolean", nullable: false),
                     infract_on_invite = table.Column<bool>(type: "boolean", nullable: false),
                     delete_invite_messages = table.Column<bool>(type: "boolean", nullable: false),
                     match_aggressively = table.Column<bool>(type: "boolean", nullable: false),
                     progressive_infractions = table.Column<bool>(type: "boolean", nullable: false),
-                    AutoDehoist = table.Column<bool>(type: "boolean", nullable: false),
                     detect_phishing = table.Column<bool>(type: "boolean", nullable: false),
                     delete_detected_phishing = table.Column<bool>(type: "boolean", nullable: false),
                     scan_invite_origin = table.Column<bool>(type: "boolean", nullable: false),
-                    UseWebhookLogging = table.Column<bool>(type: "boolean", nullable: false),
-                    WebhookLoggingId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    LoggingWebhookUrl = table.Column<string>(type: "text", nullable: true),
                     LoggingConfigId = table.Column<int>(type: "integer", nullable: false),
                     NamedInfractionSteps = table.Column<string>(type: "text", nullable: false)
                 },
@@ -415,19 +377,6 @@ namespace Silk.Data.Migrations
                         principalTable: "guild_moderation_config",
                         principalColumn: "Id");
                 });
-
-            migrationBuilder.Sql("ALTER TABLE \"infraction_exemptions\" ALTER COLUMN \"exempt_from\" TYPE integer USING (\"exempt_from\"::integer)");
-            
-            migrationBuilder.CreateIndex(
-                name: "IX_disbaled_commands_GuildConfigEntityId",
-                table: "disbaled_commands",
-                column: "GuildConfigEntityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_disbaled_commands_GuildID_CommandName",
-                table: "disbaled_commands",
-                columns: new[] { "GuildID", "CommandName" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_guild_configs_guild_id",
@@ -527,9 +476,6 @@ namespace Silk.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "command_invocations");
-
-            migrationBuilder.DropTable(
-                name: "disbaled_commands");
 
             migrationBuilder.DropTable(
                 name: "guild_greetings");

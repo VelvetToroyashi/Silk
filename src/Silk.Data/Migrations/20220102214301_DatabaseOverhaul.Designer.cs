@@ -13,8 +13,8 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    [Migration("20211224232203_Attempt2")]
-    partial class SnowflakeIDsConversion
+    [Migration("20220102214301_DatabaseOverhaul")]
+    partial class DatabaseOverhaul
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -45,34 +45,6 @@ namespace Silk.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("command_invocations");
-                });
-
-            modelBuilder.Entity("Silk.Data.Entities.DisabledCommandEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CommandName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("GuildConfigEntityId")
-                        .HasColumnType("integer");
-
-                    b.Property<ulong>("GuildID")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildConfigEntityId");
-
-                    b.HasIndex("GuildID", "CommandName")
-                        .IsUnique();
-
-                    b.ToTable("disbaled_commands");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.ExemptionEntity", b =>
@@ -117,22 +89,9 @@ namespace Silk.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("GreetingChannel")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int>("GreetingOption")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("GreetingText")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<ulong>("GuildID")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
-
-                    b.Property<decimal>("VerificationRole")
-                        .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
@@ -271,12 +230,6 @@ namespace Silk.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AutoDehoist")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("BlacklistWords")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("DeleteMessageOnMatchedInvite")
                         .HasColumnType("boolean")
                         .HasColumnName("delete_invite_messages");
@@ -297,23 +250,8 @@ namespace Silk.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("infract_on_invite");
 
-                    b.Property<bool>("LogMemberJoins")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LogMemberLeaves")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LogMessageChanges")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("LoggingChannel")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<int>("LoggingConfigId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("LoggingWebhookUrl")
-                        .HasColumnType("text");
 
                     b.Property<int>("MaxRoleMentions")
                         .HasColumnType("integer")
@@ -342,12 +280,6 @@ namespace Silk.Data.Migrations
                     b.Property<bool>("UseAggressiveRegex")
                         .HasColumnType("boolean")
                         .HasColumnName("match_aggressively");
-
-                    b.Property<bool>("UseWebhookLogging")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("WebhookLoggingId")
-                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("WhitelistInvites")
                         .HasColumnType("boolean")
@@ -415,6 +347,10 @@ namespace Silk.Data.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
+
+                    b.Property<bool>("UserNotified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("user_notified");
 
                     b.HasKey("Id");
 
@@ -682,21 +618,6 @@ namespace Silk.Data.Migrations
                     b.ToTable("user_histories");
                 });
 
-            modelBuilder.Entity("Silk.Data.Entities.DisabledCommandEntity", b =>
-                {
-                    b.HasOne("Silk.Data.Entities.GuildConfigEntity", null)
-                        .WithMany("DisabledCommands")
-                        .HasForeignKey("GuildConfigEntityId");
-
-                    b.HasOne("Silk.Data.Entities.GuildEntity", "Guild")
-                        .WithMany()
-                        .HasForeignKey("GuildID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Guild");
-                });
-
             modelBuilder.Entity("Silk.Data.Entities.ExemptionEntity", b =>
                 {
                     b.HasOne("Silk.Data.Entities.GuildModConfigEntity", null)
@@ -844,8 +765,6 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Entities.GuildConfigEntity", b =>
                 {
-                    b.Navigation("DisabledCommands");
-
                     b.Navigation("Greetings");
                 });
 
