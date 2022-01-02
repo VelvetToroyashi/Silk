@@ -1,101 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using Humanizer;
+using Remora.Commands.Attributes;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Rest.Core;
+using Remora.Results;
 using Silk.Data;
 using Silk.Extensions;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using CommandGroup = Remora.Commands.Groups.CommandGroup;
 using TimestampFormat = DSharpPlus.TimestampFormat;
 
 namespace Silk.Commands.Server;
 
 [HelpCategory(Categories.Server)]
-public class ServerInfoCommand : BaseCommandModule
+public class ServerInfoCommand : CommandGroup
 {
-
-    [Command]
-    [Description("Get info about the current Guild")]
-    public async Task ServerInfo(CommandContext ctx)
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestGuildAPI   _guilds;
+    private readonly IDiscordRestChannelAPI _channels;
+    public ServerInfoCommand(ICommandContext context, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
     {
-        DiscordGuild guild = await ctx.Client.GetGuildAsync(ctx.Guild.Id, true);
+        _context  = context;
+        _guilds   = guilds;
+        _channels = channels;
+    }
 
-        DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                                   .WithTitle($"Guild info for {guild.Name}:")
-                                   .WithColor(DiscordColor.Gold)
-                                   .WithFooter($"Silk! | Requested by: {ctx.User.Id}", ctx.Client.CurrentUser.AvatarUrl);
+    
+    [Command("serverinfo", "si")]
+    [RequireContext(ChannelContext.Guild)]
+    [Description("Get info about the current Guild")]
+    public async Task<IResult> ServerInfo()
+    {
+        var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value, true);
 
-        embed.WithThumbnail(guild.IconUrl);
+        if (!guildResult.IsDefined(out var guild))
+            return guildResult;
+        
+        var fields = new List<IEmbedField>();
 
-        embed.AddField("Server Icon:", guild.IconUrl is null ? "Not set." : $"[Link]({guild.IconUrl})", true)
-             .AddField("Invite Splash:", guild.SplashUrl is null ? "Not set." : $"[Link]({guild.SplashUrl})", true)
-             .AddField("Server banner:", guild.BannerUrl is null ? "Not set." : $"[Link]({guild.BannerUrl})", true);
+        fields.Add(new EmbedField("Server Icon:", CDN.GetGuildIconUrl(guild, imageSize: 4096).IsDefined(out var guildIcon) ? $"[Link]({guildIcon})" : "Not Set!", true));
+        fields.Add(new EmbedField("Invite Splash:", CDN.GetGuildSplashUrl(guild, imageSize: 4096).IsDefined(out var guildSplash) ? $"[Link]({guildSplash})" : "Not Set!", true));
+        fields.Add(new EmbedField("Server Banner:", CDN.GetGuildBannerUrl(guild, imageSize: 4096).IsDefined(out var guildBanner) ? $"[Link]({guildBanner})" : "Not Set!", true));
+        
+        var memberInformation = $"Max: {(guild.MaxMembers.IsDefined(out var maxMembers) ? $"{maxMembers}" : "Unknown")}\n"                   +
+                                $"Current\\*: {(guild.ApproximateMemberCount.IsDefined(out var memberCount) ? $"{memberCount}" : "Unknown")}\n" +
+                                $"Online\\*: {(guild.ApproximatePresenceCount.IsDefined(out var onlineCount) ? $"{onlineCount}" : "Unknown")}";
 
-        var stringBuilder = new StringBuilder();
-        stringBuilder
-           .AppendLine($"Max: {guild.MaxMembers}")
-           .AppendLine($"Online: {guild.ApproximatePresenceCount.Value}")
-           .AppendLine($"Offline: {guild.Members.Count - guild.ApproximatePresenceCount.Value}")
-           .AppendLine($"**Total**: {guild.MemberCount}");
-        embed.AddField("Members:", stringBuilder.ToString(), true);
-        stringBuilder.Clear();
+        fields.Add(new EmbedField("Members:" , memberInformation, true));
 
-
-        IEnumerable<IGrouping<ChannelType, KeyValuePair<ulong, DiscordChannel>>>? cTypes = guild.Channels.GroupBy(g => g.Value.Type);
-        foreach (IGrouping<ChannelType, KeyValuePair<ulong, DiscordChannel>> type in cTypes)
+        if (!guild.Channels.IsDefined(out var channels))
         {
-            _ = type.Key switch
-            {
-                ChannelType.News     => stringBuilder.AppendLine($"News: {type.Count()}"),
-                ChannelType.Text     => stringBuilder.AppendLine($"Text: {type.Count()}"),
-                ChannelType.Voice    => stringBuilder.AppendLine($"Voice: {type.Count()}"),
-                ChannelType.Stage    => stringBuilder.AppendLine($"Stage: {type.Count()}"),
-                ChannelType.Category => stringBuilder.AppendLine($"Category: {type.Count()}"),
-                _                    => stringBuilder.AppendLine($"Unknown ({type.Key}): {type.Count()}")
-            };
+            fields.Add(new EmbedField("Channels:", "Channel information is unavailable. Sorry.", true));
         }
-        stringBuilder.AppendLine($"**Total**: {guild.Channels.Count}/500");
-        embed.AddField("Channels:", stringBuilder.ToString(), true);
-        stringBuilder.Clear();
-
-        int maxEmojis = guild.PremiumTier switch
+        else
         {
-            PremiumTier.Tier_1 => 100,
-            PremiumTier.Tier_2 => 150,
-            PremiumTier.Tier_3 => 250,
-            PremiumTier.None   => 50
+            var channelInfo = channels
+                             .GroupBy(c => c.Type)
+                             .Select(gc => $"{gc.Key.Humanize()}: {gc.Count()}")
+                             .Join("\n");
+            
+            fields.Add(new EmbedField("Channels:", $"{channelInfo}\n Total: {channels.Count}", true));
+        }
+
+        var tier = guild.PremiumTier switch
+        {
+            PremiumTier.None  => ("(No Level)", 100),
+            PremiumTier.Tier1 => ("(Level 1)", 200),
+            PremiumTier.Tier2 => ("(Level 2)", 300),
+            PremiumTier.Tier3 => ("(Level 3)", 500),
+            PremiumTier.Tier4 => throw new InvalidOperationException("Tier 4 doesn't exist."),
         };
 
-        string? tierName = guild.PremiumTier switch
+        fields.Add(new EmbedField("Other Info:", $"Emojis: {guild.Emojis.Count}/{tier.Item2}\n "                                                                        +
+                                                 $"Roles: {guild.Roles.Count}\n "                                                                                       +
+                                                 $"Boosts: {(guild.PremiumSubscriptionCount.IsDefined(out var boosts) ? $"{boosts}" : "Unknown")} {tier.Item1}\n " +
+                                                 $"Progress Bar: {(guild.IsPremiumProgressBarEnabled ? "Yes" : "No")}", true));
+
+
+        fields.Add(new EmbedField("Server Created:", $"{guild.ID.Timestamp.ToTimestamp(Extensions.TimestampFormat.LongDateTime)} ({guild.ID.Timestamp.ToTimestamp()})", true));
+        fields.Add(new EmbedField("Server Owner:", $"<@{guild.OwnerID}>", true));
+        
+        fields.Add(new EmbedField("Features:", guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n")));
+
+        var embed = new Embed
         {
-            PremiumTier.None   => "(No level)",
-            PremiumTier.Tier_1 => "(Level 1)",
-            PremiumTier.Tier_2 => "(Level 2)",
-            PremiumTier.Tier_3 => "(Level 3)"
+            Title     = $"Information about {guild.Name}:",
+            Colour    = Color.Gold,
+            Fields    = fields,
+            Thumbnail = guildIcon is null ? default(Optional<IEmbedThumbnail>) : new EmbedThumbnail(guildIcon.ToString()),
+            Image     = guildBanner is null ? default(Optional<IEmbedImage>) : new EmbedImage(guildBanner.ToString()),
         };
-
-        stringBuilder
-           .AppendLine($"Emojis: {ctx.Guild.Emojis.Count}/{maxEmojis * 2}")
-           .AppendLine($"Roles: {guild.Roles.Count}/250")
-           .AppendLine($"Boosts: {guild.PremiumSubscriptionCount ?? 0} {tierName}");
-
-        embed.AddField("Other information:", stringBuilder.ToString(), true);
-        stringBuilder.Clear();
-
-
-        var creation = $"{Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow, TimestampFormat.LongDate)} ({Formatter.Timestamp(guild.CreationTimestamp - DateTime.UtcNow)})";
-        embed.AddField("Server Owner:", guild.Owner.Mention, true)
-             .AddField("Most recent member:", guild.Members.OrderBy(m => m.Value.JoinedAt).Last().Value.Mention, true)
-             .AddField("Creation date:", creation);
-
-
-        embed.AddField("Guild features:", guild.Features.Select(ft => ft.ToLower().Titleize()).Join(", "));
-
-        await ctx.RespondAsync(embed);
+        
+        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
     }
 }
