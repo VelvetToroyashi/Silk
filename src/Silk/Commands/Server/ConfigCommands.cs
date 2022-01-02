@@ -1,4 +1,5 @@
 ﻿//TODO: This
+using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -13,7 +14,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
+using Silk.Data.MediatR.Guilds.Config;
 using Silk.Extensions.Remora;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
@@ -35,9 +38,9 @@ public class ConfigCommands : CommandGroup
 
     public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels)
     {
-        _context  = context;
+        _context     = context;
         _configCache = configCache;
-        _channels = channels;
+        _channels    = channels;
     }
 
     [Command("reload")]
@@ -76,7 +79,8 @@ public class ConfigCommands : CommandGroup
             ICommandContext        context,
             IDiscordRestGuildAPI   guilds,
             IDiscordRestUserAPI    users,
-            IDiscordRestChannelAPI channels)
+            IDiscordRestChannelAPI channels
+        )
         {
             _mediator = mediator;
             _context  = context;
@@ -85,18 +89,64 @@ public class ConfigCommands : CommandGroup
             _channels = channels;
         }
 
-
-        [Command("mute")]
-        [Description("Adjust the configured mute role, or setup native mutes (powered by Discord's Timeout feature).")]
+        [Command("phishing")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+        [Description("Edit the settings for phishing detection.")]
+        public async Task<IResult> PhishingAsync
+        (
+            [Option("enabled")]
+            [Description("Whether phishing detection should be enabled.")]
+            bool?   enabled = null,
+            
+            [Option("action")]
+            [Description("What action to take when phishing is detected. (kick, ban, or mute)")]
+            string? action  = null,
+            
+            [Switch("preserve")]
+            [Description("Whether to preserve the message that contains phishing. Not recommended.")]
+            bool   preserve  = false
+        )
+        {
+            if (action is not null and not ("kick" or "ban" or "mute"))
+                return await _channels.CreateMessageAsync(_context.ChannelID, "Invalid action. Valid actions are: kick, ban, and mute.");
+
+            InfractionType? parsedAction = action switch
+            {
+                "kick" => InfractionType.Kick,
+                "ban"  => InfractionType.Ban,
+                "mute" => InfractionType.Mute,
+                null   => null,
+                _      => throw new ArgumentOutOfRangeException(nameof(action), action, "Impossible condition.")
+            };
+
+            var config = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value));
+            
+            if (action is not null)
+                config!.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = parsedAction.Value };
+
+
+            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            {
+                DetectPhishingLinks  = enabled ?? default(Optional<bool>),
+                DeletePhishingLinks  = !preserve,
+                NamedInfractionSteps = config.NamedInfractionSteps
+
+            });
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+        }
+        
+        [Command("mute")]
+        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+        [Description("Adjust the configured mute role, or setup native mutes (powered by Discord's Timeout feature).")]
         public async Task<IResult> MuteAsync
         (
             [Description("The role to mute users with.")]
             IRole? mute,
             
-            [Switch("native")]                            
-            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission.")]
-            bool useNativeMutes = false
+            [Option("native")]                            
+            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission. (This is currently unimplemented)")]
+            bool? useNativeMutes = null
         )
         {
             
@@ -114,7 +164,7 @@ public class ConfigCommands : CommandGroup
 
             var selfPerms = DiscordPermissionSet.ComputePermissions(self.User.Value.ID, roles.First(r => r.ID == _context.GuildID), selfRoles);
             
-            if (useNativeMutes && !selfPerms.HasPermission(DiscordPermission.ModerateMembers)) 
+            if (useNativeMutes is not null && useNativeMutes.Value && !selfPerms.HasPermission(DiscordPermission.ModerateMembers)) 
                 return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to timeout members!");
             
             if (mute is not null)
@@ -200,7 +250,6 @@ public class ConfigModule : BaseCommandModule
     public Task Default(CommandContext ctx) => ctx.CommandsNext.ExecuteCommandAsync(ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, ctx.CommandsNext.RegisteredCommands["config view"]));
 
     [Group("view")]
-    
     [Description("View the current config, or specify a sub-command to see detailed information.")]
     public sealed class ViewConfigModule : BaseCommandModule
     {
