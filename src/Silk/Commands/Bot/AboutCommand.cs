@@ -67,7 +67,7 @@ public class AboutCommand : CommandGroup
             Fields = new IEmbedField[]
             {
                 new EmbedField("Guild Count:", guildsList.Count.ToString(), true),
-                new EmbedField("Owners:", app.Owner?.Username.Value  ?? app.Team?.Members.Select(t => t.User.Username.Value).Join(", ") ?? "Unknown", true),
+                new EmbedField("Owners:", app.Team is null ? app.Owner!.Username.Value : app.Team?.Members.Select(t => t.User.Username.Value).Join(", ") ?? "Unknown", true),
                 new EmbedField("Remora Version:", remora?.ToString() ?? "Unknown", true),
                 new EmbedField("Silk! Core:", StringConstants.Version, true)
             }
