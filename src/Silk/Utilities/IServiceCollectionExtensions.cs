@@ -83,6 +83,7 @@ public static class IServiceCollectionExtensions
             {
                 cs.SetAbsoluteExpiration<IChannel>(null)
                   .SetAbsoluteExpiration<IMessage>(null)
+                  .SetAbsoluteExpiration<IGuild>(null)
                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
                   .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromMinutes(5));
             })
