@@ -13,6 +13,7 @@ namespace Silk.Data.Migrations
 @"DROP TABLE IF EXISTS
     ""CommandInvocations"",
     ""DisabledCommandEntity"",
+    ""ExemptionEntity"",
     ""GuildConfigs"",
     ""GuildGreetingEntity"",
     ""GuildLoggingConfigEntity"",
