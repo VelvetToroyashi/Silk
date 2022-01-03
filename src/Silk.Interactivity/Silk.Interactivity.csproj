@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Remora.Discord.API.Abstractions" Version="51.0.0" />
-    <PackageReference Include="Remora.Discord.Gateway" Version="6.2.5" />
+    <PackageReference Include="Remora.Discord.API.Abstractions" Version="51.0.1" />
+    <PackageReference Include="Remora.Discord.Gateway" Version="6.2.6" />
   </ItemGroup>
 
 </Project>

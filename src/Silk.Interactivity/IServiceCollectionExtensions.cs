@@ -7,7 +7,7 @@ namespace Silk.Interactivity;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddInteractivity(this IServiceCollection services)
+    public static IServiceCollection AddSilkInteractivity(this IServiceCollection services)
     {
         services.AddSingleton<InteractivityExtension>();
         

@@ -13,6 +13,9 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
+using Remora.Discord.Interactivity.Extensions;
+using Remora.Discord.Interactivity.Responders;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Serilog;
 using Serilog.Events;
@@ -46,8 +49,10 @@ public static class IServiceCollectionExtensions
         var asm = Assembly.GetEntryAssembly()!;
 
         services
+           .AddResponders(asm)
            .AddInteractivity()
-           .AddResponders(asm);
+           .AddPagination()
+           .AddSilkInteractivity();
 
         services
            .AddScoped<CommandHelpViewer>()
@@ -71,6 +76,7 @@ public static class IServiceCollectionExtensions
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
         services
+           .Configure<InteractivityResponderOptions>(iro => iro with { SuppressAutomaticResponses = false })
            .Configure<DiscordGatewayClientOptions>(gw =>
             {
                 gw.Intents |=
