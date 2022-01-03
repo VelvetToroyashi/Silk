@@ -15,6 +15,7 @@ using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Interactivity.Responders;
+using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Serilog;
@@ -76,7 +77,7 @@ public static class IServiceCollectionExtensions
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
         services
-           .Configure<InteractivityResponderOptions>(iro => iro with { SuppressAutomaticResponses = false })
+           .Configure<PaginatedAppearanceOptions>(pap => pap with { HelpText = "Use the buttons to navigate and the close button to stop."})
            .Configure<DiscordGatewayClientOptions>(gw =>
             {
                 gw.Intents |=
