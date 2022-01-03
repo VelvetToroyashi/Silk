@@ -20,6 +20,7 @@ using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Interactivity;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -45,7 +46,7 @@ public static class IServiceCollectionExtensions
         var asm = Assembly.GetEntryAssembly()!;
 
         services
-            //.AddInteractivity()
+           .AddInteractivity()
            .AddResponders(asm);
 
         services

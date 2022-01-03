@@ -109,6 +109,9 @@ public class Program
                 services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
                 services.AddSingleton<IInfractionService, InfractionService>();
 
+                services.AddSingleton<InviteDectectionService>();
+                services.AddSingleton<ExemptionEvaluationService>();
+                
                 services.AddSingleton<IChannelLoggingService, ChannelLoggingService>();
                 services.AddSingleton<MemberLoggerService>();
                 services.AddSingleton<GuildConfigCacheService>();
@@ -119,7 +122,6 @@ public class Program
                 
                 services.AddSingleton<FlagOverlayService>();
                 
-                services.AddResponder<MemberGreetingResponder>();
 
                 services.AddMediatR(typeof(Program));
                 services.AddMediatR(typeof(GuildContext));

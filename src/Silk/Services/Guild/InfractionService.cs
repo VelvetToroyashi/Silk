@@ -51,19 +51,19 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IDiscordRestWebhookAPI _webhooks;
     
-    private readonly ChannelLoggingService _channelLogger;
+    private readonly IChannelLoggingService _channelLogger;
 
     private readonly List<InfractionEntity> _queue = new();
     public InfractionService
     (
-            ILogger<InfractionService> logger,
-            IMediator                  mediator,
-            GuildConfigCacheService    config,
-            IDiscordRestUserAPI        users,
-            IDiscordRestGuildAPI       guilds,
-            IDiscordRestChannelAPI     channels,
-            IDiscordRestWebhookAPI     webhooks, 
-            ChannelLoggingService channelLogger
+        ILogger<InfractionService> logger,
+        IMediator                  mediator,
+        GuildConfigCacheService    config,
+        IDiscordRestUserAPI        users,
+        IDiscordRestGuildAPI       guilds,
+        IDiscordRestChannelAPI     channels,
+        IDiscordRestWebhookAPI     webhooks, 
+        IChannelLoggingService     channelLogger
     )
     {
         _logger        = logger;
