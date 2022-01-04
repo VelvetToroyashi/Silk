@@ -1,21 +1,150 @@
-﻿/*using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
+using Recognizers.Text.DateTime.Wrapper;
+using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
+using Remora.Commands.Attributes;
+using Remora.Commands.Results;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using Silk.Data.Entities;
-using Silk.Services.Server;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
+using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
-namespace Silk.Commands.General
+namespace Silk.Commands.General;
+
+public static class MicroTimeParser
 {
+    private static readonly Regex _timeRegex = new(@"(?<quantity>\d+)(?<unit>mo|[ywdhms])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    public static Result<TimeSpan> TryParse(string input)
+    {
+        var start = TimeSpan.Zero;
+        
+        var matches = _timeRegex.Matches(input);
+        
+        if (!matches.Any())
+            return Result<TimeSpan>.FromError(new ParsingError<TimeSpan>(input, "Failed to extract time from input."));
+
+        var returnResult = matches.Aggregate(start, (c, n) =>
+        {
+            var multiplier = int.Parse(n.Groups["quantity"].Value);
+            var unit       = n.Groups["unit"].Value;
+
+            return c + unit switch
+            {
+                "mo" => TimeSpan.FromDays(30  * multiplier),
+                "y"  => TimeSpan.FromDays(365 * multiplier),
+                "w"  => TimeSpan.FromDays(7   * multiplier),
+                "d"  => TimeSpan.FromDays(multiplier),
+                "h"  => TimeSpan.FromHours(multiplier),
+                "m"  => TimeSpan.FromMinutes(multiplier),
+                "s"  => TimeSpan.FromSeconds(multiplier),
+                _    => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+            };
+        });
+        
+        if (returnResult == TimeSpan.Zero)
+            return Result<TimeSpan>.FromError(new ParsingError<TimeSpan>(input, "Failed to extract time from input."));
+        
+        return Result<TimeSpan>.FromSuccess(returnResult);
+    }
+}
+
+[HelpCategory(Categories.General)]
+public class ReminderCommand : CommandGroup
+{
+    private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
+                                                  "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'tomorrow at 5pm' and 'in 2 days'";
+    
+    private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
+    
+    private readonly ICommandContext        _context;
+    private readonly IDiscordRestChannelAPI _channels;
+    public ReminderCommand(ICommandContext context, IDiscordRestChannelAPI channels)
+    {
+        _context  = context;
+        _channels = channels;
+    }
+    
+    
+    
+    [Command("remind", "remindme")]
+    [Description("Reminds you of something in the future.")]
+    public async Task<IResult> RemindAsync
+    (
+        [Option("cancel")]
+        [Description("Cancels a reminder. Mutually exclusive with the other options.")]
+        int? cancelID = null,
+        
+        [Switch("list")]
+        [Description("Lists all reminders you have set.")]
+        bool list = false,
+        
+        [Greedy]
+        [Description("The reminder to set. A time is required.\n"                                                      +
+                     "You can use natural language like `tomorrow at 5pm` and `in 2 days`\n"                           +
+                     "If you're accustomed to other bots (or the behavior of V2), you can\n"                           +
+                     "set reminders in the format of `remind 2h30m to go to the gym`.\n\n"                             +
+                     "Keep in mind that the time will be extrapolated from the first mention of a time.\n"             +
+                     "Time ranges (such as `for 2 days`) are ignored.\n"                                               +
+                     "Mentions of `in X days` `X hours from now`, and similar are detected.\n\n"                       +
+                     "**NOTE:** \nIf you mention a time such as 5pm, it will be interpreted as 5pm UTC.\n"             +
+                     "For reference, Noon UTC is <t:1577880000:T>.\n"                                                  +
+                     "If the timestamp reads AM, you need to add hours, and the opposite for PM.\n\n"                  +
+                     "Because of this, it's advised to not say 'today', as reminders are based on UTC.\n"              +
+                     "Your reminder may be rejected for being in the past.\n"                                          +
+                     "Instead, use tomorrow, or mention a relative time such as `in five hours`.\n\n"                  +
+                     "If you want to set a reminder at a specific time directly, you must interpret the\n"             +
+                     "appropriate time based on the timestamp. \n"                                                     +
+                     "If it reads 7AM, you're 5 hours behind UTC, and must then remove five hours to your reminder.\n" +
+                     "e.g: `remind me tomorrow at 4AM feed the dogs` will remind you at 9AM your time.\n\n"            +
+                     "We're aware this is a less-than ideal solution, and hope to add locale support for this in the future. <3")]
+        string reminder = ""
+    )
+    {
+        if (string.IsNullOrEmpty(reminder))
+            return await _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a reminder!");
+
+        var timeResult = MicroTimeParser.TryParse(reminder.Split(' ')[0]);
+        
+        if (!timeResult.IsDefined(out var time))
+        {
+            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, refTime: DateTime.UtcNow);
+            
+            if (parsedTimes.FirstOrDefault() is not {} parsedTime || !parsedTime.Resolution.Values.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+            
+            var timeModel = parsedTime.Resolution.Values.FirstOrDefault(v => v is DateTimeV2Date or DateTimeV2DateTime);
+            
+            if (timeModel is null)
+                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+
+            if (timeModel is DateTimeV2Date vd)
+                time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+            
+            if (timeModel is DateTimeV2DateTime vdt)
+                time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+        }
+        
+        if (time <= TimeSpan.Zero)
+            return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
+        
+        if (time < _minimumReminderTime)
+            return await _channels.CreateMessageAsync(_context.ChannelID, $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
+        
+        return await _channels.CreateMessageAsync(_context.ChannelID, $"Reminder set for {time.Humanize(minUnit: TimeUnit.Minute, precision: 4)}!");
+    }
+    
+}
+/*{
     
     [HelpCategory(Categories.General)]
     public class RemindersCommand : BaseCommandModule
