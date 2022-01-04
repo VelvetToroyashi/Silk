@@ -20,19 +20,21 @@ namespace Silk.Commands.General;
 [HelpCategory(Categories.Misc)]
 public class PingCommand : CommandGroup
 {
-    
-    private readonly HttpClient           _client;
     private readonly GuildContext         _db;
     private readonly ICommandContext      _context;
     private readonly DiscordGatewayClient _gateway;
     
-
     private readonly IDiscordRestChannelAPI _channels;
 
-    public PingCommand(GuildContext db, HttpClient client, ICommandContext context, DiscordGatewayClient gateway, IDiscordRestChannelAPI channels)
+    public PingCommand
+    (
+        GuildContext db,
+        ICommandContext context,
+        DiscordGatewayClient gateway,
+        IDiscordRestChannelAPI channels
+    )
     {
         _db       = db;
-        _client   = client;
         _context  = context;
         _gateway  = gateway;
         _channels = channels;
@@ -75,7 +77,7 @@ public class PingCommand : CommandGroup
 
         embed = embed with
         {
-            Fields = new EmbedField[]
+            Fields = new[]
             {
                 (embed.Fields.Value[0] as EmbedField)! with { Value = $"```cs\n" + $"{(message.Entity.Timestamp - (_context as MessageContext)!.MessageID.Timestamp).TotalMilliseconds:N0} ms".PadLeft(10) + "```" },
                 (embed.Fields.Value[1] as EmbedField)!,
