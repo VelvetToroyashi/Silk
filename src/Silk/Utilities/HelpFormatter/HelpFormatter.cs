@@ -9,12 +9,64 @@ using Remora.Commands.Signatures;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
+using Remora.Results;
 using Silk.Extensions;
 
 namespace Silk.Utilities.HelpFormatter;
 
 public class HelpFormatter : IHelpFormatter
 {
+
+    public IEnumerable<IEmbed> GetCommandsHelpEmbeds(OneOf<CommandNode, IReadOnlyList<IChildNode>> commands)
+    {
+        if (commands.TryPickT0(out var standalone, out var overloads))
+        {
+            string aliases = standalone.Aliases.Any() ? string.Join(", ", standalone.Aliases) + '\n' : "None";
+
+            var embed = new Embed
+            {
+                //Title = command.Key,
+                Description = $"**Command** - {standalone.Key}\n"               +
+                              $"**Aliases** - {aliases}\n"                      +
+                              $"**Usage**\n {GetParameterHelp(standalone)}\n\n" +
+                              $"**Description** - {standalone.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
+                Colour = Color.DodgerBlue
+            };
+
+            yield return embed;
+        }
+        else
+        {
+            if (overloads.All(c => c is CommandNode)) // If this is the case, we're dealing with actual overloads.
+            {
+                var    overloadIndex = 0;
+                var    firstOverload = overloads.First();
+                string aliases       = firstOverload.Aliases.Any() ? string.Join(", ", firstOverload.Aliases) + '\n' : "None";
+            
+                yield return new Embed
+                {
+                    Title = "This command has several ways to use it:",
+                    Description = $"**Command** - {firstOverload.Key}\n" +
+                                  $"**Aliases** - {aliases}\n",                         
+                    Colour = Color.DodgerBlue
+                };
+
+                foreach (var overload in overloads.Cast<CommandNode>())
+                {
+                    yield return new Embed
+                    {
+                        Title = $"Option {++overloadIndex}/{overloads.Count}",
+                        Description = $"**Usage**\n {GetParameterHelp(overload)}\n\n" +
+                                      $"**Description** - {overload.Shape.Description}",
+                        Colour = Color.DodgerBlue
+                    };
+                }
+            }
+
+
+        }
+    }
+
     /// <inheritdoc />
     public IEnumerable<IEmbed> GetCommandHelpEmbeds(OneOf<CommandNode, IReadOnlyList<CommandNode>> command)
     {
@@ -25,8 +77,8 @@ public class HelpFormatter : IHelpFormatter
             var embed = new Embed
             {
                 //Title = command.Key,
-                Description = $"**Command** - {standalone.Key}\n"                  +
-                              $"**Aliases** - {aliases}\n"                         +
+                Description = $"**Command** - {standalone.Key}\n"               +
+                              $"**Aliases** - {aliases}\n"                      +
                               $"**Usage**\n {GetParameterHelp(standalone)}\n\n" +
                               $"**Description** - {standalone.Shape.Description}", //command.Shape.Description + usage + parameterHelp,
                 Colour = Color.DodgerBlue
@@ -73,7 +125,8 @@ public class HelpFormatter : IHelpFormatter
                             .Shape
                             .Parameters
                             .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
-
+    
+    
     /// <inheritdoc />
     public IEmbed GetSubcommandHelpEmbed(IEnumerable<IChildNode> subcommands)
     {
@@ -115,11 +168,15 @@ public class HelpFormatter : IHelpFormatter
                 node  = subcommands.Single().Parent as IChildNode;
             else node = subcommands.First();
 
+
+            var containsDefaultCommand = IsExecutableGroup(node, out var usage);
+            
             embed = new Embed
             {
-                Title = $"Help for {node!.Key}:",
-                Description = "Showing subcommands. \n" +
-                              "Specify a command name to see more information. \n",
+                Title = $"Help for {node.Key}:",
+                Description = "Showing subcommands. \n"                            +
+                              "Specify a command name to see more information.\n\n" +
+                              (containsDefaultCommand ? usage : null),
                 Colour = Color.DodgerBlue,
                 Fields = new[]
                 {
@@ -130,6 +187,31 @@ public class HelpFormatter : IHelpFormatter
         }
 
         return embed;
+    }
+
+    private bool IsExecutableGroup(IChildNode node, out string usage)
+    {
+        usage = "";
+
+        if (node is not GroupNode gn || gn.Parent is not {} parent) //How??
+            return false;
+        
+        if (parent.Children.Count < 2)
+            return false;
+        
+        var nodes = parent.Children.Where(n => n.Key == node.Key);
+        
+        if (nodes.Count() < 2)
+            return false;
+
+        var command = nodes.FirstOrDefault(n => n is not IParentNode) as CommandNode;
+
+        if (command is null)
+            return false; // Plugins may add on to a group.
+
+        usage = "This group can be used like a command:\n" + GetParameterHelp(command);
+
+        return true;
     }
     
     /// <summary>

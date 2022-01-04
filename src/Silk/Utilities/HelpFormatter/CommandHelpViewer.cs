@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using OneOf;
 using Remora.Commands.Conditions;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
@@ -28,7 +29,63 @@ public class CommandHelpViewer
         _channelApi = channelApi;
     }
 
+
+
     public async Task<Result<IMessage>> SendHelpAsync(string? command, Snowflake channelID)
+    {
+        var formatter = _services.GetService<IHelpFormatter>();
+
+        if (formatter is null)
+            return Result<IMessage>.FromError(new InvalidOperationError("No help formatter was registered with the container."));
+
+        var embeds = Array.Empty<IEmbed>();
+
+        if (string.IsNullOrEmpty(command))
+        {
+            IEnumerable<IChildNode> commands = await GetApplicableCommandsAsync(_services, _tree.Root.Children);
+
+            if (!commands.Any())
+                return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
+
+            commands = commands.DistinctBy(c => c.Key, StringComparer.OrdinalIgnoreCase);
+            
+            embeds = new [] { formatter.GetSubcommandHelpEmbed(commands) };
+        }
+        else
+        {
+            var nodes = SearchCommands(command, _tree.Root).ToArray();
+
+            if (!nodes.Any()) //TODO: Change this message to "No command was found with the name '<name>'."
+                return Result<IMessage>.FromError(new NotFoundError($"No command was found with the name '{command}'."));
+
+            if (nodes.Length > 1)
+            {
+                // This seemed stupid, but essentially if the parent of a group is the first node, skip it
+                if (nodes[0] is IParentNode pn)
+                {
+                    if (pn.Children.FirstOrDefault() is { } child && child.Parent == pn)
+                    {
+                        nodes  = nodes.Skip(1).ToArray();
+                        embeds = new [] { formatter.GetSubcommandHelpEmbed(nodes) };
+                    }
+                    
+                }
+                
+                if (nodes[0].Key == nodes[1].Key && nodes[1] is IParentNode pn2)
+                    embeds = new [] { formatter.GetSubcommandHelpEmbed(pn2.Children) };
+            }
+            else
+            {
+                embeds = formatter.GetCommandHelpEmbeds(nodes[0] as CommandNode).ToArray();
+            }
+        }
+
+        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: embeds.ToArray());
+
+        return res;
+    }
+    
+    public async Task<Result<IMessage>> SendHelpMessageAsync(string? command, Snowflake channelID)
     {
         var formatter = _services.GetService<IHelpFormatter>();
 
@@ -83,25 +140,29 @@ public class CommandHelpViewer
             if (string.Equals(child.Key, currentToken, StringComparison.OrdinalIgnoreCase) ||
                 child.Aliases.Contains(currentToken, StringComparer.OrdinalIgnoreCase))
             {
-                if (child is not IParentNode pn)
+                var parentNode = child as IParentNode;
+                if (commandRoute.Length > 1)
                 {
-                    yield return child;
-                }
-                else
-                {
-                    if (commandRoute.Length is 1)
+                    if (parentNode is null)
                     {
-                        yield return child;
-                        foreach (var subcommand in pn.Children)
-                            yield return subcommand;
-
+                        continue;
+                    }
+                    else
+                    {
+                        var commands = SearchCommands(string.Join(' ', commandRoute.Skip(1)), parentNode);
+                        foreach (var subCommand in commands)
+                            yield return subCommand;
                         yield break;
                     }
-
-                    var commands = SearchCommands(string.Join(' ', commandRoute.Skip(1)), pn);
-                    foreach (var subCommand in commands)
-                        yield return subCommand;
                 }
+
+                yield return child;
+                
+                if (parentNode is not null)
+                    foreach (var subcommand in parentNode.Children)
+                        yield return subcommand;
+                
+                yield break;
             }
         }
     }
