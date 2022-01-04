@@ -11,10 +11,13 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity.Services;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Interactivity;
 using Silk.Utilities.HelpFormatter;
 
@@ -28,9 +31,9 @@ public class CasesCommand : CommandGroup
     private readonly ICommandContext        _context;
     private readonly IDiscordRestChannelAPI _channels;
     
-    private readonly InteractivityExtension _interactivity;
+    private readonly InteractiveMessageService _interactivity;
     
-    public CasesCommand(IMediator mediator, ICommandContext context, IDiscordRestChannelAPI channels, InteractivityExtension interactivity)
+    public CasesCommand(IMediator mediator, ICommandContext context, IDiscordRestChannelAPI channels, InteractiveMessageService interactivity)
     {
         _mediator      = mediator;
         _context       = context;
@@ -64,9 +67,7 @@ public class CasesCommand : CommandGroup
                 new EmbedField("Pardoned:", (!infCase.AppliesToTarget).ToString(), true)
             }
         };
-        
-        //TODO: Pagination, waiting on Remora to support it
-        
+
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
     }
 
@@ -83,9 +84,24 @@ public class CasesCommand : CommandGroup
         if (!cases.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "It appears this user is clean. They should keep it up!");
 
+        if (cases.Count() > 5)
+        {
+            var paginatedInfractions = cases.Chunk(5)
+                                            .Select(c => 
+                                                        new Embed()
+                                                        {
+                                                            Title       = $"Infractions for {user.ToDiscordTag()}",
+                                                            Colour      = Color.Goldenrod,
+                                                            Description = c.Select(GetCaseDescription).Join("\n")
+                                                        }
+                                             );
+
+            return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, paginatedInfractions.ToList());
+        }
+        
         var embed = new Embed()
         {
-            Title       = $"Infractions for {user.Username}#{user.Discriminator:0000}",
+            Title       = $"Infractions for {user.ToDiscordTag()}",
             Colour      = Color.Goldenrod,
             Description = cases.Select(GetCaseDescription).Join("\n")
         };
