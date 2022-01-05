@@ -63,9 +63,9 @@ public static class MicroTimeParser
         return Result<TimeSpan>.FromSuccess(returnResult);
     }
 }
+
 [Group("remind")]
 [HelpCategory(Categories.General)]
-
 public class ReminderCommands : CommandGroup
 {
     private const string ReminderDescription =
@@ -226,7 +226,7 @@ public class ReminderCommands : CommandGroup
 
         await _reminders.RemoveReminderAsync(id);
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, $"I've cancelled your reminder!");
+        return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
     }
     
 }
