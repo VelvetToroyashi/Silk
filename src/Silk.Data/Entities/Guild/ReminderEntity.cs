@@ -25,6 +25,18 @@ public class ReminderEntity
     public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
+    /// Whether this reminder is private. Reminders sent in DMs or invoked by slash commnands are private.
+    /// </summary>
+    [Column("is_private")]
+    public bool IsPrivate { get; set; }
+    
+    /// <summary>
+    /// Whether the reminder message was a reply to another message.
+    /// </summary>
+    [Column("is_reply")]
+    public bool IsReply { get; set; }
+    
+    /// <summary>
     ///     The Id of the owner.
     /// </summary>
     [Column("owner_id")]
@@ -70,5 +82,5 @@ public class ReminderEntity
     ///     The Id of the message that was replied to, if any.
     /// </summary>
     [Column("reply_message_id")]
-    public Snowflake? ReplyID { get; set; }
+    public Snowflake? ReplyMessageID { get; set; }
 }

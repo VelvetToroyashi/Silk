@@ -118,9 +118,9 @@ public sealed class ReminderService : IHostedService
         var now       = DateTimeOffset.UtcNow;
         var replyExists = false;
 
-        if (reminder.ReplyID is not null)
+        if (reminder.ReplyMessageID is not null)
         {
-            var reply = reminder.ReplyID.Value;
+            var reply = reminder.ReplyMessageID.Value;
             
             Result<IMessage> replyResult = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reply);
             replyExists = replyResult.IsSuccess;
@@ -130,10 +130,27 @@ public sealed class ReminderService : IHostedService
 
         bool originalMessageExists = reminderMessage.IsSuccess;
 
-        var dispatchMessage = GetReminderMessageString(reminder, false, replyExists, originalMessageExists).ToString();
+        var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
-        Result<IMessage> dispatchReuslt = await _channelApi.CreateMessageAsync(reminder.ChannelID, dispatchMessage);
-
+        Result<IMessage> dispatchReuslt = await _channelApi.CreateMessageAsync
+            (
+             reminder.ChannelID,
+             dispatchMessage,
+             allowedMentions: 
+             new AllowedMentions
+                 (
+                  Users: new[] { reminder.OwnerID },
+                  MentionRepliedUser: !reminder.IsReply
+                 ),
+             messageReference: 
+             new MessageReference
+                 (
+                  reminder.ReplyMessageID ?? reminder.MessageID ?? default,
+                  reminder.ChannelID,
+                  FailIfNotExists: false
+                 )
+            ); 
+        
         if (dispatchReuslt.IsSuccess)
         {
             _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds.ToString("N1"));
@@ -144,7 +161,7 @@ public sealed class ReminderService : IHostedService
         }
         _logger.LogWarning(EventIds.Service, "Failed to dispatch reminder. Falling back to a DM.");
 
-        Result fallbackResult = await AttemptDispatchDMReminderAsync(reminder);
+        var fallbackResult = await AttemptDispatchDMReminderAsync(reminder);
 
         if (fallbackResult.IsSuccess)
         {
@@ -165,18 +182,16 @@ public sealed class ReminderService : IHostedService
     /// <param name="replyExists">Whether the reply (if any) still exists.</param>
     /// <param name="originalMessageExists">Whether the invocation messsage for the reminder still exists.</param>
     /// <returns>A StringBuilder contianing the built message.</returns>
-    private static StringBuilder GetReminderMessageString(ReminderEntity reminder, bool inDMs, bool replyExists, bool originalMessageExists)
+    private static StringBuilder GetReminderMessageString(ReminderEntity reminder, bool replyExists, bool originalMessageExists)
     {
         var dispatchMessage = new StringBuilder();
-
-        bool isReply = reminder.ReplyID is not null;
-
-        if (inDMs)
+        
+        if (reminder.IsPrivate)
         {
             dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
             dispatchMessage.AppendLine(reminder.MessageContent);
         }
-        else if (isReply)
+        else if (reminder.IsReply)
         {
             dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerID}>! You asked me to remind you about this!");
 
@@ -213,7 +228,7 @@ public sealed class ReminderService : IHostedService
     {
         await RemoveReminderAsync(reminder.Id);
 
-        var message = GetReminderMessageString(reminder, true, false, true).ToString();
+        var message = GetReminderMessageString(reminder, false, true).ToString();
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
 

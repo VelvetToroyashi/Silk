@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
@@ -35,24 +36,26 @@ public class CreateReminderHandler : IRequestHandler<CreateReminderRequest, Remi
 
     public async Task<ReminderEntity> Handle(CreateReminderRequest request, CancellationToken cancellationToken)
     {
-        ReminderEntity r = new()
+        var reminder = new ReminderEntity()
         {
             ExpiresAt           = request.Expiration,
-            CreatedAt           = DateTime.UtcNow,
+            CreatedAt           = DateTimeOffset.UtcNow,
             OwnerID             = request.OwnerID,
             ChannelID           = request.ChannelID,
             MessageID           = request.MessageID,
             GuildID             = request.GuildID,
-            ReplyID             = request.ReplyID,
+            ReplyMessageID      = request.ReplyID,
             MessageContent      = request.MessageContent,
             ReplyAuthorID       = request.ReplyAuthorID,
-            ReplyMessageContent = request.ReplyMessageContent
+            ReplyMessageContent = request.ReplyMessageContent,
+            IsPrivate           = request.GuildID is null,
+            IsReply             = request.ReplyID is not null,
         };
 
-        _db.Add(r);
+        _db.Add(reminder);
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return r;
+        return reminder;
     }
 }

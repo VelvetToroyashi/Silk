@@ -134,7 +134,7 @@ public class ReminderCommands : CommandGroup
         if (time <= TimeSpan.Zero)
             return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
         
-        if (time < _minimumReminderTime)
+        if (false) //time < _minimumReminderTime)
             return await _channels.CreateMessageAsync(_context.ChannelID, $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
 
         Snowflake? guildID = _context.GuildID.HasValue ? _context.GuildID.Value : null;
