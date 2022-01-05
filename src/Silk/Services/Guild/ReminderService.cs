@@ -9,10 +9,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Reminders;
+using Silk.Extensions;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
 
@@ -40,9 +42,9 @@ public sealed class ReminderService : IHostedService
         _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
     }
 
-    public async Task CreateReminder
+    public async Task CreateReminderAsync
         (
-            DateTime   expiry,
+            DateTimeOffset   expiry,
             Snowflake  ownerID,
             Snowflake  channelID,
             Snowflake  messageID,
@@ -62,7 +64,7 @@ public sealed class ReminderService : IHostedService
     /// </summary>
     /// <param name="userID">The ID of the user to search reminders for.</param>
     /// <returns>The specified user's reminders.</returns>
-    public IEnumerable<ReminderEntity> GetRemindersAsync(Snowflake userID) => _reminders.Where(r => r.OwnerID == userID);
+    public IEnumerable<ReminderEntity> GetReminders(Snowflake userID) => _reminders.Where(r => r.OwnerID == userID);
 
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
@@ -113,8 +115,8 @@ public sealed class ReminderService : IHostedService
     /// <returns>A result indicating whether the opreation succeeded.</returns>
     private async Task<Result> AttemptDispatchReminderAsync(ReminderEntity reminder)
     {
-        DateTimeOffset now         = DateTimeOffset.UtcNow;
-        var            replyExists = false;
+        var now       = DateTimeOffset.UtcNow;
+        var replyExists = false;
 
         if (reminder.ReplyID is not null)
         {
@@ -190,15 +192,15 @@ public sealed class ReminderService : IHostedService
         }
         else
         {
-            dispatchMessage.AppendLine("Hey, you wanted to be reminded of this.");
+            dispatchMessage.AppendLine("Hey, you wanted to be reminded of this!");
 
             if (!originalMessageExists)
                 dispatchMessage.AppendLine("I couldn't find the original message, but here's what you wanted to be reminded of:");
 
-            dispatchMessage.AppendLine(reminder.MessageContent);
+            dispatchMessage.AppendLine($"> {reminder.MessageContent} \n\n");
         }
 
-        dispatchMessage.AppendLine($"This reminder was set <t:{((DateTimeOffset)reminder.CreatedAt).ToUnixTimeSeconds()}:R> ago!");
+        dispatchMessage.AppendLine($"This reminder was set {reminder.CreatedAt.ToTimestamp()}!");
         return dispatchMessage;
     }
 

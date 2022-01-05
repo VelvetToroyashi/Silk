@@ -103,6 +103,9 @@ public class Program
 
                 services.AddSingleton<SlashCommandService>();
 
+                services.AddSingleton<ReminderService>();
+                services.AddHostedService(s => s.GetRequiredService<ReminderService>());
+
                 services.AddCondition<RequireNSFWCondition>();
                 services.AddCondition<RequireTeamOrOwnerCondition>();
 

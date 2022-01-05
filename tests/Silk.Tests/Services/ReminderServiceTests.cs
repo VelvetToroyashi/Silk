@@ -43,7 +43,7 @@ public class ReminderServiceTests
         var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>());
 
         // Act
-        await reminderService.CreateReminder(default, default, default, default, default, default);
+        await reminderService.CreateReminderAsync(default, default, default, default, default, default);
 
         // Assert
         mediatorMock.Verify(x => x.Send(It.IsAny<CreateReminderRequest>(), default), Times.Once);

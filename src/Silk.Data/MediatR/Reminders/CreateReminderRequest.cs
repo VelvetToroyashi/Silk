@@ -13,15 +13,15 @@ namespace Silk.Data.MediatR.Reminders;
 /// </summary>
 public record CreateReminderRequest
 (
-    DateTime   Expiration,
-    Snowflake  OwnerID,
-    Snowflake  ChannelID,
-    Snowflake? MessageID,
-    Snowflake? GuildID,
-    string?    MessageContent,
-    Snowflake? ReplyID             = null,
-    Snowflake? ReplyAuthorID       = null,
-    string?    ReplyMessageContent = null
+    DateTimeOffset Expiration,
+    Snowflake      OwnerID,
+    Snowflake      ChannelID,
+    Snowflake?     MessageID,
+    Snowflake?     GuildID,
+    string?        MessageContent,
+    Snowflake?     ReplyID             = null,
+    Snowflake?     ReplyAuthorID       = null,
+    string?        ReplyMessageContent = null
 ) : IRequest<ReminderEntity>;
 
 /// <summary>
