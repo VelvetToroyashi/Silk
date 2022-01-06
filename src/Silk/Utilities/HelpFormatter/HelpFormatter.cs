@@ -139,19 +139,29 @@ public class HelpFormatter : IHelpFormatter
 
             var fields = new List<IEmbedField>();
 
-            IOrderedEnumerable<IGrouping<string?, IChildNode>>? categories = subcommands
-                .GroupBy(x => x is CommandNode cn
-                             ? cn.GroupType.GetCustomAttribute<HelpCategoryAttribute>()?.Name
-                             : ((x as IParentNode).Children.FirstOrDefault() as CommandNode)?
-                              .GroupType.GetCustomAttribute<HelpCategoryAttribute>()
-                             ?.Name)
-                .OrderBy(x => Categories.Order.IndexOf(x.Key ?? Categories.Uncategorized));
-
-            fields
-               .AddRange(categories
-                            .Select(c => new EmbedField(c.Key ?? Categories.Uncategorized, c
-                                                                                          .Select(cn => $"`{cn.Key}`")
-                                                                                          .Join(", "))));
+            var categoryMap = new Dictionary<string, (IChildNode, string)>();
+            
+            foreach (var command in subcommands)
+            {
+                if (!categoryMap.ContainsKey(command.Key))
+                    categoryMap[command.Key] = (command,
+                                                command is GroupNode group
+                                                    ? group
+                                                     .GroupTypes
+                                                     .Select(g => g.GetCustomAttribute<HelpCategoryAttribute>())
+                                                     .FirstOrDefault(ha => ha is not null)?
+                                                     .Name ?? Categories.Uncategorized
+                                                    : ((CommandNode) command)
+                                                     .GroupType
+                                                     .GetCustomAttribute<HelpCategoryAttribute>()?
+                                                     .Name ?? Categories.Uncategorized);
+            }
+            
+            var categories = categoryMap
+                            .GroupBy(c => c.Value.Item2)
+                            .OrderBy(c => Categories.Order.IndexOf(c.Key));
+            
+            fields.AddRange(categories.Select(c => new EmbedField("`" + c.Key + "`", c.Select(cn => $"`{cn.Key}`").Join(", "))));
 
             embed = new Embed
             {
