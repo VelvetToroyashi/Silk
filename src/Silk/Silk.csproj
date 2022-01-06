@@ -9,6 +9,7 @@
         <OutputType>Exe</OutputType>
         <ServerGarbageCollection>true</ServerGarbageCollection>
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -74,6 +75,7 @@
         <PackageReference Include="Remora.Discord.Extensions" Version="1.0.6" />
         <PackageReference Include="Remora.Discord.Hosting" Version="4.0.8" />
         <PackageReference Include="Remora.Discord.Interactivity" Version="1.0.2" />
+        <PackageReference Include="Remora.Plugins" Version="3.0.1" />
         <PackageReference Include="Remora.Results" Version="7.1.0" />
         <PackageReference Include="Serilog" Version="2.10.1-dev-01366" />
         <PackageReference Include="Serilog.Expressions" Version="3.2.1" />
