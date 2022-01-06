@@ -13,6 +13,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Extensions;
 
 namespace Silk.Utilities.HelpFormatter;
 
@@ -53,120 +54,59 @@ public class CommandHelpViewer
         }
         else
         {
-            var nodes = SearchCommands(command, _tree.Root).ToArray();
+            var nodes = FindNodes(command, _tree.Root, out var isSubcommands);
 
-            if (!nodes.Any()) //TODO: Change this message to "No command was found with the name '<name>'."
+            if (!nodes.Any())
                 return Result<IMessage>.FromError(new NotFoundError($"No command was found with the name '{command}'."));
 
-            if (nodes.Length > 1)
+            if (isSubcommands)
+                embeds = new[] { formatter.GetSubcommandHelpEmbed(nodes.DistinctBy(node => node.Key)) };
+            else
+                embeds = formatter.GetCommandHelpEmbeds(nodes.Count is 1 
+                                                            ? (CommandNode)nodes.Single() 
+                                                            : nodes.Cast<CommandNode>().ToArray()).ToArray();
+        }
+
+        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: embeds.ToArray());
+
+        return res;
+    }
+        
+    public IReadOnlyList<IChildNode> FindNodes(string command, IParentNode parent, out bool isSubcommands)
+    {
+        isSubcommands = false;
+        
+        var nodes      = new List<IChildNode>();
+        var tokenStack = new Stack<string>(command.Split(' ').Reverse());
+
+        while (tokenStack.TryPop(out var current))
+        {
+            foreach (var child in parent.Children)
             {
-                // This seemed stupid, but essentially if the parent of a group is the first node, skip it
-                if (nodes[0] is IParentNode pn)
+                if (child.Key.Equals(current, StringComparison.OrdinalIgnoreCase) || child.Aliases.Contains(current, StringComparer.OrdinalIgnoreCase))
                 {
-                    if (pn.Children.FirstOrDefault() is { } child && child.Parent == pn)
+                    if (tokenStack.TryPeek(out _))
                     {
-                        nodes  = nodes.Skip(1).ToArray();
-                        embeds = new [] { formatter.GetSubcommandHelpEmbed(nodes) };
+                        if (child is not IParentNode pn)
+                            continue;
+
+                        parent = pn;
+                        break;
                     }
                     
-                }
-                
-                if (nodes[0].Key == nodes[1].Key && nodes[1] is IParentNode pn2)
-                    embeds = new [] { formatter.GetSubcommandHelpEmbed(pn2.Children) };
-            }
-            else
-            {
-                embeds = formatter.GetCommandHelpEmbeds(nodes[0] as CommandNode).ToArray();
-            }
-        }
+                    isSubcommands |= child is IParentNode;
 
-        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: embeds.ToArray());
-
-        return res;
-    }
-    
-    public async Task<Result<IMessage>> SendHelpMessageAsync(string? command, Snowflake channelID)
-    {
-        var formatter = _services.GetService<IHelpFormatter>();
-
-        if (formatter is null)
-            return Result<IMessage>.FromError(new InvalidOperationError("No help formatter was registered with the container."));
-
-        IEnumerable<IEmbed> embeds;
-
-        if (string.IsNullOrEmpty(command))
-        {
-            IEnumerable<IChildNode> commands = await GetApplicableCommandsAsync(_services, _tree.Root.Children);
-
-            if (!commands.Any())
-                return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
-
-            commands = commands.DistinctBy(c => c.Key, StringComparer.OrdinalIgnoreCase);
-            
-            embeds = new [] { formatter.GetSubcommandHelpEmbed(commands) };
-        }
-        else
-        {
-            var nodes = SearchCommands(command, _tree.Root).ToArray();
-
-            if (!nodes.Any()) //TODO: Change this message to "No command was found with the name '<name>'."
-                return Result<IMessage>.FromError(new NotFoundError($"No command was found with the name '{command}'."));
-
-            IEnumerable<IChildNode> viewableCommands = await GetApplicableCommandsAsync(_services, nodes);
-
-            if (!viewableCommands.Any())
-                return Result<IMessage>.FromError(new InvalidOperationError("No commands were found."));
-            
-            embeds = nodes.First() is IParentNode
-                ? new [] { formatter.GetSubcommandHelpEmbed(viewableCommands.Skip(1)) }
-                : formatter.GetCommandHelpEmbeds(viewableCommands.Count() > 1 
-                                                     ? viewableCommands.Cast<CommandNode>().ToArray() 
-                                                     : viewableCommands.Cast<CommandNode>().First());
-        }
-
-        Result<IMessage> res = await _channelApi.CreateMessageAsync(channelID, embeds: embeds.ToArray());
-
-        return res;
-    }
-
-    public IEnumerable<IChildNode> SearchCommands(string command, IParentNode parent)
-    {
-        string[] commandRoute = command.Split(' ');
-
-        var currentToken = commandRoute[0];
-
-        foreach (var child in parent.Children)
-        {
-            if (string.Equals(child.Key, currentToken, StringComparison.OrdinalIgnoreCase) ||
-                child.Aliases.Contains(currentToken, StringComparer.OrdinalIgnoreCase))
-            {
-                var parentNode = child as IParentNode;
-                if (commandRoute.Length > 1)
-                {
-                    if (parentNode is null)
-                    {
-                        continue;
-                    }
+                    if (child is not IParentNode group)
+                        nodes.Add(child);
                     else
-                    {
-                        var commands = SearchCommands(string.Join(' ', commandRoute.Skip(1)), parentNode);
-                        foreach (var subCommand in commands)
-                            yield return subCommand;
-                        yield break;
-                    }
+                        nodes.AddRange(group.Children);
                 }
-
-                yield return child;
-                
-                if (parentNode is not null)
-                    foreach (var subcommand in parentNode.Children)
-                        yield return subcommand;
-                
-                yield break;
-            }
+            } 
         }
+        
+        return nodes;
     }
-    
+
     public async Task<IEnumerable<IChildNode>> GetApplicableCommandsAsync
     (
         IServiceProvider        services,
