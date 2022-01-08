@@ -22,7 +22,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-      <PackageReference Include="Remora.Results" Version="7.0.3"/>
+      <PackageReference Include="Remora.Results" Version="7.1.0"/>
       <PackageReference Include="YumeChan.PluginBase" />
     </ItemGroup>
 
