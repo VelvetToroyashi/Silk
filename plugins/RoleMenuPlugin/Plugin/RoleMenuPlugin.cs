@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -19,9 +22,43 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
     
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<RoleMenuRoleService>();
+        try
+        {
+            serviceCollection.AddSingleton<RoleMenuService>()
+                             .AddDbContext<RoleMenuContext>((s, b) =>
+                              {
+                                  var config = s.GetRequiredService<IConfiguration>();
+                                  var dbString = config
+                                                .GetSection("Plugins")
+                                                .GetSection("RoleMenu")
+                                                .GetSection("Database")
+                                                .Value ?? throw new KeyNotFoundException("Missing plugin config!");
+
+                                  b.UseNpgsql(dbString);
+                              });
+        }
+        catch (Exception e)
+        {
+            return Result.FromError(new ExceptionError(e));
+        }
+        
+        
         return Result.FromSuccess();
     }
 
-    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default) => default;
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
+    {
+        var context = serviceProvider.GetRequiredService<RoleMenuContext>();
+
+        try
+        {
+            await context.Database.MigrateAsync(ct);
+        }
+        catch (Exception e)
+        {
+            return Result.FromError(new ExceptionError(e));
+        }
+        
+        return Result.FromSuccess();
+    }
 }

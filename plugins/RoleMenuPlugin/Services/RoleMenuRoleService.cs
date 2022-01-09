@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +46,7 @@ namespace RoleMenuPlugin
                  * TODO: Get roles
                  * TODO: Set role ids to be preselected
                  * TODO: Send ephemeral message
-                 */
+                 #1#
                 RoleMenuModel? menu  = await _mediator.Send(new GetRoleMenu.Request(eventArgs.Message.Id));
                 List<ulong>?   roles = ((DiscordMember)eventArgs.User).Roles.Select(r => r.Id).ToList();
 
@@ -77,7 +77,7 @@ namespace RoleMenuPlugin
                  * TODO: Unselected & Present -> Unassign
                  * TODO: Selected & Not Present -> Assign
                  * TODO: Selected & Present | Unselected & Not Present -> Ignore
-                 */
+                 #1#
 
                 await HandleDropdownAsync(client, eventArgs);
             }
@@ -161,4 +161,4 @@ namespace RoleMenuPlugin
 
         private bool RoleExists(ulong id, DiscordGuild guild, out DiscordRole role) => (role = guild.GetRole(id)) is not null;
     }
-}
+}*/

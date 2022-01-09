@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -16,7 +17,8 @@ public class TestPlugin : PluginDescriptor
 
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddCommandGroup<TestCommand>();
+        serviceCollection.AddCommandGroup<ButtonCommand>()
+                         .AddResponder<ButtonResponder>();
         
         return Result.FromSuccess();
     }
