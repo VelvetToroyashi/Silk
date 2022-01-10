@@ -1,13 +1,12 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Plugins;
 using Remora.Plugins.Abstractions;
-using Remora.Plugins.Errors;
 using Remora.Results;
 
 namespace Silk.Services.Bot;
@@ -36,11 +35,7 @@ public class PluginInitializerService : BackgroundService
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if ((await LoadPluginsAsync(stoppingToken)).IsSuccess)
-        {
-            _logger.LogInformation("Plugins loaded successfully.");
-        }
-        else
+        if (!(await LoadPluginsAsync(stoppingToken)).IsSuccess)
         {
             _logger.LogError("Failed to load plugins.");
             _lifetime.StopApplication();
@@ -49,29 +44,33 @@ public class PluginInitializerService : BackgroundService
 
     private async Task<Result> LoadPluginsAsync(CancellationToken ct)
     {
+        var sw = Stopwatch.StartNew();
         try
         {
             _logger.LogDebug("Migrating plugins...");
 
             var migrationResult = await _plugins.MigrateAsync(_services, ct);
-
+            
+            sw.Stop();
+            
             if (migrationResult.IsSuccess)
             {
-                _logger.LogInformation("Migrated plugins successfully.");
+                _logger.LogInformation("Migrated {Plugins} plugin(s) in {PluginTime:N0} ms.", _plugins.Branches.Count(p => p.Plugin is IMigratablePlugin), sw.ElapsedMilliseconds);
             }
             else
             {
                 _logger.LogError("Failed to migrate plugins.");
                 return migrationResult;
             }
-
-            _logger.LogInformation("Initializing Plugins...");
             
+            sw.Restart();
+            _logger.LogInformation("Initializing plugins...");
+
             var pluginInitializationResult = await _plugins.InitializeAsync(_services, ct);
 
             if (pluginInitializationResult.IsSuccess)
             {
-                _logger.LogInformation("Initialized Plugins successfully.");
+                _logger.LogInformation("Initialized {PluginCount} plugin(s) in {PluginTime:N0} ms.", _plugins.Branches.Count, sw.ElapsedMilliseconds);
             }
             else
             {
@@ -79,8 +78,6 @@ public class PluginInitializerService : BackgroundService
                 return pluginInitializationResult;
             }
             
-            _logger.LogInformation("Plugins loaded!");
-
             return Result.FromSuccess();
         }
         catch (Exception e)
@@ -88,6 +85,9 @@ public class PluginInitializerService : BackgroundService
             _logger.LogCritical(e, "A critical error occurred while loading plugins.");
             return Result.FromError(new ExceptionError(e));
         }
+        finally
+        {
+            sw.Stop();
+        }
     }
-
 }
