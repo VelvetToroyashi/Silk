@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ namespace Silk.Core.Commands.Bot
 				.AddField("Shards", $"{ctx.Client.ShardCount}", true)
 				.AddField("Memory", $"{GC.GetTotalMemory(true) / 1024 / 1024:n2} MB", true)
 				.AddField("Threads", $"{ThreadPool.ThreadCount}", true)
-				.AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, minUnit: TimeUnit.Second), true);
+				.AddField("Uptime", (DateTime.Now - process.StartTime).Humanize(3, CultureInfo.InvariantCulture, minUnit: TimeUnit.Second), true);
 			await ctx.RespondAsync(embed);
 		}
 	}
