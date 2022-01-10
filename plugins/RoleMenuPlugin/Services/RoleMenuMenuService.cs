@@ -36,13 +36,13 @@ public class RoleMenuMenuService
     private const string MainMenuText        = $"{CreationMessage} | Use the buttons below to create a role menu!";
     private const string MainMenuWaitingText = $"{CreationMessage} | Waiting for input...";
     
-    private readonly ButtonComponent _addMenuInteractiveButton  = new(ButtonComponentStyle.Primary, "Add (Interactive)", CustomID: "rm-add-interactive");
-    private readonly ButtonComponent _addMenuSimpleButton       = new (ButtonComponentStyle.Secondary, "Add (Simple)", CustomID: "rm-add-role-only");
-    private readonly ButtonComponent _addMenuEditButton         = new (ButtonComponentStyle.Secondary, "Edit Option", CustomID: "rm-edit-options", IsDisabled: true);
+    private readonly ButtonComponent _addMenuInteractiveButton  = new(ButtonComponentStyle.Primary,     "Add (Interactive)", CustomID: "rm-add-interactive");
+    private readonly ButtonComponent _addMenuSimpleButton       = new (ButtonComponentStyle.Secondary,  "Add (Simple)",      CustomID: "rm-add-role-only");
+    private readonly ButtonComponent _addMenuEditButton         = new (ButtonComponentStyle.Secondary,  "Edit Option",       CustomID: "rm-edit-options", IsDisabled: true);
     
-    private readonly ButtonComponent _addMenuHelpButton         = new (ButtonComponentStyle.Secondary, "Help", CustomID: "rm-help");
-    private readonly ButtonComponent _addMenuFinishButton       = new(ButtonComponentStyle.Success, "Finish", CustomID: "rm-finish", IsDisabled: true);
-    private readonly ButtonComponent _addMenuCancelButton       = new(ButtonComponentStyle.Danger, "Cancel", CustomID: "rm-cancel");
+    private readonly ButtonComponent _addMenuHelpButton         = new(ButtonComponentStyle.Secondary,   "Help",      CustomID: "rm-help");
+    private readonly ButtonComponent _addMenuFinishButton       = new(ButtonComponentStyle.Success,     "Finish",    CustomID: "rm-finish", IsDisabled: true);
+    private readonly ButtonComponent _addMenuCancelButton       = new(ButtonComponentStyle.Danger,      "Cancel",    CustomID: "rm-cancel");
     
     #endregion
 

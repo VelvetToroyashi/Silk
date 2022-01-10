@@ -17,9 +17,7 @@ public class TestPlugin : PluginDescriptor
 
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        serviceCollection.AddCommandGroup<ButtonCommand>()
-                         .AddResponder<ButtonResponder>();
-        
+
         return Result.FromSuccess();
     }
 
