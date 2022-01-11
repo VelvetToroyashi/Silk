@@ -57,8 +57,8 @@ public static class IServiceCollectionExtensions
 
         services
            .AddResponders(asm)
-           .AddInteractivity()
-           .AddPagination()
+           //.AddInteractivity()
+           //.AddPagination()
            .AddSilkInteractivity();
 
         services

@@ -51,6 +51,8 @@ namespace RoleMenuPlugin
 			private readonly ILogger<RoleMenuCommand>   _logger;
 			private readonly IDiscordRestInteractionAPI _interactions;
 			
+			private readonly List<RoleMenuOptionModel> _options = new(25);
+			
 			public CreateCommand
 			(
 				MessageContext context,
@@ -127,7 +129,59 @@ namespace RoleMenuPlugin
 
 				if (!messageResult.IsSuccess)
 					return await InformUserOfChannelErrorAsync();
+
+				return await MenuLoopAsync(messageResult.Entity);
+			}
+
+			private async Task<IResult> MenuLoopAsync(IMessage message)
+			{
+				_logger.LogTrace("Enter loop.");
+				while (true)
+				{
+					_logger.LogTrace("Looped.");
 					
+					var selectionResult = await _interactivity.WaitForButtonAsync(_context.User, message, this.CancellationToken);
+					
+					_logger.LogTrace("Got input: Success: {IsSuccess}, Defined: {IsDefined}", selectionResult.IsSuccess, selectionResult.IsDefined());
+					
+					
+					if (!selectionResult.IsSuccess || !selectionResult.IsDefined(out var selection))
+					{
+						await _channels.DeleteMessageAsync(_context.ChannelID, _context.MessageID);
+						await _channels.EditMessageAsync(_context.ChannelID, message.ID, "Cancelled!", components: Array.Empty<IMessageComponent>());
+						return Result.FromSuccess(); // TODO: Return a proper error
+					}
+					
+					// We set the timeout to 14 minutes to ensure we can still use the interaction to update our message.
+					var cts   = new CancellationTokenSource(TimeSpan.FromMinutes(14));
+					var token = cts.Token;
+					
+					//This is safe to do because the predicate ensures this information is present before returning a result.
+					var t = selection.Data.Value.CustomID.Value switch
+					{
+						"rm-add-interactive" => await CreateInteractiveAsync(selection, token),
+						//"rm-simple"      => await CreateSimpleAsync(message, selection, token),
+						//"rm-edit"        => await EditAsync(message, selection, token),
+						//"rm-help"		   => Task.CompletedTask, // Ignored, handled in a handler.
+						//"rm-finish"      => await FinishAsync(message, selection, token) 
+						
+						_ => Result.FromSuccess() // An exception should be thrown here, as it's outside what should be possible.
+					};
+					
+					await ShowMainMenuAsync(selection, _options.Count);
+				}
+
+				return Result.FromSuccess();
+			}
+
+			private async Task<IResult> CreateInteractiveAsync(IInteraction interaction, CancellationToken ct)
+			{
+				await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
+				                                                   new InteractionResponse(InteractionCallbackType.UpdateMessage,
+				                                                                           new InteractionCallbackData(Content: "Poggers.")),
+				                                                   ct: ct);
+
+				await Task.Delay(2000);
 				return Result.FromSuccess();
 			}
 
@@ -169,35 +223,28 @@ namespace RoleMenuPlugin
 				var editButtonWithState    = _addMenuEditButton			with { IsDisabled = optionCount <=  0 };
 				var finishButtonWithState  = _addMenuFinishButton		with { IsDisabled = optionCount <=  0 };
 
-				var result = await _interactions.CreateInteractionResponseAsync
+
+				var result = await _interactions.EditOriginalInteractionResponseAsync
 					(
-					 interaction.ID,
+					 interaction.ApplicationID,
 					 interaction.Token,
-					 new InteractionResponse
-						 (
-						  InteractionCallbackType.UpdateMessage,
-						  new InteractionCallbackData
-							  (
-							   Content: "Silk! Role Menu Creator V3",
-							   Components: new IMessageComponent[]
-							   {
-								   new ActionRowComponent(new IMessageComponent[]
-								   {
-									   addFullButtonWithState,
-									   addButtonWithState,
-									   editButtonWithState,
-								   }),
-								   new ActionRowComponent(new IMessageComponent[]
-								   {
-									   _addMenuHelpButton,
-									   finishButtonWithState,
-									   _addMenuCancelButton,
-								   }),
-							   }
-							  )
-						 )
-					);
-				
+					 "Silk! Role Menu Creator V3",
+					 components: new IMessageComponent[]
+					 {
+						 new ActionRowComponent(new IMessageComponent[]
+						 {
+							 addFullButtonWithState,
+							 addButtonWithState,
+							 editButtonWithState,
+						 }),
+						 new ActionRowComponent(new IMessageComponent[]
+						 {
+							 _addMenuHelpButton,
+							 finishButtonWithState,
+							 _addMenuCancelButton,
+						 })
+					 });
+
 				return result;
 			}
 

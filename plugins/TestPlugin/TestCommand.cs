@@ -47,7 +47,7 @@ public class ButtonResponder : IResponder<IInteractionCreate>
     public async Task<Result> RespondAsync(IInteractionCreate gatewayEvent, CancellationToken ct = default)
     {
         if (!gatewayEvent.Data.IsDefined(out var data))
-            throw new ArgumentException("Data is not defined");
+            return Result.FromSuccess();
 
         if (!data.ComponentType.IsDefined(out var type) || type is not ComponentType.Button)
             return Result.FromSuccess();
