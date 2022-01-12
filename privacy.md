@@ -28,7 +28,7 @@ In the context of user-submitted data, we store this information because it is g
 Examples of user-submitted content that is stored persistently include:
 
 - Reminders
-- Guild tags
+- "Tags"
 - Infractions
 - Greeting messages
 
@@ -52,7 +52,8 @@ Alternatively some services provided by Silk! accessible to non-moderators may s
 
 ## 4. What is this information used for?
 
-Information stored by Silk! is only used for the purposes stated by the related service it is used for. This information is never shared with third parties, and only leaves the confines of the service when it is required by a first-party entity.
+Information stored by Silk! is only used for the purposes stated by the related service it is used for.
+This information is never shared with third parties, and only leaves the confines of the service when it is required by a first-party entity.
 
 Some of Silk!'s services use persistently stored data to be sent back to the user at a later time.
 
@@ -68,7 +69,7 @@ Should this policy be updated in the future, for any reason, an announcement wil
 
 ## 6. Contacting:
 
-Any questions or concerns can be answered via Discord, and joining the dedicated Silk! [Discord Server](https://discord.gg/HZfZb95)
+Any questions or concerns can be answered via Discord, and joining the dedicated Silk! [Discord Server](https://discord.gg/XsHcuvUWda)
 
 ## 7. How is user information protected?
 Both temporary and persistent data stores are located on a remote server.
