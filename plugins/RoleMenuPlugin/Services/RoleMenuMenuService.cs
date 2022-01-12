@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Rest.Core;
 using Remora.Rest.Results;
 using Remora.Results;
 using RoleMenuPlugin.Database;
@@ -17,20 +18,31 @@ public class RoleMenuMenuService
 {
     private const string Version         = "V3";
     private const string CreationMessage = $"Silk! Role Menu Creator {Version}";
-    
+
+    private readonly IDiscordRestChannelAPI       _channels;
     private readonly IDiscordRestInteractionAPI   _interactions;
     private readonly ILogger<RoleMenuMenuService> _logger;
 
     public RoleMenuMenuService
     (
+        IDiscordRestChannelAPI channels,
         IDiscordRestInteractionAPI interactions, 
         ILogger<RoleMenuMenuService> logger
     )
     {
+        _channels = channels;
         _interactions = interactions;
         _logger       = logger;
     }
     
+    #region Misc / Multi-Category
+
+    private const string CancelledMessage = "Cancelled!";
+
+    private readonly ButtonComponent _cancelButton = new ButtonComponent(ButtonComponentStyle.Danger, "Cancel", CustomID: "rm-cancel");
+    
+    #endregion
+
     #region Main Menu Buttons & Text
     
     private const string MainMenuText        = $"{CreationMessage} | Use the buttons below to create a role menu!";
@@ -66,9 +78,9 @@ public class RoleMenuMenuService
 
     #region Input Messages
 
-    private const string AddRoleInputMessage        = "Which role?                         \n(Refer to the help menu for more information!)";
-    private const string AddDescriptionInputMessage = "Description?   (This is optional!)? \n(Refer to the help menu for more information!)";
-    private const string AddEmojiInputMessage       = "Want an emoji? (This is optional!)? \n(Refer to the help menu for more information!)";
+    private const string AddRoleInputMessage        = "Which role?                            \n(Refer to the help menu for more information!)";
+    private const string AddDescriptionInputMessage = "Description?   (Type `skip` to skip!)? \n(Refer to the help menu for more information!)";
+    private const string AddEmojiInputMessage       = "Want an emoji? (Type `skip` to skip!)? \n(Refer to the help menu for more information!)";
     
     #endregion
 
@@ -83,6 +95,8 @@ public class RoleMenuMenuService
     private const string EmojiNotFoundErrorMessage                = "Sorry, but I can't seem to find that emoji. Are you sure you typed it correctly?";
     
     #endregion
+    
+    #region Transition Method (Interaction Based)
     
     /// <summary>
     /// Transitions the menu to a state of displaying the main options,
@@ -133,7 +147,7 @@ public class RoleMenuMenuService
         }
         else
         {
-            var userID = interaction.User.IsDefined(out var user) ? user.ID.ToString() : "Unknown";
+            var userID  = interaction.Member.IsDefined(out var member) ? member.User.Value.ID.ToString() : "Unknown";
             var guildID = interaction.GuildID.IsDefined(out var guild) ? guild.ToString() : "Unknown";
             
             _logger.LogWarning("Encountered an error while attempting to transition to main menu. Guild: {Guild}, User: {User}, Error: {Error}",
@@ -196,7 +210,7 @@ public class RoleMenuMenuService
         }
         else
         {
-            var userID = interaction.User.IsDefined(out var user) ? user.ID.ToString() : "Unknown";
+            var userID = interaction.Member.IsDefined(out var member) ? member.User.Value.ID.ToString() : "Unknown";
             var guildID = interaction.GuildID.IsDefined(out var guild) ? guild.ToString() : "Unknown";
 
             _logger.LogWarning("Encountered an error while attempting to transition to disabled main menu. Guild: {Guild}, User: {User}, Error: {Error}",
@@ -207,6 +221,106 @@ public class RoleMenuMenuService
         }
     }
 
+    /// <summary>
+    /// Transitions a message into a state of being 'cancelled', displaying a
+    /// cancelled message, and removing any components that existed on the message.
+    /// </summary>
+    /// <param name="interaction">The interaction to update the message with.</param>
+    public async Task<IResult> TransitionToCancelledMessageAsync(IInteraction interaction)
+    {
+        var result = await _interactions
+           .CreateInteractionResponseAsync
+                (
+                 interaction.ID,
+                 interaction.Token,
+                 new InteractionResponse
+                     (
+                      InteractionCallbackType.UpdateMessage,
+                      new InteractionCallbackData
+                          (
+                           Content: CancelledMessage,
+                           Components: Array.Empty<IMessageComponent>()
+                          )
+                     )
+                );
+
+        if (result.IsSuccess)
+        {
+            _logger.LogDebug("Successfully transitioned to cancelled message.");
+            
+            return Result.FromSuccess();
+        }
+        else
+        {
+            var userID  = interaction.Member.IsDefined(out var member) ? member.User.Value.ID.ToString() : "Unknown";
+            var guildID = interaction.GuildID.IsDefined(out var guild) ? guild.ToString() : "Unknown";
+
+            _logger.LogWarning("Encountered an error while attempting to transition to disabled main menu. Guild: {Guild}, User: {User}, Error: {Error}",
+                               guildID, userID,
+                               ((RestResultError<RestError>)result.Error).Message);
+
+            return result;
+        }
+    }
+    
+    #endregion
+
+    #region Display Methods (Non Idempotent)
+
+    public async Task<IResult> DisplayMainMenuAsync(Snowflake channelID)
+    {
+        return await _channels.CreateMessageAsync
+            (
+             channelID,
+             MainMenuText,
+             components: new IMessageComponent[]
+             {
+                 new ActionRowComponent(new IMessageComponent[]
+                 {
+                     _addMenuInteractiveButton,
+                     _addMenuSimpleButton,
+                     _addMenuEditButton,
+                 }),
+                 new ActionRowComponent(new IMessageComponent[]
+                 {
+                     _addMenuHelpButton,
+                     _addMenuFinishButton,
+                     _addMenuCancelButton
+                 })
+             });
+    }
+    
+    public Task<IResult> DisplayRoleInputAsync(IInteraction interaction)
+        => DisplayCancelableInputAsync(interaction, AddRoleInputMessage);
+
+    public Task<IResult> DisplayEmojiInputAsync(IInteraction interaction)
+        => DisplayCancelableInputAsync(interaction, AddEmojiInputMessage);
+    
+    public Task<IResult> DisplayDescriptionInputAsync(IInteraction interaction)
+        => DisplayCancelableInputAsync(interaction, AddDescriptionInputMessage);
+    
+    
+    /// <summary>
+    /// Displays a cancellable input message to the user.
+    /// </summary>
+    /// <param name="interaction">The interaction to use to create a followup message with.</param>
+    /// <param name="message">The message to display to the user.</param>
+    private async Task<IResult> DisplayCancelableInputAsync(IInteraction interaction, string message)
+    {
+        return await _interactions.CreateFollowupMessageAsync
+            (
+             interaction.ApplicationID,
+             interaction.Token,
+             message,
+             flags: MessageFlags.Ephemeral,
+             components: new IMessageComponent[]
+             {
+                 new ActionRowComponent(new IMessageComponent[]
+                 {
+                     _cancelButton
+                 })
+             });
+    }
 
     /// <summary>
     /// Displays an ephemeral message informing the user the role they're trying to use couldn't be found.
@@ -265,5 +379,5 @@ public class RoleMenuMenuService
         return await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID, interaction.Token, error, flags: MessageFlags.Ephemeral);
     }
 
-
+    #endregion
 }

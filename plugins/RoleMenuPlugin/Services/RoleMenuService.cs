@@ -41,11 +41,15 @@ public class RoleMenuService
             var channelID = interaction.ChannelID.Value;
             var messageID = interaction.Message.Value.ID;
 
-            await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID, interaction.Token,
-                                                           "Hmm, it looks like this message was a role menu, but it's gone missing.\n"              +
-                                                           "Please notify server staff to fix this! Here is a message link for you to give them:\n" +
-                                                           $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
-                                                           flags: MessageFlags.Ephemeral);
+            await _interactions.CreateFollowupMessageAsync
+                (
+                 interaction.ApplicationID,
+                 interaction.Token,
+                 "Hmm, it looks like this message was a role menu, but it's gone missing.\n"              +
+                 "Please notify server staff to fix this! Here is a message link for you to give them:\n" +
+                 $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
+                 flags: MessageFlags.Ephemeral
+                );
         }
         else
         {
@@ -96,12 +100,15 @@ public class RoleMenuService
                 );
 
             var result = await _interactions
-               .CreateFollowupMessageAsync(interaction.ApplicationID, interaction.Token,
-                                                           "Use the dropdown below to assign yourself some roles!",
-                                                           components: new[]
-                                                           {
-                                                               new ActionRowComponent(new[] { dropdown })
-                                                           });
+               .CreateFollowupMessageAsync
+                    (
+                     interaction.ApplicationID, 
+                     interaction.Token,
+                     "Use the dropdown below to assign yourself some roles!",
+                     components: new[]
+                     {
+                        new ActionRowComponent(new[] { dropdown })
+                     });
             return result.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(result.Error);

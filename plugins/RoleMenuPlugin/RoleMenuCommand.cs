@@ -50,19 +50,21 @@ namespace RoleMenuPlugin
 			private readonly InteractivityExtension     _interactivity;
 			private readonly ILogger<RoleMenuCommand>   _logger;
 			private readonly IDiscordRestInteractionAPI _interactions;
+			private readonly RoleMenuMenuService        _menus;
 			
 			private readonly List<RoleMenuOptionModel> _options = new(25);
 			
 			public CreateCommand
 			(
-				MessageContext context,
-				IDiscordRestUserAPI users,
-				IDiscordRestChannelAPI channels,
-				IDiscordRestGuildAPI guilds,
-				InteractivityExtension interactivity,
-				ILogger<RoleMenuCommand> logger,
-				IDiscordRestInteractionAPI interactions
-			)
+				MessageContext             context,
+				IDiscordRestUserAPI        users,
+				IDiscordRestChannelAPI     channels,
+				IDiscordRestGuildAPI       guilds,
+				InteractivityExtension     interactivity,
+				ILogger<RoleMenuCommand>   logger,
+				IDiscordRestInteractionAPI interactions, 
+				RoleMenuMenuService menus
+				)
 			{
 				_context       = context;
 				_users         = users;
@@ -71,6 +73,7 @@ namespace RoleMenuPlugin
 				_interactivity = interactivity;
 				_logger        = logger;
 				_interactions  = interactions;
+				_menus    = menus;
 			}
 
 			[Command("create")]
@@ -106,6 +109,11 @@ namespace RoleMenuPlugin
 
 					return await _channels.CreateMessageAsync(_context.ChannelID, "Sorry, but I can't send messages to that channel!");
 				}
+
+
+				var res = await _menus.DisplayMainMenuAsync(channel.ID);
+
+				return res;
 				
 				var messageResult = await _channels.CreateMessageAsync
 					(
