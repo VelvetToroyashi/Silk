@@ -20,7 +20,14 @@ public class RoleMenuService
     private readonly IDiscordRestUserAPI        _users;
     private readonly IDiscordRestGuildAPI       _guilds;
     private readonly IDiscordRestInteractionAPI _interactions;
-    
+    public RoleMenuService(IMediator mediator, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
+    {
+        _mediator     = mediator;
+        _users        = users;
+        _guilds       = guilds;
+        _interactions = interactions;
+    }
+
     public async Task<Result> HandleButtonAsync(IInteraction interaction)
     {
         await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
