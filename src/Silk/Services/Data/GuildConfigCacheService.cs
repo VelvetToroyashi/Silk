@@ -50,7 +50,7 @@ public class GuildConfigCacheService
 
     private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(Snowflake guildId)
     {
-        GuildModConfigEntity? configuration = await _mediator.Send(new GetOrCreateGuildModConfigRequest(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
+        GuildModConfigEntity? configuration = await _mediator.Send(new GetOrCreateGuildModConfig.Request(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
         object                cacheKey      = ConfigKeyHelper.GenerateGuildModKey(guildId);
         _cache.Set(cacheKey, configuration, _defaultCacheExpiration);
         return configuration;
@@ -58,7 +58,7 @@ public class GuildConfigCacheService
 
     private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(Snowflake guildId)
     {
-        GuildConfigEntity configuration = await _mediator.Send(new GetOrCreateGuildConfigRequest(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
+        GuildConfigEntity configuration = await _mediator.Send(new GetOrCreateGuildConfig.Request(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
         object?           cacheKey      = ConfigKeyHelper.GenerateGuildKey(guildId);
         _cache.Set(cacheKey, configuration, _defaultCacheExpiration);
         return configuration;

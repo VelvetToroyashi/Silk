@@ -53,7 +53,7 @@ public class MemberLoggerService
         var twoWeeksOld = user.ID.Timestamp.AddDays(14) > DateTimeOffset.UtcNow;
         var twoDaysOld = user.ID.Timestamp.AddDays(2) > DateTimeOffset.UtcNow;
 
-        var userResult = await _mediator.Send(new GetOrCreateUserRequest(guildID, user.ID, null, member.JoinedAt));
+        var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, null, member.JoinedAt));
 
         var userFields = new List<EmbedField>()
         {

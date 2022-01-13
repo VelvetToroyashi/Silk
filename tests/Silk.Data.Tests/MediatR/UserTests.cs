@@ -66,7 +66,7 @@ public class UserTests
         UserEntity? result;
 
         //Act
-        await _mediator.Send(new AddUserRequest(GuildId, UserId));
+        await _mediator.Send(new AddUser.Request(GuildId, UserId));
         result = await _context.Users.FirstOrDefaultAsync(u => u.ID == UserId && u.GuildID == GuildId);
 
         //Assert
@@ -77,7 +77,7 @@ public class UserTests
     public async Task MediatR_Add_Throws_When_User_Exists()
     {
         //Arrange
-        var               request = new AddUserRequest(GuildId, UserId);
+        var               request = new AddUser.Request(GuildId, UserId);
         AsyncTestDelegate send;
         //Act
         await _mediator.Send(request);
@@ -92,7 +92,7 @@ public class UserTests
         //Arrange
         UserEntity? user;
         //Act
-        user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
         //Assert
         Assert.IsNull(user);
     }
@@ -102,9 +102,9 @@ public class UserTests
     {
         //Arrange
         UserEntity? user;
-        await _mediator.Send(new AddUserRequest(GuildId, UserId));
+        await _mediator.Send(new AddUser.Request(GuildId, UserId));
         //Act
-        user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
         //Assert
         Assert.IsNotNull(user);
     }
@@ -115,9 +115,9 @@ public class UserTests
         //Arrange
         UserEntity before;
         UserEntity after;
-        before = await _mediator.Send(new AddUserRequest(GuildId, UserId));
+        before = await _mediator.Send(new AddUser.Request(GuildId, UserId));
         //Act
-        after = await _mediator.Send(new UpdateUserRequest(GuildId, UserId, UserFlag.WarnedPrior));
+        after = await _mediator.Send(new UpdateUser.Request(GuildId, UserId, UserFlag.WarnedPrior));
         //Assert
         Assert.AreNotEqual(before, after);
     }
@@ -128,7 +128,7 @@ public class UserTests
         //Arrange
         AsyncTestDelegate send;
         //Act
-        send = async () => await _mediator.Send(new UpdateUserRequest(GuildId, UserId));
+        send = async () => await _mediator.Send(new UpdateUser.Request(GuildId, UserId));
         //Assert
         Assert.ThrowsAsync<InvalidOperationException>(send);
     }
@@ -139,8 +139,8 @@ public class UserTests
         //Arrange
         UserEntity? user;
         //Act
-        await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));
-        user = await _mediator.Send(new GetUserRequest(GuildId, UserId));
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
         //Assert
         Assert.IsNotNull(user);
     }
@@ -150,9 +150,9 @@ public class UserTests
     {
         //Arrange
         Result<UserEntity> user;
-        await _mediator.Send(new AddUserRequest(GuildId, UserId));
+        await _mediator.Send(new AddUser.Request(GuildId, UserId));
         //Act
-        user = await _mediator.Send(new GetOrCreateUserRequest(GuildId, UserId));
+        user = await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Assert
         Assert.IsTrue(user.IsSuccess);
     }
