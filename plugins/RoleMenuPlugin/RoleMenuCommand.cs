@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FuzzySharp;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -16,10 +13,8 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
-using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Database;
-using RoleMenuPlugin.Database.MediatR;
 using Silk.Interactivity;
 
 namespace RoleMenuPlugin
@@ -50,7 +45,6 @@ namespace RoleMenuPlugin
 			private readonly InteractivityExtension     _interactivity;
 			private readonly ILogger<RoleMenuCommand>   _logger;
 			private readonly IDiscordRestInteractionAPI _interactions;
-			private readonly RoleMenuMenuService        _menus;
 			
 			private readonly List<RoleMenuOptionModel> _options = new(25);
 			
@@ -62,9 +56,8 @@ namespace RoleMenuPlugin
 				IDiscordRestGuildAPI       guilds,
 				InteractivityExtension     interactivity,
 				ILogger<RoleMenuCommand>   logger,
-				IDiscordRestInteractionAPI interactions, 
-				RoleMenuMenuService menus
-				)
+				IDiscordRestInteractionAPI interactions
+			)
 			{
 				_context       = context;
 				_users         = users;
@@ -73,7 +66,6 @@ namespace RoleMenuPlugin
 				_interactivity = interactivity;
 				_logger        = logger;
 				_interactions  = interactions;
-				_menus    = menus;
 			}
 
 			[Command("create")]
@@ -110,11 +102,6 @@ namespace RoleMenuPlugin
 					return await _channels.CreateMessageAsync(_context.ChannelID, "Sorry, but I can't send messages to that channel!");
 				}
 
-
-				var res = await _menus.DisplayMainMenuAsync(channel.ID);
-
-				return res;
-				
 				var messageResult = await _channels.CreateMessageAsync
 					(
 					 _context.ChannelID, "Silk! RoleMenu Creator V3",
@@ -143,15 +130,9 @@ namespace RoleMenuPlugin
 
 			private async Task<IResult> MenuLoopAsync(IMessage message)
 			{
-				_logger.LogTrace("Enter loop.");
 				while (true)
 				{
-					_logger.LogTrace("Looped.");
-					
 					var selectionResult = await _interactivity.WaitForButtonAsync(_context.User, message, this.CancellationToken);
-					
-					_logger.LogTrace("Got input: Success: {IsSuccess}, Defined: {IsDefined}", selectionResult.IsSuccess, selectionResult.IsDefined());
-					
 					
 					if (!selectionResult.IsSuccess || !selectionResult.IsDefined(out var selection))
 					{
@@ -172,7 +153,7 @@ namespace RoleMenuPlugin
 						//"rm-edit"        => await EditAsync(message, selection, token),
 						//"rm-help"		   => Task.CompletedTask, // Ignored, handled in a handler.
 						//"rm-finish"      => await FinishAsync(message, selection, token) 
-						
+						//"rm-cancel"
 						_ => Result.FromSuccess() // An exception should be thrown here, as it's outside what should be possible.
 					};
 					
@@ -181,15 +162,65 @@ namespace RoleMenuPlugin
 
 				return Result.FromSuccess();
 			}
-
+			
 			private async Task<IResult> CreateInteractiveAsync(IInteraction interaction, CancellationToken ct)
 			{
-				await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
-				                                                   new InteractionResponse(InteractionCallbackType.UpdateMessage,
-				                                                                           new InteractionCallbackData(Content: "Poggers.")),
-				                                                   ct: ct);
+				await _interactions.CreateInteractionResponseAsync
+					(
+					 interaction.ID,
+					 interaction.Token,
+					 new InteractionResponse
+						(
+                         InteractionCallbackType.UpdateMessage,
+                         new InteractionCallbackData
+	                         (
+	                          Content: "What role would you like for the role menu?\n" +
+	                                   "Type `cancel` to cancel. (Press the help button if you're stuck!)"
+	                         )
+					    ),
+				      ct: ct
+					 );
 
-				await Task.Delay(2000);
+				while (true)
+				{
+					var roleInput = await _interactivity.WaitForMessageAsync
+						(message =>
+							!string.IsNullOrEmpty(message.Content)  &&
+							message.ChannelID == _context.ChannelID &&
+							message.Author.ID == _context.User.ID   &&
+							message.MentionedRoles.Any() || message.Content.Equals("cancel", StringComparison.Ordinal)
+						);
+					
+					if (!roleInput.IsSuccess)
+						return roleInput;
+
+					if (roleInput.Entity?.Content.ToLower() is null or "cancel")
+						return Result.FromSuccess();
+
+					var roleID = roleInput.Entity.MentionedRoles.First();
+
+					var selfUser = await _users.GetCurrentUserAsync(ct);
+					var selfMember = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, selfUser.Entity.ID, ct);
+					var guildRoles = await _guilds.GetGuildRolesAsync(_context.GuildID.Value, ct);
+					
+					var selfRoles = selfMember.Entity.Roles.Select(x => guildRoles.Entity.First(y => y.ID == x)).ToArray();
+					var role = guildRoles.Entity.FirstOrDefault(x => x.ID == roleID);
+
+					if (role is null)
+						throw new InvalidOperationException(); // How did this happen?
+			
+					if (role.Position >= selfRoles.Max(x => x.Position))
+					{
+						await _interactions.EditOriginalInteractionResponseAsync
+							(
+							 interaction.ApplicationID,
+							 interaction.Token,
+							 "Sorry, but this role is above my highest role, and I cannot assign it!"
+							);
+					}
+
+				}
+				
 				return Result.FromSuccess();
 			}
 

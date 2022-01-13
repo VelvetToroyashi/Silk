@@ -31,10 +31,6 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
         {
             serviceCollection.AddSingleton<RoleMenuService>()
                              .AddCommandGroup<RoleMenuCommand>()
-                             .AddSingleton<RoleMenuMenuService>()
-                             .AddSingleton<RoleMenuCreatorService>()
-                             .AddResponder<RoleMenuHelpButtonResponder>()
-                             .AddResponder<RoleMenuMenuButtonResponder>()
                              .AddDbContext<RoleMenuContext>((s, b) =>
                               {
                                   var config = s.GetRequiredService<IConfiguration>();

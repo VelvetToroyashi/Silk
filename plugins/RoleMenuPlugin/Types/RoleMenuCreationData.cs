@@ -4,4 +4,4 @@ using RoleMenuPlugin.Database;
 
 namespace RoleMenuPlugin.Types;
 
-public record RoleMenuCreationData(Snowflake UserID, Snowflake MessageID, RoleMenuCreationState CreationState, IReadOnlyList<RoleMenuOptionModel> Options);
+public record RoleMenuCreationData(Snowflake UserID, Snowflake GuildID, Snowflake MessageID, RoleMenuOptionModel? Current, IReadOnlyList<RoleMenuOptionModel> Options);
