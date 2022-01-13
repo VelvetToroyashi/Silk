@@ -543,7 +543,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
         {
-            MuteRoleId = roleResult.Entity.ID
+            MuteRoleID = roleResult.Entity.ID
         });
 
         _config.PurgeCache(guildID);

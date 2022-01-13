@@ -15,7 +15,7 @@ public static class UpdateGuildModConfig
     public sealed record Request(Snowflake GuildID) : IRequest<GuildModConfigEntity?>
     {
         public Optional<bool>      ScanInvites           { get; init; }
-        public Optional<Snowflake> MuteRoleId            { get; init; }
+        public Optional<Snowflake> MuteRoleID            { get; init; }
         public Optional<int>       MaxUserMentions       { get; init; }
         public Optional<int>       MaxRoleMentions       { get; init; }
         public Optional<bool>      BlacklistInvites      { get; init; }
@@ -50,7 +50,7 @@ public static class UpdateGuildModConfig
                                                    .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);
 
 
-            if (request.MuteRoleId.IsDefined(out Snowflake muteRole))
+            if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
                 config.MuteRoleID = muteRole;
 
             if (request.EscalateInfractions.IsDefined(out bool escalate))
