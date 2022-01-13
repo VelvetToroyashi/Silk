@@ -165,6 +165,9 @@ namespace RoleMenuPlugin
 			
 			private async Task<IResult> CreateInteractiveAsync(IInteraction interaction, CancellationToken ct)
 			{
+				const string DescriptionInputMessage = "What role would you like for the role menu?\n" +
+				                                       "Type `cancel` to cancel. (Press the help button if you're stuck!)";
+				
 				await _interactions.CreateInteractionResponseAsync
 					(
 					 interaction.ID,
@@ -172,14 +175,47 @@ namespace RoleMenuPlugin
 					 new InteractionResponse
 						(
                          InteractionCallbackType.UpdateMessage,
-                         new InteractionCallbackData
-	                         (
-	                          Content: "What role would you like for the role menu?\n" +
-	                                   "Type `cancel` to cancel. (Press the help button if you're stuck!)"
-	                         )
+                         new InteractionCallbackData(Content: DescriptionInputMessage)
 					    ),
 				      ct: ct
 					 );
+
+				var option = new RoleMenuOptionModel();
+				
+				// Parse role
+				var roleResult = await GetRoleInputAsync(interaction, ct, option);
+
+				if (roleResult is not Result<RoleMenuOptionModel> rmresult)
+					return roleResult;
+				
+				option = rmresult.Entity;
+				
+				var descriptionResult = await GetDescriptionInputAsync(interaction, ct, option);
+				
+				
+				return Result.FromSuccess();
+
+			}
+
+			private async Task<IResult> GetDescriptionInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
+			{
+				
+
+				return Result<RoleMenuOptionModel>.FromSuccess(option);
+			}
+			
+			private async Task<IResult> GetRoleInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
+			{
+				async Task<IResult> CreateFollowupAsync(string content)
+					=> await _interactions
+					   .CreateFollowupMessageAsync
+							(
+							 interaction.ApplicationID,
+							 interaction.Token,
+							 content,
+							 flags: MessageFlags.Ephemeral,
+							 ct: default
+							);
 
 				while (true)
 				{
@@ -190,7 +226,7 @@ namespace RoleMenuPlugin
 							message.Author.ID == _context.User.ID   &&
 							message.MentionedRoles.Any() || message.Content.Equals("cancel", StringComparison.Ordinal)
 						);
-					
+
 					if (!roleInput.IsSuccess)
 						return roleInput;
 
@@ -199,29 +235,37 @@ namespace RoleMenuPlugin
 
 					var roleID = roleInput.Entity.MentionedRoles.First();
 
-					var selfUser = await _users.GetCurrentUserAsync(ct);
+					var selfUser   = await _users.GetCurrentUserAsync(ct);
 					var selfMember = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, selfUser.Entity.ID, ct);
 					var guildRoles = await _guilds.GetGuildRolesAsync(_context.GuildID.Value, ct);
-					
-					var selfRoles = selfMember.Entity.Roles.Select(x => guildRoles.Entity.First(y => y.ID == x)).ToArray();
-					var role = guildRoles.Entity.FirstOrDefault(x => x.ID == roleID);
 
-					if (role is null)
-						throw new InvalidOperationException(); // How did this happen?
-			
-					if (role.Position >= selfRoles.Max(x => x.Position))
+					var selfRoles = selfMember.Entity.Roles.Select(x => guildRoles.Entity.First(y => y.ID == x)).ToArray();
+					var role      = guildRoles.Entity.First(x => x.ID == roleID);
+
+					if (role.ID == _context.GuildID.Value)
 					{
-						await _interactions.EditOriginalInteractionResponseAsync
-							(
-							 interaction.ApplicationID,
-							 interaction.Token,
-							 "Sorry, but this role is above my highest role, and I cannot assign it!"
-							);
+						var errorResult = await CreateFollowupAsync("Heh, everyone already has the everyone role!");
+
+						if (!errorResult.IsSuccess)
+							return errorResult;
+
+						continue;
 					}
 
+					if (role.Position >= selfRoles.Max(x => x.Position))
+					{
+						var errorResult = await CreateFollowupAsync("Sorry, but that role is above my highest role, and I cannot assign it!");
+
+						if (!errorResult.IsSuccess)
+							return errorResult;
+
+						continue;
+					}
+
+					option = option with { RoleId = role.ID.Value };
+
+					return Result<RoleMenuOptionModel>.FromSuccess(option);
 				}
-				
-				return Result.FromSuccess();
 			}
 
 			private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)
