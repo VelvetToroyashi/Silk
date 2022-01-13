@@ -1,9 +1,7 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -14,9 +12,9 @@ public static class UpdateGuild
 {
     // Create a public Request record that extends IRequest<Guild, Result<Guild>> and an internal handler class that implements IRequestHandler<Request, Result<Guild>>
     
-    public record Request(Snowflake GuildID, string Prefix) : IRequest<Result<GuildEntity>>;
-    
-    internal class Handler : IRequestHandler<Request, Result<GuildEntity>>
+    public sealed record Request(Snowflake GuildID, string Prefix) : IRequest<Result<GuildEntity>>;
+
+    internal sealed class Handler : IRequestHandler<Request, Result<GuildEntity>>
     {
         private readonly GuildContext        _db;
         public Handler(GuildContext db) => _db = db;

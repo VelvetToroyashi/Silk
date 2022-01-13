@@ -128,7 +128,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (infraction.Type is not (InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute) && newExpiration.HasValue)
             return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration is only valid for soft bans, auto mod mutes, and mutes."));
         
-        var newInfraction = await _mediator.Send(new UpdateInfractionRequest(
+        var newInfraction = await _mediator.Send(new UpdateInfraction.Request(
                                                                              infraction.Id,
                                                                              newExpiration.HasValue 
                                                                                  ? newExpiration.Value is null 
@@ -176,12 +176,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         (target, enforcer) = canInfractResult.Entity;
 
-        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Strike));
+        InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Strike));
 
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsSuccess && informResult.Entity)
-            infraction = await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+            infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         Result returnResult = await LogInfractionAsync(infraction, target, enforcer);
 
@@ -203,12 +203,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         (target, enforcer) = canInfractResult.Entity;
 
-        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Kick));
+        InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Kick));
 
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
 
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
@@ -240,13 +240,13 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         (target, enforcer) = hierarchyResult.Entity;
 
-        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
+        InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
         //TODO: Don't attempt to inform the user if they're not present on the guild.
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
@@ -271,7 +271,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!banResult.IsSuccess)
             return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(banResult, "ban (required for unbanning)"));
 
-        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Unban));
+        InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Unban));
 
         Result<(IUser target, IUser enforcer)> targetEnforcerResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
@@ -302,7 +302,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (inMemory)
             return true;
 
-        var inDatabase = await _mediator.Send(new GetUserInfractionsRequest(guildID, targetID));
+        var inDatabase = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
 
         if (inDatabase.FirstOrDefault(Predicate) is {} inf)
         {
@@ -331,7 +331,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         (target, enforcer) = hierarchyResult.Entity;
 
-        var config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
+        var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
         
         if (config!.MuteRoleID.Value is 0)
         {
@@ -340,7 +340,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             if (!muteResult.IsSuccess)
                 return Result<InfractionEntity>.FromError(muteResult.Error);
             
-            config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
+            config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
         }
 
         var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
@@ -361,7 +361,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         var infraction = await _mediator.Send
             (
-             new CreateInfractionRequest
+             new CreateInfraction.Request
                  (
                   guildID,
                   targetID,
@@ -378,7 +378,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfractionRequest(infraction.Id, Notified: true));
+            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
@@ -420,13 +420,13 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         _queue.Remove(mute);
 
-        await _mediator.Send(new UpdateInfractionRequest(mute.Id, Processed: true));
+        await _mediator.Send(new UpdateInfraction.Request(mute.Id, Processed: true));
         
-        var config = await _mediator.Send(new GetGuildModConfigRequest(guildID));
+        var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
         await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
         
-        var infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Unmute));
+        var infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Unmute));
 
         await LogInfractionAsync(infraction, target, enforcer);
         
@@ -436,7 +436,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note)
     {
-        InfractionEntity infraction = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, note, InfractionType.Note));
+        InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, note, InfractionType.Note));
         
         Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
 
@@ -455,7 +455,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int? caseID, string reason = "Not Given.")
     {
-        InfractionEntity pardon = await _mediator.Send(new CreateInfractionRequest(guildID, targetID, enforcerID, reason, InfractionType.Pardon));
+        InfractionEntity pardon = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Pardon));
         
         Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
         
@@ -464,7 +464,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         var (target, enforcer) = hierarchyResult.Entity;
         
-        var infraction = await _mediator.Send(new GetUserInfractionRequest(targetID, guildID, InfractionType.Strike, caseID));
+        var infraction = await _mediator.Send(new GetUserInfraction.Request(targetID, guildID, InfractionType.Strike, caseID));
         
         if (infraction is null)
             if (caseID is null)
@@ -472,7 +472,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             else
                 return Result.FromError(new NotFoundError("Either that infraction doesn't exist, or it doesn't apply to this user, are you sure you have the right ID?"));
         
-        await _mediator.Send(new UpdateInfractionRequest(infraction.Id, AppliesToTarget: false));
+        await _mediator.Send(new UpdateInfraction.Request(infraction.Id, AppliesToTarget: false));
         
         if (_queue.FirstOrDefault(inf => inf.Id == infraction.Id) is {} inf)
             _queue.Remove(inf);
@@ -492,7 +492,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _logger.LogDebug("Loading active infractions...");
 
         DateTimeOffset                now         = DateTimeOffset.UtcNow;
-        IEnumerable<InfractionEntity> infractions = await _mediator.Send(new GetActiveInfractionsRequest());
+        IEnumerable<InfractionEntity> infractions = await _mediator.Send(new GetActiveInfractions.Request());
 
         _logger.LogDebug("Loaded infractions in {Time} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
@@ -541,9 +541,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!modResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to modify mute role position."));
 
-        await _mediator.Send(new UpdateGuildModConfigRequest(guildID)
+        await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
         {
-            MuteRoleId = roleResult.Entity.ID
+            MuteRoleID = roleResult.Entity.ID
         });
 
         _config.PurgeCache(guildID);
@@ -941,7 +941,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                     config.LoggingConfig.Infractions.WebhookID    = webhook.ID;
                     config.LoggingConfig.Infractions.WebhookToken = webhook.Token.Value;
 
-                    await _mediator.Send(new UpdateGuildModConfigRequest(guildID) { LoggingConfig = config.LoggingConfig });
+                    await _mediator.Send(new UpdateGuildModConfig.Request(guildID) { LoggingConfig = config.LoggingConfig });
                 }
             }
         }

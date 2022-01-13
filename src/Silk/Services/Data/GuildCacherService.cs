@@ -158,7 +158,7 @@ public class GuildCacherService
         if (members.Count < 2) // Just us. Rip.
             return Result.FromSuccess();
 
-        await _mediator.Send(new GetOrCreateGuildRequest(guildID, StringConstants.DefaultCommandPrefix));
+        await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
         return default;
     }
@@ -178,7 +178,7 @@ public class GuildCacherService
                 continue;
             }
             
-            var currentMemberState = await _mediator.Send(new GetOrCreateUserRequest(guildID, user.ID, JoinedAt: member.JoinedAt));
+            var currentMemberState = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, JoinedAt: member.JoinedAt));
 
             if (!currentMemberState.IsSuccess)
                 erroredMembers.Add(currentMemberState);

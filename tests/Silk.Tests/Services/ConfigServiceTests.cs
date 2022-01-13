@@ -24,8 +24,8 @@ public class ConfigServiceTests
 
 
         _mediator
-           .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfigRequest>>(), It.IsAny<CancellationToken>()))
-           .ReturnsAsync(It.IsAny<GetGuildConfigRequest>())
+           .Setup(m => m.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(It.IsAny<GetGuildConfig.Request>())
            .Verifiable("uHHHH");
 
         _guildConfigCacheService = new(_cache.Object, _mediator.Object);
@@ -39,7 +39,7 @@ public class ConfigServiceTests
         _cache.Setup(cache => cache.TryGetValue(0ul, out discard)).Returns(false);
         await _guildConfigCacheService.GetConfigAsync(new(0));
         //Assert
-        _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfigRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mediator.Verify(x => x.Send(It.IsAny<GetGuildConfig.Request>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
