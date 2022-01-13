@@ -59,7 +59,7 @@ public class GuildTests
             after;
         //Act
         before = _context.Guilds.Count();
-        result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        result = await _mediator.Send(new GetOrCreateGuild.Request(GuildId, ""));
         after  = _context.Guilds.Count();
         //Assert
         Assert.IsNotNull(result);
@@ -74,11 +74,11 @@ public class GuildTests
         int before,
             after;
 
-        await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        await _mediator.Send(new GetOrCreateGuild.Request(GuildId, ""));
 
         //Act
         before = _context.Guilds.Count();
-        result = await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        result = await _mediator.Send(new GetOrCreateGuild.Request(GuildId, ""));
         after  = _context.Guilds.Count();
 
         //Assert
@@ -92,7 +92,7 @@ public class GuildTests
         //Arrange
         GuildEntity? result;
         //Act
-        result = await _mediator.Send(new GetGuildRequest(GuildId));
+        result = await _mediator.Send(new GetGuild.Request(GuildId));
         //Assert
         Assert.IsNull(result);
     }
@@ -102,10 +102,10 @@ public class GuildTests
     {
         //Arrange
         GuildEntity? result;
-        await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        await _mediator.Send(new GetOrCreateGuild.Request(GuildId, ""));
 
         //Act
-        result = await _mediator.Send(new GetGuildRequest(GuildId));
+        result = await _mediator.Send(new GetGuild.Request(GuildId));
 
         //Assert
         Assert.IsNotNull(result);

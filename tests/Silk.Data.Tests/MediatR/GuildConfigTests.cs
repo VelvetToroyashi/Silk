@@ -55,7 +55,7 @@ public class GuildConfigTests
         //Arrange
         GuildConfigEntity? result;
         //Act
-        result = await _mediator.Send(new GetGuildConfigRequest(GuildId));
+        result = await _mediator.Send(new GetGuildConfig.Request(GuildId));
         //Assert
         Assert.IsNull(result);
     }
@@ -65,9 +65,9 @@ public class GuildConfigTests
     {
         //Arrange
         GuildConfigEntity? result;
-        await _mediator.Send(new GetOrCreateGuildRequest(GuildId, ""));
+        await _mediator.Send(new GetOrCreateGuild.Request(GuildId, ""));
         //Act
-        result = await _mediator.Send(new GetGuildConfigRequest(GuildId));
+        result = await _mediator.Send(new GetGuildConfig.Request(GuildId));
         //Assert
         Assert.IsNotNull(result, "Config is null!");
     }

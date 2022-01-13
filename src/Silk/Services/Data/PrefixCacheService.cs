@@ -46,7 +46,7 @@ public sealed class PrefixCacheService : IPrefixCacheService
 
     private async Task<string> GetDatabasePrefixAsync(Snowflake guildId)
     {
-        GuildEntity guild = await _mediator.Send(new GetOrCreateGuildRequest(guildId, StringConstants.DefaultCommandPrefix));
+        GuildEntity guild = await _mediator.Send(new GetOrCreateGuild.Request(guildId, StringConstants.DefaultCommandPrefix));
         _memoryCache.Set(ConfigKeyHelper.GenerateGuildPrefixKey(guildId), guild.Prefix);
         return guild.Prefix;
     }

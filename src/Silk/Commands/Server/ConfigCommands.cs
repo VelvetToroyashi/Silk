@@ -117,13 +117,13 @@ public class ConfigCommands : CommandGroup
                 _      => throw new ArgumentOutOfRangeException(nameof(action), action, "Impossible condition.")
             };
 
-            var config = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
             
             if (action is not null)
                 config!.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = parsedAction.Value };
 
 
-            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
                 DetectPhishingLinks  = enabled ?? default(Optional<bool>),
                 DeletePhishingLinks  = !preserve,
@@ -162,7 +162,7 @@ public class ConfigCommands : CommandGroup
             if ((delete ?? aggressive ?? scanOrigin ?? warnOnMatch) is null)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify at least one option.");
             
-            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
                 DeleteOnMatchedInvite = delete      ?? default(Optional<bool>),
                 UseAggressiveRegex    = aggressive  ?? default(Optional<bool>),
@@ -221,7 +221,7 @@ public class ConfigCommands : CommandGroup
                     return await _channels.CreateMessageAsync(_context.ChannelID, "This role can send messages. It's not a good idea to assign it to a mute role.");
             }
             
-            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
                 MuteRoleId = mute?.ID ?? default(Optional<Snowflake>)
                 //TODO: UseNativeMute

@@ -69,7 +69,7 @@ public class BulkUserTests
 
         int result;
         //Act
-        await _mediator.Send(new BulkAddUserRequest(users));
+        await _mediator.Send(new BulkAddUser.Request(users));
         result = _context.Users.Count();
         //Assert
         Assert.AreEqual(users.Count, result);
@@ -79,7 +79,7 @@ public class BulkUserTests
     public async Task MediatR_BulkAdd_Skips_Users_When_User_Exists()
     {
         //Arrange
-        await _mediator.Send(new AddUserRequest(GuildId, new(1)));
+        await _mediator.Send(new AddUser.Request(GuildId, new(1)));
         List<UserEntity> users = new()
         {
             new() { ID = new(1), GuildID = GuildId },
@@ -88,7 +88,7 @@ public class BulkUserTests
         int result;
 
         //Act
-        await _mediator.Send(new BulkAddUserRequest(users));
+        await _mediator.Send(new BulkAddUser.Request(users));
         result = _context.Users.ToArray().Length;
 
         //Assert
@@ -107,7 +107,7 @@ public class BulkUserTests
         int result;
 
         //Act
-        await _mediator.Send(new BulkAddUserRequest(users));
+        await _mediator.Send(new BulkAddUser.Request(users));
         result = _context.Users.Count();
 
         //Assert
@@ -125,14 +125,14 @@ public class BulkUserTests
             new() { ID = new(1), GuildID = GuildId },
             new() { ID = new(2), GuildID = GuildId }
         };
-        users = (await _mediator.Send(new BulkAddUserRequest(users))).ToList();
+        users = (await _mediator.Send(new BulkAddUser.Request(users))).ToList();
         //Act
         users.CopyTo(updatedUsers);
 
         foreach (UserEntity u in updatedUsers)
             u.Flags = UserFlag.WarnedPrior;
 
-        await _mediator.Send(new BulkUpdateUserRequest(updatedUsers));
+        await _mediator.Send(new BulkUpdateUser.Request(updatedUsers));
         updatedUsers = _context.Users.ToArray();
         //Assert
         Assert.AreNotEqual(users, updatedUsers);

@@ -55,7 +55,7 @@ public sealed class ReminderService : IHostedService
             Snowflake? replyAuthorID = null
         )
     {
-        ReminderEntity reminder = await _mediator.Send(new CreateReminderRequest(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
+        ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
     }
 
@@ -94,7 +94,7 @@ public sealed class ReminderService : IHostedService
         else
         {
             _reminders.Remove(reminder);
-            await _mediator.Send(new RemoveReminderRequest(id));
+            await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
@@ -258,7 +258,7 @@ public sealed class ReminderService : IHostedService
         DateTime now = DateTime.UtcNow;
         _logger.LogInformation(EventIds.Service, "Loading reminders...");
 
-        IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllRemindersRequest());
+        IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request());
         _reminders = reminders.ToList();
 
         _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);

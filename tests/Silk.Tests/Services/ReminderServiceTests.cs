@@ -31,7 +31,7 @@ public class ReminderServiceTests
         await reminderService.StopAsync(default);
 
         // Assert
-        mediatorMock.Verify(x => x.Send(It.IsAny<GetAllRemindersRequest>(), default), Times.Once);
+        mediatorMock.Verify(x => x.Send(It.IsAny<GetAllReminders.Request>(), default), Times.Once);
     }
 
 
@@ -46,7 +46,7 @@ public class ReminderServiceTests
         await reminderService.CreateReminderAsync(default, default, default, default, default, default);
 
         // Assert
-        mediatorMock.Verify(x => x.Send(It.IsAny<CreateReminderRequest>(), default), Times.Once);
+        mediatorMock.Verify(x => x.Send(It.IsAny<CreateReminder.Request>(), default), Times.Once);
     }
 
     [Test]
@@ -133,9 +133,9 @@ public class ReminderServiceTests
         await reminderService.StopAsync(default);
 
         // Assert
-        mediatorMock.Verify(x => x.Send(It.IsAny<GetAllRemindersRequest>(), default), Times.Once);
+        mediatorMock.Verify(x => x.Send(It.IsAny<GetAllReminders.Request>(), default), Times.Once);
 
-        mediatorMock.Verify(x => x.Send(It.IsAny<RemoveReminderRequest>(), default), Times.Once);
+        mediatorMock.Verify(x => x.Send(It.IsAny<RemoveReminder.Request>(), default), Times.Once);
     }
 
     [Test]
@@ -172,7 +172,7 @@ public class ReminderServiceTests
                               ),
                           Times.Once);
 
-        mediatorMock.Verify(x => x.Send(It.IsAny<RemoveReminderRequest>(), default), Times.Once);
+        mediatorMock.Verify(x => x.Send(It.IsAny<RemoveReminder.Request>(), default), Times.Once);
     }
 
     [Test]
