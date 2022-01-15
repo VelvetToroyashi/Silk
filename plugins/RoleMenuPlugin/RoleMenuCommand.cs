@@ -204,6 +204,21 @@ namespace RoleMenuPlugin
 			}
 			private async Task<IResult> GetEmojiInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
 			{
+				async Task<IResult> EditResponseAsync(string content)
+					=> await _interactions
+					   .EditOriginalInteractionResponseAsync
+							(
+							 interaction.ApplicationID,
+							 interaction.Token,
+							 content,
+							 ct: ct
+							);
+
+				while (true)
+				{
+					var emojiResult = await _interactivity.WaitForMessageAsync(interaction.Member.Value.User.Value, ct);
+				}
+				
 				return default;
 			}
 
@@ -228,6 +243,8 @@ namespace RoleMenuPlugin
 
 				while (true)
 				{
+					await EditResponseAsync("What role would you like to add? Please mention the role directly! (e.g. @Super Cool Role)");
+					
 					var roleInput = await _interactivity.WaitForMessageAsync
 						(message =>
 							!string.IsNullOrEmpty(message.Content)  &&
@@ -240,9 +257,25 @@ namespace RoleMenuPlugin
 						return roleInput;
 
 					if (roleInput.Entity?.Content.ToLower() is null or "cancel")
-						return await EditResponseAsync("Cancelled!");
+					{
+						var res = await EditResponseAsync("Cancelled!");
+
+						await Task.Delay(2000, ct);
+						return res;
+					}
 
 					var roleID = roleInput.Entity.MentionedRoles.First();
+
+					if (_options.Any(r => r.RoleId == roleID.Value))
+					{
+						var errorResult = await EditResponseAsync("Sorry, but that role is already in use!");
+						
+						if (errorResult.IsSuccess)
+							return errorResult;
+
+						await Task.Delay(2000, ct);
+						continue;
+					}
 
 					var selfUser   = await _users.GetCurrentUserAsync(ct);
 					var selfMember = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, selfUser.Entity.ID, ct);
@@ -258,6 +291,7 @@ namespace RoleMenuPlugin
 						if (!errorResult.IsSuccess)
 							return errorResult;
 
+						await Task.Delay(2000, ct);
 						continue;
 					}
 
@@ -268,6 +302,7 @@ namespace RoleMenuPlugin
 						if (!errorResult.IsSuccess)
 							return errorResult;
 
+						await Task.Delay(2000, ct);
 						continue;
 					}
 
