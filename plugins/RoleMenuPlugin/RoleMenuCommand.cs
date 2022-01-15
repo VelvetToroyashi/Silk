@@ -174,10 +174,14 @@ namespace RoleMenuPlugin
 					 interaction.Token,
 					 new InteractionResponse
 						(
-                         InteractionCallbackType.UpdateMessage,
-                         new InteractionCallbackData(Content: DescriptionInputMessage)
+                         InteractionCallbackType.ChannelMessageWithSource,
+                         new InteractionCallbackData
+	                         (
+	                          Content: DescriptionInputMessage, 
+	                          Flags: InteractionCallbackDataFlags.Ephemeral
+	                         ) 
 					    ),
-				      ct: ct
+					 ct: ct
 					 );
 
 				var option = new RoleMenuOptionModel();
@@ -189,12 +193,18 @@ namespace RoleMenuPlugin
 					return roleResult;
 				
 				option = rmresult.Entity;
+
+				var emojiResult = await GetEmojiInputAsync(interaction, ct, option);
 				
 				var descriptionResult = await GetDescriptionInputAsync(interaction, ct, option);
 				
 				
 				return Result.FromSuccess();
 
+			}
+			private async Task<IResult> GetEmojiInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
+			{
+				return default;
 			}
 
 			private async Task<IResult> GetDescriptionInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
@@ -206,15 +216,14 @@ namespace RoleMenuPlugin
 			
 			private async Task<IResult> GetRoleInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
 			{
-				async Task<IResult> CreateFollowupAsync(string content)
+				async Task<IResult> EditResponseAsync(string content)
 					=> await _interactions
-					   .CreateFollowupMessageAsync
+					   .EditOriginalInteractionResponseAsync
 							(
 							 interaction.ApplicationID,
 							 interaction.Token,
 							 content,
-							 flags: MessageFlags.Ephemeral,
-							 ct: default
+							 ct: ct
 							);
 
 				while (true)
@@ -231,7 +240,7 @@ namespace RoleMenuPlugin
 						return roleInput;
 
 					if (roleInput.Entity?.Content.ToLower() is null or "cancel")
-						return Result.FromSuccess();
+						return await EditResponseAsync("Cancelled!");
 
 					var roleID = roleInput.Entity.MentionedRoles.First();
 
@@ -244,7 +253,7 @@ namespace RoleMenuPlugin
 
 					if (role.ID == _context.GuildID.Value)
 					{
-						var errorResult = await CreateFollowupAsync("Heh, everyone already has the everyone role!");
+						var errorResult = await EditResponseAsync("Heh, everyone already has the everyone role!");
 
 						if (!errorResult.IsSuccess)
 							return errorResult;
@@ -254,7 +263,7 @@ namespace RoleMenuPlugin
 
 					if (role.Position >= selfRoles.Max(x => x.Position))
 					{
-						var errorResult = await CreateFollowupAsync("Sorry, but that role is above my highest role, and I cannot assign it!");
+						var errorResult = await EditResponseAsync("Sorry, but that role is above my highest role, and I cannot assign it!");
 
 						if (!errorResult.IsSuccess)
 							return errorResult;
