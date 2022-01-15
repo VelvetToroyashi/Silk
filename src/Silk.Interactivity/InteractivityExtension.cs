@@ -31,11 +31,11 @@ public class InteractivityExtension
     public Task<Result<IInteractionCreate?>> WaitForButtonAsync(Func<IInteractionCreate, bool> predicate, CancellationToken ct = default)
         => _interactionWaiter.WaitForEventAsync(predicate, ct);
 
-    public Task<Result<IMessageCreate?>> WaitForMessageAsync(IUser user)
-        => _messageWaiter.WaitForEventAsync(ev => ev.Author.ID == user.ID);
+    public Task<Result<IMessageCreate?>> WaitForMessageAsync(IPartialUser user, CancellationToken ct = default)
+        => _messageWaiter.WaitForEventAsync(ev => ev.Author.ID == user.ID, ct);
 
-    public Task<Result<IMessageCreate?>> WaitForMessageAsync(Func<IMessageCreate, bool> predicate)
-        => _messageWaiter.WaitForEventAsync(predicate);
+    public Task<Result<IMessageCreate?>> WaitForMessageAsync(Func<IMessage, bool> predicate, CancellationToken ct = default)
+        => _messageWaiter.WaitForEventAsync(predicate, ct);
     
     
     private Optional<IUser> GetUser(IInteraction interaction) 
