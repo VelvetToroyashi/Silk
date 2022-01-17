@@ -32,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj" />
       <ProjectReference Include="..\..\src\Silk.Interactivity\Silk.Interactivity.csproj" />
     </ItemGroup>
 
