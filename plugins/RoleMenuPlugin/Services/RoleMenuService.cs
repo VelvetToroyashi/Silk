@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DnsClient.Internal;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -20,12 +22,15 @@ public class RoleMenuService
     private readonly IDiscordRestUserAPI        _users;
     private readonly IDiscordRestGuildAPI       _guilds;
     private readonly IDiscordRestInteractionAPI _interactions;
-    public RoleMenuService(IMediator mediator, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
+    private readonly ILogger<RoleMenuService>   _logger;
+    
+    public RoleMenuService(IMediator mediator, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions, ILogger<RoleMenuService> logger)
     {
         _mediator     = mediator;
         _users        = users;
         _guilds       = guilds;
         _interactions = interactions;
+        _logger       = logger;
     }
 
     public async Task<Result> HandleButtonAsync(IInteraction interaction)
@@ -50,6 +55,8 @@ public class RoleMenuService
                  $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
                  flags: MessageFlags.Ephemeral
                 );
+            
+            _logger.LogError("Role menu defined in {GuildID}/{ChannelID}/{MessageID} but missing from database", guildID, channelID, messageID);
         }
         else
         {
@@ -190,7 +197,7 @@ public class RoleMenuService
             var currentMemberResult = await _guilds.GetGuildMemberAsync(guildID, selfResult.Entity.ID);
 
             if (!currentMemberResult.IsDefined(out var selfMember))
-                return Result.FromError(currentMemberResult.Error);
+                return Result.FromError(currentMemberResult.Error!);
 
             var guildRolesResult = await _guilds.GetGuildRolesAsync(guildID);
 
@@ -206,13 +213,35 @@ public class RoleMenuService
             content.AppendLine("There was an error assigning one or more of the roles you selected.")
                    .AppendLine("Please forward this information to a server staff member so they can resolve the issue!");
 
+
+            var loggedMissingRole = false; 
+            var loggedHierarchy = false;
+            
+            
             foreach (var role in roleMenuRoleIDs)
             {
                 if (guildRoles.FirstOrDefault(r => r.ID == role) is not { } guildRole)
+                {
                     content.AppendLine($"Role {role} has since been removed from the server.");
 
+                    if (!loggedMissingRole)
+                    {
+                        loggedMissingRole = true;
+                        _logger.LogError("One or more roles has gone missing in {GuildID}", guildID);
+                    }
+                }
+
                 else if (guildRole.Position >= highestSelfRole.Position)
+                {
                     content.AppendLine($"<@&{role}> has been moved above my highest role (<@&{highestSelfRole.ID}>); I cannot (un-)assign it.");
+
+                    if (!loggedHierarchy)
+                    {
+                        loggedHierarchy = true;
+                        _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
+                    }
+                }
+                    
             }
 
             await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
