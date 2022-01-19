@@ -211,13 +211,12 @@ namespace RoleMenuPlugin
 				if (emojiResult is not Result<RoleMenuOptionModel> emresult)
 					return emojiResult;
 
-				await _channels.CreateMessageAsync(_context.ChannelID, $"Current option: {emresult.Entity}");
-				
 				var descriptionResult = await GetDescriptionInputAsync(interaction, ct, option);
-				
 				
 				if (descriptionResult is not Result<RoleMenuOptionModel> drresult)
 					return descriptionResult;
+				
+				
 				
 				return Result.FromSuccess();
 			}

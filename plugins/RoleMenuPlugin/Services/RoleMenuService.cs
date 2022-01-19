@@ -37,7 +37,7 @@ public class RoleMenuService
     {
         await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
                                                            new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage));
-
+        
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(interaction.Message.Value.ID.Value));
 
         if (!roleMenuResult.IsDefined(out var rolemenu))
