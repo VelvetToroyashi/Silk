@@ -160,7 +160,7 @@ namespace RoleMenuPlugin
 						"rm-add-interactive" => await CreateInteractiveAsync(selection, token),
 						//"rm-simple"      => await CreateSimpleAsync(message, selection, token),
 						//"rm-edit"        => await EditAsync(message, selection, token),
-						//"rm-help"		   => Task.CompletedTask, // Ignored, handled in a handler.
+						"rm-help"		   => Result.FromSuccess(), // Ignored, handled in a handler.
 						//"rm-finish"      => await FinishAsync(message, selection, token) 
 						//"rm-cancel"
 						_ => Result.FromSuccess() // An exception should be thrown here, as it's outside what should be possible.
@@ -216,7 +216,7 @@ namespace RoleMenuPlugin
 				if (descriptionResult is not Result<RoleMenuOptionModel> drresult)
 					return descriptionResult;
 				
-				
+				_options.Add(drresult.Entity);
 				
 				return Result.FromSuccess();
 			}
