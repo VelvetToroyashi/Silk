@@ -13,8 +13,8 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    [Migration("20220105034317_ReminderMetadata")]
-    partial class ReminderMetadata
+    [Migration("20220121093343_MigrationOrSomething")]
+    partial class MigrationOrSomething
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
