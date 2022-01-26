@@ -141,6 +141,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                                     .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
+                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         string? configOptions = host.Configuration["Logging"];
