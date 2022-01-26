@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Commands.Parsers;
+using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -40,9 +41,13 @@ namespace RoleMenuPlugin
 			private readonly ButtonComponent _addMenuSimpleButton      = new (ButtonComponentStyle.Secondary,  "Add (Simple)",      CustomID: "rm-add-role-only");
 			private readonly ButtonComponent _addMenuEditButton        = new (ButtonComponentStyle.Secondary,  "Edit Option",       CustomID: "rm-edit-options", IsDisabled: true);
     
-			private readonly ButtonComponent _addMenuHelpButton   = new(ButtonComponentStyle.Primary,   "Help",      CustomID: "rm-help");
+			private readonly ButtonComponent _addMenuHelpButton   = new(ButtonComponentStyle.Primary,     "Help",      CustomID: "rm-help");
 			private readonly ButtonComponent _addMenuFinishButton = new(ButtonComponentStyle.Success,     "Finish",    CustomID: "rm-finish", IsDisabled: true);
 			private readonly ButtonComponent _addMenuCancelButton = new(ButtonComponentStyle.Danger,      "Cancel",    CustomID: "rm-cancel");
+			
+			private readonly ButtonComponent _backButton = new(ButtonComponentStyle.Secondary, "Back", CustomID: "rm-back");
+			private readonly ButtonComponent _exitButton = new(ButtonComponentStyle.Secondary, "Exit", CustomID: "rm-exit");
+			
 			
 			private readonly MessageContext             _context;
 			private readonly IDiscordRestUserAPI        _users;
@@ -51,7 +56,6 @@ namespace RoleMenuPlugin
 			private readonly InteractivityExtension     _interactivity;
 			private readonly ILogger<RoleMenuCommand>   _logger;
 			private readonly IDiscordRestInteractionAPI _interactions;
-			private readonly ITypeParser<IPartialEmoji> _emojiParser;
 
 			private readonly List<RoleMenuOptionModel> _options = new(25);
 			
@@ -152,17 +156,15 @@ namespace RoleMenuPlugin
 					var cts   = new CancellationTokenSource(TimeSpan.FromMinutes(14));
 					var token = cts.Token;
 					
-					
-					
 					//This is safe to do because the predicate ensures this information is present before returning a result.
 					var t = selection.Data.Value.CustomID.Value switch
 					{
 						"rm-add-interactive" => await CreateInteractiveAsync(selection, token),
-						//"rm-simple"      => await CreateSimpleAsync(message, selection, token),
-						//"rm-edit"        => await EditAsync(message, selection, token),
+						"rm-simple"      => await CreateSimpleAsync(selection, token),
+						//"rm-edit"        => await EditAsync(selection, token),
 						"rm-help"		   => Result.FromSuccess(), // Ignored, handled in a handler.
 						//"rm-finish"      => await FinishAsync(message, selection, token) 
-						//"rm-cancel"
+						//"rm-cancel"      => await CancelAsync(message, selection, token)
 						_ => Result.FromSuccess() // An exception should be thrown here, as it's outside what should be possible.
 					};
 
@@ -171,10 +173,73 @@ namespace RoleMenuPlugin
 					
 					await ShowMainMenuAsync(selection, _options.Count);
 				}
-
-				return Result.FromSuccess();
 			}
 			
+			private async Task<IResult> CreateSimpleAsync(IInteractionCreate selection, CancellationToken ct)
+			{
+				var interaction = default(IInteraction);
+				var followup	= default(IMessage);
+				
+				var rolesResult = await _guilds.GetGuildRolesAsync(selection.GuildID.Value, ct);
+				await _interactions.CreateInteractionResponseAsync(selection.ID, selection.Token, new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage), ct: ct);
+				
+				if (!rolesResult.IsSuccess)
+					return rolesResult;
+				
+				Select:
+
+				var select = new SelectMenuComponent
+					(
+					 "rm-select-role",
+					 _options.Select((s, i) =>
+					          {
+						          var userFriendlyRoleName = rolesResult.Entity.FirstOrDefault(r => r.ID.Value == s.RoleId)?.Name;
+					              
+						          if (userFriendlyRoleName is null)
+						          {
+							          userFriendlyRoleName = "Unknown Role";
+							          _logger.LogWarning("RoleMenu role has gone missing on {Guild}", selection.GuildID.Value);
+						          }
+
+						          return new SelectOption(userFriendlyRoleName, i.ToString());
+					          })
+					         .ToArray()
+					);
+				
+				if (followup is null)
+				{
+					var interactionResult = await _interactions.CreateFollowupMessageAsync
+						(
+						 selection.ApplicationID,
+						 selection.Token,
+						 "Please select a role to add to the menu.",
+						 flags: MessageFlags.Ephemeral,
+						 components: new IMessageComponent[]
+						 {
+							 new ActionRowComponent(new [] { select }),
+							 new ActionRowComponent(new [] { _addMenuCancelButton })
+						 }
+						);
+
+					if (!interactionResult.IsSuccess)
+						return interactionResult;
+
+					followup = interactionResult.Entity;
+				}
+				
+				var optionInputResult = _interactivity.WaitForSelectAsync(selection.Member.Value.User.Value, followup, ct);
+				var cancelInputResult = _interactivity.WaitForButtonAsync(selection.Member.Value.User.Value, followup, ct);
+
+				await Task.WhenAny(optionInputResult, cancelInputResult);
+				
+				_logger.LogInformation("Input returned. Cancelled: {Cancelled} Index: {Index}",
+				                       cancelInputResult.IsCompleted && cancelInputResult.Result.IsDefined(),
+				                       optionInputResult.IsCompleted ? optionInputResult.Result.IsDefined(out var index) ? index : -1 : -1);
+				
+				
+				return Result.FromSuccess();
+			}
+
 			private async Task<IResult> CreateInteractiveAsync(IInteraction interaction, CancellationToken ct)
 			{
 				const string DescriptionInputMessage = "What role would you like for the role menu?\n" +
