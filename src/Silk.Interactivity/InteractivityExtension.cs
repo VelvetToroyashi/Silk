@@ -21,6 +21,13 @@ public class InteractivityExtension
         _messageWaiter     = messageWaiter;
         _interactionWaiter = interactionWaiter;
     }
+    
+    public Task<Result<IInteractionCreate?>> WaitForSelectAsync(IUser user, IMessage message, CancellationToken ct = default)
+        => WaitForSelectAsync(ev => GetUser(ev).IsDefined(out var evUser)   && evUser.ID    == user.ID &&
+                                    ev.Message.IsDefined(out var evMessage) && evMessage.ID == message.ID, ct);
+    
+    public Task<Result<IInteractionCreate?>> WaitForSelectAsync(Func<IInteractionCreate, bool> predicate, CancellationToken ct = default)
+        => _interactionWaiter.WaitForEventAsync(predicate, ct);
 
 
     public Task<Result<IInteractionCreate?>> WaitForButtonAsync(IUser user, IMessage message, CancellationToken ct = default)
