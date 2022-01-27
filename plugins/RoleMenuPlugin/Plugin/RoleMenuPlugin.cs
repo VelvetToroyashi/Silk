@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,19 +30,21 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
     {
         try
         {
-            serviceCollection.AddSingleton<RoleMenuService>()
-                             .AddCommandGroup<RoleMenuCommand>()
-                             .AddDbContext<RoleMenuContext>((s, b) =>
-                              {
-                                  var config = s.GetRequiredService<IConfiguration>();
-                                  var dbString = config
-                                                .GetSection("Plugins")
-                                                .GetSection("RoleMenu")
-                                                .GetSection("Database")
-                                                .Value ?? throw new KeyNotFoundException("Missing plugin config!");
+            serviceCollection
+               .AddMediatR(typeof(RoleMenuPlugin))
+               .AddSingleton<RoleMenuService>()
+               .AddCommandGroup<RoleMenuCommand>()
+               .AddDbContext<RoleMenuContext>((s, b) =>
+                {
+                    var config = s.GetRequiredService<IConfiguration>();
+                    var dbString = config
+                                  .GetSection("Plugins")
+                                  .GetSection("RoleMenu")
+                                  .GetSection("Database")
+                                  .Value ?? throw new KeyNotFoundException("Missing plugin config!");
 
-                                  b.UseNpgsql(dbString);
-                              });
+                    b.UseNpgsql(dbString);
+                });
         }
         catch (Exception e)
         {
