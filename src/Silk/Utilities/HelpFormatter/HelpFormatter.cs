@@ -186,7 +186,7 @@ public class HelpFormatter : IHelpFormatter
                 Title = $"Help for {node.Key}:",
                 Description = "Showing subcommands. \n"                            +
                               "Specify a command name to see more information.\n\n" +
-                              (containsDefaultCommand ? usage : null),
+                              (containsDefaultCommand ? usage : (node as CommandNode)?.Shape.Description ?? (node as GroupNode)?.Description),
                 Colour = Color.DodgerBlue,
                 Fields = new[]
                 {
