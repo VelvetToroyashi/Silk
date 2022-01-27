@@ -16,6 +16,8 @@ using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Database;
 
+// ReSharper disable once ContextualLoggerProblem
+// ReSharper disable RedundantBlankLines
 namespace RoleMenuPlugin
 {
 	/// <summary>
@@ -41,7 +43,7 @@ namespace RoleMenuPlugin
 				IDiscordRestUserAPI      users,
 				IDiscordRestChannelAPI   channels,
 				IDiscordRestGuildAPI     guilds,
-				// ReSharper disable once ContextualLoggerProblem
+				
 				ILogger<RoleMenuCommand> logger
 			)
 			{
@@ -59,6 +61,9 @@ namespace RoleMenuPlugin
 				[Description("The channel the role menu will be created in.\n" +
 				             "This channel must be a text channel, and must allow sending messages.")]
 				IChannel? channel = null,
+				
+				[Description("The roles to add to the role menu; this is optional, but any roles above my own.\n" +
+				             "Any roles above my own and the @everyone role will be discarded!")]
 				params IRole[]? roles
 			)
 			{
@@ -90,10 +95,12 @@ namespace RoleMenuPlugin
 				if (permsResult is not Result<(IReadOnlyList<IRole>, IRole)> permissionResultWithValue)
 					return permsResult;
 				
-				var (selfRoles, role) = permissionResultWithValue.Entity;
+				var (selfRoles, everyoneRole) = permissionResultWithValue.Entity;
 
 				_sessions[_context.User.ID] = (channel.ID, (roles ?? Array.Empty<IRole>())
-				                                          .Where(r => r.Position <= selfRoles.Max(r => r.Position))
+				                                          .DistinctBy(r => r.ID)
+				                                          .Where(r => r.Position <= selfRoles.Max(sr => sr.Position))
+				                                          .Except(new [] {everyoneRole})
 				                                          .Select(r => r.ID)
 				                                          .ToList());
 				
