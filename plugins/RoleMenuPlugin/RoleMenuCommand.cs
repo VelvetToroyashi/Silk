@@ -177,12 +177,9 @@ namespace RoleMenuPlugin
 			
 			private async Task<IResult> CreateSimpleAsync(IInteractionCreate selection, CancellationToken ct)
 			{
-				var interaction = default(IInteraction);
-				var followup	= default(IMessage);
 				
 				var rolesResult = await _guilds.GetGuildRolesAsync(selection.GuildID.Value, ct);
-				await _interactions.CreateInteractionResponseAsync(selection.ID, selection.Token, new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage), ct: ct);
-				
+
 				if (!rolesResult.IsSuccess)
 					return rolesResult;
 				
@@ -206,29 +203,8 @@ namespace RoleMenuPlugin
 					         .ToArray()
 					);
 				
-				if (followup is null)
-				{
-					var interactionResult = await _interactions.CreateFollowupMessageAsync
-						(
-						 selection.ApplicationID,
-						 selection.Token,
-						 "Please select a role to add to the menu.",
-						 flags: MessageFlags.Ephemeral,
-						 components: new IMessageComponent[]
-						 {
-							 new ActionRowComponent(new [] { select }),
-							 new ActionRowComponent(new [] { _addMenuCancelButton })
-						 }
-						);
-
-					if (!interactionResult.IsSuccess)
-						return interactionResult;
-
-					followup = interactionResult.Entity;
-				}
-				
-				var optionInputResult = _interactivity.WaitForSelectAsync(selection.Member.Value.User.Value, followup, ct);
-				var cancelInputResult = _interactivity.WaitForButtonAsync(selection.Member.Value.User.Value, followup, ct);
+				var optionInputResult = _interactivity.WaitForSelectAsync(selection.Member.Value.User.Value, selection.Message.Value, ct);
+				var cancelInputResult = _interactivity.WaitForButtonAsync(selection.Member.Value.User.Value, selection.Message.Value, ct);
 
 				await Task.WhenAny(optionInputResult, cancelInputResult);
 				
@@ -283,7 +259,7 @@ namespace RoleMenuPlugin
 				
 				_options.Add(drresult.Entity);
 				
-				return Result.FromSuccess();
+				return drresult;
 			}
 			
 			private async Task<IResult> GetEmojiInputAsync(IInteraction interaction, CancellationToken ct, RoleMenuOptionModel option)
@@ -409,6 +385,11 @@ namespace RoleMenuPlugin
 						return Result.FromSuccess(); 
 					}
 
+					if (descriptionResult.Entity.Content is "skip")
+					{
+						return Result<RoleMenuOptionModel>.FromSuccess(option);
+					}
+
 					option = option with { Description = descriptionResult.Entity.Content };
 					return Result<RoleMenuOptionModel>.FromSuccess(option);
 				}
@@ -425,7 +406,9 @@ namespace RoleMenuPlugin
 							 content,
 							 ct: ct
 							);
-
+				
+				
+				
 				while (true)
 				{
 					await EditResponseAsync("What role would you like to add? Please mention the role directly! (e.g. @Super Cool Role)");
