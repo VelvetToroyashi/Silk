@@ -63,6 +63,7 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).")]
     public async Task<IResult> CreateAsync
     (
+        [Option('c', "channel")]
         [Description("The channel the role menu will be created in.\n" +
                      "This channel must be a text channel, and must allow sending messages.")]
         IChannel? channel = null,
@@ -112,7 +113,8 @@ public sealed class RoleMenuCommand : CommandGroup
             return roleMenuResult;
         }
         
-        await _channels.CreateMessageAsync(_context.ChannelID, $"Role menu created! The message ID is {((Result<IMessage>)roleMenuResult).Entity.ID}");
+        await _channels.CreateMessageAsync(_context.ChannelID, $"RoleMenu ID: {((Result<IMessage>)roleMenuResult).Entity.ID}.\n" +
+                                                               $"Use this ID to edit the menu!");
         
         
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
@@ -146,7 +148,7 @@ public sealed class RoleMenuCommand : CommandGroup
              {
                  ChannelId = _context.ChannelID.Value,
                  MessageId = roleMenuMessageResult.Entity.ID.Value,
-                 Options   = roles.Select(r => new RoleMenuOptionModel() { RoleId = r.ID.Value }).ToList()
+                 Options   = roles.Select(r => new RoleMenuOptionModel() { RoleId = r.ID.Value, RoleName = r.Name }).ToList()
              })
             );
         
