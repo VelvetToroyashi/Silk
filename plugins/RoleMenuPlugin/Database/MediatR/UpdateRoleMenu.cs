@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-    public static class UpdateRoleMenuRequest
+    public static class UpdateRoleMenu
     {
-        public record Request(RoleMenuModel RoleMenu) : IRequest<Result>;
+        public record Request(Snowflake RoleMenuID, List<RoleMenuOptionModel> Options = null) : IRequest<Result>;
 
         internal class Handler : IRequestHandler<Request, Result>
         {
@@ -22,16 +24,16 @@ namespace RoleMenuPlugin.Database.MediatR
                 RoleMenuModel? roleMenu = await _db
                                                .RoleMenus
                                                .Include(r => r.Options)
-                                               .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenu.MessageId, cancellationToken);
+                                               .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
 
                 if (roleMenu is null)
                     return Result.FromError(new NotFoundError("RoleMenu not found"));
 
-                if (request.RoleMenu.Options.Count is < 1 or > 25)
-                    return Result.FromError(new ArgumentOutOfRangeError(nameof(request.RoleMenu.Options), "Options must be between 1 and 25"));
+                if (request.Options.Count is < 1 or > 25)
+                    return Result.FromError(new ArgumentOutOfRangeError(nameof(request.Options), "Options must be between 1 and 25"));
 
                 roleMenu.Options.Clear();
-                roleMenu.Options.AddRange(request.RoleMenu.Options);
+                roleMenu.Options.AddRange(request.Options);
 
                 var        saved = 0;
                 Exception? ex    = null;

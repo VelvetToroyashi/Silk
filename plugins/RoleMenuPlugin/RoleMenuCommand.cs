@@ -141,6 +141,9 @@ public sealed class RoleMenuCommand : CommandGroup
                        })
                    }
                 );
+        
+        if (!roleMenuMessageResult.IsSuccess)
+            return roleMenuMessageResult;
 
         var roleMenu = await _mediator.Send
             (
@@ -155,7 +158,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenu.IsSuccess)
             return roleMenu;
 
-        return roleMenuMessageResult;
+        return Result.FromSuccess();
     }
 
     private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)
