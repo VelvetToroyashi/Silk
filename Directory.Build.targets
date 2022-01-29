@@ -6,7 +6,7 @@
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01062"/>
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0-nightly-01062"/>
         <PackageReference Update="DSharpPlus.VoiceNext" Version="4.2.0-nightly-01063"/>
-        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01062"/>
+        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01063"/>
         <PackageReference Update="DSharpPlus.Menus" Version="1.0.3.5" />
 
         <PackageReference Update="Humanizer" Version="2.14.1" />
