@@ -72,29 +72,13 @@ public sealed class RoleMenuCommand : CommandGroup
     (
         [Description("The channel the role menu will be created in.\n" +
                      "This channel must be a text channel, and must allow sending messages.")]
-        IChannel? channel,
+        IChannel channel,
             
         [Description("The roles to add to the role menu; this is optional, but any roles above my own.\n" +
                      "Any roles above my own and the @everyone role will be discarded!")]
         IRole[]? roles = null
     )
     {
-
-        if (channel is null)
-        {
-            var currentChannelResult = await _channels.GetChannelAsync(_context.ChannelID);
-
-            if (currentChannelResult.IsSuccess)
-            {
-                channel = currentChannelResult.Entity;
-            }
-            else
-            {
-                _logger.LogError("User appears to be in an invalid channel: {UserID}, {ChannelID}", _context.User.ID, _context.ChannelID);
-                return currentChannelResult;
-            }
-        }
-
         var permsResult = await EnsureChannelPermissionsAsync(channel);
 
         if (permsResult is not Result<(IReadOnlyList<IRole>, IRole)> permissionResultWithValue)
@@ -170,10 +154,30 @@ public sealed class RoleMenuCommand : CommandGroup
 
         if (!rolesToAdd.Any())
             return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✔");
+
+        if (rolesToAdd.Length + roleMenu.Options.Count > 25)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            
+            return await DeleteAfter($"You can only have 25 roles in a role menu! You're {roles.Length + roleMenu.Options.Count - 25} roles over!", TimeSpan.FromSeconds(15));
+        }
         
         roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel() { RoleId = r.ID.Value, RoleName = r.Name}));
+        
 
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
+        
+        var roleMenuMessageResult = await _channels.EditMessageAsync(_context.ChannelID, messageID, "**Role Menu!**\n"                               +
+                                                                                                    "Use the button below to select your roles!\n\n" +
+                                                                                                    "Available roles:\n"                             +
+                                                                                                    string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>")));
+
+        if (!roleMenuMessageResult.IsSuccess)
+        {
+            _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter("I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
+        }
         
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✔");
     }
