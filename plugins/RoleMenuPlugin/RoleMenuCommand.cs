@@ -167,7 +167,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
         
-        var roleMenuMessageResult = await _channels.EditMessageAsync(_context.ChannelID, messageID, "**Role Menu!**\n"                               +
+        var roleMenuMessageResult = await _channels.EditMessageAsync(new(roleMenu.ChannelId), messageID, "**Role Menu!**\n"                               +
                                                                                                     "Use the button below to select your roles!\n\n" +
                                                                                                     "Available roles:\n"                             +
                                                                                                     string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>")));
