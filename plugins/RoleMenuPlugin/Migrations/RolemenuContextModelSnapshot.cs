@@ -7,7 +7,7 @@ using RoleMenuPlugin.Database;
 
 namespace RoleMenuPlugin.Migrations
 {
-    [DbContext(typeof(RolemenuContext))]
+    [DbContext(typeof(RoleMenuContext))]
     partial class RolemenuContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -47,11 +47,9 @@ namespace RoleMenuPlugin.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EmojiName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("GuildId")
@@ -68,6 +66,10 @@ namespace RoleMenuPlugin.Migrations
 
                     b.Property<decimal?>("RoleMenuModelMessageId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

@@ -1,0 +1,144 @@
+/*using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using MediatR;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Attributes;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
+using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
+using Silk.Data.MediatR.Guilds.Config;
+
+namespace Silk.Commands;
+
+//[Group("config")]
+[Description("Configure various settings for your guild!")]
+//[RequireDiscordPermission(DiscordPermission.ManageGuild)]
+
+public class ConfigTestCommand : CommandGroup
+{
+    [Group("edit")]
+    [Description("Edit various settings for your guild!")]
+    public class EditConfig : CommandGroup
+    {
+        private const string WebhookLoggingName = "Silk! Logging";
+
+        private readonly IMediator              _mediator;
+        private readonly ICommandContext        _context;
+        private readonly IDiscordRestChannelAPI _channelApi;
+        private readonly IDiscordRestWebhookAPI _webhookApi;
+
+        public EditConfig
+            (
+                IMediator              mediator,
+                ICommandContext        context,
+                IDiscordRestChannelAPI channelApi,
+                IDiscordRestWebhookAPI webhookApi
+            )
+        {
+            _mediator   = mediator;
+            _context    = context;
+            _channelApi = channelApi;
+            _webhookApi = webhookApi;
+        }
+
+        [Command("logging")]
+        [CommandType(ApplicationCommandType.ChatInput)]
+        [Description("Edit the logging settings for your guild!")]
+        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Too many parameters")]
+        public async Task<Result> EditLogging
+            (
+                [Option('f', "fc")] [Description("The fallback channel to use for logging.")]         IChannel? fallbackChannel    = null,
+                [Option('i', "ic")] [Description("The channel to use for logging infractions.")]      IChannel? infractionsChannel = null,
+                [Option('e', "ec")] [Description("The channel to use for logging edits.")]            IChannel? editsChannel       = null,
+                [Option('d', "dc")] [Description("The channel to use for logging deletes.")]          IChannel? deletesChannel     = null,
+                [Option('j', "jc")] [Description("The channel to use for logging joins.")]            IChannel? joinsChannel       = null,
+                [Option('l', "lc")] [Description("The channel to use for logging leaves.")]           IChannel? leavesChannel      = null,
+                [Option('w', "webhook")] [Description("Whether or not to use webhooks for logging.")] bool?     useWebhooks        = null,
+                [Option("edits")] [Description("Whether to log message edits.")]                      bool?     logEdits           = null,
+                [Option("deletes")] [Description("Whether to log message deletes.")]                  bool?     logDeletes         = null,
+                [Option("joins")] [Description("Whether to log user joins.")]                         bool?     logJoins           = null,
+                [Option("leaves")] [Description("Whether to log user leaves.")]                       bool?     logLeaves          = null,
+                [Option("infractions")] [Description("Whether to log infractions.")]                  bool?     logInfractions     = null
+            )
+        {
+            GuildModConfigEntity? currentConfig = await _mediator.Send(new GetGuildModConfigRequest(_context.GuildID.Value));
+
+            GuildLoggingConfigEntity logging = currentConfig!.LoggingConfig;
+
+            if (logEdits.HasValue)
+                logging.LogMessageEdits = logEdits.Value;
+
+            if (logDeletes.HasValue)
+                logging.LogMessageDeletes = logDeletes.Value;
+
+            if (logJoins.HasValue)
+                logging.LogMemberJoins = logJoins.Value;
+
+            if (logLeaves.HasValue)
+                logging.LogMemberLeaves = logLeaves.Value;
+
+            if (logInfractions.HasValue)
+                logging.LogInfractions = logInfractions.Value;
+
+            if (fallbackChannel != null)
+                logging.FallbackChannelID = fallbackChannel.ID;
+
+            if (infractionsChannel != null)
+                logging.Infractions = await CreateLoggingChannelAsync(useWebhooks, infractionsChannel);
+
+            if (editsChannel != null)
+                logging.MessageEdits = await CreateLoggingChannelAsync(useWebhooks, editsChannel);
+
+            if (deletesChannel != null)
+                logging.MessageDeletes = await CreateLoggingChannelAsync(useWebhooks, deletesChannel);
+
+            if (joinsChannel != null)
+                logging.MemberJoins = await CreateLoggingChannelAsync(useWebhooks, joinsChannel);
+
+            if (leavesChannel != null)
+                logging.MemberLeaves = await CreateLoggingChannelAsync(useWebhooks, leavesChannel);
+
+            await _mediator.Send(new UpdateGuildModConfigRequest(_context.GuildID.Value)
+            {
+                LoggingConfig = logging
+            });
+
+            return Result.FromSuccess();
+        }
+
+        private async Task<LoggingChannelEntity> CreateLoggingChannelAsync(bool? useWebhooks, IChannel channel)
+        {
+            if (!useWebhooks ?? false)
+            {
+                return new()
+                {
+                    ChannelID = channel.ID,
+                    GuildID   = channel.GuildID.Value
+                };
+            }
+            Result<IWebhook> whResult = await _webhookApi.CreateWebhookAsync(channel.ID, WebhookLoggingName, default);
+
+            if (!whResult.IsSuccess)
+            {
+                return new()
+                {
+                    ChannelID = channel.ID,
+                    GuildID   = channel.GuildID.Value
+                };
+            }
+            IWebhook webhook = whResult.Entity;
+            return new()
+            {
+                WebhookID    = webhook.ID,
+                WebhookToken = webhook.Token.Value,
+                ChannelID    = channel.ID,
+                GuildID      = channel.GuildID.Value
+            };
+        }
+    }
+}*/

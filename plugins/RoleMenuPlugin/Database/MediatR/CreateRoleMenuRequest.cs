@@ -1,40 +1,36 @@
-﻿using System.Linq;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-	public static class CreateRoleMenu
-	{
-		public sealed record Request(RoleMenuDto Menu) : IRequest;
-	
-		public sealed class Handler : IRequestHandler<Request>
-		{
-			private readonly RolemenuContext _db;
-			public Handler(RolemenuContext db) => _db = db;
+    public static class CreateRoleMenu
+    {
+        public sealed record Request(RoleMenuModel Menu) : IRequest<Result>;
 
-			public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
-			{
-				var rm = new RoleMenuModel()
-				{
-					MessageId = request.Menu.MessageId,
-					GuildId = request.Menu.GuildId,
-					Options = request.Menu.Options.Select(o => new RoleMenuOptionModel()
-					{
-						RoleId = o.RoleId,
-						GuildId = o.GuildId,
-						Description = o.Description,
-						ComponentId = o.ComponentId,
-						EmojiName = o.EmojiName
-					}).ToList()
-				};
+        public sealed class Handler : IRequestHandler<Request, Result>
+        {
+            private readonly RoleMenuContext _db;
+            public Handler(RoleMenuContext db) => _db = db;
 
-				_db.RoleMenus.Add(rm);
-				await _db.SaveChangesAsync(cancellationToken);
-			
-				return Unit.Value;
-			}
-		}
-	}
+            public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
+            {
+                RoleMenuModel? rm = request.Menu;
+
+                try
+                {
+                    _db.RoleMenus.Add(rm);
+                    await _db.SaveChangesAsync(cancellationToken);
+
+                    return Result.FromSuccess();
+                }
+                catch (Exception e)
+                {
+                    return Result.FromError(new ExceptionError(e, "A role menu with the defined message ID was already present in the database."));
+                }
+            }
+        }
+    }
 }
