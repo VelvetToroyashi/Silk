@@ -167,10 +167,15 @@ public sealed class RoleMenuCommand : CommandGroup
 
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
         
-        var roleMenuMessageResult = await _channels.EditMessageAsync(new(roleMenu.ChannelId), messageID, "**Role Menu!**\n"                               +
-                                                                                                    "Use the button below to select your roles!\n\n" +
-                                                                                                    "Available roles:\n"                             +
-                                                                                                    string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>")));
+        var roleMenuMessageResult = await _channels.EditMessageAsync
+            (
+             new(roleMenu.ChannelId),
+             messageID,
+             "**Role Menu!**\n"                               +
+             "Use the button below to select your roles!\n\n" +
+             "Available roles:\n"                             +
+             string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>"))
+            );
 
         if (!roleMenuMessageResult.IsSuccess)
         {
@@ -224,7 +229,7 @@ public sealed class RoleMenuCommand : CommandGroup
             (
              new CreateRoleMenu.Request(new()
              {
-                 ChannelId = _context.ChannelID.Value,
+                 ChannelId = channelID.Value,
                  MessageId = roleMenuMessageResult.Entity.ID.Value,
                  Options   = roles.Select(r => new RoleMenuOptionModel() { RoleId = r.ID.Value, RoleName = r.Name }).ToList()
              })
