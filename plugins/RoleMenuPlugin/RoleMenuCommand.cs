@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Attributes;
@@ -25,12 +27,15 @@ namespace RoleMenuPlugin;
 /// <summary>
 /// The command module responsible for creating, modifying, and deleting role menus.
 /// </summary>
+[PublicAPI]
 [Group("rolemenu")]
+[RequireDiscordPermission(DiscordPermission.ManageChannels)]
 [Description("Role Menu related commands.\n"                                                                                +
              "V3 has simplified and streamlined this process, using a command-based creation and modification system. \n\n" +
              "**Quick-start guilde**:\n"                                                                                    +
              "`rolemenu create` - Creates a new menu, optionally adding roles to it.\n"                                     +
              "`rolemenu add` - Adds roles to a role menu")]
+
 public sealed class RoleMenuCommand : CommandGroup
 {
     private readonly MessageContext           _context;
@@ -57,16 +62,17 @@ public sealed class RoleMenuCommand : CommandGroup
         _logger   = logger;
         _mediator = mediator;
     }
-
+    
     [Command("create")]
     [RequireDiscordPermission(DiscordPermission.ManageChannels)]
-    [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).")]
+    [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
+                 "It's recommended to create a role menu in a channel user's cannot initially see whilst setting up the role menu.\n"  +
+                 "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users.")]
     public async Task<IResult> CreateAsync
     (
-        [Option('c', "channel")]
         [Description("The channel the role menu will be created in.\n" +
                      "This channel must be a text channel, and must allow sending messages.")]
-        IChannel? channel = null,
+        IChannel? channel,
             
         [Description("The roles to add to the role menu; this is optional, but any roles above my own.\n" +
                      "Any roles above my own and the @everyone role will be discarded!")]
@@ -102,7 +108,7 @@ public sealed class RoleMenuCommand : CommandGroup
                    .Except(new[] { everyoneRole })
                    .ToArray();
 
-        var roleMenuResult = await FinalizeRoleMenuAsync(roles);
+        var roleMenuResult = await CreateRoleMenuMessageAsync(roles);
 
         if (!roleMenuResult.IsSuccess)
         {
@@ -120,7 +126,72 @@ public sealed class RoleMenuCommand : CommandGroup
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
-    private async Task<IResult> FinalizeRoleMenuAsync(IReadOnlyList<IRole> roles)
+    [Command("add")]
+    [Description("Adds a role to the role menu.\n"                                             +
+                 "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
+                 "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users.")]
+    public async Task<IResult> AddAsync
+        (
+            [Description("The ID of the role menu message, provided when creating the role menu.")]
+            Snowflake messageID,
+            
+            [Description("The role to add to the role menu; this is optional, but any roles above my own.\n" +
+                         "Any roles above my own and the @everyone role will be discarded!")]
+            IRole[] roles
+        )
+    {
+        if (!roles.Any())
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.ChannelID, "❌");
+            return await DeleteAfter("You must provide at least one role!", TimeSpan.FromSeconds(5));
+        }
+
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+
+        if (!roleMenuResult.IsSuccess)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.ChannelID, "❌");
+            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+        }
+        
+        var roleResult = await GetRolesAsync();
+
+        if (!roleResult.IsSuccess)
+            return roleResult;
+        
+        var (everyoneRole, allRoles) = roleResult.Entity;
+        
+        var roleMenu = roleMenuResult.Entity;
+        
+        var rolesToAdd = roles.DistinctBy(r => r.ID)
+                              .Where(r => r.Position <= allRoles.Max(sr => sr.Position))
+                              .Except(new[] { everyoneRole })
+                              .ToArray();
+
+        if (!rolesToAdd.Any())
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✔");
+        
+        roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel() { RoleId = r.ID.Value, RoleName = r.Name}));
+
+        await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
+        
+        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✔");
+    }
+
+
+    private async Task<IResult> DeleteAfter(string content, TimeSpan delay)
+    {
+        var sendResult = await _channels.CreateMessageAsync(_context.ChannelID, content);
+        
+        if (!sendResult.IsSuccess)
+            return sendResult;
+        
+        await Task.Delay(delay);
+        
+        return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
+    }
+    
+    private async Task<IResult> CreateRoleMenuMessageAsync(IReadOnlyList<IRole> roles)
     {
         var roleMenuMessageResult = await _channels
            .CreateMessageAsync
@@ -158,29 +229,18 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenu.IsSuccess)
             return roleMenu;
 
-        return Result.FromSuccess();
+        return roleMenuMessageResult;
     }
 
     private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)
     {
-        var rolesResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
+        var roleResult = await GetRolesAsync();
 
-        if (!rolesResult.IsDefined(out var guildRoles))
-            return rolesResult;
-
-        var selfResult = await _users.GetCurrentUserAsync();
-
-        if (!selfResult.IsDefined(out var self))
-            return selfResult;
-
-        var memberResult = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, self.ID);
-
-        if (!memberResult.IsDefined(out var member))
-            return memberResult;
-
-        var everyoneRole = guildRoles.First(r => r.ID == _context.GuildID.Value);
-        var selfRoles    = guildRoles.Where(r => member.Roles.Contains(r.ID)).ToArray();
-
+        if (!roleResult.IsSuccess)
+            return roleResult;
+        
+        var (everyoneRole, selfRoles) = roleResult.Entity;
+        
         var channelPermissionResult = DiscordPermissionSet
            .ComputePermissions(_context.User.ID,
                                everyoneRole,
@@ -194,5 +254,28 @@ public sealed class RoleMenuCommand : CommandGroup
         }
 
         return Result<(IReadOnlyList<IRole>, IRole)>.FromSuccess((selfRoles, everyoneRole));
+    }
+    
+    private async Task<Result<(IRole everyoneRole, IRole[] selfRole)>> GetRolesAsync()
+    {
+        var rolesResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
+
+        if (!rolesResult.IsDefined(out var guildRoles))
+            return Result<(IRole, IRole[])>.FromError(rolesResult.Error!);
+
+        var selfResult = await _users.GetCurrentUserAsync();
+
+        if (!selfResult.IsDefined(out var self))
+            return Result<(IRole, IRole[])>.FromError(selfResult.Error!);
+
+        var memberResult = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, self.ID);
+
+        if (!memberResult.IsDefined(out var member))
+            return Result<(IRole, IRole[])>.FromError(memberResult.Error!);
+
+        var everyoneRole = guildRoles.First(r => r.ID == _context.GuildID.Value);
+        var selfRoles    = guildRoles.Where(r => member.Roles.Contains(r.ID)).ToArray();
+        
+        return Result<(IRole everyoneRole, IRole[] selfRole)>.FromSuccess((everyoneRole, selfRoles));
     }
 }
