@@ -92,7 +92,7 @@ public sealed class RoleMenuCommand : CommandGroup
                    .Except(new[] { everyoneRole })
                    .ToArray();
 
-        var roleMenuResult = await CreateRoleMenuMessageAsync(roles);
+        var roleMenuResult = await CreateRoleMenuMessageAsync(channel.ID, roles);
 
         if (!roleMenuResult.IsSuccess)
         {
@@ -195,12 +195,12 @@ public sealed class RoleMenuCommand : CommandGroup
         return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
     }
     
-    private async Task<IResult> CreateRoleMenuMessageAsync(IReadOnlyList<IRole> roles)
+    private async Task<IResult> CreateRoleMenuMessageAsync(Snowflake channelID, IReadOnlyList<IRole> roles)
     {
         var roleMenuMessageResult = await _channels
            .CreateMessageAsync
                 (
-                   _context.ChannelID,
+                 channelID,
                    !roles.Any()
                        ? "This role menu is being set up, please wait!"
                        : "**Role Menu!**\n"                               +
