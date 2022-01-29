@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>true</ImplicitUsings>
         <RootNamespace>Silk.Dashboard</RootNamespace>
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Humanizer" />
-        <PackageReference Include="MudBlazor" Version="5.2.0" />
-        <PackageReference Include="DSharpPlus.Rest" Version="4.1.0" />
+        <PackageReference Include="MudBlazor" Version="6.0.5" />
+        <PackageReference Include="Remora.Discord.Rest" Version="28.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="BlazorComponentUtilities" Version="1.7.1" />
-        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.18" />
+        <PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.3" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
@@ -20,8 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Silk.Core.Data\Silk.Core.Data.csproj" />
-        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
-        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
+      <ProjectReference Include="..\Silk.Data\Silk.Data.csproj" />
+      <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
     </ItemGroup>
 </Project>

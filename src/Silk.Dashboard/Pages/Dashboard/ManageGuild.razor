@@ -1,11 +1,9 @@
-﻿@page "/Dashboard/ManageGuild/{GuildId:long}"
+﻿@page "/Dashboard/ManageGuild/{GuildId}"
 
 @attribute [Authorize]
 
 @inherits ComponentBase
-
-@using Humanizer
-@using Silk.Core.Data.Entities
+@using Microsoft.AspNetCore.Components
 
 @* Todo: Look into Blazor Redux *@
 @* Todo: Add ToolTips for model Properties on UI elements (use documentation comments) *@
@@ -33,7 +31,8 @@ else
     }
     else
     {
-        <HeaderView ImageUrl="@_guild.IconUrl" Text="@_guild.Name" />
+        @* Todo: Fix Icon URL *@
+        <HeaderView ImageUrl="@_guild.Icon.Value.Value" Text="@_guild.Name.Value" />
     }
 
     <MudDivider Class="my-7" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />
@@ -69,7 +68,9 @@ else
         else
         {
             <MudContainer>
-                <div class="mb-7">
+                @* Todo: Rewrite using greeting entities *@
+                <MudText Class="shades-text text-white" Typo="Typo.h5">Greetings</MudText>
+                @*<div class="mb-7">
                     <MudTooltip Placement="Placement.Bottom" Text="The trigger to greet new members, if any.">
                         <MudText Class="shades-text text-white" Typo="Typo.h5">
                             @LabelFor(nameof(_guildConfig.GreetingOption))
@@ -131,7 +132,7 @@ else
                             Characters Remaining: @RemainingChars
                         </MudText>
                     </div>
-
+                    
                     if (_guildConfig.GreetingOption is GreetingOption.GreetOnRole)
                     {
                         <div class="mt-7">
@@ -145,7 +146,7 @@ else
                                           Variant="Variant.Outlined" HideSpinButtons="true" />
                         </div>
                     }
-                }
+                }*@
             </MudContainer>
         }
     </MudTabPanel>
@@ -174,7 +175,7 @@ else
             <MudContainer>
                 <div class="mb-7">
                     <MudText Class="shades-text text-white" Typo="Typo.h5">Options</MudText>
-                    <MudGrid Spacing="0">
+                    @*<MudGrid Spacing="0">
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.LogMessageChanges"
                                          Label="@LabelFor(nameof(_guildModConfig.LogMessageChanges))" />
@@ -240,12 +241,12 @@ else
                                          Label="@LabelFor(nameof(_guildModConfig.ScanInvites))"/>
                         </MudItem>
                         
-                        @* Todo: Make/Show another section to add the LoggingId and Webhook URL *@
+                        $1$ Todo: Make/Show another section to add the LoggingId and Webhook URL #1#
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.UseWebhookLogging"
                                          Label="@LabelFor(nameof(_guildModConfig.UseWebhookLogging))"/>
                         </MudItem>
-                    </MudGrid>
+                    </MudGrid>*@
                 </div>
 
                 @* Todo: Replace field with Select when grabbing channels from guild *@
@@ -254,11 +255,12 @@ else
                         <MudItem xs="12" sm="6">
                             <MudTooltip Placement="Placement.Bottom" Text="Id of the role to apply when muting members.">
                                 <MudText Class="shades-text text-white" Typo="Typo.h5">
-                                    @LabelFor(nameof(_guildModConfig.MuteRoleId))
+                                    @LabelFor(nameof(_guildModConfig.MuteRoleID))
                                 </MudText>
                             </MudTooltip>
 
-                            <MudTextField T="ulong" @bind-Value="_guildModConfig.MuteRoleId" 
+                            @* Todo: Check that this doesn't crash with input *@
+                            <MudTextField @bind-Value="_guildModConfig.MuteRoleID"
                                           Variant="Variant.Outlined" HideSpinButtons="true" />
                         </MudItem>
 
@@ -289,14 +291,15 @@ else
                         <MudItem xs="12" sm="6">
                             <MudTooltip Placement="Placement.Bottom" Text="The Channel Id to log moderation/message changes to.">
                                 <MudText Class="shades-text text-white" Typo="Typo.h5">
-                                    @LabelFor(nameof(_guildModConfig.LoggingChannel))
+                                    @LabelFor(nameof(_guildModConfig.LoggingConfig))
                                 </MudText>
                             </MudTooltip>
 
                             @* Todo: Fix Numeric field bugginess with large ulong value *@
-                            @* Fix: Use MudTextField T="ulong" *@
-                            <MudTextField T="ulong" @bind-Value="_guildModConfig.LoggingChannel"
-                                          Variant="Variant.Outlined" HideSpinButtons="true" />
+                            @* Todo: - Fix, Use MudTextField T="ulong" *@
+                            @* Todo: Make layout for entity *@
+                            @*<MudTextField T="ulong" @bind-Value="_guildModConfig.LoggingChannel"
+                                          Variant="Variant.Outlined" HideSpinButtons="true" />*@
                         </MudItem>
                     </MudGrid>
                 </div>

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using Humanizer;
+﻿using Humanizer;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
-using Silk.Core.Data.Entities;
-using Silk.Core.Data.MediatR.Guilds;
-using Silk.Core.Data.MediatR.Guilds.Config.Mod;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Rest.Core;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
+using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
+using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard
@@ -24,8 +21,10 @@ namespace Silk.Dashboard.Pages.Dashboard
         [Inject] private NavigationManager NavManager { get; set; }
         [Inject] private DiscordRestClientService RestClientService { get; set; }
 
-        [Parameter] public long GuildId { get; set; }
-        private ulong GuildIdParsed => (ulong)GuildId;
+        [Parameter] public string GuildId { get; set; }
+        private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake) 
+            ? (Snowflake) snowflake 
+            : new();
 
         /* Todo: Make sure that reading/writing doesn't break anything */
         private volatile bool _busy;
@@ -37,7 +36,7 @@ namespace Silk.Dashboard.Pages.Dashboard
         private const string ModConfigTabId = "mod";
 
         private MudTabs _tabContainer;
-        private DiscordGuild _guild;
+        private IPartialGuild _guild;
         private GuildConfigEntity _guildConfig;
         private GuildModConfigEntity _guildModConfig;
 
@@ -47,7 +46,8 @@ namespace Silk.Dashboard.Pages.Dashboard
 
         /* Max Characters for Discord Greeting Text */
         private const int MaxGreetingTextLength = 2000;
-        private long RemainingChars => MaxGreetingTextLength - _guildConfig!.GreetingText.Length;
+        private long RemainingChars => MaxGreetingTextLength - 0; // Todo: Fix Remaining Chars
+        // private long RemainingChars => MaxGreetingTextLength - _guildConfig!.GreetingText.Length;
         private string RemainingCharsClass => RemainingChars < 20 ? "mud-error-text" : "";
 
         private static string LabelFor(string @string) 
@@ -136,37 +136,38 @@ namespace Silk.Dashboard.Pages.Dashboard
         private async Task FetchDiscordGuildFromRestAsync()
         {
             _requestFailed = false;
-            _guild = await RestClientService.GetGuildByIdAndPermissions(GuildIdParsed, Permissions.ManageGuild);
+            _guild = await RestClientService.GetGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
             if (_guild is null) _requestFailed = true;
             await InvokeAsync(StateHasChanged);
         }
 
         private async Task<GuildConfigEntity> FetchGuildConfigAsync()
         {
-            return await Mediator.Send(
-                new GetOrCreateGuildConfigRequest(GuildIdParsed, StringConstants.DefaultCommandPrefix));
+            return await Mediator.Send(new GetOrCreateGuildConfig.Request(GuildIdParsed, 
+                                                                          StringConstants.DefaultCommandPrefix));
         }
 
         private async Task<GuildModConfigEntity> FetchGuildModConfigAsync()
         {
-            return await Mediator.Send(
-                new GetOrCreateGuildModConfigRequest(GuildIdParsed, StringConstants.DefaultCommandPrefix));
+            return await Mediator.Send(new GetOrCreateGuildModConfig.Request(GuildIdParsed, 
+                                                                             StringConstants.DefaultCommandPrefix));
         }
 
         private async Task<GuildConfigEntity> UpdateGuildConfigAsync()
         {
             if (_guildConfig is null) return null;
 
-            var request = new UpdateGuildConfigRequest(GuildIdParsed)
+            /*var request = new UpdateGuildConfig.Request(GuildIdParsed)
             {
                 GreetingOption = _guildConfig.GreetingOption,
                 GreetingChannelId = _guildConfig.GreetingChannel,
                 VerificationRoleId = _guildConfig.VerificationRole,
                 GreetingText = _guildConfig.GreetingText,
                 DisabledCommands = _guildConfig.DisabledCommands,
-            };
+            };*/
 
-            var response = await Mediator.Send(request);
+            GuildConfigEntity response = null; // Todo: Add MediatR Request + Handler
+            // var response = await Mediator.Send(request);
             return response;
         }
 
@@ -174,25 +175,24 @@ namespace Silk.Dashboard.Pages.Dashboard
         {
             if (_guildModConfig is null) return null;
 
-            var request = new UpdateGuildModConfigRequest(GuildIdParsed)
+            var request = new UpdateGuildModConfig.Request(GuildIdParsed)
             {
-                MuteRoleId = _guildModConfig.MuteRoleId,
-                EscalateInfractions = _guildModConfig.AutoEscalateInfractions,
-                LogMessageChanges = _guildModConfig.LogMessageChanges,
-                MaxUserMentions = _guildModConfig.MaxUserMentions,
-                MaxRoleMentions = _guildModConfig.MaxRoleMentions,
-                LoggingChannel = _guildModConfig.LoggingChannel,
-                ScanInvites = _guildModConfig.ScanInvites,
-                BlacklistWords = _guildModConfig.BlacklistWords,
-                BlacklistInvites = _guildModConfig.BlacklistInvites,
-                LogMembersJoining = _guildModConfig.LogMemberJoins,
-                LogMembersLeaving = _guildModConfig.LogMemberLeaves,
+                MuteRoleID          = _guildModConfig.MuteRoleID,
+                // EscalateInfractions = _guildModConfig.Es,
+                LoggingConfig       = _guildModConfig.LoggingConfig,
+                MaxUserMentions     = _guildModConfig.MaxUserMentions,
+                MaxRoleMentions     = _guildModConfig.MaxRoleMentions,
+                ScanInvites         = _guildModConfig.ScanInviteOrigin,
+                // BlacklistWords = _guildModConfig.BlacklistWords,
+                BlacklistInvites = _guildModConfig.WhitelistInvites, // Todo: Rename property?
+                // LogMembersJoining = _guildModConfig.LogMemberJoins,
+                // LogMembersLeaving = _guildModConfig.LogMemberLeaves,
                 UseAggressiveRegex = _guildModConfig.UseAggressiveRegex,
-                WarnOnMatchedInvite = _guildModConfig.WarnOnMatchedInvite,
+                // WarnOnMatchedInvite = _guildModConfig.InfractOnMatchedInvite, // Todo: Check this is wanted?
                 DeleteOnMatchedInvite = _guildModConfig.DeleteMessageOnMatchedInvite,
                 InfractionSteps = _guildModConfig.InfractionSteps,
                 AllowedInvites = _guildModConfig.AllowedInvites,
-                AutoModActions = _guildModConfig.NamedInfractionSteps,
+                // AutoModActions = _guildModConfig.NamedInfractionSteps,
             };
 
             var response = await Mediator.Send(request);

@@ -1,48 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Rest.Core;
 
 namespace Silk.Dashboard.Services
 {
-    public class DiscordRestClientService : IDisposable
+    public class DiscordRestClientService
     {
-        private bool _disposed;
+        public IDiscordRestUserAPI RestClient { get; }
 
-        public DiscordRestClient RestClient { get; }
+        public DiscordRestClientService(IDiscordRestUserAPI restClient) 
+            => RestClient = restClient;
 
-        public DiscordRestClientService(DiscordRestClient restClient) => RestClient = restClient;
+        public async Task<IReadOnlyList<IPartialGuild>> GetAllGuildsAsync()
+            => (await RestClient.GetCurrentUserGuildsAsync(limit: 100)).Entity;
 
-        public async Task<IReadOnlyList<DiscordGuild>> GetAllGuildsAsync()
-            => await RestClient.GetCurrentUserGuildsAsync(100);
+        public async Task<IReadOnlyList<IPartialGuild>> GetGuildsByPermissionAsync(
+            DiscordPermission permissions)
+            => FilterGuildsByPermission(await GetAllGuildsAsync(), permissions);
 
-        public async Task<IReadOnlyList<DiscordGuild>> GetGuildsByPermissionAsync(Permissions perms)
-            => FilterGuildsByPermission(await GetAllGuildsAsync(), perms);
-
-        public IReadOnlyList<DiscordGuild> FilterGuildsByPermission(IReadOnlyList<DiscordGuild> guilds, Permissions perms)
-            => guilds.Where(g => (g.Permissions & perms) != 0).ToList();
-
-        public async Task<DiscordGuild> GetGuildByIdAndPermissions(ulong guildId, Permissions permissions)
+        public IReadOnlyList<IPartialGuild> FilterGuildsByPermission(
+            IReadOnlyList<IPartialGuild> guilds, 
+            DiscordPermission permission)
+            => guilds.Where(g => g.Permissions.IsDefined(out var permissionSet) && 
+                                 permissionSet.HasPermission(permission)).ToList();
+        
+        public async Task<IPartialGuild> GetGuildByIdAndPermissionAsync(
+            Snowflake guildId, 
+            DiscordPermission permission)
         {
-            return (await GetGuildsByPermissionAsync(permissions))
-                .FirstOrDefault(g => g.Id == guildId);
-        }
-
-        public void Dispose() => Dispose(true);
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-            {
-                RestClient?.Dispose();
-            }
-
-            _disposed = true;
+            return (await GetGuildsByPermissionAsync(permission))
+               .FirstOrDefault(g => g.ID == guildId);
         }
     }
 }

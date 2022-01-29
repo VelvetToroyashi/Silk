@@ -1,22 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using AspNet.Security.OAuth.Discord;
-using DSharpPlus;
+﻿using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using MudBlazor.Services;
-using Silk.Core.Data;
+using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Models;
 using Silk.Dashboard.Services;
+using Silk.Data;
 using Silk.Shared.Configuration;
 
 namespace Silk.Dashboard
@@ -63,7 +57,16 @@ namespace Silk.Dashboard
 
             /* Regular DiscordRestClient */
             /* Todo: Handle AccessToken expiration and re-login (singleton won't get updated AccessToken from re-login) */
-            services.AddSingleton(provider =>
+            
+            /* Todo: This uses the BotToken for 'Scheme', so don't care about Discord OAuth2 Token? */
+            services.AddDiscordRest(provider =>
+            {
+                return provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
+                               .Value.Discord.BotToken;
+                // return provider.GetRequiredService<ITokenService>().Token?.AccessToken;
+            });
+            
+            /*services.AddSingleton(provider =>
             {
                 var tokenService = provider.GetRequiredService<ITokenService>();
                 var restClient = new DiscordRestClient(new DiscordConfiguration
@@ -74,7 +77,7 @@ namespace Silk.Dashboard
 
                 restClient.InitializeAsync().GetAwaiter().GetResult();
                 return restClient;
-            });
+            });*/
 
             services.AddScoped<DiscordRestClientService>();
 

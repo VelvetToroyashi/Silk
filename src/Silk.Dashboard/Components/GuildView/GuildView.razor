@@ -2,8 +2,8 @@
 
 @inherits DashboardComponentBase
 
-@using DSharpPlus.Entities
 @using BlazorComponentUtilities
+@using Remora.Discord.API.Abstractions.Objects
 
 <MudCard Class="@ComponentClasses" 
          Style="@ComponentStyles" 
@@ -23,10 +23,10 @@
 @code {
 
     [Parameter]
-    public DiscordGuild Guild { get; set; }
+    public IPartialGuild Guild { get; set; }
 
     [Parameter]
-    public EventCallback<DiscordGuild> OnClick { get; set; }
+    public EventCallback<IPartialGuild> OnClick { get; set; }
 
     protected override string ComponentStyles
         => GuildViewStyleBuilder.Build();
@@ -36,10 +36,11 @@
             .AddStyle("cursor", "pointer")
             .AddStyle(base.ComponentStyles);
 
-    private bool HasIcon => !string.IsNullOrEmpty(Guild.IconUrl);
+    /* Todo: Fix - Properly retrieve icon URL */
+    private bool HasIcon => !string.IsNullOrEmpty(Guild.Icon.Value.Value);
 
     private string GuildIconUrl => HasIcon 
-        ? $"{Guild.IconUrl}?size=256" 
+        ? $"{Guild.Icon.Value.Value}?size=256" 
         : "https://img.icons8.com/ios-filled/100/000000/no-image.png";
 
     private async Task HandleOnClickAsync() => await OnClick.InvokeAsync(Guild);

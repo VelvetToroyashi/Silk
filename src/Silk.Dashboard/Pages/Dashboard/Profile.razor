@@ -30,7 +30,7 @@ else
                     <MudGrid Spacing="4" Justify="Justify.Center">
                         <CollectionView Data="@_ownedGuilds">
                             <ItemTemplate>
-                                <MudItem @key="@context.Id">
+                                <MudItem @key="@context.ID">
                                     <GuildView Guild="context"
                                                OnClick="_ => HandleGuildNavigation(context)"/>
                                 </MudItem>
@@ -61,7 +61,7 @@ else
                         <MudGrid Spacing="4" Justify="Justify.Center">
                             <CollectionView Data="@_joinedGuilds">
                                 <ItemTemplate>
-                                    <MudItem @key="@context.Id">
+                                    <MudItem @key="@context.ID">
                                         <GuildView Guild="context"
                                                    OnClick="_ => HandleGuildNavigation(context)"/>
                                     </MudItem>
