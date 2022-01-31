@@ -28,6 +28,7 @@ namespace RoleMenuPlugin;
 /// </summary>
 [PublicAPI]
 [Group("rolemenu")]
+[RequireContext(ChannelContext.Guild)]
 [RequireDiscordPermission(DiscordPermission.ManageChannels)]
 [Description("Role Menu related commands.\n" +
              "V3 has simplified and streamlined this process, using a command-based creation and modification system. \n\n" +
@@ -62,7 +63,6 @@ public sealed class RoleMenuCommand : CommandGroup
     }
 
     [Command("create")]
-    [RequireDiscordPermission(DiscordPermission.ManageChannels)]
     [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
                  "It's recommended to create a role menu in a channel users cannot view whilst setting up the role menu.\n" +
                  "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users!")]
