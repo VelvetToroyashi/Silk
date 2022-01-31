@@ -64,8 +64,8 @@ public sealed class RoleMenuCommand : CommandGroup
     [Command("create")]
     [RequireDiscordPermission(DiscordPermission.ManageChannels)]
     [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
-                 "It's recommended to create a role menu in a channel user's cannot initially see whilst setting up the role menu.\n" +
-                 "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users.")]
+                 "It's recommended to create a role menu in a channel users cannot view whilst setting up the role menu.\n" +
+                 "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users!")]
     public async Task<IResult> CreateAsync
     (
         [Description("The channel the role menu will be created in.\n" +
