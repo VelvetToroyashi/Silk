@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -11,7 +12,7 @@ namespace RoleMenuPlugin.Database.MediatR
 {
     public static class UpdateRoleMenu
     {
-        public record Request(Snowflake RoleMenuID, List<RoleMenuOptionModel> Options = null) : IRequest<Result>;
+        public record Request(Snowflake RoleMenuID, IEnumerable<RoleMenuOptionModel> Options) : IRequest<Result>;
 
         internal class Handler : IRequestHandler<Request, Result>
         {
@@ -21,15 +22,15 @@ namespace RoleMenuPlugin.Database.MediatR
 
             public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
             {
-                RoleMenuModel? roleMenu = await _db
-                                               .RoleMenus
-                                               .Include(r => r.Options)
-                                               .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
+                var roleMenu = await _db
+                                    .RoleMenus
+                                    .Include(r => r.Options)
+                                    .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
 
                 if (roleMenu is null)
                     return Result.FromError(new NotFoundError("RoleMenu not found"));
 
-                if (request.Options.Count is < 1 or > 25)
+                if (request.Options.Count() is < 1 or > 25)
                     return Result.FromError(new ArgumentOutOfRangeError(nameof(request.Options), "Options must be between 1 and 25"));
 
                 roleMenu.Options.Clear();
