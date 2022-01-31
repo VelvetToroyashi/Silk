@@ -154,7 +154,7 @@ public sealed class RoleMenuCommand : CommandGroup
                         .ToArray();
 
         if (!rolesToAdd.Any())
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✔");
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
 
         if (rolesToAdd.Length + roleMenu.Options.Count > 25)
         {
