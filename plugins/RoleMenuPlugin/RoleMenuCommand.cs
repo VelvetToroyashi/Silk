@@ -134,8 +134,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenuResult.IsSuccess)
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.ChannelID, "❌");
-            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?",
-                                     TimeSpan.FromSeconds(5));
+            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
         }
 
         var roleResult = await GetRolesAsync();
@@ -147,10 +146,13 @@ public sealed class RoleMenuCommand : CommandGroup
 
         var roleMenu = roleMenuResult.Entity;
 
+        var duplicateRoles = roles.Where(r => roleMenu.Options.Select(rm => rm.RoleId).Contains(r.ID.Value));
+        
         var rolesToAdd = roles
                         .DistinctBy(r => r.ID)
                         .Where(r => r.Position <= allRoles.Max(sr => sr.Position))
                         .Except(new[] {everyoneRole})
+                        .Except(duplicateRoles)
                         .ToArray();
 
         if (!rolesToAdd.Any())
@@ -167,8 +169,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
         roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel()
                                                         {RoleId = r.ID.Value, RoleName = r.Name}));
-
-
+        
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
 
         var roleMenuMessageResult = await _channels.EditMessageAsync
