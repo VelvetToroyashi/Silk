@@ -23,6 +23,7 @@ namespace RoleMenuPlugin.Database.MediatR
             public async Task<Result<RoleMenuModel>> Handle(Request request, CancellationToken cancellationToken)
             {
                 RoleMenuModel? rolemenu = await _db.RoleMenus
+                                                   .AsNoTracking()
                                                    .Include(r => r.Options)
                                                    .FirstOrDefaultAsync(r => r.MessageId == request.MessageId, cancellationToken);
                 
