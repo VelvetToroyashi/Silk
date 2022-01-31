@@ -37,21 +37,22 @@ namespace RoleMenuPlugin;
              "`rolemenu add` - Adds roles to a role menu")]
 public sealed class RoleMenuCommand : CommandGroup
 {
+    private readonly IMediator                _mediator;
     private readonly MessageContext           _context;
     private readonly IDiscordRestUserAPI      _users;
-    private readonly IDiscordRestChannelAPI   _channels;
     private readonly IDiscordRestGuildAPI     _guilds;
+    private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<RoleMenuCommand> _logger;
-    private readonly IMediator                _mediator;
+   
 
     public RoleMenuCommand
     (
+        IMediator                mediator,
         MessageContext           context,
         IDiscordRestUserAPI      users,
-        IDiscordRestChannelAPI   channels,
         IDiscordRestGuildAPI     guilds,
-        ILogger<RoleMenuCommand> logger,
-        IMediator                mediator
+        IDiscordRestChannelAPI   channels,
+        ILogger<RoleMenuCommand> logger
     )
     {
         _context  = context;
