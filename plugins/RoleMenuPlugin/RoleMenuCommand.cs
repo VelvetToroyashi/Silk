@@ -136,7 +136,7 @@ public sealed class RoleMenuCommand : CommandGroup
     {
         if (!roles.Any())
         {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.ChannelID, "❌");
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             return await DeleteAfter("You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
 
@@ -144,7 +144,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
         if (!roleMenuResult.IsSuccess)
         {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.ChannelID, "❌");
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
         }
 
@@ -215,6 +215,84 @@ public sealed class RoleMenuCommand : CommandGroup
         await Task.Delay(delay);
 
         return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
+    }
+    
+    [Command("remove")]
+    [Description("Removes one or more roles from the role menu.")]
+    public Task<IResult> RemoveAsync
+    (
+        [Description("A link to the role menu message. This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.")]
+        IMessage message,
+        
+        [Description("The roles to remove, roles can be removed by mention (@Role) or by ID (123456789).\n" +
+                     "You must have at least one role in the role menu, however.")]
+        IRole[] roles
+    )
+    => RemoveAsync(message.ID, roles);
+
+    [Command("remove")]
+    [Description("Removes one or more roles from the role menu.")]
+    public async Task<IResult> RemoveAsync
+    (
+        [Description("The ID of the role menu message.")]
+        Snowflake messageID,
+
+        [Description("The roles to remove, roles can be removed by mention (@Role) or by ID (123456789).\n" +
+                     "You must have at least one role in the role menu, however.")]
+        IRole[] roles
+    )
+    {
+
+        if (!roles.Any())
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter("You must provide at least one role!", TimeSpan.FromSeconds(5));
+        }
+        
+        
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+
+        if (!roleMenuResult.IsSuccess)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+        }
+        
+        var roleMenu = roleMenuResult.Entity;
+
+        var roleOptions = roleMenu.Options;
+
+        var newRoles = roleOptions.ExceptBy(roles.Select(r => r.ID.Value), o => o.RoleId).ToArray();
+        
+        if (!newRoles.Any())
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            
+            return await DeleteAfter("It appears you're trying to remove all the roles from the role menu. " +
+                                     "\n\nDid you mean to call `rolemenu delete` instead?", TimeSpan.FromSeconds(5));
+        }
+        
+        await _mediator.Send(new UpdateRoleMenu.Request(messageID, newRoles));
+        
+        var roleMenuMessageResult = await _channels.EditMessageAsync
+            (
+             new(roleMenu.ChannelId),
+             messageID,
+             "**Role Menu!**\n"                               +
+             "Use the button below to select your roles!\n\n" +
+             "Available roles:\n"                             +
+             string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>"))
+            );
+
+        if (!roleMenuMessageResult.IsSuccess)
+        {
+            _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            
+            return await DeleteAfter("I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
+        }
+        
+        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
     private async Task<IResult> CreateRoleMenuMessageAsync(Snowflake channelID, IReadOnlyList<IRole> roles)
