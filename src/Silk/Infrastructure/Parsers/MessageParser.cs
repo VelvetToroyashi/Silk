@@ -18,7 +18,7 @@ public class MessageParser : AbstractTypeParser<IMessage>
     private readonly ICommandContext _context;
     private readonly IDiscordRestChannelAPI _channels;
     
-    private readonly Regex _messageLinkRegex = new Regex(@"^https?://(?:canary|ptb)\.discord(?:app)?.com/channels/\d{20}/(<CHANNEL>\d{20}/)(<MESSAGE>\d{20}$)");
+    private readonly Regex _messageLinkRegex = new Regex(@"^https?://(?:(?:canary|ptb)\.)?discord(?:app)?.com/channels/\d+/(<CHANNEL>\d+/)(<MESSAGE>\d+)$");
     
     public MessageParser(ICommandContext context, IDiscordRestChannelAPI channels)
     {
