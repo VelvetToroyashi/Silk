@@ -43,8 +43,7 @@ public sealed class RoleMenuCommand : CommandGroup
     private readonly IDiscordRestGuildAPI     _guilds;
     private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<RoleMenuCommand> _logger;
-   
-
+    
     public RoleMenuCommand
     (
         IMediator                mediator,
@@ -224,7 +223,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  {
                      new ActionRowComponent(new[]
                      {
-                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: "rm-button")
+                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix)
                      })
                  }
                 );
