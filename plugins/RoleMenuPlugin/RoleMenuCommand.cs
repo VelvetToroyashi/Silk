@@ -110,16 +110,27 @@ public sealed class RoleMenuCommand : CommandGroup
     }
 
     [Command("add")]
-    [Description("Adds a role to the role menu.\n"                                             +
-                 "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
-                 "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users.")]
+    [Description("Adds one or more role(s) to the role menu.\n" +
+                 "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n")]
+    public Task<IResult> AddAsync
+        (
+            [Description("A link to the role menu message. This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.")]
+            IMessage message,
+            
+            [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
+            IRole[] roles
+        )
+        => AddAsync(message.ID, roles);
+    
+    [Command("add")]
+    [Description("Adds one or more role(s) to the role menu.\n"                                             +
+                 "Roles can be added at this stage via mentions (@Role) or IDs (123456789)")]
     public async Task<IResult> AddAsync
     (
         [Description("The ID of the role menu message, provided when creating the role menu.")]
         Snowflake messageID,
         
-        [Description("The role to add to the role menu; this is optional, but any roles above my own.\n" +
-                     "Any roles above my own and the @everyone role will be discarded!")]
+        [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
         IRole[] roles
     )
     {
