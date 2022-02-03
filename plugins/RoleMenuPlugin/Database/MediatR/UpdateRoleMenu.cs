@@ -24,6 +24,7 @@ namespace RoleMenuPlugin.Database.MediatR
             {
                 var roleMenu = await _db
                                     .RoleMenus
+                                    .AsNoTracking()
                                     .Include(r => r.Options)
                                     .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
 
@@ -36,15 +37,15 @@ namespace RoleMenuPlugin.Database.MediatR
                 roleMenu.Options.Clear();
                 roleMenu.Options.AddRange(request.Options);
 
+                _db.Update(roleMenu);
+                
                 var        saved = 0;
                 Exception? ex    = null;
-
-                _db.RoleMenus.Update(roleMenu);
-
+                
                 try { saved = await _db.SaveChangesAsync(cancellationToken); }
                 catch (Exception e) { ex = e; }
 
-                return saved is 1
+                return saved > 0
                     ? Result.FromSuccess()
                     : Result.FromError(new ExceptionError(ex!, "Unable to update RoleMenu"));
             }

@@ -281,7 +281,7 @@ public sealed class RoleMenuCommand : CommandGroup
              "**Role Menu!**\n"                               +
              "Use the button below to select your roles!\n\n" +
              "Available roles:\n"                             +
-             string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>"))
+             string.Join('\n', newRoles.Select(r => $"<@&{r.RoleId}>"))
             );
 
         if (!roleMenuMessageResult.IsSuccess)
@@ -336,6 +336,13 @@ public sealed class RoleMenuCommand : CommandGroup
 
         return roleMenuMessageResult;
     }
+
+    public Task<IResult> DeleteAsync
+        (
+            IMessage message,
+
+            IRole[] roles
+        ) => Task.FromResult((IResult)Result.FromSuccess());
 
     private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)
     {
