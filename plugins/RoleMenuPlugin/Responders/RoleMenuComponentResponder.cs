@@ -24,7 +24,7 @@ public class RoleMenuComponentResponder : IResponder<IInteractionCreate>
             !data.CustomID.IsDefined(out var customID))
             throw new InvalidOperationException("Component interaction without data?");
         
-        if (!customID.StartsWith(RoleMenuService.RoleMenuButtonPrefix) || !customID.StartsWith(RoleMenuService.RoleMenuDropdownPrefix))
+        if (!customID.Equals(RoleMenuService.RoleMenuButtonPrefix) && !customID.Equals(RoleMenuService.RoleMenuDropdownPrefix))
             return Result.FromSuccess();
 
         return type switch
