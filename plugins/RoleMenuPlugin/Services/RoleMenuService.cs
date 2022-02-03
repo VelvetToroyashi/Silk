@@ -18,6 +18,8 @@ public class RoleMenuService
 {
     public const string RoleMenuButtonPrefix = "rm-menu-initiator";
     
+    public const string RoleMenuDropdownPrefix = "rm-menu-selector";
+    
     private readonly IMediator                  _mediator;
     private readonly IDiscordRestUserAPI        _users;
     private readonly IDiscordRestGuildAPI       _guilds;
@@ -60,6 +62,18 @@ public class RoleMenuService
         }
         else
         {
+            if (!rolemenu.Options.Any())
+            {
+                var followupResult = await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
+                                                                                    interaction.Token,
+                                                                                    "This role menu is being set up! Please wait until options have been added.",
+                                                                                    flags: MessageFlags.Ephemeral);
+                
+                return followupResult.IsSuccess
+                    ? Result.FromSuccess() 
+                    : Result.FromError(followupResult);
+            }
+
             var guildRolesResult = await _guilds.GetGuildRolesAsync(interaction.GuildID.Value);
             
             if (!guildRolesResult.IsDefined(out var guildRoles))
@@ -70,7 +84,7 @@ public class RoleMenuService
 
             var dropdown = new SelectMenuComponent
                 (
-                   "silk-rolemenu",
+                   RoleMenuDropdownPrefix,
                    rolemenu
                       .Options
                       .Select(o =>

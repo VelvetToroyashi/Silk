@@ -24,12 +24,14 @@ public class RoleMenuComponentResponder : IResponder<IInteractionCreate>
             !data.CustomID.IsDefined(out var customID))
             throw new InvalidOperationException("Component interaction without data?");
         
-        if (!customID.StartsWith(RoleMenuService.RoleMenuButtonPrefix))
+        if (!customID.StartsWith(RoleMenuService.RoleMenuButtonPrefix) || !customID.StartsWith(RoleMenuService.RoleMenuDropdownPrefix))
             return Result.FromSuccess();
 
-        if (type is ComponentType.Button)
-            return await _roleMenus.HandleButtonAsync(gatewayEvent);
-        
-        return Result.FromSuccess();
+        return type switch
+        {
+            ComponentType.Button     => await _roleMenus.HandleButtonAsync(gatewayEvent),
+            ComponentType.SelectMenu => await _roleMenus.HandleDropdownAsync(gatewayEvent),
+            _                        => Result.FromSuccess()
+        };
     }
 }
