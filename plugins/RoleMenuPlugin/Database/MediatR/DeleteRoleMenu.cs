@@ -6,9 +6,9 @@ using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
 {
-    public static class DeleteRoleMenuRequest
+    public static class DeleteRoleMenu
     {
-        public record Request(RoleMenuModel RoleMenu) : IRequest<Result>;
+        public record Request(ulong RoleMenuId) : IRequest<Result>;
 
         internal class Handler : IRequestHandler<Request, Result>
         {
@@ -18,7 +18,7 @@ namespace RoleMenuPlugin.Database.MediatR
 
             public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
             {
-                RoleMenuModel? entity = await _context.RoleMenus.FirstOrDefaultAsync(r => r.MessageId == request.RoleMenu.MessageId, cancellationToken);
+                var entity = await _context.RoleMenus.FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuId, cancellationToken);
 
                 if (entity == null)
                     return Result.FromError(new NotFoundError());

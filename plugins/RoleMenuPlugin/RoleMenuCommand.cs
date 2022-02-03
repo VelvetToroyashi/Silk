@@ -342,11 +342,47 @@ public sealed class RoleMenuCommand : CommandGroup
 
     public Task<IResult> DeleteAsync
         (
+            [Description("A link to the role menu you'd like to delete.")]
             IMessage message,
-
-            IRole[] roles
+            
+            [Option("confirm")]
+            [Description("Ensures you don't accidentally delete a role menu!")]
+            bool confirm = false
         ) => Task.FromResult((IResult)Result.FromSuccess());
 
+    public async Task<IResult> DeleteAsync
+        (
+            [Description("The ID of the role menu you'd like to delete.")]
+            Snowflake messageID,
+
+            [Option("confirm")] [Description("Ensures you don't accidentally delete a role menu!")]
+            bool confirm = false
+        )
+    {
+        if (!confirm)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            
+            return await DeleteAfter("To ensure rolemenus aren't accidentally deleted, you must confirm this action by adding `--confirm` to the end of your command.", TimeSpan.FromSeconds(10));
+        }
+
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+        
+        var deleteResult   = await _mediator.Send(new DeleteRoleMenu.Request(messageID.Value));
+
+        if (!deleteResult.IsSuccess)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            
+            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(10));
+        }
+        
+        if (roleMenuResult.IsSuccess)
+            await _channels.DeleteMessageAsync(new(roleMenuResult.Entity.ChannelId), new(roleMenuResult.Entity.MessageId));
+        
+        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+    }
+    
     private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)
     {
         var roleResult = await GetRolesAsync();
