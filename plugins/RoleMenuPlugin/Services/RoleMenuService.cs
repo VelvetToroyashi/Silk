@@ -92,14 +92,7 @@ public class RoleMenuService
                            var roleId   = o.RoleId.ToString();
                            var roleName = guildRoles.FirstOrDefault(r => r.ID.Value == o.RoleId)?.Name ?? "Unknown Role";
                            
-                           return new SelectOption
-                               (
-                                Label: roleName,
-                                Value: roleId,
-                                Description: default,
-                                Emoji: GetRoleEmoji(),
-                                IsDefault: HasRoleMenuRole()
-                               );
+                           return new SelectOption(roleName, roleId, default, GetRoleEmoji(), HasRoleMenuRole());
 
                            bool HasRoleMenuRole() => member.Roles.Any(r => r.Value == o.RoleId);
                            
@@ -185,14 +178,22 @@ public class RoleMenuService
 
         if (roleResult.IsSuccess)
         {
-            await _interactions.EditOriginalInteractionResponseAsync(
-                                                                     interaction.ApplicationID,
-                                                                     interaction.Token,
-                                                                     "Done! Enjoy your new roles!"
-                                                                    );
+            await _interactions.EditOriginalInteractionResponseAsync
+                (
+                 interaction.ApplicationID,
+                 interaction.Token,
+                 "Done! Enjoy your new roles!",
+                 components: new[] {new ActionRowComponent(new [] { GetDropdownFromMessage(message) })}
+                );
+            
             return Result.FromSuccess();
         }
 
+        return await DisplayRoleMenuErrorAsync(interaction, guildID, roleMenuRoleIDs, roleResult);
+    }
+
+    private async Task<Result> DisplayRoleMenuErrorAsync(IInteraction interaction, Snowflake guildID, Snowflake[] roleMenuRoleIDs, Result roleResult)
+    {
         var selfResult = await _users.GetCurrentUserAsync();
 
         if (!selfResult.IsSuccess)
@@ -218,10 +219,10 @@ public class RoleMenuService
                .AppendLine("Please forward this information to a server staff member so they can resolve the issue!");
 
 
-        var loggedMissingRole = false; 
+        var loggedMissingRole = false;
         var loggedHierarchy   = false;
-            
-            
+
+
         foreach (var role in roleMenuRoleIDs)
         {
             if (guildRoles.FirstOrDefault(r => r.ID == role) is not { } guildRole)
@@ -245,13 +246,12 @@ public class RoleMenuService
                     _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
                 }
             }
-                    
         }
 
         await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
                                                        interaction.Token,
                                                        content.ToString());
-            
+
         return Result.FromError(roleResult.Error!);
     }
 
