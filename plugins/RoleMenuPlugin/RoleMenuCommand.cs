@@ -62,7 +62,7 @@ public sealed class RoleMenuCommand : CommandGroup
         _mediator = mediator;
     }
 
-    [Command("create")]
+    [Command("create", "c")]
     [Description("Initiates a role menu creation session. Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n" +
                  "It's recommended to create a role menu in a channel users cannot view whilst setting up the role menu.\n" +
                  "The role menu message is sent immediately and updated as you update your role menu, which may confuse vigilant users!")]
@@ -109,7 +109,7 @@ public sealed class RoleMenuCommand : CommandGroup
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
-    [Command("add")]
+    [Command("add", "a")]
     [Description("Adds one or more role(s) to the role menu.\n" +
                  "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n")]
     public Task<IResult> AddAsync
@@ -122,7 +122,7 @@ public sealed class RoleMenuCommand : CommandGroup
         )
         => AddAsync(message.ID, roles);
     
-    [Command("add")]
+    [Command("add", "a")]
     [Description("Adds one or more role(s) to the role menu.\n"                                             +
                  "Roles can be added at this stage via mentions (@Role) or IDs (123456789)")]
     public async Task<IResult> AddAsync
@@ -205,19 +205,9 @@ public sealed class RoleMenuCommand : CommandGroup
     }
 
 
-    private async Task<IResult> DeleteAfter(string content, TimeSpan delay)
-    {
-        var sendResult = await _channels.CreateMessageAsync(_context.ChannelID, content);
 
-        if (!sendResult.IsSuccess)
-            return sendResult;
-
-        await Task.Delay(delay);
-
-        return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
-    }
     
-    [Command("remove")]
+    [Command("remove", "rm", "r")]
     [Description("Removes one or more roles from the role menu.")]
     public Task<IResult> RemoveAsync
     (
@@ -230,7 +220,7 @@ public sealed class RoleMenuCommand : CommandGroup
     )
     => RemoveAsync(message.ID, roles);
 
-    [Command("remove")]
+    [Command("remove", "rm", "r")]
     [Description("Removes one or more roles from the role menu.")]
     public async Task<IResult> RemoveAsync
     (
@@ -295,6 +285,19 @@ public sealed class RoleMenuCommand : CommandGroup
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
+    
+    private async Task<IResult> DeleteAfter(string content, TimeSpan delay)
+    {
+        var sendResult = await _channels.CreateMessageAsync(_context.ChannelID, content);
+
+        if (!sendResult.IsSuccess)
+            return sendResult;
+
+        await Task.Delay(delay);
+
+        return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
+    }
+    
     private async Task<IResult> CreateRoleMenuMessageAsync(Snowflake channelID, IReadOnlyList<IRole> roles)
     {
         var roleMenuMessageResult = await _channels
