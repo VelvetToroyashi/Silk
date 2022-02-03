@@ -157,113 +157,111 @@ public class RoleMenuService
 
         if (!data.ComponentType.IsDefined(out var type) || type is not ComponentType.SelectMenu)
             return Result.FromError(new InvalidOperationError($"Expected a select menu but got {type}."));
-
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(message.ID.Value));
-
-        if (!roleMenuResult.IsDefined(out var roleMenu))
-        {
-            await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
-                                                           interaction.Token,
-                                                           "The role menu you selected was not found! This is likely a bug in Silk!, and should be reported.\n" +
-                                                           "You can join the support server [here](https://discord.gg/XsHcuvUWda) to report this.\n\n"          +
-                                                           "In your report, feel free to include the information below:\n"                                      +
-                                                           "Role deleted between invocation and action.\n"                                                      +
-                                                           $"Guild ID: {interaction.GuildID.Value}\n"                                                           +
-                                                           $"Channel ID: {interaction.ChannelID.Value}\n"                                                       +
-                                                           $"Message ID: {interaction.Message.Value.ID.Value}\n");
-
-            //TODO: Log
-            return Result.FromError(new NotFoundError("Role menu was defined but could not be found at the time of actioning."));
-        }
-        else
-        {
-            if (!data.Values.IsDefined(out var values))
+        
+        if (!data.Values.IsDefined(out var values))
                 values ??= Array.Empty<string>();
+        
+        var roleMenuRoleIDs = 
+            GetDropdownFromMessage(message)
+               .Options
+               .Select(r => Snowflake.TryParse(r.Value, out var ID)
+                           ? ID.Value 
+                           : default
+                      )
+               .ToArray();
+        
+        var parsedRoleIDs = values.Select(ulong.Parse).Select(ID => new Snowflake(ID));
 
-            var roleMenuRoleIDs = roleMenu.Options.Select(r => new Snowflake(r.RoleId));
-            var parsedRoleIDs   = values.Select(ulong.Parse).Select(ID => new Snowflake(ID));
+        var newUserRoles = member.Roles
+                                 .Except(roleMenuRoleIDs)
+                                 .Union(parsedRoleIDs)
+                                 .ToArray();
 
-            var newUserRoles = member.Roles
-                                     .Except(roleMenuRoleIDs)
-                                     .Union(parsedRoleIDs)
-                                     .ToArray();
+        var roleResult = await _guilds.ModifyGuildMemberAsync(
+                                                              interaction.GuildID.Value,
+                                                              user.ID,
+                                                              roles: newUserRoles
+                                                             );
 
-            var roleResult = await _guilds.ModifyGuildMemberAsync(
-                                                                  interaction.GuildID.Value,
-                                                                  user.ID,
-                                                                  roles: newUserRoles
-                                                                 );
-
-            if (roleResult.IsSuccess)
-            {
-                await _interactions.EditOriginalInteractionResponseAsync(
-                                                                         interaction.ApplicationID,
-                                                                         interaction.Token,
-                                                                         "Done! Enjoy your new roles!"
-                                                                        );
-                return Result.FromSuccess();
-            }
-
-            var selfResult = await _users.GetCurrentUserAsync();
-
-            if (!selfResult.IsSuccess)
-                return Result.FromError(selfResult.Error);
-
-            var currentMemberResult = await _guilds.GetGuildMemberAsync(guildID, selfResult.Entity.ID);
-
-            if (!currentMemberResult.IsDefined(out var selfMember))
-                return Result.FromError(currentMemberResult.Error!);
-
-            var guildRolesResult = await _guilds.GetGuildRolesAsync(guildID);
-
-            if (!guildRolesResult.IsDefined(out var guildRoles))
-                return Result.FromError(guildRolesResult.Error!);
-
-            var highestSelfRole = guildRoles
-                                 .OrderByDescending(r => r.Position)
-                                 .Last(r => selfMember.Roles.Contains(r.ID));
-
-            var content = new StringBuilder();
-
-            content.AppendLine("There was an error assigning one or more of the roles you selected.")
-                   .AppendLine("Please forward this information to a server staff member so they can resolve the issue!");
-
-
-            var loggedMissingRole = false; 
-            var loggedHierarchy = false;
-            
-            
-            foreach (var role in roleMenuRoleIDs)
-            {
-                if (guildRoles.FirstOrDefault(r => r.ID == role) is not { } guildRole)
-                {
-                    content.AppendLine($"Role {role} has since been removed from the server.");
-
-                    if (!loggedMissingRole)
-                    {
-                        loggedMissingRole = true;
-                        _logger.LogError("One or more roles has gone missing in {GuildID}", guildID);
-                    }
-                }
-
-                else if (guildRole.Position >= highestSelfRole.Position)
-                {
-                    content.AppendLine($"<@&{role}> has been moved above my highest role (<@&{highestSelfRole.ID}>); I cannot (un-)assign it.");
-
-                    if (!loggedHierarchy)
-                    {
-                        loggedHierarchy = true;
-                        _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
-                    }
-                }
-                    
-            }
-
-            await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
-                                                           interaction.Token,
-                                                           content.ToString());
-            
-            return Result.FromError(roleResult.Error!);
+        if (roleResult.IsSuccess)
+        {
+            await _interactions.EditOriginalInteractionResponseAsync(
+                                                                     interaction.ApplicationID,
+                                                                     interaction.Token,
+                                                                     "Done! Enjoy your new roles!"
+                                                                    );
+            return Result.FromSuccess();
         }
+
+        var selfResult = await _users.GetCurrentUserAsync();
+
+        if (!selfResult.IsSuccess)
+            return Result.FromError(selfResult.Error);
+
+        var currentMemberResult = await _guilds.GetGuildMemberAsync(guildID, selfResult.Entity.ID);
+
+        if (!currentMemberResult.IsDefined(out var selfMember))
+            return Result.FromError(currentMemberResult.Error!);
+
+        var guildRolesResult = await _guilds.GetGuildRolesAsync(guildID);
+
+        if (!guildRolesResult.IsDefined(out var guildRoles))
+            return Result.FromError(guildRolesResult.Error!);
+
+        var highestSelfRole = guildRoles
+                             .OrderByDescending(r => r.Position)
+                             .Last(r => selfMember.Roles.Contains(r.ID));
+
+        var content = new StringBuilder();
+
+        content.AppendLine("There was an error assigning one or more of the roles you selected.")
+               .AppendLine("Please forward this information to a server staff member so they can resolve the issue!");
+
+
+        var loggedMissingRole = false; 
+        var loggedHierarchy   = false;
+            
+            
+        foreach (var role in roleMenuRoleIDs)
+        {
+            if (guildRoles.FirstOrDefault(r => r.ID == role) is not { } guildRole)
+            {
+                content.AppendLine($"Role {role} has since been removed from the server.");
+
+                if (!loggedMissingRole)
+                {
+                    loggedMissingRole = true;
+                    _logger.LogError("One or more roles has gone missing in {GuildID}", guildID);
+                }
+            }
+
+            else if (guildRole.Position >= highestSelfRole.Position)
+            {
+                content.AppendLine($"<@&{role}> has been moved above my highest role (<@&{highestSelfRole.ID}>); I cannot (un-)assign it.");
+
+                if (!loggedHierarchy)
+                {
+                    loggedHierarchy = true;
+                    _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
+                }
+            }
+                    
+        }
+
+        await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
+                                                       interaction.Token,
+                                                       content.ToString());
+            
+        return Result.FromError(roleResult.Error!);
+    }
+
+
+    public ISelectMenuComponent GetDropdownFromMessage(IMessage message)
+    {
+        var actionRow = message.Components.Value[0] as IActionRowComponent;
+        
+        var selectMenu = actionRow!.Components[0] as ISelectMenuComponent;
+        
+        return selectMenu;
     }
 }
