@@ -189,10 +189,10 @@ public class RoleMenuService
                  interaction.ApplicationID,
                  interaction.Token,
                  "Done! Enjoy your new roles!",
-                 components: new[] {new ActionRowComponent(new []
+                 components: new[]
                  {
-                     new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0, 25)
-                 })}
+                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0, 25) } )
+                 }
                 );
             
             return Result.FromSuccess();
