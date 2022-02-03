@@ -71,7 +71,7 @@ public sealed class RoleMenuCommand : CommandGroup
         [Description("The channel the role menu will be created in.\n" +
                      "This channel must be a text channel, and must allow sending messages.")]
         IChannel channel,
-        [Description("The roles to add to the role menu; this is optional, but any roles above my own.\n" +
+        [Description("The roles to add to the role menu. This is optional!\n" +
                      "Any roles above my own and the @everyone role will be discarded!")]
         IRole[]? roles = null
     )
