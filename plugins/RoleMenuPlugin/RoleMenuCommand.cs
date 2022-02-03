@@ -268,8 +268,8 @@ public sealed class RoleMenuCommand : CommandGroup
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("It appears you're trying to remove all the roles from the role menu. " +
-                                     "\n\nDid you mean to call `rolemenu delete` instead?", TimeSpan.FromSeconds(5));
+            return await DeleteAfter("It appears you're trying to clear the role menu." +
+                                     "\n\nPerhaps you meant to use `rolemenu delete` instead?", TimeSpan.FromSeconds(25));
         }
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, newRoles));
