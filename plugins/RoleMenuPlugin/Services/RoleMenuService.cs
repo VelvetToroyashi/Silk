@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DnsClient.Internal;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
@@ -154,14 +153,15 @@ public class RoleMenuService
         if (!data.Values.IsDefined(out var values))
                 values ??= Array.Empty<string>();
         
-        var roleMenuRoleIDs = 
-            GetDropdownFromMessage(message)
-               .Options
-               .Select(r => Snowflake.TryParse(r.Value, out var ID)
-                           ? ID.Value 
-                           : default
-                      )
-               .ToArray();
+        var dropdownOptions = GetDropdownFromMessage(message).Options;
+        
+        var roleMenuRoleIDs = dropdownOptions
+                             .Select
+                             (r => Snowflake.TryParse(r.Value, out var ID)
+                                 ? ID.Value
+                                 : default
+                             )
+                             .ToArray();
         
         var parsedRoleIDs = values.Select(ulong.Parse).Select(ID => new Snowflake(ID));
 
@@ -170,20 +170,29 @@ public class RoleMenuService
                                  .Union(parsedRoleIDs)
                                  .ToArray();
 
-        var roleResult = await _guilds.ModifyGuildMemberAsync(
-                                                              interaction.GuildID.Value,
-                                                              user.ID,
-                                                              roles: newUserRoles
-                                                             );
+        var roleResult = await _guilds
+           .ModifyGuildMemberAsync
+                (
+                 interaction.GuildID.Value,
+                 user.ID,
+                 roles: newUserRoles
+                );
 
         if (roleResult.IsSuccess)
         {
+            var newOptions = dropdownOptions
+                            .Select(r => new SelectOption(r.Label, r.Value, r.Description, r.Emoji, values.Contains(r.Value)))
+                            .ToArray();
+            
             await _interactions.EditOriginalInteractionResponseAsync
                 (
                  interaction.ApplicationID,
                  interaction.Token,
                  "Done! Enjoy your new roles!",
-                 components: new[] {new ActionRowComponent(new [] { GetDropdownFromMessage(message) })}
+                 components: new[] {new ActionRowComponent(new []
+                 {
+                     new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0, 25)
+                 })}
                 );
             
             return Result.FromSuccess();
