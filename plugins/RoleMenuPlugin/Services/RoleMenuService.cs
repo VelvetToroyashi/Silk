@@ -126,6 +126,7 @@ public class RoleMenuService
                      interaction.ApplicationID, 
                      interaction.Token,
                      "Use the dropdown below to assign yourself some roles!",
+                     flags: MessageFlags.Ephemeral,
                      components: new[]
                      {
                         new ActionRowComponent(new[] { dropdown })
