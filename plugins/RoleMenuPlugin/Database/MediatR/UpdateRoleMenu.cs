@@ -33,11 +33,11 @@ namespace RoleMenuPlugin.Database.MediatR
 
                 if (request.Options.Count() is < 1 or > 25)
                     return Result.FromError(new ArgumentOutOfRangeError(nameof(request.Options), "Options must be between 1 and 25"));
-
-                roleMenu.Options.Clear();
-                roleMenu.Options.AddRange(request.Options);
-
-                _db.Update(roleMenu);
+                
+                
+                _db.RemoveRange(roleMenu.Options.Except(request.Options));
+                roleMenu.Options = request.Options.ToList();
+                
                 
                 var        saved = 0;
                 Exception? ex    = null;
