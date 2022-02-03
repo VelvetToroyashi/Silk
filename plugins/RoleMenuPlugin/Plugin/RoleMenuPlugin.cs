@@ -33,6 +33,7 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
             serviceCollection
                .AddMediatR(typeof(RoleMenuPlugin))
                .AddSingleton<RoleMenuService>()
+               .AddResponder<RoleMenuComponentResponder>()
                .AddCommandGroup<RoleMenuCommand>()
                .AddDbContext<RoleMenuContext>((s, b) =>
                 {
