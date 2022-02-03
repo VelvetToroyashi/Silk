@@ -340,6 +340,9 @@ public sealed class RoleMenuCommand : CommandGroup
         return roleMenuMessageResult;
     }
 
+    
+    [Command("delete", "d")]
+    [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public Task<IResult> DeleteAsync
         (
             [Description("A link to the role menu you'd like to delete.")]
@@ -350,6 +353,8 @@ public sealed class RoleMenuCommand : CommandGroup
             bool confirm = false
         ) => Task.FromResult((IResult)Result.FromSuccess());
 
+    [Command("delete", "d")]
+    [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public async Task<IResult> DeleteAsync
         (
             [Description("The ID of the role menu you'd like to delete.")]
