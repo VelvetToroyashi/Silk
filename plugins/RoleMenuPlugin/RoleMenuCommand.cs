@@ -27,7 +27,7 @@ namespace RoleMenuPlugin;
 /// The command module responsible for creating, modifying, and deleting role menus.
 /// </summary>
 [PublicAPI]
-[Group("rolemenu")]
+[Group("rolemenu", "rm")]
 [RequireContext(ChannelContext.Guild)]
 [RequireDiscordPermission(DiscordPermission.ManageChannels)]
 [Description("Role Menu related commands.\n" +
