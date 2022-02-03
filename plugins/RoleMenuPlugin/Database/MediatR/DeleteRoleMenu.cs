@@ -18,7 +18,10 @@ namespace RoleMenuPlugin.Database.MediatR
 
             public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
             {
-                var entity = await _context.RoleMenus.FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuId, cancellationToken);
+                var entity = await _context
+                                  .RoleMenus
+                                  .Include(r => r.Options)
+                                  .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuId, cancellationToken);
 
                 if (entity == null)
                     return Result.FromError(new NotFoundError());
