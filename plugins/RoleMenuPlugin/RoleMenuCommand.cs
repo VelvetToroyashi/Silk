@@ -348,7 +348,7 @@ public sealed class RoleMenuCommand : CommandGroup
             [Description("A link to the role menu you'd like to delete.")]
             IMessage message,
             
-            [Option("confirm")]
+            [Switch("confirm")]
             [Description("Ensures you don't accidentally delete a role menu!")]
             bool confirm = false
         ) => Task.FromResult((IResult)Result.FromSuccess());
@@ -360,7 +360,7 @@ public sealed class RoleMenuCommand : CommandGroup
             [Description("The ID of the role menu you'd like to delete.")]
             Snowflake messageID,
 
-            [Option("confirm")] [Description("Ensures you don't accidentally delete a role menu!")]
+            [Switch("confirm")] [Description("Ensures you don't accidentally delete a role menu!")]
             bool confirm = false
         )
     {
