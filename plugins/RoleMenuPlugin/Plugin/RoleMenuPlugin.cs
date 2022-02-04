@@ -1,41 +1,82 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 using RoleMenuPlugin.Database;
-using YumeChan.PluginBase;
+using RoleMenuPlugin.Responders;
 
-namespace RoleMenuPlugin
+[assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
+namespace RoleMenuPlugin;
+
+public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
 {
-    public sealed class RoleMenuPlugin : Plugin
+    public override string Name        { get; } = "Role-Menu Plugin";
+    public override string Description { get; } = "Provides interaction-based role-menu functionality.";
+    
+
+    public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
-        private readonly DiscordClient   _client;
-        private readonly RoleMenuContext _db;
-
-        private readonly RoleMenuRoleService _roleMenu;
-
-        public RoleMenuPlugin(RoleMenuRoleService roleMenu, DiscordClient client, RoleMenuContext db)
+        try
         {
-            _roleMenu = roleMenu;
-            _client   = client;
-            _db       = db;
+            serviceCollection
+               .AddMediatR(typeof(RoleMenuPlugin))
+               .AddSingleton<RoleMenuService>()
+               .AddResponder<RoleMenuComponentResponder>()
+               .AddCommandGroup<RoleMenuCommand>()
+               .AddDbContext<RoleMenuContext>((s, b) =>
+                {
+                    var config = s.GetRequiredService<IConfiguration>();
+                    var dbString = config
+                                  .GetSection("Plugins")
+                                  .GetSection("RoleMenu")
+                                  .GetSection("Database")
+                                  .Value ?? throw new KeyNotFoundException("Missing plugin config!");
 
-            Version = GetType().Assembly.GetName().Version!.ToString(3);
+                    b.UseNpgsql(dbString);
+                });
         }
-        public override string DisplayName => "Role-Menu Plugin";
-
-        public override async Task LoadAsync()
+        catch (Exception e)
         {
-            await base.LoadAsync(); // Simply sets Loaded to true //
-
-            await _db.Database.MigrateAsync();
-
-            _client.ComponentInteractionCreated += _roleMenu.Handle;
+            return Result.FromError(new ExceptionError(e));
         }
-
-        public override async Task UnloadAsync()
-        {
-            await base.UnloadAsync();
-            _client.ComponentInteractionCreated -= _roleMenu.Handle; // Stop listening to events. //
-        }
+        
+        
+        return Result.FromSuccess();
     }
+
+    public async Task<Result> MigrateAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
+    {
+        var context = serviceProvider.GetRequiredService<RoleMenuContext>();
+
+        try
+        {
+            await context.Database.MigrateAsync(ct);
+        }
+        catch (Exception e)
+        {
+            return Result.FromError(new ExceptionError(e));
+        }
+        
+        return Result.FromSuccess();
+    }
+
+    public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider, CancellationToken ct = default)
+    {
+        serviceProvider.GetRequiredService<ILogger<RoleMenuPlugin>>().LogInformation("Silk! RoleMenu plugin {Version} loaded!", Version.ToString(3));
+        
+        return new(Result.FromSuccess());
+    }
+
 }

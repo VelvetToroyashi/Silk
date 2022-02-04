@@ -18,7 +18,7 @@ public class MessageParser : AbstractTypeParser<IMessage>
     private readonly ICommandContext _context;
     private readonly IDiscordRestChannelAPI _channels;
     
-    private readonly Regex _messageLinkRegex = new Regex(@"^https?://(?:canary|ptb)\.discord(?:app)?.com/channels/\d{20}/(<CHANNEL>\d{20}/)(<MESSAGE>\d{20}$)");
+    private readonly Regex _messageLinkRegex = new(@"^https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/\d+\/(?<CHANNEL>\d+)\/(?<MESSAGE>\d+)$");
     
     public MessageParser(ICommandContext context, IDiscordRestChannelAPI channels)
     {
@@ -29,9 +29,9 @@ public class MessageParser : AbstractTypeParser<IMessage>
     public override async ValueTask<Result<IMessage>> TryParseAsync(string token, CancellationToken ct = default)
     {
         Snowflake? channel = null;
-        Snowflake? message = null;
 
-        if (!Snowflake.TryParse(token, out message, Constants.DiscordEpoch))
+
+        if (!Snowflake.TryParse(token, out var message, Constants.DiscordEpoch))
         {
             var match = _messageLinkRegex.Match(token);
             if (match.Success)

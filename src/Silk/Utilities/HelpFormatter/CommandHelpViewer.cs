@@ -83,7 +83,8 @@ public class CommandHelpViewer
         {
             foreach (var child in parent.Children)
             {
-                if (child.Key.Equals(current, StringComparison.OrdinalIgnoreCase) || child.Aliases.Contains(current, StringComparer.OrdinalIgnoreCase))
+                if (child.Key.Equals(current, StringComparison.OrdinalIgnoreCase) ||
+                    child.Aliases.Contains(current, StringComparer.OrdinalIgnoreCase))
                 {
                     if (tokenStack.TryPeek(out _))
                     {
@@ -96,7 +97,7 @@ public class CommandHelpViewer
                     
                     isSubcommands |= child is IParentNode;
 
-                    if (child is not IParentNode group)
+                    if (child is not IParentNode group || nodes.Any(c => c.Key.Equals(child.Key, StringComparison.OrdinalIgnoreCase)))
                         nodes.Add(child);
                     else
                         nodes.AddRange(group.Children);

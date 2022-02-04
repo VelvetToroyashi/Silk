@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -10,13 +9,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
-using Remora.Discord.Gateway.Extensions;
+using Remora.Plugins;
+using Remora.Plugins.Errors;
+using Remora.Plugins.Services;
+using Remora.Results;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
+using Silk.Extensions;
 using Silk.Remora.SlashCommands;
-using Silk.Responders;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -30,10 +33,12 @@ public class Program
 {
     public static async Task Main()
     {
+        Console.WriteLine("Starting Silk...");
+        
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();
-
+        
         hostBuilder.ConfigureAppConfiguration(configuration =>
         {
             configuration.SetBasePath(Directory.GetCurrentDirectory());
@@ -41,12 +46,31 @@ public class Program
             configuration.AddUserSecrets("VelvetThePanda-Silk", false);
         });
 
-        ConfigureServices(hostBuilder);
-
+        ConfigureServices(hostBuilder).AddPlugins();
+        
+        Console.WriteLine("Configured services.");
+        
+        
         IHost? host = hostBuilder.Build();
         
-        await EnsureDatabaseCreatedAndApplyMigrations(host);
+        Console.WriteLine("Host is built. Switching to logging.");
+        
+        Log.ForContext<Program>().Information("Attempting to migrate core database");
+        var coreMigrationResult = await EnsureDatabaseCreatedAndApplyMigrations(host);
 
+        if (coreMigrationResult.IsDefined(out var migrationsApplied))
+        {
+            Log.ForContext<Program>().Information(migrationsApplied > 0 
+                                ? "Successfully applied migrations to core database." 
+                                : "No pending migrations to apply to core database.");
+        }
+        else
+        {
+            Log.ForContext<Program>().Fatal("Failed to migrate core database. Error: {Error}", coreMigrationResult.Error);
+            return;
+        }
+        
+        Log.ForContext<Program>().Information("Startup checks OK. Starting Silk!");
         await host.RunAsync();
     }
 
@@ -65,71 +89,65 @@ public class Program
 
         return builder;
     }
-
-    private static async Task EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
+    
+    private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
     {
         try
         {
-            using IServiceScope? serviceScope = builtBuilder.Services?.CreateScope();
-            if (serviceScope is not null)
-            {
-                await using GuildContext? dbContext = serviceScope.ServiceProvider
-                                                                  .GetRequiredService<IDbContextFactory<GuildContext>>()
-                                                                  .CreateDbContext();
+            using var serviceScope = builtBuilder.Services.CreateScope();
 
-                IEnumerable<string>? pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+            await using GuildContext dbContext = serviceScope
+                                                .ServiceProvider
+                                                .GetRequiredService<GuildContext>();
 
-                if (pendingMigrations.Any())
-                    await dbContext.Database.MigrateAsync();
-            }
+            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+
+            if (pendingMigrations.Any())
+                await dbContext.Database.MigrateAsync();
+
+            return Result<int>.FromSuccess(pendingMigrations.Count());
         }
-        catch (Exception) { }
+        catch (Exception e)
+        {
+            return Result<int>.FromError(new ExceptionError(e));
+        }
     }
 
     private static IHostBuilder ConfigureServices(IHostBuilder builder)
     {
         builder
+           .AddPlugins()
+           .AddRemoraHosting()
            .ConfigureLogging(l => l.ClearProviders().AddSerilog())
            .ConfigureServices((context, services) =>
             {
                 // There's a more elegant way to do this, but I'm lazy and this works.
-                SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+                var silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
 
-                AddSilkConfigurationOptions(services, context.Configuration);
                 AddDatabases(services, silkConfig.Persistence);
-
-                services.AddRemoraServices();
-                services.AddSilkLogging(context);
-
-                services.AddSingleton<SlashCommandService>();
-
-                services.AddSingleton<ReminderService>();
-                services.AddHostedService(s => s.GetRequiredService<ReminderService>());
-
-                services.AddCondition<RequireNSFWCondition>();
-                services.AddCondition<RequireTeamOrOwnerCondition>();
-
-                services.AddSingleton<IPrefixCacheService, PrefixCacheService>();
-                services.AddSingleton<IInfractionService, InfractionService>();
-
-                services.AddSingleton<InviteDectectionService>();
-                services.AddSingleton<ExemptionEvaluationService>();
+                AddSilkConfigurationOptions(services, context.Configuration);
                 
-                services.AddSingleton<IChannelLoggingService, ChannelLoggingService>();
-                services.AddSingleton<MemberLoggerService>();
-                services.AddSingleton<GuildConfigCacheService>();
-                services.AddSingleton<GuildCacherService>();
-
-                services.AddSingleton<GuildGreetingService>();
-                //services.AddScoped<SilkCommandResponder>(); // So Remora's default responder can be overridden. I'll remove this when my PR is merged. //
-                
-                services.AddSingleton<FlagOverlayService>();
-                
-
-                services.AddMediatR(typeof(Program));
-                services.AddMediatR(typeof(GuildContext));
-            })
-           .AddRemoraHosting();
+                services
+                   .AddRemoraServices()
+                   .AddSilkLogging(context)
+                   .AddSingleton<SlashCommandService>()
+                   .AddSingleton<ReminderService>()
+                   .AddHostedService(s => s.GetRequiredService<ReminderService>())
+                   .AddCondition<RequireNSFWCondition>()
+                   .AddCondition<RequireTeamOrOwnerCondition>()
+                   .AddSingleton<IPrefixCacheService, PrefixCacheService>()
+                   .AddSingleton<IInfractionService, InfractionService>()
+                   .AddSingleton<InviteDectectionService>()
+                   .AddSingleton<ExemptionEvaluationService>()
+                   .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
+                   .AddSingleton<MemberLoggerService>()
+                   .AddSingleton<GuildConfigCacheService>()
+                   .AddSingleton<GuildCacherService>()
+                   .AddSingleton<GuildGreetingService>()
+                   .AddSingleton<FlagOverlayService>()
+                   .AddMediatR(typeof(Program))
+                   .AddMediatR(typeof(GuildContext));
+            });
 
         return builder;
     }

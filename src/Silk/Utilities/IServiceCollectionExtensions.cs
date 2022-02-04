@@ -1,9 +1,12 @@
 using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
@@ -18,6 +21,8 @@ using Remora.Discord.Interactivity.Responders;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
+using Remora.Plugins.Services;
+using Remora.Results;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
@@ -25,6 +30,7 @@ using Silk.Commands.Conditions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Interactivity;
+using Silk.Services.Bot;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -52,7 +58,7 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           .AddPagination()
+           //.AddPagination()
            .AddSilkInteractivity();
 
         services
@@ -72,7 +78,8 @@ public static class IServiceCollectionExtensions
            .AddCommands();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
-        services.AddParser<EmojiParser>();
+        services.AddParser<EmojiParser>()
+                .AddParser<MessageParser>();
 
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
@@ -99,6 +106,33 @@ public static class IServiceCollectionExtensions
 
         return services;
     }
+    
+    public static IHostBuilder AddPlugins(this IHostBuilder hostBuilder)
+    {
+        Directory.CreateDirectory("./plugins"); // In case it doesn't exist.
+        return hostBuilder.ConfigureServices((_, services) =>
+        {
+            var pluginOptions = new PluginServiceOptions(new[] { "./plugins" }, false);
+            var pluginService = new PluginService(Options.Create(pluginOptions));
+        
+            var tree = pluginService.LoadPluginTree();
+        
+            services
+               .AddSingleton(tree)
+               .AddSingleton(pluginService)
+               .AddHostedService<PluginInitializerService>();
+
+            var configResult = tree.ConfigureServices(services);
+            
+            if (!configResult.IsSuccess)
+            {
+                Log.Logger.Error("Plugin configuration failed: {@Error}", 
+                                 ((AggregateError)configResult.Error)
+                                .Errors.Select(err => err.Error!.Message + "\n"));
+            }
+            
+        });
+    }
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, HostBuilderContext host)
     {
@@ -108,6 +142,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                                     .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
+                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         string? configOptions = host.Configuration["Logging"];
