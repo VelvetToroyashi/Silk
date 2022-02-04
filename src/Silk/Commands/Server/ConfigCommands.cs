@@ -1,10 +1,15 @@
 ﻿//TODO: This
+
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MediatR;
+using OneOf;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -17,6 +22,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Guilds.Config;
+using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
@@ -67,24 +73,27 @@ public class ConfigCommands : CommandGroup
     public class EditConfigCommands : CommandGroup
     {
         private readonly IMediator              _mediator;
-        private readonly ICommandContext        _context;
+        private readonly MessageContext         _context;
         private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestUserAPI    _users;
+        private readonly IDiscordRestInviteAPI  _invites;
         private readonly IDiscordRestChannelAPI _channels;
         public EditConfigCommands
         (
             IMediator              mediator,
-            ICommandContext        context,
+            MessageContext        context,
             IDiscordRestGuildAPI   guilds,
             IDiscordRestUserAPI    users,
-            IDiscordRestChannelAPI channels
+            IDiscordRestChannelAPI channels,
+            IDiscordRestInviteAPI invites
         )
         {
-            _mediator = mediator;
-            _context  = context;
-            _guilds   = guilds;
-            _users    = users;
-            _channels = channels;
+            _mediator     = mediator;
+            _context      = context;
+            _guilds       = guilds;
+            _users        = users;
+            _channels     = channels;
+            _invites = invites;
         }
 
         [Command("phishing")]
@@ -131,7 +140,7 @@ public class ConfigCommands : CommandGroup
 
             });
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
         }
         
         //TODO: Infraction config (stepped, not named)
@@ -170,7 +179,196 @@ public class ConfigCommands : CommandGroup
                 WarnOnMatchedInvite   = warnOnMatch ?? default(Optional<bool>)
             });
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
+        }
+
+        [Command("invite-whitelist", "iw")]
+        [Description("Control the whitelisting of invites!")]
+        [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+        public async Task<IResult> WhitelistAsync
+        (
+            [Option('a', "add")]
+            [Description("Add one or more invite(s) to the whitelist. Guild IDs can also be specified!")]
+            OneOf<string, Snowflake>[] add,
+            
+            [Option('r', "remove")]
+            [Description("Remove one or more invite(s) from the whitelist. Guild IDs can also be specified!")]
+            OneOf<string, Snowflake>[] remove,
+            
+            [Switch('c', "clear")]
+            [Description("Clear the whitelist. For convenience, a dump of all current whitelisted invites will be sent to the channel.")]
+            bool clear = false,
+            
+            [Option("active")]
+            [Description("Whether the whitelist is active.")]
+            bool? active = null
+        )
+        {
+            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            
+            if (clear)
+            {
+                if (!modConfig!.AllowedInvites.Any())
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, "There are no invites to clear!");
+                    return Result.FromSuccess();
+                }
+
+                var inviteString = modConfig.AllowedInvites.Select(r => r.VanityURL).Join(" ");
+
+                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
+                
+                await _channels.CreateMessageAsync(_context.ChannelID, $"Here's a dump of the whitelist prior to clearing! \n{inviteString}");
+
+                return Result.FromSuccess();
+            }
+
+            var addedInvites  = new List<string>();
+            var failedAdds = new List<string>();
+            
+            var removedInvites = new List<string>();
+            var failedRemoves  = new List<string>();
+            
+            
+            foreach (var added in add)
+            {
+                if (added.TryPickT0(out var inviteString, out var guildID))
+                {
+                    if (modConfig!.AllowedInvites.Any(iv => iv.VanityURL == inviteString))
+                    {
+                        failedAdds.Add($"`{inviteString,-15}{"(already whitelisted)`",30}");
+                        continue;
+                    }
+
+                    var inviteResult = await _invites.GetInviteAsync(inviteString);
+
+                    if (!inviteResult.IsDefined(out var inv))
+                    {
+                        failedAdds.Add($"`{inviteString,-15}{"(invalid invite)`",30}");
+                        continue;
+                    }
+
+                    if (inv.Guild.IsDefined(out var inviteGuild) && inviteGuild.ID.Value == _context.GuildID.Value)
+                    {
+                        failedAdds.Add($"`{inviteString,-15}{"(invite is for this server)`",30}");
+                        continue;
+                    }
+
+                    if (inv.ExpiresAt.IsDefined())
+                    {
+                        failedAdds.Add($"`{inviteString,-15}{"(invite is temporary)`",30}");
+                        continue;
+                    }
+                    
+                    modConfig.AllowedInvites.Add(new () { VanityURL = inviteString, GuildId = _context.GuildID.Value});
+                    addedInvites.Add($"`{inviteString,-44}`");;
+                }
+                else
+                {
+                    if (guildID == _context.GuildID.Value)
+                    {
+                        failedAdds.Add($"`{guildID.ToString(),-15}{"(invite is for this server)`",30}");
+                        continue;
+                    }
+                    
+                    if (modConfig!.AllowedInvites.Any(iv => iv.InviteGuildId == guildID))
+                    {
+                        failedAdds.Add($"`{guildID.ToString(),-15}{"(already whitelisted)`",30}");
+                        continue;
+                    }
+                    
+                    modConfig.AllowedInvites.Add(new() { GuildId = _context.GuildID.Value, InviteGuildId = guildID });
+                    
+                    addedInvites.Add($"`{guildID,-44}`");
+                }
+            }
+
+            foreach (var removed in remove)
+            {
+                if (!modConfig!.AllowedInvites.Any())
+                {
+                    failedRemoves.Add("The whitelist is empty!".PadRight(34));
+                    break;
+                }
+                
+                if (removed.TryPickT0(out var inviteString, out var guildID))
+                {
+                    inviteString = Regex.Replace(inviteString, @"(https?:\/\/discord\.gg\/)?(?<invite>[A-z0-9_-]+)", "${invite}");
+                    
+                    if (modConfig!.AllowedInvites.All(iv => iv.VanityURL != inviteString))
+                    {
+                        failedRemoves.Add($"`{inviteString,-15}{"(not whitelisted)`",30}");
+                        continue;
+                    }
+                    
+                    modConfig.AllowedInvites.RemoveAll(iv => iv.VanityURL == inviteString);
+                    removedInvites.Add($"`{inviteString,-44}`");
+                }
+                else
+                {
+                    if (modConfig!.AllowedInvites.All(iv => iv.InviteGuildId != guildID))
+                    {
+                        failedRemoves.Add($"`{guildID.ToString(),-15}{"(not whitelisted)`",30}");
+                        continue;
+                    }
+                    
+                    modConfig.AllowedInvites.RemoveAll(iv => iv.InviteGuildId == guildID);
+                    removedInvites.Add($"`{guildID,-44}`");
+                }
+            }
+            
+            var messageBuilder = new StringBuilder();
+
+            if (addedInvites.Any())
+            {
+                messageBuilder.AppendLine($"Added {addedInvites.Count} invites to the whitelist:");
+                
+                foreach (var invite in addedInvites)
+                    messageBuilder.AppendLine(invite);
+
+                messageBuilder.AppendLine();
+            }
+
+            if (removedInvites.Any())
+            {
+                messageBuilder.AppendLine($"Removed {removedInvites.Count} invites from the whitelist:");
+                
+                foreach (var invite in removedInvites)
+                    messageBuilder.AppendLine(invite);
+
+                messageBuilder.AppendLine();
+            }
+            
+            if (failedAdds.Any())
+            {
+                messageBuilder.AppendLine($"Failed to add {failedAdds.Count} invites from the whitelist:");
+                
+                foreach (var invite in failedAdds)
+                    messageBuilder.AppendLine(invite);
+
+                messageBuilder.AppendLine();
+            }
+
+            if (failedRemoves.Any())
+            {
+                messageBuilder.AppendLine($"Failed to remove {failedRemoves.Count} invites to the whitelist:");
+                
+                foreach (var invite in failedRemoves)
+                    messageBuilder.AppendLine(invite);
+            }
+            
+            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            {
+                AllowedInvites = modConfig.AllowedInvites,
+                BlacklistInvites = active ?? default
+            });
+
+            
+            if (messageBuilder.Length > 0)
+                return await _channels.CreateMessageAsync(_context.ChannelID, messageBuilder.ToString());
+            
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
         }
         
         [Command("mute")]
@@ -183,7 +381,7 @@ public class ConfigCommands : CommandGroup
             
             [Option("native")]                            
             [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission. (This is currently unimplemented)")]
-            bool? useNativeMutes = null
+            bool? useNativeMute = null
             //It's worth noting that there WAS an option here to have Silk automatically configure the role,
             // but between ratelimits and the fact that permissions suck, it was removed.
         )
@@ -203,7 +401,7 @@ public class ConfigCommands : CommandGroup
 
             var selfPerms = DiscordPermissionSet.ComputePermissions(self.User.Value.ID, roles.First(r => r.ID == _context.GuildID), selfRoles);
             
-            if (useNativeMutes is not null && useNativeMutes.Value && !selfPerms.HasPermission(DiscordPermission.ModerateMembers)) 
+            if (useNativeMute is not null && useNativeMute.Value && !selfPerms.HasPermission(DiscordPermission.ModerateMembers)) 
                 return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to timeout members!");
             
             if (mute is not null)
@@ -223,17 +421,15 @@ public class ConfigCommands : CommandGroup
             
             await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
-                MuteRoleID = mute?.ID ?? default(Optional<Snowflake>)
-                //TODO: UseNativeMute
+                MuteRoleID = mute?.ID ?? default(Optional<Snowflake>),
+                UseNativeMute = useNativeMute ?? default(Optional<bool>)
             });
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
         }
             
     }
 }
-
-
 
 /*using System;
 using System.Collections.Concurrent;
