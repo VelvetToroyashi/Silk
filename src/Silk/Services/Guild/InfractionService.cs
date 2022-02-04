@@ -348,7 +348,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!roleResult.IsSuccess)
             return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
 
-        if (await IsMutedAsync(guildID, targetID)) //TODO: Call UpdateInfractionAsync
+        if (await IsMutedAsync(guildID, targetID))
             return await UpdateInfractionAsync(_queue.First(inf => 
                                                                 inf.GuildID == guildID && 
                                                                 inf.TargetID == targetID && 
