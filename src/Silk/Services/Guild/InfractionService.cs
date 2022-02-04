@@ -349,29 +349,24 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
 
         if (await IsMutedAsync(guildID, targetID))
-            return await UpdateInfractionAsync(_queue.First(inf => 
-                                                                inf.GuildID == guildID && 
-                                                                inf.TargetID == targetID && 
-                                                                inf.Type is InfractionType.Mute or
-                                                                            InfractionType.AutoModMute),
-                                               enforcer, 
-                                               reason,
-                                               expirationRelativeToNow
-                                               );
-        
-        var infraction = await _mediator.Send
-            (
-             new CreateInfraction.Request
-                 (
-                  guildID,
-                  targetID,
-                  enforcerID, 
-                  reason,
-                  enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute,
-                  expirationRelativeToNow.HasValue 
-                      ? DateTimeOffset.UtcNow + expirationRelativeToNow
-                      : null)
-            );
+        {
+            var queuedInfraction = _queue.First
+                (
+                 inf =>
+                     inf.GuildID  == guildID  &&
+                     inf.TargetID == targetID &&
+                     inf.Type is InfractionType.Mute or
+                                 InfractionType.AutoModMute
+                );
+
+            return await UpdateInfractionAsync(queuedInfraction, enforcer, reason, expirationRelativeToNow);
+        }
+
+        var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
+
+        DateTimeOffset? infractionExpiration = expirationRelativeToNow.HasValue ? DateTimeOffset.UtcNow + expirationRelativeToNow.Value : null;
+
+        var infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, infractionType, infractionExpiration));
             
         _queue.Add(infraction);
 
