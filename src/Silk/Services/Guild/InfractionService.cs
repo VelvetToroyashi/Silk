@@ -35,6 +35,8 @@ namespace Silk.Services.Guild;
 
 public sealed class InfractionService : IHostedService, IInfractionService
 {
+    private static readonly TimeSpan _maxTimeoutDuration = TimeSpan.FromDays(28);
+    
     private const string SemiSuccessfulAction = "The action completed, but there was an error processing the infraction.";
 
     private const string SilkWebhookName = "Silk! Logging";
@@ -332,21 +334,36 @@ public sealed class InfractionService : IHostedService, IInfractionService
         (target, enforcer) = hierarchyResult.Entity;
 
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
-        
-        if (config!.MuteRoleID.Value is 0)
+
+        if (!config.UseNativeMute)
         {
-            var muteResult = await TryCreateMuteRoleAsync(guildID);
+            if (config!.MuteRoleID.Value is 0)
+            {
+                var muteResult = await TryCreateMuteRoleAsync(guildID);
             
-            if (!muteResult.IsSuccess)
-                return Result<InfractionEntity>.FromError(muteResult.Error);
+                if (!muteResult.IsSuccess)
+                    return Result<InfractionEntity>.FromError(muteResult.Error);
             
-            config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+                config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+            }
+
+            var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+
+            if (!roleResult.IsSuccess)
+                return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
         }
+        else
+        {
+            var timeoutDuration = DateTimeOffset.UtcNow + (expirationRelativeToNow ?? _maxTimeoutDuration);
+            
+            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration);
 
-        var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
-
-        if (!roleResult.IsSuccess)
-            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
+            if (!timeoutResult.IsSuccess)
+            {
+                _logger.LogWarning("Failed to set timeout in {Guild}. Permission issue?", guildID);
+                return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(timeoutResult, "timeout"));
+            }
+        }
 
         if (await IsMutedAsync(guildID, targetID))
         {
