@@ -7,7 +7,7 @@ namespace Silk.Shared.Types;
 ///     <para>A helper class for generating keys to store in an <see cref="IMemoryCache" /></para>
 ///     <para>These keys are formatted in a way that should be compatible with Redis, too.</para>
 /// </summary>
-public static class ConfigKeyHelper
+public static class SilkKeyHelper
 {
     /// <summary>
     ///     Generates a key for a regular guild config.

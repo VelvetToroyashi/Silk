@@ -160,7 +160,7 @@ public class GuildCacherService
 
         await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
-        return default;
+        return await CacheMembersAsync(guildID, members);
     }
     
     private async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
@@ -170,9 +170,9 @@ public class GuildCacherService
 
         var erroredMembers = new List<IResult>();
 
-        foreach (IGuildMember member in members)
+        foreach (var member in members)
         {
-            if (!member.User.IsDefined(out IUser? user))
+            if (!member.User.IsDefined(out var user))
             {
                 erroredMembers.Add(Result.FromError(new InvalidOperationError("Member did not have a defined user.")));
                 continue;
@@ -183,6 +183,8 @@ public class GuildCacherService
             if (!currentMemberState.IsSuccess)
                 erroredMembers.Add(currentMemberState);
         }
+        
+        _logger.LogInformation("Guild [");
         
         return erroredMembers.Any()
             ? Result.FromError(new AggregateError(erroredMembers, "One or more guild members could not be cached."))

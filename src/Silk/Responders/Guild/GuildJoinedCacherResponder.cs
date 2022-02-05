@@ -18,10 +18,8 @@ public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
             return Result.FromSuccess(); //???
 
         if (_guildCacherService.IsNewGuild(gatewayEvent.ID))
-        {
-            //await GreetGuildAsync(gatewayEvent);
-        }
-
+            await _guildCacherService.GreetGuildAsync(gatewayEvent);
+        
         if (!gatewayEvent.Members.IsDefined())
             return Result.FromError(new InvalidOperationError("Guild did not contain any members."));
 
