@@ -16,6 +16,7 @@ public static class UpdateGuildModConfig
     {
         public Optional<bool>      ScanInvites           { get; init; }
         public Optional<Snowflake> MuteRoleID            { get; init; }
+        public Optional<bool>      UseNativeMute        { get; init; }
         public Optional<int>       MaxUserMentions       { get; init; }
         public Optional<int>       MaxRoleMentions       { get; init; }
         public Optional<bool>      BlacklistInvites      { get; init; }
@@ -52,6 +53,9 @@ public static class UpdateGuildModConfig
 
             if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
                 config.MuteRoleID = muteRole;
+            
+            if (request.UseNativeMute.IsDefined(out bool useNativeMute))
+                config.UseNativeMute = useNativeMute;
 
             if (request.EscalateInfractions.IsDefined(out bool escalate))
                 config.ProgressiveStriking = escalate;
@@ -106,10 +110,10 @@ public static class UpdateGuildModConfig
                 config.AllowedInvites = whitelistedInvites;
             }
 
-            EntityEntry<GuildModConfigEntity>? updatedEntry = _db.GuildModConfigs.Update(config);
+            _db.Update(config);
+            
             await _db.SaveChangesAsync(cancellationToken);
-
-            return updatedEntry.Entity;
+            return config;
         }
     }
 }

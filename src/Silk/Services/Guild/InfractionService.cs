@@ -35,6 +35,8 @@ namespace Silk.Services.Guild;
 
 public sealed class InfractionService : IHostedService, IInfractionService
 {
+    private static readonly TimeSpan _maxTimeoutDuration = TimeSpan.FromDays(28);
+    
     private const string SemiSuccessfulAction = "The action completed, but there was an error processing the infraction.";
 
     private const string SilkWebhookName = "Silk! Logging";
@@ -104,38 +106,86 @@ public sealed class InfractionService : IHostedService, IInfractionService
         for (var i = _queue.Count; i >= 0; i--)
         {
             var infraction = _queue[i];
-            
-            if (!infraction.ExpiresAt.HasValue)
-                continue;
 
-            if (infraction.ExpiresAt.Value < DateTimeOffset.UtcNow)
+            if (infraction.Type is InfractionType.Mute or InfractionType.AutoModMute)
+                await TryResetTimeoutAsync(infraction);
+
+            if (infraction.ExpiresAt < DateTimeOffset.UtcNow)
                 continue;
             
             _queue.RemoveAt(i);
             _logger.LogDebug("Removed infraction {InfractionID} from queue.", infraction.Id);
             
             _logger.LogInformation("Proccessing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
+
+            await HandleExpiredInfractionAsync(infraction);
         }
     }
-    
+
+    private async Task TryResetTimeoutAsync(InfractionEntity infraction)
+    {
+        var memberResult = await _guilds.GetGuildMemberAsync(infraction.GuildID, infraction.TargetID);
+
+        if (!memberResult.IsSuccess)
+            return;
+
+        if (memberResult.Entity.CommunicationDisabledUntil.IsDefined(out var disabledUntil))
+        {
+            // check if disabledUntil is less than a day in the future
+            if (disabledUntil.Value.AddDays(1) > DateTimeOffset.UtcNow)
+                return;
+            
+            // if it is, either set the timeout to the expiration date, or the max expiration if it's larger
+            
+            var newTimeout = infraction.ExpiresAt > DateTimeOffset.UtcNow + _maxTimeoutDuration
+                ? DateTimeOffset.UtcNow + _maxTimeoutDuration
+                : infraction.ExpiresAt ?? DateTimeOffset.UtcNow + _maxTimeoutDuration;
+
+            var timoutResult = await _guilds.ModifyGuildMemberAsync(infraction.GuildID, infraction.TargetID, communicationDisabledUntil: newTimeout);
+
+            if (!timoutResult.IsSuccess) 
+                _logger.LogError("Failed to reset timeout for {TargetID} in {GuildID}", infraction.TargetID, infraction.GuildID);
+        }
+    }
+
+    private async Task HandleExpiredInfractionAsync(InfractionEntity infraction)
+    {
+        var selfResult = await _users.GetCurrentUserAsync();
+        
+        var userResult = await _users.GetUserAsync(infraction.TargetID);
+        
+        if (infraction.Type is InfractionType.SoftBan)
+        {
+            var unbanResult = await UnBanAsync(infraction.GuildID, infraction.TargetID, infraction.EnforcerID, "Infraction expired.");
+
+            if (!unbanResult.IsSuccess)
+                _logger.LogError("Failed to unban user {UserID} ({GuildID}) for expired infraction {InfractionID}.", infraction.TargetID, infraction.GuildID, infraction.Id);
+        }
+        else if (infraction.Type is InfractionType.Mute or InfractionType.AutoModMute)
+        {
+            var unmuteResult = await UnMuteAsync(infraction.GuildID, infraction.TargetID, infraction.EnforcerID, "Infraction expired.");
+            
+            if (!unmuteResult.IsSuccess)
+                _logger.LogError("Failed to unmute user {UserID} ({GuildID}) for expired infraction {InfractionID}.", infraction.TargetID, infraction.GuildID, infraction.Id);
+        }
+        else
+        {
+            _logger.LogWarning("Detected an unknown temporary infraction type {InfractionType}.", infraction.Type);
+        }
+    }
+
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> UpdateInfractionAsync(InfractionEntity infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default)
     {
-        if (newExpiration.IsDefined(out TimeSpan? expiration))
-            if (expiration.Value < TimeSpan.Zero)
-                return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration cannot be negative."));
-        
+        if (newExpiration.IsDefined(out var expiration) && expiration.Value < TimeSpan.Zero) 
+            return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration cannot be negative."));
+
         if (infraction.Type is not (InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute) && newExpiration.HasValue)
             return Result<InfractionEntity>.FromError(new ArgumentOutOfRangeError(nameof(newExpiration), "Expiration is only valid for soft bans, auto mod mutes, and mutes."));
+
+        var infractionExpiration = newExpiration.HasValue ? DateTimeOffset.UtcNow + expiration : default(Optional<DateTimeOffset?>);
         
-        var newInfraction = await _mediator.Send(new UpdateInfraction.Request(
-                                                                             infraction.Id,
-                                                                             newExpiration.HasValue 
-                                                                                 ? newExpiration.Value is null 
-                                                                                     ? null 
-                                                                                     : DateTimeOffset.UtcNow + expiration 
-                                                                                 : default(Optional<DateTimeOffset?>), 
-                                                                             newReason ?? default(Optional<string>)));
+        var newInfraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, infractionExpiration, newReason ?? default(Optional<string>)));
 
         if (infraction.Type is InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute)
         {
@@ -332,46 +382,56 @@ public sealed class InfractionService : IHostedService, IInfractionService
         (target, enforcer) = hierarchyResult.Entity;
 
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
-        
-        if (config!.MuteRoleID.Value is 0)
+
+        if (!config!.UseNativeMute)
         {
-            var muteResult = await TryCreateMuteRoleAsync(guildID);
+            if (config!.MuteRoleID.Value is 0)
+            {
+                var muteResult = await TryCreateMuteRoleAsync(guildID);
             
-            if (!muteResult.IsSuccess)
-                return Result<InfractionEntity>.FromError(muteResult.Error);
+                if (!muteResult.IsSuccess)
+                    return Result<InfractionEntity>.FromError(muteResult.Error);
             
-            config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+                config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+            }
+
+            var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+
+            if (!roleResult.IsSuccess)
+                return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
+        }
+        else
+        {
+            var timeoutDuration = DateTimeOffset.UtcNow + (expirationRelativeToNow ?? _maxTimeoutDuration);
+            
+            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration);
+
+            if (!timeoutResult.IsSuccess)
+            {
+                _logger.LogWarning("Failed to set timeout in {Guild}. Permission issue?", guildID);
+                return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(timeoutResult, "timeout"));
+            }
         }
 
-        var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+        if (await IsMutedAsync(guildID, targetID))
+        {
+            var queuedInfraction = _queue.First
+                (
+                 inf =>
+                     inf.GuildID  == guildID  &&
+                     inf.TargetID == targetID &&
+                     inf.Type is InfractionType.Mute or
+                                 InfractionType.AutoModMute
+                );
 
-        if (!roleResult.IsSuccess)
-            return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
+            return await UpdateInfractionAsync(queuedInfraction, enforcer, reason, expirationRelativeToNow);
+        }
 
-        if (await IsMutedAsync(guildID, targetID)) //TODO: Call UpdateInfractionAsync
-            return await UpdateInfractionAsync(_queue.First(inf => 
-                                                                inf.GuildID == guildID && 
-                                                                inf.TargetID == targetID && 
-                                                                inf.Type is InfractionType.Mute or
-                                                                            InfractionType.AutoModMute),
-                                               enforcer, 
-                                               reason,
-                                               expirationRelativeToNow
-                                               );
-        
-        var infraction = await _mediator.Send
-            (
-             new CreateInfraction.Request
-                 (
-                  guildID,
-                  targetID,
-                  enforcerID, 
-                  reason,
-                  enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute,
-                  expirationRelativeToNow.HasValue 
-                      ? DateTimeOffset.UtcNow + expirationRelativeToNow
-                      : null)
-            );
+        var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
+
+        DateTimeOffset? infractionExpiration = expirationRelativeToNow.HasValue ? DateTimeOffset.UtcNow + expirationRelativeToNow.Value : null;
+
+        var infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, infractionType, infractionExpiration));
             
         _queue.Add(infraction);
 
@@ -424,13 +484,20 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
-        await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
-        
+        Result unmuteResult;
+
+        if (!config!.UseNativeMute)
+            unmuteResult = await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+        else
+            unmuteResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: null);
+
         var infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Unmute));
 
         await LogInfractionAsync(infraction, target, enforcer);
         
-        return Result<InfractionEntity>.FromSuccess(infraction);
+        return unmuteResult.IsSuccess
+            ? Result<InfractionEntity>.FromSuccess(infraction)
+            : Result<InfractionEntity>.FromError(new InfractionError(SemiSuccessfulAction, unmuteResult));
     }
 
     /// <inheritdoc />
@@ -806,7 +873,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var embed = new Embed
         {
             Title       = "Infraction #" + infraction.CaseNumber,
-            Author      = new EmbedAuthor($"{target.Username}#{target.Discriminator}", CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
+            Author      = new EmbedAuthor($"{target?.Username ?? "Unknown"}#{target.Discriminator}", CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
             Description = infraction.Reason,
             Colour      = Color.Goldenrod,
             Fields = new IEmbedField[]

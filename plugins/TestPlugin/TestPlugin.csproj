@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Remora.Commands" Version="7.2.0" />
+    <PackageReference Include="Remora.Discord.Commands" Version="16.1.0" />
+    <PackageReference Include="Remora.Plugins" Version="3.0.1" />
+    <PackageReference Include="Remora.Plugins.Abstractions" Version="4.0.1" />
+  </ItemGroup>
+
+  <!-- Todo: Update this if support for multi-plugin project dll export is needed -->
+  <Target Name="CopyPluginDLL" AfterTargets="Build">
+        <PropertyGroup>
+            <!-- Update 'RootPath' if solution file is renamed -->
+          <RootPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath>
+
+          <!-- Update if project 'Silk' is renamed -->
+          <SilkCoreProjectName>Silk</SilkCoreProjectName>
+
+          <!-- By default uses current project framework; update if 'Silk' project framework changes -->
+          <SilkCoreProjectFramework>$(TargetFramework)</SilkCoreProjectFramework>
+
+            <PluginOutputDir>$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir>
+        </PropertyGroup>
+
+        <Message Text="Copying Plugin DLL ($(Configuration))" Importance="High" />
+
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;" DestinationFolder="$(PluginOutputDir)" />
+
+        <Message Text="Copied Plugin DLL to $(PluginOutputDir)" Importance="High" />
+    </Target>
+  
+</Project>

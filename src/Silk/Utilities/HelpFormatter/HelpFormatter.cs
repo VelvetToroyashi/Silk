@@ -173,11 +173,7 @@ public class HelpFormatter : IHelpFormatter
         }
         else
         {
-            IChildNode node;
-            if (subcommands.Count() is 1)
-                node  = subcommands.Single().Parent as IChildNode;
-            else node = subcommands.First();
-
+            var node = subcommands.First().Parent as IChildNode;
 
             var containsDefaultCommand = IsExecutableGroup(node, out var usage);
             

@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Remora.SlashCommands",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Interactivity", "src\Silk.Interactivity\Silk.Interactivity.csproj", "{74516148-6318-4CDA-A7A6-8D0B605A87B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlugin", "plugins\TestPlugin\TestPlugin.csproj", "{025296EA-238F-4111-B225-085A6001544D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,14 @@ Global
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|x64.ActiveCfg = Release|Any CPU
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|x64.Build.0 = Release|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Debug|x64.Build.0 = Debug|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Release|x64.ActiveCfg = Release|Any CPU
+		{025296EA-238F-4111-B225-085A6001544D}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -198,5 +208,6 @@ Global
 		{641B6151-DB69-457D-A5EA-2A71509A15DB} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 		{300F88DF-46A6-4F37-9E88-B51BECFBD65A} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
+		{025296EA-238F-4111-B225-085A6001544D} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 	EndGlobalSection
 EndGlobal

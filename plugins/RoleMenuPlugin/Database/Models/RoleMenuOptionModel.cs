@@ -1,6 +1,6 @@
 ﻿namespace RoleMenuPlugin.Database
 {
-    public sealed class RoleMenuOptionModel
+    public sealed record RoleMenuOptionModel
     {
         public int Id { get; set; }
 
