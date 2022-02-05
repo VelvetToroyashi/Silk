@@ -78,34 +78,41 @@ public class GuildCacherService
         //a guild fetched from REST here, which typically doesn't have
         //channels defined, which is a big issue, but that's on the caller
 
-        Result<IUser> currentUserResult = await _userApi.GetCurrentUserAsync();
+        var currentUserResult = await _userApi.GetCurrentUserAsync();
 
         if (!currentUserResult.IsSuccess)
             return Result.FromError(currentUserResult.Error);
 
-        Result<IGuildMember> currentMemberResult = await _guildApi.GetGuildMemberAsync(guild.ID, currentUserResult.Entity.ID);
+        var currentMemberResult = await _guildApi.GetGuildMemberAsync(guild.ID, currentUserResult.Entity.ID);
 
         if (!currentMemberResult.IsSuccess)
             return Result.FromError(currentMemberResult.Error);
 
-        IGuildMember? currentMember = currentMemberResult.Entity;
-        IUser?        currentUser   = currentMember.User.Value;
+        var currentUser   = currentUserResult.Entity;
+        
+        var currentMember = currentMemberResult.Entity;
 
-        IReadOnlyList<IChannel>? channels = guild.Channels.Value;
+        if (currentMember.JoinedAt - DateTimeOffset.UtcNow > JoinedTimestampThreshold)
+            return Result.FromSuccess();
+        
+        var channels = guild.Channels.Value;
 
         IChannel? availableChannel = null;
-        foreach (IChannel channel in channels)
+        
+        foreach (var channel in channels)
         {
             if (channel.Type is not ChannelType.GuildText)
                 continue;
 
-            IReadOnlyList<IPermissionOverwrite>? overwrites = channel.PermissionOverwrites.Value;
+            var overwrites = channel.PermissionOverwrites.Value;
 
-            IDiscordPermissionSet? permissions = DiscordPermissionSet.ComputePermissions(
-                                                                                         currentUser.ID,
-                                                                                         guild.Roles.Single(r => r.ID == guild.ID),
-                                                                                         guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
-                                                                                         overwrites);
+            var permissions = DiscordPermissionSet.ComputePermissions
+                (
+                 currentUser.ID,
+                 guild.Roles.Single(r => r.ID == guild.ID),
+                 guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
+                 overwrites
+                );
 
             if (permissions.HasPermission(_welcomeMessagePermissions))
             {
@@ -120,7 +127,7 @@ public class GuildCacherService
         }
         else
         {
-            Result<IMessage> send = await _channelApi.CreateMessageAsync(availableChannel.ID, embeds: new[] { _onGuildJoinEmbed });
+            var send = await _channelApi.CreateMessageAsync(availableChannel.ID, embeds: new[] { _onGuildJoinEmbed });
 
             if (send.IsSuccess)
             {
@@ -133,7 +140,7 @@ public class GuildCacherService
     }
 
     /// <summary>
-    ///     Stores hashes of guilds that are available during READY to differientiate from joining a new guild.
+    ///     Stores hashes of guilds that are available during READY to differentiate from joining a new guild.
     /// </summary>
     /// <param name="ready">The gateway event to store IDs from.</param>
     /// <returns></returns>
