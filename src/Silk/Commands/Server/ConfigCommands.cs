@@ -30,7 +30,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands;
 
-[Group("config")]
+[Group("config", "cfg")]
 [HelpCategory(Categories.Server)]
 [RequireContext(ChannelContext.Guild)]
 [Description("Configure various settings for your server!")]
@@ -61,14 +61,14 @@ public class ConfigCommands : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, "Done! Changes should take effect immediately.");
     }
     
-    [Group("view")]
+    [Group("view", "v")]
     [Description("View the settings for your server.")]
     public class ViewConfigCommands : CommandGroup
     {
         
     }
 
-    [Group("edit")]
+    [Group("edit", "e")]
     [Description("Edit the settings for your server.")]
     public class EditConfigCommands : CommandGroup
     {
