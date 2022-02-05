@@ -32,5 +32,12 @@ public static class SilkKeyHelper
     /// <returns>The generated key.</returns>
     public static object GenerateGuildPrefixKey(Snowflake guildId)
         => $"guild_prefix:{guildId}";
+    
+    public static object GenerateGuildMemberCountKey(Snowflake guildId)
+        => $"guild_member_count:{guildId}";
+    
+    public static object GenerateGuildCountKey()
+        => "guild_count";
+    
 
 }
