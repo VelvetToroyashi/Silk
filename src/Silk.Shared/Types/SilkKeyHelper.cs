@@ -39,5 +39,11 @@ public static class SilkKeyHelper
     public static object GenerateGuildCountKey()
         => "guild_count";
     
+    public static object GenerateCurrentGuildCounterKey()
+        => "current_guild_count";
+    
+    public static object GenerateGuildIdentifierKey(Snowflake guildId)
+        => $"guild_identifier:{guildId}";
+    
 
 }

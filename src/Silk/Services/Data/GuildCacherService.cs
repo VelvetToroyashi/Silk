@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
@@ -15,6 +16,7 @@ using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
+using Silk.Shared.Types;
 
 namespace Silk.Services.Data;
 
@@ -25,8 +27,8 @@ public class GuildCacherService
     /// </summary>
     // If we joined within the last 30 seconds, we consider it new.
     // This is bound to change in the future. For now 30s is good enough to allow for caching,
-    // as well as accomodating for any responder delays.
-    public TimeSpan JoinedTimestampThreshold { get; set; } = 30.Seconds(); 
+    // as well as accommodating for any responder delays.
+    private readonly TimeSpan _joinedTimestampThreshold = 30.Seconds(); 
 
     private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n"      +
                                                     $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "           +
@@ -36,11 +38,8 @@ public class GuildCacherService
     private readonly IDiscordRestChannelAPI _channelApi;
     private readonly IDiscordRestGuildAPI   _guildApi;
 
-    /// <summary>
-    ///     A collection of guilds known to be already joined. Populated on READY gateway event.
-    /// </summary>
-    private readonly HashSet<Snowflake> _knownGuilds = new();
-
+    private readonly IMemoryCache _cache;
+    
     private readonly ILogger<GuildCacherService> _logger;
 
     private readonly IMediator _mediator;
@@ -62,7 +61,8 @@ public class GuildCacherService
         IDiscordRestUserAPI         userApi,
         IDiscordRestGuildAPI        guildApi,
         IDiscordRestChannelAPI      channelApi,
-        ILogger<GuildCacherService> logger
+        ILogger<GuildCacherService> logger,
+        IMemoryCache cache
     )
     {
         _mediator   = mediator;
@@ -70,6 +70,7 @@ public class GuildCacherService
         _guildApi   = guildApi;
         _channelApi = channelApi;
         _logger     = logger;
+        _cache = cache;
     }
 
     public async Task<Result> GreetGuildAsync(IGuild guild)
@@ -92,7 +93,8 @@ public class GuildCacherService
         
         var currentMember = currentMemberResult.Entity;
 
-        if (currentMember.JoinedAt - DateTimeOffset.UtcNow > JoinedTimestampThreshold)
+        // check if we joined within the last 30 seconds
+        if (currentMember.JoinedAt + _joinedTimestampThreshold < DateTimeOffset.Now)
             return Result.FromSuccess();
         
         var channels = guild.Channels.Value;
@@ -138,27 +140,7 @@ public class GuildCacherService
 
         return Result.FromSuccess();
     }
-
-    /// <summary>
-    ///     Stores hashes of guilds that are available during READY to differentiate from joining a new guild.
-    /// </summary>
-    /// <param name="ready">The gateway event to store IDs from.</param>
-    /// <returns></returns>
-    public void StoreKnownGuilds(IReady ready)
-    {
-        foreach (IUnavailableGuild guild in ready.Guilds)
-            _knownGuilds.Add(guild.ID);
-    }
-
-    /// <summary>
-    ///     Checks whether a guild was just joined, or if it was already joined.
-    /// </summary>
-    /// <param name="guildID">The ID of the guild to check.</param>
-    // This technically introduces an edge case where the bot isn't on any guilds,
-    // and the first guild would be considered old, but the first guild a bot joins is likely a testing server anyway,
-    // therefore there's no reason to send a greeting there. This also helps prevent calling this before the bot is ready.
-    public bool IsNewGuild(Snowflake guildID) 
-        => _knownGuilds.Any() && !_knownGuilds.Contains(guildID);
+    
 
     public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
@@ -191,10 +173,22 @@ public class GuildCacherService
                 erroredMembers.Add(currentMemberState);
         }
         
-        _logger.LogInformation("Guild [");
-        
+        LogAndCacheGuild(guildID, members);
+
         return erroredMembers.Any()
             ? Result.FromError(new AggregateError(erroredMembers, "One or more guild members could not be cached."))
             : Result.FromSuccess();
+    }
+
+    private void LogAndCacheGuild(Snowflake guildID, IReadOnlyList<IGuildMember> members)
+    {
+        var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());
+        var currentGuildCounter = _cache.GetOrCreate(SilkKeyHelper.GenerateCurrentGuildCounterKey(), _ => 1);
+
+        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}] handling {MemberCount,-5} members.", currentGuildCounter, currentGuildCount, members.Count);
+
+        _cache.Set(SilkKeyHelper.GenerateGuildIdentifierKey(guildID), true);
+        _cache.Set(SilkKeyHelper.GenerateGuildMemberCountKey(guildID), members.Count);
+        _cache.Set(SilkKeyHelper.GenerateCurrentGuildCounterKey(), currentGuildCounter + 1);
     }
 }
