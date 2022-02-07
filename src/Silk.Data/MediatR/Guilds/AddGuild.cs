@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -25,6 +26,9 @@ public static class AddGuild
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            if (await _db.Guilds.FirstOrDefaultAsync(x => x.ID == request.GuildID, cancellationToken) is {} existingGuild)
+                return existingGuild;
+            
             GuildEntity guild = new()
             {
                 ID            = request.GuildID,
