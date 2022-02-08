@@ -37,7 +37,7 @@
             .AddStyle(base.ComponentStyles);
 
     /* Todo: Fix - Properly retrieve icon URL */
-    private bool HasIcon => !string.IsNullOrEmpty(Guild.Icon.Value.Value);
+    private bool HasIcon => Guild.Icon.IsDefined(out var icon) && !string.IsNullOrEmpty(icon.Value);
 
     private string GuildIconUrl => HasIcon 
         ? $"{Guild.Icon.Value.Value}?size=256" 

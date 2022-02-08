@@ -1,43 +1,42 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Silk.Dashboard.Extensions
+namespace Silk.Dashboard.Extensions;
+
+public static class NavigationManagerExtensions
 {
-    public static class NavigationManagerExtensions
+    public static void RefreshCurrentPage(this NavigationManager navigationManager)
     {
-        public static void RefreshCurrentPage(this NavigationManager navigationManager)
-        {
-            navigationManager.NavigateTo(navigationManager.Uri, true);
-        }
+        navigationManager.NavigateTo(navigationManager.Uri, true);
+    }
 
-        // Credit: https://chrissainty.com/working-with-query-strings-in-blazor
-        public static bool TryGetQueryString<T>(this NavigationManager navManager, string key, out T value)
-        {
-            var uri = navManager.ToAbsoluteUri(navManager.Uri);
+    // Credit: https://chrissainty.com/working-with-query-strings-in-blazor
+    public static bool TryGetQueryString<T>(this NavigationManager navManager, string key, out T value)
+    {
+        var uri = navManager.ToAbsoluteUri(navManager.Uri);
 
-            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(key, out var valueFromQueryString))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(key, out var valueFromQueryString))
+        {
+            if (typeof(T) == typeof(int) && int.TryParse(valueFromQueryString, out var valueAsInt))
             {
-                if (typeof(T) == typeof(int) && int.TryParse(valueFromQueryString, out var valueAsInt))
-                {
-                    value = (T)(object)valueAsInt;
-                    return true;
-                }
-
-                if (typeof(T) == typeof(string))
-                {
-                    value = (T)(object)valueFromQueryString.ToString();
-                    return true;
-                }
-
-                if (typeof(T) == typeof(decimal) && decimal.TryParse(valueFromQueryString, out var valueAsDecimal))
-                {
-                    value = (T)(object)valueAsDecimal;
-                    return true;
-                }
+                value = (T)(object)valueAsInt;
+                return true;
             }
 
-            value = default;
-            return false;
+            if (typeof(T) == typeof(string))
+            {
+                value = (T)(object)valueFromQueryString.ToString();
+                return true;
+            }
+
+            if (typeof(T) == typeof(decimal) && decimal.TryParse(valueFromQueryString, out var valueAsDecimal))
+            {
+                value = (T)(object)valueAsDecimal;
+                return true;
+            }
         }
+
+        value = default;
+        return false;
     }
 }

@@ -1,7 +1,3 @@
-﻿namespace Silk.Dashboard.Models
-{
-    public class AppState
-    {
-        public DiscordOAuthTokenResponse TokenResponse { get; init; }
-    }
-}
+﻿namespace Silk.Dashboard.Models;
+
+public class AppState { }

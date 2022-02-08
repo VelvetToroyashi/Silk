@@ -7,7 +7,7 @@
         @Message
     </MudText>
     
-    @Content
+    @ChildContent
 </MudContainer>
 
 @code   
@@ -19,5 +19,5 @@
     public string ImageUrl { get; set; } = "imgs/rp_flop.png";
 
     [Parameter]
-    public RenderFragment Content { get; set; }
+    public RenderFragment ChildContent { get; set; }
 }

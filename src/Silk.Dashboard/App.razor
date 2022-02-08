@@ -4,7 +4,7 @@
 @using Silk.Dashboard.Themes
 
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
@@ -26,6 +26,7 @@
                 </NotAuthorized>
             </AuthorizeRouteView>
         </Found>
+
         <NotFound>
             <LayoutView Layout="@typeof(MainLayout)">
                 <ProblemView>
@@ -42,18 +43,3 @@
 <MudThemeProvider Theme="@ThemeManager.CurrentTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
-
-@code
-{
-    [Inject]
-    public ITokenService TokenService { get; set; }
-
-    [Parameter]
-    public AppState InitialState { get; set; }
-
-    protected override Task OnInitializedAsync()
-    {
-        TokenService.SetToken(InitialState.TokenResponse);
-        return base.OnInitializedAsync();
-    }
-}

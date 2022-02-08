@@ -6,17 +6,18 @@
 {
     @* Todo: Check this doesn't look weird if other elements are added *@
     <MudButtonGroup OverrideStyles="false">
-        <MudButton Variant="Variant.Text" Link="Dashboard/Profile">
+        <MudButton Variant="Variant.Text" Link="dashboard/profile">
             @_authState.User.Identity?.Name
         </MudButton>
-        <MudButton Variant="Variant.Text" Link="Api/Account/Logout">
+        
+        <MudButton Variant="Variant.Text" Link="api/account/logout">
             Logout
         </MudButton>
     </MudButtonGroup>
 }
 else
 {
-    <MudButton Variant="Variant.Text" Link="Api/Account/Login">
+    <MudButton Variant="Variant.Text" Link="api/account/login">
         Login
     </MudButton>
 }

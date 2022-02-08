@@ -1,0 +1,71 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace Silk.Dashboard.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<!-- EMBED STUFF START -->
+	<meta property="og:title" content="Silk!">
+	<meta property="og:description" content="Silk! is the Discord bot for all your needs!" />
+	<meta property="og:url" content="https://silk.velvetthepanda.dev">
+	<meta property="og:image" content="https://files.velvetthepanda.dev/silk.png">
+	<meta property="og:image:width" content="148">
+	<meta property="og:image:height" content="148">
+	<meta name="theme-color" content="#008000">
+	<!-- EMBED STUFF END -->
+
+	<base href="~/" />
+
+	<title>Silk Dashboard</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+	<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+
+	<link href="css/site.css" rel="stylesheet" />
+	<link href="Silk.Dashboard.styles.css" rel="stylesheet" />
+
+	<component type="typeof(HeadOutlet)" render-mode="Server" />
+</head>
+<body>
+	@RenderBody()
+
+	<div id="blazor-error-ui">
+		<environment include="Staging,Production">
+			An error has occurred. This application may no longer respond until reloaded.
+		</environment>
+		<environment include="Development">
+			An unhandled exception has occurred. See browser dev tools for details.
+		</environment>
+		<a href="" class="reload">Reload</a>
+		<a class="dismiss">🗙</a>
+	</div>
+
+	<div id="components-reconnect-modal">
+		<div id="blazorReconnect" style="color: black">
+			Attempting to reconnect to webserver ...
+		</div>
+
+		<div id="blazorFailedOrRejected" style="color: black">
+			Could not reconnect to webserver
+			<p onclick="location.reload()"
+			   style="text-decoration: underline;color: blue;cursor: pointer">
+				Reload the page
+			</p>
+		</div>
+	</div>
+
+	@* Blazor *@
+	<script src="_framework/blazor.server.js" autostart="false"></script>
+
+	@* Blazor options *@
+	<script>
+		Blazor.start({ reconnectionOptions: { maxRetries: 4, retryIntervalMilliseconds: 3000 } });
+	</script>
+
+	<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+</html>
