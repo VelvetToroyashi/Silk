@@ -18,7 +18,7 @@ public class DiscordOAuthTokenStorage : IDiscordOAuthTokenStorage
     public DiscordOAuthTokenStorage(IDataProtectionProvider provider)
         => _protector = provider.CreateProtector("Discord");
 
-    public void   SetAccessToken(string token) => _accessToken = _protector.Protect(token);
-    public string GetAccessToken()             => _protector.Unprotect(_accessToken);
+    public void   SetAccessToken(string token) => _accessToken = !string.IsNullOrWhiteSpace(token) ? _protector.Protect(token) : null;
+    public string GetAccessToken()             => !string.IsNullOrWhiteSpace(_accessToken) ? _protector.Unprotect(_accessToken) : null;
     public void   ClearAccessToken()           => _accessToken = null;
 }
