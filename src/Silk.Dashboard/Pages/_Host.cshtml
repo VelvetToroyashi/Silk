@@ -1,9 +1,13 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authentication
+@using Silk.Dashboard.Services
 @namespace Silk.Dashboard.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
     Layout = "_Layout";
+    var tokenStorage = HttpContext.RequestServices.GetService(typeof(IDiscordOAuthTokenStorage)) as IDiscordOAuthTokenStorage;
+    tokenStorage!.SetAccessToken(await HttpContext.GetTokenAsync("access_token"));
 }
 
-<component type="typeof(App)" render-mode="ServerPrerendered" />
+<component type="typeof(App)" render-mode="Server" />

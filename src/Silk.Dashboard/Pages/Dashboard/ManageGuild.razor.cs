@@ -14,7 +14,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
-public partial class ManageGuild : ComponentBase, IDisposable
+public partial class ManageGuild : ComponentBase
 {
     [Inject] private IMediator                Mediator          { get; set; }
     [Inject] private ISnackbar                Snackbar          { get; set; }
@@ -25,20 +25,24 @@ public partial class ManageGuild : ComponentBase, IDisposable
     private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake) 
         ? (Snowflake) snowflake 
         : new();
+    
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? ConfigTab { get; set; }
 
     /* Todo: Make sure that reading/writing doesn't break anything */
     private volatile bool _busy;
     private volatile bool _savingChanges;
     private volatile bool _requestFailed;
 
-    private       string _pageTabQueryParam;
     private const string GenConfigTabId = "gen";
     private const string ModConfigTabId = "mod";
 
-    private MudTabs              _tabContainer;
     private IPartialGuild        _guild;
     private GuildConfigEntity    _guildConfig;
     private GuildModConfigEntity _guildModConfig;
+    
+    private MudTabs              _tabContainer;
 
     private readonly GreetingOption[] _greetingOptions = Enum.GetValues<GreetingOption>();
 
@@ -54,36 +58,18 @@ public partial class ManageGuild : ComponentBase, IDisposable
         => @string.Humanize(LetterCasing.Title);
 
     private static bool PanelIdMatches(MudTabPanel panel, string panelId) 
-        => string.Equals((string)panel.ID, panelId, StringComparison.OrdinalIgnoreCase);
+        => string.Equals(((string)panel.ID).ToLower(), panelId.ToLower(), StringComparison.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
     {
-        GetQueryStringValues();
         _ = FetchDiscordGuildFromRestAsync();
-            
         await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            _                          =  SetTabsAsync();
-            NavManager.LocationChanged += HandleLocationChanged;
-        }
-            
+        if (firstRender) _ = SetTabsAsync();
         await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private void GetQueryStringValues()
-    {
-        NavManager.TryGetQueryString("tab", out _pageTabQueryParam);
-    }
-        
-    private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
-    {
-        GetQueryStringValues();
-        StateHasChanged();
     }
 
     private async Task LoadAllConfigsAsync()
@@ -101,9 +87,9 @@ public partial class ManageGuild : ComponentBase, IDisposable
     {
         var task = LoadAllConfigsAsync();
 
-        if (!string.IsNullOrWhiteSpace(_pageTabQueryParam))
+        if (!string.IsNullOrWhiteSpace(ConfigTab))
         {
-            var tab = _tabContainer.Panels.FirstOrDefault(panel => PanelIdMatches(panel, _pageTabQueryParam));
+            var tab = _tabContainer.Panels.FirstOrDefault(panel => PanelIdMatches(panel, ConfigTab));
             if (tab is null) return;
 
             if (PanelIdMatches(tab, GenConfigTabId))
@@ -143,14 +129,16 @@ public partial class ManageGuild : ComponentBase, IDisposable
 
     private async Task<GuildConfigEntity> FetchGuildConfigAsync()
     {
-        return await Mediator.Send(new GetOrCreateGuildConfig.Request(GuildIdParsed, 
-                                                                      StringConstants.DefaultCommandPrefix));
+        var request = new GetOrCreateGuildConfig.Request(GuildIdParsed,
+                                                         StringConstants.DefaultCommandPrefix);
+        return await Mediator.Send(request);
     }
 
     private async Task<GuildModConfigEntity> FetchGuildModConfigAsync()
     {
-        return await Mediator.Send(new GetOrCreateGuildModConfig.Request(GuildIdParsed, 
-                                                                         StringConstants.DefaultCommandPrefix));
+        var request = new GetOrCreateGuildModConfig.Request(GuildIdParsed, 
+                                                            StringConstants.DefaultCommandPrefix);
+        return await Mediator.Send(request);
     }
 
     private async Task<GuildConfigEntity> UpdateGuildConfigAsync()
@@ -236,10 +224,5 @@ public partial class ManageGuild : ComponentBase, IDisposable
         {
             Snackbar.Add("Uh-oh! Something went wrong!", Severity.Error);
         }
-    }
-
-    public void Dispose()
-    {
-        NavManager.LocationChanged -= HandleLocationChanged;
     }
 }

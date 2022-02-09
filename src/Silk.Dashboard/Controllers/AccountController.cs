@@ -10,6 +10,13 @@ namespace Silk.Dashboard.Controllers;
 [Route("api/account")]
 public class AccountController : ControllerBase
 {
+    private readonly IDiscordOAuthTokenStorage _authTokenStorage;
+
+    public AccountController(IDiscordOAuthTokenStorage authTokenStorage)
+    {
+        _authTokenStorage = authTokenStorage;
+    }
+    
     [HttpGet("login")]
     [HttpPost("login")]
     public IActionResult Login(string returnUrl = "/")
@@ -25,6 +32,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> LogOut(string returnUrl = "/")
     {
         // This removes the cookie assigned to the user login.
+        _authTokenStorage.ClearAccessToken();
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         var safeReturnUrl = EnsureLocalRedirectUrl(returnUrl);
         return LocalRedirect(safeReturnUrl);

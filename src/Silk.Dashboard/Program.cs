@@ -1,8 +1,8 @@
 using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Services;
@@ -19,8 +19,9 @@ builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddMudServices();
-
+builder.Services.AddDataProtection().SetDefaultKeyLifetime(TimeSpan.FromDays(14));
 builder.Services.AddHttpClient();
+
 builder.Services.AddMediatR(typeof(GuildContext));
 
 /* Todo: Consolidate Adding SilkConfigurationOptions to common location? */
@@ -42,8 +43,16 @@ builder.Services.AddDbContextFactory<GuildContext>(dbBuilder =>
 //    ServiceLifetime.Transient));
 
 /* Todo: This uses the BotToken for 'Scheme', so don't care about Discord OAuth2 Token? */
-builder.Services.AddDiscordRest(provider => provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
-                                                    .Value.Discord.BotToken);
+// builder.Services.AddDiscordRest(provider => provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
+//                                                     .Value.Discord.BotToken);
+
+builder.Services.AddSingleton<IDiscordOAuthTokenStorage, DiscordOAuthTokenStorage>();
+
+builder.Services.AddDiscordRest(provider =>
+{
+    var oauthTokenService = provider.GetRequiredService<IDiscordOAuthTokenStorage>();
+    return oauthTokenService.GetAccessToken();
+});
 
 builder.Services.AddScoped<DiscordRestClientService>();
 
@@ -64,6 +73,13 @@ builder.Services.AddAuthentication(opt =>
             opt.ClientSecret = silkConfig.Discord.ClientSecret;
 
             opt.CallbackPath = DiscordAuthenticationDefaults.CallbackPath;
+            
+            opt.Events.OnCreatingTicket = context =>
+            {
+                var oauthTokenService = context.HttpContext.RequestServices.GetRequiredService<IDiscordOAuthTokenStorage>();
+                oauthTokenService.SetAccessToken(context.AccessToken);
+                return Task.CompletedTask;
+            };
         })
        .AddCookie(options =>
         {

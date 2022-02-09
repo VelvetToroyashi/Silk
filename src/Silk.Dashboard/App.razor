@@ -1,6 +1,4 @@
 ﻿@using Silk.Dashboard.Extensions
-@using Silk.Dashboard.Models
-@using Silk.Dashboard.Services
 @using Silk.Dashboard.Themes
 
 <CascadingAuthenticationState>
@@ -12,7 +10,7 @@
                     {
                         <ProblemView Message="Please login to get started with the Dashboard"
                                      ImageUrl="imgs/rp_scare.png">
-                            <MudButton Size="Size.Large" Color="Color.Info" Link="Api/Account/Login"
+                            <MudButton Size="Size.Large" Color="Color.Info" Link="api/account/login"
                                        StartIcon="@Icons.Material.Filled.Login">
                                 Login
                             </MudButton>
