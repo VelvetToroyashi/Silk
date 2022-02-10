@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -61,7 +62,7 @@ namespace Silk.Core.Utilities.Bot
 					RequireOwnerAttribute => $"My owners consist of: {owner}. {cf.Context.User.Username}#{cf.Context.User.Discriminator} doesn't look like any of those names!",
 					RequireNsfwAttribute => "As much as I'd love to, I've gotta keep the hot stuff to the right channels.",
 					RequireFlagAttribute f => $"Heh. You need to be {f.RequisiteUserFlag.Humanize(LetterCasing.Title)} for that.",
-					CooldownAttribute cd => $"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, minUnit: TimeUnit.Second)}!",
+					CooldownAttribute cd => $"Sorry, but this command has a cooldown! You can use it {cd.MaxUses} time(s) every {cd.Reset.Humanize(2, CultureInfo.InvariantCulture, minUnit: TimeUnit.Second)}!",
 					RequireUserPermissionsAttribute p => $"You need to have permission to {p.Permissions.Humanize(LetterCasing.Title)} to run this!",
 					RequireDirectMessageAttribute => "Psst. You need to be in DMs to run this!",
 					RequireGuildAttribute => "As it would turn out, you can't run this in DMs!",

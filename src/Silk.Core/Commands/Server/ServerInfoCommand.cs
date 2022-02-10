@@ -99,7 +99,7 @@ namespace Silk.Core.Commands.Server
 				.AddField("Creation date:", creation);
 
 
-			embed.AddField("Guild features:", guild.Features.Select(ft => ft.ToLower().Titleize()).Join(", "));
+			embed.AddField("Guild features:", guild.Features.Any() ? guild.Features.Select(ft => ft.ToLower().Titleize()).Join(", ") : "None", true);
 
 			await ctx.RespondAsync(embed);
 		}

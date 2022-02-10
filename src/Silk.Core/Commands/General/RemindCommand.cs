@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -55,7 +56,7 @@ namespace Silk.Core.Commands.General
 
 			await _reminders.CreateReminder(DateTime.UtcNow + time, ctx.User.Id, ctx.Channel.Id,
 				ctx.Message.Id, ctx.Guild?.Id ?? 0, reminder, ctx.Message.ReferencedMessage is not null, ReminderType.Once, replyId, authorId, replyContent);
-			await ctx.RespondAsync($"Alrighty, I'll remind you in {time.Humanize(2, minUnit: TimeUnit.Second)}: {reminder.Pull(..200)}");
+			await ctx.RespondAsync($"Alrighty, I'll remind you in {time.Humanize(2, CultureInfo.InvariantCulture, minUnit: TimeUnit.Second)}: {reminder.Pull(..200)}");
 		}
 
 		// RECURRING REMINDERS //
