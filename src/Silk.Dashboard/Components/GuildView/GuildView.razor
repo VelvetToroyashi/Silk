@@ -15,9 +15,13 @@
             @Guild.Name.Value
         </MudText>
 
-        <img src="@GuildIconUrl" 
-             style="max-width: 256px" 
-             alt="@Guild.Name.Value Logo" />
+        <MudImage ObjectFit="ObjectFit.Contain" 
+                  Height="@null" 
+                  Width="256" 
+                  Src="@GuildIconUrl" 
+                  Alt="@Guild.Name.Value" 
+                  Elevation="1" 
+                  Class="rounded"/>
     </MudCardContent>
 </MudCard>
 
@@ -39,13 +43,10 @@
             .AddStyle("cursor", "pointer")
             .AddStyle(base.ComponentStyles);
 
-    /* Todo: Fix - Properly retrieve icon URL */
     private bool HasIcon => Guild.Icon.IsDefined(out var icon) && 
                             !string.IsNullOrEmpty(icon.Value);
 
-    private string GuildIconUrl => HasIcon 
-        ? GetGuildIconUrl(Guild) 
-        : DefaultGuildIconUrl;
+    private string GuildIconUrl => HasIcon ? GetGuildIconUrl(Guild) : DefaultGuildIconUrl;
 
     public static string GetGuildIconUrl(IPartialGuild guild)
     {
@@ -53,7 +54,6 @@
 
         var result = CDN.GetGuildIconUrl(guild.ID.Value, guild.Icon.Value!, imageSize: 256);
 
-        if (!result.IsSuccess) return guildIconUrl;
         if (result.IsDefined(out var uri))
             guildIconUrl = uri.ToString();
         

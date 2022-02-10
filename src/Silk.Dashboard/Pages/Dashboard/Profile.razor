@@ -30,7 +30,7 @@ else
                     <MudGrid Spacing="4" Justify="Justify.Center">
                         <CollectionView Data="@_ownedGuilds">
                             <ItemTemplate>
-                                <MudItem @key="@context.ID">
+                                <MudItem @key="@context.ID.Value.Value">
                                     <GuildView Guild="context"
                                                OnClick="HandleGuildNavigation"/>
                                 </MudItem>
@@ -40,7 +40,7 @@ else
                 </MudItem>
             </MudGrid>
 
-            <MudButton Class="mt-10" Color="Color.Info" 
+            <MudButton Class="my-9" Color="Color.Info" 
                        Variant="Variant.Filled"
                        OnClick="ToggleJoinedGuildsVisibility">
                 @JoinedGuildsVisibilityText
@@ -61,7 +61,7 @@ else
                         <MudGrid Spacing="4" Justify="Justify.Center">
                             <CollectionView Data="@_joinedGuilds">
                                 <ItemTemplate>
-                                    <MudItem @key="@context.ID">
+                                    <MudItem @key="@context.ID.Value.Value">
                                         <GuildView Guild="context"
                                                    OnClick="HandleGuildNavigation"/>
                                     </MudItem>
