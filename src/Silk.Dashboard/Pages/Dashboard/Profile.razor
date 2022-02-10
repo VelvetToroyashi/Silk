@@ -22,7 +22,7 @@ else
             <MudText Class="shades-text text-white mb-4" 
                      Typo="Typo.h4" 
                      GutterBottom="true">
-                Servers You Manage
+                Managed Servers
             </MudText>
 
             <MudGrid>
@@ -32,7 +32,7 @@ else
                             <ItemTemplate>
                                 <MudItem @key="@context.ID">
                                     <GuildView Guild="context"
-                                               OnClick="_ => HandleGuildNavigation(context)"/>
+                                               OnClick="HandleGuildNavigation"/>
                                 </MudItem>
                             </ItemTemplate>
                         </CollectionView>
@@ -53,7 +53,7 @@ else
                 <MudText Class="shades-text text-white" 
                          Typo="Typo.h4" 
                          GutterBottom="true">
-                    Servers You've Joined (not all)
+                    Joined Servers (not all)
                 </MudText>
 
                 <MudGrid>
@@ -63,7 +63,7 @@ else
                                 <ItemTemplate>
                                     <MudItem @key="@context.ID">
                                         <GuildView Guild="context"
-                                                   OnClick="_ => HandleGuildNavigation(context)"/>
+                                                   OnClick="HandleGuildNavigation"/>
                                     </MudItem>
                                 </ItemTemplate>
                             </CollectionView>

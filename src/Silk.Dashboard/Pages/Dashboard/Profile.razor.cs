@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Silk.Dashboard.Services;
 
@@ -24,10 +25,21 @@ public partial class Profile : ComponentBase
         _ownedGuilds  = RestClientService.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }
 
-    private string CurrentUserAvatar => _user.Avatar.Value;
-    // private string CurrentUserAvatar => RestClientService.RestClient.CurrentUser.GetAvatarUrl(ImageFormat.Auto, 256);
+    private string CurrentUserAvatar => GetUserAvatarUrl();
+
+    private string GetUserAvatarUrl()
+    {
+        var avatarUrl = "";
+        var result = CDN.GetUserAvatarUrl(_user, imageSize: 256);
+
+        if (!result.IsSuccess) return avatarUrl;
+        if (result.IsDefined(out var uri))
+            avatarUrl = uri.ToString();
+        
+        return avatarUrl;
+    }
+
     private string CurrentUserName => _user.Username;
-    // private string CurrentUserName => RestClientService.RestClient.CurrentUser.Username;
     private string HeaderViewGreeting         => $"Hello, {CurrentUserName}";
     private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers"; 
 
@@ -35,7 +47,7 @@ public partial class Profile : ComponentBase
 
     private void HandleGuildNavigation(IPartialGuild guild)
     {
-        var navUrl = $"/Dashboard/ManageGuild/{guild.ID}";
+        var navUrl = $"/Dashboard/ManageGuild/{guild.ID.Value.Value}";
         var canNavigate = guild.Permissions.IsDefined(out var permissionSet) && permissionSet.HasPermission(DiscordPermission.ManageGuild);
 
         if (!canNavigate)

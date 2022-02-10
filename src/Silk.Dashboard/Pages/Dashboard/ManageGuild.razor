@@ -32,7 +32,7 @@ else
     else
     {
         @* Todo: Fix Icon URL *@
-        <HeaderView ImageUrl="@_guild.Icon.Value.Value" Text="@_guild.Name.Value" />
+        <HeaderView ImageUrl="@GuildView.GetGuildIconUrl(_guild)" Text="@_guild.Name.Value" />
     }
 
     <MudDivider Class="my-7" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />

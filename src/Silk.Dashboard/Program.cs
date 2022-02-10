@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Services;
@@ -38,20 +39,13 @@ builder.Services.AddDbContextFactory<GuildContext>(dbBuilder =>
 #endif
 });
 
-//services.TryAdd(new ServiceDescriptor(typeof(GuildContext),
-//    p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(),
-//    ServiceLifetime.Transient));
-
-/* Todo: This uses the BotToken for 'Scheme', so don't care about Discord OAuth2 Token? */
-// builder.Services.AddDiscordRest(provider => provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
-//                                                     .Value.Discord.BotToken);
-
 builder.Services.AddSingleton<IDiscordOAuthTokenStorage, DiscordOAuthTokenStorage>();
 
 builder.Services.AddDiscordRest(provider =>
 {
-    var oauthTokenService = provider.GetRequiredService<IDiscordOAuthTokenStorage>();
-    return oauthTokenService.GetAccessToken();
+    // Todo: Find alt solution for Dashboard
+    var config = provider.GetRequiredService<IOptions<SilkConfigurationOptions>>();
+    return config.Value.Discord.BotToken;
 });
 
 builder.Services.AddScoped<DiscordRestClientService>();

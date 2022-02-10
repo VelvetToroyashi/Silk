@@ -11,26 +11,49 @@
 
 <MudContainer Class="my-15">
     <HeaderView Text="Welcome to Silk!" ImageUrl="@IconLink">
-        <MudButton Class="my-6" Color="Color.Success" Variant="Variant.Filled" Link="@InviteLink" Target="_blank">
+        <MudButton Class="my-8"
+                   Color="Color.Success"
+                   Variant="Variant.Filled"
+                   Link="@InviteLink"
+                   Target="_blank">
             Invite Me
         </MudButton>
-        <MudText Class="shades-text text-white" Typo="Typo.h4">
-            Meet My Creators!
+
+        <MudText Class="text-white shades-text"
+                 Color="Color.Surface"
+                 Typo="Typo.h4">
+            Meet my Creators
         </MudText>
     </HeaderView>
-    
-    <MudDivider Class="my-8" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />
 
-    <OwnerCardCollectionView Owners="@Owners" />
+    <MudDivider Class="my-8"
+                DividerType="DividerType.Middle" />
+
+    <MudGrid>
+        <MudItem xs="12">
+            <MudGrid Spacing="4" Justify="Justify.Center">
+                <CollectionView Data="@Owners">
+                    <ItemTemplate>
+                        <MudItem @key="@context">
+                            <OwnerCardView Owner="@context" />
+                        </MudItem>
+                    </ItemTemplate>
+                </CollectionView>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
 </MudContainer>
 
 @code {
+
     private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
-    private const string InviteLink = "https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
+    private const string InviteLink = "https://discord.com/api/oauth2/authorize?" +
+                                      "client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
 
     private static List<SilkOwner> Owners { get; } = new()
     {
         new("VelvetThePanda", "Founder and Lead Developer", "https://github.com/VelvetThePanda.png"),
         new("CalebABG", "Dashboard Developer and Helper", "https://github.com/CalebABG.png"),
     };
+
 }

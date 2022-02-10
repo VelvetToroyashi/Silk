@@ -3,20 +3,21 @@
 @inherits DashboardComponentBase
 
 @using BlazorComponentUtilities
+@using Remora.Discord.API
 @using Remora.Discord.API.Abstractions.Objects
 
 <MudCard Class="@ComponentClasses" 
          Style="@ComponentStyles" 
          @onclick="async () => await HandleOnClickAsync()">
-    <MudCardContent Class="d-flex flex-column align-center pa-2">
+    <MudCardContent Class="d-flex flex-column align-center p-2">
         <MudText Typo="Typo.h5" 
                  GutterBottom="true">
-            @Guild.Name
+            @Guild.Name.Value
         </MudText>
 
         <img src="@GuildIconUrl" 
              style="max-width: 256px" 
-             alt="@Guild.Name Logo" />
+             alt="@Guild.Name.Value Logo" />
     </MudCardContent>
 </MudCard>
 
@@ -27,6 +28,8 @@
 
     [Parameter]
     public EventCallback<IPartialGuild> OnClick { get; set; }
+    
+    private const string DefaultGuildIconUrl = "https://img.icons8.com/ios-filled/100/000000/no-image.png";
 
     protected override string ComponentStyles
         => GuildViewStyleBuilder.Build();
@@ -37,11 +40,25 @@
             .AddStyle(base.ComponentStyles);
 
     /* Todo: Fix - Properly retrieve icon URL */
-    private bool HasIcon => Guild.Icon.IsDefined(out var icon) && !string.IsNullOrEmpty(icon.Value);
+    private bool HasIcon => Guild.Icon.IsDefined(out var icon) && 
+                            !string.IsNullOrEmpty(icon.Value);
 
     private string GuildIconUrl => HasIcon 
-        ? $"{Guild.Icon.Value.Value}?size=256" 
-        : "https://img.icons8.com/ios-filled/100/000000/no-image.png";
+        ? GetGuildIconUrl(Guild) 
+        : DefaultGuildIconUrl;
+
+    public static string GetGuildIconUrl(IPartialGuild guild)
+    {
+        var guildIconUrl = "";
+
+        var result = CDN.GetGuildIconUrl(guild.ID.Value, guild.Icon.Value!, imageSize: 256);
+
+        if (!result.IsSuccess) return guildIconUrl;
+        if (result.IsDefined(out var uri))
+            guildIconUrl = uri.ToString();
+        
+        return guildIconUrl;
+    }
 
     private async Task HandleOnClickAsync() => await OnClick.InvokeAsync(Guild);
 }

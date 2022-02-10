@@ -1,16 +1,24 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<MudAppBar Color="Color.Dark" Fixed="false" Elevation="2" Dense="false">
-    <MudElement HtmlTag="a" Class="mx-4" href="/" Style="font-size:1.2rem;font-weight:bold">
-        Silk Dashboard
-    </MudElement>
+<MudAppBar Style="background-color: #25292c" Color="Color.Transparent"
+           Fixed="false" Elevation="2"
+           Dense="false">
 
-    <MudElement HtmlTag="a" href="https://github.com/VelvetThePanda/Silk"
-                target="_blank" Style="font-size:1.0rem;">
-        Github
-    </MudElement>
+    <MudButtonGroup OverrideStyles="false">
+        <MudButton Size="Size.Large"
+                   Variant="Variant.Text"
+                   Link="/">
+            Silk Dashboard
+        </MudButton>
 
-    <MudSpacer/>
+        <MudButton Variant="Variant.Text"
+                   Link="https://github.com/VTPDevelopment/Silk"
+                   Target="_blank">
+            Github
+        </MudButton>
+    </MudButtonGroup>
 
-    <LoginToolBar/>
+    <MudSpacer />
+
+    <LoginToolBar />
 </MudAppBar>

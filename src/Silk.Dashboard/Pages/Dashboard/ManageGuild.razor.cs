@@ -1,11 +1,10 @@
 ﻿using Humanizer;
 using MediatR;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
-using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
@@ -21,8 +20,10 @@ public partial class ManageGuild : ComponentBase
     [Inject] private NavigationManager        NavManager        { get; set; }
     [Inject] private DiscordRestClientService RestClientService { get; set; }
 
-    [Parameter] public string GuildId { get; set; }
-    private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake) 
+    [Parameter] 
+    public string GuildId { get; set; }
+    
+    private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake, Constants.DiscordEpoch)
         ? (Snowflake) snowflake 
         : new();
     
@@ -44,8 +45,6 @@ public partial class ManageGuild : ComponentBase
     
     private MudTabs              _tabContainer;
 
-    private readonly GreetingOption[] _greetingOptions = Enum.GetValues<GreetingOption>();
-
     private bool CanShowSaveButton => _guildConfig is not null || _guildModConfig is not null;
 
     /* Max Characters for Discord Greeting Text */
@@ -54,16 +53,15 @@ public partial class ManageGuild : ComponentBase
     // private long RemainingChars => MaxGreetingTextLength - _guildConfig!.GreetingText.Length;
     private string RemainingCharsClass => RemainingChars < 20 ? "mud-error-text" : "";
 
-    private static string LabelFor(string @string) 
-        => @string.Humanize(LetterCasing.Title);
+    private static string LabelFor(string @string) => @string.Humanize(LetterCasing.Title);
 
     private static bool PanelIdMatches(MudTabPanel panel, string panelId) 
         => string.Equals(((string)panel.ID).ToLower(), panelId.ToLower(), StringComparison.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
     {
-        _ = FetchDiscordGuildFromRestAsync();
         await base.OnInitializedAsync();
+        _ = FetchDiscordGuildFromRestAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
