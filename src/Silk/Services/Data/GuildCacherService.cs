@@ -30,7 +30,9 @@ public class GuildCacherService
     // If we joined within the last 30 seconds, we consider it new.
     // This is bound to change in the future. For now 30s is good enough to allow for caching,
     // as well as accommodating for any responder delays.
-    private readonly TimeSpan _joinedTimestampThreshold = 30.Seconds(); 
+    private readonly TimeSpan _joinedTimestampThreshold = 30.Seconds();
+
+    private readonly object _obj = new();
 
     private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n"      +
                                                     $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "           +
@@ -176,16 +178,18 @@ public class GuildCacherService
     }
 
     
-    [MethodImpl(MethodImplOptions.Synchronized)]
     private void LogAndCacheGuild(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-        var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());
-        var currentGuildCounter = _cache.GetOrCreate(SilkKeyHelper.GenerateCurrentGuildCounterKey(), _ => 1);
+        lock (_obj)
+        {
+            var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());
+            var currentGuildCounter = _cache.GetOrCreate(SilkKeyHelper.GenerateCurrentGuildCounterKey(), _ => 1);
 
-        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}] handling {MemberCount,-5} members.", currentGuildCounter, currentGuildCount, members.Count);
+            _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}] handling {MemberCount,-5} members.", currentGuildCounter, currentGuildCount, members.Count);
 
-        _cache.Set(SilkKeyHelper.GenerateGuildIdentifierKey(guildID), true);
-        _cache.Set(SilkKeyHelper.GenerateGuildMemberCountKey(guildID), members.Count);
-        _cache.Set(SilkKeyHelper.GenerateCurrentGuildCounterKey(), currentGuildCounter + 1);
+            _cache.Set(SilkKeyHelper.GenerateGuildIdentifierKey(guildID), true);
+            _cache.Set(SilkKeyHelper.GenerateGuildMemberCountKey(guildID), members.Count);
+            _cache.Set(SilkKeyHelper.GenerateCurrentGuildCounterKey(), currentGuildCounter + 1);
+        }
     }
 }
