@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
@@ -13,6 +14,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
@@ -154,25 +156,18 @@ public class GuildCacherService
     
     private async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-        if (members.Count < 2) // Just us, or just a bad collection. Either way this isn't a valid state.
-            return Result.FromError(new ArgumentOutOfRangeError("Members only contained current user."));
-
         var erroredMembers = new List<IResult>();
 
-        foreach (var member in members)
-        {
-            if (!member.User.IsDefined(out var user))
-            {
-                erroredMembers.Add(Result.FromError(new InvalidOperationError("Member did not have a defined user.")));
-                continue;
-            }
-            
-            var currentMemberState = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, JoinedAt: member.JoinedAt));
+        var users = members.Where(u => u.User.IsDefined())
+                           .Select(u => (u.User.Value.ID, u.JoinedAt))
+                           .Select((uj, _) =>
+                            {
+                                var (id, joinedAt) = uj;
+                                return new UserEntity {ID = id, GuildID = guildID, History = new() {JoinDate = joinedAt}};
+                            });
 
-            if (!currentMemberState.IsSuccess)
-                erroredMembers.Add(currentMemberState);
-        }
-        
+        await _mediator.Send(new BulkAddUser.Request(users));
+
         LogAndCacheGuild(guildID, members);
 
         return erroredMembers.Any()
@@ -180,6 +175,8 @@ public class GuildCacherService
             : Result.FromSuccess();
     }
 
+    
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private void LogAndCacheGuild(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
         var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());

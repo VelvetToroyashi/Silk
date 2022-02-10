@@ -33,35 +33,16 @@ public static class BulkAddUser
 
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<UserEntity>> Handle(Request request,
-                                                          CancellationToken  cancellationToken)
+        public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
-            try
-            {
-                _db.AddRange(request.Users);
-                await _db.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateException)
-            {
-                _db.ChangeTracker.Clear();
-
-                List<UserEntity>? nonAddedUsers = await _db.Users.Where(u => u.GuildID == request.Users.First().ID)
-                                                           .ToListAsync(cancellationToken);
-                nonAddedUsers = request.Users.Except(nonAddedUsers).ToList();
-
-                _db.Users.AddRange(nonAddedUsers);
-
-
-                try
-                {
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                catch (DbUpdateException)
-                {
-                    await AttemptAddUsersSlowAsync(request.Users);
-                }
-                // Y'know. I hope whoever forces the catch branch to run has a warm pillow. //
-            }
+            var users = await _db.Users
+                                  .Where(u => u.GuildID == request.Users.First().GuildID)
+                                  .Select(u => u.ID)
+                                  .ToListAsync(cancellationToken);
+            
+            _db.AddRange(request.Users.ExceptBy(users, u => u.ID));
+            
+            await _db.SaveChangesAsync(cancellationToken);
 
             return request.Users;
         }
