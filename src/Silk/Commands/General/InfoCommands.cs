@@ -83,7 +83,7 @@ public class InfoCommands : CommandGroup
         if (!bannerUrl.IsSuccess)
             bannerImage = !user.AccentColour.IsDefined(out var accent)
                 ? default
-                : await GenerateBannerColorImageAsync(accent.ToString()!);
+                : await GenerateBannerColorImageAsync(accent.Value.Name);
         
         var embed = new Embed
         {
@@ -136,7 +136,7 @@ public class InfoCommands : CommandGroup
         if (!bannerUrl.IsSuccess)
             bannerImage = !user.AccentColour.IsDefined(out var accent)
                 ? default
-                : await GenerateBannerColorImageAsync(accent.ToString()!);
+                : await GenerateBannerColorImageAsync(accent.Value.Name);
         
         var embed = new Embed
         {
@@ -167,6 +167,13 @@ public class InfoCommands : CommandGroup
     [Description("Get information about a role!")]
     public async Task<IResult> GetRoleInfoAsync(IRole role)
     {
+        var roleResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
+        
+        if (!roleResult.IsDefined(out var roles))
+            return roleResult;
+
+        var highestRole = roles.Max(r => r.Position);
+        
         var hierarchyResult = await GetRoleHiearchyStringAsync(role);
         
         if (!hierarchyResult.IsDefined(out var hierarchy))
@@ -193,8 +200,8 @@ public class InfoCommands : CommandGroup
             {
                 new("ID", role.ID.ToString(), true),
                 new("Created", $"{role.ID.Timestamp.ToTimestamp(TimestampFormat.LongDate)}\n({role.ID.Timestamp.ToTimestamp()})", true),
-                new("Position", role.Position.ToString(), true),
-                new("Color", $"#{role.Colour.Name[2..]}", true),
+                new("Position", $"{role.Position}/{highestRole}", true),
+                new("Color", $"#{role.Colour.Name[2..].ToUpper()}", true),
                 new("Hierarchy", hierarchy, true),
                 new("Mentionable", role.IsMentionable ? "Yes" : "No", true),
                 new("Hoisted", role.IsHoisted ? "Yes" : "No", true),
