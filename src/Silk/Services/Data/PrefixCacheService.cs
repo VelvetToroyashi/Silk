@@ -29,14 +29,14 @@ public sealed class PrefixCacheService : IPrefixCacheService
     public string RetrievePrefix(Snowflake? guildId)
     {
         if (guildId is null) return string.Empty;
-        if (_memoryCache.TryGetValue(ConfigKeyHelper.GenerateGuildPrefixKey(guildId.Value), out object? prefix)) return (string)prefix;
+        if (_memoryCache.TryGetValue(SilkKeyHelper.GenerateGuildPrefixKey(guildId.Value), out object? prefix)) return (string)prefix;
         return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
     }
 
     // I don't know if updating a reference will update 
     public void UpdatePrefix(Snowflake id, string prefix)
     {
-        object key = ConfigKeyHelper.GenerateGuildPrefixKey(id);
+        object key = SilkKeyHelper.GenerateGuildPrefixKey(id);
 
         _memoryCache.TryGetValue(key, out string oldPrefix);
         _memoryCache.Set(key, prefix);
@@ -47,7 +47,7 @@ public sealed class PrefixCacheService : IPrefixCacheService
     private async Task<string> GetDatabasePrefixAsync(Snowflake guildId)
     {
         GuildEntity guild = await _mediator.Send(new GetOrCreateGuild.Request(guildId, StringConstants.DefaultCommandPrefix));
-        _memoryCache.Set(ConfigKeyHelper.GenerateGuildPrefixKey(guildId), guild.Prefix);
+        _memoryCache.Set(SilkKeyHelper.GenerateGuildPrefixKey(guildId), guild.Prefix);
         return guild.Prefix;
     }
 }

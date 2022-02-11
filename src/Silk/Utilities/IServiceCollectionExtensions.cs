@@ -134,7 +134,8 @@ public static class IServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddSilkLogging(this IServiceCollection services, HostBuilderContext host)
+    public static IServiceCollection AddSilkLogging(this IServiceCollection services, 
+                                                    IConfiguration          configuration)
     {
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
@@ -145,7 +146,7 @@ public static class IServiceCollectionExtensions
                                     .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
-        string? configOptions = host.Configuration["Logging"];
+        string? configOptions = configuration["Logging"];
         Log.Logger = configOptions switch
         {
             "All"     => logger.MinimumLevel.Verbose().CreateLogger(),

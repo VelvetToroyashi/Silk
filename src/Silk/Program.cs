@@ -129,7 +129,7 @@ public class Program
                 
                 services
                    .AddRemoraServices()
-                   .AddSilkLogging(context)
+                   .AddSilkLogging(context.Configuration)
                    .AddSingleton<SlashCommandService>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
