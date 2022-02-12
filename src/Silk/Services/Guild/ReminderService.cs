@@ -153,7 +153,7 @@ public sealed class ReminderService : IHostedService
         
         if (dispatchReuslt.IsSuccess)
         {
-            _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds.ToString("N1"));
+            _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
             await RemoveReminderAsync(reminder.Id);
 
@@ -165,7 +165,7 @@ public sealed class ReminderService : IHostedService
 
         if (fallbackResult.IsSuccess)
         {
-            _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds.ToString("N1"));
+            _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
             return Result.FromSuccess();
         }
@@ -248,7 +248,7 @@ public sealed class ReminderService : IHostedService
             _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
-        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);
+        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);
         return Result.FromSuccess();
     }
 
@@ -258,10 +258,10 @@ public sealed class ReminderService : IHostedService
         DateTime now = DateTime.UtcNow;
         _logger.LogInformation(EventIds.Service, "Loading reminders...");
 
-        IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request());
+        IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request(), cancellationToken);
         _reminders = reminders.ToList();
 
-        _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
+        _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime:N0} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
 
         _timer.Start();
 
