@@ -32,15 +32,15 @@ public class PhishingDetectionService
     private readonly ILogger<PhishingDetectionService> _logger;
 
     public PhishingDetectionService
-        (
-            IInfractionService                infractions,
-            IDiscordRestUserAPI               userApi,
-            IDiscordRestChannelAPI            channelApi,
-            PhishingGatewayService            phishGateway,
-            GuildConfigCacheService           configService,
-            ExemptionEvaluationService        exemptions,
-            ILogger<PhishingDetectionService> logger
-        )
+    (
+        IInfractionService                infractions,
+        IDiscordRestUserAPI               userApi,
+        IDiscordRestChannelAPI            channelApi,
+        PhishingGatewayService            phishGateway,
+        GuildConfigCacheService           configService,
+        ExemptionEvaluationService        exemptions,
+        ILogger<PhishingDetectionService> logger
+    )
     {
         _infractions   = infractions;
         _userApi       = userApi;
