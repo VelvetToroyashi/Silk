@@ -122,17 +122,17 @@ public sealed class ReminderService : IHostedService
         {
             var reply = reminder.ReplyMessageID.Value;
             
-            Result<IMessage> replyResult = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reply);
+            var replyResult = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reply);
             replyExists = replyResult.IsSuccess;
         }
 
-        Result<IMessage> reminderMessage = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reminder.MessageID.Value);
+        var reminderMessage = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reminder.MessageID.Value);
 
-        bool originalMessageExists = reminderMessage.IsSuccess;
+        var originalMessageExists = reminderMessage.IsSuccess;
 
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
-        Result<IMessage> dispatchReuslt = await _channelApi.CreateMessageAsync
+        var dispatchReuslt = await _channelApi.CreateMessageAsync
             (
              reminder.ChannelID,
              dispatchMessage,
