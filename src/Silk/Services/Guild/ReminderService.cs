@@ -112,7 +112,7 @@ public sealed class ReminderService : IHostedService
     ///     Attempts to dispatch a reminder to a user in the same channel as the reminder, falling back to a DM if the channel is unavailable.
     /// </summary>
     /// <param name="reminder">The reminder to dispatch.</param>
-    /// <returns>A result indicating whether the opreation succeeded.</returns>
+    /// <returns>A result indicating whether the operation succeeded.</returns>
     private async Task<Result> AttemptDispatchReminderAsync(ReminderEntity reminder)
     {
         var now       = DateTimeOffset.UtcNow;
@@ -180,8 +180,8 @@ public sealed class ReminderService : IHostedService
     /// <param name="reminder">The reminder.</param>
     /// <param name="inDMs">Whether this reminder is being sent in DMs.</param>
     /// <param name="replyExists">Whether the reply (if any) still exists.</param>
-    /// <param name="originalMessageExists">Whether the invocation messsage for the reminder still exists.</param>
-    /// <returns>A StringBuilder contianing the built message.</returns>
+    /// <param name="originalMessageExists">Whether the invocation message for the reminder still exists.</param>
+    /// <returns>A StringBuilder containing the built message.</returns>
     private static StringBuilder GetReminderMessageString(ReminderEntity reminder, bool replyExists, bool originalMessageExists)
     {
         var dispatchMessage = new StringBuilder();
