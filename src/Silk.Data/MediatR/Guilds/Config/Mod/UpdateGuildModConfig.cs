@@ -16,12 +16,10 @@ public static class UpdateGuildModConfig
     {
         public Optional<bool>      ScanInvites           { get; init; }
         public Optional<Snowflake> MuteRoleID            { get; init; }
-        public Optional<bool>      UseNativeMute        { get; init; }
+        public Optional<bool>      UseNativeMute         { get; init; }
         public Optional<int>       MaxUserMentions       { get; init; }
         public Optional<int>       MaxRoleMentions       { get; init; }
         public Optional<bool>      BlacklistInvites      { get; init; }
-        public Optional<bool>      LogMembersJoining     { get; init; }
-        public Optional<bool>      LogMembersLeaving     { get; init; }
         public Optional<bool>      UseAggressiveRegex    { get; init; }
         public Optional<bool>      EscalateInfractions   { get; init; }
         public Optional<bool>      WarnOnMatchedInvite   { get; init; }
@@ -86,13 +84,7 @@ public static class UpdateGuildModConfig
 
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.DeleteMessageOnMatchedInvite = deleteOnMatchedInvite;
-
-            if (request.LogMembersJoining.IsDefined(out bool logMembersJoining))
-                config.LoggingConfig.LogMemberJoins = logMembersJoining;
-
-            if (request.LogMembersLeaving.IsDefined(out bool logMembersLeaving))
-                config.LoggingConfig.LogMemberLeaves = logMembersLeaving;
-
+            
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
                 config.Exemptions = exemptions;
 

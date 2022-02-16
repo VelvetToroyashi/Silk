@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -34,10 +35,9 @@ namespace Silk.Commands;
 [HelpCategory(Categories.Server)]
 [RequireContext(ChannelContext.Guild)]
 [Description("Configure various settings for your server!")]
-[RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.Or)]
+[RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.And)]
 public class ConfigCommands : CommandGroup
 {
-    
     private readonly ICommandContext         _context;
     private readonly GuildConfigCacheService _configCache;
     private readonly IDiscordRestChannelAPI  _channels;
@@ -65,6 +65,82 @@ public class ConfigCommands : CommandGroup
     [Description("View the settings for your server.")]
     public class ViewConfigCommands : CommandGroup
     {
+        private readonly IMediator              _mediator;
+        private readonly MessageContext        _context;
+        private readonly IDiscordRestGuildAPI  _guilds;
+        private readonly IDiscordRestChannelAPI _channels;
+
+        public ViewConfigCommands
+        (
+            IMediator              mediator,
+            MessageContext         context,
+            IDiscordRestGuildAPI   guilds,
+            IDiscordRestChannelAPI channels
+        )
+        {
+            _mediator = mediator;
+            _context  = context;
+            _guilds   = guilds;
+            _channels = channels;
+        }
+
+        [Command("all", "a")]
+        [Description("View all settings for your server.")]
+        public async Task<IResult> ViewAllAsync()
+        {
+            var config    = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+
+            var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
+
+            if (!guildResult.IsDefined(out var guild))
+                return guildResult;
+            
+            var contentBuilder = new StringBuilder();
+
+            contentBuilder
+               .Clear()
+               .AppendLine("**General Config:**")
+               .AppendLine("__Greetings__ | Soon:tm:")
+               .AppendLine($"> Configured Greetings: {config.Greetings.Count}")
+               .AppendLine()
+               .AppendLine("**Moderation Config:**")
+               .AppendLine()
+               .AppendLine("__Logging__ | Soon:tm:")
+               .AppendLine($"> Log members joining: <:_:{(modConfig.LoggingConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log members leaving: <:_:{(modConfig.LoggingConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log message edits: <:_:{(modConfig.LoggingConfig.LogMessageEdits ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log message deletes: <:_:{(modConfig.LoggingConfig.LogMessageDeletes ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine()
+               .AppendLine("__Invites__ | `config edit invites`, `config edit invite-whitelist`")
+               .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInviteOrigin ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(modConfig.InfractOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See `config view invites`]")}")
+               .AppendLine("Aggressive pattern matching regex:")
+               .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
+               .AppendLine()
+               .AppendLine("__Infractions__ | `config edit infractions`")
+               .AppendLine($"> Mute role: {(modConfig.MuteRoleID.Value is 0 ? "Not set" : $"<@&{modConfig.MuteRoleID}>")}")
+               .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.ProgressiveStriking ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See `config view infractions`]" : "Not configured")}")
+               .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}")
+               .AppendLine()
+               .AppendLine("__Anti-Phishing__ **(New!)** | `config edit phishing`")
+               .AppendLine($"> Anti-Phishing enabled: <:_:{(modConfig.DetectPhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete Phishing Links: <:_:{(modConfig.DeletePhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Phishing detection action: {(modConfig.NamedInfractionSteps!.TryGetValue(AutoModConstants.PhishingLinkDetected, out var action) ? action.Type : "Not configured")}");
+
+            var embed = new Embed
+            {
+                Title       = $"Config for {guild.Name}!",
+                Colour      = Color.MidnightBlue,
+                Description = contentBuilder.ToString()
+            };
+            
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+        }
         
     }
 
@@ -78,22 +154,25 @@ public class ConfigCommands : CommandGroup
         private readonly IDiscordRestUserAPI    _users;
         private readonly IDiscordRestInviteAPI  _invites;
         private readonly IDiscordRestChannelAPI _channels;
+        private readonly IDiscordRestWebhookAPI _webhooks;
         public EditConfigCommands
         (
             IMediator              mediator,
-            MessageContext        context,
+            MessageContext         context,
             IDiscordRestGuildAPI   guilds,
             IDiscordRestUserAPI    users,
             IDiscordRestChannelAPI channels,
-            IDiscordRestInviteAPI invites
+            IDiscordRestInviteAPI  invites,
+            IDiscordRestWebhookAPI webhooks
         )
         {
-            _mediator     = mediator;
-            _context      = context;
-            _guilds       = guilds;
-            _users        = users;
-            _channels     = channels;
-            _invites = invites;
+            _mediator      = mediator;
+            _context       = context;
+            _guilds        = guilds;
+            _users         = users;
+            _channels      = channels;
+            _invites       = invites;
+            _webhooks = webhooks;
         }
 
         [Command("phishing")]
@@ -182,6 +261,263 @@ public class ConfigCommands : CommandGroup
             return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
         }
 
+        [Command("logging")]
+        [Description("Adjust the settings for logging. \n"                    +
+                     "If removing options, true or false can be specified.\n" +
+                     "If a channel is already specified for the action, it will be overridden with the new one.")]
+        public async Task<IResult> LoggingAsync
+        (
+            [Option('j', "joins")] 
+            [Description("Whether to log when a user joins. ")]
+            bool? logJoins = null,
+
+            [Option('l', "leaves")] 
+            [Description("Whether to log when a user leaves.")]
+            bool? logLeaves = null,
+
+            [Option('d', "deletes")] 
+            [Description("Whether to log message deletes.")]
+            bool? logDeletes = null,
+
+            [Option('e', "edits")] 
+            [Description("Whether to log message edits.")]
+            bool? logEdits = null,
+
+            [Option('w', "webhook")] 
+            [Description("Whether to log to a webhook.")]
+            bool? webhook = null,
+
+            [Switch('r', "remove")] 
+            [Description("Removes specified options from the logging settings.")]
+            bool remove = false,
+            
+            [Option('c', "channel")]
+            [Description("The channel to log to. This is required if not removing options.")]
+            IChannel? channel = null
+        )
+        {
+            if (!remove && channel is null && webhook is null)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
+                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel` or `--webhook` is must be specified.");
+            }
+            
+            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+
+            var loggingConfig = modConfig.LoggingConfig;
+            
+            if (remove)
+            {
+                if (logJoins is not null)
+                {
+                    loggingConfig.LogMemberJoins = false;
+                    loggingConfig.MemberJoins    = null;
+                }
+                
+                if (logLeaves is not null)
+                {
+                    loggingConfig.LogMemberLeaves = false;
+                    loggingConfig.MemberLeaves    = null;
+                }
+                
+                if (logDeletes is not null)
+                {
+                    loggingConfig.LogMessageDeletes = false;
+                    loggingConfig.MessageDeletes    = null;
+                }
+
+                if (logEdits is not null)
+                {
+                    loggingConfig.LogMessageEdits = false;
+                    loggingConfig.MessageEdits    = null;
+                }
+                
+                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+                {
+                    LoggingConfig = loggingConfig
+                });
+
+                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            }
+
+            if (channel is not null)
+            {
+                if (logJoins is true)
+                {
+                    loggingConfig.LogMemberJoins = true;
+
+                    var lwt = loggingConfig.MemberJoins?.WebhookToken;
+                    var lwi = loggingConfig.MemberJoins?.WebhookID;
+                    
+                    loggingConfig.MemberJoins    = new()
+                    {
+                        ChannelID = channel.ID,
+                        GuildID = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID = lwi ?? default(Snowflake)
+                    };
+                }
+                
+                if (logLeaves is true)
+                {
+                    loggingConfig.LogMemberLeaves = true;
+
+                    var lwt = loggingConfig.MemberLeaves?.WebhookToken;
+                    var lwi = loggingConfig.MemberLeaves?.WebhookID;
+                    
+                    loggingConfig.MemberLeaves    = new()
+                    {
+                        ChannelID = channel.ID,
+                        GuildID = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID = lwi ?? default(Snowflake)
+                    };
+                }
+                
+                if (logDeletes is true)
+                {
+                    loggingConfig.LogMessageDeletes = true;
+
+                    var lwt = loggingConfig.MessageDeletes?.WebhookToken;
+                    var lwi = loggingConfig.MessageDeletes?.WebhookID;
+                    
+                    loggingConfig.MessageDeletes    = new()
+                    {
+                        ChannelID = channel.ID,
+                        GuildID = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID = lwi ?? default(Snowflake)
+                    };
+                }
+                
+                if (logEdits is true)
+                {
+                    loggingConfig.LogMessageEdits = true;
+
+                    var lwt = loggingConfig.MessageEdits?.WebhookToken;
+                    var lwi = loggingConfig.MessageEdits?.WebhookID;
+                    
+                    loggingConfig.MessageEdits = new()
+                    {
+                        ChannelID = channel.ID,
+                        GuildID = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID = lwi ?? default(Snowflake)
+                    };
+                }
+            }
+
+
+            if (webhook is true && channel is not null)
+            {
+                var success = true;
+                
+                if (logJoins is true)
+                {
+                    var joinWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (joinWebhook.IsDefined(out var jw))
+                        loggingConfig.MemberJoins = new()
+                        {
+                            WebhookID    = jw.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = jw.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+                
+                if (logLeaves is true)
+                {
+                    var leaveWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (leaveWebhook.IsDefined(out var lw))
+                        loggingConfig.MemberLeaves = new()
+                        {
+                            WebhookID    = lw.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = lw.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+                
+                if (logDeletes is true)
+                {
+                    var deleteWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (deleteWebhook.IsDefined(out var dw))
+                        loggingConfig.MessageDeletes = new()
+                        {
+                            WebhookID    = dw.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = dw.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+                
+                if (logEdits is true)
+                {
+                    var editWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (editWebhook.IsDefined(out var ew))
+                        loggingConfig.MessageEdits = new()
+                        {
+                            WebhookID    = ew.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = ew.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+
+                if (!success)
+                {
+                    await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
+
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't create webhooks in that channel. Check the channel settings to ensure I have `Manage Webhooks` please!");
+                }
+
+                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+                {
+                    LoggingConfig = loggingConfig
+                });
+            }
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmEmoji}");
+        }
+
+        private async Task<Result<IWebhook>> TryCreateWebhookAsync(Snowflake channelID)
+        {
+            var selfResult = await _users.GetCurrentUserAsync();
+            
+            if (!selfResult.IsSuccess)
+                return Result<IWebhook>.FromError(selfResult.Error);
+            
+            var webhooks = await _webhooks.GetChannelWebhooksAsync(channelID);
+
+            if (!webhooks.IsSuccess)
+                return Result<IWebhook>.FromError(webhooks.Error);
+
+            //Webhook tokens are always returned (if you have permission), so we need to check if the wh is owned by us.
+            var webhook = webhooks.Entity.FirstOrDefault
+                (
+                 wh =>
+                     wh.Type is WebhookType.Incoming &&
+                     wh.User.IsDefined(out var user) &&
+                     user.ID == selfResult.Entity.ID
+                );
+
+            //Return the webhook if it already exists.
+            if (webhook is not null)
+                return Result<IWebhook>.FromSuccess(webhook);
+
+            var createResult = await _webhooks.CreateWebhookAsync(channelID, "Silk! Logging", default);
+
+            return createResult;
+        }
+        
         [Command("invite-whitelist", "iw")]
         [Description("Control the whitelisting of invites!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
@@ -380,7 +716,7 @@ public class ConfigCommands : CommandGroup
             IRole? mute,
             
             [Option("native")]                            
-            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission. (This is currently unimplemented)")]
+            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission.")]
             bool? useNativeMute = null
             //It's worth noting that there WAS an option here to have Silk automatically configure the role,
             // but between ratelimits and the fact that permissions suck, it was removed.

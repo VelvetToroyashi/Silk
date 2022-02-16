@@ -129,10 +129,14 @@ public class Program
                 
                 services
                    .AddRemoraServices()
+                   
                    .AddSilkLogging(context.Configuration)
                    .AddSingleton<SlashCommandService>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
+                   .AddSingleton<PhishingGatewayService>()
+                   .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
+                   .AddSingleton<PhishingDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
