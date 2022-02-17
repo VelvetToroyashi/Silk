@@ -261,6 +261,8 @@ public class ConfigCommands : CommandGroup
             return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
         }
 
+        #region Logging
+        
         [Command("logging")]
         [Description("Adjust the settings for logging. \n"                    +
                      "If removing options, true or false can be specified.\n" +
@@ -487,7 +489,9 @@ public class ConfigCommands : CommandGroup
             
             return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmEmoji}");
         }
-
+        
+        #endregion
+        
         private async Task<Result<IWebhook>> TryCreateWebhookAsync(Snowflake channelID)
         {
             var selfResult = await _users.GetCurrentUserAsync();
@@ -517,8 +521,10 @@ public class ConfigCommands : CommandGroup
 
             return createResult;
         }
-        
-        [Command("invite-whitelist", "iw")]
+
+        #region  Invite Whitelist
+
+                [Command("invite-whitelist", "iw")]
         [Description("Control the whitelisting of invites!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         public async Task<IResult> WhitelistAsync
@@ -706,6 +712,9 @@ public class ConfigCommands : CommandGroup
             
             return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
         }
+
+        #endregion
+
         
         [Command("mute")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
@@ -763,7 +772,158 @@ public class ConfigCommands : CommandGroup
             
             return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
         }
-            
+
+
+
+        [Group("greetings", "greeting", "welcome")]
+        public class GreetingCommands : CommandGroup
+        {
+            private readonly IMediator              _mediator;
+            private readonly MessageContext        _context;
+            private readonly IDiscordRestChannelAPI _channels;
+
+            public enum GreetOption
+            {
+                Join    = GreetingOption.GreetOnJoin, 
+                Role    = GreetingOption.GreetOnRole,
+                Channel = GreetingOption.GreetOnChannelAccess
+            }
+
+            public GreetingCommands(IMediator mediator, MessageContext context, IDiscordRestChannelAPI channels)
+            {
+                _mediator = mediator;
+                _context  = context;
+                _channels = channels;
+            }
+
+            [Command("add")]
+            [Description("Add a greeting message to a channel.")]
+            [SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
+            public async Task<IResult> AddAsync
+            (
+                [Description("The channel to add the greeting to.")]
+                IChannel channel,
+
+                [Description("When to greet the member. Available options are `join`, `role`, and `channel`.")]
+                GreetOption option,
+
+                [Greedy]
+                [Description
+                    (
+                        "The welcome message to send. The following subsitutions are supported:\n" +
+                        "`{u}` - The username of the user who joined.\n"                           +
+                        "`{@u}` - The mention (@user) of the user who joined.\n"                   +
+                        "`{s}` - The name of the server.\n\n"                                      +
+                        "Greetings are limited to 2000 characters."
+                    )]
+                string greeting,
+
+                [Option("cor")]
+                [Description
+                    (
+                        "The channel or the role to check for.\n"                                                                      +
+                        "When a channel is specified: The user will be greeted when manually added to the channel via an overwrite.\n" +
+                        "When a role is specified: The user will be greeted when given the specified role. "
+                    )]
+                OneOf<IChannel, IRole>? channelOrRole = null
+            )
+            {
+                var entityID = Result<Snowflake>.FromSuccess(default);
+
+                if (option is GreetOption.Role or GreetOption.Channel)
+                {
+                    if (channelOrRole is null)
+                    {
+                        await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a channel or role to check for!");
+
+                        return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    }
+
+                    entityID = option switch
+                    {
+                        GreetOption.Role when channelOrRole.Value.IsT1 => Result<Snowflake>.FromSuccess(channelOrRole.Value.AsT1.ID),
+                        GreetOption.Role when channelOrRole.Value.IsT0
+                            => Result<Snowflake>.FromError(new InvalidOperationError("The greeting is set for a role, but you specified a channel!")),
+                        GreetOption.Role when channelOrRole is null
+                            => Result<Snowflake>.FromError(new ArgumentNullError("A role must be specified!")),
+
+                        GreetOption.Channel when channelOrRole.Value.IsT0 => Result<Snowflake>.FromSuccess(channelOrRole.Value.AsT0.ID),
+                        GreetOption.Channel when channelOrRole.Value.IsT1
+                            => Result<Snowflake>.FromError(new InvalidOperationError("The greeting is set for a channel, but you specified a role!")),
+                        GreetOption.Channel when channelOrRole is null
+                            => Result<Snowflake>.FromError(new ArgumentNullError("A channel must be specified!")),
+
+                        _ => throw new InvalidOperationException("Impossible situation")
+                    };
+
+                }
+                
+                if (!entityID.IsDefined(out var ID))
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, entityID.Error!.Message);
+                   
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                }
+
+                if (greeting.Length > 2000)
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, $"Hm. That greeting is a bit too long ({greeting.Length} characters). Try a shorter one.");
+                    
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                }
+
+                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+                
+                var greetingEntity = new GuildGreetingEntity
+                {
+                    Message = greeting,
+                    ChannelID = channel.ID,
+                    MetadataID = ID,
+                    Option = (GreetingOption)option
+                };
+                
+                config.Greetings.Add(greetingEntity);
+                
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+
+                return Result.FromSuccess();
+            }
+
+            [Command("update")]
+            [Description("Updates an existing greeting.")]
+            public async Task<IResult> UpdateGreetingAsync
+            (
+                int GreetingID,
+
+                [Description("The new option for the greeting message")]
+                string? option = null,
+
+
+
+                [Greedy] [Option("greeting")] [Description("The new greeting")]
+                string? greeting = null
+            )
+            {
+
+                if (option is not ("always" or "on_role" or "on_channel"))
+                {
+                    if (option.Contains("role"))
+                    {
+                        option = "on_role";
+                    }
+                    else if (option.Contains("channel"))
+                    {
+                        option = "on_channel";
+                    }
+                    else
+                    {
+                        option = "always";
+                    }
+                }
+
+                return Result.FromSuccess();
+            }
+        }
     }
 }
 
