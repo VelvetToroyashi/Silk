@@ -8,6 +8,7 @@ namespace Silk.Data.Entities;
 public class InfractionEntity
 {
     public int Id { get; set; } //Requisite Id for DB purposes
+    
     /// <summary>
     ///     The Id of the target this infraction belongs to.
     /// </summary>
