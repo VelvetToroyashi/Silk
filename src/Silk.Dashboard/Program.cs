@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Services;
@@ -41,11 +40,15 @@ builder.Services.AddDbContextFactory<GuildContext>(dbBuilder =>
 
 builder.Services.AddSingleton<IDiscordOAuthTokenStorage, DiscordOAuthTokenStorage>();
 
-builder.Services.AddDiscordRest(provider =>
+// Todo: Hack/clever way to use OAuth instead of Bot token
+builder.Services.AddDiscordRest(_ => "_", clientBuilder =>
 {
-    // Todo: Find alt solution for Dashboard
-    var config = provider.GetRequiredService<IOptions<SilkConfigurationOptions>>();
-    return config.Value.Discord.BotToken;
+    clientBuilder.ConfigureHttpClient((provider, client) =>
+    {
+        var tokenStore = provider.GetRequiredService<IDiscordOAuthTokenStorage>();
+        client.DefaultRequestHeaders.Authorization = new("Bearer",
+                                                         tokenStore.GetAccessToken());
+    });
 });
 
 builder.Services.AddScoped<DiscordRestClientService>();
@@ -58,26 +61,28 @@ builder.Services.AddAuthentication(opt =>
         })
        .AddDiscord(opt =>
         {
-            opt.UsePkce      = true;
-            opt.SaveTokens   = true;
-            
+            opt.UsePkce    = true;
+            opt.SaveTokens = true;
+
             opt.Scope.Add("guilds");
-            
+
             opt.ClientId     = silkConfig.Discord.ClientId;
             opt.ClientSecret = silkConfig.Discord.ClientSecret;
 
-            opt.CallbackPath = DiscordAuthenticationDefaults.CallbackPath;
-            
+            opt.CallbackPath       = DiscordAuthenticationDefaults.CallbackPath;
+            opt.AccessDeniedPath   = new("/");
+            opt.ReturnUrlParameter = string.Empty;
+
             opt.Events.OnCreatingTicket = context =>
             {
-                var oauthTokenService = context.HttpContext.RequestServices.GetRequiredService<IDiscordOAuthTokenStorage>();
-                oauthTokenService.SetAccessToken(context.AccessToken);
+                var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordOAuthTokenStorage>();
+                tokenStore.SetAccessToken(context.AccessToken);
                 return Task.CompletedTask;
             };
         })
        .AddCookie(options =>
         {
-            /* Set Cookie expiry (default Discord access token expiry time?) */
+            // Todo: Find way to set expiration based on OAuth token expiry
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
         });
 
