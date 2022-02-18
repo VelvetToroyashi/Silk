@@ -60,31 +60,14 @@ public partial class ManageGuild : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        // Todo: Fix GuildContext exception when fire and forgetting task
         await base.OnInitializedAsync();
         _ = FetchDiscordGuildFromRestAsync();
+        _ = GetGuildConfigAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender) _ = SetTabsAsync();
-        await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private async Task LoadAllConfigsAsync()
-    {
-        Task[] tasks = { GetGuildConfigAsync(), GetGuildModConfigAsync() };
-
-        _busy = true;
-
-        await Task.WhenAll(tasks);
-            
-        _busy = false;
-    }
-        
     private async Task SetTabsAsync()
     {
-        var task = LoadAllConfigsAsync();
-
         if (!string.IsNullOrWhiteSpace(ConfigTab))
         {
             var tab = _tabContainer.Panels.FirstOrDefault(panel => PanelIdMatches(panel, ConfigTab));
@@ -99,8 +82,6 @@ public partial class ManageGuild : ComponentBase
                 _tabContainer.ActivatePanel(ModConfigTabId);
             }
         }
-
-        await task;
 
         await InvokeAsync(StateHasChanged);
     }

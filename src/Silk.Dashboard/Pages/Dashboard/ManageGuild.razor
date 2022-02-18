@@ -13,7 +13,7 @@
     <MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100%">
         <MudText Class="shades-text text-white mb-4" Typo="Typo.h3">Uh Oh! 😢</MudText>
         <MudText Class="shades-text text-white" Typo="Typo.h4">
-            Looks like the requested guild either isn't available or the request failed. <br />
+            Looks like the requested guild either isn't available or the request failed. <br/>
             Refresh the page or try a different guild id to try again.
         </MudText>
     </MudContainer>
@@ -25,17 +25,17 @@ else
     @if (_guild is null)
     {
         <MudContainer Class="d-flex flex-column align-center justify-center">
-            <MudSkeleton Animation="Animation.Wave" Class="mb-4" SkeletonType="SkeletonType.Circle" Width="128px" Height="128px" />
-            <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle" Width="280px" Height="50px" />
+            <MudSkeleton Animation="Animation.Wave" Class="mb-4" SkeletonType="SkeletonType.Circle" Width="128px" Height="128px"/>
+            <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle" Width="280px" Height="50px"/>
         </MudContainer>
     }
     else
     {
         @* Todo: Fix Icon URL *@
-        <HeaderView ImageUrl="@GuildView.GetGuildIconUrl(_guild)" Text="@_guild.Name.Value" />
+        <HeaderView ImageUrl="@GuildView.GetGuildIconUrl(_guild)" Text="@_guild.Name.Value"/>
     }
 
-    <MudDivider Class="my-7" Light="false" Style="height: 4px" DividerType="DividerType.Middle" />
+    <MudDivider Class="my-7" Light="false" Style="height: 4px" DividerType="DividerType.Middle"/>
 
     @* Todo: Change color? *@
     <MudText Class="mb-7" Color="Color.Info" Typo="Typo.subtitle1" Align="Align.Center">
@@ -55,7 +55,7 @@ else
                 <MudButton Color="Color.Info" Variant="Variant.Filled" Disabled="@_busy" OnClick="GetGuildConfigAsync">
                     @if (_busy)
                     {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
                         <MudText Class="ms-2">Loading...</MudText>
                     }
                     else
@@ -69,84 +69,28 @@ else
         {
             <MudContainer>
                 @* Todo: Rewrite using greeting entities *@
-                <MudText Class="shades-text text-white" Typo="Typo.h5">Greetings</MudText>
-                @*<div class="mb-7">
-                    <MudTooltip Placement="Placement.Bottom" Text="The trigger to greet new members, if any.">
-                        <MudText Class="shades-text text-white" Typo="Typo.h5">
-                            @LabelFor(nameof(_guildConfig.GreetingOption))
-                        </MudText>
-                    </MudTooltip>
-
-                    <MudSelect @bind-Value="_guildConfig.GreetingOption" Variant="Variant.Outlined">
-                        @foreach (var go in _greetingOptions)
-                        {
-                            <MudSelectItem Value="@go">
-                                @go.Humanize(LetterCasing.Title)
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                </div>
-
-                @if (_guildConfig.GreetingOption is not GreetingOption.DoNotGreet)
+                @* Todo: Extract logic for displaying Greetings to component *@
+                @if (_guildConfig.Greetings is null || _guildConfig.Greetings.Count < 1)
                 {
-                    <div class="mb-7">
-                        <MudTooltip Placement="Placement.Bottom" Text="The Id of the channel to greet members in.">
-                            <MudText Class="shades-text text-white" Typo="Typo.h5">
-                                @LabelFor(nameof(_guildConfig.GreetingChannel))
-                            </MudText>
-                        </MudTooltip>
+                    <MudText Class="shades-text text-white" Typo="Typo.h5">
+                        No configured greetings yet.
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Class="shades-text text-white" Typo="Typo.h5">
+                        Configured Greetings:
+                    </MudText>
 
-                        <MudTextField T="ulong" @bind-Value="_guildConfig.GreetingChannel" 
-                                      Variant="Variant.Outlined" HideSpinButtons="true" />
-                    </div>
-
-                    <div>
-                        <MudTooltip Placement="Placement.Bottom" Text="The text that will be used to greet new members">
-                            <MudText Class="shades-text text-white" Typo="Typo.h5">
-                                @LabelFor(nameof(_guildConfig.GreetingText))
-                            </MudText>
-                        </MudTooltip>
-
-                        <MudList Clickable="false">
-                            <MudListItem Class="pa-0">
-                                <span class="mud-info-text">{u} </span>
-                                Gets replaced with the member's username
-                            </MudListItem>
-                            <MudListItem Class="pa-0">
-                                <span class="mud-info-text">{s} </span>
-                                Gets replaced with the Guild's name
-                            </MudListItem>
-                            <MudListItem Class="pa-0">
-                                <span class="mud-info-text">{@@u} </span>
-                                Gets replaced with the member's mention
-                            </MudListItem>
-                        </MudList>
-
-                        <MudTextField T="string" @bind-Value="_guildConfig.GreetingText"
-                                      Class="mb-2" Immediate="true"
-                                      Variant="Variant.Outlined" DisableUnderLine="true" Lines="6"
-                                      Placeholder="@("Welcome {@u}! This is {s}, the best server around!")"
-                                      maxlength="@MaxGreetingTextLength" />
-
-                        <MudText Class="@RemainingCharsClass" Typo="Typo.caption">
-                            Characters Remaining: @RemainingChars
-                        </MudText>
-                    </div>
-                    
-                    if (_guildConfig.GreetingOption is GreetingOption.GreetOnRole)
-                    {
-                        <div class="mt-7">
-                            <MudTooltip Placement="Placement.Bottom" Text="The Id of the role to wait for to greets new members.">
-                                <MudText Class="shades-text text-white" Typo="Typo.h5">
-                                    @LabelFor(nameof(_guildConfig.VerificationRole))
-                                </MudText>
-                            </MudTooltip>
-
-                            <MudTextField T="ulong" @bind-Value="_guildConfig.VerificationRole" 
-                                          Variant="Variant.Outlined" HideSpinButtons="true" />
-                        </div>
-                    }
-                }*@
+                    <MudList>
+                        @foreach (var greetingEntity in _guildConfig.Greetings)
+                        {
+                            @* Todo: Remove this placeholder *@
+                            var t = $"{greetingEntity.ChannelID.Value} - {greetingEntity.Option} - {greetingEntity.Message}";
+                            <MudListItem Text="@t" />
+                        }
+                    </MudList>
+                }
             </MudContainer>
         }
     </MudTabPanel>
@@ -160,7 +104,7 @@ else
                 <MudButton Color="Color.Info" Variant="Variant.Filled" Disabled="@_busy" OnClick="GetGuildModConfigAsync">
                     @if (_busy)
                     {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
                         <MudText Class="ms-2">Loading...</MudText>
                     }
                     else
@@ -175,48 +119,61 @@ else
             <MudContainer>
                 <div class="mb-7">
                     <MudText Class="shades-text text-white" Typo="Typo.h5">Options</MudText>
-                    @*<MudGrid Spacing="0">
+                    <MudGrid Spacing="0">
+                        @* Todo: Create separate sections for each Entity type (i.e LoggingEntity, etc...) *@
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.LogMessageChanges"
-                                         Label="@LabelFor(nameof(_guildModConfig.LogMessageChanges))" />
+                            <MudCheckBox @bind-Checked="_guildModConfig.UseNativeMute"
+                                         Label="@LabelFor(nameof(_guildModConfig.UseNativeMute))"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.LogMemberJoins"
-                                         Label="@LabelFor(nameof(_guildModConfig.LogMemberJoins))" />
+                            <MudCheckBox @bind-Checked="_guildModConfig.LoggingConfig.LogMessageEdits"
+                                         Label="@LabelFor(nameof(_guildModConfig.LoggingConfig.LogMessageEdits))"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.LogMemberLeaves"
-                                         Label="@LabelFor(nameof(_guildModConfig.LogMemberLeaves))" />
+                            <MudCheckBox @bind-Checked="_guildModConfig.LoggingConfig.LogMemberJoins"
+                                         Label="@LabelFor(nameof(_guildModConfig.LoggingConfig.LogMemberJoins))"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.BlacklistInvites"
-                                         Label="@LabelFor(nameof(_guildModConfig.BlacklistInvites))" />
+                            <MudCheckBox @bind-Checked="_guildModConfig.LoggingConfig.LogMemberLeaves"
+                                         Label="@LabelFor(nameof(_guildModConfig.LoggingConfig.LogMemberLeaves))"/>
                         </MudItem>
 
+                        @* Todo: Make/Show another section to add the LoggingId and Webhook URL *@
                         <MudItem xs="12" sm="6" md="4">
+                            <MudCheckBox @bind-Checked="_guildModConfig.LoggingConfig.UseWebhookLogging"
+                                         Label="@LabelFor(nameof(_guildModConfig.LoggingConfig.UseWebhookLogging))"/>
+                        </MudItem>
+
+                        @* Todo: Add separate section for adding Whitelisted invites *@
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudCheckBox @bind-Checked="_guildModConfig.WhitelistInvites"
+                                         Label="@LabelFor(nameof(_guildModConfig.WhitelistInvites))"/>
+                        </MudItem>
+
+                        @*<MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.BlacklistWords"
                                          Label="@LabelFor(nameof(_guildModConfig.BlacklistWords))" />
-                        </MudItem>
+                        </MudItem>*@
 
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.WarnOnMatchedInvite"
-                                         Label="@LabelFor(nameof(_guildModConfig.WarnOnMatchedInvite))" />
+                            <MudCheckBox @bind-Checked="_guildModConfig.InfractOnMatchedInvite"
+                                         Label="@LabelFor(nameof(_guildModConfig.InfractOnMatchedInvite))"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.DeleteMessageOnMatchedInvite"
-                                         Label="@LabelFor(nameof(_guildModConfig.DeleteMessageOnMatchedInvite))" />
+                                         Label="@LabelFor(nameof(_guildModConfig.DeleteMessageOnMatchedInvite))"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.UseAggressiveRegex"
-                                         Label="@LabelFor(nameof(_guildModConfig.UseAggressiveRegex))" />
+                                         Label="@LabelFor(nameof(_guildModConfig.UseAggressiveRegex))"/>
                         </MudItem>
 
-                        <MudItem xs="12" sm="6" md="4">
+                        @*<MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.AutoEscalateInfractions"
                                          Label="@LabelFor(nameof(_guildModConfig.AutoEscalateInfractions))" />
                         </MudItem>
@@ -224,7 +181,7 @@ else
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.AutoDehoist"
                                          Label="@LabelFor(nameof(_guildModConfig.AutoDehoist))" />
-                        </MudItem>
+                        </MudItem>*@
 
                         <MudItem xs="12" sm="6" md="4">
                             <MudCheckBox @bind-Checked="_guildModConfig.DetectPhishingLinks"
@@ -237,16 +194,15 @@ else
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.ScanInvites"
-                                         Label="@LabelFor(nameof(_guildModConfig.ScanInvites))"/>
+                            <MudCheckBox @bind-Checked="_guildModConfig.ProgressiveStriking"
+                                         Label="@LabelFor(nameof(_guildModConfig.ProgressiveStriking))"/>
                         </MudItem>
-                        
-                        $1$ Todo: Make/Show another section to add the LoggingId and Webhook URL #1#
+
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCheckBox @bind-Checked="_guildModConfig.UseWebhookLogging"
-                                         Label="@LabelFor(nameof(_guildModConfig.UseWebhookLogging))"/>
+                            <MudCheckBox @bind-Checked="_guildModConfig.ScanInviteOrigin"
+                                         Label="@LabelFor(nameof(_guildModConfig.ScanInviteOrigin))"/>
                         </MudItem>
-                    </MudGrid>*@
+                    </MudGrid>
                 </div>
 
                 @* Todo: Replace field with Select when grabbing channels from guild *@
@@ -261,7 +217,7 @@ else
 
                             @* Todo: Check that this doesn't crash with input *@
                             <MudTextField @bind-Value="_guildModConfig.MuteRoleID"
-                                          Variant="Variant.Outlined" HideSpinButtons="true" />
+                                          Variant="Variant.Outlined" HideSpinButtons="true"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -273,7 +229,7 @@ else
 
                             @* Todo: Check that inputs to these fields don't cause similar bug behavior *@
                             <MudNumericField @bind-Value="_guildModConfig.MaxUserMentions"
-                                             Min="0" Variant="Variant.Outlined" HideSpinButtons="true" />
+                                             Min="0" Variant="Variant.Outlined" HideSpinButtons="true"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -285,7 +241,7 @@ else
 
                             @* Todo: Check that inputs to these fields don't cause similar bug behavior *@
                             <MudNumericField @bind-Value="_guildModConfig.MaxRoleMentions"
-                                             Min="0" Variant="Variant.Outlined" HideSpinButtons="true" />
+                                             Min="0" Variant="Variant.Outlined" HideSpinButtons="true"/>
                         </MudItem>
 
                         <MudItem xs="12" sm="6">
@@ -298,7 +254,7 @@ else
                             @* Todo: Fix Numeric field bugginess with large ulong value *@
                             @* Todo: - Fix, Use MudTextField T="ulong" *@
                             @* Todo: Make layout for entity *@
-                            @*<MudTextField T="ulong" @bind-Value="_guildModConfig.LoggingChannel"
+                            @*<MudTextField T="ulong" @bind-Value="_guildModConfig.LoggingConfig.LoggingChannel"
                                           Variant="Variant.Outlined" HideSpinButtons="true" />*@
                         </MudItem>
                     </MudGrid>
@@ -315,7 +271,7 @@ else
                    OnClick="SaveChangesAsync" Disabled="@_savingChanges">
             @if (_savingChanges)
             {
-                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
                 <MudText Class="ms-2">Saving...</MudText>
             }
             else
