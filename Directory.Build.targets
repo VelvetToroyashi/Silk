@@ -53,7 +53,7 @@
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 
         <PackageReference Update="Swashbuckle.AspNetCore" Version="6.2.3" />
-        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
+        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
         <PackageReference Update="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.2" />
         <PackageReference Update="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.2" />
 
