@@ -1,7 +1,6 @@
 using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
@@ -21,7 +20,6 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddDataProtection().SetDefaultKeyLifetime(TimeSpan.FromDays(14));
 builder.Services.AddMemoryCache();
 
 builder.Services.AddHttpClient();
