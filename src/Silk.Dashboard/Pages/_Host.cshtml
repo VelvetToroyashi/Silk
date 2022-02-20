@@ -1,13 +1,41 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Authentication
+@using Silk.Dashboard.Extensions
 @using Silk.Dashboard.Services
 @namespace Silk.Dashboard.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
     Layout = "_Layout";
-    var tokenStorage = HttpContext.RequestServices.GetService(typeof(IDiscordOAuthTokenStorage)) as IDiscordOAuthTokenStorage;
-    tokenStorage!.SetAccessToken(await HttpContext.GetTokenAsync("access_token"));
+
+    var tokenStorage = HttpContext.RequestServices.GetService(typeof(IDiscordTokenStore)) as IDiscordTokenStore;
+
+    var userId = HttpContext.User.GetUserId();
+
+    if (!string.IsNullOrEmpty(userId))
+    {
+        var tasks = new[]
+        {
+            HttpContext.GetTokenAsync("access_token"),
+            HttpContext.GetTokenAsync("refresh_token"),
+            HttpContext.GetTokenAsync("expires_at"),
+            HttpContext.GetTokenAsync("token_type"),
+        };
+
+        // Wait for all tokens to be returned (instead of individually awaiting each)
+        await Task.WhenAll(tasks);
+
+        var accessToken = tasks[0].Result;
+        var refreshToken = tasks[1].Result;
+
+        var expiresAt = tasks[2].Result;
+        DateTimeOffset? expiresDateTimeOffset = DiscordTokenStoreExtensions.GetTokenExpiry(expiresAt);
+
+        var tokenType = tasks[3].Result;
+
+        var tokenEntry = new DiscordTokenStoreEntry(accessToken, refreshToken, expiresDateTimeOffset, tokenType);
+        tokenStorage!.SetToken(userId, tokenEntry);
+    }
 }
 
 <component type="typeof(App)" render-mode="Server" />

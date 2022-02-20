@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Controllers;
@@ -10,19 +11,19 @@ namespace Silk.Dashboard.Controllers;
 [Route("api/account")]
 public class AccountController : ControllerBase
 {
-    private readonly IDiscordOAuthTokenStorage _authTokenStorage;
+    private readonly IDiscordTokenStore _tokenStore;
 
-    public AccountController(IDiscordOAuthTokenStorage authTokenStorage)
+    public AccountController(IDiscordTokenStore tokenStore)
     {
-        _authTokenStorage = authTokenStorage;
+        _tokenStore = tokenStore;
     }
-    
+
     [HttpGet("login")]
     [HttpPost("login")]
     public IActionResult Login(string returnUrl = "/")
     {
         var safeReturnUrl = EnsureLocalRedirectUrl(returnUrl);
-        var challenge = Challenge(new AuthenticationProperties {RedirectUri = safeReturnUrl},
+        var challenge = Challenge(new AuthenticationProperties { RedirectUri = safeReturnUrl }, 
                                   DiscordAuthenticationDefaults.AuthenticationScheme);
         return challenge;
     }
@@ -31,9 +32,12 @@ public class AccountController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> LogOut(string returnUrl = "/")
     {
+        var userId = HttpContext.User.GetUserId();
+        _tokenStore.RemoveToken(userId);
+
         // This removes the cookie assigned to the user login.
-        _authTokenStorage.ClearAccessToken();
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
         var safeReturnUrl = EnsureLocalRedirectUrl(returnUrl);
         return LocalRedirect(safeReturnUrl);
     }
@@ -45,9 +49,11 @@ public class AccountController : ControllerBase
     /// <returns>Safe redirect url. Defaults to "/" if parameter is null or a non-local url</returns>
     private string EnsureLocalRedirectUrl(string returnUrl)
     {
-        const string defaultReturnUrl = "/";
+        const string defaultReturnUrl      = "/";
+
         var          temp             = string.IsNullOrWhiteSpace(returnUrl) ? defaultReturnUrl : returnUrl;
         var          newReturnUrl     = Url.IsLocalUrl(temp) ? temp : defaultReturnUrl;
+
         return newReturnUrl;
     }
 }

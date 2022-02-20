@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
+using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 using Silk.Data;
 using Silk.Shared.Configuration;
@@ -18,9 +19,13 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddMudServices();
 builder.Services.AddDataProtection().SetDefaultKeyLifetime(TimeSpan.FromDays(14));
+builder.Services.AddMemoryCache();
+
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddMudServices();
 
 builder.Services.AddMediatR(typeof(GuildContext));
 
@@ -38,16 +43,21 @@ builder.Services.AddDbContextFactory<GuildContext>(dbBuilder =>
 #endif
 });
 
-builder.Services.AddSingleton<IDiscordOAuthTokenStorage, DiscordOAuthTokenStorage>();
+builder.Services.AddSingleton<IDiscordTokenStore, DiscordTokenStore>();
 
 // Todo: Hack/clever way to use OAuth instead of Bot token
 builder.Services.AddDiscordRest(_ => "_", clientBuilder =>
 {
     clientBuilder.ConfigureHttpClient((provider, client) =>
     {
-        var tokenStore = provider.GetRequiredService<IDiscordOAuthTokenStorage>();
-        client.DefaultRequestHeaders.Authorization = new("Bearer",
-                                                         tokenStore.GetAccessToken());
+        // Todo: Check that using the context accessor works (NOT recommended by Blazor team due to HttpContext only hitting _Host.cshtml page on initial request or full page reload)
+        var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+        var tokenStore          = provider.GetRequiredService<IDiscordTokenStore>();
+
+        var userId      = httpContextAccessor.HttpContext?.User.GetUserId();
+        var accessToken = tokenStore.GetToken(userId!)?.AccessToken;
+
+        client.DefaultRequestHeaders.Authorization = new("Bearer", accessToken);
     });
 });
 
@@ -75,8 +85,17 @@ builder.Services.AddAuthentication(opt =>
 
             opt.Events.OnCreatingTicket = context =>
             {
-                var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordOAuthTokenStorage>();
-                tokenStore.SetAccessToken(context.AccessToken);
+                var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordTokenStore>();
+
+                var userId= context.Principal.GetUserId();
+
+                const string tokenExpiryKey = ".Token.expires_at";
+                var tokenExpiry = DiscordTokenStoreExtensions.GetTokenExpiry(context.Properties.Items[tokenExpiryKey]);
+                var tokenEntry = new DiscordTokenStoreEntry(context.AccessToken,
+                                                            context.RefreshToken,
+                                                            tokenExpiry,
+                                                            context.TokenType);
+                tokenStore.SetToken(userId!, tokenEntry);
                 return Task.CompletedTask;
             };
         })
