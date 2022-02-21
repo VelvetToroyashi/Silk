@@ -44,6 +44,8 @@ builder.Services.AddDbContextFactory<GuildContext>(dbBuilder =>
 });
 
 builder.Services.AddSingleton<IDiscordTokenStore, DiscordTokenStore>();
+builder.Services.AddSingleton<IDiscordTokenStoreWatcher, DiscordTokenStoreWatcher>();
+builder.Services.AddHostedService(s => s.GetRequiredService<IDiscordTokenStoreWatcher>());
 
 // Todo: Hack/clever way to use OAuth instead of Bot token
 builder.Services.AddDiscordRest(_ => "_", clientBuilder =>

@@ -1,4 +1,6 @@
-﻿namespace Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
+﻿#nullable enable
+
+namespace Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
 public interface IDiscordTokenStoreEntry
 {

@@ -1,3 +1,5 @@
+#nullable enable
+
 using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
 namespace Silk.Dashboard.Services.DiscordTokenStorage;

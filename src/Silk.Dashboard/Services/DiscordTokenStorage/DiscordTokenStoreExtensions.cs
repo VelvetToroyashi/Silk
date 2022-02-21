@@ -1,4 +1,6 @@
-﻿namespace Silk.Dashboard.Services.DiscordTokenStorage;
+﻿#nullable enable
+
+namespace Silk.Dashboard.Services.DiscordTokenStorage;
 
 public static class DiscordTokenStoreExtensions
 {

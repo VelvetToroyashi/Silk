@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿#nullable enable
+
+using System.Collections.Concurrent;
 using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
 namespace Silk.Dashboard.Services.DiscordTokenStorage;
@@ -28,5 +30,10 @@ public class DiscordTokenStore : IDiscordTokenStore
     public void RemoveAllTokens()
     {
         _tokenStore.Clear();
+    }
+
+    public IReadOnlyDictionary<string, IDiscordTokenStoreEntry> GetEntries()
+    {
+        return _tokenStore;
     }
 }
