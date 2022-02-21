@@ -58,12 +58,11 @@ public partial class ManageGuild : ComponentBase
     private static bool PanelIdMatches(MudTabPanel panel, string panelId) 
         => string.Equals(((string)panel.ID).ToLower(), panelId.ToLower(), StringComparison.OrdinalIgnoreCase);
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        // Todo: Fix GuildContext exception when fire and forgetting task
-        await base.OnInitializedAsync();
         _ = FetchDiscordGuildFromRestAsync();
         _ = GetGuildConfigAsync();
+        return Task.CompletedTask;
     }
 
     private async Task SetTabsAsync()

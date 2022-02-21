@@ -40,14 +40,14 @@ public partial class Profile : ComponentBase
     }
 
     private string CurrentUserName => _user.Username;
-    private string HeaderViewGreeting         => $"Hello, {CurrentUserName}";
+    private string HeaderViewGreeting         => CurrentUserName;
     private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers"; 
 
     private void ToggleJoinedGuildsVisibility() => _showJoinedGuilds = !_showJoinedGuilds;
 
     private void HandleGuildNavigation(IPartialGuild guild)
     {
-        var navUrl = $"/Dashboard/ManageGuild/{guild.ID.Value.Value}";
+        var navUrl = $"/dashboard/manage-guild/{guild.ID.Value.Value}";
         var canNavigate = guild.Permissions.IsDefined(out var permissionSet) &&
                           permissionSet.HasPermission(DiscordPermission.ManageGuild);
 

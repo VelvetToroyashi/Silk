@@ -1,7 +1,5 @@
 ﻿@page "/"
 
-@using Silk.Dashboard.Models
-
 @* Todo: Add License page for Open Source Libs used *@
 @* Todo: Add UI Testing framework (Playwright) *@
 @* Todo: Go through Pages and add `id` attributes to elements for UI test *@
@@ -10,50 +8,21 @@
 <PageTitle>Index</PageTitle>
 
 <MudContainer Class="my-15">
-    <HeaderView Text="Welcome to Silk!" ImageUrl="@IconLink">
-        <MudButton Class="my-8"
-                   Color="Color.Success"
-                   Variant="Variant.Filled"
-                   Link="@InviteLink"
-                   Target="_blank">
-            Invite Me
-        </MudButton>
+    <MudText Class="text-white shades-text mb-4"
+             Align="Align.Center"
+             Color="Color.Surface"
+             Typo="Typo.h2">
+        Welcome to Silk!
+    </MudText>
 
-        <MudText Class="text-white shades-text"
-                 Color="Color.Surface"
-                 Typo="Typo.h4">
-            Meet my Creators
-        </MudText>
-    </HeaderView>
+    <MudText Class="text-white shades-text"
+             Align="Align.Center"
+             Color="Color.Surface"
+             Typo="Typo.h4">
+        Here is your Dashboard
+    </MudText>
 
-    <MudDivider Class="my-8"
-                DividerType="DividerType.Middle" />
-
-    <MudGrid>
-        <MudItem xs="12">
-            <MudGrid Spacing="4" Justify="Justify.Center">
-                <CollectionView Data="@Owners">
-                    <ItemTemplate>
-                        <MudItem @key="@context">
-                            <OwnerCardView Owner="@context" />
-                        </MudItem>
-                    </ItemTemplate>
-                </CollectionView>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
+    <MudDivider Class="my-8" 
+                Style="height: 4px" 
+                DividerType="DividerType.Middle"/>
 </MudContainer>
-
-@code {
-
-    private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
-    private const string InviteLink = "https://discord.com/api/oauth2/authorize?" +
-                                      "client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
-
-    private static List<SilkOwner> Owners { get; } = new()
-    {
-        new("VelvetThePanda", "Founder and Lead Developer", "https://github.com/VelvetThePanda.png"),
-        new("CalebABG", "Dashboard Developer and Helper", "https://github.com/CalebABG.png"),
-    };
-
-}

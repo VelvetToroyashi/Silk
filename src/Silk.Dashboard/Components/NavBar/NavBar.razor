@@ -1,14 +1,26 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<MudAppBar Style="background-color: #25292c" Color="Color.Transparent"
-           Fixed="false" Elevation="2"
+<MudAppBar Style="background-color: #25292c"
+           Color="Color.Transparent"
+           Fixed="false"
+           Elevation="2"
            Dense="false">
 
     <MudButtonGroup OverrideStyles="false">
+        <MudButton Link="/"
+                   Variant="Variant.Text">
+            <MudImage Class="mr-3" 
+                      Src="@IconLink"
+                      ObjectFit="ObjectFit.Contain"
+                      ObjectPosition="ObjectPosition.Center"
+                      Width="45"/>
+            Home
+        </MudButton>
+
         <MudButton Size="Size.Large"
                    Variant="Variant.Text"
-                   Link="/">
-            Silk Dashboard
+                   Link="/about">
+            About
         </MudButton>
 
         <MudButton Variant="Variant.Text"
@@ -16,9 +28,23 @@
                    Target="_blank">
             Github
         </MudButton>
+
+        <MudButton Variant="Variant.Text"
+                   Link="@InviteLink"
+                   Target="_blank">
+            Invite Me
+        </MudButton>
     </MudButtonGroup>
 
-    <MudSpacer />
+    <MudSpacer/>
 
-    <LoginToolBar />
+    <LoginToolBar/>
 </MudAppBar>
+
+@code {
+        private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
+
+        private const string InviteLink = "https://discord.com/api/oauth2/authorize?" +
+                                          "client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
+
+}

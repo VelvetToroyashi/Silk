@@ -6,16 +6,16 @@
     <MudCardContent Class="d-flex flex-column align-center pa-2">
         <MudImage ObjectFit="ObjectFit.Contain"
                   Width="256"
-                  Src="@Owner.ImageUrl"
-                  Alt="@($"{Owner.Name}'s Avatar")"
+                  Src="@Contributor.ImageUrl"
+                  Alt="@($"{Contributor.Name} Avatar")"
                   Class="rounded mb-3"/>
 
         <MudText Typo="Typo.h5">
-            @Owner.Name
+            @Contributor.Name
         </MudText>
 
         <MudText Typo="Typo.subtitle1">
-            @Owner.Description
+            @Contributor.Description
         </MudText>
     </MudCardContent>
 </MudCard>
@@ -23,6 +23,6 @@
 @code {
 
     [Parameter]
-    public SilkOwner Owner { get; set; }
+    public SilkContributor Contributor { get; set; }
 
 }

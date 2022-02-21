@@ -10,13 +10,14 @@
          Style="@ComponentStyles"
          @onclick="HandleOnClickAsync">
     <MudCardContent Class="d-flex flex-column align-center p-2">
-        <MudText Typo="Typo.h5"
+        <MudText Class="shades-text text-white" 
+                 Typo="Typo.h5"
                  GutterBottom="true">
             @Guild.Name.Value
         </MudText>
 
         <MudImage ObjectFit="ObjectFit.Contain"
-                  Width="256"
+                  Width="165"
                   Src="@GuildIconUrl"
                   Alt="@Guild.Name.Value"
                   Elevation="1"
