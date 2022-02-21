@@ -61,7 +61,7 @@ public class DiscordTokenStoreWatcher : IDiscordTokenStoreWatcher
     )
     {
         if (storeEntry?.ExpiresAt is null) return false;
-        return storeEntry.ExpiresAt >= DateTimeOffset.UtcNow - periodBeforeExpiration;
+        return storeEntry.ExpiresAt + periodBeforeExpiration <= DateTimeOffset.UtcNow;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
