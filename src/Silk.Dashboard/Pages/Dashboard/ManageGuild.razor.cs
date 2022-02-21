@@ -5,8 +5,7 @@ using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
-using Silk.Dashboard.Services;
-using Silk.Dashboard.Services.DashboardDiscordClient;
+using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Guilds.Config;
@@ -19,7 +18,7 @@ public partial class ManageGuild : ComponentBase
     [Inject] private IMediator                Mediator          { get; set; }
     [Inject] private ISnackbar                Snackbar          { get; set; }
     [Inject] private NavigationManager        NavManager        { get; set; }
-    [Inject] private DashboardDiscordClient Client { get; set; }
+    [Inject] private IDashboardDiscordClient DiscordClient { get; set; }
 
     [Parameter] 
     public string GuildId { get; set; }
@@ -102,7 +101,7 @@ public partial class ManageGuild : ComponentBase
     private async Task FetchDiscordGuildFromRestAsync()
     {
         _requestFailed = false;
-        _guild = await Client.GetGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
+        _guild = await DiscordClient.GetGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
         if (_guild is null) _requestFailed = true;
         await InvokeAsync(StateHasChanged);
     }
