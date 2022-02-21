@@ -2,7 +2,7 @@
 using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
-using Silk.Dashboard.Services;
+using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
@@ -10,7 +10,7 @@ public partial class Profile : ComponentBase
 {
     [Inject] public  ISnackbar                Snackbar          { get; set; }
     [Inject] private NavigationManager        NavigationManager { get; set; }
-    [Inject] private DiscordRestClientService RestClientService { get; set; }
+    [Inject] private IDashboardDiscordClient  DiscordClient { get; set; }
 
     private bool _showJoinedGuilds;
 
@@ -20,9 +20,9 @@ public partial class Profile : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _user         = (await RestClientService.RestClient.GetCurrentUserAsync()).Entity;
-        _joinedGuilds = await RestClientService.GetAllGuildsAsync();
-        _ownedGuilds  = RestClientService.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
+        _user         = await DiscordClient.GetCurrentUserAsync(true);
+        _joinedGuilds = await DiscordClient.GetAllGuildsAsync(true);
+        _ownedGuilds  = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }
 
     private string CurrentUserAvatar => GetUserAvatarUrl();

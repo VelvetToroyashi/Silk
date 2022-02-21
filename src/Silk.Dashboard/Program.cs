@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Extensions;
-using Silk.Dashboard.Services;
+using Silk.Dashboard.Services.DashboardDiscordClient;
+using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 using Silk.Dashboard.Services.DiscordTokenStorage;
 using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 using Silk.Data;
@@ -63,7 +64,7 @@ builder.Services.AddDiscordRest(_ => "_", clientBuilder =>
     });
 });
 
-builder.Services.AddScoped<DiscordRestClientService>();
+builder.Services.AddScoped<IDashboardDiscordClient, DashboardDiscordClient>();
 
 builder.Services.AddAuthentication(opt =>
         {
