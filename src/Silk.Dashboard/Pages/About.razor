@@ -1,11 +1,7 @@
 ﻿@page "/about"
 
-@using Silk.Dashboard.Models
-
 <MudContainer>
-    <MudText Class="text-white shades-text"
-             Align="Align.Center"
-             Color="Color.Surface"
+    <MudText Align="Align.Center"
              Typo="Typo.h3">
         Meet our Contributors!
     </MudText>
@@ -14,28 +10,26 @@
                 Style="height: 4px"
                 DividerType="DividerType.Middle"/>
 
-    <MudGrid>
-        <MudItem xs="12">
-            <MudGrid Spacing="4" Justify="Justify.Center">
-                <CollectionView Data="@_contributors">
-                    <ItemTemplate>
-                        <MudItem @key="@context.Id">
-                            <ContributorCardView Contributor="@context"/>
-                        </MudItem>
-                    </ItemTemplate>
-                </CollectionView>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
-
-@code {
-
-    // Todo: Get contributors from Github repo
-    private static readonly List<SilkContributor> _contributors = new()
+    @if (_contributors is null)
     {
-        new("VelvetThePanda", "Founder and Lead Developer", "https://github.com/VelvetThePanda.png"),
-        new("CalebABG", "Dashboard Developer and Helper", "https://github.com/CalebABG.png"),
-    };
+        <LoadingView/>
+    }
+    else
+    {
+        <MudGrid>
+            <MudItem xs="12">
+                <MudGrid Spacing="4" 
+                         Justify="Justify.Center">
+                    <CollectionView Data="@_contributors">
+                        <ItemTemplate>
+                            <MudItem @key="@context.Id">
+                                <ContributorCardView Contributor="@context"/>
+                            </MudItem>
+                        </ItemTemplate>
+                    </CollectionView>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    }
 
-}
+</MudContainer>

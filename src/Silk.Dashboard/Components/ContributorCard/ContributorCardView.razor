@@ -1,22 +1,36 @@
 ﻿@namespace Silk.Dashboard.Components
 
+@using Humanizer
 @using Silk.Dashboard.Models
 
 <MudCard>
-    <MudCardContent Class="d-flex flex-column align-center pa-2">
+    <MudCardContent Class="d-flex flex-column align-center">
         <MudImage ObjectFit="ObjectFit.Contain"
                   Width="256"
-                  Src="@Contributor.ImageUrl"
-                  Alt="@($"{Contributor.Name} Avatar")"
+                  Src="@Contributor.AvatarUrl"
+                  Alt="@($"{Contributor.Name}'s Avatar")"
                   Class="rounded mb-3"/>
 
-        <MudText Typo="Typo.h5">
+        <MudLink Href="@Contributor.HtmlUrl" 
+                 Target="_blank" 
+                 Typo="Typo.h5" 
+                 Color="Color.Default" 
+                 Underline="Underline.Hover">
             @Contributor.Name
-        </MudText>
+        </MudLink>
 
-        <MudText Typo="Typo.subtitle1">
-            @Contributor.Description
-        </MudText>
+        <MudChip Variant="Variant.Text" 
+                 Color="Color.Warning"
+                 Size="Size.Medium">
+            @HumanizedContributionsText
+        </MudChip>
+        
+        @if (!string.IsNullOrWhiteSpace(Contributor.Description))
+        {
+            <MudText Typo="Typo.subtitle1">
+                @Contributor.Description
+            </MudText>
+        }
     </MudCardContent>
 </MudCard>
 
@@ -24,5 +38,7 @@
 
     [Parameter]
     public SilkContributor Contributor { get; set; }
+    
+    private string HumanizedContributionsText => "Contribution".ToQuantity(Contributor.Contributions);
 
 }

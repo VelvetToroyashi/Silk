@@ -11,8 +11,8 @@
 @if (_requestFailed)
 {
     <MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100%">
-        <MudText Class="shades-text text-white mb-4" Typo="Typo.h3">Uh Oh! 😢</MudText>
-        <MudText Class="shades-text text-white" Typo="Typo.h4">
+        <MudText Class="mb-4" Typo="Typo.h3">Uh Oh! 😢</MudText>
+        <MudText Typo="Typo.h4">
             Looks like the requested guild either isn't available or the request failed. <br/>
             Refresh the page or try a different guild id to try again.
         </MudText>
@@ -49,7 +49,7 @@ else
                 @if (_guildConfig is null)
                 {
                     <MudContainer Class="d-flex flex-column align-center justify-center">
-                        <MudText Class="shades-text text-white mb-4" Typo="Typo.h6">This Tab is for General Configuration</MudText>
+                        <MudText Class="mb-4" Typo="Typo.h6">This Tab is for General Configuration</MudText>
                         <MudButton Color="Color.Info" Variant="Variant.Filled" Disabled="@_busy" OnClick="GetGuildConfigAsync">
                             @if (_busy)
                             {
@@ -70,13 +70,13 @@ else
                         @* Todo: Extract logic for displaying Greetings to component *@
                         @if (_guildConfig.Greetings is null || _guildConfig.Greetings.Count < 1)
                         {
-                            <MudText Class="shades-text text-white" Typo="Typo.h5">
+                            <MudText Typo="Typo.h5">
                                 No configured greetings yet.
                             </MudText>
                         }
                         else
                         {
-                            <MudText Class="shades-text text-white" Typo="Typo.h5">
+                            <MudText Typo="Typo.h5">
                                 Configured Greetings:
                             </MudText>
 
@@ -98,7 +98,7 @@ else
                 @if (_guildModConfig is null)
                 {
                     <MudContainer Class="d-flex flex-column align-center justify-center">
-                        <MudText Class="shades-text text-white mb-4" Typo="Typo.h6">This Tab is for Moderation Configuration</MudText>
+                        <MudText Class="mb-4" Typo="Typo.h6">This Tab is for Moderation Configuration</MudText>
                         <MudButton Color="Color.Info" Variant="Variant.Filled" Disabled="@_busy" OnClick="GetGuildModConfigAsync">
                             @if (_busy)
                             {
@@ -116,7 +116,7 @@ else
                 {
                     <MudContainer>
                         <div class="mb-7">
-                            <MudText Class="shades-text text-white" Typo="Typo.h5">Options</MudText>
+                            <MudText Typo="Typo.h5">Options</MudText>
                             <MudGrid Spacing="0">
                                 @* Todo: Create separate sections for each Entity type (i.e LoggingEntity, etc...) *@
                                 <MudItem xs="12" sm="6" md="4">
@@ -208,7 +208,7 @@ else
                             <MudGrid Spacing="4">
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="Id of the role to apply when muting members.">
-                                        <MudText Class="shades-text text-white" Typo="Typo.h5">
+                                        <MudText Typo="Typo.h5">
                                             @LabelFor(nameof(_guildModConfig.MuteRoleID))
                                         </MudText>
                                     </MudTooltip>
@@ -220,7 +220,7 @@ else
 
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The maximum amount of users that can be mentioned in a single message.">
-                                        <MudText Class="shades-text text-white" Typo="Typo.h5">
+                                        <MudText Typo="Typo.h5">
                                             @LabelFor(nameof(_guildModConfig.MaxUserMentions))
                                         </MudText>
                                     </MudTooltip>
@@ -232,7 +232,7 @@ else
 
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The maximum amount of roles that can be mentioned in a single role.">
-                                        <MudText Class="shades-text text-white" Typo="Typo.h5">
+                                        <MudText Typo="Typo.h5">
                                             @LabelFor(nameof(_guildModConfig.MaxRoleMentions))
                                         </MudText>
                                     </MudTooltip>
@@ -244,7 +244,7 @@ else
 
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The Channel Id to log moderation/message changes to.">
-                                        <MudText Class="shades-text text-white" Typo="Typo.h5">
+                                        <MudText Typo="Typo.h5">
                                             @LabelFor(nameof(_guildModConfig.LoggingConfig))
                                         </MudText>
                                     </MudTooltip>
