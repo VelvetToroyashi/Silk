@@ -6,7 +6,7 @@ namespace Silk.Dashboard.Components;
 public abstract class DashboardComponentBase : ComponentBase
 {
     private const int DebugTaskDelayTime = 750;
-        
+
     /// <summary>
     /// Classes added after component's classes
     /// </summary>
@@ -20,23 +20,13 @@ public abstract class DashboardComponentBase : ComponentBase
     public string Style { get; set; } = string.Empty;
 
     /// <summary>
-    /// Tag for attaching data object to the component
-    /// </summary>
-    /// <remarks>
-    /// Inspiration taken from <b>MudBlazor</b>
-    /// <a href="https://github.com/Garderoben/MudBlazor/blob/dev/src/MudBlazor/Base/MudComponentBase.cs"/>
-    /// </remarks>
-    [Parameter]
-    public object Tag { get; set; }
-
-    /// <summary>
     /// Attributes added to component that don't match any of its parameters
     /// </summary>
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> ComponentAttributes { get; set; } = new();
 
     protected bool IsBusy { get; set; }
-        
+
     protected virtual string ComponentClasses
         => new CssBuilder()
           .AddClass(Class)
@@ -47,12 +37,14 @@ public abstract class DashboardComponentBase : ComponentBase
           .AddStyle(Style)
           .Build();
 
-    protected async Task ComponentRunAsync(
+    protected async Task ComponentRunAsync
+    (
         Func<Task>                      func,
         bool                            callStateHasChanged = true,
-        ILogger<DashboardComponentBase> logger              = null)
+        ILogger<DashboardComponentBase> logger              = null
+    )
     {
-        if (IsBusy) 
+        if (IsBusy)
             return;
 
         IsBusy = true;
@@ -67,12 +59,12 @@ public abstract class DashboardComponentBase : ComponentBase
         }
         catch (Exception e)
         {
-            logger?.LogError(e, e.Message);
+            logger?.LogError(e, "{ErrorMessage}", e.Message);
         }
         finally
         {
             IsBusy = false;
-            if (callStateHasChanged) 
+            if (callStateHasChanged)
                 await InvokeAsync(StateHasChanged);
         }
     }
