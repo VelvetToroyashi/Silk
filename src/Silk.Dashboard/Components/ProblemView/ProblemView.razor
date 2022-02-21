@@ -1,17 +1,23 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 100%">
-    <img style="max-width: 256px;" src="@ImageUrl" alt="Issue Image" />
-    
+<MudContainer Class="d-flex flex-column align-center justify-center"
+              Style="height: 100%">
+    <MudImage ObjectFit="ObjectFit.Contain"
+              Width="256"
+              Src="@ImageUrl"
+              Alt="Issue Image"
+              Elevation="1"
+              Class="rounded"/>
+
     <MudText Class="shades-text text-white my-3" Typo="Typo.h4">
         @Message
     </MudText>
-    
+
     @ChildContent
 </MudContainer>
 
-@code   
-{
+@code {
+
     [Parameter]
     public string Message { get; set; } = "We don't know what went wrong, but lets pretend we do";
 
@@ -20,4 +26,5 @@
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
+
 }

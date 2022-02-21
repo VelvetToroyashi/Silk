@@ -48,7 +48,8 @@ public partial class Profile : ComponentBase
     private void HandleGuildNavigation(IPartialGuild guild)
     {
         var navUrl = $"/Dashboard/ManageGuild/{guild.ID.Value.Value}";
-        var canNavigate = guild.Permissions.IsDefined(out var permissionSet) && permissionSet.HasPermission(DiscordPermission.ManageGuild);
+        var canNavigate = guild.Permissions.IsDefined(out var permissionSet) &&
+                          permissionSet.HasPermission(DiscordPermission.ManageGuild);
 
         if (!canNavigate)
         {
