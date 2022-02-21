@@ -10,7 +10,7 @@ public class DiscordTokenStoreWatcher : IDiscordTokenStoreWatcher
     private readonly ILogger<DiscordTokenStore> _logger;
     private readonly IDiscordTokenStore         _tokenStore;
 
-    private readonly TimeSpan _checkTokenExpiryPeriod = TimeSpan.FromSeconds(15);
+    private readonly TimeSpan _checkTokenExpiryPeriod = TimeSpan.FromMinutes(3);
 
     // Todo: Zero because HttpContext.User will still have token if removed early
     private readonly TimeSpan _periodBeforeTokenExpires = TimeSpan.Zero;
@@ -37,15 +37,11 @@ public class DiscordTokenStoreWatcher : IDiscordTokenStoreWatcher
 
     private void CheckForExpiredTokens(object? state)
     {
-        _logger.LogInformation("Checking for expired tokens");
-
         var expiredTokens = 0;
 
         foreach (var storeEntry in _tokenStore.GetEntries())
         {
-            if (!TokenExpired(storeEntry.Value, _periodBeforeTokenExpires))
-                continue;
-
+            if (!TokenExpired(storeEntry.Value, _periodBeforeTokenExpires)) continue;
             _tokenStore.RemoveToken(storeEntry.Key);
             ++expiredTokens;
         }
