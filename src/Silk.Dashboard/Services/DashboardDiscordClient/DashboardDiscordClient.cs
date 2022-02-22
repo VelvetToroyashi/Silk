@@ -21,7 +21,7 @@ public class DashboardDiscordClient : IDashboardDiscordClient
 
     public async Task<IUser?> GetCurrentUserAsync(bool forceRefresh = false)
     {
-        if (_cachedCurrentUserGuilds is null || forceRefresh)
+        if (_cachedUser is null || forceRefresh)
         {
             var result = await _userApi.GetCurrentUserAsync();
             _cachedUser = result.IsDefined(out var user) ? user : null;
