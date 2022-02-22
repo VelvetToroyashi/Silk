@@ -6,7 +6,7 @@ using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
-public partial class Profile : ComponentBase
+public partial class Profile
 {
     [Inject] public  ISnackbar                Snackbar          { get; set; }
     [Inject] private NavigationManager        NavigationManager { get; set; }
@@ -16,13 +16,13 @@ public partial class Profile : ComponentBase
 
     private IUser                        _user;
     private IReadOnlyList<IPartialGuild> _joinedGuilds;
-    private IReadOnlyList<IPartialGuild> _ownedGuilds;
+    private IReadOnlyList<IPartialGuild> _managedGuilds;
 
     protected override async Task OnInitializedAsync()
     {
         _user         = await DiscordClient.GetCurrentUserAsync(true);
-        _joinedGuilds = await DiscordClient.GetAllGuildsAsync(true);
-        _ownedGuilds  = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
+        _joinedGuilds = await DiscordClient.GetCurrentUserGuildsAsync(true);
+        _managedGuilds  = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }
 
     private string CurrentUserAvatar => GetUserAvatarUrl();

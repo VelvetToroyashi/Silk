@@ -2,7 +2,7 @@
 
 @attribute [Authorize]
 
-@inherits ComponentBase
+@inherits DashboardPageBase
 
 @if (_joinedGuilds is null)
 {
@@ -28,7 +28,7 @@ else
             <MudGrid>
                 <MudItem xs="12">
                     <MudGrid Spacing="4" Justify="Justify.Center">
-                        <CollectionView Data="@_ownedGuilds">
+                        <CollectionView Data="@_managedGuilds">
                             <ItemTemplate>
                                 <MudItem @key="@context.ID.Value.Value">
                                     <GuildView Guild="context"

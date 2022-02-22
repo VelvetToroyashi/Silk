@@ -30,7 +30,7 @@ public class DashboardDiscordClient : IDashboardDiscordClient
         return _cachedUser;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetAllGuildsAsync(bool forceRefresh = false)
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync(bool forceRefresh = false)
     {
         if (_cachedCurrentUserGuilds is null || forceRefresh)
         {
@@ -41,13 +41,13 @@ public class DashboardDiscordClient : IDashboardDiscordClient
         return _cachedCurrentUserGuilds;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetGuildsByPermissionAsync
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionsAsync
     (
         DiscordPermission permissions,
         bool              forceRefresh = false
     )
     {
-        return FilterGuildsByPermission(await GetAllGuildsAsync(forceRefresh), permissions);
+        return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(forceRefresh), permissions);
     }
 
     public IReadOnlyList<IPartialGuild>? FilterGuildsByPermission
@@ -61,14 +61,14 @@ public class DashboardDiscordClient : IDashboardDiscordClient
                       .ToList();
     }
 
-    public async Task<IPartialGuild?> GetGuildByIdAndPermissionAsync
+    public async Task<IPartialGuild?> GetCurrentUserGuildByIdAndPermissionAsync
     (
         Snowflake         guildId,
         DiscordPermission permission,
         bool              forceRefresh = false
     )
     {
-        var cachedGuilds = await GetAllGuildsAsync(forceRefresh);
+        var cachedGuilds = await GetCurrentUserGuildsAsync(forceRefresh);
         var guild = cachedGuilds?.FirstOrDefault(guild => guild.ID.Value == guildId                          &&
                                                           guild.Permissions.IsDefined(out var permissionSet) &&
                                                           permissionSet.HasPermission(permission));

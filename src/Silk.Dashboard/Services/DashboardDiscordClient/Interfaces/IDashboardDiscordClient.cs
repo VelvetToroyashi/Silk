@@ -8,9 +8,9 @@ namespace Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 public interface IDashboardDiscordClient
 {
     Task<IUser?>                        GetCurrentUserAsync(bool forceRefresh = false);
-    Task<IReadOnlyList<IPartialGuild>?> GetAllGuildsAsync(bool   forceRefresh = false);
+    Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync(bool   forceRefresh = false);
 
-    Task<IReadOnlyList<IPartialGuild>?> GetGuildsByPermissionAsync
+    Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionsAsync
     (
         DiscordPermission permissions,
         bool              forceRefresh = false
@@ -22,7 +22,7 @@ public interface IDashboardDiscordClient
         DiscordPermission             permission
     );
 
-    Task<IPartialGuild?> GetGuildByIdAndPermissionAsync
+    Task<IPartialGuild?> GetCurrentUserGuildByIdAndPermissionAsync
     (
         Snowflake         guildId,
         DiscordPermission permission,

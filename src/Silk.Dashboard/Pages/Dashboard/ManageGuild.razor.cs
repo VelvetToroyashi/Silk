@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Remora.Discord.API;
@@ -13,28 +12,19 @@ using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
-public partial class ManageGuild : ComponentBase
+public partial class ManageGuild
 {
-    [Inject] private IMediator                Mediator          { get; set; }
-    [Inject] private ISnackbar                Snackbar          { get; set; }
-    [Inject] private NavigationManager        NavManager        { get; set; }
-    [Inject] private IDashboardDiscordClient DiscordClient { get; set; }
+    [Inject]    private IMediator               Mediator      { get; set; }
+    [Inject]    private ISnackbar               Snackbar      { get; set; }
+    [Inject]    private IDashboardDiscordClient DiscordClient { get; set; }
+    [Parameter] public  string                  GuildId       { get; set; }
 
-    [Parameter] 
-    public string GuildId { get; set; }
-    
     private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake, Constants.DiscordEpoch)
-        ? (Snowflake) snowflake 
+        ? (Snowflake)snowflake
         : new();
-    
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "tab")]
-    public string? ConfigTab { get; set; }
 
-    /* Todo: Make sure that reading/writing doesn't break anything */
-    private volatile bool _busy;
-    private volatile bool _savingChanges;
-    private volatile bool _requestFailed;
+    private bool _savingChanges;
+    private bool _requestFailed;
 
     private const string GenConfigTabId = "gen";
     private const string ModConfigTabId = "mod";
@@ -42,47 +32,16 @@ public partial class ManageGuild : ComponentBase
     private IPartialGuild        _guild;
     private GuildConfigEntity    _guildConfig;
     private GuildModConfigEntity _guildModConfig;
-    
-    private MudTabs              _tabContainer;
+
+    private MudTabs _tabContainer;
 
     private bool CanShowSaveButton => _guildConfig is not null || _guildModConfig is not null;
-
-    /* Max Characters for Discord Greeting Text */
-    private const int  MaxGreetingTextLength = 2000;
-    private       long RemainingChars => MaxGreetingTextLength - 0; // Todo: Fix Remaining Chars
-    // private long RemainingChars => MaxGreetingTextLength - _guildConfig!.GreetingText.Length;
-    private string RemainingCharsClass => RemainingChars < 20 ? "mud-error-text" : "";
-
-    private static string LabelFor(string @string) => @string.Humanize(LetterCasing.Title);
-
-    private static bool PanelIdMatches(MudTabPanel panel, string panelId) 
-        => string.Equals(((string)panel.ID).ToLower(), panelId.ToLower(), StringComparison.OrdinalIgnoreCase);
 
     protected override Task OnInitializedAsync()
     {
         _ = FetchDiscordGuildFromRestAsync();
         _ = GetGuildConfigAsync();
         return Task.CompletedTask;
-    }
-
-    private async Task SetTabsAsync()
-    {
-        if (!string.IsNullOrWhiteSpace(ConfigTab))
-        {
-            var tab = _tabContainer.Panels.FirstOrDefault(panel => PanelIdMatches(panel, ConfigTab));
-            if (tab is null) return;
-
-            if (PanelIdMatches(tab, GenConfigTabId))
-            {
-                _tabContainer.ActivatePanel(GenConfigTabId);
-            }
-            else if (PanelIdMatches(tab, ModConfigTabId))
-            {
-                _tabContainer.ActivatePanel(ModConfigTabId);
-            }
-        }
-
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task GetGuildConfigAsync()
@@ -100,7 +59,7 @@ public partial class ManageGuild : ComponentBase
     private async Task FetchDiscordGuildFromRestAsync()
     {
         _requestFailed = false;
-        _guild = await DiscordClient.GetGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
+        _guild = await DiscordClient.GetCurrentUserGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
         if (_guild is null) _requestFailed = true;
         await InvokeAsync(StateHasChanged);
     }
