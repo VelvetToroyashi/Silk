@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
-    <PackageReference Include="Remora.Discord.API.Abstractions" Version="51.0.1" />
-    <PackageReference Include="Remora.Discord.Gateway" Version="6.2.6" />
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="Remora.Discord.API.Abstractions" />
+    <PackageReference Include="Remora.Discord.Gateway" />
   </ItemGroup>
 
 </Project>
