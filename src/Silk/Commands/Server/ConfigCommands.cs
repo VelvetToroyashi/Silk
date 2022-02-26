@@ -101,7 +101,7 @@ public class ConfigCommands : CommandGroup
             contentBuilder
                .Clear()
                .AppendLine("**General Config:**")
-               .AppendLine("__Greetings__ | Soon:tm:")
+               .AppendLine("__Greetings__ | `config edit greetings`")
                .AppendLine($"> Configured Greetings: {config.Greetings.Count}")
                .AppendLine()
                .AppendLine("**Moderation Config:**")
@@ -784,12 +784,18 @@ public class ConfigCommands : CommandGroup
 
             public enum GreetOption
             {
+                Ignore = GreetingOption.DoNotGreet,
                 Join    = GreetingOption.GreetOnJoin, 
                 Role    = GreetingOption.GreetOnRole,
-                Channel = GreetingOption.GreetOnChannelAccess
+                //Screen  = GreetingOption.GreetOnScreening
             }
 
-            public GreetingCommands(IMediator mediator, MessageContext context, IDiscordRestChannelAPI channels)
+            public GreetingCommands
+            (
+                IMediator mediator,
+                MessageContext context,
+                IDiscordRestChannelAPI channels
+            )
             {
                 _mediator = mediator;
                 _context  = context;
@@ -804,71 +810,31 @@ public class ConfigCommands : CommandGroup
                 [Description("The channel to add the greeting to.")]
                 IChannel channel,
 
-                [Description("When to greet the member. Available options are `join`, `role`, and `channel`.")]
+                [Description("When to greet the member. Available options are `join` and `role`.")]
                 GreetOption option,
 
                 [Greedy]
-                [Description
-                    (
-                        "The welcome message to send. The following subsitutions are supported:\n" +
-                        "`{u}` - The username of the user who joined.\n"                           +
-                        "`{@u}` - The mention (@user) of the user who joined.\n"                   +
-                        "`{s}` - The name of the server.\n\n"                                      +
-                        "Greetings are limited to 2000 characters."
-                    )]
+                [Description(
+                                "The welcome message to send. \n"                                  +
+                                "The following subsitutions are supported:\n"                      +
+                                "`{s}` - The name of the server.\n"                              +
+                                "`{u}` - The username of the user who joined.\n"                   +
+                                "`{@u}` - The mention (@user) of the user who joined.\n\n"           +
+                                "Greetings larger than 2000 characters will be placed an embed.\n" +
+                                "Embeded greetings do not generate pings for mentioned users/roles."
+                            )]
                 string greeting,
 
-                [Option("cor")]
-                [Description
-                    (
-                        "The channel or the role to check for.\n"                                                                      +
-                        "When a channel is specified: The user will be greeted when manually added to the channel via an overwrite.\n" +
-                        "When a role is specified: The user will be greeted when given the specified role. "
-                    )]
-                OneOf<IChannel, IRole>? channelOrRole = null
+                [Option("role")]
+                [Description("The role to check for. \n" +
+                             "This can be an ID (`123456789012345678`), or a mention (`@Role`).")]
+                IRole? role = null
             )
             {
-                var entityID = Result<Snowflake>.FromSuccess(default);
-
-                if (option is GreetOption.Role or GreetOption.Channel)
+                if (option is GreetOption.Role && role is null)
                 {
-                    if (channelOrRole is null)
-                    {
-                        await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a channel or role to check for!");
+                    await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
 
-                        return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
-                    }
-
-                    entityID = option switch
-                    {
-                        GreetOption.Role when channelOrRole.Value.IsT1 => Result<Snowflake>.FromSuccess(channelOrRole.Value.AsT1.ID),
-                        GreetOption.Role when channelOrRole.Value.IsT0
-                            => Result<Snowflake>.FromError(new InvalidOperationError("The greeting is set for a role, but you specified a channel!")),
-                        GreetOption.Role when channelOrRole is null
-                            => Result<Snowflake>.FromError(new ArgumentNullError("A role must be specified!")),
-
-                        GreetOption.Channel when channelOrRole.Value.IsT0 => Result<Snowflake>.FromSuccess(channelOrRole.Value.AsT0.ID),
-                        GreetOption.Channel when channelOrRole.Value.IsT1
-                            => Result<Snowflake>.FromError(new InvalidOperationError("The greeting is set for a channel, but you specified a role!")),
-                        GreetOption.Channel when channelOrRole is null
-                            => Result<Snowflake>.FromError(new ArgumentNullError("A channel must be specified!")),
-
-                        _ => throw new InvalidOperationException("Impossible situation")
-                    };
-
-                }
-                
-                if (!entityID.IsDefined(out var ID))
-                {
-                    await _channels.CreateMessageAsync(_context.ChannelID, entityID.Error!.Message);
-                   
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
-                }
-
-                if (greeting.Length > 2000)
-                {
-                    await _channels.CreateMessageAsync(_context.ChannelID, $"Hm. That greeting is a bit too long ({greeting.Length} characters). Try a shorter one.");
-                    
                     return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
                 }
 
@@ -878,50 +844,112 @@ public class ConfigCommands : CommandGroup
                 {
                     Message = greeting,
                     ChannelID = channel.ID,
-                    MetadataID = ID,
+                    MetadataID = role?.ID,
                     Option = (GreetingOption)option
                 };
                 
                 config.Greetings.Add(greetingEntity);
-                
+
                 await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
 
-                return Result.FromSuccess();
+                var message = $"Created greeting with ID `{greetingEntity.Id}`\n\n";
+                
+                if (greeting.Length > 2000)
+                    message += $"Be warned! This greeting is larger than 2000 characters ({greeting.Length}), and will be placed an embed.";
+
+                await _channels.CreateMessageAsync(_context.ChannelID, message);
+                
+                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
             }
 
             [Command("update")]
             [Description("Updates an existing greeting.")]
             public async Task<IResult> UpdateGreetingAsync
             (
+                [Description("The ID of the greeting to update.")]
                 int GreetingID,
 
-                [Description("The new option for the greeting message")]
-                string? option = null,
-
-
-
-                [Greedy] [Option("greeting")] [Description("The new greeting")]
+                [Option("on")]
+                [Description("When to greet the member (`join` or `role`).")]
+                GreetOption? option = null,
+                
+                [Option("role")]
+                [Description("The role to check for when greeting")]
+                IRole? role = null,
+                
+                [Option("channel")]
+                [Description("The new channel to send greetings to")]
+                IChannel? channel = null,
+                
+                [Greedy]
+                [Option("greeting")]
+                [Description("The new greeting")]
                 string? greeting = null
             )
             {
-
-                if (option is not ("always" or "on_role" or "on_channel"))
+                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+                
+                var greetingEntity = config.Greetings.FirstOrDefault(x => x.Id == GreetingID);
+                
+                if (greetingEntity is null)
                 {
-                    if (option.Contains("role"))
-                    {
-                        option = "on_role";
-                    }
-                    else if (option.Contains("channel"))
-                    {
-                        option = "on_channel";
-                    }
-                    else
-                    {
-                        option = "always";
-                    }
+                    await _channels.CreateMessageAsync(_context.ChannelID, "Could not find a greeting with that ID!");
+
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
                 }
 
-                return Result.FromSuccess();
+                if (option is GreetOption.Role && role is null)
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
+                    
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                }
+                
+                greetingEntity.ChannelID  = channel?.ID ?? greetingEntity.ChannelID;
+                greetingEntity.MetadataID = role?.ID    ?? greetingEntity.MetadataID;
+                greetingEntity.Message    = greeting    ?? greetingEntity.Message;
+                
+                if (option is not null)
+                    greetingEntity.Option = (GreetingOption)option;
+                
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+                
+                var message = $"Updated greeting with ID `{greetingEntity.Id}`\n\n";
+                
+                if (greeting?.Length > 2000)
+                    message += $"Be warned! This greeting is larger than 2000 characters ({greeting.Length}), and will be placed an embed.";
+                
+                await _channels.CreateMessageAsync(_context.ChannelID, message);
+                
+                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            }
+
+            [Command("delete")]
+            [Description("Deletes an existing greeting.")]
+            public async Task<IResult> Delete
+            (
+                [Description("The ID of the greeting to delete.")]
+                int GreetingID
+            )
+            {
+                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+                
+                var greetingEntity = config.Greetings.FirstOrDefault(x => x.Id == GreetingID);
+                
+                if (greetingEntity is null)
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, "I can't seem to find a greeting with that ID!");
+
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                }
+                
+                config.Greetings.Remove(greetingEntity);
+                
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+                
+                await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted greeting with ID `{greetingEntity.Id}`");
+                
+                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
             }
         }
     }

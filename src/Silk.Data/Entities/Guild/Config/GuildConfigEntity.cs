@@ -24,10 +24,10 @@ public class GuildConfigEntity
     ///     Requisite property to form a Foreign Key (FK)
     /// </summary>
     public GuildEntity Guild { get; set; }
-    
+
     /// <summary>
     /// Greetings configured for this guild.
     /// </summary>
     [Column("greetings")]
-    public List<GuildGreetingEntity> Greetings { get; set; }
+    public List<GuildGreetingEntity> Greetings { get; set; } = new();
 }

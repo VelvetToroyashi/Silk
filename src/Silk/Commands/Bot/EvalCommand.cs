@@ -41,18 +41,21 @@ public class EvalCommand : CommandGroup
     private readonly IDiscordRestChannelAPI             _channels;
     private readonly IDiscordRestGuildScheduledEventAPI _events;
 
+    private readonly IServiceProvider _services;
+
     private static readonly IEmbed _evaluatingEmbed = new Embed
     {
         Title  = "Evaluating. Please wait.",
         Colour = Color.HotPink
     };
-    public EvalCommand(ICommandContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events)
+    public EvalCommand(ICommandContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events, IServiceProvider services)
     {
-        _context     = context;
-        _channels    = channels;
-        _users       = users;
-        _guilds      = guilds;
-        _events = events;
+        _context       = context;
+        _channels      = channels;
+        _users         = users;
+        _guilds        = guilds;
+        _events        = events;
+        _services = services;
     }
     
     [Command("eval")]
@@ -78,6 +81,8 @@ public class EvalCommand : CommandGroup
                 ChannelID      = context.ChannelID,
                 MessageID      = context.MessageID,
                 ReplyMessageID = context.Message.ReferencedMessage.IsDefined(out var reply) ? reply.ID : default,
+                
+                Services = _services,
                 
                 Users           = _users,
                 Guilds          = _guilds,
@@ -201,6 +206,7 @@ public class EvalCommand : CommandGroup
         public Snowflake MessageID      { get; init; }
         public Snowflake ReplyMessageID { get; init; }
         
+        public IServiceProvider Services { get; init; }
         
         public IDiscordRestUserAPI                Users           { get; init; }
         public IDiscordRestGuildAPI               Guilds          { get; init; }

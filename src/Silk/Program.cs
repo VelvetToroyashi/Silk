@@ -152,6 +152,7 @@ public class Program
                    .AddSingleton<GuildConfigCacheService>()
                    .AddSingleton<GuildCacherService>()
                    .AddSingleton<GuildGreetingService>()
+                   .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
                    .AddMediatR(typeof(Program))
                    .AddMediatR(typeof(GuildContext));

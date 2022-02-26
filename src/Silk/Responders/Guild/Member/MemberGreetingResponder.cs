@@ -12,7 +12,7 @@ using Silk.Services.Guild;
 
 namespace Silk.Responders;
 
-public class MemberGreetingResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberUpdate>, IResponder<IChannelUpdate>
+public class MemberGreetingResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberUpdate>
 {
     private readonly CacheService         _cache;
     private readonly GuildGreetingService _greetingService;
@@ -35,19 +35,5 @@ public class MemberGreetingResponder : IResponder<IGuildMemberAdd>, IResponder<I
             return Task.FromResult(Result.FromSuccess());
 
         return _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User, GreetingOption.GreetOnRole);
-    }
-
-    public Task<Result> RespondAsync(IChannelUpdate gatewayEvent, CancellationToken ct = default)
-    {
-        if (!gatewayEvent.GuildID.IsDefined(out Snowflake guildID))
-            return Task.FromResult(Result.FromSuccess());
-
-        object cacheKey = KeyHelpers.CreateChannelCacheKey(gatewayEvent.ID);
-
-        if (_cache.TryGetValue(cacheKey, out IChannel? newChannel) &&
-            _cache.TryGetPreviousValue(cacheKey, out IChannel? oldChannel))
-            return _greetingService.TryGreetAsync(guildID, oldChannel, newChannel);
-
-        return Task.FromResult(Result.FromSuccess()); // Channel wasn't in cache, so we can't determine which overwrites to check.
     }
 }
