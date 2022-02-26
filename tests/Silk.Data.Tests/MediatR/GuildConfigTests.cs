@@ -50,7 +50,7 @@ public class GuildConfigTests
     }
 
     [Test]
-    public async Task MediatR_Get_When_Guild_Is_Null_Returns_Null()
+    public async Task GetReturnsNullForNonGuild()
     {
         //Arrange
         GuildConfigEntity? result;
@@ -61,7 +61,7 @@ public class GuildConfigTests
     }
 
     [Test]
-    public async Task MediatR_Get_When_Guild_Is_Not_Null_Does_Not_Return_Null()
+    public async Task ReturnsConfigWhenGuildExists()
     {
         //Arrange
         GuildConfigEntity? result;

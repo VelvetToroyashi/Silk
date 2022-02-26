@@ -17,7 +17,7 @@ public class BulkUserTests
 {
     private readonly Snowflake          GuildId          = new (10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
 
     private GuildContext _context;
@@ -58,7 +58,7 @@ public class BulkUserTests
     }
 
     [Test]
-    public async Task MediatR_BulkAdd_Inserts_All_Users_When_None_Exist()
+    public async Task InsertsAllUsers()
     {
         //Arrange
         List<UserEntity> users = new()
@@ -67,16 +67,16 @@ public class BulkUserTests
             new() { ID = new(2), GuildID = GuildId }
         };
 
-        int result;
         //Act
         await _mediator.Send(new BulkAddUser.Request(users));
-        result = _context.Users.Count();
+        
+        var result = _context.Users.Count();
         //Assert
         Assert.AreEqual(users.Count, result);
     }
 
     [Test]
-    public async Task MediatR_BulkAdd_Skips_Users_When_User_Exists()
+    public async Task InsertsAndUpdatesAllUsers()
     {
         //Arrange
         await _mediator.Send(new AddUser.Request(GuildId, new(1)));
@@ -85,38 +85,17 @@ public class BulkUserTests
             new() { ID = new(1), GuildID = GuildId },
             new() { ID = new(2), GuildID = GuildId }
         };
-        int result;
 
         //Act
         await _mediator.Send(new BulkAddUser.Request(users));
-        result = _context.Users.ToArray().Length;
+        var result = _context.Users.ToArray().Length;
 
         //Assert
         Assert.AreEqual(users.Count, result);
     }
-
+    
     [Test]
-    public async Task MediatR_BulkAdd_Takes_Slow_Route_When_Passed_Malformed_Collection()
-    {
-        //Arrange
-        List<UserEntity> users = new()
-        {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2) }
-        };
-        int result;
-
-        //Act
-        await _mediator.Send(new BulkAddUser.Request(users));
-        result = _context.Users.Count();
-
-        //Assert
-        Assert.AreNotEqual(users.Count, result);
-        Assert.AreEqual(1, result);
-    }
-
-    [Test]
-    public async Task MediatR_Bulk_Update_Updates_All_Users()
+    public async Task UpdatesAllUsers()
     {
         //Arrange
         var updatedUsers = new UserEntity[2];
@@ -129,7 +108,7 @@ public class BulkUserTests
         //Act
         users.CopyTo(updatedUsers);
 
-        foreach (UserEntity u in updatedUsers)
+        foreach (var u in updatedUsers)
             u.Flags = UserFlag.WarnedPrior;
 
         await _mediator.Send(new BulkUpdateUser.Request(updatedUsers));
@@ -137,7 +116,8 @@ public class BulkUserTests
         //Assert
         Assert.AreNotEqual(users, updatedUsers);
 
-        foreach (UserEntity user in updatedUsers)
-            Assert.AreEqual(UserFlag.WarnedPrior, user.Flags);
+        var allUsersWarned = users.All(u => u.Flags == UserFlag.WarnedPrior);
+        
+        Assert.True(allUsersWarned);
     }
 }

@@ -214,6 +214,15 @@ public sealed class AsyncTimer : IAsyncDisposable, IDisposable
         Started     = false;
 
         if (!YieldsWhenRunning)
-            await (_task ?? Task.CompletedTask);
+        {
+            try
+            {
+                await (_task ?? Task.CompletedTask);
+            }
+            catch (Exception e)
+            {
+                Errored?.Invoke(this, e);
+            }
+        }
     }
 }

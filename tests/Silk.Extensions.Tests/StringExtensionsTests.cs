@@ -11,7 +11,7 @@ public class StringExtensionsTests
     [Theory]
     [TestCase("This is a\ttest string that\tshould be centered!", "             This string should center!             ")]
     [TestCase("This is a test string that should be centered against!", "              This string should center!              ")]
-    public void Center_ReturnsCenteredString(string input, string expected)
+    public void CentersCorrectly(string input, string expected)
     {
         //Act
         string actualCenterWithTabs = CenterInputString.Center(input);
@@ -20,75 +20,39 @@ public class StringExtensionsTests
     }
 
     [Test]
-    public void Center_WhenOversizedInput_ReturnsOriginalString()
+    public void DoesNotPadWhenLargerThanReference()
     {
         //Arrange
         const string input  = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
         const string anchor = "This string is too short!";
         //Act
-        string actual = input.Center(anchor);
+        var actual = input.Center(anchor);
         //Assert
         Assert.AreEqual(input, actual);
     }
 
     [Test]
-    public void Pull_Returns_Entire_String_When_RangeEnd_Exceeds_Length()
+    [TestCase("Lorem Ipsum", "", 0)]
+    [TestCase("Lorem Ipsum", "Lorem", 5)]
+    [TestCase("Lorem Ipsum", "Lorem Ipsum", 12)]
+    [TestCase("Lorem Ipsum", "Lorem Ipsum", 13)]
+    public void CorrectlyTruncatesString
+    (
+        string input,
+        string expected,
+        int maxLength
+    )
     {
         //Arrange
-        var    input = "This is a short string!";
-        string result;
-        Range  range = ..25;
+        var  range = Range.EndAt(maxLength);
         //Act
-        result = input.Pull(range);
+        var actual = input.Pull(range);
         //Assert
-        Assert.AreEqual(input, result);
+        Assert.AreEqual(expected, actual);
     }
-
+    
     [Test]
-    public void Pull_Returns_Entire_String_when_RangeStart_Exceeds_Length()
-    {
-        //Arrange
-        var    input = "This is a short string!";
-        string result;
-        Range  range = 25..;
-        //Act
-        result = input.Pull(range);
-        //Assert
-        Assert.AreEqual(input, result);
-    }
-
-    [Test]
-    public void Pull_Returns_Substring_When_Range_Does_Not_Exceed_Length()
-    {
-        //Arrange
-        var    input    = "This is a short string!";
-        var    expected = "This is a ";
-        string result;
-        Range  range = ..10;
-        //Act
-        result = input.Pull(range);
-        //Assert
-        Assert.AreNotEqual(input, result);
-        Assert.AreEqual(expected, result);
-    }
-
-    [Test]
-    public void Pull_Returns_Substring_When_Range_Has_From_End_Defined()
-    {
-        //Arrange
-        var    input    = "This is a short string!";
-        var    expected = "This is a short string";
-        string result;
-        Range  range = ..^1;
-        //Act
-        result = input.Pull(range);
-        //Assert
-        Assert.AreNotEqual(input, result);
-        Assert.AreEqual(expected, result);
-    }
-
-    [Test]
-    public void AsStream_Returns_Stream_When_String_Is_Not_Null()
+    public void ReturnsPopulatedStream()
     {
         //Arrange
         var     input = "This is a really cool string!";
@@ -97,5 +61,32 @@ public class StringExtensionsTests
         stream = input.AsStream();
         //Assert
         Assert.IsNotNull(stream);
+    }
+    
+    [Test]
+    public void ReturnsEmptyStreamForEmptyInput()
+    {
+        //Arrange
+        var input = "";
+        
+        //Act
+        var stream = input.AsStream();
+        
+        //Assert
+        Assert.AreEqual(0, stream.Length);
+    }
+    
+    [Test]
+    public void ReturnsReadableAndSeekableStream()
+    {
+        //Arrange
+        var input = "This is a really cool string!";
+        
+        //Act
+        var stream = input.AsStream();
+        
+        //Assert
+        Assert.IsTrue(stream.CanRead);
+        Assert.IsTrue(stream.CanSeek);
     }
 }
