@@ -13,23 +13,23 @@ public static class GetGuildConfig
     /// Request for getting the <see cref="GuildConfigEntity" /> for the Guild.
     /// </summary>
     /// <param name="GuildId">The Id of the Guild</param>
-    public sealed record Request(Snowflake GuildId) : IRequest<GuildConfigEntity?>;
+    public sealed record Request(Snowflake GuildId) : IRequest<GuildConfigEntity>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity?>
+    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<GuildConfigEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildConfigEntity? config = await _db.GuildConfigs
-                                                 .Include(g => g.Greetings)
-                                                  //.Include(c => c.BlackListedWords)
-                                                 .AsSplitQuery()
-                                                 .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
+            var config = await _db.GuildConfigs
+                                  .Include(g => g.Greetings)
+                                   //.Include(c => c.BlackListedWords)
+                                  .AsSplitQuery()
+                                  .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
 
             return config;
         }

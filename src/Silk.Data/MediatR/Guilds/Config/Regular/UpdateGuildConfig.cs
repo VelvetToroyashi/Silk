@@ -26,7 +26,8 @@ public static class UpdateGuildConfig
             
             config.Greetings.AddRange(request.Greetings);
                 
-            _db.AddRange(config.Greetings);
+            await _db.SaveChangesAsync(cancellationToken);
+            
             return config;
         }
     }

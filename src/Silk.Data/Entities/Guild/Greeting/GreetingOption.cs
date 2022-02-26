@@ -24,10 +24,5 @@ public enum GreetingOption
     /// <summary>
     ///     Members should be greeted when they pass guild member verification.
     /// </summary>
-    GreetOnScreening,
-
-    /// <summary>
-    ///     Members should be greeted when given access to a channel.
-    /// </summary>
-    GreetOnChannelAccess,
+    GreetOnScreening
 }

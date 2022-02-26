@@ -15,7 +15,7 @@ public delegate Task AsyncTimerDelegate<in T1, in T2>(T1 t1, T2 t2);
 /// <summary>
 ///     An asynchronous timer that can yield to tasks if necessary.
 /// </summary>
-public sealed class AsyncTimer : IDisposable
+public sealed class AsyncTimer : IAsyncDisposable, IDisposable
 {
     private readonly object[]? _args = Array.Empty<object>();
 
@@ -25,6 +25,12 @@ public sealed class AsyncTimer : IDisposable
     private          bool     _isDisposed;
 
     private bool _running;
+    
+    // The currently running task may not be set if we've yet to start. 
+    // Otherwise it's here to ensure the task completes before we finished.
+    // This does introduce the issue of potentially re-throwing on the finalizer thread
+    // Which under normal circumstances will go unnoticed. Read: TaskScheduler.UnobservedTaskException
+    private Task? _task;
 
 
     /// <summary>
@@ -130,12 +136,7 @@ public sealed class AsyncTimer : IDisposable
     /// </summary>
     public bool YieldsWhenRunning { get; }
 
-    public void Dispose()
-    {
-        _isDisposed = true;
-        _running    = false;
-        Started     = false;
-    }
+
 
     /// <summary>
     ///     An event fired when the callback throws an exception.
@@ -162,9 +163,9 @@ public sealed class AsyncTimer : IDisposable
         do
         {
             DateTime invoketime = DateTime.UtcNow;
-            Task     task       = _taskDelegate is AsyncTimerDelegate del ? del() : (Task)_taskDelegate.DynamicInvoke(_args)!;
-
-
+            
+            Task task = _task =  _taskDelegate is AsyncTimerDelegate del ? del() : (Task)_taskDelegate.DynamicInvoke(_args)!;
+            
             _ = task.ContinueWith(static (t, timer) =>
             {
                 var time = Unsafe.As<AsyncTimer>(timer)!;
@@ -180,8 +181,7 @@ public sealed class AsyncTimer : IDisposable
                 }
             }
             /* Else we just let it run in the background. */
-
-
+            
             TimeSpan execTime = DateTime.UtcNow - invoketime;
 
             if (_interval == TimeSpan.Zero)
@@ -203,5 +203,17 @@ public sealed class AsyncTimer : IDisposable
 
         _running = false;
         Started  = false;
+    }
+
+    public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
+    
+    public async ValueTask DisposeAsync()
+    {
+        _isDisposed = true;
+        _running    = false;
+        Started     = false;
+
+        if (!YieldsWhenRunning)
+            await (_task ?? Task.CompletedTask);
     }
 }

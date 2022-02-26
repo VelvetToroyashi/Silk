@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -9,37 +13,73 @@ using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Greetings;
 using Silk.Errors;
 using Silk.Services.Data;
+using Silk.Shared.Types;
 
 namespace Silk.Services.Guild;
 
-public class GuildGreetingService
+public class GuildGreetingService : IHostedService
 {
+    private readonly List<PendingGreetingEntity> _pendingGreetings = new();
+
+    private readonly AsyncTimer _timer;
+    
     private readonly GuildConfigCacheService       _config;
     private readonly ILogger<GuildGreetingService> _logger;
 
+    private readonly IMediator              _mediator;
     private readonly IDiscordRestUserAPI    _userApi;
     private readonly IDiscordRestGuildAPI   _guildApi;
     private readonly IDiscordRestChannelAPI _channelApi;
 
     public GuildGreetingService
-        (
-            GuildConfigCacheService       config,
-            ILogger<GuildGreetingService> logger,
-            IDiscordRestUserAPI           userApi,
-            IDiscordRestGuildAPI          guildApi,
-            IDiscordRestChannelAPI        channelApi
-        )
+    (
+        GuildConfigCacheService       config,
+        ILogger<GuildGreetingService> logger,
+        IMediator                     mediator,
+        IDiscordRestUserAPI           userApi,
+        IDiscordRestGuildAPI          guildApi,
+        IDiscordRestChannelAPI        channelApi
+    )
     {
         _config = config;
         _logger = logger;
 
+        _mediator   = mediator;
         _userApi    = userApi;
         _guildApi   = guildApi;
         _channelApi = channelApi;
+        
+        //It's important to yield to the queue task here because if we get 429'd, 
+        // Polly will retry the request, which will continue to block the queue task.
+        _timer = new(QueueLoopAsync, TimeSpan.FromSeconds(5), true);
     }
 
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        var greetings = await _mediator.Send(new GetPendingGreetings.Request(), cancellationToken);
+        
+        _pendingGreetings.AddRange(greetings);
+        
+        _timer.Start();
+        
+        _logger.LogInformation("Started greeting service.");
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _timer.Stop();
+        _timer.Dispose();
+        _pendingGreetings.Clear();
+        
+        _logger.LogInformation("Stopped greeting service.");
+
+        return Task.CompletedTask;
+    }
+    
+    
     /// <summary>
     ///     Determines whether a member should be greeted on join, caching them otherwise.
     /// </summary>
@@ -49,12 +89,12 @@ public class GuildGreetingService
     /// <returns>A result that may or may have not succeeded.</returns>
     public async Task<Result> TryGreetMemberAsync(Snowflake guildID, IUser user, GreetingOption option)
     {
-        Result<IGuildMember> memberRes = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
+        var memberRes = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
 
-        if (!memberRes.IsDefined(out IGuildMember? member))
+        if (!memberRes.IsDefined(out var member))
             return Result.FromError(memberRes.Error!); // This is guaranteed to be an error.
 
-        GuildConfigEntity config = await _config.GetConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
 
         if (!config.Greetings.Any())
             return Result.FromSuccess();
@@ -63,14 +103,14 @@ public class GuildGreetingService
             return Result.FromSuccess();
 
         //There could be multiple greetings, so we check each one.
-        foreach (GuildGreetingEntity greeting in config.Greetings)
+        foreach (var greeting in config.Greetings)
         {
             if (greeting.Option is GreetingOption.DoNotGreet)
                 continue;
 
             if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
             {
-                Result res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
+                var res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
 
                 if (!res.IsSuccess)
                     return res;
@@ -80,18 +120,19 @@ public class GuildGreetingService
 
             if (greeting.Option is GreetingOption.GreetOnRole && option is GreetingOption.GreetOnRole)
             {
-                if (member.Roles.Any(r => r == greeting.MetadataID))
+                var greetingResult = await _mediator.Send(new AddPendingGreeting.Request(user.ID, guildID, greeting.Id));
+
+                if (greetingResult.IsSuccess)
                 {
-                    Result res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
-
-                    if (!res.IsSuccess)
-                        return res;
+                    _pendingGreetings.Add(greetingResult.Entity);
                 }
-                continue;
-            }
+                else
+                {
+                    _logger.LogError("Failed to add greeting: {Error}", greetingResult.Error);
+                }
 
-            if (greeting.Option is GreetingOption.GreetOnChannelAccess)
                 break;
+            }
 
             _logger.LogError("Unhandled greeting option. {Option}, spawned from guild {Guild}", greeting.Option, guildID);
         }
@@ -99,67 +140,62 @@ public class GuildGreetingService
         return Result.FromSuccess();
     }
 
-    /// <summary>
-    ///     Attempts to greet a user based on whether or not they can access any of the configured greeting channels.
-    /// </summary>
-    /// <param name="guildID">The ID of the guild the channel resides on.</param>
-    /// <param name="before">The channel before, to compare against.</param>
-    /// <param name="after">The channel after, to compare against.</param>
-    /// <returns>A result that may or may have not succeeded.</returns>
-    public async Task<Result> TryGreetAsync(Snowflake guildID, IChannel before, IChannel after)
+    private async Task QueueLoopAsync()
     {
-        if (!before.PermissionOverwrites.IsDefined(out IReadOnlyList<IPermissionOverwrite>? overwritesBefore) ||
-            !after.PermissionOverwrites.IsDefined(out IReadOnlyList<IPermissionOverwrite>? overwritesAfter))
-            return Result.FromSuccess();
-
-        if (overwritesBefore.Count >= overwritesAfter.Count)
-            return Result.FromSuccess();
+        if (!_pendingGreetings.Any())
+            return;
         
-        GuildConfigEntity config = await _config.GetConfigAsync(guildID);
-
-        if (!config.Greetings.Any())
-            return Result.FromSuccess();
-
-        GuildGreetingEntity? greeting = config.Greetings
-                                              .FirstOrDefault(greeting =>
-                                                                  greeting.Option is GreetingOption.GreetOnChannelAccess &&
-                                                                  greeting.MetadataID == before.ID);
-
-        if (greeting is null)
-            return Result.FromSuccess();
-
-        IEnumerable<IPermissionOverwrite> distinctOverwrites = overwritesAfter.Except(overwritesBefore);
-
-        foreach (IPermissionOverwrite overwrite in distinctOverwrites)
+        for (var i = _pendingGreetings.Count; i >= 0; i--)
         {
-            if (overwrite.Type is not PermissionOverwriteType.Member)
+            var pending      = _pendingGreetings[i];
+            var memberResult = await _guildApi.GetGuildMemberAsync(pending.GuildID, pending.UserID);
+
+            if (!memberResult.IsDefined(out var member))
+            {
+                _logger.LogError("Failed to get member {User} in guild {Guild}", pending.UserID, pending.GuildID);
                 continue;
+            }
 
-            return await GreetAsync(guildID, overwrite.ID, greeting.MetadataID.Value, greeting.Message);
+            var guildConfig = await _config.GetConfigAsync(pending.GuildID);
+
+            if (guildConfig.Greetings.FirstOrDefault(g => g.Id == pending.GreetingID) is not { } greeting)
+            {
+                _logger.LogError("A queued greeting is no longer present in the guild's config. ({Guild})", pending.GuildID);
+                continue;
+            }
+
+            if (greeting.Option is GreetingOption.DoNotGreet)
+                continue;
+            
+            _pendingGreetings.RemoveAt(i);
+            
+            var res = await GreetAsync(pending.GuildID, pending.UserID, greeting.ChannelID, greeting.Message);
+            
+            if (!res.IsSuccess)
+                _logger.LogError("Failed to greet {User} in guild {Guild}", pending.UserID, pending.GuildID);
         }
-
-        return Result.FromSuccess();
     }
-
+    
+    
     private async Task<Result> GreetAsync(Snowflake guildID, Snowflake memberID, Snowflake channelId, string greetingMessage)
     {
         string formattedMessage;
 
-        Result<IUser> memberResult = await _userApi.GetUserAsync(memberID);
+        var memberResult = await _userApi.GetUserAsync(memberID);
 
-        if (!memberResult.IsDefined(out IUser? member))
+        if (!memberResult.IsDefined(out var member))
             return Result.FromError(memberResult.Error!);
 
-        Result permissionRes = await EnsurePermissionsAsync(guildID, channelId);
+        var permissionRes = await EnsurePermissionsAsync(guildID, channelId);
 
         if (!permissionRes.IsSuccess)
             return permissionRes;
 
         if (greetingMessage.Contains("{s}"))
         {
-            Result<IGuild> guildResult = await _guildApi.GetGuildAsync(guildID);
+            var guildResult = await _guildApi.GetGuildAsync(guildID);
 
-            if (!guildResult.IsDefined(out IGuild? guild))
+            if (!guildResult.IsDefined(out var guild))
                 return Result.FromError(guildResult.Error!); //This checks `IsSuccess`, which implies the error isn't null
 
             formattedMessage = greetingMessage.Replace("{s}", guild.Name)
@@ -204,46 +240,46 @@ public class GuildGreetingService
     }
 
     /// <summary>
-    ///     Determines whether requisite permissions exist for a given channel.
+    /// Determines whether requisite permissions exist for a given channel.
     /// </summary>
     /// <param name="guildID">The ID of the guild the channel exists on.</param>
     /// <param name="channelID">The ID of the channel to check.</param>
     /// <returns>A successful result if the permissions are correct.</returns>
     private async Task<Result> EnsurePermissionsAsync(Snowflake guildID, Snowflake channelID)
     {
-        Result<IUser> userResult = await _userApi.GetCurrentUserAsync();
+        var userResult = await _userApi.GetCurrentUserAsync();
 
-        if (!userResult.IsDefined(out IUser? user))
+        if (!userResult.IsDefined(out var user))
         {
             _logger.LogCritical("Unable to fetch current user.");
             return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch current user."));
         }
 
-        Result<IGuildMember> memberResult = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
+        var memberResult = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
 
-        if (!memberResult.IsDefined(out IGuildMember? member))
+        if (!memberResult.IsDefined(out var member))
         {
             _logger.LogCritical("Unable to fetch current user's member.");
             return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch current member."));
         }
 
-        Result<IChannel> channelResult = await _channelApi.GetChannelAsync(channelID);
+        var channelResult = await _channelApi.GetChannelAsync(channelID);
 
-        if (!channelResult.IsDefined(out IChannel? channel))
+        if (!channelResult.IsDefined(out var channel))
         {
             _logger.LogCritical("Unable to fetch channel.");
             return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch channel."));
         }
 
-        Result<IReadOnlyList<IRole>> rolesResult = await _guildApi.GetGuildRolesAsync(guildID);
+        var rolesResult = await _guildApi.GetGuildRolesAsync(guildID);
 
-        if (!rolesResult.IsDefined(out IReadOnlyList<IRole>? roles))
+        if (!rolesResult.IsDefined(out var roles))
         {
             _logger.LogCritical("Unable to fetch guild.");
             return Result.FromError(new InvalidOperationError("CRITICAL: Unable to fetch roles."));
         }
 
-        IDiscordPermissionSet permissions = DiscordPermissionSet
+        var permissions = DiscordPermissionSet
            .ComputePermissions
                 (
                  user.ID,
@@ -260,4 +296,6 @@ public class GuildGreetingService
 
         return Result.FromSuccess();
     }
+    
+
 }
