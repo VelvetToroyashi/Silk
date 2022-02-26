@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Remora.Rest.Core;
 using Remora.Results;
 using Respawn;
+using Respawn.Graph;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 
@@ -16,10 +17,10 @@ namespace Silk.Data.Tests.MediatR;
 
 public class UserTests
 {
-    private readonly Snowflake              UserId           = new(1234567890);
-    private readonly    Snowflake              GuildId          = new(10);
+    private readonly Snowflake          UserId           = new(1234567890);
+    private readonly Snowflake          GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "Guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new Table[] { "guilds", "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
 
     private GuildContext _context;
@@ -60,7 +61,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Add_Inserts_When_User_Does_Not_Exist()
+    public async Task AddInsertsUserSuccessfully()
     {
         // Arrange
         UserEntity? result;
@@ -74,7 +75,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Add_Throws_When_User_Exists()
+    public async Task AddDoesNotAllowDuplicateUsers()
     {
         //Arrange
         var               request = new AddUser.Request(GuildId, UserId);
@@ -87,7 +88,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Get_Returns_Null_When_User_Does_Not_Exist()
+    public async Task GetReturnsNullForNonUser()
     {
         //Arrange
         UserEntity? user;
@@ -98,7 +99,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Get_Returns_NonNull_When_User_Exists()
+    public async Task GetReturnsUserCorrectly()
     {
         //Arrange
         UserEntity? user;
@@ -110,7 +111,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Update_Returns_Updated_User()
+    public async Task UpdateReturnsUpdatedUser()
     {
         //Arrange
         UserEntity before;
@@ -123,7 +124,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_Update_Throws_When_User_Does_Not_Exist()
+    public async Task UpdateThrowsForNonUser()
     {
         //Arrange
         AsyncTestDelegate send;
@@ -134,7 +135,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_GetOrCreate_Creates_When_User_Does_Not_Exist()
+    public async Task GetOrCreateCreatesForNonUser()
     {
         //Arrange
         UserEntity? user;
@@ -146,7 +147,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task MediatR_GetOrCreate_Returns_User_When_User_Exists()
+    public async Task GetOrCreateDoesNotDuplicateUser()
     {
         //Arrange
         Result<UserEntity> user;

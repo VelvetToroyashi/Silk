@@ -9,7 +9,7 @@ namespace Silk.Tests.Types;
 public class AsyncTimerTest
 {
     [Test]
-    public void AsyncTimer_ExecutesTask()
+    public void SuccessfullyExecutesTask()
     {
         //Arrange
         var executed = false;
@@ -28,7 +28,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Executes_Task_WithParameters()
+    public void SuccessfullyExecutesTaskWithParameters()
     {
         //Arrange
         var executed = false;
@@ -48,7 +48,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Does_Not_Yield()
+    public void AllowsParallelTaskExecution()
     {
         //Arrange
         var num = 1;
@@ -69,7 +69,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Does_Yield_When_True()
+    public void CanWaitOnTaskCorrectly()
     {
         //Arrange
         var num = 1;
@@ -89,7 +89,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Does_Not_StartTwice()
+    public void ThrowsWhenAlreadyStarted()
     {
         //Arange
         using var timer = new AsyncTimer(() => Task.FromResult(0), TimeSpan.FromSeconds(1));
@@ -103,7 +103,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Does_Not_Stop_If_NotStarted()
+    public void ThrowsOnStopIfNotStarted()
     {
         //Arrange
         var timer = new AsyncTimer(() => Task.CompletedTask, TimeSpan.Zero);
@@ -115,7 +115,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Does_Not_PropogateExceptions()
+    public void StartingDoesNotThrowWhenTaskThrows()
     {
         //Arrange
         using var timer = new AsyncTimer(() => Task.FromException<Exception>(new()), TimeSpan.FromSeconds(1));
@@ -125,7 +125,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Fires_Errored_Event_On_Error()
+    public void InvokesErrorHandlerWithDetachedTask()
     {
         //Arrange
         var       errored = false;
@@ -140,7 +140,7 @@ public class AsyncTimerTest
     }
 
     [Test]
-    public void AsyncTimer_Fires_Errored_Event_On_Error_When_Yielding()
+    public void InvokesErrorHandlerWithAttachedTask()
     {
         //Arrange
         var       errored = false;

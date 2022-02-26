@@ -10,7 +10,7 @@ public class LoopedListTest
     private readonly LoopedList<int> _loopedIntList = new() { 1, 2, 3, 4 };
 
     [Test]
-    public void LoopedIntList_Indexer_Accesses_LastElement()
+    public void IndexerCorrectlyReturnsLastElement()
     {
         //Arrange
         int index    = _loopedIntList.Count - 1;
@@ -23,7 +23,7 @@ public class LoopedListTest
     }
 
     [Test]
-    public void LoopedIntList_Next_Returns_FirstElement()
+    public void NextCorrectlyLoopsToFirstElement()
     {
         //Arrange
         int result;
@@ -35,7 +35,7 @@ public class LoopedListTest
     }
 
     [Test]
-    public void LoopedIntList_Indexer_Overflows()
+    public void IndexerOverflowsCorrectly()
     {
         //Arrange
         int result;
@@ -49,13 +49,13 @@ public class LoopedListTest
     }
 
     [Test]
-    public void LoopedIntList_ThrowsWhen_Empty()
+    public void NextThrowsWithoutElements()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => _emptyIntList.Next());
     }
 
     [Test]
-    public void LoopedIntList_Setter_Sets_Index_Within_Bounds()
+    public void IndexerSetsCorrectElement()
     {
         //Arrange
         var             expected = 2;
@@ -69,7 +69,7 @@ public class LoopedListTest
     }
 
     [Test]
-    public void LoopedIntList_Setter_Sets_Overflowed_Indexer()
+    public void IndexerSetterSetsElementAfterOverflow()
     {
         //Arrange
         LoopedList<int> expected = new() { 1, 3, 3, 4 };
@@ -80,7 +80,7 @@ public class LoopedListTest
     }
 
     [Test]
-    public void LoopedIntList_Setter_Throws_When_Empty()
+    public void IndexerSetterThrowsWhenEmpty()
     {
         //Arrange
         var          expected = 2;

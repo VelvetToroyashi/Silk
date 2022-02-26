@@ -7,6 +7,7 @@ using Npgsql;
 using NUnit.Framework;
 using Remora.Rest.Core;
 using Respawn;
+using Respawn.Graph;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 
@@ -16,7 +17,7 @@ public class GuildTests
 {
     private readonly Snowflake          GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new Table[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
 
     private GuildContext _context;
@@ -51,7 +52,7 @@ public class GuildTests
     }
 
     [Test]
-    public async Task MediatR_Get_Or_Create_Creates_When_Guild_Does_Not_Exist()
+    public async Task GetOrCreateCreatesGuildCorrectly()
     {
         //Arrange
         GuildEntity result;
@@ -67,7 +68,7 @@ public class GuildTests
     }
 
     [Test]
-    public async Task MediatR_Get_Or_Create_Does_Not_Create_When_Guild_Exists()
+    public async Task GetOrCreateDoesNotRecreate()
     {
         //Arrange
         GuildEntity? result;
@@ -87,7 +88,7 @@ public class GuildTests
     }
 
     [Test]
-    public async Task MediatR_Get_Returns_Null_When_Guild_Does_Not_Exist()
+    public async Task GetReturnsNullForNonGuild()
     {
         //Arrange
         GuildEntity? result;
@@ -98,7 +99,7 @@ public class GuildTests
     }
 
     [Test]
-    public async Task MediatR_Get_Returns_NonNull_When_Guild_Exists()
+    public async Task GetReturnsGuildCorrectly()
     {
         //Arrange
         GuildEntity? result;

@@ -20,7 +20,7 @@ namespace Silk.Tests.Services;
 public class ReminderServiceTests
 {
     [Test]
-    public async Task ReminderService_Fetches_All_Active_Reminders()
+    public async Task PullsActiveRemindersOnStartup()
     {
         // Arrange
         var mediatorMock    = new Mock<IMediator>();
@@ -36,7 +36,7 @@ public class ReminderServiceTests
 
 
     [Test]
-    public async Task ReminderService_CreateReminder_Sends_CreateReminder_Command()
+    public async Task CreatesReminderSuccessfully()
     {
         // Arrange
         var mediatorMock    = new Mock<IMediator>();
@@ -50,7 +50,7 @@ public class ReminderServiceTests
     }
 
     [Test]
-    public async Task ReminderService_AttemptsDM_When_MessageID_Is_Zero()
+    public async Task CreatesDMMessageWhenMessageIDIsZero()
     {
         // Arrange
         var mediatorMock = new Mock<IMediator>();
@@ -80,7 +80,7 @@ public class ReminderServiceTests
     }
 
     [Test]
-    public async Task ReminderService_RepliesTo_OriginalMessage_When_Exists()
+    public async Task CorrectlyRepliesToSourceMessage()
     {
         // Arrange
         var mediatorMock = new Mock<IMediator>();
@@ -112,7 +112,7 @@ public class ReminderServiceTests
     }
 
     [Test]
-    public async Task ReminderService_Dispatches_ExpiredReminders_Immediately()
+    public async Task DispatchesExpiredRemindersImmediately()
     {
         // Arrange
         var mediatorMock = new Mock<IMediator>();
@@ -139,7 +139,7 @@ public class ReminderServiceTests
     }
 
     [Test]
-    public async Task ReminderService_LogsError_WhenUser_NonContactable()
+    public async Task LogsErrorWhenRecipientUnavailable()
     {
         var loggerMock = new Mock<ILogger<ReminderService>>();
 
@@ -176,7 +176,7 @@ public class ReminderServiceTests
     }
 
     [Test]
-    public async Task ReminderService_LogsError_WhenUser_HasClosedDMs()
+    public async Task LogsErrorWhenRecipientDMClosed()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<ReminderService>>();

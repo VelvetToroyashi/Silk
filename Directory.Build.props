@@ -1,8 +1,8 @@
-﻿<Project >
-    <PropertyGroup Label="Common Solution Properties" >
-        <Product >Silk!</Product >
-        <Company >The Silk Dev Team</Company >
-        <Authors >VelvetThePanda, CalebABG97, NatsumiHB, Silk Contributors</Authors >
-        <RepositoryUrl >https://github.com/VelvetThePanda/Silk</RepositoryUrl >
-    </PropertyGroup >
-</Project >
+﻿<Project>
+    <PropertyGroup Label="Common Solution Properties">
+        <Product>Silk!</Product>
+        <Company>The Silk Dev Team</Company>
+        <Authors>VelvetThePanda, CalebABG97, NatsumiHB, Silk Contributors</Authors>
+        <RepositoryUrl>https://github.com/VelvetThePanda/Silk</RepositoryUrl>
+    </PropertyGroup>
+</Project>

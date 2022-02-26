@@ -6,6 +6,7 @@ using Npgsql;
 using NUnit.Framework;
 using Remora.Rest.Core;
 using Respawn;
+using Respawn.Graph;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 
@@ -15,7 +16,7 @@ public class GuildConfigTests
 {
     private readonly    Snowflake              GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new Table[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
 
     private GuildContext _context;
@@ -50,7 +51,7 @@ public class GuildConfigTests
     }
 
     [Test]
-    public async Task MediatR_Get_When_Guild_Is_Null_Returns_Null()
+    public async Task GetReturnsNullForNonGuild()
     {
         //Arrange
         GuildConfigEntity? result;
@@ -61,7 +62,7 @@ public class GuildConfigTests
     }
 
     [Test]
-    public async Task MediatR_Get_When_Guild_Is_Not_Null_Does_Not_Return_Null()
+    public async Task ReturnsConfigWhenGuildExists()
     {
         //Arrange
         GuildConfigEntity? result;

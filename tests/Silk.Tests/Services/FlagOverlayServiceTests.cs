@@ -53,7 +53,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentOutOfRangeError_When_Intensity_IsInvalid()
+    public async Task FailsOnInvalidIntensity()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -68,7 +68,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentOutOfRangeError_When_Flag_IsInvalid()
+    public async Task FailsOnUnsupportedFlag()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -83,7 +83,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_IsNull()
+    public async Task FailsOnNullURL()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -99,7 +99,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_IsEmpty()
+    public async Task FailsOnEmptyUrl()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -117,7 +117,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_DoesNot_HaveDomain()
+    public async Task FailsOnMissingDomain()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -132,7 +132,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_DoesNot_HaveExtension()
+    public async Task FailsOnMissingExtension()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -147,7 +147,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_IsNot_Https()
+    public async Task FailsOnNonHTTPUri()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -163,7 +163,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentInvalidError_When_Url_IsNot_Image()
+    public async Task FailsOnNonImageUrl()
     {
         // Arrange
         var flagHelper = new FlagOverlayService(_httpClient);
@@ -180,7 +180,7 @@ public class FlagOverlayServiceTests
 
 
     [Test]
-    public async Task GetFlagAsync_Preflight_OnlyUses_HEAD_When_ContentLength_IsReturned()
+    public async Task SizeCheckUsesHEAD()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -204,7 +204,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Preflight_Uses_GET_When_ContentLengh_NotReturned()
+    public async Task SizeCheckUsesGETWhenHEADFails()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -229,7 +229,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_NotFoundError_When_ContentLength_IsNotReturned()
+    public async Task FailsWhenImageSizeCannotBeDetermined()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -253,7 +253,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentOutOfRangeError_When_Image_Is_BiggerThan2MB()
+    public async Task FailsWhenImageExceeds2MB()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -277,7 +277,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_ArgumentOutOfRangeError_When_ImageDimensions_Exceed_3000px()
+    public async Task FailsWhenImageExceeds3000Pixels()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -304,7 +304,7 @@ public class FlagOverlayServiceTests
     }
 
     [Test]
-    public async Task GetFlagAsync_Returns_Success_When_ImageDimensions_DoesNotExceed_3000px()
+    public async Task SucceedsWhenImageDoesNotExceed3000PixelsOr2MB()
     {
         // Arrange
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
