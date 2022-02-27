@@ -45,7 +45,7 @@ public static class UpdateGuildModConfig
             GuildModConfigEntity config = await _db.GuildModConfigs
                                                    .AsNoTracking()
                                                    .Include(c => c.InfractionSteps)
-                                                   .Include(c => c.AllowedInvites)
+                                                   .Include(c => c.Invites)
                                                    .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);
 
 
@@ -68,7 +68,7 @@ public static class UpdateGuildModConfig
                 config.UseAggressiveRegex = useAggressiveRegex;
 
             if (request.ScanInvites.IsDefined(out bool scanInvites))
-                config.ScanInviteOrigin = scanInvites;
+                config.Invites.ScanOrigin = scanInvites;
 
             if (request.DeletePhishingLinks.IsDefined(out bool deletePhishingLinks))
                 config.DeletePhishingLinks = deletePhishingLinks;
@@ -77,13 +77,13 @@ public static class UpdateGuildModConfig
                 config.DetectPhishingLinks = detectPhishingLinks;
 
             if (request.BlacklistInvites.IsDefined(out bool blacklistInvites))
-                config.WhitelistInvites = blacklistInvites;
+                config.Invites.WhitelistEnabled = blacklistInvites;
 
             if (request.WarnOnMatchedInvite.IsDefined(out bool warnOnMatchedInvite))
-                config.InfractOnMatchedInvite = warnOnMatchedInvite;
+                config.Invites.WarnOnMatch = warnOnMatchedInvite;
 
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
-                config.DeleteMessageOnMatchedInvite = deleteOnMatchedInvite;
+                config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
             
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
                 config.Exemptions = exemptions;
@@ -98,8 +98,8 @@ public static class UpdateGuildModConfig
 
             if (request.AllowedInvites.IsDefined(out List<InviteEntity>? whitelistedInvites))
             {
-                _db.RemoveRange(config.AllowedInvites.Except(whitelistedInvites));
-                config.AllowedInvites = whitelistedInvites;
+                _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
+                config.Invites.Whitelist = whitelistedInvites;
             }
 
             _db.Update(config);

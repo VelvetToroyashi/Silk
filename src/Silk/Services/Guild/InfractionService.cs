@@ -819,7 +819,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
 
-        if (!config.LoggingConfig.LogInfractions || config.LoggingConfig.Infractions is null)
+        if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
 
         Result channelExists = await EnsureLoggingChannelExistsAsync(infraction.GuildID);
@@ -827,7 +827,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!channelExists.IsSuccess)
             return Result.FromError(new NotFoundError());
 
-        bool useWebhook = config.LoggingConfig.UseWebhookLogging;
+        bool useWebhook = config.Logging.UseWebhookLogging;
 
         var embed = new Embed
         {
@@ -847,7 +847,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             }
         };
         
-        return await _channelLogger.LogAsync(useWebhook, config.LoggingConfig.Infractions, $"📝 Case #{infraction.CaseNumber} was updated by **{updatedBy.Username}**", embed);
+        return await _channelLogger.LogAsync(useWebhook, config.Logging.Infractions, $"📝 Case #{infraction.CaseNumber} was updated by **{updatedBy.Username}**", embed);
     }
 
     /// <summary>
@@ -860,7 +860,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
 
-        if (!config.LoggingConfig.LogInfractions || config.LoggingConfig.Infractions is null)
+        if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
 
         Result channelExists = await EnsureLoggingChannelExistsAsync(infraction.GuildID);
@@ -868,7 +868,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!channelExists.IsSuccess)
             return Result.FromError(new NotFoundError());
 
-        bool useWebhook = config.LoggingConfig.UseWebhookLogging;
+        bool useWebhook = config.Logging.UseWebhookLogging;
 
         var embed = new Embed
         {
@@ -888,7 +888,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             }
         };
 
-        var logResult = await _channelLogger.LogAsync(useWebhook, config.LoggingConfig.Infractions!, null, embed);
+        var logResult = await _channelLogger.LogAsync(useWebhook, config.Logging.Infractions!, null, embed);
 
         if (!logResult.IsSuccess)
         {
@@ -908,7 +908,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
 
-        Debug.Assert(config.LoggingConfig.LogInfractions, "Caller should validate that infraction logging is enabled.");
+        Debug.Assert(config.Logging.LogInfractions, "Caller should validate that infraction logging is enabled.");
 
         Result<IUser> currentResult = await _users.GetCurrentUserAsync();
 
@@ -928,7 +928,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(currentMemberResult.Error!);
         }
         
-        if (config.LoggingConfig.Infractions is not LoggingChannelEntity ilc)
+        if (config.Logging.Infractions is not LoggingChannelEntity ilc)
         {
             return Result.FromSuccess();
         }
@@ -971,7 +971,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(new PermissionDeniedError("An infraction channel was set, but permissions do not allow embeds."));
         }
 
-        if (config.LoggingConfig.UseWebhookLogging)
+        if (config.Logging.UseWebhookLogging)
         {
             if (!loggingChannelPermissions.HasPermission(DiscordPermission.ManageWebhooks))
             {
@@ -980,20 +980,20 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 return Result.FromError(new PermissionDeniedError("An infraction channel was set, but permissions do not allow managing webhooks."));
             }
 
-            if (config.LoggingConfig.Infractions.WebhookID.Value is 0)
+            if (config.Logging.Infractions.WebhookID.Value is 0)
             {
                 _logger.LogDebug("Attempting to create new webhook for infraction channel.");
 
             }
             else
             {
-                Result<IWebhook> webhookResult = await _webhooks.GetWebhookAsync(config.LoggingConfig.Infractions.WebhookID);
+                Result<IWebhook> webhookResult = await _webhooks.GetWebhookAsync(config.Logging.Infractions.WebhookID);
 
                 if (!webhookResult.IsSuccess)
                 {
                     _logger.LogWarning("Webhook has gone missing. Attempting to create a new one.");
 
-                    Result<IWebhook> webhookReuslt = await _webhooks.CreateWebhookAsync(config.LoggingConfig.Infractions.ChannelID, SilkWebhookName, default);
+                    Result<IWebhook> webhookReuslt = await _webhooks.CreateWebhookAsync(config.Logging.Infractions.ChannelID, SilkWebhookName, default);
 
                     if (!webhookReuslt.IsSuccess)
                     {
@@ -1005,10 +1005,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
                     IWebhook webhook = webhookReuslt.Entity;
 
-                    config.LoggingConfig.Infractions.WebhookID    = webhook.ID;
-                    config.LoggingConfig.Infractions.WebhookToken = webhook.Token.Value;
+                    config.Logging.Infractions.WebhookID    = webhook.ID;
+                    config.Logging.Infractions.WebhookToken = webhook.Token.Value;
 
-                    await _mediator.Send(new UpdateGuildModConfig.Request(guildID) { LoggingConfig = config.LoggingConfig });
+                    await _mediator.Send(new UpdateGuildModConfig.Request(guildID) { LoggingConfig = config.Logging });
                 }
             }
         }

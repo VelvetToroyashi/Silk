@@ -24,7 +24,6 @@
         <PackageReference Include="Remora.Discord.Gateway" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
-        <PackageReference Include="YumeChan.PluginBase" />
     </ItemGroup>
 
     <ItemGroup>

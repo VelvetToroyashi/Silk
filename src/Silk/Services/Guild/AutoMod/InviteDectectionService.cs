@@ -55,14 +55,15 @@ public class InviteDectectionService
       var config = await _config.GetModConfigAsync(guildID);
       var start  = DateTimeOffset.UtcNow;
       
-      if (!config.WhitelistInvites)
-         return Result.FromSuccess();
-      
       var inviteMatch = config.UseAggressiveRegex 
          ? AggressiveInviteRegex.Match(message.Content) 
          : InviteRegex.Match(message.Content);
 
       if (!inviteMatch.Success)
+         return Result.FromSuccess();
+      
+      // We bail after regexing the message for metrics
+      if (!config.Invites.WhitelistEnabled)
          return Result.FromSuccess();
       
       _logger.LogDebug(EventIds.AutoMod, "Detected invite in {Time:N0} ms (Regex: {RegexTime:N4} ms)", 
@@ -71,15 +72,15 @@ public class InviteDectectionService
       
       var invite = inviteMatch.Groups["invite"].Value;
       
-      if (config.AllowedInvites.Any(inv => inv.VanityURL == invite))
+      if (config.Invites.Whitelist.Any(inv => inv.VanityURL == invite))
          return Result.FromSuccess();
 
-      if (config.ScanInviteOrigin)
+      if (config.Invites.ScanOrigin)
       {
          var inviteOrigin = await _invites.GetInviteAsync(invite);
          
          if (inviteOrigin.IsSuccess && inviteOrigin.Entity.Guild.IsDefined(out var origin))
-            if (config.AllowedInvites.Any(inv => inv.GuildId == origin.ID))
+            if (config.Invites.Whitelist.Any(inv => inv.GuildId == origin.ID))
                return Result.FromSuccess();
       }
       
@@ -96,10 +97,10 @@ public class InviteDectectionService
       if (isExempt)
          return Result.FromSuccess();
       
-      if (!config.InfractOnMatchedInvite)
+      if (!config.Invites.WarnOnMatch)
          return Result.FromSuccess();
 
-      if (config.DeleteMessageOnMatchedInvite)
+      if (config.Invites.DeleteOnMatch)
          await _channels.DeleteMessageAsync(message.ChannelID, message.ID);
       
       var selfResult = await _users.GetCurrentUserAsync();
