@@ -383,7 +383,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
-        if (!config!.UseNativeMute)
+        if (!config.UseNativeMute)
         {
             if (config!.MuteRoleID.Value is 0)
             {
@@ -395,7 +395,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
             }
 
-            var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+            var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config.MuteRoleID, reason);
 
             if (!roleResult.IsSuccess)
                 return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(roleResult, "mute"));
@@ -415,16 +415,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         if (await IsMutedAsync(guildID, targetID))
         {
-            var queuedInfraction = _queue.First
-                (
-                 inf =>
-                     inf.GuildID  == guildID  &&
-                     inf.TargetID == targetID &&
-                     inf.Type is InfractionType.Mute or
-                                 InfractionType.AutoModMute
-                );
-
-            return await UpdateInfractionAsync(queuedInfraction, enforcer, reason, expirationRelativeToNow);
+            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
+            
+            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
         }
 
         var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
