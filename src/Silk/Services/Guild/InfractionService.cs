@@ -110,7 +110,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             if (infraction.Type is InfractionType.Mute or InfractionType.AutoModMute)
                 await TryResetTimeoutAsync(infraction);
 
-            if (infraction.ExpiresAt < DateTimeOffset.UtcNow)
+            if (infraction.ExpiresAt > DateTimeOffset.UtcNow)
                 continue;
             
             _queue.RemoveAt(i);
@@ -150,10 +150,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     private async Task HandleExpiredInfractionAsync(InfractionEntity infraction)
     {
-        var selfResult = await _users.GetCurrentUserAsync();
-        
-        var userResult = await _users.GetUserAsync(infraction.TargetID);
-        
         if (infraction.Type is InfractionType.SoftBan)
         {
             var unbanResult = await UnBanAsync(infraction.GuildID, infraction.TargetID, infraction.EnforcerID, "Infraction expired.");
@@ -354,13 +350,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var inDatabase = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
 
-        if (inDatabase.FirstOrDefault(Predicate) is {} inf)
-        {
-            _logger.LogWarning("A mute for {Target} created by {Enforcer} on {Guild} was found in database but not in memory.", targetID, inf.EnforcerID, guildID);
-            return true;
-        }
-        
-        return false;
+        return inDatabase.FirstOrDefault(Predicate) is not null;
     }
 
     /// <inheritdoc />
@@ -432,7 +422,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+            infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         var returnResult = await LogInfractionAsync(infraction, target, enforcer);
             
@@ -456,22 +446,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!await IsMutedAsync(guildID, targetID))
             return Result<InfractionEntity>.FromError(new InvalidOperationError("That user isn't muted!"));
         
-        
         var hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
         
         if (!hierarchyResult.IsSuccess)
             return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
-        
-        var mute = _queue.FirstOrDefault(inf => inf.GuildID == guildID && inf.TargetID == targetID && inf.Type is InfractionType.Mute or InfractionType.AutoModMute);
 
-        if (mute is null)
-        {
-            _logger.LogError("Attempted to unmute {Target} but the mute was not present in memory.", targetID);
-            return Result<InfractionEntity>.FromError(new InvalidOperationError("Catostrophic error. Mute was not present in memory."));
-        }
-        
+        var infractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+
+        var mute = infractions.Last(inf => inf.Type is InfractionType.Mute or InfractionType.AutoModMute && !inf.Processed);
+
         _queue.Remove(mute);
 
         await _mediator.Send(new UpdateInfraction.Request(mute.Id, Processed: true));
@@ -480,7 +465,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         Result unmuteResult;
 
-        if (!config!.UseNativeMute)
+        if (!config.UseNativeMute)
             unmuteResult = await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
         else
             unmuteResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: null);
@@ -552,10 +537,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         _logger.LogDebug("Loading active infractions...");
 
-        DateTimeOffset                now         = DateTimeOffset.UtcNow;
-        IEnumerable<InfractionEntity> infractions = await _mediator.Send(new GetActiveInfractions.Request());
+        var                now         = DateTimeOffset.UtcNow;
+        var infractions = await _mediator.Send(new GetActiveInfractions.Request());
 
-        _logger.LogDebug("Loaded infractions in {Time} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
+        _logger.LogDebug("Loaded infractions in {Time:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
         if (!infractions.Any())
         {
@@ -773,7 +758,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             InfractionType.Unban   => "unbanned",
             InfractionType.Unmute  => "unmuted",
             InfractionType.Mute or 
-                InfractionType.AutoModMute => "muted",
+            InfractionType.AutoModMute => "muted",
             
             _ => infraction.Type.ToString()
         };
@@ -922,11 +907,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(currentMemberResult.Error!);
         }
         
-        if (config.Logging.Infractions is not LoggingChannelEntity ilc)
+        if (config.Logging.Infractions is not { } ilc)
         {
             return Result.FromSuccess();
         }
-        Result<IChannel> infractionChannelResult = await _channels.GetChannelAsync(ilc.ChannelID);
+        
+        var infractionChannelResult = await _channels.GetChannelAsync(ilc.ChannelID);
 
         if (!infractionChannelResult.IsSuccess)
         {
