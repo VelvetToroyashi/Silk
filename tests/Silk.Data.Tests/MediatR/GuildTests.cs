@@ -7,6 +7,7 @@ using Npgsql;
 using NUnit.Framework;
 using Remora.Rest.Core;
 using Respawn;
+using Respawn.Graph;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 
@@ -16,7 +17,7 @@ public class GuildTests
 {
     private readonly Snowflake          GuildId          = new(10);
     private const    string             ConnectionString = "Server=localhost; Port=5432; Database=unit_test; Username=silk; Password=silk; Include Error Detail=true;";
-    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
+    private readonly Checkpoint         _checkpoint      = new() { TablesToIgnore = new Table[] { "__EFMigrationsHistory" }, DbAdapter = DbAdapter.Postgres };
     private readonly IServiceCollection _provider        = new ServiceCollection();
 
     private GuildContext _context;
