@@ -837,9 +837,21 @@ public class ConfigCommands : CommandGroup
 
                     return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
                 }
-
-                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
                 
+                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+
+                if (config.Greetings.FirstOrDefault(g => g.ChannelID == channel.ID) is {} existingGreeting)
+                {
+                    await _channels.CreateMessageAsync
+                        (
+                         _context.ChannelID,
+                         $"There appears to already be a greeting set up for that channel! (ID `{existingGreeting.Id}`)\n\n" +
+                         "Consider updating or deleting that greeting instead!"
+                        );
+                    
+                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                }
+
                 var greetingEntity = new GuildGreetingEntity
                 {
                     Message = greeting,
