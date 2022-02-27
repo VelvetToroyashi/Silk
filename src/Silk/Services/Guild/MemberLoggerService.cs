@@ -42,10 +42,10 @@ public class MemberLoggerService
         
         var config = await _configService.GetModConfigAsync(guildID);
         
-        if (!config.LoggingConfig.LogMemberJoins)
+        if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
 
-        var channel = config.LoggingConfig.MemberJoins;
+        var channel = config.Logging.MemberJoins;
         
         if (channel is null)
             return Result.FromSuccess();
@@ -103,6 +103,6 @@ public class MemberLoggerService
             Fields      = userFields.ToArray()
         };
         
-        return await _channelLogger.LogAsync(config.LoggingConfig.UseWebhookLogging, channel, null, embed);
+        return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, channel, null, embed);
     }
 }

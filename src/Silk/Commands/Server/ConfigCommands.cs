@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Humanizer;
 using MediatR;
 using OneOf;
 using Remora.Commands.Attributes;
@@ -60,14 +61,14 @@ public class ConfigCommands : CommandGroup
         
         return await _channels.CreateMessageAsync(_context.ChannelID, "Done! Changes should take effect immediately.");
     }
-    
+
     [Group("view", "v")]
     [Description("View the settings for your server.")]
     public class ViewConfigCommands : CommandGroup
     {
         private readonly IMediator              _mediator;
-        private readonly MessageContext        _context;
-        private readonly IDiscordRestGuildAPI  _guilds;
+        private readonly MessageContext         _context;
+        private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestChannelAPI _channels;
 
         public ViewConfigCommands
@@ -95,7 +96,7 @@ public class ConfigCommands : CommandGroup
 
             if (!guildResult.IsDefined(out var guild))
                 return guildResult;
-            
+
             var contentBuilder = new StringBuilder();
 
             contentBuilder
@@ -107,17 +108,17 @@ public class ConfigCommands : CommandGroup
                .AppendLine("**Moderation Config:**")
                .AppendLine()
                .AppendLine("__Logging__ | Soon:tm:")
-               .AppendLine($"> Log members joining: <:_:{(modConfig.LoggingConfig.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Log members leaving: <:_:{(modConfig.LoggingConfig.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Log message edits: <:_:{(modConfig.LoggingConfig.LogMessageEdits ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Log message deletes: <:_:{(modConfig.LoggingConfig.LogMessageDeletes ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log members joining: <:_:{(modConfig.Logging.LogMemberJoins ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log members leaving: <:_:{(modConfig.Logging.LogMemberLeaves ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log message edits: <:_:{(modConfig.Logging.LogMessageEdits ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Log message deletes: <:_:{(modConfig.Logging.LogMessageDeletes ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine()
                .AppendLine("__Invites__ | `config edit invites`, `config edit invite-whitelist`")
-               .AppendLine($"> Scan invite: <:_:{(modConfig.ScanInviteOrigin ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Warn on invite: <:_:{(modConfig.InfractOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Scan invite: <:_:{(modConfig.Invites.ScanOrigin ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Warn on invite: <:_:{(modConfig.Invites.WarnOnMatch ? Emojis.ConfirmId : Emojis.DeclineId)}>")
+               .AppendLine($"> Delete matched invite: <:_:{(modConfig.Invites.DeleteOnMatch ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See `config view invites`]")}")
+               .AppendLine($"> Allowed invites: {(modConfig.Invites.Whitelist.Count is 0 ? "None" : $"{modConfig.Invites.Whitelist.Count} allowed invites [See `config view invites`]")}")
                .AppendLine("Aggressive pattern matching regex:")
                .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
                .AppendLine()
@@ -125,7 +126,10 @@ public class ConfigCommands : CommandGroup
                .AppendLine($"> Mute role: {(modConfig.MuteRoleID.Value is 0 ? "Not set" : $"<@&{modConfig.MuteRoleID}>")}")
                .AppendLine($"> Auto-escalate auto-mod infractions: <:_:{(modConfig.ProgressiveStriking ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps?.Count is var dictCount and not 0 ? $"{dictCount} steps [See `config view infractions`]" : "Not configured")}")
-               .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}")
+               .AppendLine
+                    (
+                     $"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}"
+                    )
                .AppendLine()
                .AppendLine("__Anti-Phishing__ **(New!)** | `config edit phishing`")
                .AppendLine($"> Anti-Phishing enabled: <:_:{(modConfig.DetectPhishingLinks ? Emojis.ConfirmId : Emojis.DeclineId)}>")
@@ -138,8 +142,102 @@ public class ConfigCommands : CommandGroup
                 Colour      = Color.MidnightBlue,
                 Description = contentBuilder.ToString()
             };
-            
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        }
+
+        [Command("phishing", "p")]
+        [Description("View Anti-Phishing settings for your server.")]
+        public async Task<IResult> ViewPhishingAsync()
+        {
+            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+
+            var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
+
+            if (!guildResult.IsDefined(out var guild))
+                return guildResult;
+
+            var enabled = config.DeletePhishingLinks ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+            var delete  = config.DeletePhishingLinks ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+            var action  = config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var phishingAction) ? phishingAction.Type.Humanize() : "Not configured";
+
+            var embed = new Embed
+            {
+                Colour = Color.MidnightBlue,
+                Title  = $"Phishing detection for {guild.Name}",
+                Description = $"**Enabled:** {enabled}\n"              +
+                              $"**Delete Phishing Links:** {delete}\n" +
+                              $"**Phishing detection action:** {action}"
+            };
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        }
+
+        [Command("infractions", "i")]
+        [Description("View Infraction settings for your server.")]
+        public async Task<IResult> ViewInfractionsAsync()
+        {
+            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+
+            var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
+
+            if (!guildResult.IsDefined(out var guild))
+                return guildResult;
+
+            var muteRole     = config.MuteRoleID.Value is 0 ? "Not configured." : $"<@&{config.MuteRoleID}>";
+            var autoEscalate = config.ProgressiveStriking ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+            var infractionSteps = !config.InfractionSteps.Any()
+                ? "Not configured."
+                : config
+                 .InfractionSteps
+                 .Select((inf, ind) => $"{ind + 1} ➜ {inf.Type.Humanize()}")
+                 .Join("\n");
+
+            var infractionStepsNamed = !config.NamedInfractionSteps.Any()
+                ? "Not configured."
+                : config
+                 .NamedInfractionSteps
+                 .Select(inf => $"{AutoModConstants.ActionStrings[inf.Key]} ({inf.Key}) ➜ {inf.Value.Type.Humanize()}")
+                 .Join("\n");
+
+            var embed = new Embed
+            {
+                Colour = Color.MidnightBlue,
+                Title  = $"Infraction settings for {guild.Name}",
+                Description = $"**Mute Role:** {muteRole}\n"               +
+                              $"**Auto-Escalate:** {autoEscalate}\n"       +
+                              $"**Infraction steps:** {infractionSteps}\n" +
+                              $"**Infraction steps (named):** {infractionStepsNamed}"
+            };
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        }
+
+        [Command("invites", "inv")]
+        [Description("View Invite settings for your server.")]
+        public async Task<IResult> ViewInvitesAsync()
+        {
+            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+
+            var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
+
+            if (!guildResult.IsDefined(out var guild))
+                return guildResult;
+
+            var enabled = config.Invites.WhitelistEnabled ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+            var delete  = config.Invites.DeleteOnMatch ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+            var action  = config.Invites.WarnOnMatch ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji;
+
+            var embed = new Embed
+            {
+                Colour = Color.MidnightBlue,
+                Title  = $"Invite detection for {guild.Name}",
+                Description = $"**Enabled:** {enabled}\n"       +
+                              $"**Delete Invites:** {delete}\n" +
+                              $"**Warn On Invite:** {action}"
+            };
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
         }
         
     }
@@ -306,7 +404,7 @@ public class ConfigCommands : CommandGroup
             
             var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
 
-            var loggingConfig = modConfig.LoggingConfig;
+            var loggingConfig = modConfig.Logging;
             
             if (remove)
             {
@@ -524,7 +622,7 @@ public class ConfigCommands : CommandGroup
 
         #region  Invite Whitelist
 
-                [Command("invite-whitelist", "iw")]
+        [Command("invite-whitelist", "iw")]
         [Description("Control the whitelisting of invites!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         public async Task<IResult> WhitelistAsync
@@ -550,13 +648,13 @@ public class ConfigCommands : CommandGroup
             
             if (clear)
             {
-                if (!modConfig!.AllowedInvites.Any())
+                if (!modConfig.Invites.Whitelist.Any())
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "There are no invites to clear!");
                     return Result.FromSuccess();
                 }
 
-                var inviteString = modConfig.AllowedInvites.Select(r => r.VanityURL).Join(" ");
+                var inviteString = modConfig.Invites.Whitelist.Select(r => r.VanityURL).Join(" ");
 
                 await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
                 
@@ -576,7 +674,7 @@ public class ConfigCommands : CommandGroup
             {
                 if (added.TryPickT0(out var inviteString, out var guildID))
                 {
-                    if (modConfig!.AllowedInvites.Any(iv => iv.VanityURL == inviteString))
+                    if (modConfig.Invites.Whitelist.Any(iv => iv.VanityURL == inviteString))
                     {
                         failedAdds.Add($"`{inviteString,-15}{"(already whitelisted)`",30}");
                         continue;
@@ -602,7 +700,7 @@ public class ConfigCommands : CommandGroup
                         continue;
                     }
                     
-                    modConfig.AllowedInvites.Add(new () { VanityURL = inviteString, GuildId = _context.GuildID.Value});
+                    modConfig.Invites.Whitelist.Add(new () { VanityURL = inviteString, GuildId = _context.GuildID.Value});
                     addedInvites.Add($"`{inviteString,-44}`");;
                 }
                 else
@@ -613,13 +711,13 @@ public class ConfigCommands : CommandGroup
                         continue;
                     }
                     
-                    if (modConfig!.AllowedInvites.Any(iv => iv.InviteGuildId == guildID))
+                    if (modConfig.Invites.Whitelist.Any(iv => iv.InviteGuildId == guildID))
                     {
                         failedAdds.Add($"`{guildID.ToString(),-15}{"(already whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.AllowedInvites.Add(new() { GuildId = _context.GuildID.Value, InviteGuildId = guildID });
+                    modConfig.Invites.Whitelist.Add(new() { GuildId = _context.GuildID.Value, InviteGuildId = guildID });
                     
                     addedInvites.Add($"`{guildID,-44}`");
                 }
@@ -627,7 +725,7 @@ public class ConfigCommands : CommandGroup
 
             foreach (var removed in remove)
             {
-                if (!modConfig!.AllowedInvites.Any())
+                if (!modConfig.Invites.Whitelist.Any())
                 {
                     failedRemoves.Add("The whitelist is empty!".PadRight(34));
                     break;
@@ -637,24 +735,24 @@ public class ConfigCommands : CommandGroup
                 {
                     inviteString = Regex.Replace(inviteString, @"(https?:\/\/discord\.gg\/)?(?<invite>[A-z0-9_-]+)", "${invite}");
                     
-                    if (modConfig!.AllowedInvites.All(iv => iv.VanityURL != inviteString))
+                    if (modConfig.Invites.Whitelist.All(iv => iv.VanityURL != inviteString))
                     {
                         failedRemoves.Add($"`{inviteString,-15}{"(not whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.AllowedInvites.RemoveAll(iv => iv.VanityURL == inviteString);
+                    modConfig.Invites.Whitelist.RemoveAll(iv => iv.VanityURL == inviteString);
                     removedInvites.Add($"`{inviteString,-44}`");
                 }
                 else
                 {
-                    if (modConfig!.AllowedInvites.All(iv => iv.InviteGuildId != guildID))
+                    if (modConfig.Invites.Whitelist.All(iv => iv.InviteGuildId != guildID))
                     {
                         failedRemoves.Add($"`{guildID.ToString(),-15}{"(not whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.AllowedInvites.RemoveAll(iv => iv.InviteGuildId == guildID);
+                    modConfig.Invites.Whitelist.RemoveAll(iv => iv.InviteGuildId == guildID);
                     removedInvites.Add($"`{guildID,-44}`");
                 }
             }
@@ -701,7 +799,7 @@ public class ConfigCommands : CommandGroup
             
             await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
-                AllowedInvites = modConfig.AllowedInvites,
+                AllowedInvites = modConfig.Invites.Whitelist,
                 BlacklistInvites = active ?? default
             });
 
@@ -1065,7 +1163,7 @@ public class ConfigModule : BaseCommandModule
                .AppendLine($"> Warn on invite: <:_:{(modConfig.InfractOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($"> Delete matched invite: <:_:{(modConfig.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($@"> Use aggressive invite matching: <:_:{(modConfig.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
-               .AppendLine($"> Allowed invites: {(modConfig.AllowedInvites?.Count is 0 ? "None" : $"{modConfig.AllowedInvites.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
+               .AppendLine($"> Allowed invites: {(modConfig.Invites.Whitelist?.Count is 0 ? "None" : $"{modConfig.Invites.Whitelist.Count} allowed invites [See {ctx.Prefix}config view invites]")}")
                .AppendLine("Aggressive pattern matching regex:")
                .AppendLine(@"`disc((ord)?(((app)?\.com\/invite)|(\.gg)))\/([A-z0-9-_]{2,})`")
                .AppendLine()
@@ -1166,11 +1264,11 @@ public class ConfigModule : BaseCommandModule
                .AppendLine($"> Delete matched invite: <:_:{(config.DeleteMessageOnMatchedInvite ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine($@"> Use aggressive invite matching : <:_:{(config.UseAggressiveRegex ? Emojis.ConfirmId : Emojis.DeclineId)}>")
                .AppendLine()
-               .AppendLine($"> Allowed invites: {(config.AllowedInvites.Count is 0 ? "There are no whitelisted invites!" : $"{config.AllowedInvites.Count} allowed invites:")}")
-               .AppendLine($"> {config.AllowedInvites.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
+               .AppendLine($"> Allowed invites: {(config.Invites.Whitelist.Count is 0 ? "There are no whitelisted invites!" : $"{config.Invites.Whitelist.Count} allowed invites:")}")
+               .AppendLine($"> {config.Invites.Whitelist.Take(15).Select(inv => $"`{inv.VanityURL}`\n").Join("> ")}");
 
-            if (config.AllowedInvites.Count > 15)
-                contentBuilder.AppendLine($"..Plus {config.AllowedInvites.Count - 15} more");
+            if (config.Invites.Whitelist.Count > 15)
+                contentBuilder.AppendLine($"..Plus {config.Invites.Whitelist.Count - 15} more");
 
             contentBuilder
                .AppendLine("Aggressive pattern matching are any invites that match this rule:")
@@ -1661,9 +1759,9 @@ public class ConfigModule : BaseCommandModule
                     if (!res) return;
 
                     GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
-                    config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+                    config.Invites.Whitelist.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
 
-                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.Invites.Whitelist });
                 }
 
                 [Command]
@@ -1689,10 +1787,10 @@ public class ConfigModule : BaseCommandModule
                         if (inviteObj.Guild.Id == ctx.Guild.Id)
                             continue;
 
-                        config.AllowedInvites.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+                        config.Invites.Whitelist.Add(new() { GuildId = ctx.Guild.Id, InviteGuildId = inviteObj.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
                     }
 
-                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.Invites.Whitelist });
                 }
 
                 [Command]
@@ -1723,13 +1821,13 @@ public class ConfigModule : BaseCommandModule
 
                     GuildModConfigEntity? config = await _mediator.Send(new GetGuildModConfigRequest(ctx.Guild.Id));
 
-                    InviteEntity? inv = config.AllowedInvites.SingleOrDefault(i => i.VanityURL == inviteObj.Code);
+                    InviteEntity? inv = config.Invites.Whitelist.SingleOrDefault(i => i.VanityURL == inviteObj.Code);
 
                     if (inv is null) return;
 
-                    config.AllowedInvites.Remove(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
+                    config.Invites.Whitelist.Remove(new() { GuildId = ctx.Guild.Id, VanityURL = inviteObj.Guild.VanityUrlCode ?? inviteObj.Code });
 
-                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.AllowedInvites });
+                    await _mediator.Send(new UpdateGuildModConfigRequest(ctx.Guild.Id) { AllowedInvites = config.Invites.Whitelist });
                 }
 
                 [Command]

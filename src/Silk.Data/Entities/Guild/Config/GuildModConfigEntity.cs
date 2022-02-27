@@ -2,24 +2,25 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
+using Silk.Data.Entities.Guild.Config;
 
 namespace Silk.Data.Entities;
 
 [Table("guild_moderation_config")]
 public class GuildModConfigEntity
 {
-    public int         Id      { get; set; }
+    public int Id { get; set; }
     
     /// <summary>
     /// The ID of the guild this config belongs to.
     /// </summary>
     [Column("guild_id")]
-    public Snowflake   GuildID { get; set; }
+    public Snowflake GuildID { get; set; }
     
     /// <summary>
     /// The Guild this config belongs to.
     /// </summary>
-    public GuildEntity Guild   { get; set; }
+    public GuildEntity Guild { get; set; }
 
     /// <summary>
     ///     Id of the role to apply when muting members.
@@ -35,12 +36,8 @@ public class GuildModConfigEntity
     [Column("use_native_mute")]
     public bool UseNativeMute { get; set; }
 
-    /// <summary>
-    ///     A list of whitelisted invites.
-    /// </summary>
-    [Column("whitelisted_invites")]
-    public List<InviteEntity> AllowedInvites { get; set; } = new();
-
+    public InviteConfigEntity Invites { get; set; }
+    
     /// <summary>
     ///     The maximum amount of users that can be mentioned in a single message.
     /// </summary>
@@ -53,25 +50,6 @@ public class GuildModConfigEntity
     [Column("max_role_mentions")]
     public int MaxRoleMentions { get; set; }
     
-    /// <summary>
-    ///     Blacklist certain invites.
-    /// </summary>
-    [Column("invite_whitelist_enabled")]
-    public bool WhitelistInvites { get; set; }
-    
-
-    /// <summary>
-    ///     Represents whether to add an infraction to the user after sending an invite.
-    /// </summary>
-    [Column("infract_on_invite")]
-    public bool InfractOnMatchedInvite { get; set; }
-
-    /// <summary>
-    ///     Represents whether to delete a message containing an invite.
-    /// </summary>
-    [Column("delete_invite_messages")]
-    public bool DeleteMessageOnMatchedInvite { get; set; }
-
     /// <summary>
     ///     Whether to match only discord.gg/ or all possible invite codes.
     /// </summary>
@@ -102,16 +80,11 @@ public class GuildModConfigEntity
     [Column("delete_detected_phishing")]
     public bool DeletePhishingLinks { get; set; }
 
-    /// <summary>
-    ///     Whether to scan matched invites. Server must be premium and blacklist invites.
-    /// </summary>
-   [Column("scan_invite_origin")]
-    public bool ScanInviteOrigin { get; set; }
 
     /// <summary>
     ///     Gets various logging-related settings.
     /// </summary>
-    public GuildLoggingConfigEntity LoggingConfig { get; set; } = new();
+    public GuildLoggingConfigEntity Logging { get; set; } = new();
 
     /// <summary>
     ///     A list of steps depending on the number of infractions a <see cref="UserEntity" /> has.
