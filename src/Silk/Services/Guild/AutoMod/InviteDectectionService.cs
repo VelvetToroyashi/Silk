@@ -55,14 +55,15 @@ public class InviteDectectionService
       var config = await _config.GetModConfigAsync(guildID);
       var start  = DateTimeOffset.UtcNow;
       
-      if (!config.Invites.WhitelistEnabled)
-         return Result.FromSuccess();
-      
       var inviteMatch = config.UseAggressiveRegex 
          ? AggressiveInviteRegex.Match(message.Content) 
          : InviteRegex.Match(message.Content);
 
       if (!inviteMatch.Success)
+         return Result.FromSuccess();
+      
+      // We bail after regexing the message for metrics
+      if (!config.Invites.WhitelistEnabled)
          return Result.FromSuccess();
       
       _logger.LogDebug(EventIds.AutoMod, "Detected invite in {Time:N0} ms (Regex: {RegexTime:N4} ms)", 
