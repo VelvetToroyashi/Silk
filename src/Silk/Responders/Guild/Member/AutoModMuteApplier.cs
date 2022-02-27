@@ -2,14 +2,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
 
-namespace Silk.Services.Guild;
+namespace Silk.Responders;
 
 /// <summary>
 ///     An AutoMod feature that automatically re-applies mutes when members rejoin a guild.
