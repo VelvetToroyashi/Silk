@@ -183,15 +183,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         var newInfraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, infractionExpiration, newReason ?? default(Optional<string>)));
 
-        if (infraction.Type is InfractionType.SoftBan or InfractionType.AutoModMute or InfractionType.Mute)
-        {
-            var cachedInfraction = _queue.FirstOrDefault(i => i.Id == infraction.Id);
+        var cachedInfraction = _queue.FirstOrDefault(i => i.Id == infraction.Id);
 
-            if (cachedInfraction is not null)
-                _queue.Remove(cachedInfraction);
+        if (cachedInfraction is not null)
+            _queue.Remove(cachedInfraction);
             
-            _queue.Add(infraction);
-        }
+        _queue.Add(newInfraction);
         
         var enforcerResult = await _users.GetUserAsync(newInfraction.EnforcerID);
         var targetResult   = await _users.GetUserAsync(newInfraction.TargetID);
