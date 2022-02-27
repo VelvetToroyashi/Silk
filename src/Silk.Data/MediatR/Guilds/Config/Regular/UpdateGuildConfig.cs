@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -20,12 +21,15 @@ public static class UpdateGuildConfig
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var config = await _db.GuildConfigs.FirstAsync(c => c.GuildID == request.GuildID, cancellationToken: cancellationToken);
+            var config = await _db
+                              .GuildConfigs
+                              .Include(g => g.Greetings)
+                              .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
             
-            config.Greetings.Clear();
+            _db.RemoveRange(config.Greetings.Except(request.Greetings));
             
-            config.Greetings.AddRange(request.Greetings);
-                
+            config.Greetings = request.Greetings;
+            
             await _db.SaveChangesAsync(cancellationToken);
             
             return config;
