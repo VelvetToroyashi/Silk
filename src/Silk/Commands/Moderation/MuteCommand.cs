@@ -52,7 +52,7 @@ public class MuteCommand : CommandGroup
             await _channels.CreateMessageAsync(_context.ChannelID,
                                                !infractionResult.IsSuccess
                                                    ? infractionResult.Error.Message
-                                                   : $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}!" +
+                                                   : $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}! " +
             (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"));
         ;
     }

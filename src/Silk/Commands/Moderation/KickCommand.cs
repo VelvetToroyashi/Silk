@@ -11,6 +11,7 @@ using Silk.Commands.Conditions;
 using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
+using Silk.Shared.Constants;
 
 namespace Silk.Commands.Moderation;
 
@@ -19,23 +20,17 @@ public class KickCommand : CommandGroup
 {
     private readonly ICommandContext        _context;
     private readonly IInfractionService     _infractions;
-    private readonly IDiscordRestUserAPI    _users;
-    private readonly IDiscordRestGuildAPI   _guilds;
     private readonly IDiscordRestChannelAPI _channels;
         
     public KickCommand
-        (
-            IInfractionService     infractions,
-            ICommandContext        context,
-            IDiscordRestUserAPI    users,
-            IDiscordRestGuildAPI   guilds,
-            IDiscordRestChannelAPI channels
-        )
+    (
+        IInfractionService     infractions,
+        ICommandContext        context,
+        IDiscordRestChannelAPI channels
+    )
     {
         _context     = context;
         _infractions = infractions;
-        _users       = users;
-        _guilds      = guilds;
         _channels    = channels;
     }
 
@@ -48,9 +43,13 @@ public class KickCommand : CommandGroup
     {
         var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
 
-        return infractionResult.IsSuccess
-            ? await _channels.CreateMessageAsync(_context.ChannelID, $"{user.Mention()} has been kicked from the guild !")
-            : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
+        return await _channels.CreateMessageAsync
+            (_context.ChannelID,
+             infractionResult.IsSuccess
+                 ? $"{Emojis.ConfirmEmoji} Successfully kicked {user.ToDiscordTag()}! " +
+                   (infractionResult.Entity.UserNotified ? "(User notified via DM)" : "(Failed to DM)")
+                 : $"{Emojis.DeclineEmoji} Failed to kick {user.ToDiscordTag()}! {infractionResult.Error}"
+             );
 
     }
 }
