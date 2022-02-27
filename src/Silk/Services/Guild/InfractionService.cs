@@ -103,7 +103,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     private async Task ProccessQueueAsync()
     {
-        for (var i = _queue.Count; i >= 0; i--)
+        for (var i = _queue.Count - 1; i >= 0; i--)
         {
             var infraction = _queue[i];
 
