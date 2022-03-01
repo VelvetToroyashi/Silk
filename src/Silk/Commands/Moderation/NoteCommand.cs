@@ -52,6 +52,7 @@ public class NoteCommand : CommandGroup
              _context.ChannelID,
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
-                 : $"{Emojis.NoteEmoji} Successfully added note to **{user.ToDiscordTag()}**!");
+                 : $"{Emojis.NoteEmoji} Note recorded for **{user.ToDiscordTag()}**!"
+            );
     }
 }

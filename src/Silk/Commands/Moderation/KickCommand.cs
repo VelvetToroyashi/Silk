@@ -42,14 +42,14 @@ public class KickCommand : CommandGroup
     public async Task<IResult> Kick([NonSelfActionable] IUser user, [Greedy] string reason = "Not given.")
     {
         var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-
+        var notified         = infractionResult.Entity.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        
         return await _channels.CreateMessageAsync
             (_context.ChannelID,
-             infractionResult.IsSuccess
-                 ? $"{Emojis.ConfirmEmoji} Successfully kicked {user.ToDiscordTag()}! " +
-                   (infractionResult.Entity.UserNotified ? "(User notified via DM)" : "(Failed to DM)")
-                 : $"{Emojis.DeclineEmoji} Failed to kick {user.ToDiscordTag()}! {infractionResult.Error}"
-             );
+             !infractionResult.IsSuccess
+                 ? infractionResult.Error.Message
+                 : $"{Emojis.KickEmoji} Kicked **{user.ToDiscordTag()}**! {notified}"
+            );
 
     }
 }
