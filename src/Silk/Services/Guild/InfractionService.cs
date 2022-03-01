@@ -251,7 +251,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+            infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
 
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
@@ -289,7 +289,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
         if (informResult.IsDefined(out var informed) && informed)
-            await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+           infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
@@ -470,6 +470,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Unmute));
 
         await LogInfractionAsync(infraction, target, enforcer);
+
+        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+        
+        if (informResult.IsDefined(out var informed) && informed)
+            infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
         
         return unmuteResult.IsSuccess
             ? Result<InfractionEntity>.FromSuccess(infraction)
