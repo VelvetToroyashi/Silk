@@ -145,7 +145,7 @@ public class GuildGreetingService : IHostedService
         if (!_pendingGreetings.Any())
             return;
         
-        for (var i = _pendingGreetings.Count; i >= 0; i--)
+        for (var i = _pendingGreetings.Count - 1; i >= 0; i--)
         {
             var pending      = _pendingGreetings[i];
             var memberResult = await _guildApi.GetGuildMemberAsync(pending.GuildID, pending.UserID);
