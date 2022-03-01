@@ -100,7 +100,7 @@ public static class IServiceCollectionExtensions
                   .SetAbsoluteExpiration<IMessage>(null)
                   .SetAbsoluteExpiration<IGuild>(null)
                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromMinutes(5));
+                  .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromHours(1));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true });
 
