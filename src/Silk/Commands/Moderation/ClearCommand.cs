@@ -13,6 +13,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
@@ -102,7 +103,7 @@ public class ClearCommand : CommandGroup
 
         var deleted = Math.Min(messageCount, messages.Count());
         
-        var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
+        var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.DeleteEmoji} Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
         
         await Task.Delay(6000);
 
