@@ -167,6 +167,9 @@ public class GuildGreetingService : IHostedService
             if (greeting.Option is GreetingOption.DoNotGreet)
                 continue;
             
+            if (member.Roles.All(r => r != greeting.MetadataID))
+                continue;
+            
             _pendingGreetings.RemoveAt(i);
             
             var res = await GreetAsync(pending.GuildID, pending.UserID, greeting.ChannelID, greeting.Message);
