@@ -171,6 +171,7 @@ public class GuildGreetingService : IHostedService
                 continue;
             
             _pendingGreetings.RemoveAt(i);
+            await _mediator.Send(new RemovePendingGreeting.Request(pending.Id));
             
             var res = await GreetAsync(pending.GuildID, pending.UserID, greeting.ChannelID, greeting.Message);
             
