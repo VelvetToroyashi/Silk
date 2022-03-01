@@ -30,7 +30,7 @@ using Silk.Services.Data;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 
-namespace Silk.Commands;
+namespace Silk.Commands.Server;
 
 [Group("config", "cfg")]
 [HelpCategory(Categories.Server)]
@@ -239,7 +239,60 @@ public class ConfigCommands : CommandGroup
 
             return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
         }
-        
+
+
+        [Command("greetings", "welcome")]
+        [Description("View greeting settings for your server.")]
+        public async Task<IResult> ViewGreetingsAsync
+        (
+            [Description("The ID of the specific greeting to view. Leave blank to view all greetings.")]
+            int? id = null
+        )
+        {
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+
+            Embed embed;
+            
+            if (id is null)
+            {
+                var greetings = 
+                    config
+                       .Greetings
+                       .Select
+                        (g =>
+                         {
+                             var enabled  = g.Option is GreetingOption.DoNotGreet ? Emojis.DeclineEmoji : Emojis.ConfirmEmoji;
+                             var role     = g.Option is GreetingOption.GreetOnRole ? $"(<@&{g.MetadataID}>) " : null;
+                             var option   = g.Option.Humanize(LetterCasing.Title);
+                             var greeting = g.Message.Truncate(50, " [...]");
+                             var channel  = $"<#{g.ChannelID}>";
+                             
+                             return $"{enabled} ➜ **`{g.Id}`** ➜ {option} {role}in {channel} \n> {greeting}\n";
+                         }
+                        );
+
+                embed = new()
+                {
+                    Colour      = Color.Goldenrod,
+                    Title       = $"All greetings ({greetings.Count()})",
+                    Description = greetings.Join("\n")
+                };
+            }
+            else
+            {
+                if (config.Greetings.FirstOrDefault(g => g.Id == id) is not {} greeting)
+                    return await _channels.CreateMessageAsync(_context.ChannelID, "I don't see a greeting with that ID!");
+                
+                embed = new()
+                {
+                    Colour      = Color.Goldenrod,
+                    Title       = $"Greeting {id}",
+                    Description = greeting.Message
+                };
+            }
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        }
     }
 
     [Group("edit", "e")]
@@ -307,7 +360,6 @@ public class ConfigCommands : CommandGroup
             
             if (action is not null)
                 config!.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = parsedAction.Value };
-
 
             await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
             {
