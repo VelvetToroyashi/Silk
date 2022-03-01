@@ -37,7 +37,7 @@ public static class GetUserInfraction
                                       .Where(inf => inf.TargetID == request.UserID)
                                       .Where(inf => inf.GuildID  == request.GuildID)
                                       .Where(inf => inf.Type     == request.Type)
-                                      .Where(inf => !inf.AppliesToTarget)
+                                      .Where(inf => inf.AppliesToTarget)
                                       .OrderBy(inf => inf.CaseNumber)
                                       .LastOrDefaultAsync(cancellationToken);
             }
