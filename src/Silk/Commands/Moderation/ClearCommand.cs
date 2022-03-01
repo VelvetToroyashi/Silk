@@ -38,7 +38,7 @@ public class ClearCommand : CommandGroup
                  "then filters by user (if specified), "                   +
                  "and then by regex (if specified).\n\n"                   +
                  "Furthermore, **--around and --skip are mutually exclusive.**")]
-    [RequireDiscordPermission(DiscordPermission.ManageMessages)]
+    //[RequireDiscordPermission(DiscordPermission.ManageMessages)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
     public async Task<Result<IMessage>> Clear
     (
@@ -76,6 +76,10 @@ public class ClearCommand : CommandGroup
             return Result<IMessage>.FromError(messageResult.Error);
         
         var messages = messageResult.Entity.AsEnumerable();
+        
+        var twoWeeks = DateTimeOffset.UtcNow.AddHours(-(24 * 14 - 0.5));
+
+        messages = messages.Where(m => m.ID.Timestamp > twoWeeks);
 
         messages = messages.Skip(skip + 1 ?? 1);
 
