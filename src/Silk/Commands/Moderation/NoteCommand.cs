@@ -47,9 +47,11 @@ public class NoteCommand : CommandGroup
     {
         var infractionResult = await _infractions.AddNoteAsync(_context.GuildID.Value, user.ID, _context.User.ID, note);
 
-        return await _channels.CreateMessageAsync(_context.ChannelID,
-                                                  !infractionResult.IsSuccess
-                                                      ? infractionResult.Error.Message
-                                                      : $"<:check:{Emojis.ConfirmId}> Successfully added note to **{user.ToDiscordTag()}**!");
+        return await _channels.CreateMessageAsync
+            (
+             _context.ChannelID,
+             !infractionResult.IsSuccess
+                 ? infractionResult.Error.Message
+                 : $"{Emojis.NoteEmoji} Successfully added note to **{user.ToDiscordTag()}**!");
     }
 }

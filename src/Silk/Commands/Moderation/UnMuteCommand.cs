@@ -46,10 +46,13 @@ public class UnMuteCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.UnMuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-
-        return await _channels.CreateMessageAsync(_context.ChannelID,
-                                                  !infractionResult.IsSuccess
-                                                      ? infractionResult.Error.Message
-                                                      : $"<:check:{Emojis.ConfirmId}> Successfully unmuted **{user.ToDiscordTag()}**!");
+        
+        return await _channels.CreateMessageAsync
+            (
+             _context.ChannelID,
+             !infractionResult.IsSuccess
+                 ? infractionResult.Error.Message
+                 : $"{Emojis.UnmuteEmoji} Successfully unmuted **{user.ToDiscordTag()}**!");
+        
     }
 }

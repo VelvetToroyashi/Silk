@@ -5,6 +5,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
@@ -47,13 +48,15 @@ public class MuteCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
-
+        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        
         return
-            await _channels.CreateMessageAsync(_context.ChannelID,
-                                               !infractionResult.IsSuccess
-                                                   ? infractionResult.Error.Message
-                                                   : $"<:check:{Emojis.ConfirmId}> Successfully muted {user.ToDiscordTag()}! " +
-            (infractionResult.Entity?.UserNotified ?? false ? "(User notified via DM)" : "(Failed to DM)"));
-        ;
+            await _channels.CreateMessageAsync
+                (
+                 _context.ChannelID,
+                 !infractionResult.IsSuccess
+                     ? infractionResult.Error!.Message
+                     : $"{Emojis.MuteEmoji} Successfully muted {user.ToDiscordTag()}! {notified}"
+                );
     }
 }

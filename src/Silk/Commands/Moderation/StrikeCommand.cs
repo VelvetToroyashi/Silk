@@ -48,10 +48,13 @@ public class StrikeCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.StrikeAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-
-        return await _channels.CreateMessageAsync(_context.ChannelID, !infractionResult.IsSuccess
-                                                      ? infractionResult.Error.Message
-                                                      : $"<:check:{Emojis.ConfirmId}> Successfully warned **{user.ToDiscordTag()}**! " +
-                                                        $"({(infractionResult.Entity.UserNotified ? "User notified with DM." : "Unable to DM.")})");
+        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        
+        return await _channels.CreateMessageAsync
+            (
+             _context.ChannelID,
+             !infractionResult.IsSuccess
+                 ? infractionResult.Error.Message
+                 : $"{Emojis.WarningEmoji} Warned **{user.ToDiscordTag()}**! {notified}");
     }
 }
