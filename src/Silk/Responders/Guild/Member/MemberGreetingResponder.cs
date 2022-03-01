@@ -24,5 +24,5 @@ public class MemberGreetingResponder : IResponder<IGuildMemberAdd>
     }
 
     public Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
-        => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User.Value, GreetingOption.GreetOnJoin);
+        => _greetingService.TryGreetMemberAsync(gatewayEvent.GuildID, gatewayEvent.User.Value);
 }

@@ -87,7 +87,7 @@ public class GuildGreetingService : IHostedService
     /// <param name="user">The member that joined.</param>
     /// <param name="option">The option to use when checking if the member should be greeted.</param>
     /// <returns>A result that may or may have not succeeded.</returns>
-    public async Task<Result> TryGreetMemberAsync(Snowflake guildID, IUser user, GreetingOption option)
+    public async Task<Result> TryGreetMemberAsync(Snowflake guildID, IUser user)
     {
         var memberRes = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
 
@@ -108,7 +108,7 @@ public class GuildGreetingService : IHostedService
             if (greeting.Option is GreetingOption.DoNotGreet)
                 continue;
 
-            if (greeting.Option is GreetingOption.GreetOnJoin && option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
+            if (greeting.Option is GreetingOption.GreetOnJoin) // If we can greet immediately, don't make a db call.
             {
                 var res = await GreetAsync(guildID, user.ID, greeting.ChannelID, greeting.Message);
 
@@ -118,7 +118,7 @@ public class GuildGreetingService : IHostedService
                 continue; // There may be multiple greetings, so we continue.
             }
 
-            if (greeting.Option is GreetingOption.GreetOnRole && option is GreetingOption.GreetOnRole)
+            if (greeting.Option is GreetingOption.GreetOnRole)
             {
                 var greetingResult = await _mediator.Send(new AddPendingGreeting.Request(user.ID, guildID, greeting.Id));
 
