@@ -113,13 +113,15 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Adds one or more role(s) to the role menu.\n" +
                  "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n")]
     public Task<IResult> AddAsync
-        (
-            [Description("A link to the role menu message. This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.")]
-            IMessage message,
+    (
+        [Description("A link to the role menu message. \n"                                                                +
+                     "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
+                     "**This is required if you set the role menu to the current channel.**")]
+        IMessage message,
             
-            [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
-            IRole[] roles
-        )
+        [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
+        IRole[] roles
+    )
         => AddAsync(message.ID, roles);
     
     [Command("add", "a")]
@@ -203,8 +205,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
-
-
+    
 
     
     [Command("remove", "rm", "r")]
@@ -232,7 +233,7 @@ public sealed class RoleMenuCommand : CommandGroup
         IRole[] roles
     )
     {
-
+        
         if (!roles.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
@@ -328,6 +329,7 @@ public sealed class RoleMenuCommand : CommandGroup
              new CreateRoleMenu.Request(new()
              {
                  ChannelId = channelID.Value,
+                 GuildId = _context.GuildID.Value.Value,
                  MessageId = roleMenuMessageResult.Entity.ID.Value,
                  Options = roles.Select(r => new RoleMenuOptionModel() {RoleId = r.ID.Value, RoleName = r.Name})
                                 .ToList()
