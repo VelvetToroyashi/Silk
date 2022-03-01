@@ -9,11 +9,13 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Extensions;
 using SkiaSharp;
 
@@ -42,6 +44,8 @@ public class YoinkCommand : CommandGroup
     }
 
     [Command("yoink")]
+    [RequireTeamOrOwner]
+    [RequireContext(ChannelContext.Guild)]
     public async Task<IResult> YoinkAsync
     (
         [Option("names")] 
