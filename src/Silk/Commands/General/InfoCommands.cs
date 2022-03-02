@@ -53,8 +53,14 @@ public class InfoCommands : CommandGroup
     }
 
     [Command("info")]
-    [RequireContext(ChannelContext.Guild)]
-    [Description("Get information about a member!")]
+    [Description("Get information about a user or member!")]
+    public Task<IResult> GetMemberOrUserInfoAsync(OneOf<IGuildMember, IUser>? memberOrUser = null)
+        => memberOrUser is null 
+            ? GetUserInfoAsync()
+            : memberOrUser.Value.TryPickT0(out var member, out var user)
+                ? GetMemberInfoAsync(member)
+                : GetUserInfoAsync(user);
+    
     public async Task<IResult> GetMemberInfoAsync(IGuildMember member)
     {
         var roleResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
@@ -111,8 +117,6 @@ public class InfoCommands : CommandGroup
         return res;
     }
 
-    [Command("info")]
-    [Description("Get information about a user or yourself!")]
     public async Task<IResult> GetUserInfoAsync(IUser? user = null)
     {
         user ??= _context.User;
