@@ -12,15 +12,6 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Silk.Services.Bot;
 
-public enum FlagResultType
-{
-    FileDimensionsTooLarge,
-    FileSizeTooLarge,
-    FileNotImage,
-    FileNotFound,
-    Succeeded,
-}
-
 public enum FlagOverlay
 {
     MaleLovingMale,
@@ -38,16 +29,7 @@ public sealed class FlagOverlayService
 
     private const int TwoMegaBytes      = 1000 * 1000 * 2;
     private const int MaxImageDimension = 3000;
-
-    private static readonly Image _prideImage = Image.Load(File.ReadAllBytes("./flags/pride.png"));
-    private static readonly Image _transImage = Image.Load(File.ReadAllBytes("./flags/trans.png"));
-    private static readonly Image _demiImage  = Image.Load(File.ReadAllBytes("./flags/demi.png"));
-    private static readonly Image _enbyImage  = Image.Load(File.ReadAllBytes("./flags/enby.png"));
-    private static readonly Image _panImage   = Image.Load(File.ReadAllBytes("./flags/pan.png"));
-    private static readonly Image _aceImage   = Image.Load(File.ReadAllBytes("./flags/ace.png"));
-    private static readonly Image _mlmImage   = Image.Load(File.ReadAllBytes("./flags/mlm.png"));
-    private static readonly Image _biImage    = Image.Load(File.ReadAllBytes("./flags/bi.png"));
-
+    
     private readonly HttpClient                  _httpClient;
     private readonly ILogger<FlagOverlayService> _logger;
 
@@ -112,41 +94,45 @@ public sealed class FlagOverlayService
 
     private static async Task<Stream> GetOverlayAsync(Image image, FlagOverlay overlay, float intensity, float grayscale)
     {
-        Image? overlaySelection = overlay switch
+        using Image overlaySelection = overlay switch
         {
-            FlagOverlay.LGBTQPride     => _prideImage,
-            FlagOverlay.MaleLovingMale => _mlmImage,
-            FlagOverlay.Bisexual       => _biImage,
-            FlagOverlay.Demisexual     => _demiImage,
-            FlagOverlay.NonBinary      => _enbyImage,
-            FlagOverlay.Transgender    => _transImage,
-            FlagOverlay.Pansexual      => _panImage,
-            FlagOverlay.Asexual        => _aceImage,
+            FlagOverlay.LGBTQPride     => Image.Load(await File.ReadAllBytesAsync("./flags/pride.png")),
+            FlagOverlay.MaleLovingMale => Image.Load(await File.ReadAllBytesAsync("./flags/mlm.png")),
+            FlagOverlay.Bisexual       => Image.Load(await File.ReadAllBytesAsync("./flags/bi.png")),
+            FlagOverlay.Demisexual     => Image.Load(await File.ReadAllBytesAsync("./flags/demi.png")),
+            FlagOverlay.NonBinary      => Image.Load(await File.ReadAllBytesAsync("./flags/enby.png")),
+            FlagOverlay.Transgender    => Image.Load(await File.ReadAllBytesAsync("./flags/trans.png")),
+            FlagOverlay.Pansexual      => Image.Load(await File.ReadAllBytesAsync("./flags/pan.png")),
+            FlagOverlay.Asexual        => Image.Load(await File.ReadAllBytesAsync("./flags/ace.png")),
 
             _ => throw new ArgumentOutOfRangeException(nameof(overlay), overlay, null)
         };
 
-        using Image? resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
-
+        using var resizedOverlay = overlaySelection.Clone(m => m.Resize(image.Width, image.Height));
+        
+        // ReSharper disable once AccessToDisposedClosure
         image.Mutate(x => x.Grayscale(grayscale).DrawImage(resizedOverlay, PixelColorBlendingMode.Multiply, PixelAlphaCompositionMode.SrcAtop, intensity));
 
         var stream = new MemoryStream();
+        
         await image.SaveAsPngAsync(stream);
-        stream.Position = 0;
+        stream.Seek(0, SeekOrigin.Begin);
+        
         return stream;
     }
 
     private async Task<bool> ValidateImageSizeAsync(string imageUrl)
     {
         // Typically a 'preflight' request is OPTIONS, not HEAD, but we're concerned about the size of the image, so we're using HEAD
-        using HttpResponseMessage? preflight = await _httpClient.SendAsync(new(HttpMethod.Head, imageUrl));
+        using var preflight = await _httpClient.SendAsync(new(HttpMethod.Head, imageUrl));
 
         if (preflight.IsSuccessStatusCode) // False if the host doesn't support HEAD requests
         {
             return preflight.Content.Headers.ContentLength < TwoMegaBytes;
         }
+        
         _logger.LogTrace(EventIds.Service, "Preflight request failed, falling back to manual fetching.");
-        using HttpResponseMessage? secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
+        using var secondarySizeRequest = await _httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead);
 
         secondarySizeRequest.EnsureSuccessStatusCode();
 
