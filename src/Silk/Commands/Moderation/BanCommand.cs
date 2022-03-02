@@ -10,7 +10,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Commands.Conditions;
+using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation
@@ -63,10 +65,15 @@ namespace Silk.Commands.Moderation
         )
         {
             var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason, banDuration);
-
-            return infractionResult.IsSuccess
-                ? await _channels.CreateMessageAsync(_context.ChannelID, $"Successfully banned <@{user.ID}>! " + (infractionResult.Entity.UserNotified ? "(User notified with DM)" : "(Failed to DM user)"))
-                : await _channels.CreateMessageAsync(_context.ChannelID, infractionResult.Error.Message);
+            var notified         = infractionResult.Entity.UserNotified ? "(User notified with DM)" : "(Failed to DM)";
+            
+            return await _channels.CreateMessageAsync
+                (
+                 _context.ChannelID,
+                 !infractionResult.IsSuccess
+                     ? infractionResult.Error.Message
+                     : $"{Emojis.BanEmoji} Banned **{user.ToDiscordTag()}**! {notified}"
+                );
         }
     }
 }

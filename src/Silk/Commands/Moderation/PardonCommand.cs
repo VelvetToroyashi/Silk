@@ -52,15 +52,16 @@ public class PardonCommand : CommandGroup
     {
         var infractionResult = await _infractions.PardonAsync(_context.GuildID.Value, user.ID, _context.User.ID, caseID, reason);
 
-        return await _channels.CreateMessageAsync(_context.ChannelID,
-                                                  !infractionResult.IsSuccess
-                                                      ? infractionResult.Error.Message
-                                                      : $"<:check:{Emojis.ConfirmId}> " + 
-                                                        (
-                                                          caseID is null 
-                                                            ? $"Pardoned **{user.ToDiscordTag()}** from their last applicable infraction!"
-                                                            : $"Pardoned **{user.ToDiscordTag()}** from case **#{caseID}**!"
-                                                        )
-                                                 );
+        var caseMessage = caseID is null
+            ? $"Pardoned **{user.ToDiscordTag()}** from their last applicable infraction!"
+            : $"Pardoned **{user.ToDiscordTag()}** from case **#{caseID}**!";
+        
+        return await _channels.CreateMessageAsync
+                (
+                 _context.ChannelID,
+                 !infractionResult.IsSuccess
+                     ? infractionResult.Error.Message
+                     : $"{Emojis.WrenchEmoji} {caseMessage}"
+                );
     }
 }

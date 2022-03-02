@@ -13,6 +13,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
@@ -38,7 +39,7 @@ public class ClearCommand : CommandGroup
                  "then filters by user (if specified), "                   +
                  "and then by regex (if specified).\n\n"                   +
                  "Furthermore, **--around and --skip are mutually exclusive.**")]
-    [RequireDiscordPermission(DiscordPermission.ManageMessages)]
+    //[RequireDiscordPermission(DiscordPermission.ManageMessages)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
     public async Task<Result<IMessage>> Clear
     (
@@ -76,6 +77,10 @@ public class ClearCommand : CommandGroup
             return Result<IMessage>.FromError(messageResult.Error);
         
         var messages = messageResult.Entity.AsEnumerable();
+        
+        var twoWeeks = DateTimeOffset.UtcNow.AddHours(-(24 * 14 - 0.5));
+
+        messages = messages.Where(m => m.ID.Timestamp > twoWeeks);
 
         messages = messages.Skip(skip + 1 ?? 1);
 
@@ -98,7 +103,7 @@ public class ClearCommand : CommandGroup
 
         var deleted = Math.Min(messageCount, messages.Count());
         
-        var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
+        var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.DeleteEmoji} Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
         
         await Task.Delay(6000);
 

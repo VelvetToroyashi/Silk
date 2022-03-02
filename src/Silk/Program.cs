@@ -145,6 +145,7 @@ public class Program
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
                    .AddSingleton<IInfractionService, InfractionService>()
+                   .AddHostedService(s => (s.GetRequiredService<IInfractionService>() as InfractionService)!)
                    .AddSingleton<InviteDectectionService>()
                    .AddSingleton<ExemptionEvaluationService>()
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
