@@ -135,6 +135,39 @@
 
     <ItemGroup>
         <Compile Remove="logs\**" />
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.cs">
+          <DependentUpon>ConfigCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Phishing.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Invites.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Logging.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Greetings.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Mutes.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.cs">
+          <DependentUpon>ConfigCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Greetings.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Invites.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Infractions.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Phishing.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
