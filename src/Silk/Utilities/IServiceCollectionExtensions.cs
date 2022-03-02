@@ -35,7 +35,6 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
-using IChannel = MongoDB.Driver.Core.Bindings.IChannel;
 
 namespace Silk.Utilities;
 
