@@ -13,7 +13,6 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
-using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 

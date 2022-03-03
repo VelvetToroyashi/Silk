@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using Remora.Commands.Attributes;
@@ -15,12 +14,9 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Data;
 using Silk.Extensions;
-using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
-using TimestampFormat = DSharpPlus.TimestampFormat;
 
 namespace Silk.Commands.Server;
 

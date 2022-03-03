@@ -1,17 +1,10 @@
 ﻿//TODO: This
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Humanizer;
 using MediatR;
-using OneOf;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -19,13 +12,9 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
-using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Guilds.Config;
-using Silk.Extensions;
-using Silk.Extensions.Remora;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;

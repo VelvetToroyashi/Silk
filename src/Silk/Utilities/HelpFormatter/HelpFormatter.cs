@@ -9,7 +9,6 @@ using Remora.Commands.Signatures;
 using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
-using Remora.Results;
 using Silk.Extensions;
 
 namespace Silk.Utilities.HelpFormatter;
