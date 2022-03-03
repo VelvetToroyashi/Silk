@@ -93,7 +93,7 @@ public class PhishingDetectionService
                     if (!exemptionResult.IsSuccess)
                         return Result.FromError(exemptionResult.Error);
 
-                    if (exemptionResult.Entity)
+                    if (!exemptionResult.Entity)
                         return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
                 }
             }
