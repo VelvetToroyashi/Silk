@@ -14,6 +14,7 @@ public enum ExemptionTarget
 [Flags]
 public enum ExemptionCoverage
 {
+	NonExemptMarker,
     MessageEdits,
     MessageDeletes,
     Phishing,
