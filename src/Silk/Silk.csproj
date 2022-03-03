@@ -171,6 +171,9 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.View.Logging.cs">
           <DependentUpon>ConfigCommands.View.cs</DependentUpon>
         </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Exemptions.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
