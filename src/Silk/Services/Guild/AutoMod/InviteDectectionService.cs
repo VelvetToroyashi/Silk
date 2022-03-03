@@ -86,7 +86,7 @@ public class InviteDectectionService
       
       //Evaluate if the user is whitelisted.
       
-      var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.Invites, guildID, message.Author.ID, message.ChannelID);
+      var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiInvite, guildID, message.Author.ID, message.ChannelID);
 
       if (!exemptionResult.IsDefined(out var isExempt))
       {

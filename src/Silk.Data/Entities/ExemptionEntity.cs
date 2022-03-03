@@ -15,11 +15,11 @@ public enum ExemptionTarget
 public enum ExemptionCoverage
 {
 	NonExemptMarker = 0,
-    MessageEdits = 2,
-    MessageDeletes = 4,
-    Phishing = 8,
-    Spam = 16,
-    Invites = 32,
+    EditLogging = 2,
+    DeleteLogging = 4,
+    AntiPhishing = 8,
+    AntiSpam = 16,
+    AntiInvite = 32,
     WordBlacklist = 64,
 }
 

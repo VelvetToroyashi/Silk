@@ -88,7 +88,7 @@ public class PhishingDetectionService
                 {
                     _logger.LogInformation("Detected phishing link.");
 
-                    Result<bool> exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.Phishing, guildId, message.Author.ID, message.ChannelID);
+                    Result<bool> exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
 
                     if (!exemptionResult.IsSuccess)
                         return Result.FromError(exemptionResult.Error);
