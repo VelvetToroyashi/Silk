@@ -79,7 +79,7 @@ public partial class ConfigCommands : CommandGroup
         
         [Command("all", "a")]
         [Description("View all settings for your server. \n" +
-                     "Each section can be configued with `config edit` and the respective section name.")]
+                     "Each section can be configured with `config edit` and the respective section name.")]
         public async Task<IResult> ViewAllAsync()
         {
             var config    = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
