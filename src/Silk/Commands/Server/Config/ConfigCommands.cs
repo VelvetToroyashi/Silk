@@ -77,7 +77,8 @@ public partial class ConfigCommands : CommandGroup
         //TODO: Add exmemptions
         
         [Command("all", "a")]
-        [Description("View all settings for your server.")]
+        [Description("View all settings for your server. \n" +
+                     "Each section can be configued with `config edit` and the respective section name.")]
         public async Task<IResult> ViewAllAsync()
         {
             var config    = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
@@ -95,32 +96,33 @@ public partial class ConfigCommands : CommandGroup
             contentBuilder
                .Clear()
                .AppendLine($"{Emojis.SettingsEmoji} **General Config:**")
-               .AppendLine("__Greetings__ | `config edit greetings`")
+               .AppendLine()
+               .AppendLine("**Greetings** | `greetings`")
                .AppendLine($"> Configured Greetings: {config.Greetings.Count}")
                .AppendLine()
                .AppendLine($"{Emojis.WrenchEmoji} **Moderation Config:**")
                .AppendLine()
-               .AppendLine("__Logging__ | `config edit logging`")
+               .AppendLine("**Logging** | `logging`")
                .AppendLine($"> {(modConfig.Logging.LogMemberJoins ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.JoinEmoji} Log members joining")
                .AppendLine($"> {(modConfig.Logging.LogMemberLeaves ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.LeaveEmoji} Log members leaving")
                .AppendLine($"> {(modConfig.Logging.LogMessageEdits ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.EditEmoji} Log message edits")
                .AppendLine($"> {(modConfig.Logging.LogMessageDeletes ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Log message deletes")
                .AppendLine()
-               .AppendLine("__Invites__ | `config edit invites`, `config edit invite-whitelist`")
+               .AppendLine("**Invites** | `invites`, `invite-whitelist`")
                .AppendLine($"> {(modConfig.Invites.ScanOrigin ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.ScanEmoji} Scan invite origin")
                .AppendLine($"> {(modConfig.Invites.WarnOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Warn on invite")
                .AppendLine($"> {(modConfig.Invites.DeleteOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete matched invite")
                .AppendLine($"> {(modConfig.UseAggressiveRegex ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.NoteEmoji} Use aggressive invite matching")
                .AppendLine($"> Allowed invites: {(modConfig.Invites.Whitelist.Count is 0 ? "None" : $"{modConfig.Invites.Whitelist.Count} allowed invites [See `config view invites`]")}")
                .AppendLine()
-               .AppendLine("__Infractions__ | `config edit infractions`")
+               .AppendLine("**Infractions** | `infractions`")
                .AppendLine($"> Mute role: {(modConfig.MuteRoleID.Value is 0 ? "Not set" : $"<@&{modConfig.MuteRoleID}>")}")
                .AppendLine($"> {(modConfig.UseNativeMute ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} Use native mutes (Requires Timeout Members permission)")
                .AppendLine($"> {(modConfig.ProgressiveStriking ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} Escalate infractions")
                .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See `config view infractions`]" : "Not configured")}")
                .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}")
                .AppendLine()
-               .AppendLine($"__Anti-Phishing__ {Emojis.NewEmoji} | `config edit phishing`")
+               .AppendLine($"**Anti-Phishing** {Emojis.NewEmoji} | `phishing`")
                .AppendLine($"> {(modConfig.DetectPhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Detect Phishing Links")
                .AppendLine($"> {(modConfig.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete Phishing Links")
                .AppendLine($"> {(action is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WrenchEmoji} Post-detection action: {phishingAction}");
