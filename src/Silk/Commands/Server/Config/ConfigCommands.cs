@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
@@ -121,6 +122,9 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine($"> {(modConfig.ProgressiveStriking ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} Escalate infractions")
                .AppendLine($"> Infraction steps: {(modConfig.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See `config view infractions`]" : "Not configured")}")
                .AppendLine($"> Infraction steps (named): {((modConfig.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}")
+               .AppendLine()
+               .AppendLine($"**Exemptions** {Emojis.NewEmoji} {Emojis.BetaEmoji} | `exemptions`")
+               .AppendLine($"> {(modConfig.Exemptions.Any() ? $"Configured AutoMod Exemptions: {modConfig.Exemptions.Count}" : "Not configured")}")
                .AppendLine()
                .AppendLine($"**Anti-Phishing** {Emojis.NewEmoji} | `phishing`")
                .AppendLine($"> {(modConfig.DetectPhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Detect Phishing Links")
