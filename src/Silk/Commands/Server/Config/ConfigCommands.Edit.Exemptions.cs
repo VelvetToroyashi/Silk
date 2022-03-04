@@ -60,7 +60,7 @@ public partial class ConfigCommands
                     if (existingExemption.Exemption is ExemptionCoverage.NonExemptMarker)
                         exemptions.Remove(existingExemption);
                 }
-                else
+                else if (flagsToAdd != default)
                 {
                     var newExemption = new ExemptionEntity()
                     {
