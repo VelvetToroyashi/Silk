@@ -46,6 +46,7 @@ public static class UpdateGuildModConfig
                                                    .AsNoTracking()
                                                    .Include(c => c.InfractionSteps)
                                                    .Include(c => c.Invites)
+                                                   .Include(c => c.Exemptions)
                                                    .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);
 
 
@@ -84,9 +85,12 @@ public static class UpdateGuildModConfig
 
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
-            
+
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
+            {
+                _db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
+            }
 
             config.NamedInfractionSteps = request.NamedInfractionSteps ?? config.NamedInfractionSteps;
 

@@ -52,7 +52,15 @@ public partial class ConfigCommands
             
             foreach (var exemption in flattened)
             {
-                if (exemptions.FirstOrDefault(x => x.TargetID == exemption.Item1) is not { } existingExemption)
+                if (exemptions.FirstOrDefault(x => x.TargetID == exemption.Item1) is { } existingExemption)
+                {
+                    existingExemption.Exemption |= flagsToAdd;
+                    existingExemption.Exemption &= ~flagsToRemove;
+
+                    if (existingExemption.Exemption is ExemptionCoverage.NonExemptMarker)
+                        exemptions.Remove(existingExemption);
+                }
+                else
                 {
                     var newExemption = new ExemptionEntity()
                     {
@@ -61,16 +69,8 @@ public partial class ConfigCommands
                         TargetID   = exemption.Item1,
                         TargetType = exemption.Item2,
                     };
-                    
-                    exemptions.Add(newExemption);
-                }
-                else
-                {
-                    existingExemption.Exemption |= flagsToAdd;
-                    existingExemption.Exemption &= ~flagsToRemove;
 
-                    if (existingExemption.Exemption is ExemptionCoverage.NonExemptMarker)
-                        exemptions.Remove(existingExemption);
+                    exemptions.Add(newExemption);
                 }
             }
             
