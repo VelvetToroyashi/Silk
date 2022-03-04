@@ -33,7 +33,7 @@ public class ExemptionEvaluationService
     {
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
 
-        if (config.Exemptions.Any())
+        if (!config.Exemptions.Any())
             return Result<bool>.FromSuccess(false); // No exemptions
 
         Result<IGuildMember> guildMemberResult = await _guildApi.GetGuildMemberAsync(guildID, userID);
