@@ -47,6 +47,7 @@ public static class UpdateGuildModConfig
                                                    .Include(c => c.InfractionSteps)
                                                    .Include(c => c.Invites)
                                                    .Include(c => c.Exemptions)
+                                                   .Include(c => c.Logging)
                                                    .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);
 
 
@@ -86,6 +87,28 @@ public static class UpdateGuildModConfig
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
 
+            if (request.LoggingConfig.IsDefined(out var loggingConfig))
+            {
+                var log = config.Logging;
+                
+                log.LogInfractions = loggingConfig.LogInfractions;
+                log.Infractions = loggingConfig.Infractions;
+                
+                log.LogMemberJoins = loggingConfig.LogMemberJoins;
+                log.MemberJoins = loggingConfig.MemberJoins;
+                
+                log.LogMemberLeaves = loggingConfig.LogMemberLeaves;
+                log.MemberLeaves = loggingConfig.MemberLeaves;
+                
+                log.LogMessageEdits = loggingConfig.LogMessageEdits;
+                log.MessageEdits = loggingConfig.MessageEdits;
+                
+                log.LogMessageDeletes = loggingConfig.LogMessageDeletes;
+                log.MessageDeletes = loggingConfig.MessageDeletes;
+                
+                log.UseWebhookLogging = loggingConfig.UseWebhookLogging;
+            }
+            
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
             {
                 _db.RemoveRange(config.Exemptions.Except(exemptions));
