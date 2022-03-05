@@ -153,6 +153,9 @@ public class GuildGreetingService : IHostedService
             if (!memberResult.IsDefined(out var member))
             {
                 _logger.LogError("Failed to get member {User} in guild {Guild}", pending.UserID, pending.GuildID);
+                
+                _pendingGreetings.RemoveAt(i);
+                await _mediator.Send(new RemovePendingGreeting.Request(pending.Id));
                 continue;
             }
 
