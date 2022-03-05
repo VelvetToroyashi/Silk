@@ -240,7 +240,7 @@ public partial class ConfigCommands
                     );
             }
 
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmEmoji}");
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
         }
 
         private async Task<Result<IWebhook>> TryCreateWebhookAsync(Snowflake channelID)
