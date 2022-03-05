@@ -158,8 +158,7 @@ public partial class ConfigCommands
                     };
                 }
             }
-
-
+            
             if (webhook is true && channel is not null)
             {
                 var success = true;
@@ -231,13 +230,7 @@ public partial class ConfigCommands
                     return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't create webhooks in that channel. Check the channel settings to ensure I have `Manage Webhooks` please!");
                 }
 
-                await _mediator.Send
-                    (
-                     new UpdateGuildModConfig.Request(_context.GuildID.Value)
-                     {
-                         LoggingConfig = loggingConfig
-                     }
-                    );
+                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
             }
 
             return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
