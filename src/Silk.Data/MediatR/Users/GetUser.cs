@@ -25,9 +25,12 @@ public static class GetUser
         public async Task<UserEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
             UserEntity? user = await _db.Users
+                                        .Include(u => u.History)
+                                        .Include(u => u.Infractions)
                                         .FirstOrDefaultAsync(u => 
                                                                  u.ID      == request.UserID && 
-                                                                 u.GuildID == request.GuildID, cancellationToken);
+                                                                 u.GuildID == request.GuildID,
+                                                             cancellationToken);
             return user;
         }
     }
