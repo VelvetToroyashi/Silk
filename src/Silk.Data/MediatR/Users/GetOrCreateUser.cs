@@ -45,7 +45,7 @@ public static class GetOrCreateUser
                 ID      = request.UserID,
                 GuildID = request.GuildID,
                 Flags   = request.Flags ?? UserFlag.None,
-                History = new() { JoinDate = request.JoinedAt ?? DateTimeOffset.UtcNow }
+                History = new() { JoinDates = new() { request.JoinedAt ?? DateTimeOffset.UtcNow } }
             };
     
             _db.Users.Add(user);
