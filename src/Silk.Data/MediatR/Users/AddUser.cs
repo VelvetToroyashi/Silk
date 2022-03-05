@@ -29,7 +29,11 @@ public static class AddUser
                 ID      = request.UserID,
                 GuildID = request.GuildID,
                 Flags   = request.Flags ?? UserFlag.None,
-                History = new() { JoinDate = request.JoinedAt ?? DateTimeOffset.UtcNow }
+                History = new() 
+                {
+                    UserID = request.UserID,
+                    JoinDates = new() { request.JoinedAt ?? DateTimeOffset.UtcNow } 
+                }
             };
 
             _db.Users.Add(user);

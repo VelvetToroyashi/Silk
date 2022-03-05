@@ -28,6 +28,8 @@ public static class AddUserLeaveDate
 
             user.History.LeaveDates.Add(request.Date);
             
+            _db.Update(user);
+            
             await _db.SaveChangesAsync(cancellationToken);
             
             return Result.FromSuccess();

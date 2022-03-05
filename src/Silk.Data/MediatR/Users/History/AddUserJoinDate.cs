@@ -28,6 +28,8 @@ public static class AddUserJoinDate
                 return new NotFoundError($"No user exists by the ID of {request.UserID} in guild {request.GuildID}");
 
             user.History.JoinDates.Add(request.Date);
+
+            _db.Update(user);
             
             await _db.SaveChangesAsync(cancellationToken);
             
