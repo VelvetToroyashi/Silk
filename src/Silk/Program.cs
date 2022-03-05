@@ -28,11 +28,7 @@ public class Program
 {
     public static async Task Main()
     {
-        IConfiguration config = new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
-        
-        
-
-         Console.WriteLine("Starting Silk...");
+        Console.WriteLine("Starting Silk...");
         
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
