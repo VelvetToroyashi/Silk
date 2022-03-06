@@ -20,14 +20,23 @@ public class InviteDectectionService
    
    private static readonly Regex AggressiveInviteRegex = new(@"(?:https?\:\/\/)?(www\.)?(((di?sc(?:ord)?\.(gg|io|me|li))|(discord(?:app)?\.com\/invite))\/(?<invite>[A-z0-9-]{2,}))", RegexOptions.Compiled);
    
-   private readonly IInfractionService                     _infractions;
-   private readonly IDiscordRestUserAPI                    _users;
-   private readonly IDiscordRestInviteAPI                  _invites;
-   private readonly IDiscordRestChannelAPI                 _channels;
-   private readonly GuildConfigCacheService                _config;
-   private readonly ExemptionEvaluationService             _exemptions;
+   private readonly IInfractionService               _infractions;
+   private readonly IDiscordRestUserAPI              _users;
+   private readonly IDiscordRestInviteAPI            _invites;
+   private readonly IDiscordRestChannelAPI           _channels;
+   private readonly GuildConfigCacheService          _config;
+   private readonly ExemptionEvaluationService       _exemptions;
    private readonly ILogger<InviteDectectionService> _logger;
-   public InviteDectectionService(IInfractionService infractions, IDiscordRestUserAPI users, IDiscordRestInviteAPI invites, IDiscordRestChannelAPI channels, GuildConfigCacheService config, ExemptionEvaluationService exemptions, ILogger<InviteDectectionService> logger)
+   public InviteDectectionService
+   (
+      IInfractionService               infractions,
+      IDiscordRestUserAPI              users,
+      IDiscordRestInviteAPI            invites,
+      IDiscordRestChannelAPI           channels,
+      GuildConfigCacheService          config,
+      ExemptionEvaluationService       exemptions,
+      ILogger<InviteDectectionService> logger
+   )
    {
       _infractions = infractions;
       _users       = users;
@@ -37,7 +46,6 @@ public class InviteDectectionService
       _exemptions  = exemptions;
       _logger = logger;
    }
-
    
    /// <summary>
    /// Determines whether a given message contains an invite, and takes appropriate action.
@@ -112,7 +120,6 @@ public class InviteDectectionService
 
          if (!infractionResult.IsSuccess)
             _logger.LogWarning(EventIds.AutoMod, "Failed to create infraction for {User} in {Guild} \n{@Error}", message.Author.ID, guildID, infractionResult.Error);
-
       }
       
       _logger.LogDebug(EventIds.AutoMod, "Invite handling finished in {Time:N0} ms", (message.ID.Timestamp - DateTimeOffset.UtcNow).TotalMilliseconds);
