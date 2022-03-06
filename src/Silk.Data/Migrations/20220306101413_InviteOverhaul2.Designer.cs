@@ -13,8 +13,8 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    [Migration("20220227031244_InviteOverhaul")]
-    partial class InviteOverhaul
+    [Migration("20220306101413_InviteOverhaul2")]
+    partial class InviteOverhaul2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -93,12 +93,16 @@ namespace Silk.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("delete");
 
-                    b.Property<int>("GuildModConfigId")
+                    b.Property<int?>("GuildModConfigId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("ScanOrigin")
                         .HasColumnType("boolean")
                         .HasColumnName("scan_origin");
+
+                    b.Property<bool>("UseAggressiveRegex")
+                        .HasColumnType("boolean")
+                        .HasColumnName("match_aggressively");
 
                     b.Property<bool>("WarnOnMatch")
                         .HasColumnType("boolean")
@@ -299,10 +303,6 @@ namespace Silk.Data.Migrations
                     b.Property<bool>("ProgressiveStriking")
                         .HasColumnType("boolean")
                         .HasColumnName("progressive_infractions");
-
-                    b.Property<bool>("UseAggressiveRegex")
-                        .HasColumnType("boolean")
-                        .HasColumnName("match_aggressively");
 
                     b.Property<bool>("UseNativeMute")
                         .HasColumnType("boolean")
@@ -686,9 +686,7 @@ namespace Silk.Data.Migrations
                 {
                     b.HasOne("Silk.Data.Entities.GuildModConfigEntity", "GuildConfig")
                         .WithOne("Invites")
-                        .HasForeignKey("Silk.Data.Entities.Guild.Config.InviteConfigEntity", "GuildModConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Silk.Data.Entities.Guild.Config.InviteConfigEntity", "GuildModConfigId");
 
                     b.Navigation("GuildConfig");
                 });

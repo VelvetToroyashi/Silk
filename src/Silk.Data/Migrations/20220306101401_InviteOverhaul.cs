@@ -9,6 +9,7 @@ namespace Silk.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("CREATE TABLE temp_invites AS SELECT \"Id\", \"match_aggressively\", \"infract_on_invite\", \"scan_invite_origin\", \"delete_invite_messages\", \"invite_whitelist_enabled\" FROM \"guild_moderation_config\"");
             migrationBuilder.DropForeignKey(
                 name: "FK_guild_moderation_config_guild_logging_configs_LoggingConfig~",
                 table: "guild_moderation_config");
@@ -27,6 +28,10 @@ namespace Silk.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "invite_whitelist_enabled",
+                table: "guild_moderation_config");
+
+            migrationBuilder.DropColumn(
+                name: "match_aggressively",
                 table: "guild_moderation_config");
 
             migrationBuilder.DropColumn(
@@ -60,10 +65,11 @@ namespace Silk.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     whitelist_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    match_aggressively = table.Column<bool>(type: "boolean", nullable: false),
                     infract = table.Column<bool>(type: "boolean", nullable: false),
                     delete = table.Column<bool>(type: "boolean", nullable: false),
                     scan_origin = table.Column<bool>(type: "boolean", nullable: false),
-                    GuildModConfigId = table.Column<int>(type: "integer", nullable: false)
+                    GuildModConfigId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,8 +78,7 @@ namespace Silk.Data.Migrations
                         name: "FK_invite_configs_guild_moderation_config_GuildModConfigId",
                         column: x => x.GuildModConfigId,
                         principalTable: "guild_moderation_config",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -147,6 +152,13 @@ namespace Silk.Data.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "invite_whitelist_enabled",
+                table: "guild_moderation_config",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "match_aggressively",
                 table: "guild_moderation_config",
                 type: "boolean",
                 nullable: false,
