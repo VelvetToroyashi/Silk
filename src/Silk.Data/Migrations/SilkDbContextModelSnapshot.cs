@@ -18,7 +18,7 @@ namespace Silk.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -77,41 +77,6 @@ namespace Silk.Data.Migrations
                     b.HasIndex("GuildModConfigEntityId");
 
                     b.ToTable("infraction_exemptions");
-                });
-
-            modelBuilder.Entity("Silk.Data.Entities.Guild.Config.InviteConfigEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("DeleteOnMatch")
-                        .HasColumnType("boolean")
-                        .HasColumnName("delete");
-
-                    b.Property<int>("GuildModConfigId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("ScanOrigin")
-                        .HasColumnType("boolean")
-                        .HasColumnName("scan_origin");
-
-                    b.Property<bool>("WarnOnMatch")
-                        .HasColumnType("boolean")
-                        .HasColumnName("infract");
-
-                    b.Property<bool>("WhitelistEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("whitelist_enabled");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildModConfigId")
-                        .IsUnique();
-
-                    b.ToTable("invite_configs");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildConfigEntity", b =>
@@ -263,6 +228,10 @@ namespace Silk.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("DeleteMessageOnMatchedInvite")
+                        .HasColumnType("boolean")
+                        .HasColumnName("delete_invite_messages");
+
                     b.Property<bool>("DeletePhishingLinks")
                         .HasColumnType("boolean")
                         .HasColumnName("delete_detected_phishing");
@@ -275,7 +244,11 @@ namespace Silk.Data.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
-                    b.Property<int>("LoggingId")
+                    b.Property<bool>("InfractOnMatchedInvite")
+                        .HasColumnType("boolean")
+                        .HasColumnName("infract_on_invite");
+
+                    b.Property<int>("LoggingConfigId")
                         .HasColumnType("integer");
 
                     b.Property<int>("MaxRoleMentions")
@@ -298,6 +271,10 @@ namespace Silk.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("progressive_infractions");
 
+                    b.Property<bool>("ScanInviteOrigin")
+                        .HasColumnType("boolean")
+                        .HasColumnName("scan_invite_origin");
+
                     b.Property<bool>("UseAggressiveRegex")
                         .HasColumnType("boolean")
                         .HasColumnName("match_aggressively");
@@ -306,12 +283,16 @@ namespace Silk.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("use_native_mute");
 
+                    b.Property<bool>("WhitelistInvites")
+                        .HasColumnType("boolean")
+                        .HasColumnName("invite_whitelist_enabled");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GuildID")
                         .IsUnique();
 
-                    b.HasIndex("LoggingId");
+                    b.HasIndex("LoggingConfigId");
 
                     b.ToTable("guild_moderation_config");
                 });
@@ -428,7 +409,7 @@ namespace Silk.Data.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
-                    b.Property<int?>("InviteConfigEntityId")
+                    b.Property<int?>("GuildModConfigEntityId")
                         .HasColumnType("integer");
 
                     b.Property<ulong>("InviteGuildId")
@@ -442,7 +423,7 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InviteConfigEntityId");
+                    b.HasIndex("GuildModConfigEntityId");
 
                     b.ToTable("invites");
                 });
@@ -680,17 +661,6 @@ namespace Silk.Data.Migrations
                         .HasForeignKey("GuildModConfigEntityId");
                 });
 
-            modelBuilder.Entity("Silk.Data.Entities.Guild.Config.InviteConfigEntity", b =>
-                {
-                    b.HasOne("Silk.Data.Entities.GuildModConfigEntity", "GuildConfig")
-                        .WithOne("Invites")
-                        .HasForeignKey("Silk.Data.Entities.Guild.Config.InviteConfigEntity", "GuildModConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GuildConfig");
-                });
-
             modelBuilder.Entity("Silk.Data.Entities.GuildConfigEntity", b =>
                 {
                     b.HasOne("Silk.Data.Entities.GuildEntity", "Guild")
@@ -750,15 +720,15 @@ namespace Silk.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Silk.Data.Entities.GuildLoggingConfigEntity", "Logging")
+                    b.HasOne("Silk.Data.Entities.GuildLoggingConfigEntity", "LoggingConfig")
                         .WithMany()
-                        .HasForeignKey("LoggingId")
+                        .HasForeignKey("LoggingConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Guild");
 
-                    b.Navigation("Logging");
+                    b.Navigation("LoggingConfig");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.InfractionEntity", b =>
@@ -789,9 +759,9 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Entities.InviteEntity", b =>
                 {
-                    b.HasOne("Silk.Data.Entities.Guild.Config.InviteConfigEntity", null)
-                        .WithMany("Whitelist")
-                        .HasForeignKey("InviteConfigEntityId");
+                    b.HasOne("Silk.Data.Entities.GuildModConfigEntity", null)
+                        .WithMany("AllowedInvites")
+                        .HasForeignKey("GuildModConfigEntityId");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.TagEntity", b =>
@@ -829,11 +799,6 @@ namespace Silk.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Silk.Data.Entities.Guild.Config.InviteConfigEntity", b =>
-                {
-                    b.Navigation("Whitelist");
-                });
-
             modelBuilder.Entity("Silk.Data.Entities.GuildConfigEntity", b =>
                 {
                     b.Navigation("Greetings");
@@ -856,12 +821,11 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Entities.GuildModConfigEntity", b =>
                 {
+                    b.Navigation("AllowedInvites");
+
                     b.Navigation("Exemptions");
 
                     b.Navigation("InfractionSteps");
-
-                    b.Navigation("Invites")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.TagEntity", b =>
@@ -880,3 +844,4 @@ namespace Silk.Data.Migrations
         }
     }
 }
+
