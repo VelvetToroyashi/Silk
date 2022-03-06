@@ -55,7 +55,7 @@ public class InviteDectectionService
       var config = await _config.GetModConfigAsync(guildID);
       var start  = DateTimeOffset.UtcNow;
       
-      var inviteMatch = config.UseAggressiveRegex 
+      var inviteMatch = config.Invites.UseAggressiveRegex 
          ? AggressiveInviteRegex.Match(message.Content) 
          : InviteRegex.Match(message.Content);
 

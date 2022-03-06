@@ -67,7 +67,7 @@ public static class UpdateGuildModConfig
                 config.MaxRoleMentions = maxRoleMentions;
 
             if (request.UseAggressiveRegex.IsDefined(out bool useAggressiveRegex))
-                config.UseAggressiveRegex = useAggressiveRegex;
+                config.Invites.UseAggressiveRegex = useAggressiveRegex;
 
             if (request.ScanInvites.IsDefined(out bool scanInvites))
                 config.Invites.ScanOrigin = scanInvites;
