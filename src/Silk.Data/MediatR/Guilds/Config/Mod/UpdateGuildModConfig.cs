@@ -46,6 +46,7 @@ public static class UpdateGuildModConfig
                                                    .AsNoTracking()
                                                    .Include(c => c.InfractionSteps)
                                                    .Include(c => c.Invites)
+                                                   .ThenInclude(i => i.Whitelist)
                                                    .Include(c => c.Exemptions)
                                                    .Include(c => c.Logging)
                                                    .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);

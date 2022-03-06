@@ -20,6 +20,7 @@ public static class GetGuildModConfig
         {
             return _db.GuildModConfigs
                       .Include(c => c.Invites)
+                      .Include(c => c.Invites.Whitelist)
                       .Include(c => c.InfractionSteps)
                       .Include(c => c.Exemptions)
                       .Include(c => c.Logging)
