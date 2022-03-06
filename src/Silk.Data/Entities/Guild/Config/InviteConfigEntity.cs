@@ -45,7 +45,7 @@ public class InviteConfigEntity
     [Column("scan_origin")]
     public bool ScanOrigin { get; set; }
     
-    public int? GuildModConfigId { get; set; }
+    public int GuildModConfigId { get; set; }
     
-    public GuildModConfigEntity? GuildConfig { get; set; }
+    public GuildModConfigEntity GuildConfig { get; set; }
 }
