@@ -113,7 +113,7 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine($"> {(modConfig.Invites.ScanOrigin ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.ScanEmoji} Scan invite origin")
                .AppendLine($"> {(modConfig.Invites.WarnOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Warn on invite")
                .AppendLine($"> {(modConfig.Invites.DeleteOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete matched invite")
-               .AppendLine($"> {(modConfig.UseAggressiveRegex ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.NoteEmoji} Use aggressive invite matching")
+               .AppendLine($"> {(modConfig.Invites.UseAggressiveRegex ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.NoteEmoji} Use aggressive invite matching")
                .AppendLine($"> Allowed invites: {(modConfig.Invites.Whitelist.Count is 0 ? "None" : $"{modConfig.Invites.Whitelist.Count} allowed invites [See `config view invites`]")}")
                .AppendLine()
                .AppendLine("**Infractions** | `infractions`")
