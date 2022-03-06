@@ -97,24 +97,25 @@ public class InviteDectectionService
       if (isExempt)
          return Result.FromSuccess();
       
-      if (!config.Invites.WarnOnMatch)
-         return Result.FromSuccess();
-
       if (config.Invites.DeleteOnMatch)
          await _channels.DeleteMessageAsync(message.ChannelID, message.ID);
-      
-      var selfResult = await _users.GetCurrentUserAsync();
-      
-      //This should be cached. It should be fine. If it's not it deserves to break.
-      if (!selfResult.IsDefined(out var self))
-         return Result.FromError(selfResult.Error!);
 
-      var infractionResult = await _infractions.StrikeAsync(guildID, message.Author.ID, selfResult.Entity.ID, $"Posted a non-whitelisted invite: {invite}");
+      if (config.Invites.WarnOnMatch)
+      {
+         var selfResult = await _users.GetCurrentUserAsync();
+      
+         //This should be cached. It should be fine. If it's not it deserves to break.
+         if (!selfResult.IsDefined(out var self))
+            return Result.FromError(selfResult.Error!);
+
+         var infractionResult = await _infractions.StrikeAsync(guildID, message.Author.ID, selfResult.Entity.ID, $"Posted a non-whitelisted invite: {invite}");
+
+         if (!infractionResult.IsSuccess)
+            _logger.LogWarning(EventIds.AutoMod, "Failed to create infraction for {User} in {Guild} \n{@Error}", message.Author.ID, guildID, infractionResult.Error);
+
+      }
       
       _logger.LogDebug(EventIds.AutoMod, "Invite handling finished in {Time:N0} ms", (message.ID.Timestamp - DateTimeOffset.UtcNow).TotalMilliseconds);
-      
-      if (!infractionResult.IsSuccess)
-         _logger.LogWarning(EventIds.AutoMod, "Failed to create infraction for {User} in {Guild} \n{@Error}", message.Author.ID, guildID, infractionResult.Error);
       
       return Result.FromSuccess();
    }

@@ -110,6 +110,7 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine($"> {(modConfig.Logging.LogMessageDeletes ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Log message deletes")
                .AppendLine()
                .AppendLine("**Invites** | `invites`, `invite-whitelist`")
+               .AppendLine($"> {(modConfig.Invites.WhitelistEnabled ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} Whitelist enabled")
                .AppendLine($"> {(modConfig.Invites.ScanOrigin ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.ScanEmoji} Scan invite origin")
                .AppendLine($"> {(modConfig.Invites.WarnOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Warn on invite")
                .AppendLine($"> {(modConfig.Invites.DeleteOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete matched invite")
