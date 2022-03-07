@@ -146,9 +146,6 @@ public class GuildCacherService
 
     public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-        if (members.Count < 2) // Just us. Rip.
-            return Result.FromSuccess();
-
         await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
         return await CacheMembersAsync(guildID, members);
