@@ -45,7 +45,7 @@ public class ChannelLoggingServiceTests
                                                          It.IsAny<Optional<string>>(),
                                                          default, default,
                                                          default, default, default,
-                                                         default, default, default), Times.Once);
+                                                         default, default, default, default), Times.Once);
 
     }
     
@@ -65,6 +65,6 @@ public class ChannelLoggingServiceTests
                                                         It.IsAny<Optional<string>>(),
                                                         default, default, default,
                                                         default, default, default,
-                                                        default, default, default), Times.Once);
+                                                        default, default, default, default), Times.Once);
     }
 }

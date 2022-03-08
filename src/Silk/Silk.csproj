@@ -75,6 +75,7 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="1.0.2" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Serilog" />

@@ -76,7 +76,13 @@ public class ReminderServiceTests
         // Assert
         userAPI.Verify(u => u.CreateDMAsync(new(69, default), default), Times.Once);
 
-        channelAPI.Verify(c => c.CreateMessageAsync(It.IsAny<Snowflake>(), It.IsAny<Optional<string>>(), default, default, default, default, default, default, default, default, default), Times.Once);
+        channelAPI.Verify(c => c.CreateMessageAsync
+                              (
+                               It.IsAny<Snowflake>(),
+                               It.IsAny<Optional<string>>(),
+                               default, default, default,
+                               default, default, default,
+                               default, default, default, default), Times.Once);
     }
 
     [Test]
@@ -187,7 +193,13 @@ public class ReminderServiceTests
 
         var channelAPI = new Mock<IDiscordRestChannelAPI>();
 
-        channelAPI.Setup(m => m.CreateMessageAsync(It.IsAny<Snowflake>(), It.IsAny<Optional<string>>(), default, default, default, default, default, default, default, default, default))
+        channelAPI.Setup(m => m.CreateMessageAsync
+                             (
+                              It.IsAny<Snowflake>(),
+                              It.IsAny<Optional<string>>(),
+                              default, default, default,
+                              default, default, default,
+                              default, default, default, default))
                   .ReturnsAsync(Result<IMessage>.FromError(new NotFoundError()));
 
         userAPI.Setup(m => m.CreateDMAsync(It.IsAny<Snowflake>(), default))

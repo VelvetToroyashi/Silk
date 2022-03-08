@@ -35,9 +35,11 @@ public static class RemoraIServiceCollectionExtensions
                                   .GetExportedTypes()
                                   .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
 
-        foreach (Type type in types)
-            collection.AddCommandGroup(type);
+        var tree = collection.AddCommandTree();
         
-        return collection;
+        foreach (Type type in types)
+            tree.WithCommandGroup(type);
+        
+        return tree.Finish();
     }
 }
