@@ -33,7 +33,8 @@ public class InfoCommands : CommandGroup
 {
     private readonly IMemoryCache           _cache;
     private readonly MessageContext         _context;
-    private readonly IDiscordRestUserAPI    _userApi;
+    private readonly IDiscordRestUserAPI    _users;
+    private readonly IDiscordRestEmojiAPI   _emojis;
     private readonly IDiscordRestGuildAPI   _guilds;
     private readonly IDiscordRestChannelAPI _channels;
 
@@ -41,14 +42,16 @@ public class InfoCommands : CommandGroup
     (
         IMemoryCache           cache,
         MessageContext         context,
-        IDiscordRestUserAPI    userApi,
+        IDiscordRestUserAPI    users,
+        IDiscordRestEmojiAPI   emojis,
         IDiscordRestGuildAPI   guilds,
         IDiscordRestChannelAPI channels
     )
     {
         _cache    = cache;
         _context  = context;
-        _userApi  = userApi;
+        _users  = users;
+        _emojis   = emojis;
         _guilds   = guilds;
         _channels = channels;
     }
@@ -84,7 +87,7 @@ public class InfoCommands : CommandGroup
         
         UncacheUser(member.User.Value.ID);
         
-        var userResult = await _userApi.GetUserAsync(member.User.Value.ID);
+        var userResult = await _users.GetUserAsync(member.User.Value.ID);
 
         if (!userResult.IsDefined(out var user))
             return userResult;
@@ -138,7 +141,7 @@ public class InfoCommands : CommandGroup
         
         UncacheUser(user.ID);
         
-        var userResult = await _userApi.GetUserAsync(user.ID);
+        var userResult = await _users.GetUserAsync(user.ID);
         
         if (!userResult.IsDefined(out user))
             return userResult;
@@ -297,7 +300,55 @@ public class InfoCommands : CommandGroup
         return res;
     }
 
+    [Command("info")]
+    [RequireContext(ChannelContext.Guild)]
+    [Description("Get information about an emoji!")]
+    public async Task<IResult> GetEmojiInfoAsync(IPartialEmoji emoji)
+    {
+        if (!emoji.ID.IsDefined(out var emojiID))
+            return await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.WarningEmoji}  This appears to be a unicode emoji. I can't tell you anything about it!");
+        
+        var emojiResult = await _emojis.GetGuildEmojiAsync(_context.GuildID.Value, emojiID.Value);
 
+        Embed embed;
+        
+        if (!emojiResult.IsDefined(out var guildEmoji))
+        {
+            embed = new()
+            {
+                Title  = $"Info about {(emoji.Name.IsDefined(out var eName) ? eName : "(This emoji is unnamed. Potential bug?)")}",
+                Colour = Color.DodgerBlue,
+                Fields = new EmbedField[]
+                {
+                    new("ID", emoji.ID.ToString()),
+                    new("Created", emoji.ID.Value.Value.Timestamp.ToTimestamp(TimestampFormat.LongDate))
+                }
+            };
+        }
+        else
+        {
+            var roleLocked = guildEmoji.Roles.IsDefined(out var roles) && roles.Any();
+
+            embed = new()
+            {
+                Title  = $"Emoji info for {guildEmoji.Name ?? "(This emoji is unnamed. Potential bug?)"}",
+                Colour = Color.DodgerBlue,
+                Fields = new EmbedField[]
+                {
+                    new("ID", emoji.ID.ToString()),
+                    new("Created", emoji.ID.Value.Value.Timestamp.ToTimestamp(TimestampFormat.LongDate)),
+                    new("Animated", guildEmoji.IsAnimated.IsDefined(out var anim)  && anim ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
+                    new("Managed", guildEmoji.IsManaged.IsDefined(out var managed) && managed ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
+                    new("Added By", guildEmoji.User.IsDefined(out var addedBy) ? addedBy.ToDiscordTag() : "Unknown"),
+                    new("Role-Locked", roleLocked ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
+                    new("Role-Locked to", roleLocked ? roles!.Select(r => $"<@&{r}>").Join(",\n") : "None")
+                }
+            };
+        }
+
+        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+    }
+    
     private async Task<Result<string>> GetRoleHiearchyStringAsync(IRole role)
     {
         var roleResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
