@@ -74,7 +74,8 @@ public static class IServiceCollectionExtensions
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
-           .AddCommands();   // Register commands
+           .AddCommands()
+           .AddPostExecutionEvent<PostCommandHandler>();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>()
@@ -102,7 +103,7 @@ public static class IServiceCollectionExtensions
                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
                   .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromHours(1));
             })
-           .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true });
+           .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
         return services;
     }
