@@ -14,6 +14,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
@@ -66,7 +67,8 @@ public static class IServiceCollectionExtensions
                 .AddCondition<RequireNSFWCondition>();
         
         services
-           .AddDiscordCommands(useDefaultCommandResponder: false)
+           .AddDiscordCommands()
+           .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
            .AddDiscordCaching();
         
         services
@@ -89,7 +91,8 @@ public static class IServiceCollectionExtensions
                     GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
-                    GatewayIntents.GuildMessages;
+                    GatewayIntents.GuildMessages  |
+                    GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
             {
