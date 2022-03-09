@@ -340,7 +340,7 @@ public class InfoCommands : CommandGroup
                 Colour = Color.DodgerBlue,
                 Fields = new EmbedField[]
                 {
-                    new("ID", emoji.ID.Value.ToString()!),
+                    new("ID", emoji.ID.Value.Value.ToString()!),
                     new("Created", emoji.ID.Value.Value.Timestamp.ToTimestamp(TimestampFormat.LongDate)),
                     new("Animated", guildEmoji.IsAnimated.IsDefined(out var anim)  && anim ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
                     new("Managed", guildEmoji.IsManaged.IsDefined(out var managed) && managed ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
