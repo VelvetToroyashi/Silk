@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -20,7 +21,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     {
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.Value.ID, JoinedAt: gatewayEvent.JoinedAt), ct);
 
-        if (cacheResult.IsDefined(out var user) && user.History.JoinDates.Count > 1)
+        if (cacheResult.IsDefined(out var user) && user.History.JoinDates.Last() != gatewayEvent.JoinedAt)
             await _mediator.Send(new AddUserJoinDate.Request(gatewayEvent.GuildID, user.ID, gatewayEvent.JoinedAt), ct);
 
         return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
@@ -30,7 +31,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     {
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.ID, JoinedAt: DateTimeOffset.MinValue), ct);
         
-        if (cacheResult.IsDefined(out var user) && user.History.LeaveDates.Count > 1)
+        if (cacheResult.IsDefined(out var user) && user.History.LeaveDates.Last() != DateTimeOffset.MinValue)
             await _mediator.Send(new AddUserLeaveDate.Request(gatewayEvent.GuildID, user.ID, DateTimeOffset.UtcNow), ct);
         
         return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);

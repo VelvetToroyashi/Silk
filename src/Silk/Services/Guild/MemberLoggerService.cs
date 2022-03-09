@@ -57,9 +57,9 @@ public class MemberLoggerService
 
         var userFields = new List<EmbedField>()
         {
-            new("Username:", user.ToDiscordTag(), true),
-            new("User ID:", user.ID.ToString(), true),
-            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime), true),
+            new("Username:", user.ToDiscordTag()),
+            new("User ID:", user.ID.ToString()),
+            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
         };
         
         var sb = new StringBuilder();
