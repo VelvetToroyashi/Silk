@@ -308,11 +308,16 @@ public class InfoCommands : CommandGroup
         if (!emoji.ID.IsDefined(out var emojiID))
             return await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.WarningEmoji}  This appears to be a unicode emoji. I can't tell you anything about it!");
         
-        var emojiResult = await _emojis.GetGuildEmojiAsync(_context.GuildID.Value, emojiID.Value);
-
+        var emojiResult = await _emojis.ListGuildEmojisAsync(_context.GuildID.Value);
+        
+        if (!emojiResult.IsDefined(out var emojis))
+            return emojiResult;
+        
+        var guildEmoji = emojis.FirstOrDefault(e => e.ID == emojiID);
+        
         Embed embed;
         
-        if (!emojiResult.IsDefined(out var guildEmoji))
+        if (guildEmoji is null)
         {
             embed = new()
             {
@@ -335,7 +340,7 @@ public class InfoCommands : CommandGroup
                 Colour = Color.DodgerBlue,
                 Fields = new EmbedField[]
                 {
-                    new("ID", emoji.ID.ToString()),
+                    new("ID", emoji.ID.Value.ToString()!),
                     new("Created", emoji.ID.Value.Value.Timestamp.ToTimestamp(TimestampFormat.LongDate)),
                     new("Animated", guildEmoji.IsAnimated.IsDefined(out var anim)  && anim ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
                     new("Managed", guildEmoji.IsManaged.IsDefined(out var managed) && managed ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji),
