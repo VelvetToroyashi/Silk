@@ -79,7 +79,8 @@ public static class IServiceCollectionExtensions
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>()
-                .AddParser<MessageParser>();
+                .AddParser<MessageParser>()
+                .AddParser<UriParser>();
 
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
