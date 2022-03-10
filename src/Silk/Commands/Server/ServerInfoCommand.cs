@@ -15,6 +15,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Utilities.HelpFormatter;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
@@ -85,8 +86,10 @@ public class ServerInfoCommand : CommandGroup
                                                  $"Progress Bar: {(guild.IsPremiumProgressBarEnabled ? "Yes" : "No")}", true));
 
 
-        fields.Add(new EmbedField("Server Created:", $"{guild.ID.Timestamp.ToTimestamp(Extensions.TimestampFormat.LongDateTime)} ({guild.ID.Timestamp.ToTimestamp()})", true));
         fields.Add(new EmbedField("Server Owner:", $"<@{guild.OwnerID}>", true));
+        fields.Add(new EmbedField("Most Recent Member:", guild.Members.IsDefined(out var members) ? members.OrderByDescending(m => m.JoinedAt).First().Mention() : "Unknown :(", true));
+        
+        fields.Add(new EmbedField("Server Created:", $"{guild.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)} ({guild.ID.Timestamp.ToTimestamp()})"));
         
         fields.Add(new EmbedField("Features:", guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n")));
 
