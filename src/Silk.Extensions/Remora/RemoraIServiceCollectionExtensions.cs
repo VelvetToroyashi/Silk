@@ -15,7 +15,7 @@ public static class RemoraIServiceCollectionExtensions
     public static IServiceCollection AddResponders(this IServiceCollection collection, Assembly assembly)
     {
         IEnumerable<Type>? types = assembly
-                                  .GetTypes()
+                                  .GetExportedTypes()
                                   .Where(t => t.IsClass && !t.IsAbstract && t.IsResponder());
 
         foreach (Type type in types)

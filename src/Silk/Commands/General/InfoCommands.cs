@@ -285,7 +285,7 @@ public class InfoCommands : CommandGroup
                 new("Hoisted", role.IsHoisted ? "Yes" : "No", true),
                 new("Bot/Managed", role.IsManaged ? "Yes" : "No", true),
                 new("Permissions", permissions),
-            }
+            },
         };
 
         await using var swatchImage = await GenerateRoleColorSwatchAsync(role.Colour);
@@ -316,6 +316,11 @@ public class InfoCommands : CommandGroup
         var guildEmoji = emojis.FirstOrDefault(e => e.ID == emojiID);
         
         Embed embed;
+
+        var emojiUrl = CDN.GetEmojiUrl((guildEmoji?.ID ?? emojiID.Value), imageSize: 256);
+
+        if (!emojiUrl.IsDefined(out var url))
+            return emojiUrl;
         
         if (guildEmoji is null)
         {
@@ -323,6 +328,7 @@ public class InfoCommands : CommandGroup
             {
                 Title  = $"Info about {(emoji.Name.IsDefined(out var eName) ? eName : "(This emoji is unnamed. Potential bug?)")}",
                 Colour = Color.DodgerBlue,
+                Image = new EmbedImage(url.ToString()),
                 Fields = new EmbedField[]
                 {
                     new("ID", emoji.ID.ToString()),
@@ -338,6 +344,7 @@ public class InfoCommands : CommandGroup
             {
                 Title  = $"Emoji info for {guildEmoji.Name ?? "(This emoji is unnamed. Potential bug?)"}",
                 Colour = Color.DodgerBlue,
+                Image  = new EmbedImage(url.ToString()),
                 Fields = new EmbedField[]
                 {
                     new("ID", emoji.ID.Value.Value.ToString()!),
