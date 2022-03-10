@@ -31,7 +31,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     {
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.ID, JoinedAt: DateTimeOffset.MinValue), ct);
         
-        if (cacheResult.IsDefined(out var user) && user.History.LeaveDates.Last() != DateTimeOffset.MinValue)
+        if (cacheResult.IsDefined(out var user) && user.History.LeaveDates.LastOrDefault() != DateTimeOffset.MinValue)
             await _mediator.Send(new AddUserLeaveDate.Request(gatewayEvent.GuildID, user.ID, DateTimeOffset.UtcNow), ct);
         
         return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
