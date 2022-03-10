@@ -97,11 +97,14 @@ public static class IServiceCollectionExtensions
             })
            .Configure<CacheSettings>(cs =>
             {
-                cs.SetAbsoluteExpiration<IChannel>(null)
-                  .SetAbsoluteExpiration<IMessage>(null)
-                  .SetAbsoluteExpiration<IGuild>(null)
-                  .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromHours(1));
+                
+                cs
+                  .SetDefaultAbsoluteExpiration(null)
+                  .SetSlidingExpiration<IChannel>(null)
+                  .SetSlidingExpiration<IMessage>(null)
+                  .SetSlidingExpiration<IGuild>(null)
+                  .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
+                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
