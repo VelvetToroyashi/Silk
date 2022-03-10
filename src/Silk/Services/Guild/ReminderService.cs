@@ -29,7 +29,9 @@ public sealed class ReminderService : IHostedService
     private readonly IDiscordRestUserAPI    _userApi;
     private readonly IDiscordRestChannelAPI _channelApi;
 
-    private          List<ReminderEntity> _reminders = new(); // We're gonna slurp all reminders into memory. Yolo, I guess.
+    // When it comes to sharding, ideally this is only the reminders for the guilds that are in the shard.
+    // Perhaps we'll filter manually with `.Where(r => r.GuildID >> 22 % ShardCount == ShardId)`
+    private          List<ReminderEntity> _reminders = new(); 
     private readonly AsyncTimer           _timer;
 
     public ReminderService(ILogger<ReminderService> logger, IMediator mediator, IDiscordRestUserAPI userApi, IDiscordRestChannelAPI channelApi)
