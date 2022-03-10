@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Rest;
@@ -10,6 +11,8 @@ namespace Silk;
 
 public class SilkPrefixMatcher : ICommandPrefixMatcher
 {
+    private static readonly Regex MentionRegex = new(@"^(<@!?(?<ID>\d+)>).+");
+    
     private readonly MessageContext      _context;
     private readonly IDiscordRestUserAPI _users;
     private readonly IPrefixCacheService _prefixCache;
@@ -40,10 +43,10 @@ public class SilkPrefixMatcher : ICommandPrefixMatcher
         if (!selfResult.IsSuccess)
             return Result<(bool Matches, int ContentStartIndex)>.FromError(selfResult.Error);
         
-        var mention =  $"<@{selfResult.Entity.ID}>";
+        var match = MentionRegex.Match(content);
         
-        if (content.StartsWith(mention))
-            return Result<(bool Matches, int ContentStartIndex)>.FromSuccess((true, mention.Length));
+        if (match.Success && match.Groups["ID"].Value == selfResult.Entity.ID.ToString())
+            return Result<(bool Matches, int ContentStartIndex)>.FromSuccess((true, match.Length));
         
         return Result<(bool Matches, int ContentStartIndex)>.FromSuccess((false, 0));
     }
