@@ -161,16 +161,14 @@ public sealed class ReminderService : IHostedService
 
             return Result.FromSuccess();
         }
+        
         _logger.LogWarning(EventIds.Service, "Failed to dispatch reminder. Falling back to a DM.");
 
         var fallbackResult = await AttemptDispatchDMReminderAsync(reminder);
 
         if (fallbackResult.IsSuccess)
-        {
-            _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
-
             return Result.FromSuccess();
-        }
+        
         _logger.LogError(EventIds.Service, "Failed to dispatch reminder. Giving up.");
 
         return Result.FromError(fallbackResult.Error);
