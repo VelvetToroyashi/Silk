@@ -18,11 +18,11 @@ public class RedisCacheService
     private readonly CacheSettings         _settings;
     private readonly JsonSerializerOptions _jsonOptions;
     
-    public RedisCacheService(IDistributedCache cache, IOptions<CacheSettings> settings, JsonSerializerOptions jsonOptions)
+    public RedisCacheService(IDistributedCache cache, IOptions<CacheSettings> settings, IOptions<JsonSerializerOptions> jsonOptions)
     {
         _cache = cache;
         _settings = settings.Value;
-        _jsonOptions = jsonOptions;
+        _jsonOptions = jsonOptions.Value;
     }
 
     public async Task EvictAsync<T>(string key)
