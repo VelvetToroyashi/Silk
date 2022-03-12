@@ -14,7 +14,6 @@ using Remora.Results;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
-using Silk.Remora.SlashCommands;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -126,7 +125,6 @@ public class Program
                    .AddRemoraServices()
                    
                    .AddSilkLogging(context.Configuration)
-                   .AddSingleton<SlashCommandService>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()
