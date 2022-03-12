@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching;
@@ -17,10 +18,10 @@ public class RedisCacheService
     private readonly CacheSettings         _settings;
     private readonly JsonSerializerOptions _jsonOptions;
     
-    public RedisCacheService(IDistributedCache cache, CacheSettings settings, JsonSerializerOptions jsonOptions)
+    public RedisCacheService(IDistributedCache cache, IOptions<CacheSettings> settings, JsonSerializerOptions jsonOptions)
     {
         _cache = cache;
-        _settings = settings;
+        _settings = settings.Value;
         _jsonOptions = jsonOptions;
     }
 
