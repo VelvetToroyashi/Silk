@@ -8,9 +8,9 @@ to join the [Silk! Server](https://discord.gg/HZfZb95) to ask any questions you 
 need. Want this bot on your
 server? [Feel free to invite it!](https://discord.com/api/oauth2/authorize?client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands)
 
-[![Code Quality](https://www.codefactor.io/repository/github/VTPDevelopment/Silk/badge)](https://www.codefactor.io/repository/github/velvetthepanda/silk)
-![Code Size](https://img.shields.io/github/languages/code-size/VelvetThePanda/Silk)
-![Lines of Code](https://img.shields.io/tokei/lines/github/VelvetThePanda/Silk)
+[![Code Quality](https://www.codefactor.io/repository/github/VTPDevelopment/Silk/badge)](https://www.codefactor.io/repository/github/VTPDevelopment/silk)
+![Code Size](https://img.shields.io/github/languages/code-size/VTPDevelopment/Silk)
+![Lines of Code](https://img.shields.io/tokei/lines/github/VTPDevelopment/Silk)
 ![GitHub Closed Issues](https://img.shields.io/github/issues-closed-raw/VelvetThePanda/Silk)
 ![Discord](https://img.shields.io/discord/721518523704410202)
 
