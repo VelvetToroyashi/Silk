@@ -82,7 +82,7 @@ public class MessageLoggerService
                                        : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
                                   ),
             Description = $"**Content Before:** \n{beforeContent}\n\n" +
-                          $"After: \n{(message.Content.IsDefined(out var content) ? $"> {content.Replace("\n", "\n> ")}" : "Message did not contain content!")}",
+                          $"**Content After**: \n{(message.Content.IsDefined(out var content) ? $"> {content.Replace("\n", "\n> ")}" : "Message did not contain content!")}",
             
             Colour = Color.DarkOrange,
             
