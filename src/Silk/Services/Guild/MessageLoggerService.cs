@@ -169,7 +169,7 @@ public class MessageLoggerService
                 if (!attachment.ContentType.IsDefined(out var ct))
                     continue;
 
-                var url = new Uri($"https://cdn.discordapp.com/attachments/{message.ChannelID}/{message.ID}/{attachment.Filename}.{ct.Split('/').Last()}");
+                var url = new Uri($"https://cdn.discordapp.com/attachments/{message.ChannelID}/{message.ID}/{attachment.Filename}");
 
                 var stream = await _http.GetStreamAsync(url);
 
@@ -178,10 +178,10 @@ public class MessageLoggerService
                     Colour = Color.DarkRed,
                     Title = "Attachment Deleted",
                     Description = $"**Attachment:** {attachment.Filename}",
-                    Image = new EmbedImage($"attachment://attachment{i}.{ct.Split('/').Last()}")
+                    Image = new EmbedImage($"attachment://attachment{i}")
                 };
                 
-                files.Add(new FileData($"attachment{i}.{ct.Split('/').Last()}", stream));
+                files.Add(new FileData($"attachment{i}", stream));
             }
         }
 
