@@ -181,7 +181,8 @@ public class MessageLoggerService
                     Image = new EmbedImage($"attachment://attachment{i}")
                 };
                 
-                files.Add(new FileData($"attachment{i}", stream));
+                embeds.Add(embed);
+                files.Add(new FileData($"attachment{i}{attachment.Filename.Split('.')[^1]}", stream));
             }
         }
 
