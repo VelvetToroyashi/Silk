@@ -16,5 +16,6 @@ public class MessageLoggerResponder : IResponder<IMessageUpdate>, IResponder<IMe
     public Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default) 
         => _messageLogger.LogEditAsync(gatewayEvent);
     
-    public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default) => default;
+    public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default) 
+        => _messageLogger.LogDeleteAsync(gatewayEvent);
 }

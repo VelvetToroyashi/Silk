@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
@@ -11,6 +12,7 @@ using Remora.Rest.Results;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Services.Interfaces;
+using OneOf;
 
 namespace Silk.Services.Bot;
 
@@ -42,17 +44,20 @@ public class ChannelLoggingService : IChannelLoggingService
     public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString, IEmbed? embedContent)
     {
         if (useWebhook)
-            return LogWebhookAsync(loggingData, contentString, embedContent);
+            return LogWebhookAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null);
         else 
-            return LogChannelAsync(loggingData, contentString, embedContent);
+            return LogChannelAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null);
+    }
+
+    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed[]? embed = null, FileData[]? files = null)
+    {
+        if (useWebhook)
+            return LogWebhookAsync(loggingData, contentString, embed, files);
+        else 
+            return LogChannelAsync(loggingData, contentString, embed, files);
     }
     
-    /// <summary>
-    /// Logs to a configured channel.
-    /// </summary>
-    /// <param name="loggingData">The logging configuration to use.</param>
-    /// <param name="content">The content to log.</param>
-    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed? embedContent)
+    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData)
     {
         var channel = await _channels.GetChannelAsync(loggingData.ChannelID);
         
@@ -65,9 +70,9 @@ public class ChannelLoggingService : IChannelLoggingService
         var result = await _channels
            .CreateMessageAsync(
                                loggingData.ChannelID, 
-                               stringContent, 
-                               embeds: embedContent is null 
-                                   ? default(Optional<IReadOnlyList<IEmbed>>) : new[] { embedContent }
+                               stringContent                                                                       ?? default(Optional<string>), 
+                               embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
+                               attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
                               );
 
 
@@ -85,13 +90,12 @@ public class ChannelLoggingService : IChannelLoggingService
     /// </summary>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed? embedContent)
+    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData = null)
     {
         var result = await _webhooks.ExecuteWebhookAsync(loggingData.WebhookID, loggingData.WebhookToken, true,
-                                                         stringContent ?? default(Optional<string>), 
-                                                         embeds: embedContent is not null
-                                                             ? new[] { embedContent }
-                                                             : default(Optional<IReadOnlyList<IEmbed>>),
+                                                         stringContent                                                                       ?? default(Optional<string>), 
+                                                         embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
+                                                         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>),
                                                          username: "Silk! Logging");
 
         if (!result.IsSuccess)
