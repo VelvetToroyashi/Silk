@@ -144,6 +144,7 @@ public class Program
                    .AddSingleton<GuildGreetingService>()
                    .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
+                   .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
                    .AddMediatR(typeof(GuildContext));
             });
