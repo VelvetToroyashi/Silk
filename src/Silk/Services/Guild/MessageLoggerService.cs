@@ -74,32 +74,81 @@ public class MessageLoggerService
             ? "Message did not contain content!"
             : $"> {previousMessage.Content.Replace("\n", "\n> ")}";
 
-        var embed = new Embed
-        {
-            Title = "Message Edited",
-            Thumbnail = new EmbedThumbnail(author.Avatar is null
-                                       ? CDN.GetDefaultUserAvatarUrl(author, imageSize: 256).Entity.ToString()
-                                       : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
-                                  ),
-            Description = $"**Content Before:** \n{beforeContent}\n\n" +
-                          $"**Content After**: \n{(message.Content.IsDefined(out var content) ? $"> {content.Replace("\n", "\n> ")}" : "Message did not contain content!")}",
-            
-            Colour = Color.DarkOrange,
-            
-            Fields = new EmbedField[]
-            {
-                new("Channel", $"<#{channelID}>", true),
-                new("Thread", message.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
-                new("\u200b", "\u200b", true),
-                new("Sent At", message.ID.Value.Timestamp.ToTimestamp(), true),
-                new("Edited At", message.EditedTimestamp.Value.Value.ToTimestamp(), true),
-                new("\u200b", "\u200b", true),
-                new("Message ID", $"[{message.ID.Value}](https://discordapp.com/channels/{guildID}/{channelID}/{message.ID.Value})", true),
-                new("User ID", $"[{author.ID}](https://discordapp.com/users/{author.ID})", true)
-            }
-        };
+        var afterContent = message.Content.IsDefined(out var content) ? $"> {content.Replace("\n", "\n> ")}" : "Message did not contain content!";
 
-        return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, config.Logging.MessageEdits, null, embed);
+        if (beforeContent.Length + afterContent.Length < 4000)
+        {
+            var embed = new Embed
+            {
+                Title = "Message Edited",
+                Thumbnail = new EmbedThumbnail(author.Avatar is null
+                                                   ? CDN.GetDefaultUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                                                   : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                                              ),
+                Description = $"**Content Before:** \n{beforeContent}\n\n" +
+                              $"**Content After**: \n{afterContent}",
+            
+                Colour = Color.DarkOrange,
+            
+                Fields = new EmbedField[]
+                {
+                    new("Channel", $"<#{channelID}>", true),
+                    new("Thread", message.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
+                    new("\u200b", "\u200b", true),
+                    new("Sent At", message.ID.Value.Timestamp.ToTimestamp(), true),
+                    new("Edited At", message.EditedTimestamp.Value.Value.ToTimestamp(), true),
+                    new("\u200b", "\u200b", true),
+                    new("Message ID", $"[{message.ID.Value}](https://discordapp.com/channels/{guildID}/{channelID}/{message.ID.Value})", true),
+                    new("User ID", $"[{author.ID}](https://discordapp.com/users/{author.ID})", true)
+                }
+            };
+
+            return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, config.Logging.MessageEdits!, null, embed);
+        }
+        else
+        {
+            var embed = new Embed
+            {
+                Title = "Message Edited",
+                Thumbnail = new EmbedThumbnail
+                    (
+                     author.Avatar is null
+                         ? CDN.GetDefaultUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                         : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                    ),
+                Description = "Please see the attached embeds for the content of the message.",
+
+                Colour = Color.DarkOrange,
+
+                Fields = new EmbedField[]
+                {
+                    new("Channel", $"<#{channelID}>", true),
+                    new("Thread", message.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
+                    new("\u200b", "\u200b", true),
+                    new("Sent At", message.ID.Value.Timestamp.ToTimestamp(), true),
+                    new("Edited At", message.EditedTimestamp.Value.Value.ToTimestamp(), true),
+                    new("\u200b", "\u200b", true),
+                    new("Message ID", $"[{message.ID.Value}](https://discordapp.com/channels/{guildID}/{channelID}/{message.ID.Value})", true),
+                    new("User ID", $"[{author.ID}](https://discordapp.com/users/{author.ID})", true)
+                }
+            };
+            
+            var before = new Embed
+            {
+                Title = "Content Before",
+                Description = beforeContent,
+                Colour = Color.DarkOrange
+            };
+
+            var after = new Embed
+            {
+                Title = "Content After",
+                Description = afterContent,
+                Colour = Color.DarkOrange
+            };
+            
+            return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, config.Logging.MessageEdits!, null, new IEmbed[] {embed, before, after});
+        }
     }
 
     public async Task<Result> LogDeleteAsync(IMessageDelete message)
