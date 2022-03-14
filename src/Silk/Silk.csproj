@@ -86,7 +86,7 @@
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
         <PackageReference Include="SharpYaml" Version="1.8.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.0.0" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
         <PackageReference Include="Svg.Skia" Version="0.5.10" />
         <PackageReference Include="System.CommandLine" />
