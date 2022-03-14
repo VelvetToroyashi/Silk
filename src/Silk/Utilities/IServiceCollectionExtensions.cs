@@ -89,7 +89,7 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
+                    //GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages  |
@@ -138,8 +138,7 @@ public static class IServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddSilkLogging(this IServiceCollection services, 
-                                                    IConfiguration          configuration)
+    public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()

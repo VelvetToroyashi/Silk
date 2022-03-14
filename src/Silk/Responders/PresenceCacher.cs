@@ -9,14 +9,14 @@ using Remora.Results;
 
 namespace Silk.Responders;
 
-public class PresenceCacher : IResponder<IPresenceUpdate>, IResponder<IGuildCreate>
+public class PresenceCacher //: IResponder<IPresenceUpdate>, IResponder<IGuildCreate>
 {
     private readonly IMemoryCache _cacheService;
     public PresenceCacher(IMemoryCache cacheService) => _cacheService = cacheService;
 
     public async Task<Result> RespondAsync(IPresenceUpdate gatewayEvent, CancellationToken ct = default)
     {
-        _cacheService.Set(KeyHelpers.CreatePresenceCacheKey(default, gatewayEvent.User.ID.Value), (IPartialPresence)gatewayEvent);
+        _cacheService.Set(KeyHelpers.CreatePresenceCacheKey(default, gatewayEvent.User.ID.Value), gatewayEvent);
 
         return Result.FromSuccess();
     }
