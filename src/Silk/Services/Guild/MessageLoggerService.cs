@@ -173,16 +173,18 @@ public class MessageLoggerService
 
                 var stream = await _http.GetStreamAsync(url);
 
+                var fileName = $"attachment{i}.{attachment.Filename.Split('.')[^1]}";
+                
                 var embed = new Embed
                 {
                     Colour = Color.DarkRed,
                     Title = "Attachment Deleted",
                     Description = $"**Attachment:** {attachment.Filename}",
-                    Image = new EmbedImage($"attachment://attachment{i}")
+                    Image = new EmbedImage(fileName)
                 };
                 
                 embeds.Add(embed);
-                files.Add(new FileData($"attachment{i}.{attachment.Filename.Split('.')[^1]}", stream));
+                files.Add(new FileData(fileName, stream));
             }
         }
 
