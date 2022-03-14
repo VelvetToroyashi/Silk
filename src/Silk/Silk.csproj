@@ -1,0 +1,186 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Platforms>AnyCPU;x64</Platforms>
+        <IsPackable>false</IsPackable>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyVersion>1.5.2</AssemblyVersion>
+        <OutputType>Exe</OutputType>
+        <ServerGarbageCollection>true</ServerGarbageCollection>
+        <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+        <Optimize>false</Optimize>
+        <WarningLevel>2</WarningLevel>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AsyncEnumerator" />
+        <PackageReference Include="Colorful.Console" Version="1.2.15" />
+        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+        <PackageReference Include="Config.Net" Version="4.17.0" />
+        <PackageReference Include="Config.Net.Json" Version="4.17.0" />
+        <PackageReference Include="DSharpPlus" />
+        <PackageReference Include="DSharpPlus.CommandsNext" />
+        <PackageReference Include="DSharpPlus.Interactivity" />
+        <PackageReference Include="DSharpPlus.SlashCommands" />
+        <PackageReference Include="FuzzySharp" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="JetBrains.Annotations" />
+        <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
+        <PackageReference Include="MediatR" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Http" />
+        <PackageReference Include="Microsoft.Extensions.Logging" />
+        <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
+        <PackageReference Include="Nodsoft.Unity.Microsoft.DependencyInjection" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Recognizers.Text.DateTime.Wrapper" Version="1.0.5" />
+        <PackageReference Include="Remora.Discord.Caching" />
+        <PackageReference Include="Remora.Discord.Commands" />
+        <PackageReference Include="Remora.Discord.Extensions" />
+        <PackageReference Include="Remora.Discord.Hosting" />
+        <PackageReference Include="Remora.Discord.Interactivity" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="1.0.2" />
+        <PackageReference Include="Remora.Plugins" />
+        <PackageReference Include="Remora.Results" />
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="Serilog.Expressions" />
+        <PackageReference Include="Serilog.Extensions.Hosting" />
+        <PackageReference Include="Serilog.Extensions.Logging" />
+        <PackageReference Include="Serilog.Settings.Configuration" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+        <PackageReference Include="Serilog.Sinks.File" />
+        <PackageReference Include="SharpYaml" Version="1.8.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+        <PackageReference Include="Svg.Skia" Version="0.5.10" />
+        <PackageReference Include="System.CommandLine" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />
+        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+        <PackageReference Include="Unity" />
+        <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
+        <PackageReference Include="YumeChan.PluginBase" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\plugins\PluginLoader.Unity\PluginLoader.Unity.csproj" />
+        <ProjectReference Include="..\Silk.Data\Silk.Data.csproj" />
+        <ProjectReference Include="..\Silk.Extensions\Silk.Extensions.csproj" />
+        <ProjectReference Include="..\Silk.Interactivity\Silk.Interactivity.csproj" />
+        <ProjectReference Include="..\Silk.Remora.SlashCommands\Silk.Remora.SlashCommands.csproj" />
+        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="flags\trans.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pan.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\mlm.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\enby.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\demi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\bi.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\ace.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="flags\pride.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Remove="logs\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="logs\**" />
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.cs">
+          <DependentUpon>ConfigCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Phishing.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Invites.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Logging.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Greetings.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Mutes.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.cs">
+          <DependentUpon>ConfigCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Greetings.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Invites.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Infractions.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Phishing.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Logging.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Exemptions.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.View.Exemptions.cs">
+          <DependentUpon>ConfigCommands.View.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\Commands" />
+    </ItemGroup>
+</Project>

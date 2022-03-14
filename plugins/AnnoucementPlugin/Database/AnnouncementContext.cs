@@ -2,16 +2,16 @@
 
 namespace AnnoucementPlugin.Database
 {
-	public sealed class AnnouncementContext : DbContext
-	{
-		public DbSet<AnnouncementModel> Announcements { get; set; }
+    public sealed class AnnouncementContext : DbContext
+    {
 
-		public AnnouncementContext(DbContextOptions options) : base(options) { }
+        public AnnouncementContext(DbContextOptions options) : base(options) { }
+        public DbSet<AnnouncementModel> Announcements { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.HasDefaultSchema("announcement_plugin");
-			base.OnModelCreating(modelBuilder);
-		}
-	}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("announcement_plugin");
+            base.OnModelCreating(modelBuilder);
+        }
+    }
 }

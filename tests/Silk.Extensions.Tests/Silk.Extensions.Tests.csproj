@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -14,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj"/>
+        <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj" />
     </ItemGroup>
 
 </Project>

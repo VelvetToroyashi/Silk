@@ -1,12 +1,11 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace Silk.Benchmarks
+namespace Silk.Benchmarks;
+
+class Program
 {
-    class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            BenchmarkRunner.Run<TimerVTimerTests>();
-        }
+        BenchmarkRunner.Run<TimerVTimerTests>();
     }
 }

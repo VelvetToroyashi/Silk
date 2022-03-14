@@ -2,32 +2,37 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyVersion>1.2.0</AssemblyVersion>
+        <AssemblyVersion>3.0.0.25</AssemblyVersion>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <PackageReference Include="DSharpPlus.CommandsNext" />
-      <PackageReference Include="DSharpPlus.Interactivity" />
-      <PackageReference Include="FuzzySharp" Version="2.0.2" />
-      <PackageReference Include="MediatR" />
-      <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-      <PackageReference Include="Remora.Results" Version="7.1.1" />
-      <PackageReference Include="YumeChan.PluginBase" />
+        <PackageReference Include="FuzzySharp" />
+        <PackageReference Include="MediatR" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Remora.Discord.Commands" />
+        <PackageReference Include="Remora.Discord.Gateway" />
+        <PackageReference Include="Remora.Plugins" />
+        <PackageReference Include="Remora.Results" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations" />
+        <Folder Include="Migrations" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj" />
+      <ProjectReference Include="..\..\src\Silk.Interactivity\Silk.Interactivity.csproj" />
     </ItemGroup>
 
     <!-- Todo: Update this if support for multi-plugin project dll export is needed -->
@@ -36,10 +41,10 @@
             <!-- Update 'RootPath' if solution file is renamed -->
             <RootPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath>
 
-            <!-- Update if project 'Silk.Core' is renamed -->
-            <SilkCoreProjectName>Silk.Core</SilkCoreProjectName>
+            <!-- Update if project 'Silk' is renamed -->
+            <SilkCoreProjectName>Silk</SilkCoreProjectName>
 
-            <!-- By default uses current project framework; update if 'Silk.Core' project framework changes -->
+            <!-- By default uses current project framework; update if 'Silk' project framework changes -->
             <SilkCoreProjectFramework>$(TargetFramework)</SilkCoreProjectFramework>
 
             <PluginOutputDir>$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir>
