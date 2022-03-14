@@ -169,7 +169,7 @@ public class MessageLoggerService
                 if (!attachment.ContentType.IsDefined(out var ct))
                     continue;
 
-                var url = new Uri($"https://cdn.discordapp.com/attachments/{message.ChannelID}/{message.ID}/{attachment.Filename}");
+                var url = new Uri($"https://cdn.discordapp.com/attachments/{message.ChannelID}/{attachment.ID}/{attachment.Filename}");
 
                 var stream = await _http.GetStreamAsync(url);
 
