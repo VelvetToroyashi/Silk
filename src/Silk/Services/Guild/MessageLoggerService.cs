@@ -180,7 +180,7 @@ public class MessageLoggerService
                     Colour = Color.DarkRed,
                     Title = "Attachment Deleted",
                     Description = $"**Attachment:** {attachment.Filename}",
-                    Image = new EmbedImage(fileName)
+                    Image = new EmbedImage($"attachment://{fileName}")
                 };
                 
                 embeds.Add(embed);
