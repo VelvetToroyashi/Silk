@@ -182,7 +182,7 @@ public class MessageLoggerService
                 };
                 
                 embeds.Add(embed);
-                files.Add(new FileData($"attachment{i}{attachment.Filename.Split('.')[^1]}", stream));
+                files.Add(new FileData($"attachment{i}.{attachment.Filename.Split('.')[^1]}", stream));
             }
         }
 
