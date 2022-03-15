@@ -39,16 +39,18 @@ public class FlagCommand : CommandGroup
         [Description("The flag to add to the image.")]
         string flag,
         
+        [Description("Either an image URL or an emoji to apply the overlay to. \n" +
+                     "An image can also be uploaded in lieu of either of these!")]
+        OneOf<IPartialEmoji, string>? emojiOrImageUrl = null,
+        
+        [Option('i', "intensity")]
         [Description("The intensity of the overlay, between 50 and 100.")]
         float intensity = 100,
         
+        [Option('g', "grayscale")]
         [Description("How much greyscale to apply to before applying the overlay. " +
                      "Try specifying this if the image doesn't look right.")]
-        float grayscale = 0,
-        
-        [Description("Either an image URL or an emoji to apply the overlay to. \n" +
-                     "An image can also be uploaded in lieu of either of these!")]
-        OneOf<IPartialEmoji, string>? emojiOrImageUrl = null
+        float grayscale = 0
     )
     {
         if (emojiOrImageUrl is not { })
