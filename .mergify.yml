@@ -2,6 +2,8 @@ pull_request_rules:
   - name: Automatic merge on approval
     conditions:
       - approved-reviews-by >= 2
+      - -draft
+      - -label="Manual Merge"
     actions:
       merge:
         method: merge

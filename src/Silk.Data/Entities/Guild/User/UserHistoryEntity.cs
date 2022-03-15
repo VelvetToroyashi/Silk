@@ -31,6 +31,7 @@ public class UserHistoryEntity
     ///     When this user initially joined.
     /// </summary>
     [Column("initial_join_date")]
+    [Obsolete($"Use {nameof(JoinDates)}[0] instead.")]
     public DateTimeOffset JoinDate { get; set; }
 
     /// <summary>

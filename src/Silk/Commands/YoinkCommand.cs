@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Commands.Conditions;
 using Silk.Extensions;
-using SkiaSharp;
 
 namespace Silk.Commands;
 

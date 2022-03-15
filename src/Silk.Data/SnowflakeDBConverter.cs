@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Remora.Discord.API;
 using Remora.Rest.Core;
 using DiscordConstants = Remora.Discord.API.Constants;
 
@@ -17,7 +18,7 @@ public sealed class SnowflakeConverter : ValueConverter<Snowflake, ulong>
     /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
     /// </summary>
     public SnowflakeConverter()
-        : base(sf => sf.Value, value => new(value, DiscordConstants.DiscordEpoch), _defaultHints)
+        : base(sf => sf.Value, value => DiscordSnowflake.New(value), _defaultHints)
     { }
 }
 
@@ -34,7 +35,7 @@ public sealed class NullableSnowflakeConverter : ValueConverter<Snowflake?, ulon
                    ? sf.Value.Value 
                    : default, 
                value => value.HasValue 
-                   ? new Snowflake(value.Value, DiscordConstants.DiscordEpoch) 
+                   ? DiscordSnowflake.New(value.Value) 
                    : default, _defaultHints)
     { }
 }

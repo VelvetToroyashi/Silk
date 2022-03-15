@@ -18,7 +18,6 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
-using Silk.Interactivity;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;

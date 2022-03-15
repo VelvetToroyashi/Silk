@@ -25,7 +25,6 @@ using Silk.Data.MediatR.Infractions;
 using Silk.Errors;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
-using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;

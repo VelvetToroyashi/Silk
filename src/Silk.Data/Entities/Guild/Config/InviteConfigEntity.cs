@@ -15,6 +15,12 @@ public class InviteConfigEntity
     public bool WhitelistEnabled { get; set; }
     
     /// <summary>
+    ///     Whether to match only discord.gg/ or all possible invite codes.
+    /// </summary>
+    [Column("match_aggressively")]
+    public bool UseAggressiveRegex { get; set; }
+    
+    /// <summary>
     ///     A list of whitelisted invites.
     /// </summary>
     [Column("whitelist")]

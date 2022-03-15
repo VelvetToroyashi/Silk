@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -148,9 +146,6 @@ public class GuildCacherService
 
     public async Task<Result> CacheGuildAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-        if (members.Count < 2) // Just us. Rip.
-            return Result.FromSuccess();
-
         await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
         return await CacheMembersAsync(guildID, members);
@@ -158,23 +153,24 @@ public class GuildCacherService
     
     private async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-        var erroredMembers = new List<IResult>();
-
         var users = members.Where(u => u.User.IsDefined())
                            .Select(u => (u.User.Value.ID, u.JoinedAt))
                            .Select((uj, _) =>
                             {
-                                var (id, joinedAt) = uj;
-                                return new UserEntity {ID = id, GuildID = guildID, History = new() {JoinDate = joinedAt}};
+                                (var id, var joinedAt) = uj;
+                                return new UserEntity
+                                {
+                                    ID      = id,
+                                    GuildID = guildID,
+                                    History = new() { JoinDates = new() {joinedAt} }
+                                };
                             });
 
         await _mediator.Send(new BulkAddUser.Request(users));
 
         LogAndCacheGuild(guildID, members);
 
-        return erroredMembers.Any()
-            ? Result.FromError(new AggregateError(erroredMembers, "One or more guild members could not be cached."))
-            : Result.FromSuccess();
+        return Result.FromSuccess();
     }
 
     

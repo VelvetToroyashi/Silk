@@ -32,8 +32,8 @@ public class DiceRollCommand : CommandGroup
 
     [Command("random")]
     [Description("Generate a random number in a given range; defaults to 100. (Hard limit of ~2.1 billion)")]
-    public Task<Result<IMessage>> Random(int max = 100)
-        => _channels.CreateMessageAsync(_context.ChannelID, $"{_random.Next(max)} is your number!");
+    public Task<Result<IMessage>> Random(Int64 max = 100)
+        => _channels.CreateMessageAsync(_context.ChannelID, $"{_random.NextInt64(max)} is your number!");
 
     [Command("roll")]
     [Description("Roll die like it's DnD! Example: 2d4 + 10 + d7")]

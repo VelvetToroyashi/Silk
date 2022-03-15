@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -12,9 +13,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220306101401_InviteOverhaul")]
+    partial class InviteOverhaul
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +93,7 @@ namespace Silk.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("delete");
 
-                    b.Property<int>("GuildModConfigId")
+                    b.Property<int?>("GuildModConfigId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("ScanOrigin")
@@ -684,9 +686,7 @@ namespace Silk.Data.Migrations
                 {
                     b.HasOne("Silk.Data.Entities.GuildModConfigEntity", "GuildConfig")
                         .WithOne("Invites")
-                        .HasForeignKey("Silk.Data.Entities.Guild.Config.InviteConfigEntity", "GuildModConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Silk.Data.Entities.Guild.Config.InviteConfigEntity", "GuildModConfigId");
 
                     b.Navigation("GuildConfig");
                 });

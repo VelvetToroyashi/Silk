@@ -14,12 +14,11 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
-using Remora.Discord.Interactivity.Responders;
 using Remora.Discord.Pagination;
-using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Results;
@@ -35,7 +34,6 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
-using IChannel = MongoDB.Driver.Core.Bindings.IChannel;
 
 namespace Silk.Utilities;
 
@@ -69,13 +67,15 @@ public static class IServiceCollectionExtensions
                 .AddCondition<RequireNSFWCondition>();
         
         services
-           .AddDiscordCommands(useDefaultCommandResponder: false)
+           .AddDiscordCommands()
+           .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
            .AddDiscordCaching();
         
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
-           .AddCommands();   // Register commands
+           .AddCommands()
+           .AddPostExecutionEvent<PostCommandHandler>();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>()
@@ -89,20 +89,24 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
+                    //GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
-                    GatewayIntents.GuildMessages;
+                    GatewayIntents.GuildMessages  |
+                    GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
             {
-                cs.SetAbsoluteExpiration<IChannel>(null)
-                  .SetAbsoluteExpiration<IMessage>(null)
-                  .SetAbsoluteExpiration<IGuild>(null)
-                  .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromHours(1));
+                
+                cs
+                  .SetDefaultAbsoluteExpiration(null)
+                  .SetSlidingExpiration<IChannel>(null)
+                  .SetSlidingExpiration<IMessage>(null)
+                  .SetSlidingExpiration<IGuild>(null)
+                  .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
+                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12));
             })
-           .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true });
+           .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
         return services;
     }
@@ -134,8 +138,7 @@ public static class IServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddSilkLogging(this IServiceCollection services, 
-                                                    IConfiguration          configuration)
+    public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()

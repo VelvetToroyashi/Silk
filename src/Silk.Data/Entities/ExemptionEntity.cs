@@ -14,12 +14,13 @@ public enum ExemptionTarget
 [Flags]
 public enum ExemptionCoverage
 {
-    MessageEdits,
-    MessageDeletes,
-    Phishing,
-    Spam,
-    Invites,
-    WordBlacklist
+	NonExemptMarker = 0,
+    EditLogging = 2,
+    DeleteLogging = 4,
+    AntiPhishing = 8,
+    AntiSpam = 16,
+    AntiInvite = 32,
+    WordBlacklist = 64,
 }
 
 [Table("infraction_exemptions")]

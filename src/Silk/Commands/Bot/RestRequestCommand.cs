@@ -45,6 +45,7 @@ public class RestRequestCommand : CommandGroup
         _channels          = channels;
         _silkConfiguration = silkConfiguration.Value;
     }
+    
     [Command("rest")]
     [RequireTeamOrOwner]
     [Description("Performs a REST request.")]

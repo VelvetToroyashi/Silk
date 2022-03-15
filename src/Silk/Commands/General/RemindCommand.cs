@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -18,7 +17,6 @@ using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Data.Entities;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Services.Guild;

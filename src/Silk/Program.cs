@@ -9,17 +9,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
-using Remora.Plugins;
-using Remora.Plugins.Errors;
-using Remora.Plugins.Services;
 using Remora.Results;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
-using Silk.Extensions;
-using Silk.Remora.SlashCommands;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -33,11 +27,7 @@ public class Program
 {
     public static async Task Main()
     {
-        IConfiguration config = new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
-        
-        
-
-         Console.WriteLine("Starting Silk...");
+        Console.WriteLine("Starting Silk...");
         
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
@@ -135,7 +125,6 @@ public class Program
                    .AddRemoraServices()
                    
                    .AddSilkLogging(context.Configuration)
-                   .AddSingleton<SlashCommandService>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()

@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using OneOf;
 using Remora.Commands.Conditions;
 using Remora.Commands.Trees;
 using Remora.Commands.Trees.Nodes;
@@ -13,7 +12,6 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Extensions;
 
 namespace Silk.Utilities.HelpFormatter;
 

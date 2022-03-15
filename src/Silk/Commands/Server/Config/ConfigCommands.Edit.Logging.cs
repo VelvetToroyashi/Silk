@@ -16,21 +16,38 @@ public partial class ConfigCommands
     public partial class EditConfigCommands
     {
         [Command("logging")]
-        [Description
-            (
-                "Adjust the settings for logging. \n"                    +
-                "If removing options, true or false can be specified.\n" +
-                "If a channel is already specified for the action, it will be overridden with the new one."
-            )]
+        [Description("Adjust the settings for logging. \n"                    +
+                     "If removing options, true or false can be specified.\n" +
+                     "If a channel is already specified for the action, it will be overridden with the new one."
+                    )]
         public async Task<IResult> LoggingAsync
         (
-            [Option('j', "joins")] [Description("Whether to log when a user joins. ")]                    bool? logJoins   = null,
-            [Option('l', "leaves")] [Description("Whether to log when a user leaves.")]                   bool? logLeaves  = null,
-            [Option('d', "deletes")] [Description("Whether to log message deletes.")]                     bool? logDeletes = null,
-            [Option('e', "edits")] [Description("Whether to log message edits.")]                         bool? logEdits   = null,
-            [Option('w', "webhook")] [Description("Whether to log to a webhook.")]                        bool? webhook    = null,
-            [Switch('r', "remove")] [Description("Removes specified options from the logging settings.")] bool  remove     = false,
-            [Option('c', "channel")] [Description("The channel to log to. This is required if not removing options.")]
+            [Option('j', "joins")] 
+            [Description("Whether to log when a user joins. ")]
+            bool? logJoins   = null,
+            
+            [Option('l', "leaves")]
+            [Description("Whether to log when a user leaves.")]                   
+            bool? logLeaves  = null,
+            
+            [Option('d', "deletes")] 
+            [Description("Whether to log message deletes.")]
+            bool? logDeletes = null,
+            
+            [Option('e', "edits")]
+            [Description("Whether to log message edits.")]
+            bool? logEdits   = null,
+            
+            [Option('w', "webhook")]
+            [Description("Whether to log to a webhook.")]
+            bool? webhook    = null,
+            
+            [Switch('r', "remove")]
+            [Description("Removes specified options from the logging settings.")]
+            bool  remove     = false,
+            
+            [Option('c', "channel")]
+            [Description("The channel to log to. This is required if not removing options.")]
             IChannel? channel = null
         )
         {
@@ -70,13 +87,7 @@ public partial class ConfigCommands
                     loggingConfig.MessageEdits    = null;
                 }
 
-                await _mediator.Send
-                    (
-                     new UpdateGuildModConfig.Request(_context.GuildID.Value)
-                     {
-                         LoggingConfig = loggingConfig
-                     }
-                    );
+                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
 
                 return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
             }
@@ -147,8 +158,7 @@ public partial class ConfigCommands
                     };
                 }
             }
-
-
+            
             if (webhook is true && channel is not null)
             {
                 var success = true;
@@ -219,17 +229,10 @@ public partial class ConfigCommands
 
                     return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't create webhooks in that channel. Check the channel settings to ensure I have `Manage Webhooks` please!");
                 }
-
-                await _mediator.Send
-                    (
-                     new UpdateGuildModConfig.Request(_context.GuildID.Value)
-                     {
-                         LoggingConfig = loggingConfig
-                     }
-                    );
             }
 
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmEmoji}");
+            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
         }
 
         private async Task<Result<IWebhook>> TryCreateWebhookAsync(Snowflake channelID)

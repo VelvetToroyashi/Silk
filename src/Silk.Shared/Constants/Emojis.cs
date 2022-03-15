@@ -66,20 +66,25 @@ public static class Emojis
     public static ulong ScanId { get; set; } = 948205918640820224;
     public static string ScanEmoji => $"<:_:{ScanId}>";
 
-    #endregion
-    
-    public static ulong LoadingId { get; set; } = 841020747577163838;
+    public static ulong  LoadingId    { get; set; } = 841020747577163838;
     public static string LoadingEmoji => $"<:_:{LoadingId}>";
     
-    public static ulong OnlineId       { get; set; } = 743339430672203796;
-    public static string OnlineEmoji    => $"<:_:{OnlineId}>";
+    public static ulong StreamId { get; set; } = 948652539614740480;
+    public static string StreamEmoji => $"<:_:{StreamId}>";
+    
+    public static ulong  OnlineId    { get; set; } = 948640918045589564;
+    public static string OnlineEmoji => $"<:_:{OnlineId}>";
 
-    public static ulong AwayId         { get; set; } = 743339431720910889;
-    public static string AwayEmoji      => $"<:_:{AwayId}>";
+    public static ulong  AwayId    { get; set; } = 948641120009740358;
+    public static string IdleEmoji => $"<:_:{AwayId}>";
 
-    public static ulong DoNotDisturbId { get; set; } = 743339431632568450;
+    public static ulong  DoNotDisturbId    { get; set; } = 948641122945761381;
     public static string DoNotDisturbEmoji => $"<:_:{DoNotDisturbId}>";
 
-    public static ulong OfflineId      { get; set; } = 743339431905198100;
-    public static string OfflineEmoji   => $"<:_:{OfflineId}>";
+    public static ulong  OfflineId    { get; set; } = 948641124468285460;
+    public static string OfflineEmoji => $"<:_:{OfflineId}>";
+    
+    #endregion
+    
+
 }

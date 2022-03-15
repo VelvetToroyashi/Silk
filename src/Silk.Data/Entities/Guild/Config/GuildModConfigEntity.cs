@@ -50,11 +50,7 @@ public class GuildModConfigEntity
     [Column("max_role_mentions")]
     public int MaxRoleMentions { get; set; }
     
-    /// <summary>
-    ///     Whether to match only discord.gg/ or all possible invite codes.
-    /// </summary>
-    [Column("match_aggressively")]
-    public bool UseAggressiveRegex { get; set; }
+
 
     /// <summary>
     ///     Whether to use increasingly severe infractions when a user is automatically warned.

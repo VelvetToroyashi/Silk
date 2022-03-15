@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
 using Remora.Commands.Groups;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Gateway.Responders;
 
 namespace Silk.Extensions.Remora;
 
@@ -14,11 +15,16 @@ public static class RemoraIServiceCollectionExtensions
     public static IServiceCollection AddResponders(this IServiceCollection collection, Assembly assembly)
     {
         IEnumerable<Type>? types = assembly
-                                  .GetTypes()
+                                  .GetExportedTypes()
                                   .Where(t => t.IsClass && !t.IsAbstract && t.IsResponder());
 
         foreach (Type type in types)
-            collection.AddResponder(type);
+        {
+            var responderGroup = type.GetCustomAttribute<ResponderGroupAttribute>()?.Group ?? ResponderGroup.Normal;
+           
+            collection.AddResponder(type, responderGroup);
+        }
+            
 
         return collection;
     }
@@ -29,9 +35,11 @@ public static class RemoraIServiceCollectionExtensions
                                   .GetExportedTypes()
                                   .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
 
-        foreach (Type type in types)
-            collection.AddCommandGroup(type);
+        var tree = collection.AddCommandTree();
         
-        return collection;
+        foreach (Type type in types)
+            tree.WithCommandGroup(type);
+        
+        return tree.Finish();
     }
 }

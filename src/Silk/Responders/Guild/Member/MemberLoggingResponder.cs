@@ -7,13 +7,16 @@ using Silk.Services.Guild;
 
 namespace Silk.Responders;
 
-public class MemberJoinLoggingResponder : IResponder<IGuildMemberAdd>
+public class MemberLoggingResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
     private readonly MemberLoggerService _memberLoggerService;
     
-    public MemberJoinLoggingResponder(MemberLoggerService memberLoggerService) 
+    public MemberLoggingResponder(MemberLoggerService memberLoggerService) 
         => _memberLoggerService = memberLoggerService;
 
     public Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
         => _memberLoggerService.LogMemberJoinAsync(gatewayEvent.GuildID, gatewayEvent);
+
+    public Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
+        => _memberLoggerService.LogMemberLeaveAsync(gatewayEvent.GuildID, gatewayEvent.User);
 }
