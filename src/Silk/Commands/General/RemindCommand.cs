@@ -130,7 +130,15 @@ public class ReminderCommands : CommandGroup
             if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
                 return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
-            var timeModel = parsedTime.Resolution.Values.FirstOrDefault(v => v is DateTimeV2Date or DateTimeV2DateTime);
+            var currentYear = DateTime.UtcNow.Year;
+            
+            var timeModel = parsedTime
+                           .Resolution
+                           .Values
+                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
+                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
+                                               ? dtd.Value.Year >= currentYear 
+                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
 
             if (timeModel is null)
                 return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
