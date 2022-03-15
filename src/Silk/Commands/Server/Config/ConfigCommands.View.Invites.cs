@@ -27,12 +27,14 @@ public partial class ConfigCommands
             var enabled = config.Invites.WhitelistEnabled ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             var delete  = config.Invites.DeleteOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             var action  = config.Invites.WarnOnMatch ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
-
+            var scan    = config.Invites.ScanOrigin ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            
             var embed = new Embed
             {
                 Colour = Color.MidnightBlue,
                 Title  = $"Invite detection for {guild.Name}",
                 Description = $"**Enabled:** {enabled}\n"       +
+                              $"**Scan Invite Origin**: {scan}" +
                               $"**Delete Invites:** {delete}\n" +
                               $"**Warn On Invite:** {action}"
             };

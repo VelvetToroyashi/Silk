@@ -88,7 +88,7 @@ public class InviteDectectionService
          var inviteOrigin = await _invites.GetInviteAsync(invite);
          
          if (inviteOrigin.IsSuccess && inviteOrigin.Entity.Guild.IsDefined(out var origin))
-            if (config.Invites.Whitelist.Any(inv => inv.GuildId == origin.ID))
+            if (config.Invites.Whitelist.Any(inv => inv.GuildId == origin.ID) || origin.ID == guildID)
                return Result.FromSuccess();
       }
       
