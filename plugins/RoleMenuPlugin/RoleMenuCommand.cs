@@ -181,7 +181,13 @@ public sealed class RoleMenuCommand : CommandGroup
         }
 
         roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel()
-                                                        {RoleId = r.ID.Value, RoleName = r.Name}));
+        {
+            RoleMenuId = roleMenu.MessageId,
+            MessageId  = roleMenu.MessageId,
+            GuildId    = roleMenu.GuildId,
+            RoleId     = r.ID.Value,
+            RoleName   = r.Name
+        }));
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
 

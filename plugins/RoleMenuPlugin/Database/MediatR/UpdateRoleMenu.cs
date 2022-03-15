@@ -24,7 +24,6 @@ namespace RoleMenuPlugin.Database.MediatR
             {
                 var roleMenu = await _db
                                     .RoleMenus
-                                    .AsNoTracking()
                                     .Include(r => r.Options)
                                     .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
 
@@ -36,8 +35,11 @@ namespace RoleMenuPlugin.Database.MediatR
                 
                 
                 _db.RemoveRange(roleMenu.Options.Except(request.Options));
-                roleMenu.Options = request.Options.ToList();
                 
+                roleMenu.Options.Clear();
+                roleMenu.Options.AddRange(request.Options);
+
+                _db.Update(roleMenu);
                 
                 var        saved = 0;
                 Exception? ex    = null;
