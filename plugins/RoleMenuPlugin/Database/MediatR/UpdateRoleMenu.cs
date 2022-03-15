@@ -24,6 +24,7 @@ namespace RoleMenuPlugin.Database.MediatR
             {
                 var roleMenu = await _db
                                     .RoleMenus
+                                    .AsNoTracking()
                                     .Include(r => r.Options)
                                     .FirstOrDefaultAsync(r => r.MessageId == request.RoleMenuID.Value, cancellationToken);
 
