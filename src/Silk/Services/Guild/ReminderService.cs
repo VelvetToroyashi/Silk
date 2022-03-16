@@ -49,7 +49,7 @@ public sealed class ReminderService : IHostedService
             DateTimeOffset   expiry,
             Snowflake  ownerID,
             Snowflake  channelID,
-            Snowflake  messageID,
+            Snowflake?  messageID,
             Snowflake? guildID,
             string?    content,
             string?    replyContent = null,
