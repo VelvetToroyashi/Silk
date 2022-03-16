@@ -79,7 +79,7 @@ public sealed class ReminderService : IHostedService
         DateTime                    now       = DateTime.UtcNow;
         IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.ExpiresAt <= now);
 
-        await Task.WhenAll(reminders.Select(DispatchReminderAsync));
+        await Task.WhenAll(reminders.ToList().Select(DispatchReminderAsync));
     }
 
     /// <summary>
