@@ -8,12 +8,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
+using Remora.Commands.Services;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
@@ -67,8 +69,10 @@ public static class IServiceCollectionExtensions
                 .AddCondition<RequireNSFWCondition>();
         
         services
-           .AddDiscordCommands()
+           .AddDiscordCommands(true)
+           .AddSlashCommands(asm)
            .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
+           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>()
            .AddDiscordCaching();
         
         services
