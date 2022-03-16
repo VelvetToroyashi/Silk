@@ -228,7 +228,7 @@ public class ReminderCommands : CommandGroup
         var reminders = _reminders.GetReminders(_context.User.ID);
         
         if (reminders.All(r => r.Id != id))
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
+            return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders, or at least not one by that ID!");
 
         await _reminders.RemoveReminderAsync(id);
         
