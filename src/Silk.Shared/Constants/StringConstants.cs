@@ -27,8 +27,6 @@ public static class StringConstants
     /// </summary>
     public const string FileLogFormat        = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
     
-    //TODO: Deprecate?
-    public const string HttpClientName       = "Silk";
     public const string AutoModMessagePrefix = "[AUTOMOD]";
 
     /// <summary>
