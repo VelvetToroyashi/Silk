@@ -103,21 +103,6 @@ public partial class ManageGuild
         var request = new UpdateGuildModConfig.Request(GuildIdParsed)
         {
             MuteRoleID = _guildModConfig.MuteRoleID,
-            // EscalateInfractions = _guildModConfig.Es,
-            LoggingConfig   = _guildModConfig.LoggingConfig,
-            MaxUserMentions = _guildModConfig.MaxUserMentions,
-            MaxRoleMentions = _guildModConfig.MaxRoleMentions,
-            ScanInvites     = _guildModConfig.ScanInviteOrigin,
-            // BlacklistWords = _guildModConfig.BlacklistWords,
-            BlacklistInvites = _guildModConfig.WhitelistInvites, // Todo: Rename property?
-            // LogMembersJoining = _guildModConfig.LogMemberJoins,
-            // LogMembersLeaving = _guildModConfig.LogMemberLeaves,
-            UseAggressiveRegex = _guildModConfig.UseAggressiveRegex,
-            // WarnOnMatchedInvite = _guildModConfig.InfractOnMatchedInvite, // Todo: Check this is wanted?
-            DeleteOnMatchedInvite = _guildModConfig.DeleteMessageOnMatchedInvite,
-            InfractionSteps       = _guildModConfig.InfractionSteps,
-            AllowedInvites        = _guildModConfig.AllowedInvites,
-            // AutoModActions = _guildModConfig.NamedInfractionSteps,
         };
 
         var response = await Mediator.Send(request);

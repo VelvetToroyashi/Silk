@@ -9,7 +9,6 @@ namespace Silk.Dashboard.Pages.Dashboard;
 public partial class Profile
 {
     [Inject] public  ISnackbar                Snackbar          { get; set; }
-    [Inject] private NavigationManager        NavigationManager { get; set; }
     [Inject] private IDashboardDiscordClient  DiscordClient { get; set; }
 
     private bool _showJoinedGuilds;

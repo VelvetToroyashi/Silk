@@ -16,9 +16,9 @@ public partial class About
     private const string ContributorsUrl         = "https://api.github.com/repos/VTPDevelopment/Silk/contributors";
     private const string ExcludedContributorName = "[bot]";
 
-    private static readonly TimeSpan       _fetchPeriod = TimeSpan.FromHours(1);
     private static          DateTimeOffset _nextFetchTime;
-    
+    private static readonly TimeSpan       _fetchPeriod = TimeSpan.FromHours(1);
+
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
         AllowTrailingCommas         = true,
@@ -53,18 +53,16 @@ public partial class About
 
     private async Task FetchContributorsAsync()
     {
-        using var client  = HttpClientFactory.CreateClient();
-        using var request = new HttpRequestMessage(HttpMethod.Get, ContributorsUrl);
+        using var client = HttpClientFactory.CreateClient("Github");
 
-        request.Headers.TryAddWithoutValidation("Accept", "application/vnd.github.v3+json");
-        request.Headers.TryAddWithoutValidation("User-Agent", StringConstants.ProjectIdentifier);
+        _contributors = await client.GetFromJsonAsync<List<SilkContributor>>(ContributorsUrl, _serializerOptions);
 
-        using var result = await client.SendAsync(request);
+        /*using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, ContributorsUrl));
 
-        if (!result.IsSuccessStatusCode) return;
+        if (!response.IsSuccessStatusCode) return;
 
-        _contributors  = JsonSerializer.Deserialize<List<SilkContributor>>(await result.Content.ReadAsStringAsync(), 
-                                                                           _serializerOptions);
+        _contributors = JsonSerializer.Deserialize<List<SilkContributor>>(await response.Content.ReadAsStringAsync(),
+                                                                          _serializerOptions);*/
         _nextFetchTime = DateTimeOffset.UtcNow + _fetchPeriod;
     }
 }
