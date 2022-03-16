@@ -248,7 +248,7 @@ public sealed class ReminderService : IHostedService
             _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
-        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);
+        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         return Result.FromSuccess();
     }
 
