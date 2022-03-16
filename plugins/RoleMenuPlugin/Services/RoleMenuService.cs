@@ -184,18 +184,20 @@ public class RoleMenuService
                             .Select(r => new SelectOption(r.Label, r.Value, r.Description, r.Emoji, values.Contains(r.Value)))
                             .ToArray();
             
-            await _interactions.EditOriginalInteractionResponseAsync
+            var interactionResult = await _interactions.EditOriginalInteractionResponseAsync
                 (
                  interaction.ApplicationID,
                  interaction.Token,
                  "Done! Enjoy your new roles!",
                  components: new[]
                  {
-                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0, 25) } )
+                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0) } )
                  }
                 );
             
-            return Result.FromSuccess();
+            return interactionResult.IsSuccess 
+                ? Result.FromSuccess()
+                : Result.FromError(interactionResult.Error);
         }
 
         return await DisplayRoleMenuErrorAsync(interaction, guildID, roleMenuRoleIDs, roleResult);

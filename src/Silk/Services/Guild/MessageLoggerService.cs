@@ -92,6 +92,7 @@ public class MessageLoggerService
             
                 Fields = new EmbedField[]
                 {
+                    new("Author", author.ToDiscordTag()),
                     new("Channel", $"<#{channelID}>", true),
                     new("Thread", message.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
                     new("\u200b", "\u200b", true),
@@ -122,6 +123,7 @@ public class MessageLoggerService
 
                 Fields = new EmbedField[]
                 {
+                    new("Author", author.ToDiscordTag()),
                     new("Channel", $"<#{channelID}>", true),
                     new("Thread", message.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
                     new("\u200b", "\u200b", true),
