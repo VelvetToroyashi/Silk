@@ -51,7 +51,7 @@ public static class MicroTimeParser
                 "h"  => TimeSpan.FromHours(multiplier),
                 "m"  => TimeSpan.FromMinutes(multiplier),
                 "s"  => TimeSpan.FromSeconds(multiplier),
-                _    => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+                _    => TimeSpan.Zero
             };
         });
         
