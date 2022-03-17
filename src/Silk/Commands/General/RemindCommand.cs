@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
+using Microsoft.Extensions.Logging;
 using Recognizers.Text.DateTime.Wrapper;
 using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
@@ -17,6 +18,7 @@ using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
+using Serilog;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Services.Guild;
@@ -88,21 +90,24 @@ public class ReminderCommands : CommandGroup
     private readonly MessageContext            _context;
     private readonly IDiscordRestChannelAPI    _channels;
     private readonly InteractiveMessageService _interactivity;
+    private readonly ILogger<ReminderCommands> _logger;
     
     
     public ReminderCommands
     (
-        ReminderService reminders,
-        MessageContext context,
-        IDiscordRestChannelAPI channels,
-        InteractiveMessageService interactivity
+        ReminderService           reminders,
+        MessageContext            context,
+        IDiscordRestChannelAPI    channels,
+        InteractiveMessageService interactivity,
+        ILogger<ReminderCommands> logger
     )
     {
         _context       = context;
         _channels      = channels;
         _reminders     = reminders;
         _interactivity = interactivity;
-        
+        _logger   = logger;
+
     }
     
     [Command("set", "me", "create")]
@@ -125,29 +130,39 @@ public class ReminderCommands : CommandGroup
         }
         else
         {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, refTime: DateTime.UtcNow);
+            try
+            {
+                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, refTime: DateTime.UtcNow);
 
-            if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+                if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
+                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
-            var currentYear = DateTime.UtcNow.Year;
-            
-            var timeModel = parsedTime
-                           .Resolution
-                           .Values
-                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
-                                               ? dtd.Value.Year >= currentYear 
-                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
+                var currentYear = DateTime.UtcNow.Year;
 
-            if (timeModel is null)
-                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+                var timeModel = parsedTime
+                               .Resolution
+                               .Values
+                               .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
+                               .FirstOrDefault
+                                    (
+                                     v => v is DateTimeV2Date dtd
+                                         ? dtd.Value.Year                        >= currentYear
+                                         : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
+                                    );
 
-            if (timeModel is DateTimeV2Date vd)
-                time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+                if (timeModel is null)
+                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
-            if (timeModel is DateTimeV2DateTime vdt)
-                time     = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+                if (timeModel is DateTimeV2Date vd)
+                    time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+
+                if (timeModel is DateTimeV2DateTime vdt)
+                    time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to parse reminder time!");
+            }
         }
 
         if (time <= TimeSpan.Zero)
