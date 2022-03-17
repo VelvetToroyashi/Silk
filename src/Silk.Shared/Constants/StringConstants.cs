@@ -15,7 +15,7 @@ public static class StringConstants
     /// <summary>
     /// The current version of Silk!.
     /// </summary>
-    public const string Version              = "3.0.2-alpha-2";
+    public const string Version              = "3.0.2-alpha-3";
     
     
     /// <summary>
