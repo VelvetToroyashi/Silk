@@ -17,13 +17,13 @@ using Silk.Extensions.Remora;
 namespace Silk.Commands.SlashCommands;
 
 [SlashCommand]
-public class Avatar : CommandGroup
+public class AvatarSlashCommands : CommandGroup
 {
     private readonly InteractionContext         _context;
     private readonly IDiscordRestGuildAPI       _guilds;
     private readonly IDiscordRestInteractionAPI _interactions;
 
-    public Avatar(InteractionContext context, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
+    public AvatarSlashCommands(InteractionContext context, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
     {
         _context  = context;
         _guilds   = guilds;

@@ -49,7 +49,7 @@ public sealed class ReminderService : IHostedService
             DateTimeOffset   expiry,
             Snowflake  ownerID,
             Snowflake  channelID,
-            Snowflake  messageID,
+            Snowflake?  messageID,
             Snowflake? guildID,
             string?    content,
             string?    replyContent = null,
@@ -79,7 +79,7 @@ public sealed class ReminderService : IHostedService
         DateTime                    now       = DateTime.UtcNow;
         IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.ExpiresAt <= now);
 
-        await Task.WhenAll(reminders.Select(DispatchReminderAsync));
+        await Task.WhenAll(reminders.ToList().Select(DispatchReminderAsync));
     }
 
     /// <summary>
@@ -248,7 +248,7 @@ public sealed class ReminderService : IHostedService
             _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
-        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);
+        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         return Result.FromSuccess();
     }
 
