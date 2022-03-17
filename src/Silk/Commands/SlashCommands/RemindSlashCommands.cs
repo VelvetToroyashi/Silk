@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
@@ -61,7 +62,6 @@ public class RemindSlashCommands : CommandGroup
         string about
     )
     {
-
         var parseResult = MicroTimeParser.TryParse(rawTime);
 
         if (!parseResult.IsDefined(out TimeSpan parsedTime))
@@ -133,7 +133,7 @@ public class RemindSlashCommands : CommandGroup
             (
              _context.ApplicationID,
              _context.Token,
-             $"Done! I'll remind you in {reminderTime.ToTimestamp()}!"
+             $"Done! I'll remind you {reminderTime.ToTimestamp()}!"
             );
     }
 
