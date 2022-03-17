@@ -57,12 +57,6 @@ public partial class About
 
         _contributors = await client.GetFromJsonAsync<List<SilkContributor>>(ContributorsUrl, _serializerOptions);
 
-        /*using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, ContributorsUrl));
-
-        if (!response.IsSuccessStatusCode) return;
-
-        _contributors = JsonSerializer.Deserialize<List<SilkContributor>>(await response.Content.ReadAsStringAsync(),
-                                                                          _serializerOptions);*/
         _nextFetchTime = DateTimeOffset.UtcNow + _fetchPeriod;
     }
 }
