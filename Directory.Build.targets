@@ -69,7 +69,7 @@
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
 
         <PackageReference Update="Swashbuckle.AspNetCore" Version="6.2.3" />
-        <PackageReference Update="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+        <PackageReference Update="System.CommandLine" Version="2.0.0-beta3.22114.1" />
         <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
 
         <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.1.0" />
