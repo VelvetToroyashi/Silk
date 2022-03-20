@@ -87,10 +87,10 @@
         <PackageReference Include="Serilog.Sinks.File" />
         <PackageReference Include="SharpYaml" Version="1.8.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
         <PackageReference Include="Svg.Skia" Version="0.5.10" />
         <PackageReference Include="System.CommandLine" />
-        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0-preview.2.21154.6" />
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
         <PackageReference Include="Unity" />
         <PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
