@@ -853,7 +853,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var embed = new Embed
         {
             Title       = "Infraction #" + infraction.CaseNumber,
-            Author      = new EmbedAuthor($"{target?.Username ?? "Unknown"}#{target.Discriminator}", CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
+            Author      = new EmbedAuthor($"{target.ToDiscordTag()}", default, CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
             Description = infraction.Reason,
             Colour      = Color.Goldenrod,
             Fields = new IEmbedField[]
@@ -861,10 +861,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 new EmbedField("Type:", infraction.Type.ToString(), true),
                 new EmbedField("Infracted at:", $"<t:{infraction.CreatedAt.ToUnixTimeSeconds()}:F>", true),
                 new EmbedField("Expires:", !infraction.ExpiresAt.HasValue ? "Never" : $"<t:{((DateTimeOffset)infraction.ExpiresAt).ToUnixTimeSeconds()}:F>", true),
-
                 new EmbedField("Moderator:", $"**{enforcer.ToDiscordTag()}**\n(`{enforcer.ID}`)", true),
                 new EmbedField("Offender:", $"**{target.ToDiscordTag()}**\n(`{target.ID}`)", true),
-
             }
         };
 
@@ -878,8 +876,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         return Result.FromSuccess();
     }
-
-
+    
     /// <summary>
     ///     Ensures an available logging channel exists on the guild, creating one if neccecary.
     /// </summary>
