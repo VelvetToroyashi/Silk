@@ -859,11 +859,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
             Fields = new IEmbedField[]
             {
                 new EmbedField("Type:", infraction.Type.ToString(), true),
-                new EmbedField("Infracted at:", $"<t:{((DateTimeOffset)infraction.CreatedAt).ToUnixTimeSeconds()}:F>", true),
+                new EmbedField("Infracted at:", $"<t:{infraction.CreatedAt.ToUnixTimeSeconds()}:F>", true),
                 new EmbedField("Expires:", !infraction.ExpiresAt.HasValue ? "Never" : $"<t:{((DateTimeOffset)infraction.ExpiresAt).ToUnixTimeSeconds()}:F>", true),
 
-                new EmbedField("Moderator:", $"**{enforcer.Username}#{enforcer.Discriminator}**\n(`{enforcer.ID}`)", true),
-                new EmbedField("Offender:", $"**{target.Username}#{target.Discriminator}**\n(`{target.ID}`)", true),
+                new EmbedField("Moderator:", $"**{enforcer.ToDiscordTag()}**\n(`{enforcer.ID}`)", true),
+                new EmbedField("Offender:", $"**{target.ToDiscordTag()}**\n(`{target.ID}`)", true),
 
             }
         };
