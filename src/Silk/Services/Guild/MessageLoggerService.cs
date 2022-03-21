@@ -197,6 +197,7 @@ public class MessageLoggerService
 
             Fields = new EmbedField[]
             {
+                new ("Author", $"{cachedMessage?.Author.ToDiscordTag() ?? "Unknown"}", false),
                 new("Channel", $"<#{message.ChannelID}>", true),
                 new("Thread", cachedMessage.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
                 new("\u200b", "\u200b", true),
