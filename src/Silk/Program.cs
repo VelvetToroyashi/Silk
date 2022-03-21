@@ -124,7 +124,6 @@ public class Program
                 
                 services
                    .AddRemoraServices()
-                   
                    .AddSilkLogging(context.Configuration)
                    .AddHostedService<HeartbeatLogger>()
                    .AddSingleton<ReminderService>()
@@ -132,6 +131,7 @@ public class Program
                    .AddSingleton<PhishingGatewayService>()
                    .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
                    .AddSingleton<PhishingDetectionService>()
+                   .AddSingleton<SuspiciousUserDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
