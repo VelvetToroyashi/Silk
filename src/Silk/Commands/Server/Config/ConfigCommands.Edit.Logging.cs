@@ -90,6 +90,12 @@ public partial class ConfigCommands
                     loggingConfig.LogMessageEdits = false;
                     loggingConfig.MessageEdits    = null;
                 }
+                
+                if (logInfractions)
+                {
+                    loggingConfig.LogInfractions = false;
+                    loggingConfig.Infractions    = null;
+                }
 
                 await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
 
@@ -161,6 +167,22 @@ public partial class ConfigCommands
                         WebhookID    = lwi ?? default(Snowflake)
                     };
                 }
+                
+                if (logInfractions)
+                {
+                    loggingConfig.LogInfractions = true;
+
+                    var lwt = loggingConfig.Infractions?.WebhookToken;
+                    var lwi = loggingConfig.Infractions?.WebhookID;
+
+                    loggingConfig.Infractions = new()
+                    {
+                        ChannelID    = channel.ID,
+                        GuildID      = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID    = lwi ?? default(Snowflake)
+                    };
+                }
             }
             
             if (webhook is true && channel is not null)
@@ -222,6 +244,21 @@ public partial class ConfigCommands
                             WebhookID    = ew.ID,
                             ChannelID    = channel.ID,
                             WebhookToken = ew.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+                
+                if (logInfractions)
+                {
+                    var infractionWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (infractionWebhook.IsDefined(out var iw))
+                        loggingConfig.Infractions = new()
+                        {
+                            WebhookID    = iw.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = iw.Token.Value,
                             GuildID      = _context.GuildID.Value
                         };
                     else success = false;
