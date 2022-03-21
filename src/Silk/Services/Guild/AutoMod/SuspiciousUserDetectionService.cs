@@ -22,8 +22,19 @@ public class SuspiciousUserDetectionService
     {
         "ModMail",
         "Bot Moderator",
+        "Academy Moderator",
+        "Discord Message",
+        "Discord Moderation Academy",
+        "Developer Message",
         "Discord Moderator",
         "Hypesquad Events",
+        "Hypesquad Moderator",
+        "Hypesquad Moderation",
+        "Hypesquad Moderation Academy",
+        "HypeSquad Academy",
+        "Staff Events",
+        "Staff Academy",
+        "Bot Developer",
     };
     
     public SuspiciousUserDetectionService
