@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Gateway.Events;
@@ -10,6 +11,7 @@ namespace Silk.Responders;
 public class SuspiciousMemberBannerResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberUpdate>
 {
     private readonly SuspiciousUserDetectionService _suspiciousUserDetectionService;
+    
     public SuspiciousMemberBannerResponder(SuspiciousUserDetectionService suspiciousUserDetectionService)
     {
         _suspiciousUserDetectionService = suspiciousUserDetectionService;
@@ -19,5 +21,7 @@ public class SuspiciousMemberBannerResponder : IResponder<IGuildMemberAdd>, IRes
         => _suspiciousUserDetectionService.HandleSuspiciousUserAsync(gatewayEvent.GuildID, gatewayEvent.User.Value);
     
     public Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-        => _suspiciousUserDetectionService.HandleSuspiciousUserAsync(gatewayEvent.GuildID, gatewayEvent.User);
+        => gatewayEvent.JoinedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromSeconds(15)) 
+            ? Task.FromResult(Result.FromSuccess()) 
+            :_suspiciousUserDetectionService.HandleSuspiciousUserAsync(gatewayEvent.GuildID, gatewayEvent.User);
 }
