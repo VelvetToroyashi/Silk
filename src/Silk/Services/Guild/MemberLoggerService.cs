@@ -69,7 +69,7 @@ public class MemberLoggerService
 
         if (userData.Infractions.Any())
         {
-            sb.AppendLine("User has infractions on record");
+            sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
             userFields.Add(new("Infractions:", userData
                                               .Infractions
                                               .GroupBy(inf => inf.Type)
