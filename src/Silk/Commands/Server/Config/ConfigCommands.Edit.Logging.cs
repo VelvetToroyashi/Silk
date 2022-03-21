@@ -15,7 +15,7 @@ public partial class ConfigCommands
 {
     public partial class EditConfigCommands
     {
-        [Command("logging")]
+        [Command("logging", "log", "l")]
         [Description("Adjust the settings for logging. \n" +
                      "If a channel is already specified for the action, it will be overridden with the new one."
                     )]
