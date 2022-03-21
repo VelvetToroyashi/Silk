@@ -5,6 +5,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Unidecode.NET;
 
@@ -12,11 +13,11 @@ namespace Silk.Services.Guild;
 
 public class SuspiciousUserDetectionService
 {
+    private readonly IDiscordRestUserAPI                     _users;
+    private readonly IInfractionService                      _infractions;
+    private readonly GuildConfigCacheService                 _config;
     private readonly ILogger<SuspiciousUserDetectionService> _logger;
-    private readonly IDiscordRestUserAPI                    _users;
-    private readonly IInfractionService                     _infractions;
-   
-    
+
     private readonly string[] SuspiciousUsernames = new[]
     {
         "ModMail",
@@ -25,15 +26,27 @@ public class SuspiciousUserDetectionService
         "Hypesquad Events",
     };
     
-    public SuspiciousUserDetectionService(ILogger<SuspiciousUserDetectionService> logger, IDiscordRestUserAPI users, IInfractionService infractions)
+    public SuspiciousUserDetectionService
+    (
+        IDiscordRestUserAPI users,
+        IInfractionService infractions,
+        GuildConfigCacheService config,
+        ILogger<SuspiciousUserDetectionService> logger
+    )
     {
-        _logger      = logger;
+        _users       = users;
         _infractions = infractions;
-        _users  = users;
+        _config      = config;
+        _logger = logger;
     }
-    
+
     public async Task<Result> HandleSuspiciousUserAsync(Snowflake guildID, IUser user)
     {
+        var config = await _config.GetModConfigAsync(guildID);
+
+        if (!config.BanSuspiciousUsernames)
+            return Result.FromSuccess();
+        
         // TODO: add to config and make toggelable. This will go under phishing settings.
         var detection = IsSuspcectedPhishingUsername(user.Username);
         
@@ -52,7 +65,7 @@ public class SuspiciousUserDetectionService
             return Result.FromError(self.Error);
 
         // We delete the last day of messages to clear any potential join message.
-        var infraction = await _infractions.BanAsync(guildID, user.ID, self.Entity.ID, 1, $"Potential phishing userbot | Username most similar to {detection.mostSimilarTo}");
+        var infraction = await _infractions.BanAsync(guildID, user.ID, self.Entity.ID, 1, $"Suspicious username detected: `{user.Username}` ➜ `{detection.mostSimilarTo}`");
         
         if (!infraction.IsSuccess)
             return Result.FromError(infraction.Error);
