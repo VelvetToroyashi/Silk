@@ -71,8 +71,8 @@ public class GuildModConfigEntity
     /// <summary>
     /// Whether or not to automatically ban users who exhibit suspicious usernames similar to known phishing names.
     /// </summary>
-    [Column("ban_suspected_phishing_bots")]
-    public bool BanSuspectedPhishingBots { get; set; }
+    [Column("ban_suspicious_usernames")]
+    public bool BanSuspiciousUsernames { get; set; }
 
     /// <summary>
     ///     Whether or not phishing links should be deleted.
