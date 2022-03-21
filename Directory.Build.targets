@@ -21,9 +21,7 @@
 
         <PackageReference Update="FuzzySharp" Version="2.0.2" />
         <PackageReference Update="JetBrains.Annotations" Version="2021.3.0" />
-
-        <PackageReference Update="YumeChan.PluginBase" Version="2.4.3" />
-
+        
         <PackageReference Update="FluentAssertions" Version="6.5.1" />
         <PackageReference Update="FluentValidation" Version="10.4.0" />
         <PackageReference Update="FluentValidation.AspNetCore" Version="10.3.6" />
@@ -33,10 +31,7 @@
         
         <PackageReference Update="MediatR" Version="10.0.1"/>
         <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1"/>
-
-        <PackageReference Update="Unity" Version="5.11.10" />
-        <PackageReference Update="Nodsoft.Unity.Microsoft.DependencyInjection" Version="5.11.5" />
-        
+                
         <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3"/>
 
         <PackageReference Update="Serilog" Version="2.10.1-dev-01366" />
