@@ -129,6 +129,7 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine()
                .AppendLine($"**Anti-Phishing** {Emojis.NewEmoji} | `phishing`")
                .AppendLine($"> {(modConfig.DetectPhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Detect Phishing Links")
+               .AppendLine($"> {(modConfig.BanSuspiciousUsernames ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.ScanEmoji} Ban Suspicious Usernames")
                .AppendLine($"> {(modConfig.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete Phishing Links")
                .AppendLine($"> {(action is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WrenchEmoji} Post-detection action: {phishingAction}");
 

@@ -14,18 +14,19 @@ public static class UpdateGuildModConfig
 {
     public sealed record Request(Snowflake GuildID) : IRequest<GuildModConfigEntity?>
     {
-        public Optional<bool>      ScanInvites           { get; init; }
-        public Optional<Snowflake> MuteRoleID            { get; init; }
-        public Optional<bool>      UseNativeMute         { get; init; }
-        public Optional<int>       MaxUserMentions       { get; init; }
-        public Optional<int>       MaxRoleMentions       { get; init; }
-        public Optional<bool>      BlacklistInvites      { get; init; }
-        public Optional<bool>      UseAggressiveRegex    { get; init; }
-        public Optional<bool>      EscalateInfractions   { get; init; }
-        public Optional<bool>      WarnOnMatchedInvite   { get; init; }
-        public Optional<bool>      DetectPhishingLinks   { get; init; }
-        public Optional<bool>      DeletePhishingLinks   { get; init; }
-        public Optional<bool>      DeleteOnMatchedInvite { get; init; }
+        public Optional<bool>      ScanInvites            { get; init; }
+        public Optional<Snowflake> MuteRoleID             { get; init; }
+        public Optional<bool>      UseNativeMute          { get; init; }
+        public Optional<int>       MaxUserMentions        { get; init; }
+        public Optional<int>       MaxRoleMentions        { get; init; }
+        public Optional<bool>      BlacklistInvites       { get; init; }
+        public Optional<bool>      UseAggressiveRegex     { get; init; }
+        public Optional<bool>      EscalateInfractions    { get; init; }
+        public Optional<bool>      WarnOnMatchedInvite    { get; init; }
+        public Optional<bool>      DetectPhishingLinks    { get; init; }
+        public Optional<bool>      DeletePhishingLinks    { get; init; }
+        public Optional<bool>      DeleteOnMatchedInvite  { get; init; }
+        public Optional<bool>      BanSuspiciousUsernames { get; init; }
 
         public Optional<GuildLoggingConfigEntity> LoggingConfig { get; init; }
 
@@ -87,6 +88,9 @@ public static class UpdateGuildModConfig
 
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
+            
+            if (request.BanSuspiciousUsernames.IsDefined(out var banSuspiciousUsernames))
+                config.BanSuspiciousUsernames = banSuspiciousUsernames;
 
             if (request.LoggingConfig.IsDefined(out var loggingConfig))
             {
