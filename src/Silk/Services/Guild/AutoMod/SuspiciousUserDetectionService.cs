@@ -18,7 +18,7 @@ public class SuspiciousUserDetectionService
     private readonly GuildConfigCacheService                 _config;
     private readonly ILogger<SuspiciousUserDetectionService> _logger;
 
-    private readonly string[] SuspiciousUsernames = new[]
+    private static readonly string[] SuspiciousUsernames = new[]
     {
         "Academy Moderator",
         "Bot Developer",

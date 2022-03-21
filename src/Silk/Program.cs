@@ -131,7 +131,7 @@ public class Program
                    .AddSingleton<PhishingGatewayService>()
                    .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
                    .AddSingleton<PhishingDetectionService>()
-                   .AddSingleton<SuspiciousUserDetectionService>()
+                   .AddScoped<SuspiciousUserDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
