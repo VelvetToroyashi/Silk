@@ -221,9 +221,10 @@ public class ReminderCommands : CommandGroup
         }
         else
         {
-            var formattedReminders = reminders.Select(r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                                                           $"{r.MessageContent.Truncate(50, "[...]")}" +
-                                                           (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
+            var formattedReminders = reminders.Select
+                (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                $"{r.MessageContent.Truncate(50, "[...]")}" +
+                (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
 
             var embed = new Embed
             {
@@ -249,5 +250,4 @@ public class ReminderCommands : CommandGroup
         
         return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
     }
-    
 }
