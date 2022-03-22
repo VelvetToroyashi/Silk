@@ -175,7 +175,6 @@ public class ReminderCommands : CommandGroup
 
         _ = _context.Message.ReferencedMessage.IsDefined(out var reply);
         
-        
         var reminderTime = DateTimeOffset.UtcNow + time;
         
         await _reminders.CreateReminderAsync
@@ -205,17 +204,18 @@ public class ReminderCommands : CommandGroup
 
         if (reminders.Count() > 5)
         {
-            var chunkedReminders = reminders.Select(r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                                                         $"{r.MessageContent.Truncate(50, "[...]")}"         +
-                                                         (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
-                                            .Chunk(5)
-                                            .Select((rs, i) => new Embed
-                                             {
-                                                 Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
-                                                 Colour = Color.DodgerBlue,
-                                                 Description = rs.Join("\n\n"),
-                                             })
-                                            .ToArray();
+            var chunkedReminders = reminders.Select
+               (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                     $"{r.MessageContent.Truncate(50, "[...]")}"         +
+                     (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
+              .Chunk(5)
+              .Select((rs, i) => new Embed
+               {
+                   Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
+                   Colour = Color.DodgerBlue,
+                   Description = rs.Join("\n\n"),
+               })
+              .ToArray();
 
             return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, chunkedReminders);
         }
