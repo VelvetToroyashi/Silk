@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
+using Microsoft.Extensions.Logging;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
@@ -19,13 +20,22 @@ public class PostCommandHandler : IPostExecutionEvent
     private readonly CommandHelpViewer      _help;
     private readonly ICommandPrefixMatcher  _preifx;
     private readonly IDiscordRestChannelAPI _channels;
-    
-    public PostCommandHandler(MessageContext context, CommandHelpViewer help, ICommandPrefixMatcher preifx, IDiscordRestChannelAPI channels)
+    private readonly ILogger<PostCommandHandler> _logger;
+
+    public PostCommandHandler
+    (
+        MessageContext context,
+        CommandHelpViewer help,
+        ICommandPrefixMatcher preifx,
+        IDiscordRestChannelAPI channels,
+        ILogger<PostCommandHandler> logger
+    )
     {
-        _context       = context;
-        _help          = help;
-        _preifx        = preifx;
+        _context  = context;
+        _help     = help;
+        _preifx   = preifx;
         _channels = channels;
+        _logger   = logger;
     }
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
@@ -38,12 +48,20 @@ public class PostCommandHandler : IPostExecutionEvent
         if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches)
             return Result.FromSuccess();
 
-        if (commandResult.Error is CommandNotFoundError)
+        var error = commandResult.Error;
+
+        if (error is AggregateError ag)
+            error = ag.Errors.First().Error;
+        
+        if (error is CommandNotFoundError)
             await _help.SendHelpAsync(_context.Message.Content.Value[prefix.ContentStartIndex..], _context.ChannelID);
         
-        if (commandResult.Error is ConditionNotSatisfiedError)
+        if (error is ConditionNotSatisfiedError)
             await HandleFailedConditionAsync(commandResult.Inner!.Inner!.Inner!.Inner.Error, ct);
 
+        if (error is ExceptionError er)
+            _logger.LogError(er.Exception, "Exception in command execution");
+        
         return Result.FromSuccess();
     }
 
@@ -58,8 +76,6 @@ public class PostCommandHandler : IPostExecutionEvent
 
             _ => message
         };
-        
-        
         
         await _channels.CreateMessageAsync(_context.ChannelID, responseMessage, ct: ct);
     }
