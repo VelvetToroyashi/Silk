@@ -106,7 +106,7 @@ public class ReminderCommands : CommandGroup
         _channels      = channels;
         _reminders     = reminders;
         _interactivity = interactivity;
-        _logger   = logger;
+        _logger        = logger;
 
     }
     
