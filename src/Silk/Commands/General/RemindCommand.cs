@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
+
 using Recognizers.Text.DateTime.Wrapper;
 using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
@@ -132,7 +134,7 @@ public class ReminderCommands : CommandGroup
         {
             try
             {
-                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, refTime: DateTime.UtcNow);
+                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
 
                 if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
                     return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
