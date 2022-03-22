@@ -16,10 +16,10 @@ namespace Silk;
 
 public class PostCommandHandler : IPostExecutionEvent
 {
-    private readonly MessageContext         _context;
-    private readonly CommandHelpViewer      _help;
-    private readonly ICommandPrefixMatcher  _preifx;
-    private readonly IDiscordRestChannelAPI _channels;
+    private readonly MessageContext              _context;
+    private readonly CommandHelpViewer           _help;
+    private readonly ICommandPrefixMatcher       _preifx;
+    private readonly IDiscordRestChannelAPI      _channels;
     private readonly ILogger<PostCommandHandler> _logger;
 
     public PostCommandHandler
@@ -73,8 +73,7 @@ public class PostCommandHandler : IPostExecutionEvent
         {
             SelfActionError sae       => sae.Message,
             PermissionDeniedError pne => $"As much as I'd love to, you're missing permissions to {pne.Permissions.Select(p => p.Humanize(LetterCasing.Title)).Humanize()}!",
-
-            _ => message
+            _                         => message
         };
         
         await _channels.CreateMessageAsync(_context.ChannelID, responseMessage, ct: ct);
