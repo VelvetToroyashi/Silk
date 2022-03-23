@@ -21,6 +21,7 @@ using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Results;
@@ -58,7 +59,7 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           //.AddPagination()
+           .AddPagination()
            .AddSilkInteractivity();
 
         services
