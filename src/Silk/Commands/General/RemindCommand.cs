@@ -132,39 +132,32 @@ public class ReminderCommands : CommandGroup
         }
         else
         {
-            try
-            {
-                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
+            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
 
-                if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+            if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
-                var currentYear = DateTime.UtcNow.Year;
+            var currentYear = DateTime.UtcNow.Year;
 
-                var timeModel = parsedTime
-                               .Resolution
-                               .Values
-                               .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                               .FirstOrDefault
-                                    (
-                                     v => v is DateTimeV2Date dtd
-                                         ? dtd.Value.Year                        >= currentYear
-                                         : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
-                                    );
+            var timeModel = parsedTime
+                           .Resolution
+                           .Values
+                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
+                           .FirstOrDefault
+                                (
+                                 v => v is DateTimeV2Date dtd
+                                     ? dtd.Value.Year                        >= currentYear
+                                     : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
+                                );
 
-                if (timeModel is null)
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+            if (timeModel is null)
+                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
-                if (timeModel is DateTimeV2Date vd)
-                    time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+            if (timeModel is DateTimeV2Date vd)
+                time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
 
-                if (timeModel is DateTimeV2DateTime vdt)
-                    time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to parse reminder time!");
-            }
+            if (timeModel is DateTimeV2DateTime vdt)
+                time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
         }
 
         if (time <= TimeSpan.Zero)
