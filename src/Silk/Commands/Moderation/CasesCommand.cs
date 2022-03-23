@@ -69,9 +69,7 @@ public class CasesCommand : CommandGroup
 
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
     }
-
     
-
     [Command("cases")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
