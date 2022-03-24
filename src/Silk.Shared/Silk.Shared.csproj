@@ -6,8 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" />
-        <PackageReference Include="DSharpPlus.CommandsNext" />
         <PackageReference Include="Serilog.Expressions" />
         <PackageReference Include="Serilog.Sinks.Console" />
     </ItemGroup>
