@@ -11,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
 using Remora.Results;
+using Sentry;
+using Sentry.Extensions.Logging;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -20,6 +23,7 @@ using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
 using Silk.Shared.Configuration;
+using Silk.Shared.Constants;
 using Silk.Utilities;
 
 namespace Silk;
@@ -122,6 +126,10 @@ public class Program
                 AddDatabases(services, silkConfig.Persistence);
                 AddSilkConfigurationOptions(services, context.Configuration);
                 
+                // A little note on Sentry; it's important to initialize logging FIRST
+                // And then sentry, because we set the settings for sentry later. 
+                // If we configure logging after, it'll override the settings with defaults.
+                
                 services
                    .AddRemoraServices()
                    .AddSilkLogging(context.Configuration)
@@ -148,7 +156,20 @@ public class Program
                    .AddSingleton<FlagOverlayService>()
                    .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
-                   .AddMediatR(typeof(GuildContext));
+                   .AddMediatR(typeof(GuildContext))
+                   .AddSentry<SentryLoggingOptions>()
+                   .Configure<SentryLoggingOptions>
+                    (
+                     slo =>
+                     {
+                         slo.Dsn                    = silkConfig.SentryDSN;
+                         slo.InitializeSdk          = !silkConfig.SelfHosted;
+                         slo.MinimumEventLevel      = LogLevel.Error;
+                         slo.MinimumBreadcrumbLevel = LogLevel.Trace;
+                         slo.Release                = StringConstants.Version;
+                         slo.DeduplicateMode        = DeduplicateMode.SameExceptionInstance;
+                     }
+                    );
             });
 
         return builder;

@@ -25,6 +25,7 @@ using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Results;
+using Sentry;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
@@ -149,11 +150,10 @@ public static class IServiceCollectionExtensions
         
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
+                                    .WriteTo.Sentry()
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
-                                    .WriteTo.Sentry(config.SentryDSN, initializeSdk: config.SentryDSN is not null)
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
                                     .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
