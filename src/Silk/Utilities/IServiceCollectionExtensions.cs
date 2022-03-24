@@ -145,17 +145,19 @@ public static class IServiceCollectionExtensions
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
+        var config = configuration.GetSilkConfigurationOptionsFromSection();
+        
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
+                                    .WriteTo.Sentry(config.SentryDSN, initializeSdk: config.SentryDSN is not null)
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                                     .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
                                     .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
-        string? configOptions = configuration["Logging"];
-        Log.Logger = configOptions switch
+        Log.Logger = config.LogLevel switch
         {
             "All"     => logger.MinimumLevel.Verbose().CreateLogger(),
             "Info"    => logger.MinimumLevel.Information().CreateLogger(),
