@@ -128,11 +128,25 @@ public partial class ConfigCommands
             [Description("Updates an existing greeting.")]
             public async Task<IResult> UpdateGreetingAsync
             (
-                [Description("The ID of the greeting to update.")]                           int          GreetingID,
-                [Option("on")] [Description("When to greet the member (`join` or `role`).")] GreetOption? option   = null,
-                [Option("role")] [Description("The role to check for when greeting")]        IRole?       role     = null,
-                [Option("channel")] [Description("The new channel to send greetings to")]    IChannel?    channel  = null,
-                [Greedy] [Option("greeting")] [Description("The new greeting")]              string?      greeting = null
+                [Description("The ID of the greeting to update.")]
+                int GreetingID,
+                
+                [Option("on")]
+                [Description("When to greet the member (`join` or `role`).")]
+                GreetOption? option = null,
+                
+                [Option("role")]
+                [Description("The role to check for when greeting")]
+                IRole? role = null,
+                
+                [Option("channel")]
+                [Description("The new channel to send greetings to")]
+                IChannel? channel = null,
+                
+                [Greedy]
+                [Option("greeting")]
+                [Description("The new greeting")]
+                string? greeting = null
             )
             {
                 var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
