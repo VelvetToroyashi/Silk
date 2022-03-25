@@ -59,6 +59,7 @@ public sealed class ReminderService : IHostedService
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
+        _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);
     }
 
     /// <summary>
@@ -96,13 +97,14 @@ public sealed class ReminderService : IHostedService
         else
         {
             _reminders.Remove(reminder);
+            _logger.LogDebug("Removed reminder {Reminder}", id);
             await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
     private Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
-        _logger.LogDebug(EventIds.Service, "Dispatching reminder");
+        _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
 
         if (reminder.MessageID is null)
             return AttemptDispatchDMReminderAsync(reminder);
@@ -117,6 +119,8 @@ public sealed class ReminderService : IHostedService
     /// <returns>A result indicating whether the operation succeeded.</returns>
     private async Task<Result> AttemptDispatchReminderAsync(ReminderEntity reminder)
     {
+        _logger.LogDebug("Attempting to dispatch reminder to guild channel {ChannelID}", reminder.ChannelID);
+        
         var now       = DateTimeOffset.UtcNow;
         var replyExists = false;
 
@@ -226,6 +230,8 @@ public sealed class ReminderService : IHostedService
     /// <returns>A result that may or may have not succeeded.</returns>
     private async Task<Result> AttemptDispatchDMReminderAsync(ReminderEntity reminder)
     {
+        _logger.LogDebug(EventIds.Service, "Attempting to dispatch reminder to {OwnerID}.", reminder.OwnerID);
+        
         await RemoveReminderAsync(reminder.Id);
 
         var message = GetReminderMessageString(reminder, false, true).ToString();

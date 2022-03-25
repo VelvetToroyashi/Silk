@@ -905,12 +905,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(currentMemberResult.Error!);
         }
         
-        if (config.Logging.Infractions is not { } ilc)
+        if (config.Logging.Infractions is not { } existingLogChannel)
         {
             return Result.FromSuccess();
         }
         
-        var infractionChannelResult = await _channels.GetChannelAsync(ilc.ChannelID);
+        var infractionChannelResult = await _channels.GetChannelAsync(existingLogChannel.ChannelID);
 
         if (!infractionChannelResult.IsSuccess)
         {

@@ -54,6 +54,8 @@ public sealed class FlagOverlayService
     /// </returns>
     public async Task<Result<Stream>> GetFlagAsync(string imageUrl, FlagOverlay overlay, float intensity, float grayscale = 0)
     {
+        _logger.LogDebug(EventIds.Service, "Processing overlay: {OverlayType}", overlay);
+        
         if (intensity is < 0 or > 1)
             return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(intensity), "Intensity must be between 0 and 1"));
 
@@ -71,8 +73,7 @@ public sealed class FlagOverlayService
                 return Result<Stream>.FromError(new ArgumentOutOfRangeError(nameof(imageUrl), "The image's file size exceeds the 2MB limit."));
         }
         catch { return Result<Stream>.FromError(new NotFoundError("The specified image could not be found.")); }
-
-        _logger.LogDebug(EventIds.Service, "Processing overlay: {OverlayType}", overlay);
+        
 
         DateTime before = DateTime.UtcNow;
 
