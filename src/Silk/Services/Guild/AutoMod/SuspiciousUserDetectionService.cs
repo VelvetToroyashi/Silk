@@ -90,7 +90,15 @@ public class SuspiciousUserDetectionService
             return Result.FromError(self.Error);
 
         // We delete the last day of messages to clear any potential join message.
-        var infraction = await _infractions.BanAsync(guildID, user.ID, self.Entity.ID, 1, $"Suspicious username similar to  '{detection.mostSimilarTo}' detected");
+        var infraction = await _infractions.BanAsync
+            (
+             guildID,
+             user.ID,
+             self.Entity.ID,
+             1,
+             $"Suspicious username similar to  '{detection.mostSimilarTo}' detected",
+             notify: false
+            );
         
         if (!infraction.IsSuccess)
             return Result.FromError(infraction.Error);
