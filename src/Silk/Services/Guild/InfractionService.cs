@@ -265,7 +265,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true)
     {
         IUser target;
         IUser enforcer;
@@ -284,11 +284,14 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
-        //TODO: Don't attempt to inform the user if they're not present on the guild.
-        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+        if (notify)
+        {
+            //TODO: Don't attempt to inform the user if they're not present on the guild.
+            var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
-        if (informResult.IsDefined(out var informed) && informed)
-           infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+            if (informResult.IsDefined(out var informed) && informed)
+                infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+        }
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
