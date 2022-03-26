@@ -17,7 +17,6 @@ public static class StringConstants
     /// </summary>
     public const string Version = "3.0.5";
     
-    
     /// <summary>
     /// A special expression based log template that allows for conditional event ID insertion.
     /// </summary>
