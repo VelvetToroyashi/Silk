@@ -104,6 +104,8 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine($"{Emojis.WrenchEmoji} **Moderation Config:**")
                .AppendLine()
                .AppendLine("**Logging** | `logging`")
+               .AppendLine($"> {(modConfig.Logging.UseWebhookLogging ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WrenchEmoji} Use Webhook Logging")
+               .AppendLine($"> {(modConfig.Logging.UseMobileFriendlyLogging? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.NewEmoji} Use mobile-friendly Logging")
                .AppendLine($"> {(modConfig.Logging.LogMemberJoins ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.JoinEmoji} Log members joining")
                .AppendLine($"> {(modConfig.Logging.LogMemberLeaves ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.LeaveEmoji} Log members leaving")
                .AppendLine($"> {(modConfig.Logging.LogMessageEdits ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.EditEmoji} Log message edits")

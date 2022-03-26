@@ -44,10 +44,13 @@ public partial class ConfigCommands
                 ?  "**Not Configured**"
                 : $"<#{logging.MemberLeaves.ChannelID}>";
 
+            var useMobileFriendlyLogging = logging.UseMobileFriendlyLogging ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            
             var embed = new Embed
             {
                 Title = "Logging Configuration",
-                Description = $"{webhookLoggingEnabled} Use Webhooks for logging\n\n" +
+                Description = $"{webhookLoggingEnabled} Use Webhooks for logging\n" +
+                              $"{useMobileFriendlyLogging} Use Mobile Friendly Logging\n\n" +
                               $"{logMessageEdits} Log Message Edits\n"                +
                               $"> Log Channel: {editLogChannel}\n\n"       +
                               $"{logMessageDeletes} Log Message Deletes\n"            +

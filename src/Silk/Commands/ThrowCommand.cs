@@ -40,7 +40,7 @@ public class ThrowCommand : CommandGroup
                                      e => new Embed
                                      {
                                          Title = $"{e / 4}/{embedCount }",
-                                         Url   = $"https://example-{e / 4}.com",
+                                         Url   = $"https://discord.com/{e / 4}",
                                          Image = new EmbedImage("https://cdn.velvetthepanda.dev/l0FFjgo2Ez.png")
                                      }
                                     )

@@ -45,6 +45,9 @@ public partial class ConfigCommands
             [Description("Removes specified options from the logging settings.")]
             bool remove = false,
 
+            [Option('m', "mobile")]
+            [Description("Whether to log attachments in a mobile-friendly manner.")]
+            bool? mobile = null,
             
             [Option('w', "webhook")]
             [Description("Whether to log to a webhook.")]
@@ -55,15 +58,18 @@ public partial class ConfigCommands
             IChannel? channel = null
        )
         {
-            if (!remove && channel is null && webhook is null)
+            if (!remove && channel is null && webhook is null && mobile is null)
             {
                 await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
-                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel` or `--webhook` is must be specified.");
+                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel`, `--webhook` or `--mobile true/false` is must be specified.");
             }
 
             var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
 
             var loggingConfig = modConfig.Logging;
+            
+            if (mobile is {} useMobile)
+                loggingConfig.UseMobileFriendlyLogging = useMobile;
 
             if (remove)
             {

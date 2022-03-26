@@ -112,6 +112,7 @@ public static class UpdateGuildModConfig
                 log.MessageDeletes = loggingConfig.MessageDeletes;
                 
                 log.UseWebhookLogging = loggingConfig.UseWebhookLogging;
+                log.UseMobileFriendlyLogging = loggingConfig.UseMobileFriendlyLogging;
             }
             
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
