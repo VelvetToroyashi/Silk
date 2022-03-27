@@ -36,14 +36,14 @@
         <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
         <PackageReference Include="Config.Net" Version="4.17.0" />
-        <PackageReference Include="Config.Net.Json" Version="4.17.0" />
+        <PackageReference Include="Config.Net.Json" Version="4.19.0" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.1.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
@@ -69,7 +69,7 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.4" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.5" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Sentry" Version="3.15.0" />
