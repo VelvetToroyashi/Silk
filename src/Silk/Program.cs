@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -129,7 +130,7 @@ public class Program
                 // A little note on Sentry; it's important to initialize logging FIRST
                 // And then sentry, because we set the settings for sentry later. 
                 // If we configure logging after, it'll override the settings with defaults.
-                
+
                 services
                    .AddRemoraServices()
                    .AddSilkLogging(context.Configuration)
@@ -169,7 +170,20 @@ public class Program
                          slo.Release                = StringConstants.Version;
                          slo.DeduplicateMode        = DeduplicateMode.SameExceptionInstance;
                      }
-                    );
+                    )
+                   .AddScoped<PhishingAvatarDetectionService>()
+                   .AddHttpClient
+                   (
+                    "ravy-api",
+                    (s, c) =>
+                    {
+                        var config = s.GetRequiredService<IConfiguration>().GetSilkConfigurationOptionsFromSection();
+
+                        c.BaseAddress = new("https://ravy.org/api/v1/avatars");
+                        c.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Ravy {config.RavyAPIKey}");
+                        c.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", StringConstants.ProjectIdentifier);
+                    }
+                   );
             });
 
         return builder;

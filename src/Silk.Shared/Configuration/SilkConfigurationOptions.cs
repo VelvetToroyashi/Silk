@@ -56,6 +56,11 @@ public class SilkConfigurationOptions
 	public string? SentryDSN { get; set; } = null;
 	
 	/// <summary>
+	/// Property for holding a Ravy API (https://ravy.org/api) key.
+	/// </summary>
+	public string? RavyAPIKey { get; set; } = null;
+	
+	/// <summary>
 	///     Property for holding Persistence options (property name matching sub-key property in configuration file)
 	/// </summary>
 	public SilkPersistenceOptions Persistence { get; set; }
