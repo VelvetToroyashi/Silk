@@ -9,7 +9,7 @@ using Remora.Results;
 
 namespace Silk.Responders;
 
-public class PresenceCacher //: IResponder<IPresenceUpdate>, IResponder<IGuildCreate>
+public class PresenceCacher : IResponder<IPresenceUpdate>, IResponder<IGuildCreate>
 {
     private readonly IMemoryCache _cacheService;
     public PresenceCacher(IMemoryCache cacheService) => _cacheService = cacheService;

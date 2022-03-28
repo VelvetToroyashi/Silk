@@ -10,6 +10,12 @@ RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out
 # Run it
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
 
+# Install cultures (same approach as Alpine SDK image)
+RUN apk add --no-cache icu-libs
+
+# Disable the invariant mode (set in base image)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 # Update OpenSSL for the bot to properly work (Discord sucks)
 RUN apk upgrade --update-cache --available && \
     apk add openssl && \

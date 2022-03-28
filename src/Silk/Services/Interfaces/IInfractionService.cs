@@ -49,7 +49,8 @@ public interface IInfractionService
 	/// <param name="deleteDays">The number of days to delete messages from the target's messages.</param>
 	/// <param name="reason">The reason the target was banned.</param>
 	/// <param name="expirationRelativeToNow">A time relative to now to automatically unban the target.</param>
-	public Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
+	/// <param name="notify">Whether or not to notify the target of the ban.</param>
+	public Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true);
 
 	/// <summary>
 	///     Unbans a user from the specified guild.

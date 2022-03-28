@@ -10,6 +10,7 @@ using NUnit.Framework;
 using Remora.Results;
 using Silk.Services.Bot;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -18,7 +19,7 @@ namespace Silk.Tests.Services;
 
 public class FlagOverlayServiceTests
 {
-    private readonly Image<Rgba32> _enby = Image.Load(File.ReadAllBytes("./flags/enby.png"));
+    private readonly Image<Rgba32> _enby = Image.Load<Rgba32>(File.ReadAllBytes("./flags/enby.png"));
 
     private readonly HttpClient _httpClient;
 
@@ -325,19 +326,30 @@ public class FlagOverlayServiceTests
         Assert.True(result.IsSuccess);
 
         Image<Rgba32> expected = _enby;
-        Image<Rgba32> actual   = Image.Load<Rgba32>(result.Entity);
+        Image<Rgba32> actual   = await Image.LoadAsync<Rgba32>(result.Entity);
 
         for (var i = 0; i < expected.Height; i++)
         {
-            var e = expected.GetPixelRowSpan(i).ToArray();
-            var a = actual.GetPixelRowSpan(i).ToArray();
+            var e = expected.DangerousGetPixelRowMemory(i);
+            var a = actual.DangerousGetPixelRowMemory(i);
 
             if (e.Length != a.Length)
                 Assert.Fail($"Pixel row in expected differs from actual. Expected: {e.Length} Actual: {a.Length}");
-            
-            for (var j = 0; j < e.Length; j++)
-                if (e[j] != a[j])
-                    Assert.Fail($"Pixel row in expected differs from actual at index [{i}, {j}]. Expected: {e[j]} Actual: {a[j]}");
+
+            ValidateSpan(e, a);
+
+            void ValidateSpan(Memory<Rgba32> expected, Memory<Rgba32> actual)
+            {
+                var e = expected.Span;
+                var a = actual.Span;
+                
+                if (e.Length != a.Length)
+                    Assert.Fail($"Pixel row in expected differs from actual. Expected: {e.Length} Actual: {a.Length}");
+                
+                for (var j = 0; j < e.Length; j++)
+                    if (e[j] != a[j])
+                        Assert.Fail($"Pixel at ({i}, {j}) differs. Expected: {e[j]} Actual: {a[j]}");
+            }
         }
     }
 }

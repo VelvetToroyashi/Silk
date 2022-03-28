@@ -59,6 +59,9 @@ public class GuildGreetingService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Greeting service starting...");
+        
+        _logger.LogDebug("Fetching pending greetings...");
         var greetings = await _mediator.Send(new GetPendingGreetings.Request(), cancellationToken);
         
         _pendingGreetings.AddRange(greetings);
@@ -91,8 +94,8 @@ public class GuildGreetingService : IHostedService
     {
         var memberRes = await _guildApi.GetGuildMemberAsync(guildID, user.ID);
 
-        if (!memberRes.IsDefined(out var member))
-            return Result.FromError(memberRes.Error!); // This is guaranteed to be an error.
+        if (!memberRes.IsSuccess)
+            return Result.FromError(memberRes.Error);
 
         var config = await _config.GetConfigAsync(guildID);
 
@@ -183,9 +186,10 @@ public class GuildGreetingService : IHostedService
         }
     }
     
-    
     private async Task<Result> GreetAsync(Snowflake guildID, Snowflake memberID, Snowflake channelId, string greetingMessage)
     {
+        _logger.LogDebug("Dispatching greeting to {User} in guild {Guild}", memberID, guildID);
+        
         string formattedMessage;
 
         var memberResult = await _userApi.GetUserAsync(memberID);

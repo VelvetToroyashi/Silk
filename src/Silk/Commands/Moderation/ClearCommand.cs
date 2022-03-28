@@ -9,6 +9,7 @@ using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -38,8 +39,9 @@ public class ClearCommand : CommandGroup
                  "then filters by user (if specified), "                   +
                  "and then by regex (if specified).\n\n"                   +
                  "Furthermore, **--around and --skip are mutually exclusive.**")]
-    //[RequireDiscordPermission(DiscordPermission.ManageMessages)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
+    [RequireDiscordPermission(DiscordPermission.ManageMessages)]
+    [RequireBotDiscordPermissions(DiscordPermission.ManageMessages)]
     public async Task<Result<IMessage>> Clear
     (
         [Description("How many messages to delete. `--around` limits to 100.")]

@@ -25,6 +25,12 @@ public partial class ConfigCommands
             [Description("Whether phishing detection should be enabled.")]
             bool?   enabled = null,
             
+            [Option('u', "ban_suspicious_users")]
+            [Description("Whether to ban users with suspicious usernames," +
+                         " including but not limited to \"Discord Moderator\" and the likes."
+                        )]
+            bool? banSuspiciousUsers = null,
+            
             [Option("action")]
             [Description("What action to take when phishing is detected. (kick, ban, or mute)")]
             string? action  = null,
@@ -55,6 +61,7 @@ public partial class ConfigCommands
             {
                 DetectPhishingLinks  = enabled ?? default(Optional<bool>),
                 DeletePhishingLinks  = !preserve,
+                BanSuspiciousUsernames = banSuspiciousUsers ?? default(Optional<bool>),
                 NamedInfractionSteps = config.NamedInfractionSteps
 
             });

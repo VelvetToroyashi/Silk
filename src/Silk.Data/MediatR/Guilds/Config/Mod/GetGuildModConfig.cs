@@ -28,6 +28,7 @@ public static class GetGuildModConfig
                       .Include(c => c.Logging.MemberLeaves)
                       .Include(c => c.Logging.MessageDeletes)
                       .Include(c => c.Logging.MessageEdits)
+                      .Include(c => c.Logging.Infractions)
                       .FirstOrDefaultAsync(c => c.GuildID == request.GuildId, cancellationToken)!;
         }
     }

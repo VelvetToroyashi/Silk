@@ -21,9 +21,11 @@ using Remora.Discord.Gateway;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
+using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Results;
+using Sentry;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
@@ -58,7 +60,7 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           //.AddPagination()
+           .AddPagination()
            .AddSilkInteractivity();
 
         services
@@ -93,7 +95,7 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    //GatewayIntents.GuildPresences |
+                    GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages  |
@@ -144,17 +146,18 @@ public static class IServiceCollectionExtensions
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
+        var config = configuration.GetSilkConfigurationOptionsFromSection();
+        
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
+                                    .WriteTo.Sentry()
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("DSharpPlus", LogEventLevel.Warning)
                                     .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
-        string? configOptions = configuration["Logging"];
-        Log.Logger = configOptions switch
+        Log.Logger = config.LogLevel switch
         {
             "All"     => logger.MinimumLevel.Verbose().CreateLogger(),
             "Info"    => logger.MinimumLevel.Information().CreateLogger(),

@@ -50,8 +50,6 @@ public class GuildModConfigEntity
     [Column("max_role_mentions")]
     public int MaxRoleMentions { get; set; }
     
-
-
     /// <summary>
     ///     Whether to use increasingly severe infractions when a user is automatically warned.
     /// </summary>
@@ -69,6 +67,12 @@ public class GuildModConfigEntity
     /// </summary>
     [Column("detect_phishing")]
     public bool DetectPhishingLinks { get; set; }
+    
+    /// <summary>
+    /// Whether or not to automatically ban users who exhibit suspicious usernames similar to known phishing names.
+    /// </summary>
+    [Column("ban_suspicious_usernames")]
+    public bool BanSuspiciousUsernames { get; set; }
 
     /// <summary>
     ///     Whether or not phishing links should be deleted.

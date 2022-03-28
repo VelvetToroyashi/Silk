@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
+using Microsoft.Extensions.Logging;
+
 using Recognizers.Text.DateTime.Wrapper;
 using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
@@ -17,6 +20,7 @@ using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
+using Serilog;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Services.Guild;
@@ -51,7 +55,7 @@ public static class MicroTimeParser
                 "h"  => TimeSpan.FromHours(multiplier),
                 "m"  => TimeSpan.FromMinutes(multiplier),
                 "s"  => TimeSpan.FromSeconds(multiplier),
-                _    => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+                _    => TimeSpan.Zero
             };
         });
         
@@ -88,21 +92,24 @@ public class ReminderCommands : CommandGroup
     private readonly MessageContext            _context;
     private readonly IDiscordRestChannelAPI    _channels;
     private readonly InteractiveMessageService _interactivity;
+    private readonly ILogger<ReminderCommands> _logger;
     
     
     public ReminderCommands
     (
-        ReminderService reminders,
-        MessageContext context,
-        IDiscordRestChannelAPI channels,
-        InteractiveMessageService interactivity
+        ReminderService           reminders,
+        MessageContext            context,
+        IDiscordRestChannelAPI    channels,
+        InteractiveMessageService interactivity,
+        ILogger<ReminderCommands> logger
     )
     {
         _context       = context;
         _channels      = channels;
         _reminders     = reminders;
         _interactivity = interactivity;
-        
+        _logger        = logger;
+
     }
     
     [Command("set", "me", "create")]
@@ -125,20 +132,23 @@ public class ReminderCommands : CommandGroup
         }
         else
         {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, refTime: DateTime.UtcNow);
+            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
 
             if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
                 return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
 
             var currentYear = DateTime.UtcNow.Year;
-            
+
             var timeModel = parsedTime
                            .Resolution
                            .Values
                            .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
-                                               ? dtd.Value.Year >= currentYear 
-                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
+                           .FirstOrDefault
+                                (
+                                 v => v is DateTimeV2Date dtd
+                                     ? dtd.Value.Year                        >= currentYear
+                                     : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
+                                );
 
             if (timeModel is null)
                 return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
@@ -147,7 +157,7 @@ public class ReminderCommands : CommandGroup
                 time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
 
             if (timeModel is DateTimeV2DateTime vdt)
-                time     = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+                time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
         }
 
         if (time <= TimeSpan.Zero)
@@ -159,7 +169,6 @@ public class ReminderCommands : CommandGroup
         Snowflake? guildID = _context.GuildID.HasValue ? _context.GuildID.Value : null;
 
         _ = _context.Message.ReferencedMessage.IsDefined(out var reply);
-        
         
         var reminderTime = DateTimeOffset.UtcNow + time;
         
@@ -190,25 +199,27 @@ public class ReminderCommands : CommandGroup
 
         if (reminders.Count() > 5)
         {
-            var chunkedReminders = reminders.Select(r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                                                         $"{r.MessageContent.Truncate(50, "[...]")}"         +
-                                                         (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
-                                            .Chunk(5)
-                                            .Select((rs, i) => new Embed
-                                             {
-                                                 Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
-                                                 Colour = Color.DodgerBlue,
-                                                 Description = rs.Join("\n\n"),
-                                             })
-                                            .ToArray();
+            var chunkedReminders = reminders.Select
+               (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                     $"{r.MessageContent.Truncate(50, "[...]")}"         +
+                     (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
+              .Chunk(5)
+              .Select((rs, i) => new Embed
+               {
+                   Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
+                   Colour = Color.DodgerBlue,
+                   Description = rs.Join("\n\n"),
+               })
+              .ToArray();
 
             return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, chunkedReminders);
         }
         else
         {
-            var formattedReminders = reminders.Select(r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                                                           $"{r.MessageContent.Truncate(50, "[...]")}" +
-                                                           (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
+            var formattedReminders = reminders.Select
+                (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                $"{r.MessageContent.Truncate(50, "[...]")}" +
+                (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
 
             var embed = new Embed
             {
@@ -234,5 +245,4 @@ public class ReminderCommands : CommandGroup
         
         return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
     }
-    
 }

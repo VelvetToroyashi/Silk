@@ -184,6 +184,7 @@ public class MessageLoggerService
         var mainEmbed = new Embed
         {
             Title = "Message Deleted",
+            Url = $"http://discord.com/users/{cachedMessage.Author.ID}/0",
             Thumbnail = new EmbedThumbnail
                 (
                  cachedMessage.Author.Avatar is null
@@ -197,6 +198,7 @@ public class MessageLoggerService
 
             Fields = new EmbedField[]
             {
+                new ("Author", $"{cachedMessage?.Author.ToDiscordTag() ?? "Unknown"}", false),
                 new("Channel", $"<#{message.ChannelID}>", true),
                 new("Thread", cachedMessage.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
                 new("\u200b", "\u200b", true),
@@ -217,7 +219,7 @@ public class MessageLoggerService
             for (var i = 0; i < cachedMessage.Attachments.Count; i++)
             {
                 var attachment = cachedMessage.Attachments[i];
-                if (!attachment.ContentType.IsDefined(out var ct))
+                if (!attachment.ContentType.HasValue)
                     continue;
 
                 var url = new Uri($"https://cdn.discordapp.com/attachments/{message.ChannelID}/{attachment.ID}/{attachment.Filename}");
@@ -228,11 +230,29 @@ public class MessageLoggerService
                 
                 var embed = new Embed
                 {
-                    Colour = Color.DarkRed,
-                    Title = "Attachment Deleted",
-                    Description = $"**Attachment:** {attachment.Filename}",
-                    Image = new EmbedImage($"attachment://{fileName}")
+                    Colour      = Color.Red,
+                    Title       = "Attachment Deleted:",
+                    Description = attachment.Filename,
+                    Image       = new EmbedImage($"attachment://{fileName}")
                 };
+
+                if (!config.Logging.UseMobileFriendlyLogging)
+                {
+                    var stride      = 4 * (i / 4);
+                    var attachments = cachedMessage.Attachments
+                                                   .Skip(stride)
+                                                   .Take(4)
+                                                   .Select(a => a.Filename)
+                                                   .ToArray();
+
+                    embed = embed with
+                    {
+                        Title = default,
+                        Author = new EmbedAuthor("Attachment(s) Deleted"),
+                        Url = $"http://discord.com/users/{cachedMessage.Author.ID}/{stride}",
+                        Description = string.Join(" | ", attachments)
+                    };
+                }
                 
                 embeds.Add(embed);
                 files.Add(new FileData(fileName, stream));

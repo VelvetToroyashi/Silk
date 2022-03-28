@@ -265,7 +265,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true)
     {
         IUser target;
         IUser enforcer;
@@ -284,11 +284,14 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
-        //TODO: Don't attempt to inform the user if they're not present on the guild.
-        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+        if (notify)
+        {
+            //TODO: Don't attempt to inform the user if they're not present on the guild.
+            var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
-        if (informResult.IsDefined(out var informed) && informed)
-           infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+            if (informResult.IsDefined(out var informed) && informed)
+                infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+        }
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
@@ -853,18 +856,16 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var embed = new Embed
         {
             Title       = "Infraction #" + infraction.CaseNumber,
-            Author      = new EmbedAuthor($"{target?.Username ?? "Unknown"}#{target.Discriminator}", CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
+            Author      = new EmbedAuthor($"{target.ToDiscordTag()}", default, CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
             Description = infraction.Reason,
             Colour      = Color.Goldenrod,
             Fields = new IEmbedField[]
             {
                 new EmbedField("Type:", infraction.Type.ToString(), true),
-                new EmbedField("Infracted at:", $"<t:{((DateTimeOffset)infraction.CreatedAt).ToUnixTimeSeconds()}:F>", true),
+                new EmbedField("Infracted at:", $"<t:{infraction.CreatedAt.ToUnixTimeSeconds()}:F>", true),
                 new EmbedField("Expires:", !infraction.ExpiresAt.HasValue ? "Never" : $"<t:{((DateTimeOffset)infraction.ExpiresAt).ToUnixTimeSeconds()}:F>", true),
-
-                new EmbedField("Moderator:", $"**{enforcer.Username}#{enforcer.Discriminator}**\n(`{enforcer.ID}`)", true),
-                new EmbedField("Offender:", $"**{target.Username}#{target.Discriminator}**\n(`{target.ID}`)", true),
-
+                new EmbedField("Moderator:", $"**{enforcer.ToDiscordTag()}**\n(`{enforcer.ID}`)", true),
+                new EmbedField("Offender:", $"**{target.ToDiscordTag()}**\n(`{target.ID}`)", true),
             }
         };
 
@@ -878,8 +879,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         return Result.FromSuccess();
     }
-
-
+    
     /// <summary>
     ///     Ensures an available logging channel exists on the guild, creating one if neccecary.
     /// </summary>
@@ -908,12 +908,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(currentMemberResult.Error!);
         }
         
-        if (config.Logging.Infractions is not { } ilc)
+        if (config.Logging.Infractions is not { } existingLogChannel)
         {
             return Result.FromSuccess();
         }
         
-        var infractionChannelResult = await _channels.GetChannelAsync(ilc.ChannelID);
+        var infractionChannelResult = await _channels.GetChannelAsync(existingLogChannel.ChannelID);
 
         if (!infractionChannelResult.IsSuccess)
         {
