@@ -62,7 +62,7 @@ public class SuspiciousUserDetectionService
         _users       = users;
         _infractions = infractions;
         _config      = config;
-        _logger = logger;
+        _logger      = logger;
     }
 
     public async Task<Result> HandleSuspiciousUserAsync(Snowflake guildID, IUser user)
@@ -112,10 +112,10 @@ public class SuspiciousUserDetectionService
 
         var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames);
 
-        if (fuzzy.Score > 75)
+        if (fuzzy.Score > 90)
             _logger.LogTrace("Potentially suspicious Username: {Normalized}, most similar to {FuzzyMatched}, Score: {Score}", normalized, fuzzy.Value, fuzzy.Score);
         
         // This is somewhat arbitrary, and may be adjusted to be more or less sensitive.
-        return (fuzzy.Score > 80, fuzzy.Value);
+        return (fuzzy.Score > 95, fuzzy.Value);
     }
 }
