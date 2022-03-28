@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using FuzzySharp;
+using FuzzySharp.SimilarityRatio;
+using FuzzySharp.SimilarityRatio.Scorer.Composite;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -110,9 +112,9 @@ public class SuspiciousUserDetectionService
     {
         var normalized = username.Unidecode();
 
-        var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames);
+        var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames, s => s, ScorerCache.Get<WeightedRatioScorer>());
 
-        if (fuzzy.Score > 90)
+        if (fuzzy.Score > 80)
             _logger.LogTrace("Potentially suspicious Username: {Normalized}, most similar to {FuzzyMatched}, Score: {Score}", normalized, fuzzy.Value, fuzzy.Score);
         
         // This is somewhat arbitrary, and may be adjusted to be more or less sensitive.
