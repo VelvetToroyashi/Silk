@@ -574,7 +574,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!guildRolesResult.IsSuccess)
             return Result.FromError(guildRolesResult.Error);
 
-        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID));
+        var everyoneRole = guildRolesResult.Entity.Single(role => role.ID == guildID);
+        
+        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID)).ToArray();
         
         var roleResult = await _guilds.CreateGuildRoleAsync(
                                                             guildID, 
@@ -593,6 +595,39 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!modResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to modify mute role position."));
 
+        var channels = await _guilds.GetGuildChannelsAsync(guildID);
+        
+        if (!channels.IsSuccess)
+            return Result.FromError(channels.Error);
+
+        foreach (var channel in channels.Entity.Where(c => c.Type is ChannelType.GuildText))
+        {
+            if (!channel.PermissionOverwrites.IsDefined(out var overwrites))
+                overwrites = new List<IPermissionOverwrite>();
+            
+            var permissions         = DiscordPermissionSet.ComputePermissions(roleResult.Entity.ID, everyoneRole, overwrites);
+            var selfPermisisons     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
+            var everyonePermissions = DiscordPermissionSet.ComputePermissions(everyoneRole.ID, everyoneRole, overwrites);
+
+            if (!selfPermisisons.HasPermission(DiscordPermission.ManageChannels))
+                continue;
+            
+            if (permissions.HasPermission(DiscordPermission.ViewChannel) ||
+                everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
+            {
+                var overwriteResult = await _channels.EditChannelPermissionsAsync
+                    (
+                     channel.ID,
+                     roleResult.Entity.ID,
+                     new DiscordPermissionSet(DiscordPermission.ViewChannel),
+                     new DiscordPermissionSet(DiscordPermission.Speak, DiscordPermission.AddReactions)
+                    );
+
+                if (!overwriteResult.IsSuccess && !overwrites.Any())
+                    _logger.LogError("Failed to set permissions in {Channel} on {Guild}, but permissions should allow for it.", channel.ID, guildID);
+            }
+        }
+        
         await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
         {
             MuteRoleID = roleResult.Entity.ID
