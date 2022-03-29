@@ -355,8 +355,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
     {
-        
-        
         IUser target;
         IUser enforcer;
         
@@ -411,9 +409,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(timeoutResult, "timeout"));
             }
         }
-
-
-
+        
         var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
 
         DateTimeOffset? infractionExpiration = expirationRelativeToNow.HasValue ? DateTimeOffset.UtcNow + expirationRelativeToNow.Value : null;
