@@ -612,7 +612,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             if (!selfPermisisons.HasPermission(DiscordPermission.ManageChannels))
                 continue;
             
-            if (permissions.HasPermission(DiscordPermission.ViewChannel) ||
+            if (selfPermisisons.HasPermission(DiscordPermission.ViewChannel) ||
                 everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
             {
                 var overwriteResult = await _channels.EditChannelPermissionsAsync
