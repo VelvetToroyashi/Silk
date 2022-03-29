@@ -369,7 +369,15 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
-
+        
+        if (await IsMutedAsync(guildID, targetID))
+        {
+            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
+            
+            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
+        }
+        
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
         if (!config.UseNativeMute)
@@ -401,15 +409,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(timeoutResult, "timeout"));
             }
         }
-
-        if (await IsMutedAsync(guildID, targetID))
-        {
-            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
-            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
-            
-            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
-        }
-
+        
         var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
 
         DateTimeOffset? infractionExpiration = expirationRelativeToNow.HasValue ? DateTimeOffset.UtcNow + expirationRelativeToNow.Value : null;
@@ -574,7 +574,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!guildRolesResult.IsSuccess)
             return Result.FromError(guildRolesResult.Error);
 
-        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID));
+        var everyoneRole = guildRolesResult.Entity.Single(role => role.ID == guildID);
+        
+        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID)).ToArray();
         
         var roleResult = await _guilds.CreateGuildRoleAsync(
                                                             guildID, 
@@ -586,11 +588,46 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!roleResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to create mute role."));
 
-        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botRoles.OrderByDescending(r => r.Position).Skip(1).First().Position)) });
+        var botPosition = Math.Max(0, botRoles.MaxOrDefault(r => r.Position) - 1);
+
+        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botPosition)) });
 
         if (!modResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to modify mute role position."));
 
+        var channels = await _guilds.GetGuildChannelsAsync(guildID);
+        
+        if (!channels.IsSuccess)
+            return Result.FromError(channels.Error);
+
+        foreach (var channel in channels.Entity.Where(c => c.Type is ChannelType.GuildText))
+        {
+            if (!channel.PermissionOverwrites.IsDefined(out var overwrites))
+                overwrites = new List<IPermissionOverwrite>();
+            
+            var permissions         = DiscordPermissionSet.ComputePermissions(roleResult.Entity.ID, everyoneRole, overwrites);
+            var selfPermisisons     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
+            var everyonePermissions = DiscordPermissionSet.ComputePermissions(everyoneRole.ID, everyoneRole, overwrites);
+
+            if (!selfPermisisons.HasPermission(DiscordPermission.ManageChannels))
+                continue;
+            
+            if (selfPermisisons.HasPermission(DiscordPermission.ViewChannel) ||
+                everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
+            {
+                var overwriteResult = await _channels.EditChannelPermissionsAsync
+                    (
+                     channel.ID,
+                     roleResult.Entity.ID,
+                     new DiscordPermissionSet(DiscordPermission.ViewChannel),
+                     new DiscordPermissionSet(DiscordPermission.SendMessages, DiscordPermission.AddReactions)
+                    );
+
+                if (!overwriteResult.IsSuccess && !overwrites.Any())
+                    _logger.LogError("Failed to set permissions in {Channel} on {Guild}, but permissions should allow for it.", channel.ID, guildID);
+            }
+        }
+        
         await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
         {
             MuteRoleID = roleResult.Entity.ID
@@ -672,7 +709,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
             int targetBotRoleDiff      = targetRoles.MaxOrDefault(r => r.Position) - botRoles.MaxOrDefault(r => r.Position);
             int targetEnforcerRoleDiff = targetRoles.MaxOrDefault(r => r.Position) - enforcerRoles.MaxOrDefault(r => r.Position);
 
-            if (targetEnforcerRoleDiff >= 0)
+            //Bug?: In the event that another role is added on top, MaxBy should be replaced with Any.
+            if (targetEnforcerRoleDiff >= 0 && targetRoles.MaxBy(r => r.Position)?.Name != "Muted")
                 return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to yours! I can't do anything."));
 
             if (targetBotRoleDiff >= 0)

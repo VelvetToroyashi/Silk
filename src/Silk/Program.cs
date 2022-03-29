@@ -169,6 +169,8 @@ public class Program
                          slo.MinimumBreadcrumbLevel = LogLevel.Trace;
                          slo.Release                = StringConstants.Version;
                          slo.DeduplicateMode        = DeduplicateMode.SameExceptionInstance;
+                         slo.TracesSampleRate       = 1.0;
+                         slo.AddDiagnosticSourceIntegration();
                      }
                     )
                    .AddScoped<PhishingAvatarDetectionService>()

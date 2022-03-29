@@ -71,6 +71,7 @@
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Sentry" Version="3.15.0" />
+        <PackageReference Include="Sentry.DiagnosticSource" Version="3.15.0" />
         <PackageReference Include="Sentry.Extensions.Logging" Version="3.15.0" />
         <PackageReference Include="Sentry.Serilog" Version="3.15.0" />
         <PackageReference Include="Serilog" />
@@ -80,10 +81,9 @@
         <PackageReference Include="Serilog.Settings.Configuration" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
-        <PackageReference Include="SharpYaml" Version="1.8.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Svg.Skia" Version="0.5.10" />
+        <PackageReference Include="Svg.Skia" Version="0.5.12" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />

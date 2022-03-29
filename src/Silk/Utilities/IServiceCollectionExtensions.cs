@@ -14,6 +14,7 @@ using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
+using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
@@ -67,8 +68,10 @@ public static class IServiceCollectionExtensions
            .AddScoped<CommandHelpViewer>()
            .AddScoped<IHelpFormatter, HelpFormatter.HelpFormatter>();
 
-        services.AddCondition<NonSelfActionableCondition>()
-                .AddCondition<RequireNSFWCondition>();
+        services
+           .AddCondition<RequireBotDiscordPermissionsCondition>()
+           .AddCondition<NonSelfActionableCondition>()
+           .AddCondition<RequireNSFWCondition>();
         
         services
            .AddDiscordCommands(true)
