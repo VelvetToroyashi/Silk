@@ -355,6 +355,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
     {
+        
+        
         IUser target;
         IUser enforcer;
         
@@ -369,7 +371,15 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
-
+        
+        if (await IsMutedAsync(guildID, targetID))
+        {
+            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
+            
+            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
+        }
+        
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
         if (!config.UseNativeMute)
@@ -402,13 +412,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             }
         }
 
-        if (await IsMutedAsync(guildID, targetID))
-        {
-            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
-            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
-            
-            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
-        }
+
 
         var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
 
