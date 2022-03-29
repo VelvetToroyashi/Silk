@@ -26,5 +26,6 @@ public static class AutoModConstants
     {
         [MaxUserMentions] = "Maximum unique user pings",
         [MaxRoleMentions] = "Maximum unique role pings",
+		[PhishingLinkDetected] = "Phishing link detected"
     };
 }
