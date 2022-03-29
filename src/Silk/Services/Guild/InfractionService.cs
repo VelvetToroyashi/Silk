@@ -713,7 +713,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
             int targetBotRoleDiff      = targetRoles.MaxOrDefault(r => r.Position) - botRoles.MaxOrDefault(r => r.Position);
             int targetEnforcerRoleDiff = targetRoles.MaxOrDefault(r => r.Position) - enforcerRoles.MaxOrDefault(r => r.Position);
 
-            if (targetEnforcerRoleDiff >= 0)
+            //Bug?: In the event that another role is added on top, MaxBy should be replaced with Any.
+            if (targetEnforcerRoleDiff >= 0 && targetRoles.MaxBy(r => r.Position)?.Name != "Muted")
                 return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to yours! I can't do anything."));
 
             if (targetBotRoleDiff >= 0)
