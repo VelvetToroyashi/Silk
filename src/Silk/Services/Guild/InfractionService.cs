@@ -624,7 +624,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                      channel.ID,
                      roleResult.Entity.ID,
                      new DiscordPermissionSet(DiscordPermission.ViewChannel),
-                     new DiscordPermissionSet(DiscordPermission.Speak, DiscordPermission.AddReactions)
+                     new DiscordPermissionSet(DiscordPermission.SendMessages, DiscordPermission.AddReactions)
                     );
 
                 if (!overwriteResult.IsSuccess && !overwrites.Any())
