@@ -586,7 +586,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!roleResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to create mute role."));
 
-        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botRoles.OrderByDescending(r => r.Position).Skip(1).First().Position)) });
+        var botPosition = Math.Max(0, botRoles.MaxOrDefault(r => r.Position) - 1);
+
+        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botPosition)) });
 
         if (!modResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to modify mute role position."));
