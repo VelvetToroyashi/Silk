@@ -192,7 +192,7 @@ public class ReminderCommands : CommandGroup
     [Description("Lists all of your reminders.")]
     public async Task<IResult> ListAsync()
     {
-        var reminders = _reminders.GetReminders(_context.User.ID);
+        var reminders = _reminders.GetReminders(_context.User.ID).OrderBy(r => r.ExpiresAt);
 
         if (!reminders.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
