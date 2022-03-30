@@ -25,7 +25,7 @@ public class ReminderEntity
     public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// Whether this reminder is private. Reminders sent in DMs or invoked by slash commnands are private.
+    /// Whether this reminder is private. Reminders sent in DMs or invoked by slash commands are private.
     /// </summary>
     [Column("is_private")]
     public bool IsPrivate { get; set; }

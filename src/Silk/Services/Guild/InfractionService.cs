@@ -76,7 +76,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _webhooks      = webhooks;
         _channelLogger = channelLogger;
 
-        _queueTimer = new(ProccessQueueAsync, TimeSpan.FromSeconds(5));
+        _queueTimer = new(ProcessQueueAsync, TimeSpan.FromSeconds(5));
     }
 
     /// <inheritdoc />
@@ -100,7 +100,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _logger.LogInformation("Infraction service stopped.");
     }
 
-    private async Task ProccessQueueAsync()
+    private async Task ProcessQueueAsync()
     {
         for (var i = _queue.Count - 1; i >= 0; i--)
         {
@@ -115,7 +115,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             _queue.RemoveAt(i);
             _logger.LogDebug("Removed infraction {InfractionID} from queue.", infraction.Id);
             
-            _logger.LogInformation("Proccessing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
+            _logger.LogInformation("Processing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
 
             await HandleExpiredInfractionAsync(infraction);
         }
@@ -548,7 +548,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         if (!infractions.Any())
         {
-            _logger.LogDebug("No active infrations to handle. Skipping.");
+            _logger.LogDebug("No active infractions to handle. Skipping.");
             return;
         }
 
@@ -606,13 +606,13 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 overwrites = new List<IPermissionOverwrite>();
             
             var permissions         = DiscordPermissionSet.ComputePermissions(roleResult.Entity.ID, everyoneRole, overwrites);
-            var selfPermisisons     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
+            var selfPermissions     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
             var everyonePermissions = DiscordPermissionSet.ComputePermissions(everyoneRole.ID, everyoneRole, overwrites);
 
-            if (!selfPermisisons.HasPermission(DiscordPermission.ManageChannels))
+            if (!selfPermissions.HasPermission(DiscordPermission.ManageChannels))
                 continue;
             
-            if (selfPermisisons.HasPermission(DiscordPermission.ViewChannel) ||
+            if (selfPermissions.HasPermission(DiscordPermission.ViewChannel) ||
                 everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
             {
                 var overwriteResult = await _channels.EditChannelPermissionsAsync
@@ -919,7 +919,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
     
     /// <summary>
-    ///     Ensures an available logging channel exists on the guild, creating one if neccecary.
+    ///     Ensures an available logging channel exists on the guild, creating one if necessary.
     /// </summary>
     /// <param name="guildID"></param>
     private async Task<Result> EnsureLoggingChannelExistsAsync(Snowflake guildID)
@@ -1012,17 +1012,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 {
                     _logger.LogWarning("Webhook has gone missing. Attempting to create a new one.");
 
-                    Result<IWebhook> webhookReuslt = await _webhooks.CreateWebhookAsync(config.Logging.Infractions.ChannelID, SilkWebhookName, default);
+                    Result<IWebhook> createWebhookResult = await _webhooks.CreateWebhookAsync(config.Logging.Infractions.ChannelID, SilkWebhookName, default);
 
-                    if (!webhookReuslt.IsSuccess)
+                    if (!createWebhookResult.IsSuccess)
                     {
                         _logger.LogCritical("Failed to create webhook for infraction channel. Giving up.");
 
-                        return Result.FromError(webhookReuslt.Error!);
+                        return Result.FromError(createWebhookResult.Error!);
                     }
                     _logger.LogDebug("Successfully created new webhook for infraction channel.");
 
-                    IWebhook webhook = webhookReuslt.Entity;
+                    IWebhook webhook = createWebhookResult.Entity;
 
                     config.Logging.Infractions.WebhookID    = webhook.ID;
                     config.Logging.Infractions.WebhookToken = webhook.Token.Value;

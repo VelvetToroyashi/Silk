@@ -61,7 +61,7 @@ public class ChannelLoggingService : IChannelLoggingService
     {
         _logger.LogTrace("[REST] Attempting to log to {Channel} in {Guild}", loggingData.ChannelID, loggingData.GuildID);
         
-        _logger.LogDebug("Preparring to log {EmbedCount} embeds with {FileCount} files with{Without} content", embedContent?.Length ?? 0, fileData?.Length ?? 0, stringContent is null ? "out" : null);
+        _logger.LogDebug("Preparing to log {EmbedCount} embeds with {FileCount} files with{Without} content", embedContent?.Length ?? 0, fileData?.Length ?? 0, stringContent is null ? "out" : null);
 
         
         var channel = await _channels.GetChannelAsync(loggingData.ChannelID);
@@ -99,7 +99,7 @@ public class ChannelLoggingService : IChannelLoggingService
     {
         _logger.LogTrace("[WEBHOOK] Attempting to log to {Channel} in {Guild}", loggingData.ChannelID, loggingData.GuildID);
         
-        _logger.LogDebug("Preparring to log {EmbedCount} embeds with {FileCount} files with{Without} content", embedContent?.Length ?? 0, fileData?.Length ?? 0, stringContent is null ? "out" : null);
+        _logger.LogDebug("Preparing to log {EmbedCount} embeds with {FileCount} files with{Without} content", embedContent?.Length ?? 0, fileData?.Length ?? 0, stringContent is null ? "out" : null);
         
         var result = await _webhooks.ExecuteWebhookAsync(loggingData.WebhookID,
                                                          loggingData.WebhookToken,
@@ -144,7 +144,7 @@ public class ChannelLoggingService : IChannelLoggingService
                 _logger.LogError("Configured logging channel for {Guild}➜{Channel} has webhook logging, but the webhook token is invalid.", guildID, channelID);
                 break;
             default:
-                _logger.LogError("Something catostrophic happened while logging to {Guild}➜{Channel}.", guildID, channelID);
+                _logger.LogError("Something catastrophic happened while logging to {Guild}➜{Channel}.", guildID, channelID);
                 break;
         }
     }

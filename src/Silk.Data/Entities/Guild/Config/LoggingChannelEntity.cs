@@ -4,7 +4,7 @@ using Remora.Rest.Core;
 namespace Silk.Data.Entities;
 
 /// <summary>
-///     Represents the configureation for specific logging. e.g: Message edits, Message deletes, etc.
+///     Represents the configuration for specific logging. e.g: Message edits, Message deletes, etc.
 /// </summary>
 [Table("logging_channels")]
 public class LoggingChannelEntity

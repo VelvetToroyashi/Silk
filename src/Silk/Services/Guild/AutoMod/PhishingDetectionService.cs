@@ -61,7 +61,7 @@ public class PhishingDetectionService
             return Result.FromSuccess(); // Sus.
 
         if (!message.GuildID.IsDefined(out Snowflake guildId))
-            return Result.FromSuccess(); // DM channels are exmepted.
+            return Result.FromSuccess(); // DM channels are exempted.
 
         GuildModConfigEntity config = await _configService.GetModConfigAsync(guildId);
 

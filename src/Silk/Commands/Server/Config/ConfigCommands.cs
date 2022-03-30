@@ -75,7 +75,7 @@ public partial class ConfigCommands : CommandGroup
             _channels = channels;
         }
         
-        //TODO: Add exmemptions
+        //TODO: Add exemptions
         
         [Command("all", "a")]
         [Description("View all settings for your server. \n" +

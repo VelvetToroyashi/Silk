@@ -9,8 +9,8 @@ namespace Silk.Core.Remora.Services;
 
 public class AntiInviteResponder : IResponder<IMessageCreate>
 {
-    private readonly InviteDectectionService _invites;
-    public AntiInviteResponder(InviteDectectionService invites) => _invites = invites;
+    private readonly InviteDetectionService _invites;
+    public AntiInviteResponder(InviteDetectionService invites) => _invites = invites;
 
     public Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         => _invites.CheckForInviteAsync(gatewayEvent);

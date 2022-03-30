@@ -91,7 +91,7 @@ public class AsyncTimerTest
     [Test]
     public void ThrowsWhenAlreadyStarted()
     {
-        //Arange
+        //Arrange
         using var timer = new AsyncTimer(() => Task.FromResult(0), TimeSpan.FromSeconds(1));
 
         //Act

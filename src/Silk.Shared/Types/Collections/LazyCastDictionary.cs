@@ -12,7 +12,7 @@ namespace Silk.Shared.Types.Collections;
 ///         <b>
 ///             <i>not</i>
 ///         </b>
-///         guaranteed by this class. Caution should be taken to ensure that values can be casted, by operator or inheritence.
+///         guaranteed by this class. Caution should be taken to ensure that values can be casted, by operator or inheritance.
 ///         <see cref="Add(System.Collections.Generic.KeyValuePair{TKey,TValueTo})" /> Is not cast-safe, and will throw.
 ///         <see cref="Contains" /> will return false if
 ///         <b>

@@ -20,7 +20,7 @@ public class PostCommandHandler : IPostExecutionEvent
     private readonly IHub _hub;
     private readonly MessageContext              _context;
     private readonly CommandHelpViewer           _help;
-    private readonly ICommandPrefixMatcher       _preifx;
+    private readonly ICommandPrefixMatcher       _prefix;
     private readonly IDiscordRestChannelAPI      _channels;
     private readonly ILogger<PostCommandHandler> _logger;
 
@@ -29,7 +29,7 @@ public class PostCommandHandler : IPostExecutionEvent
         IHub                        hub,
         MessageContext              context,
         CommandHelpViewer           help,
-        ICommandPrefixMatcher       preifx,
+        ICommandPrefixMatcher       prefix,
         IDiscordRestChannelAPI      channels,
         ILogger<PostCommandHandler> logger
     )
@@ -37,7 +37,7 @@ public class PostCommandHandler : IPostExecutionEvent
         _hub     = hub;
         _context  = context;
         _help     = help;
-        _preifx   = preifx;
+        _prefix   = prefix;
         _channels = channels;
         _logger   = logger;
     }
@@ -47,7 +47,7 @@ public class PostCommandHandler : IPostExecutionEvent
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
 
-        var prefixResult = await _preifx.MatchesPrefixAsync(_context.Message.Content.Value, ct);
+        var prefixResult = await _prefix.MatchesPrefixAsync(_context.Message.Content.Value, ct);
         
         if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches)
             return Result.FromSuccess();

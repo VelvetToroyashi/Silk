@@ -16,7 +16,7 @@ public class CommandBucket
     public           TimeSpan ResetInterval => _resetInterval;
     private readonly TimeSpan _resetInterval;
     
-    public  int UsesRamining => _remaining;
+    public  int UsesRemaining => _remaining;
     private int _remaining;
 
     private readonly SemaphoreSlim _resetLock = new(1);

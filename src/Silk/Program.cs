@@ -146,7 +146,7 @@ public class Program
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
                    .AddSingleton<IInfractionService, InfractionService>()
                    .AddHostedService(s => (s.GetRequiredService<IInfractionService>() as InfractionService)!)
-                   .AddSingleton<InviteDectectionService>()
+                   .AddSingleton<InviteDetectionService>()
                    .AddSingleton<ExemptionEvaluationService>()
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
                    .AddSingleton<MemberLoggerService>()

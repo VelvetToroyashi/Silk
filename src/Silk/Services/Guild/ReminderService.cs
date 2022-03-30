@@ -138,7 +138,7 @@ public sealed class ReminderService : IHostedService
 
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
-        var dispatchReuslt = await _channelApi.CreateMessageAsync
+        var dispatchResult = await _channelApi.CreateMessageAsync
             (
              reminder.ChannelID,
              dispatchMessage,
@@ -157,7 +157,7 @@ public sealed class ReminderService : IHostedService
                  )
             ); 
         
-        if (dispatchReuslt.IsSuccess)
+        if (dispatchResult.IsSuccess)
         {
             _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 

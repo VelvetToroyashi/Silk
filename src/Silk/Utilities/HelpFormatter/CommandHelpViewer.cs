@@ -123,7 +123,7 @@ public class CommandHelpViewer
             // If your name is Jax, or you happen to know the best way to fix this, please PR it.
             // If you're having an issue with groups being exposed, but not executable, it's likely
             // that you need to add a condition on the nested group. Adding it on the parent has no 
-            // effect on it's childen.
+            // effect on it's children.
             if (node is GroupNode gn)
             {
                 IEnumerable<ConditionAttribute> groupAttributes = gn.GroupTypes.SelectMany(gt => gt.GetCustomAttributes<ConditionAttribute>(true));

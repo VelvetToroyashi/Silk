@@ -184,7 +184,7 @@ public class MessageLoggerService
         var mainEmbed = new Embed
         {
             Title = "Message Deleted",
-            Url = $"http://discord.com/users/{cachedMessage.Author.ID}/0",
+            Url = $"https://discord.com/users/{cachedMessage.Author.ID}/0",
             Thumbnail = new EmbedThumbnail
                 (
                  cachedMessage.Author.Avatar is null
@@ -249,7 +249,7 @@ public class MessageLoggerService
                     {
                         Title = default,
                         Author = new EmbedAuthor("Attachment(s) Deleted"),
-                        Url = $"http://discord.com/users/{cachedMessage.Author.ID}/{stride}",
+                        Url = $"https://discord.com/users/{cachedMessage.Author.ID}/{stride}",
                         Description = string.Join(" | ", attachments)
                     };
                 }
