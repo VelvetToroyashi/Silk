@@ -141,7 +141,7 @@ public class RemindSlashCommands : CommandGroup
     [Description("List all your reminders!")]
     public async Task<IResult> ListRemindersAsync()
     {
-        var reminders = _reminders.GetReminders(_context.User.ID);
+        var reminders = _reminders.GetReminders(_context.User.ID).OrderBy(r => r.ExpiresAt);
         
         if (!reminders.Any())
             return await _interactions.EditOriginalInteractionResponseAsync
