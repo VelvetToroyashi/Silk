@@ -19,7 +19,8 @@ public static class CreateInfraction
             Snowflake       EnforcerID,
             string          Reason,
             InfractionType  Type,
-            DateTimeOffset? Expiration = null
+            DateTimeOffset? Expiration = null,
+            bool Notified = false
         ) : IRequest<InfractionEntity>;
 
     internal sealed class Handler : IRequestHandler<Request, InfractionEntity>
@@ -48,7 +49,8 @@ public static class CreateInfraction
                 ExpiresAt  = request.Expiration,
                 CreatedAt  = DateTime.UtcNow,
                 TargetID   = request.TargetID,
-                Type       = request.Type
+                Type       = request.Type,
+                UserNotified = request.Notified
             };
 
             _db.Infractions.Add(infraction);
