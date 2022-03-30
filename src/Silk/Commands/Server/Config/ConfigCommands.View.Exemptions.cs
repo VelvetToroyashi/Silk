@@ -43,7 +43,7 @@ public partial class ConfigCommands
                     (
                      _context.ChannelID,
                      $"{Emojis.WarningEmoji} You don't appear to have any configured exemptions! " +
-                     $"See `help config edit exmeptions` to learn how to add them!"
+                     "See `help config edit exemptions` to learn how to add them!"
                     );
 
             var sb = new StringBuilder();

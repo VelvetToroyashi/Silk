@@ -14,7 +14,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Services.Guild;
 
-public class InviteDectectionService
+public class InviteDetectionService
 {
    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled); 
    
@@ -26,8 +26,8 @@ public class InviteDectectionService
    private readonly IDiscordRestChannelAPI           _channels;
    private readonly GuildConfigCacheService          _config;
    private readonly ExemptionEvaluationService       _exemptions;
-   private readonly ILogger<InviteDectectionService> _logger;
-   public InviteDectectionService
+   private readonly ILogger<InviteDetectionService> _logger;
+   public InviteDetectionService
    (
       IInfractionService               infractions,
       IDiscordRestUserAPI              users,
@@ -35,7 +35,7 @@ public class InviteDectectionService
       IDiscordRestChannelAPI           channels,
       GuildConfigCacheService          config,
       ExemptionEvaluationService       exemptions,
-      ILogger<InviteDectectionService> logger
+      ILogger<InviteDetectionService> logger
    )
    {
       _infractions = infractions;

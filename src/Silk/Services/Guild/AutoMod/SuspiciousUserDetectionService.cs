@@ -75,7 +75,7 @@ public class SuspiciousUserDetectionService
             return Result.FromSuccess();
         
         // TODO: add to config and make toggelable. This will go under phishing settings.
-        var detection = IsSuspcectedPhishingUsername(user.Username);
+        var detection = IsSuspectedPhishingUsername(user.Username);
         
         if (!detection.isSuspicious)
             return Result.FromSuccess();
@@ -108,7 +108,7 @@ public class SuspiciousUserDetectionService
         return Result.FromSuccess();
     }
     
-    private (bool isSuspicious, string mostSimilarTo) IsSuspcectedPhishingUsername(string username)
+    private (bool isSuspicious, string mostSimilarTo) IsSuspectedPhishingUsername(string username)
     {
         var normalized = username.Unidecode();
 

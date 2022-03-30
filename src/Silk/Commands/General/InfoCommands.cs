@@ -252,7 +252,7 @@ public class InfoCommands : CommandGroup
 
         var highestRole = roles.Max(r => r.Position);
         
-        var hierarchyResult = await GetRoleHiearchyStringAsync(role);
+        var hierarchyResult = await GetRoleHierarchyStringAsync(role);
         
         if (!hierarchyResult.IsDefined(out var hierarchy))
             return hierarchyResult;
@@ -361,7 +361,7 @@ public class InfoCommands : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
     }
     
-    private async Task<Result<string>> GetRoleHiearchyStringAsync(IRole role)
+    private async Task<Result<string>> GetRoleHierarchyStringAsync(IRole role)
     {
         var roleResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
         

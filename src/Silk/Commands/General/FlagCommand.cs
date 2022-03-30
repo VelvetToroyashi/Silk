@@ -66,7 +66,7 @@ public class FlagCommand : CommandGroup
         
         // unicode emojis have an id of 0, and do not have a link, so we can't use them
         if (!emoji.ID.IsDefined(out var emojiID))
-            return _channels.CreateMessageAsync(_context.ChannelID,"Unfortuantely, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
+            return _channels.CreateMessageAsync(_context.ChannelID,"Unfortunately, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
 
         var emojiLinkResult = CDN.GetEmojiUrl(emojiID.Value, emoji.IsAnimated.IsDefined(out var animated) && animated ? CDNImageFormat.GIF : CDNImageFormat.PNG, 256);
         
