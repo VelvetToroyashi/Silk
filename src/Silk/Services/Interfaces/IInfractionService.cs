@@ -8,7 +8,7 @@ using Silk.Data.Entities;
 namespace Silk.Services.Interfaces;
 
 /// <summary>
-///     A service for applying infractions to userrs.
+///     A service for applying infractions to users.
 /// </summary>
 public interface IInfractionService
 {
@@ -24,8 +24,8 @@ public interface IInfractionService
 	/// <summary>
 	///     Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.
 	/// </summary>
-	/// <param name="guildID">The ID of the guild the target is being striked on.</param>
-	/// <param name="targetID">The ID of the target to be striked.</param>
+	/// <param name="guildID">The ID of the guild the target is being struck in.</param>
+	/// <param name="targetID">The ID of the target to be struck.</param>
 	/// <param name="enforcerID">The ID of user striking the target.</param>
 	/// <param name="reason">The reason strike was given.</param>
 	public Task<Result<InfractionEntity>> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
@@ -49,7 +49,8 @@ public interface IInfractionService
 	/// <param name="deleteDays">The number of days to delete messages from the target's messages.</param>
 	/// <param name="reason">The reason the target was banned.</param>
 	/// <param name="expirationRelativeToNow">A time relative to now to automatically unban the target.</param>
-	public Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
+	/// <param name="notify">Whether or not to notify the target of the ban.</param>
+	public Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true);
 
 	/// <summary>
 	///     Unbans a user from the specified guild.

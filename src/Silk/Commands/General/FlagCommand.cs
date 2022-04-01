@@ -39,16 +39,18 @@ public class FlagCommand : CommandGroup
         [Description("The flag to add to the image.")]
         string flag,
         
+        [Description("Either an image URL or an emoji to apply the overlay to. \n" +
+                     "An image can also be uploaded in lieu of either of these!")]
+        OneOf<IPartialEmoji, string>? emojiOrImageUrl = null,
+        
+        [Option('i', "intensity")]
         [Description("The intensity of the overlay, between 50 and 100.")]
         float intensity = 100,
         
+        [Option('g', "grayscale")]
         [Description("How much greyscale to apply to before applying the overlay. " +
                      "Try specifying this if the image doesn't look right.")]
-        float grayscale = 0,
-        
-        [Description("Either an image URL or an emoji to apply the overlay to. \n" +
-                     "An image can also be uploaded in lieu of either of these!")]
-        OneOf<IPartialEmoji, string>? emojiOrImageUrl = null
+        float grayscale = 0
     )
     {
         if (emojiOrImageUrl is not { })
@@ -64,7 +66,7 @@ public class FlagCommand : CommandGroup
         
         // unicode emojis have an id of 0, and do not have a link, so we can't use them
         if (!emoji.ID.IsDefined(out var emojiID))
-            return _channels.CreateMessageAsync(_context.ChannelID,"Unfortuantely, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
+            return _channels.CreateMessageAsync(_context.ChannelID,"Unfortunately, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
 
         var emojiLinkResult = CDN.GetEmojiUrl(emojiID.Value, emoji.IsAnimated.IsDefined(out var animated) && animated ? CDNImageFormat.GIF : CDNImageFormat.PNG, 256);
         

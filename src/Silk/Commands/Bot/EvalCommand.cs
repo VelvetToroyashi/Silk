@@ -114,7 +114,7 @@ public class EvalCommand : CommandGroup
 
             if (string.IsNullOrEmpty(evalResult.ReturnValue?.ToString()))
             {
-                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evlaution returned null or void.");
+                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evaluation returned null or void.");
                 return Result.FromSuccess();
             }
             

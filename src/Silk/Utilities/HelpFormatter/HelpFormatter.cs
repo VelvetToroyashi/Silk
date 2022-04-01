@@ -123,7 +123,7 @@ public class HelpFormatter : IHelpFormatter
             : string.Join("\n\n", command
                             .Shape
                             .Parameters
-                            .Select(p => $"`{GetHumanFriendlyParemeterName(p)}` - {p.Description}"));
+                            .Select(p => $"`{GetHumanFriendlyParameterName(p)}` - {p.Description}"));
     
     
     /// <inheritdoc />
@@ -165,7 +165,7 @@ public class HelpFormatter : IHelpFormatter
             embed = new Embed
             {
                 Title       = "Help",
-                Description = "Wanna see more information? Try specifing a command!",
+                Description = "Wanna see more information? Try specifying a command!",
                 Colour      = Color.DodgerBlue,
                 Fields      = fields
             };
@@ -222,9 +222,9 @@ public class HelpFormatter : IHelpFormatter
     /// <summary>
     ///     Gets a neatly formatted parameter name for the help embed.
     /// </summary>
-    /// <param name="param">The paremeter to generate a help name for.</param>
-    /// <returns>The paremeter name, formatted to respect switches and options, if applicable.</returns>
-    private string GetHumanFriendlyParemeterName(IParameterShape param)
+    /// <param name="param">The parameter to generate a help name for.</param>
+    /// <returns>The parameter name, formatted to respect switches and options, if applicable.</returns>
+    private string GetHumanFriendlyParameterName(IParameterShape param)
     {
         return param.Parameter.GetCustomAttribute<OptionAttribute>() is { } oa 
             ? param.IsOmissible() 

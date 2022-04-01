@@ -49,7 +49,7 @@ public sealed class ReminderService : IHostedService
             DateTimeOffset   expiry,
             Snowflake  ownerID,
             Snowflake  channelID,
-            Snowflake  messageID,
+            Snowflake?  messageID,
             Snowflake? guildID,
             string?    content,
             string?    replyContent = null,
@@ -59,6 +59,7 @@ public sealed class ReminderService : IHostedService
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
+        _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);
     }
 
     /// <summary>
@@ -79,7 +80,7 @@ public sealed class ReminderService : IHostedService
         DateTime                    now       = DateTime.UtcNow;
         IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.ExpiresAt <= now);
 
-        await Task.WhenAll(reminders.Select(DispatchReminderAsync));
+        await Task.WhenAll(reminders.ToList().Select(DispatchReminderAsync));
     }
 
     /// <summary>
@@ -96,13 +97,14 @@ public sealed class ReminderService : IHostedService
         else
         {
             _reminders.Remove(reminder);
+            _logger.LogDebug("Removed reminder {Reminder}", id);
             await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
     private Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
-        _logger.LogDebug(EventIds.Service, "Dispatching reminder");
+        _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
 
         if (reminder.MessageID is null)
             return AttemptDispatchDMReminderAsync(reminder);
@@ -117,6 +119,8 @@ public sealed class ReminderService : IHostedService
     /// <returns>A result indicating whether the operation succeeded.</returns>
     private async Task<Result> AttemptDispatchReminderAsync(ReminderEntity reminder)
     {
+        _logger.LogDebug("Attempting to dispatch reminder to guild channel {ChannelID}", reminder.ChannelID);
+        
         var now       = DateTimeOffset.UtcNow;
         var replyExists = false;
 
@@ -134,7 +138,7 @@ public sealed class ReminderService : IHostedService
 
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
-        var dispatchReuslt = await _channelApi.CreateMessageAsync
+        var dispatchResult = await _channelApi.CreateMessageAsync
             (
              reminder.ChannelID,
              dispatchMessage,
@@ -153,7 +157,7 @@ public sealed class ReminderService : IHostedService
                  )
             ); 
         
-        if (dispatchReuslt.IsSuccess)
+        if (dispatchResult.IsSuccess)
         {
             _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
@@ -226,6 +230,8 @@ public sealed class ReminderService : IHostedService
     /// <returns>A result that may or may have not succeeded.</returns>
     private async Task<Result> AttemptDispatchDMReminderAsync(ReminderEntity reminder)
     {
+        _logger.LogDebug(EventIds.Service, "Attempting to dispatch reminder to {OwnerID}.", reminder.OwnerID);
+        
         await RemoveReminderAsync(reminder.Id);
 
         var message = GetReminderMessageString(reminder, false, true).ToString();
@@ -248,7 +254,7 @@ public sealed class ReminderService : IHostedService
             _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
-        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms", (now - DateTimeOffset.UtcNow).TotalMilliseconds);
+        _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         return Result.FromSuccess();
     }
 

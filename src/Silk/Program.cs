@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +12,19 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
 using Remora.Results;
+using Sentry;
+using Sentry.Extensions.Logging;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
+using Silk.Responders;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
 using Silk.Shared.Configuration;
+using Silk.Shared.Constants;
 using Silk.Utilities;
 
 namespace Silk;
@@ -121,21 +127,26 @@ public class Program
                 AddDatabases(services, silkConfig.Persistence);
                 AddSilkConfigurationOptions(services, context.Configuration);
                 
+                // A little note on Sentry; it's important to initialize logging FIRST
+                // And then sentry, because we set the settings for sentry later. 
+                // If we configure logging after, it'll override the settings with defaults.
+
                 services
                    .AddRemoraServices()
-                   
                    .AddSilkLogging(context.Configuration)
+                   .AddHostedService<HeartbeatLogger>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()
                    .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
                    .AddSingleton<PhishingDetectionService>()
+                   .AddScoped<SuspiciousUserDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
                    .AddSingleton<IInfractionService, InfractionService>()
                    .AddHostedService(s => (s.GetRequiredService<IInfractionService>() as InfractionService)!)
-                   .AddSingleton<InviteDectectionService>()
+                   .AddSingleton<InviteDetectionService>()
                    .AddSingleton<ExemptionEvaluationService>()
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
                    .AddSingleton<MemberLoggerService>()
@@ -144,8 +155,37 @@ public class Program
                    .AddSingleton<GuildGreetingService>()
                    .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
+                   .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
-                   .AddMediatR(typeof(GuildContext));
+                   .AddMediatR(typeof(GuildContext))
+                   .AddSentry<SentryLoggingOptions>()
+                   .Configure<SentryLoggingOptions>
+                    (
+                     slo =>
+                     {
+                         slo.Dsn                    = silkConfig.SentryDSN;
+                         slo.InitializeSdk          = !silkConfig.SelfHosted;
+                         slo.MinimumEventLevel      = LogLevel.Error;
+                         slo.MinimumBreadcrumbLevel = LogLevel.Trace;
+                         slo.Release                = StringConstants.Version;
+                         slo.DeduplicateMode        = DeduplicateMode.SameExceptionInstance;
+                         slo.TracesSampleRate       = 1.0;
+                         slo.AddDiagnosticSourceIntegration();
+                     }
+                    )
+                   .AddScoped<PhishingAvatarDetectionService>()
+                   .AddHttpClient
+                   (
+                    "ravy-api",
+                    (s, c) =>
+                    {
+                        var config = s.GetRequiredService<IConfiguration>().GetSilkConfigurationOptionsFromSection();
+
+                        c.BaseAddress = new("https://ravy.org/api/v1/avatars");
+                        c.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Ravy {config.RavyAPIKey}");
+                        c.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", StringConstants.ProjectIdentifier);
+                    }
+                   );
             });
 
         return builder;

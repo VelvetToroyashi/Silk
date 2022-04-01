@@ -17,7 +17,7 @@ public static class UpdateInfraction
             Optional<string>          Reason          = default,
             Optional<bool>            AppliesToTarget = default,
             Optional<bool>            Processed       = default,
-            Optional<bool>            Esclated        = default,
+            Optional<bool>            Escalated        = default,
             Optional<bool>            Notified        = default
         ) : IRequest<InfractionEntity>;
 
@@ -43,8 +43,8 @@ public static class UpdateInfraction
             if (request.Processed.HasValue)
                 infraction.Processed = request.Processed.Value;
 
-            if (request.Esclated.HasValue)
-                infraction.Escalated = request.Esclated.Value;
+            if (request.Escalated.HasValue)
+                infraction.Escalated = request.Escalated.Value;
 
             if (request.Notified.HasValue)
                 infraction.UserNotified = request.Notified.Value;

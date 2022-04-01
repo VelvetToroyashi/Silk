@@ -11,7 +11,7 @@ namespace Silk;
 
 public class SilkPrefixMatcher : ICommandPrefixMatcher
 {
-    private static readonly Regex MentionRegex = new(@"^(<@!?(?<ID>\d+)>).+");
+    private static readonly Regex MentionRegex = new(@"^(<@!?(?<ID>\d+)> ?)");
     
     private readonly MessageContext      _context;
     private readonly IDiscordRestUserAPI _users;

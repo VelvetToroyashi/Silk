@@ -15,7 +15,7 @@ public static class StringConstants
     /// <summary>
     /// The current version of Silk!.
     /// </summary>
-    public const string Version              = "3.0.0-beta-5";
+    public const string Version = "3.3.1";
     
     /// <summary>
     /// A special expression based log template that allows for conditional event ID insertion.
@@ -27,8 +27,6 @@ public static class StringConstants
     /// </summary>
     public const string FileLogFormat        = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
     
-    //TODO: Deprecate?
-    public const string HttpClientName       = "Silk";
     public const string AutoModMessagePrefix = "[AUTOMOD]";
 
     /// <summary>

@@ -15,76 +15,92 @@ public partial class ConfigCommands
 {
     public partial class EditConfigCommands
     {
-        [Command("logging")]
-        [Description("Adjust the settings for logging. \n"                    +
-                     "If removing options, true or false can be specified.\n" +
+        [Command("logging", "log", "l")]
+        [Description("Adjust the settings for logging. \n" +
                      "If a channel is already specified for the action, it will be overridden with the new one."
                     )]
         public async Task<IResult> LoggingAsync
         (
-            [Option('j', "joins")] 
+            [Switch('j', "joins")] 
             [Description("Whether to log when a user joins. ")]
-            bool? logJoins   = null,
+            bool logJoins   = false,
             
-            [Option('l', "leaves")]
+            [Switch('l', "leaves")]
             [Description("Whether to log when a user leaves.")]                   
-            bool? logLeaves  = null,
+            bool logLeaves  = false,
             
-            [Option('d', "deletes")] 
+            [Switch('d', "deletes")] 
             [Description("Whether to log message deletes.")]
-            bool? logDeletes = null,
+            bool logDeletes = false,
             
-            [Option('e', "edits")]
+            [Switch('e', "edits")]
             [Description("Whether to log message edits.")]
-            bool? logEdits   = null,
+            bool logEdits   = false,
+            
+            [Switch('i', "infractions")]
+            [Description("Whether to log infractions.")]
+            bool logInfractions = false,
+            
+            [Switch('r', "remove")]
+            [Description("Removes specified options from the logging settings.")]
+            bool remove = false,
+
+            [Option('m', "mobile")]
+            [Description("Whether to log attachments in a mobile-friendly manner.")]
+            bool? mobile = null,
             
             [Option('w', "webhook")]
             [Description("Whether to log to a webhook.")]
             bool? webhook    = null,
             
-            [Switch('r', "remove")]
-            [Description("Removes specified options from the logging settings.")]
-            bool  remove     = false,
-            
             [Option('c', "channel")]
             [Description("The channel to log to. This is required if not removing options.")]
             IChannel? channel = null
-        )
+       )
         {
-            if (!remove && channel is null && webhook is null)
+            if (!remove && channel is null && webhook is null && mobile is null)
             {
                 await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
-                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel` or `--webhook` is must be specified.");
+                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel`, `--webhook` or `--mobile true/false` is must be specified.");
             }
 
             var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
 
             var loggingConfig = modConfig.Logging;
+            
+            if (mobile is {} useMobile)
+                loggingConfig.UseMobileFriendlyLogging = useMobile;
 
             if (remove)
             {
-                if (logJoins is not null)
+                if (logJoins)
                 {
                     loggingConfig.LogMemberJoins = false;
                     loggingConfig.MemberJoins    = null;
                 }
 
-                if (logLeaves is not null)
+                if (logLeaves)
                 {
                     loggingConfig.LogMemberLeaves = false;
                     loggingConfig.MemberLeaves    = null;
                 }
 
-                if (logDeletes is not null)
+                if (logDeletes)
                 {
                     loggingConfig.LogMessageDeletes = false;
                     loggingConfig.MessageDeletes    = null;
                 }
 
-                if (logEdits is not null)
+                if (logEdits)
                 {
                     loggingConfig.LogMessageEdits = false;
                     loggingConfig.MessageEdits    = null;
+                }
+                
+                if (logInfractions)
+                {
+                    loggingConfig.LogInfractions = false;
+                    loggingConfig.Infractions    = null;
                 }
 
                 await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
@@ -94,7 +110,7 @@ public partial class ConfigCommands
 
             if (channel is not null)
             {
-                if (logJoins is true)
+                if (logJoins)
                 {
                     loggingConfig.LogMemberJoins = true;
 
@@ -110,7 +126,7 @@ public partial class ConfigCommands
                     };
                 }
 
-                if (logLeaves is true)
+                if (logLeaves)
                 {
                     loggingConfig.LogMemberLeaves = true;
 
@@ -126,7 +142,7 @@ public partial class ConfigCommands
                     };
                 }
 
-                if (logDeletes is true)
+                if (logDeletes)
                 {
                     loggingConfig.LogMessageDeletes = true;
 
@@ -142,7 +158,7 @@ public partial class ConfigCommands
                     };
                 }
 
-                if (logEdits is true)
+                if (logEdits)
                 {
                     loggingConfig.LogMessageEdits = true;
 
@@ -157,13 +173,29 @@ public partial class ConfigCommands
                         WebhookID    = lwi ?? default(Snowflake)
                     };
                 }
+                
+                if (logInfractions)
+                {
+                    loggingConfig.LogInfractions = true;
+
+                    var lwt = loggingConfig.Infractions?.WebhookToken;
+                    var lwi = loggingConfig.Infractions?.WebhookID;
+
+                    loggingConfig.Infractions = new()
+                    {
+                        ChannelID    = channel.ID,
+                        GuildID      = _context.GuildID.Value,
+                        WebhookToken = lwt ?? "",
+                        WebhookID    = lwi ?? default(Snowflake)
+                    };
+                }
             }
             
             if (webhook is true && channel is not null)
             {
                 var success = true;
 
-                if (logJoins is true)
+                if (logJoins)
                 {
                     var joinWebhook = await TryCreateWebhookAsync(channel.ID);
 
@@ -178,7 +210,7 @@ public partial class ConfigCommands
                     else success = false;
                 }
 
-                if (logLeaves is true)
+                if (logLeaves)
                 {
                     var leaveWebhook = await TryCreateWebhookAsync(channel.ID);
 
@@ -193,7 +225,7 @@ public partial class ConfigCommands
                     else success = false;
                 }
 
-                if (logDeletes is true)
+                if (logDeletes)
                 {
                     var deleteWebhook = await TryCreateWebhookAsync(channel.ID);
 
@@ -208,7 +240,7 @@ public partial class ConfigCommands
                     else success = false;
                 }
 
-                if (logEdits is true)
+                if (logEdits)
                 {
                     var editWebhook = await TryCreateWebhookAsync(channel.ID);
 
@@ -218,6 +250,21 @@ public partial class ConfigCommands
                             WebhookID    = ew.ID,
                             ChannelID    = channel.ID,
                             WebhookToken = ew.Token.Value,
+                            GuildID      = _context.GuildID.Value
+                        };
+                    else success = false;
+                }
+                
+                if (logInfractions)
+                {
+                    var infractionWebhook = await TryCreateWebhookAsync(channel.ID);
+
+                    if (infractionWebhook.IsDefined(out var iw))
+                        loggingConfig.Infractions = new()
+                        {
+                            WebhookID    = iw.ID,
+                            ChannelID    = channel.ID,
+                            WebhookToken = iw.Token.Value,
                             GuildID      = _context.GuildID.Value
                         };
                     else success = false;
@@ -254,7 +301,7 @@ public partial class ConfigCommands
                      wh.Type is WebhookType.Incoming &&
                      wh.User.IsDefined(out var user) &&
                      user.ID == selfResult.Entity.ID
-                );
+               );
 
             //Return the webhook if it already exists.
             if (webhook is not null)

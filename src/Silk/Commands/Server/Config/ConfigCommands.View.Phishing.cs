@@ -28,16 +28,18 @@ public partial class ConfigCommands
             //I don't like how long this line is
             var actionType = config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out var phishingAction) ? phishingAction.Type.Humanize() : "Not configured";
 
-            var enabled = config.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
-            var delete  = config.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
-
-            var action = phishingAction is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            var enabled   = config.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            var usernames = config.BanSuspiciousUsernames? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            var delete    = config.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            var action    = phishingAction is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            
 
             var embed = new Embed
             {
                 Colour = Color.MidnightBlue,
                 Title  = $"Phishing detection for {guild.Name}",
                 Description = $"{enabled} {Emojis.WarningEmoji} **Detect Phishing Links** \n" +
+                              $"{usernames} {Emojis.ScanEmoji} **Ban Suspicious Usernames** \n" +
                               $"{delete} {Emojis.DeleteEmoji} **Delete Phishing Links**  \n"  +
                               $"{action} {Emojis.WrenchEmoji} **After-detection action :** {actionType}"
             };

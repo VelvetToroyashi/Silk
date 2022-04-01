@@ -49,7 +49,7 @@ public class GuildCacherService
     private readonly IEmbed _onGuildJoinEmbed = new Embed(
                                                           Title: "Thank you for adding me!",
                                                           Description: GuildJoinThankYouMessage,
-                                                          Colour: Color.Gold);
+                                                          Colour: Color.CornflowerBlue);
     private readonly IDiscordRestUserAPI _userApi;
 
     /// <summary>
@@ -103,6 +103,7 @@ public class GuildCacherService
 
         IChannel? availableChannel = null;
         
+        _logger.LogTrace("Attempting to find open channel to send welcome message to");
         foreach (var channel in channels)
         {
             if (channel.Type is not ChannelType.GuildText)
@@ -121,6 +122,8 @@ public class GuildCacherService
             if (permissions.HasPermission(_welcomeMessagePermissions))
             {
                 availableChannel = channel;
+                
+                _logger.LogDebug("Found available message channel");
                 break;
             }
         }
@@ -181,7 +184,7 @@ public class GuildCacherService
             var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());
             var currentGuildCounter = _cache.GetOrCreate(SilkKeyHelper.GenerateCurrentGuildCounterKey(), _ => 1);
 
-            _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}] handling {MemberCount,-5} members.", currentGuildCounter, currentGuildCount, members.Count);
+            _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", currentGuildCounter, currentGuildCount);
 
             _cache.Set(SilkKeyHelper.GenerateGuildIdentifierKey(guildID), true);
             _cache.Set(SilkKeyHelper.GenerateGuildMemberCountKey(guildID), members.Count);

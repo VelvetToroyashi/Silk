@@ -76,7 +76,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _webhooks      = webhooks;
         _channelLogger = channelLogger;
 
-        _queueTimer = new(ProccessQueueAsync, TimeSpan.FromSeconds(5));
+        _queueTimer = new(ProcessQueueAsync, TimeSpan.FromSeconds(5));
     }
 
     /// <inheritdoc />
@@ -100,7 +100,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         _logger.LogInformation("Infraction service stopped.");
     }
 
-    private async Task ProccessQueueAsync()
+    private async Task ProcessQueueAsync()
     {
         for (var i = _queue.Count - 1; i >= 0; i--)
         {
@@ -115,7 +115,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             _queue.RemoveAt(i);
             _logger.LogDebug("Removed infraction {InfractionID} from queue.", infraction.Id);
             
-            _logger.LogInformation("Proccessing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
+            _logger.LogInformation("Processing infraction {InfractionID} ({GuildID})", infraction.Id, infraction.GuildID);
 
             await HandleExpiredInfractionAsync(infraction);
         }
@@ -265,7 +265,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
+    public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true)
     {
         IUser target;
         IUser enforcer;
@@ -284,11 +284,14 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, expirationRelativeToNow.HasValue ? InfractionType.SoftBan : InfractionType.Ban));
 
-        //TODO: Don't attempt to inform the user if they're not present on the guild.
-        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+        if (notify)
+        {
+            //TODO: Don't attempt to inform the user if they're not present on the guild.
+            var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
-        if (informResult.IsDefined(out var informed) && informed)
-           infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+            if (informResult.IsDefined(out var informed) && informed)
+                infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.Id, Notified: true));
+        }
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);
 
@@ -366,7 +369,15 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result<InfractionEntity>.FromError(hierarchyResult.Error);
         
         (target, enforcer) = hierarchyResult.Entity;
-
+        
+        if (await IsMutedAsync(guildID, targetID))
+        {
+            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
+            
+            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
+        }
+        
         var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
 
         if (!config.UseNativeMute)
@@ -398,15 +409,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 return Result<InfractionEntity>.FromError(GetActionFailedErrorMessage(timeoutResult, "timeout"));
             }
         }
-
-        if (await IsMutedAsync(guildID, targetID))
-        {
-            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
-            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
-            
-            return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
-        }
-
+        
         var infractionType = enforcer.IsBot.IsDefined(out var bot) && bot ? InfractionType.AutoModMute : InfractionType.Mute;
 
         DateTimeOffset? infractionExpiration = expirationRelativeToNow.HasValue ? DateTimeOffset.UtcNow + expirationRelativeToNow.Value : null;
@@ -545,7 +548,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         if (!infractions.Any())
         {
-            _logger.LogDebug("No active infrations to handle. Skipping.");
+            _logger.LogDebug("No active infractions to handle. Skipping.");
             return;
         }
 
@@ -571,7 +574,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!guildRolesResult.IsSuccess)
             return Result.FromError(guildRolesResult.Error);
 
-        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID));
+        var everyoneRole = guildRolesResult.Entity.Single(role => role.ID == guildID);
+        
+        var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID)).ToArray();
         
         var roleResult = await _guilds.CreateGuildRoleAsync(
                                                             guildID, 
@@ -583,11 +588,46 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!roleResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to create mute role."));
 
-        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botRoles.OrderByDescending(r => r.Position).Skip(1).First().Position)) });
+        var botPosition = Math.Max(0, botRoles.MaxOrDefault(r => r.Position) - 1);
+
+        var modResult = await _guilds.ModifyGuildRolePositionsAsync(guildID, new[] { (roleResult.Entity.ID, new Optional<int?>(botPosition)) });
 
         if (!modResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to modify mute role position."));
 
+        var channels = await _guilds.GetGuildChannelsAsync(guildID);
+        
+        if (!channels.IsSuccess)
+            return Result.FromError(channels.Error);
+
+        foreach (var channel in channels.Entity.Where(c => c.Type is ChannelType.GuildText))
+        {
+            if (!channel.PermissionOverwrites.IsDefined(out var overwrites))
+                overwrites = new List<IPermissionOverwrite>();
+            
+            var permissions         = DiscordPermissionSet.ComputePermissions(roleResult.Entity.ID, everyoneRole, overwrites);
+            var selfPermissions     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
+            var everyonePermissions = DiscordPermissionSet.ComputePermissions(everyoneRole.ID, everyoneRole, overwrites);
+
+            if (!selfPermissions.HasPermission(DiscordPermission.ManageChannels))
+                continue;
+            
+            if (selfPermissions.HasPermission(DiscordPermission.ViewChannel) ||
+                everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
+            {
+                var overwriteResult = await _channels.EditChannelPermissionsAsync
+                    (
+                     channel.ID,
+                     roleResult.Entity.ID,
+                     new DiscordPermissionSet(DiscordPermission.ViewChannel),
+                     new DiscordPermissionSet(DiscordPermission.SendMessages, DiscordPermission.AddReactions)
+                    );
+
+                if (!overwriteResult.IsSuccess && !overwrites.Any())
+                    _logger.LogError("Failed to set permissions in {Channel} on {Guild}, but permissions should allow for it.", channel.ID, guildID);
+            }
+        }
+        
         await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
         {
             MuteRoleID = roleResult.Entity.ID
@@ -669,7 +709,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
             int targetBotRoleDiff      = targetRoles.MaxOrDefault(r => r.Position) - botRoles.MaxOrDefault(r => r.Position);
             int targetEnforcerRoleDiff = targetRoles.MaxOrDefault(r => r.Position) - enforcerRoles.MaxOrDefault(r => r.Position);
 
-            if (targetEnforcerRoleDiff >= 0)
+            //Bug?: In the event that another role is added on top, MaxBy should be replaced with Any.
+            if (targetEnforcerRoleDiff >= 0 && targetRoles.MaxBy(r => r.Position)?.Name != "Muted")
                 return Result<(IUser target, IUser enforcer)>.FromError(new HierarchyError("Their roles are higher or equal to yours! I can't do anything."));
 
             if (targetBotRoleDiff >= 0)
@@ -853,18 +894,16 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var embed = new Embed
         {
             Title       = "Infraction #" + infraction.CaseNumber,
-            Author      = new EmbedAuthor($"{target?.Username ?? "Unknown"}#{target.Discriminator}", CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
+            Author      = new EmbedAuthor($"{target.ToDiscordTag()}", default, CDN.GetUserAvatarUrl(target, imageSize: 1024).Entity.ToString()),
             Description = infraction.Reason,
             Colour      = Color.Goldenrod,
             Fields = new IEmbedField[]
             {
                 new EmbedField("Type:", infraction.Type.ToString(), true),
-                new EmbedField("Infracted at:", $"<t:{((DateTimeOffset)infraction.CreatedAt).ToUnixTimeSeconds()}:F>", true),
+                new EmbedField("Infracted at:", $"<t:{infraction.CreatedAt.ToUnixTimeSeconds()}:F>", true),
                 new EmbedField("Expires:", !infraction.ExpiresAt.HasValue ? "Never" : $"<t:{((DateTimeOffset)infraction.ExpiresAt).ToUnixTimeSeconds()}:F>", true),
-
-                new EmbedField("Moderator:", $"**{enforcer.Username}#{enforcer.Discriminator}**\n(`{enforcer.ID}`)", true),
-                new EmbedField("Offender:", $"**{target.Username}#{target.Discriminator}**\n(`{target.ID}`)", true),
-
+                new EmbedField("Moderator:", $"**{enforcer.ToDiscordTag()}**\n(`{enforcer.ID}`)", true),
+                new EmbedField("Offender:", $"**{target.ToDiscordTag()}**\n(`{target.ID}`)", true),
             }
         };
 
@@ -878,10 +917,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         return Result.FromSuccess();
     }
-
-
+    
     /// <summary>
-    ///     Ensures an available logging channel exists on the guild, creating one if neccecary.
+    ///     Ensures an available logging channel exists on the guild, creating one if necessary.
     /// </summary>
     /// <param name="guildID"></param>
     private async Task<Result> EnsureLoggingChannelExistsAsync(Snowflake guildID)
@@ -908,12 +946,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return Result.FromError(currentMemberResult.Error!);
         }
         
-        if (config.Logging.Infractions is not { } ilc)
+        if (config.Logging.Infractions is not { } existingLogChannel)
         {
             return Result.FromSuccess();
         }
         
-        var infractionChannelResult = await _channels.GetChannelAsync(ilc.ChannelID);
+        var infractionChannelResult = await _channels.GetChannelAsync(existingLogChannel.ChannelID);
 
         if (!infractionChannelResult.IsSuccess)
         {
@@ -974,17 +1012,17 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 {
                     _logger.LogWarning("Webhook has gone missing. Attempting to create a new one.");
 
-                    Result<IWebhook> webhookReuslt = await _webhooks.CreateWebhookAsync(config.Logging.Infractions.ChannelID, SilkWebhookName, default);
+                    Result<IWebhook> createWebhookResult = await _webhooks.CreateWebhookAsync(config.Logging.Infractions.ChannelID, SilkWebhookName, default);
 
-                    if (!webhookReuslt.IsSuccess)
+                    if (!createWebhookResult.IsSuccess)
                     {
                         _logger.LogCritical("Failed to create webhook for infraction channel. Giving up.");
 
-                        return Result.FromError(webhookReuslt.Error!);
+                        return Result.FromError(createWebhookResult.Error!);
                     }
                     _logger.LogDebug("Successfully created new webhook for infraction channel.");
 
-                    IWebhook webhook = webhookReuslt.Entity;
+                    IWebhook webhook = createWebhookResult.Entity;
 
                     config.Logging.Infractions.WebhookID    = webhook.ID;
                     config.Logging.Infractions.WebhookToken = webhook.Token.Value;

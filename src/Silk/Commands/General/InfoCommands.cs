@@ -104,7 +104,7 @@ public class InfoCommands : CommandGroup
         if (!bannerUrl.IsSuccess)
             bannerImage = !user.AccentColour.IsDefined(out var accent)
                 ? default
-                : await GenerateBannerColorImageAsync(accent.Value.Name);
+                : await GenerateBannerColorImageAsync(accent.Value);
         
         var embed = new Embed
         {
@@ -158,7 +158,7 @@ public class InfoCommands : CommandGroup
         if (!bannerUrl.IsSuccess)
             bannerImage = !user.AccentColour.IsDefined(out var accent)
                 ? default
-                : await GenerateBannerColorImageAsync(accent.Value.Name);
+                : await GenerateBannerColorImageAsync(accent.Value);
         
         var embed = new Embed
         {
@@ -252,7 +252,7 @@ public class InfoCommands : CommandGroup
 
         var highestRole = roles.Max(r => r.Position);
         
-        var hierarchyResult = await GetRoleHiearchyStringAsync(role);
+        var hierarchyResult = await GetRoleHierarchyStringAsync(role);
         
         if (!hierarchyResult.IsDefined(out var hierarchy))
             return hierarchyResult;
@@ -361,7 +361,7 @@ public class InfoCommands : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
     }
     
-    private async Task<Result<string>> GetRoleHiearchyStringAsync(IRole role)
+    private async Task<Result<string>> GetRoleHierarchyStringAsync(IRole role)
     {
         var roleResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
         
@@ -412,9 +412,9 @@ public class InfoCommands : CommandGroup
         return stream;
     }
     
-    private async Task<Stream> GenerateBannerColorImageAsync(string bannerColor)
+    private async Task<Stream> GenerateBannerColorImageAsync(Color bannerColor)
     {
-        using var image = new Image<Rgba32>(4096, 2048, Rgba32.ParseHex(bannerColor));
+        using var image = new Image<Rgba32>(4096, 2048, new Rgba32(bannerColor.R, bannerColor.G, bannerColor.B, 255));
 
         var stream = new MemoryStream();
         

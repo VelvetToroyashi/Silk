@@ -52,6 +52,12 @@ public class GuildLoggingConfigEntity
     public bool LogMemberLeaves { get; set; }
 
 	/// <summary>
+	/// If true, when logging attachments, they will chunked into four images per embed, instead of one image per embed.
+	/// </summary>
+	[Column("use_mobile_friendly_logging")]
+	public bool UseMobileFriendlyLogging { get; set; } = true;
+
+	/// <summary>
 	///     The fallback channel to use if it's not specified for a specific scope.
 	/// </summary>
 	[Column("fallback_logging_channel")]

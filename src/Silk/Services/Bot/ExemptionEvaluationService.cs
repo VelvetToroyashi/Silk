@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
@@ -16,10 +17,18 @@ public class ExemptionEvaluationService
 {
     private readonly GuildConfigCacheService _config;
     private readonly IDiscordRestGuildAPI    _guildApi;
-    public ExemptionEvaluationService(GuildConfigCacheService config, IDiscordRestGuildAPI guildApi)
+    private readonly ILogger<ExemptionEvaluationService> _logger;
+
+    public ExemptionEvaluationService
+    (
+        GuildConfigCacheService config,
+        IDiscordRestGuildAPI guildApi,
+        ILogger<ExemptionEvaluationService> logger
+    )
     {
         _config   = config;
         _guildApi = guildApi;
+        _logger   = logger;
     }
 
     /// <summary>
@@ -31,6 +40,8 @@ public class ExemptionEvaluationService
     /// <param name="channelID">The ID of the channel the exemption may apply to.</param>
     public async Task<Result<bool>> EvaluateExemptionAsync(ExemptionCoverage exemptionType, Snowflake guildID, Snowflake userID, Snowflake channelID)
     {
+        _logger.LogTrace("Evaluating exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
+        
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
 
         if (!config.Exemptions.Any())
@@ -39,7 +50,10 @@ public class ExemptionEvaluationService
         Result<IGuildMember> guildMemberResult = await _guildApi.GetGuildMemberAsync(guildID, userID);
 
         if (!guildMemberResult.IsSuccess)
+        {
+            _logger.LogWarning("Failed to get guild member {UserID} in {GuildID}", userID, guildID);
             return Result<bool>.FromError(guildMemberResult.Error);
+        }
 
         IGuildMember guildMember = guildMemberResult.Entity;
 
@@ -49,16 +63,31 @@ public class ExemptionEvaluationService
                 continue;
 
             if (exemption.TargetType is ExemptionTarget.Channel)
+            {
                 if (channelID == exemption.TargetID)
+                {
+                    _logger.LogTrace("Found channel-level exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
                     return Result<bool>.FromSuccess(true);
+                }
+            }
 
             if (exemption.TargetType is ExemptionTarget.Role)
+            {
                 if (guildMember.Roles.Any(r => r == exemption.TargetID))
+                {
+                    _logger.LogTrace("Found role-level exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
                     return Result<bool>.FromSuccess(true);
+                }
+            }
 
             if (exemption.TargetType is ExemptionTarget.User)
+            {
                 if (userID == exemption.TargetID)
+                {
+                    _logger.LogTrace("Found user-level exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
                     return Result<bool>.FromSuccess(true);
+                }
+            }
         }
 
         return Result<bool>.FromSuccess(false);

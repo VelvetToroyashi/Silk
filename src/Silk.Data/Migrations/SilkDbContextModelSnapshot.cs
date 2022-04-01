@@ -18,7 +18,7 @@ namespace Silk.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("ProductVersion", "6.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -240,6 +240,11 @@ namespace Silk.Data.Migrations
                     b.Property<int?>("MessageEditsId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("UseMobileFriendlyLogging")
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("use_mobile_friendly_logging");
+
                     b.Property<bool>("UseWebhookLogging")
                         .HasColumnType("boolean")
                         .HasColumnName("use_webhook_logging");
@@ -266,6 +271,10 @@ namespace Silk.Data.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("BanSuspiciousUsernames")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ban_suspicious_usernames");
 
                     b.Property<bool>("DeletePhishingLinks")
                         .HasColumnType("boolean")

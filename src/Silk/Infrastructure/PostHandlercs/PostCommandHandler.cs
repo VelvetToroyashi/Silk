@@ -2,12 +2,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
+using Microsoft.Extensions.Logging;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Results;
+using Sentry;
 using Silk.Errors;
 using Silk.Utilities.HelpFormatter;
 
@@ -15,17 +17,29 @@ namespace Silk;
 
 public class PostCommandHandler : IPostExecutionEvent
 {
-    private readonly MessageContext         _context;
-    private readonly CommandHelpViewer      _help;
-    private readonly ICommandPrefixMatcher  _preifx;
-    private readonly IDiscordRestChannelAPI _channels;
-    
-    public PostCommandHandler(MessageContext context, CommandHelpViewer help, ICommandPrefixMatcher preifx, IDiscordRestChannelAPI channels)
+    private readonly IHub _hub;
+    private readonly MessageContext              _context;
+    private readonly CommandHelpViewer           _help;
+    private readonly ICommandPrefixMatcher       _prefix;
+    private readonly IDiscordRestChannelAPI      _channels;
+    private readonly ILogger<PostCommandHandler> _logger;
+
+    public PostCommandHandler
+    (
+        IHub                        hub,
+        MessageContext              context,
+        CommandHelpViewer           help,
+        ICommandPrefixMatcher       prefix,
+        IDiscordRestChannelAPI      channels,
+        ILogger<PostCommandHandler> logger
+    )
     {
-        _context       = context;
-        _help          = help;
-        _preifx        = preifx;
+        _hub     = hub;
+        _context  = context;
+        _help     = help;
+        _prefix   = prefix;
         _channels = channels;
+        _logger   = logger;
     }
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
@@ -33,17 +47,25 @@ public class PostCommandHandler : IPostExecutionEvent
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
 
-        var prefixResult = await _preifx.MatchesPrefixAsync(_context.Message.Content.Value, ct);
+        var prefixResult = await _prefix.MatchesPrefixAsync(_context.Message.Content.Value, ct);
         
         if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches)
             return Result.FromSuccess();
 
-        if (commandResult.Error is CommandNotFoundError)
+        var error = commandResult.Error;
+
+        if (error is AggregateError ag)
+            error = ag.Errors.First().Error;
+        
+        if (error is CommandNotFoundError)
             await _help.SendHelpAsync(_context.Message.Content.Value[prefix.ContentStartIndex..], _context.ChannelID);
         
-        if (commandResult.Error is ConditionNotSatisfiedError)
+        if (error is ConditionNotSatisfiedError)
             await HandleFailedConditionAsync(commandResult.Inner!.Inner!.Inner!.Inner.Error, ct);
 
+        if (error is ExceptionError er)
+            _hub.CaptureException(er.Exception);
+        
         return Result.FromSuccess();
     }
 
@@ -55,11 +77,8 @@ public class PostCommandHandler : IPostExecutionEvent
         {
             SelfActionError sae       => sae.Message,
             PermissionDeniedError pne => $"As much as I'd love to, you're missing permissions to {pne.Permissions.Select(p => p.Humanize(LetterCasing.Title)).Humanize()}!",
-
-            _ => message
+            _                         => message
         };
-        
-        
         
         await _channels.CreateMessageAsync(_context.ChannelID, responseMessage, ct: ct);
     }

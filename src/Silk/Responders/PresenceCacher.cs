@@ -16,7 +16,7 @@ public class PresenceCacher : IResponder<IPresenceUpdate>, IResponder<IGuildCrea
 
     public async Task<Result> RespondAsync(IPresenceUpdate gatewayEvent, CancellationToken ct = default)
     {
-        _cacheService.Set(KeyHelpers.CreatePresenceCacheKey(default, gatewayEvent.User.ID.Value), (IPartialPresence)gatewayEvent);
+        _cacheService.Set(KeyHelpers.CreatePresenceCacheKey(default, gatewayEvent.User.ID.Value), gatewayEvent);
 
         return Result.FromSuccess();
     }

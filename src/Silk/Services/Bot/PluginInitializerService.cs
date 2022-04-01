@@ -59,13 +59,14 @@ public class PluginInitializerService : BackgroundService
             }
             else
             {
-                _logger.LogError("Failed to migrate plugins.");
+                _logger.LogError("One or more plugins failed to migrate: {Error}", migrationResult.Error);
                 return migrationResult;
             }
             
-            sw.Restart();
             _logger.LogInformation("Initializing plugins...");
 
+            sw.Restart();
+            
             var pluginInitializationResult = await _plugins.InitializeAsync(_services, ct);
 
             if (pluginInitializationResult.IsSuccess)
@@ -74,7 +75,7 @@ public class PluginInitializerService : BackgroundService
             }
             else
             {
-                _logger.LogError("Failed to initialize plugins.");
+                _logger.LogError("One or more plugins failed to initialize: {Error}", pluginInitializationResult.Error);
                 return pluginInitializationResult;
             }
             

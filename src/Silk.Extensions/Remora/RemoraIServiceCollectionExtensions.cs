@@ -37,7 +37,21 @@ public static class RemoraIServiceCollectionExtensions
 
         var tree = collection.AddCommandTree();
         
-        foreach (Type type in types)
+        foreach (Type type in types.Where(t => t.GetCustomAttribute<SlashCommandAttribute>() is null))
+            tree.WithCommandGroup(type);
+        
+        return tree.Finish();
+    }
+    
+    public static IServiceCollection AddSlashCommands(this IServiceCollection collection, Assembly assembly)
+    {
+        IEnumerable<Type>? types = assembly
+                                  .GetExportedTypes()
+                                  .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
+
+        var tree = collection.AddCommandTree("silk_slash_tree");
+        
+        foreach (Type type in types.Where(t => t.GetCustomAttribute<SlashCommandAttribute>() is not null))
             tree.WithCommandGroup(type);
         
         return tree.Finish();
