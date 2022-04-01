@@ -128,8 +128,9 @@ public class ShardAwareGateweayHelper : BackgroundService
         }
 
         try { await _client.RunAsync(stoppingToken); }
-        catch (OperationCanceledException) { /* ignored */ }
+        catch { /* ignored */ }
 
+        _cts.Cancel();
         await (_shardRefreshTask ?? Task.CompletedTask);
         
         await SaveResumeDataAsync();
