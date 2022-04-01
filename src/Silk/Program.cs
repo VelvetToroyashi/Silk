@@ -133,6 +133,7 @@ public class Program
 
                 services
                    .AddRemoraServices()
+                   .AddRedis(context.Configuration)
                    .AddSilkLogging(context.Configuration)
                    .AddHostedService<HeartbeatLogger>()
                    .AddSingleton<ReminderService>()

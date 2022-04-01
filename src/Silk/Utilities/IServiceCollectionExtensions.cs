@@ -19,6 +19,7 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
@@ -39,6 +40,7 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using StackExchange.Redis;
 
 namespace Silk.Utilities;
 
@@ -46,14 +48,35 @@ public static class IServiceCollectionExtensions
 {
     public static IHostBuilder AddRemoraHosting(this IHostBuilder hostBuilder)
     {
-        return hostBuilder.AddDiscordService(s =>
-        {
-            SilkConfigurationOptions? config = s.Get<IConfiguration>()!.GetSilkConfigurationOptionsFromSection();
-
-            return config.Discord.BotToken;
-        });
+        hostBuilder.ConfigureServices
+            (
+             s =>
+             {
+                 s.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
+                 s.AddSingleton<ShardAwareGateweayHelper>();
+                 s.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
+             }
+            );
+        
+        return hostBuilder;
     }
 
+    public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration config)
+    {
+        var redisConfig = config.GetSilkConfigurationOptionsFromSection().Redis;
+        
+        var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+        {
+            EndPoints       = { { redisConfig.Host, redisConfig.Port } },
+            Password        = redisConfig.Password,
+            DefaultDatabase = redisConfig.Database
+        });
+
+        services.AddSingleton<IConnectionMultiplexer>(redis);
+
+        return services;
+    }
+    
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
         var asm = Assembly.GetEntryAssembly()!;
@@ -157,7 +180,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
+                                    //.MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         Log.Logger = config.LogLevel switch
