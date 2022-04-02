@@ -120,7 +120,7 @@ public class Program
         
         while (true)
         {
-            for (int i = -1; i < silkConfig.Discord.Shards; i++)
+            for (int i = 0; i < silkConfig.Discord.Shards; i++)
             {
                 var key = $"shard:{i}";
 
