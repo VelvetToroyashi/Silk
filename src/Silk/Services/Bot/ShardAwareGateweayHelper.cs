@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Silk.Shared.Configuration;
 using StackExchange.Redis;
@@ -39,7 +40,7 @@ public class ShardAwareGateweayHelper : BackgroundService
     (
         DiscordGatewayClient                  client,
         IConnectionMultiplexer                redis,
-        IOptions<SilkConfigurationOptions>     config,
+        IOptions<SilkConfigurationOptions>    config,
         IOptions<DiscordGatewayClientOptions> options,
         ILogger<ShardAwareGateweayHelper>     logger
     )
@@ -81,14 +82,16 @@ public class ShardAwareGateweayHelper : BackgroundService
             }
 
             if (found)
+            {
+                _options.ShardIdentification = new ShardIdentification(ShardID, _config.Discord.Shards);
                 break;
+            }
 
             _logger.LogInformation("No available shard IDs found, waiting {Delay} seconds", delay);
             
             await Task.Delay(TimeSpan.FromSeconds(delay), _cts.Token);
             
             delay = (int)(delay * 1.5);
-
         }
 
         return ShardID;
