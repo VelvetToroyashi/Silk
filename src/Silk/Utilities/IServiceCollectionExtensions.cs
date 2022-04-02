@@ -12,6 +12,7 @@ using Remora.Commands.Services;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Conditions;
@@ -60,22 +61,6 @@ public static class IServiceCollectionExtensions
         
         return hostBuilder;
     }
-
-    public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration config)
-    {
-        var redisConfig = config.GetSilkConfigurationOptionsFromSection().Redis;
-        
-        var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions()
-        {
-            EndPoints       = { { redisConfig.Host, redisConfig.Port } },
-            Password        = redisConfig.Password,
-            DefaultDatabase = redisConfig.Database
-        });
-
-        services.AddSingleton<IConnectionMultiplexer>(redis);
-
-        return services;
-    }
     
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
@@ -116,6 +101,7 @@ public static class IServiceCollectionExtensions
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
         services
+           .AddSingleton<IShardIdentification>(s => s.GetRequiredService<IOptions<DiscordGatewayClientOptions>>().Value.ShardIdentification!)
            .Configure<PaginatedAppearanceOptions>(pap => pap with { HelpText = "Use the buttons to navigate and the close button to stop."})
            .Configure<DiscordGatewayClientOptions>(gw =>
             {

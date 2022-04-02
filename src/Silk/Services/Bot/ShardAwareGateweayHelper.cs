@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Silk.Shared.Configuration;
@@ -17,8 +18,6 @@ public class ShardAwareGateweayHelper : BackgroundService
 {
     public int ShardID { get; private set; }
 
-    private bool _setShardID;
-    
     private static readonly TimeSpan ShardRefreshInterval = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan ShardRefreshTimeout = TimeSpan.FromSeconds(5);
     
@@ -29,81 +28,34 @@ public class ShardAwareGateweayHelper : BackgroundService
     private Task? _shardRefreshTask;
     
     private readonly CancellationTokenSource _cts = new();
-    
+
+    private readonly IShardIdentification              _shard;
     private readonly DiscordGatewayClient              _client;
     private readonly IConnectionMultiplexer            _redis;
-    private readonly SilkConfigurationOptions          _config;
-    private readonly DiscordGatewayClientOptions       _options;
+    private readonly IHostApplicationLifetime          _lifetime;
     private readonly ILogger<ShardAwareGateweayHelper> _logger;
     
     public ShardAwareGateweayHelper
     (
-        DiscordGatewayClient                  client,
-        IConnectionMultiplexer                redis,
-        IOptions<SilkConfigurationOptions>    config,
-        IOptions<DiscordGatewayClientOptions> options,
-        ILogger<ShardAwareGateweayHelper>     logger
+        IShardIdentification              shard,
+        DiscordGatewayClient              client,
+        IConnectionMultiplexer            redis,
+        IHostApplicationLifetime          lifetime,
+        ILogger<ShardAwareGateweayHelper> logger
     )
     {
-        _client  = client;
-        _redis   = redis;
-        _config  = config.Value;
-        _options = options.Value;
-        _logger  = logger;
+        _shard  = shard;
+        _client = client;
+        _redis  = redis;
+        _lifetime = lifetime;
+        _logger = logger;
     }
-
-    public async ValueTask<int> GetAvailableShardIDAsync()
-    {
-        if (_setShardID)
-            return ShardID;
-        
-        var redis = _redis.GetDatabase();
-        var delay = 30;
-
-        var found   = false;
-
-        while (!_cts.Token.IsCancellationRequested)
-        {
-            int shardID;
-            for (shardID = 0; shardID < _config.Discord.Shards; shardID++)
-            {
-                if (!redis.KeyExists($"{ShardPrefix}{ShardID}"))
-                {
-                    found       = true;
-                    _setShardID = true;
-                    ShardID     = shardID;
-                    
-                    _logger.LogInformation("Found available shard ID {ShardID}", shardID);
-
-                    _shardRefreshTask = KeepAliveLoopAsync();
-                    
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                _options.ShardIdentification = new ShardIdentification(ShardID, _config.Discord.Shards);
-                break;
-            }
-
-            _logger.LogInformation("No available shard IDs found, waiting {Delay} seconds", delay);
-            
-            await Task.Delay(TimeSpan.FromSeconds(delay), _cts.Token);
-            
-            delay = (int)(delay * 1.5);
-        }
-
-        return ShardID;
-    }
-
+    
     private async Task KeepAliveLoopAsync()
     {
-        Debug.Assert(_setShardID);
-        
         var redis = _redis.GetDatabase();
 
-        var shardKey = $"{ShardPrefix}{ShardID}";
+        var shardKey = $"{ShardPrefix}{_shard.ShardID}";
         
         while (!_cts.Token.IsCancellationRequested)
         {
@@ -116,8 +68,6 @@ public class ShardAwareGateweayHelper : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Shard aware gateway helper started");
-
-        await GetAvailableShardIDAsync();
         
         var resume = await LoadResumeDataAsync();
 

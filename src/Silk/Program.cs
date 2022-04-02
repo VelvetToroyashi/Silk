@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Gateway.Commands;
+using Remora.Discord.Gateway;
 using Remora.Results;
 using Sentry;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Core;
 using Silk.Commands.Conditions;
 using Silk.Data;
 using Silk.Responders;
@@ -26,6 +30,7 @@ using Silk.Services.Interfaces;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities;
+using StackExchange.Redis;
 
 namespace Silk;
 
@@ -33,7 +38,10 @@ public class Program
 {
     public static async Task Main()
     {
+        Log.Logger.Debug("Test");
+        
         Console.WriteLine("Starting Silk...");
+        
         
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
@@ -47,13 +55,14 @@ public class Program
         });
 
         ConfigureServices(hostBuilder).AddPlugins();
+
+        hostBuilder.ConfigureServices(AddRedisAndAcquireShard);
         
         Console.WriteLine("Configured services.");
         
-        
         IHost? host = hostBuilder.Build();
         
-        Console.WriteLine("Host is built. Switching to logging.");
+        Console.WriteLine("Host is built.");
         
         Log.ForContext<Program>().Information("Attempting to migrate core database");
         var coreMigrationResult = await EnsureDatabaseCreatedAndApplyMigrations(host);
@@ -89,6 +98,53 @@ public class Program
 
         return builder;
     }
+
+    private static void AddRedisAndAcquireShard(HostBuilderContext context, IServiceCollection services)
+    {
+        var config      = context.Configuration;
+        
+        var silkConfig  = config.GetSilkConfigurationOptionsFromSection();
+        var redisConfig = silkConfig.Redis;
+        
+        var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+        {
+            EndPoints       = { { redisConfig.Host, redisConfig.Port } },
+            Password        = redisConfig.Password,
+            DefaultDatabase = redisConfig.Database
+        });
+        
+        var db    = redis.GetDatabase();
+        var taken = false;
+
+        var takenShard = 0;
+        
+        while (true)
+        {
+            for (int i = -1; i < silkConfig.Discord.Shards; i++)
+            {
+                var key = $"shard:{i}";
+
+                if (db.KeyExists(key))
+                    continue;
+
+                db.StringSet(key, "", TimeSpan.FromSeconds(7));
+                //Metrics.DefaultRegistry.SetStaticLabels(new Dictionary<string, string>() { "shard", i.ToString() });
+                takenShard = i;
+                
+                taken = true;
+                break;
+            }
+            
+            if (taken) break;
+            
+            Thread.Sleep(1000);
+        }
+        
+        services.AddSingleton<IConnectionMultiplexer>(redis);
+        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = new ShardIdentification(takenShard, silkConfig.Discord.Shards));
+    }
+    
+    
     
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
     {
@@ -133,7 +189,7 @@ public class Program
 
                 services
                    .AddRemoraServices()
-                   .AddRedis(context.Configuration)
+                   .AddHostedService<ShardStatService>()
                    .AddSilkLogging(context.Configuration)
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
