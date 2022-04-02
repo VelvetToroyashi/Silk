@@ -24,7 +24,7 @@
         
         <PackageReference Update="FluentAssertions" Version="6.5.1" />
         <PackageReference Update="FluentValidation" Version="10.4.0" />
-        <PackageReference Update="FluentValidation.AspNetCore" Version="10.3.6" />
+        <PackageReference Update="FluentValidation.AspNetCore" Version="10.4.0" />
         <PackageReference Update="FluentValidation.DependencyInjectionExtensions" Version="10.4.0" />
         
         <PackageReference Update="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
