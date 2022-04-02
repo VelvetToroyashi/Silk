@@ -144,8 +144,6 @@ public class Program
         services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = new ShardIdentification(takenShard, silkConfig.Discord.Shards));
     }
     
-    
-    
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
     {
         try

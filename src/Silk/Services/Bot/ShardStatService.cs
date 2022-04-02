@@ -26,18 +26,16 @@ public class ShardStatService : BackgroundService
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var db = _redis.GetDatabase();
+
+        var cpuKey = $"shard:{_shard.ShardID}:stats:cpu";
+        var memKey = $"shard:{_shard.ShardID}:stats:mem";
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await Task.Delay(15000, stoppingToken);
-                
-                var db = _redis.GetDatabase();
-
-                var cpuKey = $"shard:{_shard.ShardID}:stats:cpu";
-                var memKey = $"shard:{_shard.ShardID}:stats:mem";
-                
-                var cpu = _process.TotalProcessorTime.TotalMilliseconds;
+                var cpu = await GetCPUUsage(stoppingToken);
                 var mem = _process.WorkingSet64 / 1024 / 1024;
                 
                 await db.StringSetAsync(cpuKey, cpu);
@@ -50,9 +48,11 @@ public class ShardStatService : BackgroundService
         }
     }
 
-    private int GetCPUUsage()
+    private async Task<double> GetCPUUsage(CancellationToken ct)
     {
         var cpuOld = _process.TotalProcessorTime;
+
+        await Task.Delay(3000, ct);
         
         _process.Refresh();
         
@@ -60,9 +60,9 @@ public class ShardStatService : BackgroundService
         
         var cpuDelta = (cpuNew - cpuOld).TotalMilliseconds;
 
-        var usage = cpuDelta / 15000;
+        var usage = cpuDelta / (3000 * Environment.ProcessorCount);
         
-        return (int) usage;
+        return usage * 100;
     }
     
 }

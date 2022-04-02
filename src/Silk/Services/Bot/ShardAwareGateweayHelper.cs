@@ -68,6 +68,8 @@ public class ShardAwareGateweayHelper : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Shard aware gateway helper started");
+
+        _ = Task.Run(KeepAliveLoopAsync, CancellationToken.None);
         
         var resume = await LoadResumeDataAsync();
 
