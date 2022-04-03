@@ -8,6 +8,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using Sentry;
 using Silk.Errors;
@@ -17,8 +18,7 @@ namespace Silk;
 
 public class PostCommandHandler : IPostExecutionEvent
 {
-    private readonly IHub _hub;
-    private readonly MessageContext              _context;
+    private readonly IHub                        _hub;
     private readonly CommandHelpViewer           _help;
     private readonly ICommandPrefixMatcher       _prefix;
     private readonly IDiscordRestChannelAPI      _channels;
@@ -27,15 +27,13 @@ public class PostCommandHandler : IPostExecutionEvent
     public PostCommandHandler
     (
         IHub                        hub,
-        MessageContext              context,
         CommandHelpViewer           help,
         ICommandPrefixMatcher       prefix,
         IDiscordRestChannelAPI      channels,
         ILogger<PostCommandHandler> logger
     )
     {
-        _hub     = hub;
-        _context  = context;
+        _hub      = hub;
         _help     = help;
         _prefix   = prefix;
         _channels = channels;
@@ -44,10 +42,13 @@ public class PostCommandHandler : IPostExecutionEvent
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
     {
+        if (context is not MessageContext mc)
+            return Result.FromSuccess();
+        
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
 
-        var prefixResult = await _prefix.MatchesPrefixAsync(_context.Message.Content.Value, ct);
+        var prefixResult = await _prefix.MatchesPrefixAsync(mc.Message.Content.Value, ct);
         
         if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches)
             return Result.FromSuccess();
@@ -58,10 +59,10 @@ public class PostCommandHandler : IPostExecutionEvent
             error = ag.Errors.First().Error;
         
         if (error is CommandNotFoundError)
-            await _help.SendHelpAsync(_context.Message.Content.Value[prefix.ContentStartIndex..], _context.ChannelID);
+            await _help.SendHelpAsync(mc.Message.Content.Value[prefix.ContentStartIndex..], mc.ChannelID);
         
         if (error is ConditionNotSatisfiedError)
-            await HandleFailedConditionAsync(commandResult.Inner!.Inner!.Inner!.Inner.Error, ct);
+            await HandleFailedConditionAsync(mc.ChannelID, commandResult.Inner!.Inner!.Inner!.Inner!.Error!, ct);
 
         if (error is ExceptionError er)
             _hub.CaptureException(er.Exception);
@@ -69,7 +70,7 @@ public class PostCommandHandler : IPostExecutionEvent
         return Result.FromSuccess();
     }
 
-    private async Task HandleFailedConditionAsync(IResultError conditionError, CancellationToken ct)
+    private async Task HandleFailedConditionAsync(Snowflake channelID, IResultError conditionError, CancellationToken ct)
     {
         var message = conditionError.Message;
 
@@ -80,6 +81,6 @@ public class PostCommandHandler : IPostExecutionEvent
             _                         => message
         };
         
-        await _channels.CreateMessageAsync(_context.ChannelID, responseMessage, ct: ct);
+        await _channels.CreateMessageAsync(channelID, responseMessage, ct: ct);
     }
 }
