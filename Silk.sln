@@ -39,8 +39,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginMigrationHelper", "pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Interactivity", "src\Silk.Interactivity\Silk.Interactivity.csproj", "{74516148-6318-4CDA-A7A6-8D0B605A87B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Silk.Remora.RedisCache", "src\Silk.Remora.RedisCache\Silk.Remora.RedisCache.csproj", "{C10009C9-1A79-49C3-B57E-F5D22C6914E4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,14 +135,6 @@ Global
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|x64.ActiveCfg = Release|Any CPU
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7}.Release|x64.Build.0 = Release|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Debug|x64.Build.0 = Debug|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Release|x64.ActiveCfg = Release|Any CPU
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -164,6 +154,5 @@ Global
 		{E783BF91-AAAD-47AA-90E2-0021CAAEEA02} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 		{4433A4CF-96C8-4C44-9566-7E343BCD11E2} = {A0792A2C-F57F-4E0F-A196-E0B0EE2FE60F}
 		{74516148-6318-4CDA-A7A6-8D0B605A87B7} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
-		{C10009C9-1A79-49C3-B57E-F5D22C6914E4} = {FE9BF140-0795-4CBE-A5A1-E37A36081587}
 	EndGlobalSection
 EndGlobal
