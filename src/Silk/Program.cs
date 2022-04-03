@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Remora.Results;
@@ -38,8 +41,7 @@ public class Program
 {
     public static async Task Main()
     {
-        Log.Logger.Debug("Test");
-        
+
         Console.WriteLine("Starting Silk...");
         
         
@@ -80,7 +82,14 @@ public class Program
         }
         
         Log.ForContext<Program>().Information("Startup checks OK. Starting Silk!");
+
+        var metrics = new KestrelMetricServer(6000);
+
+        metrics.Start();
+        
         await host.RunAsync();
+        
+        metrics.Stop();
     }
 
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
@@ -101,6 +110,7 @@ public class Program
 
     private static void AddRedisAndAcquireShard(HostBuilderContext context, IServiceCollection services)
     {
+        Log.ForContext<Program>().Information("Attempting to acquire shard ID from Redis...");
         var config      = context.Configuration;
         
         var silkConfig  = config.GetSilkConfigurationOptionsFromSection();
@@ -128,7 +138,8 @@ public class Program
                     continue;
 
                 db.StringSet(key, "", TimeSpan.FromSeconds(7));
-                //Metrics.DefaultRegistry.SetStaticLabels(new Dictionary<string, string>() { "shard", i.ToString() });
+                Metrics.DefaultRegistry.SetStaticLabels(new() { {"shard", i.ToString()} });
+                
                 takenShard = i;
                 
                 taken = true;
@@ -139,9 +150,14 @@ public class Program
             
             Thread.Sleep(1000);
         }
+
+        Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
+        
+        var si = new ShardIdentification(takenShard, silkConfig.Discord.Shards);
         
         services.AddSingleton<IConnectionMultiplexer>(redis);
-        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = new ShardIdentification(takenShard, silkConfig.Discord.Shards));
+        services.AddSingleton<IShardIdentification>(si);
+        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = si);
     }
     
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
