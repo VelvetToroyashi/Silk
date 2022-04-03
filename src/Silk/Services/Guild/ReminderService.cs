@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -17,6 +18,7 @@ using Silk.Data.MediatR.Reminders;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
@@ -99,6 +101,8 @@ public sealed class ReminderService : IHostedService
             _reminders.Remove(reminder);
             _logger.LogDebug("Removed reminder {Reminder}", id);
             await _mediator.Send(new RemoveReminder.Request(id));
+            
+            SilkMetric.LoadedReminders.Dec();
         }
     }
 
@@ -106,10 +110,13 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
 
-        if (reminder.MessageID is null)
-            return AttemptDispatchDMReminderAsync(reminder);
+        using (SilkMetric.ReminderDispatchTime.NewTimer())
+        {
+            if (reminder.MessageID is null)
+                return AttemptDispatchDMReminderAsync(reminder);
 
-        return AttemptDispatchReminderAsync(reminder);
+            return AttemptDispatchReminderAsync(reminder);
+        }
     }
 
     /// <summary>

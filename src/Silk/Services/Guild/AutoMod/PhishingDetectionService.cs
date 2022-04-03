@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
@@ -64,38 +66,30 @@ public class PhishingDetectionService
             return Result.FromSuccess(); // DM channels are exempted.
 
         GuildModConfigEntity config = await _configService.GetModConfigAsync(guildId);
+        
+        var links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value).Where(_phishGateway.IsBlacklisted);
 
+        foreach (var match in links)
+            SilkMetric.SeenPhishingLinks.WithLabels(match).Inc();
+        
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
-
-        // As to why I don't use Regex.Match() instead:
-        // Regex.Match casts its return value to a non-nullable Match.
-        // Run(), the method which it invokes returns Match?, which can cause an unexpected null ref.
-        // You'd think this would be documented, but I digress.
-        // Source: https://source.dot.net/#System.Text.RegularExpressions/System/Text/RegularExpressions/Regex.cs,388
-        MatchCollection links = LinkRegex.Matches(message.Content);
-
-        foreach (Match match in links)
+        
+        if (links.Any())
         {
-            if (match is null)
-                continue;
+            var link = links.First();
 
-            if (match.Success)
+            if (_phishGateway.IsBlacklisted(link))
             {
-                string link = match.Groups["link"].Value;
+                _logger.LogInformation("Detected phishing link.");
 
-                if (_phishGateway.IsBlacklisted(link))
-                {
-                    _logger.LogInformation("Detected phishing link.");
+                var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
 
-                    Result<bool> exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
+                if (!exemptionResult.IsSuccess)
+                    return Result.FromError(exemptionResult.Error);
 
-                    if (!exemptionResult.IsSuccess)
-                        return Result.FromError(exemptionResult.Error);
-
-                    if (!exemptionResult.Entity)
-                        return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
-                }
+                if (!exemptionResult.Entity)
+                    return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
             }
         }
 

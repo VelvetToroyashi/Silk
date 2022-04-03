@@ -11,6 +11,7 @@ using Microsoft.Toolkit.HighPerformance.Buffers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Services.Bot;
 
@@ -172,6 +173,7 @@ public sealed class PhishingGatewayService : IHostedService
 
         _logger.LogInformation(EventIds.Service, "Retrieved {Count} phishing domains via REST", payload.Length);
 
+        SilkMetric.LoadedPhishingLinks.IncTo(_domains.Count);
         return true;
     }
 
@@ -184,12 +186,16 @@ public sealed class PhishingGatewayService : IHostedService
 
                 foreach (string domain in domains)
                     _domains.Add(domain);
+                
+                SilkMetric.LoadedPhishingLinks.IncTo(_domains.Count);
                 break;
 
             case "delete":
                 _logger.LogDebug(EventIds.Service, "Removing {Count} domains.", domains.Length);
                 foreach (string domain in domains)
                     _domains.Remove(domain);
+                
+                SilkMetric.LoadedPhishingLinks.DecTo(_domains.Count);
                 break;
 
             default:

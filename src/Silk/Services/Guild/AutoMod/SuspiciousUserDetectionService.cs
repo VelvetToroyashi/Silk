@@ -3,12 +3,14 @@ using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using FuzzySharp.SimilarityRatio.Scorer.Composite;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
+using Silk.Utilities;
 using Unidecode.NET;
 
 namespace Silk.Services.Guild;
@@ -73,39 +75,41 @@ public class SuspiciousUserDetectionService
 
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
-        
-        // TODO: add to config and make toggelable. This will go under phishing settings.
-        var detection = IsSuspectedPhishingUsername(user.Username);
-        
-        if (!detection.isSuspicious)
-            return Result.FromSuccess();
-
-        if (user.IsBot.IsDefined(out var bot) && bot)
+        using (SilkMetric.AutoPhishingBan.WithLabels("username").NewTimer())
         {
-            _logger.LogTrace("Suspiciously named bot: {BotName}, similar to {SimilarName}", user.Username, detection.mostSimilarTo);
+            // TODO: add to config and make toggelable. This will go under phishing settings.
+            var detection = IsSuspectedPhishingUsername(user.Username);
+        
+            if (!detection.isSuspicious)
+                return Result.FromSuccess();
+
+            if (user.IsBot.IsDefined(out var bot) && bot)
+            {
+                _logger.LogTrace("Suspiciously named bot: {BotName}, similar to {SimilarName}", user.Username, detection.mostSimilarTo);
+                return Result.FromSuccess();
+            }
+
+            var self = await _users.GetCurrentUserAsync();
+
+            if (!self.IsSuccess)
+                return Result.FromError(self.Error);
+
+            // We delete the last day of messages to clear any potential join message.
+            var infraction = await _infractions.BanAsync
+                (
+                 guildID,
+                 user.ID,
+                 self.Entity.ID,
+                 1,
+                 $"Suspicious username similar to  '{detection.mostSimilarTo}' detected",
+                 notify: false
+                );
+        
+            if (!infraction.IsSuccess)
+                return Result.FromError(infraction.Error);
+        
             return Result.FromSuccess();
         }
-
-        var self = await _users.GetCurrentUserAsync();
-
-        if (!self.IsSuccess)
-            return Result.FromError(self.Error);
-
-        // We delete the last day of messages to clear any potential join message.
-        var infraction = await _infractions.BanAsync
-            (
-             guildID,
-             user.ID,
-             self.Entity.ID,
-             1,
-             $"Suspicious username similar to  '{detection.mostSimilarTo}' detected",
-             notify: false
-            );
-        
-        if (!infraction.IsSuccess)
-            return Result.FromError(infraction.Error);
-        
-        return Result.FromSuccess();
     }
     
     private (bool isSuspicious, string mostSimilarTo) IsSuspectedPhishingUsername(string username)

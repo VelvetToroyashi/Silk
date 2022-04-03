@@ -9,6 +9,7 @@ using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -29,6 +30,7 @@ using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
@@ -208,6 +210,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("strike").NewTimer();
+        
         IUser target;
         IUser enforcer;
 
@@ -235,6 +239,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("kick").NewTimer();
+        
         IUser target;
         IUser enforcer;
 
@@ -267,6 +273,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int days = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true)
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("ban").NewTimer();
+        
         IUser target;
         IUser enforcer;
 
@@ -308,6 +316,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("unban").NewTimer();
+        
         IUser target;
         IUser enforcer;
 
@@ -355,6 +365,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null)
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("mute").NewTimer();
+        
         IUser target;
         IUser enforcer;
         
@@ -434,6 +446,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("unmute").NewTimer();
+        
         IUser target;
         IUser enforcer;
         
@@ -486,6 +500,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result<InfractionEntity>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note)
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("note").NewTimer();
+        
         InfractionEntity infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, note, InfractionType.Note));
         
         Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
@@ -505,6 +521,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async Task<Result> PardonAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int? caseID, string reason = "Not Given.")
     {
+        using var _ = SilkMetric.InfractionDispatchTime.WithLabels("pardon").NewTimer();
+        
         InfractionEntity pardon = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Pardon));
         
         Result<(IUser target, IUser enforcer)> hierarchyResult = await TryGetEnforcerAndTargetAsync(guildID, targetID, enforcerID);
@@ -541,7 +559,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         _logger.LogDebug("Loading active infractions...");
 
-        var                now         = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
+        
         var infractions = await _mediator.Send(new GetActiveInfractions.Request());
 
         _logger.LogDebug("Loaded infractions in {Time:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
@@ -553,9 +572,10 @@ public sealed class InfractionService : IHostedService, IInfractionService
         }
 
         _logger.LogDebug("Enqueuing {Infractions} infractions.", infractions.Count());
-
-        foreach (InfractionEntity infraction in infractions)
-            _queue.Add(infraction);
+        _queue.AddRange(infractions);
+        
+        SilkMetric.LoadedInfractions.IncTo(_queue.Count);
+        
     }
     
     /// <summary>
