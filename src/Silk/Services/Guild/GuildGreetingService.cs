@@ -17,6 +17,7 @@ using Silk.Data.MediatR.Greetings;
 using Silk.Errors;
 using Silk.Services.Data;
 using Silk.Shared.Types;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
@@ -30,27 +31,32 @@ public class GuildGreetingService : IHostedService
     private readonly ILogger<GuildGreetingService> _logger;
 
     private readonly IMediator              _mediator;
-    private readonly IDiscordRestUserAPI    _userApi;
+    private readonly ShardHelper            _shardHelper;
+    private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestGuildAPI   _guildApi;
     private readonly IDiscordRestChannelAPI _channelApi;
 
     public GuildGreetingService
     (
-        GuildConfigCacheService       config,
-        ILogger<GuildGreetingService> logger,
+       
         IMediator                     mediator,
-        IDiscordRestUserAPI           userApi,
-        IDiscordRestGuildAPI          guildApi,
-        IDiscordRestChannelAPI        channelApi
+        ShardHelper                   shardHelper,
+        IDiscordRestUserAPI           users,
+        IDiscordRestGuildAPI          guilds,
+        IDiscordRestChannelAPI        channels,
+        GuildConfigCacheService       config,
+        ILogger<GuildGreetingService> logger  
     )
     {
-        _config = config;
-        _logger = logger;
-
+        
         _mediator   = mediator;
-        _userApi    = userApi;
-        _guildApi   = guildApi;
-        _channelApi = channelApi;
+        _shardHelper = shardHelper;
+        _users      = users;
+        _guildApi   = guilds;
+        _channelApi = channels;
+        _config     = config;
+        _logger     = logger;
+
         
         //It's important to yield to the queue task here because if we get 429'd, 
         // Polly will retry the request, which will continue to block the queue task.
@@ -64,7 +70,7 @@ public class GuildGreetingService : IHostedService
         _logger.LogDebug("Fetching pending greetings...");
         var greetings = await _mediator.Send(new GetPendingGreetings.Request(), cancellationToken);
         
-        _pendingGreetings.AddRange(greetings);
+        _pendingGreetings.AddRange(greetings.Where(g => _shardHelper.IsRelevantToCurrentShard(g.GuildID)));
         
         _timer.Start();
         
@@ -81,7 +87,6 @@ public class GuildGreetingService : IHostedService
 
         return Task.CompletedTask;
     }
-    
     
     /// <summary>
     ///     Determines whether a member should be greeted on join, caching them otherwise.
@@ -192,7 +197,7 @@ public class GuildGreetingService : IHostedService
         
         string formattedMessage;
 
-        var memberResult = await _userApi.GetUserAsync(memberID);
+        var memberResult = await _users.GetUserAsync(memberID);
 
         if (!memberResult.IsDefined(out var member))
             return Result.FromError(memberResult.Error!);
@@ -258,7 +263,7 @@ public class GuildGreetingService : IHostedService
     /// <returns>A successful result if the permissions are correct.</returns>
     private async Task<Result> EnsurePermissionsAsync(Snowflake guildID, Snowflake channelID)
     {
-        var userResult = await _userApi.GetCurrentUserAsync();
+        var userResult = await _users.GetCurrentUserAsync();
 
         if (!userResult.IsDefined(out var user))
         {

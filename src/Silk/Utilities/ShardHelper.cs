@@ -12,6 +12,6 @@ public sealed class ShardHelper
     private readonly IShardIdentification _shard;
     public ShardHelper(IShardIdentification shard) => _shard = shard;
     
-    public bool IsRelevantToCurrentShard<TObj>(TObj obj, Func<TObj, Snowflake> selector)
-        => (int)(selector(obj).Value >> 22) % _shard.ShardCount == _shard.ShardID;
+    public bool IsRelevantToCurrentShard(Snowflake snowflake)
+        => (int)snowflake.Value >> 22 % _shard.ShardCount == _shard.ShardID;
 }
