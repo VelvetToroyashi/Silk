@@ -46,6 +46,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     private readonly ILogger<InfractionService> _logger;
     private readonly IMediator                  _mediator;
+    private readonly ShardHelper                _shardHelper;
 
     private readonly GuildConfigCacheService _config;
 
@@ -59,24 +60,27 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly List<InfractionEntity> _queue = new();
     public InfractionService
     (
-        ILogger<InfractionService> logger,
+        
         IMediator                  mediator,
+        ShardHelper                shardHelper,
         GuildConfigCacheService    config,
         IDiscordRestUserAPI        users,
         IDiscordRestGuildAPI       guilds,
         IDiscordRestChannelAPI     channels,
         IDiscordRestWebhookAPI     webhooks, 
-        IChannelLoggingService     channelLogger
+        IChannelLoggingService     channelLogger,
+        ILogger<InfractionService> logger
     )
     {
-        _logger        = logger;
         _mediator      = mediator;
+        _shardHelper   = shardHelper;
         _config        = config;
         _users         = users;
         _guilds        = guilds;
         _channels      = channels;
         _webhooks      = webhooks;
         _channelLogger = channelLogger;
+        _logger        = logger;
 
         _queueTimer = new(ProcessQueueAsync, TimeSpan.FromSeconds(5));
     }
@@ -572,6 +576,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
         }
 
         _logger.LogDebug("Enqueuing {Infractions} infractions.", infractions.Count());
+
+        infractions = infractions.Where(inf => _shardHelper.IsRelevantToCurrentShard(inf.GuildID));
+        
         _queue.AddRange(infractions);
         
         SilkMetric.LoadedInfractions.IncTo(_queue.Count);

@@ -203,6 +203,7 @@ public class Program
 
                 services
                    .AddRemoraServices()
+                   .AddSingleton<ShardHelper>()
                    .AddHostedService<ShardStatService>()
                    .AddSilkLogging(context.Configuration)
                    .AddSingleton<ReminderService>()
