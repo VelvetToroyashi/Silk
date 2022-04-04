@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -30,6 +31,7 @@ namespace Silk.Commands.Bot;
 [HelpCategory(Categories.Bot)]
 public class BotStatCommand : CommandGroup
 {
+    private readonly IMemoryCache           _cache;
     private readonly ICommandContext        _context;
     private readonly IRestHttpClient        _restClient;
     private readonly IDiscordRestChannelAPI _channelApi;
@@ -37,17 +39,21 @@ public class BotStatCommand : CommandGroup
     private readonly DiscordGatewayClient        _gateway;
     private readonly DiscordGatewayClientOptions _gatewayOptions;
     
-    public BotStatCommand(
+    public BotStatCommand
+    (
+        IMemoryCache                          cache,
         ICommandContext                       context,
         IRestHttpClient                       restClient,
         IDiscordRestChannelAPI                channelApi,
         DiscordGatewayClient                  gateway, 
-        IOptions<DiscordGatewayClientOptions> gatewayOptions)
+        IOptions<DiscordGatewayClientOptions> gatewayOptions
+    )
     {
-        _context             = context;
-        _restClient          = restClient;
-        _channelApi          = channelApi;
-        _gateway             = gateway;
+        _cache          = cache;
+        _context        = context;
+        _restClient     = restClient;
+        _channelApi     = channelApi;
+        _gateway        = gateway;
         _gatewayOptions = gatewayOptions.Value;
     }
 
@@ -61,7 +67,7 @@ public class BotStatCommand : CommandGroup
            .GetAsync<IReadOnlyList<IPartialGuild>>("users/@me/guilds",
                                                    b => b
                                                        .AddQueryParameter("with_counts", "true")
-                                                       .WithRateLimitContext());
+                                                       .WithRateLimitContext(_cache));
         
         if (!guildsResult.IsDefined(out var guilds))
             return Result.FromError(guildsResult.Error!);

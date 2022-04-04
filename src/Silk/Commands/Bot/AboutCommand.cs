@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -28,13 +29,15 @@ public class AboutCommand : CommandGroup
     private readonly IDiscordRestOAuth2API  _oauthApi;
     private readonly ICommandContext        _context;
     private readonly IRestHttpClient        _restClient;
+    private readonly IMemoryCache           _cache;
     
-    public AboutCommand(IDiscordRestChannelAPI channelApi, IDiscordRestOAuth2API oauthApi, ICommandContext context, IRestHttpClient restClient)
+    public AboutCommand(IDiscordRestChannelAPI channelApi, IDiscordRestOAuth2API oauthApi, ICommandContext context, IRestHttpClient restClient, IMemoryCache cache)
     {
         _channelApi = channelApi;
         _oauthApi   = oauthApi;
         _context    = context;
         _restClient = restClient;
+        _cache = cache;
     }
     
     [Command("about")]
@@ -53,7 +56,7 @@ public class AboutCommand : CommandGroup
                                                    "users/@me/guilds",
                                                    b =>
                                                    {
-                                                       b.WithRateLimitContext();
+                                                       b.WithRateLimitContext(_cache);
                                                        b.AddQueryParameter("with_counts", "true");
                                                    });
         
