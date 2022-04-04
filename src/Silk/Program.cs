@@ -85,7 +85,7 @@ public class Program
 
         var metrics = new KestrelMetricServer(6000);
 
-        metrics.Start();
+        try { metrics.Start(); } catch {}
         
         await host.RunAsync();
         
