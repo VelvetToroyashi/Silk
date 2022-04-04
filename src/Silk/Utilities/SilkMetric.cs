@@ -6,7 +6,7 @@ public static class SilkMetric
 {
     public static Gauge LoadedPhishingLinks = Metrics.CreateGauge("loaded_phishing_links", "Number of loaded phishing links");
     
-    public static Counter SeenPhishingLinks = Metrics.CreateCounter("seen_phishing_links", "Number of seen phishing links");
+    public static Counter SeenPhishingLinks = Metrics.CreateCounter("seen_phishing_links", "Number of seen phishing links", "domain");
     
     public static Counter AutoPhishingBan = Metrics.CreateCounter("auto_phishing_ban", "Number of auto phishing bans", "reason");
     
