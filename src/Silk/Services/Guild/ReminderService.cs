@@ -57,17 +57,17 @@ public sealed class ReminderService : IHostedService
     }
 
     public async Task CreateReminderAsync
-        (
-            DateTimeOffset   expiry,
-            Snowflake  ownerID,
-            Snowflake  channelID,
-            Snowflake?  messageID,
-            Snowflake? guildID,
-            string?    content,
-            string?    replyContent = null,
-            Snowflake? replyID       = null,
-            Snowflake? replyAuthorID = null
-        )
+    (
+        DateTimeOffset expiry,
+        Snowflake      ownerID,
+        Snowflake      channelID,
+        Snowflake?     messageID,
+        Snowflake?     guildID,
+        string?        content,
+        string?        replyContent  = null,
+        Snowflake?     replyID       = null,
+        Snowflake?     replyAuthorID = null
+    )
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
