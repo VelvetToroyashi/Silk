@@ -8,6 +8,7 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using Silk.Utilities;
 using StackExchange.Redis;
 
 namespace Silk.Responders;
@@ -29,7 +30,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
 
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringSetAsync(key, (long)gatewayEvent.Guilds.Count);
 
         return Result.FromSuccess();
@@ -42,7 +43,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         var db = _redis.GetDatabase();
 
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringIncrementAsync(key);
 
         return Result.FromSuccess();
@@ -55,7 +56,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringDecrementAsync(key);
         
         return Result.FromSuccess();
@@ -65,7 +66,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
+        var key = ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringIncrementAsync(key);
         
         return Result.FromSuccess();
@@ -75,7 +76,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
+        var key = ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringDecrementAsync(key);
         
         return Result.FromSuccess();
@@ -85,7 +86,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
+        var key = ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID);
         
         if (gatewayEvent.ChunkIndex is 0)
         {
