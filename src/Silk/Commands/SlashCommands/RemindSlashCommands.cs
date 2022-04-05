@@ -141,7 +141,7 @@ public class RemindSlashCommands : CommandGroup
     [Description("List all your reminders!")]
     public async Task<IResult> ListRemindersAsync()
     {
-        var reminders = _reminders.GetReminders(_context.User.ID).OrderBy(r => r.ExpiresAt);
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
         
         if (!reminders.Any())
             return await _interactions.EditOriginalInteractionResponseAsync
@@ -179,7 +179,7 @@ public class RemindSlashCommands : CommandGroup
         int reminderID
     )
     {
-        var reminders = _reminders.GetReminders(_context.User.ID);
+        var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
         
         if (reminders.All(r => r.Id != reminderID))
             return await _interactions.EditOriginalInteractionResponseAsync
