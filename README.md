@@ -1,6 +1,6 @@
 # Silk!
 
-Silk is a simple and the fastest Discord bot written in C# until proven otherwise. Silk is built on top of the [Remora.Discord](https://github.com/Nihlus/Remora.Discord) .NET Discord library, with the goal to not only be a great bot but to also fill in the gaps that some bots have. Silk aims to be a bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk is also made with large guilds in mind. Feel free to join the [Silk! Server](https://silkbot.cc/discord) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://silkbot.cc/invite)
+Silk! is a simple and the fastest Discord bot written in C# until proven otherwise. Silk! is built on top of the [Remora.Discord](https://github.com/Nihlus/Remora.Discord) .NET Discord library, with the goal to not only be a great bot but to also fill in the gaps that some bots have. Silk! aims to be a bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk! is also made with large guilds in mind. Feel free to join the [Silk! Server](https://silkbot.cc/discord) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://silkbot.cc/invite)
 
 [![Code Quality](https://www.codefactor.io/repository/github/VTPDevelopment/Silk/badge)](https://www.codefactor.io/repository/github/VTPDevelopment/silk)  
 ![Code Size](https://img.shields.io/github/languages/code-size/VTPDevelopment/Silk)  
@@ -25,17 +25,17 @@ Silk! is an open-source bot, and if you know C#, you're more than welcome to con
 
 ### **Database**
 
-Silk uses [PostgreSQL](https://www.postgresql.org/) for its backend database store. So if you don't have PostgreSQL installed, make sure to install it before trying to run the Visual Studio solution.
+Silk! uses [PostgreSQL](https://www.postgresql.org/) for its backend database store. So if you don't have PostgreSQL installed, make sure to install it before trying to run the Visual Studio solution.
 
 ---
 
 ### **Configuration / Secrets Management**
 
-To manage storage of the needed `Discord Bot Token`, `Database Connection String`, and other important project configuration / settings, Silk uses an `appSettings.json` file.
+To manage storage of the needed `Discord Bot Token`, `Database Connection String`, and other important project configuration / settings, Silk! uses an `appSettings.json` file.
 
 #### **Default**
 
-#### When you clone Silk, before running the project, you'll need to edit the template `appSettings.json` file in the following directory: `src\Silk`
+#### When you clone Silk!, before running the project, you'll need to edit the template `appSettings.json` file in the following directory: `src\Silk`
 
 For the **Database**, look for the `Persistence` section of the file, it will look something like this:
 
@@ -94,11 +94,11 @@ Before you start, you will want to make sure that you have both Postgres and Red
 
 If Silk! is also running in Docker, ensure that it's within the same network as both Postgres and Redis. To connect, simply reference the container name instead of `localhost` or an IP (e.g. `Server=postgres`).
 
-If you're starting fresh, just cloned the repo, then you'll need to make sure you've done the needed [Configuration](#configuration--secrets-management), before running or debugging Silk.
+If you're starting fresh, just cloned the repo, then you'll need to make sure you've done the needed [Configuration](#configuration--secrets-management), before running or debugging Silk!.
 
-If you're already using Silk, you may need to do any or all of the following to ensure that you have everything you need to run the latest and greatest!
+If you're already using Silk!, you may need to do any or all of the following to ensure that you have everything you need to run the latest and greatest!
 
-Silk wil automatically apply any applicable migrations to the database. If you're starting with a clean database, this may take a few seconds.
+Silk! will automatically apply any applicable migrations to the database. If you're starting with a clean database, this may take a few seconds.
 
 ---
 
