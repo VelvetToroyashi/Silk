@@ -46,6 +46,13 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringIncrementAsync(key);
 
+        if (gatewayEvent.MemberCount.IsDefined(out var gwm))
+        {
+            var current = await db.StringGetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID));
+            
+            await db.StringSetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), (long)current + gwm);
+        }
+
         return Result.FromSuccess();
     }
 
@@ -58,6 +65,16 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringDecrementAsync(key);
+
+        if (_cache.TryGetValue<IGuild>(gatewayEvent.ID, out var guild) || _cache.TryGetPreviousValue(gatewayEvent.ID, out guild))
+        {
+            if (!guild.MemberCount.IsDefined(out var gwm))
+                return Result.FromSuccess();
+            
+            var current = await db.StringGetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID));
+            
+            await db.StringSetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), (long)current - gwm);
+        }
         
         return Result.FromSuccess();
     }
