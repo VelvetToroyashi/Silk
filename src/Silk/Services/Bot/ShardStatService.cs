@@ -42,8 +42,8 @@ public class ShardStatService : BackgroundService
             {
                 var cpu = await GetCPUUsage(stoppingToken);
                 var mem = _process.WorkingSet64 / 1024 / 1024;
-                var lat = _client.Latency.ToString();
-                var upt = (DateTime.UtcNow - _process.StartTime).ToString();
+                var lat = _client.Latency.ToString("hh\\:mm\\:ss");
+                var upt = (DateTime.UtcNow - _process.StartTime).ToString("hh\\:mm\\:ss");
                 
                 await db.StringSetAsync(cpuKey, cpu);
                 await db.StringSetAsync(memKey, mem);
