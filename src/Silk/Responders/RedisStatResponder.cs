@@ -38,27 +38,32 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
 
     public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
     {
-        if (gatewayEvent.IsUnavailable.IsDefined())
+        var present = gatewayEvent.IsUnavailable.IsDefined(out var unavailable);
+
+        if (unavailable)
             return Result.FromSuccess();
         
         var db = _redis.GetDatabase();
-
-        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
-        await db.StringIncrementAsync(key);
-
-        if (gatewayEvent.MemberCount.IsDefined(out var gwm))
+        
+        if (gatewayEvent.MemberCount.IsDefined(out var gwm) || gatewayEvent.ApproximateMemberCount.IsDefined(out gwm))
         {
             var current = await db.StringGetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID));
             
             await db.StringSetAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), (long)current + gwm);
         }
-
+        
+        if (present)
+            return Result.FromSuccess();
+        
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
+        await db.StringIncrementAsync(key);
+        
         return Result.FromSuccess();
     }
 
     public async Task<Result> RespondAsync(IGuildDelete gatewayEvent, CancellationToken ct = default)
     {
-        if (gatewayEvent.IsUnavailable.IsDefined())
+        if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess();
         
         var db = _redis.GetDatabase();
