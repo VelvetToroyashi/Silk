@@ -60,6 +60,9 @@ public class ShardsCommand : CommandGroup
             sb.AppendLine("```cs");
             sb.AppendLine($"CPU: {db.StringGet(ShardHelper.GetShardCPUUsageStatKey(i))}%");
             sb.AppendLine($"Memory: {db.StringGet(ShardHelper.GetShardMemoryStatKey(i))} MB");
+            sb.AppendLine($"Uptime: {db.StringGet(ShardHelper.GetShardUptimeStatKey(i))}");
+            sb.AppendLine($"Guilds: {db.StringGet(ShardHelper.GetShardGuildCountStatKey(i))}");
+            sb.AppendLine($"Members: {db.StringGet(ShardHelper.GetShardUserCountStatKey(i))}");
             sb.AppendLine("```");
             
             fields.Add(new($"Shard {i} {isCurrent}", sb.ToString(), true));
@@ -73,6 +76,5 @@ public class ShardsCommand : CommandGroup
         };
         
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
-        
     }
 }

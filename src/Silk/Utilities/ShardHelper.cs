@@ -35,4 +35,10 @@ public sealed class ShardHelper
     
     public static string GetShardMemoryStatKey(int shardID)
         => $"shard:{shardID}:stat:memory";
+    
+    public static string GetShardLatencyStatKey(int shardID)
+        => $"shard:{shardID}:stat:latency";
+    
+    public static string GetShardUptimeStatKey(int shardID)
+        => $"shard:{shardID}:stat:uptime";
 }
