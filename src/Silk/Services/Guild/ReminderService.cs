@@ -121,17 +121,14 @@ public sealed class ReminderService : IHostedService
     private async Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
         _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
-
-        Result dispatchResult;
         
         using (SilkMetric.ReminderDispatchTime.NewTimer())
         {
-            dispatchResult = (reminder.GuildID ?? reminder.MessageID) is null 
-                ? await AttemptDispatchDMReminderAsync(reminder) 
-                : await AttemptDispatchReminderAsync(reminder);
+            if ((reminder.GuildID ?? reminder.MessageID) is null)
+                return await AttemptDispatchDMReminderAsync(reminder);
+            
+            return await AttemptDispatchReminderAsync(reminder);
         }
-
-        return dispatchResult;
     }
 
     /// <summary>
