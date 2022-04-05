@@ -78,7 +78,8 @@ public sealed class ReminderService : IHostedService
     /// </summary>
     /// <param name="userID">The ID of the user to search reminders for.</param>
     /// <returns>The specified user's reminders.</returns>
-    public IEnumerable<ReminderEntity> GetReminders(Snowflake userID) => _reminders.Where(r => r.OwnerID == userID);
+    public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
+        => _mediator.Send(new GetRemindersForUser.Request(userID));
 
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
