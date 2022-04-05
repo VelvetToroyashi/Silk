@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.Gateway;
+using Silk.Utilities;
 using StackExchange.Redis;
 
 namespace Silk.Services.Bot;
@@ -28,8 +29,8 @@ public class ShardStatService : BackgroundService
     {
         var db = _redis.GetDatabase();
 
-        var cpuKey = $"shard:{_shard.ShardID}:stats:cpu";
-        var memKey = $"shard:{_shard.ShardID}:stats:mem";
+        var cpuKey = ShardHelper.GetShardCPUUsageStatKey(_shard.ShardID);
+        var memKey = ShardHelper.GetShardMemoryStatKey(_shard.ShardID);
         
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -62,7 +63,7 @@ public class ShardStatService : BackgroundService
 
         var usage = cpuDelta / (3000 * Environment.ProcessorCount);
         
-        return usage * 100;
+        return Math.Truncate(usage * 100);
     }
     
 }
