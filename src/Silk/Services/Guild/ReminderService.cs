@@ -71,6 +71,7 @@ public sealed class ReminderService : IHostedService
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
+        SilkMetric.LoadedReminders.Inc();
         _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);
     }
 
