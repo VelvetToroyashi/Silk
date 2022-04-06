@@ -9,12 +9,15 @@ namespace Silk.Utilities;
 
 public static class TimeHelper
 {
-    public static DateTimeOffset? Extract(string input) => ExtractImpl(input);
+    public static DateTimeOffset? Extract(string? input) => ExtractImpl(input);
 
-    public static DateTimeOffset? DetectTime(this string input) => Extract(input);
+    public static DateTimeOffset? DetectTime(this string? input) => Extract(input);
 
-    private static DateTimeOffset? ExtractImpl(string input)
+    private static DateTimeOffset? ExtractImpl(string? input)
     {
+        if (input is null)
+            return null;
+        
         var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(input, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
 
         if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
