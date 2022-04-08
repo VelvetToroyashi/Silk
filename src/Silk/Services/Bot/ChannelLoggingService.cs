@@ -132,6 +132,7 @@ public class ChannelLoggingService : IChannelLoggingService
         switch (re.Error.Code)
         {
             case DiscordError.MissingAccess:
+            case DiscordError.MissingPermission:
                 _logger.LogError("Configured logging channel for {Guild}➜{Channel} exists, but is locked.", guildID, channelID);
                 break;
             case DiscordError.UnknownChannel:
@@ -144,7 +145,7 @@ public class ChannelLoggingService : IChannelLoggingService
                 _logger.LogError("Configured logging channel for {Guild}➜{Channel} has webhook logging, but the webhook token is invalid.", guildID, channelID);
                 break;
             default:
-                _logger.LogError("Something catastrophic happened while logging to {Guild}➜{Channel}.", guildID, channelID);
+                _logger.LogError("Something catastrophic happened while logging to {Guild}➜{Channel}. ({Error})", guildID, channelID, re.Error.Code);
                 break;
         }
     }

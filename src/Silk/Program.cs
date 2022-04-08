@@ -211,7 +211,6 @@ public class Program
                    .AddSingleton<PhishingGatewayService>()
                    .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
                    .AddSingleton<PhishingDetectionService>()
-                   .AddScoped<SuspiciousUserDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
@@ -244,7 +243,6 @@ public class Program
                          slo.AddDiagnosticSourceIntegration();
                      }
                     )
-                   .AddScoped<PhishingAvatarDetectionService>()
                    .AddHttpClient
                    (
                     "ravy-api",
