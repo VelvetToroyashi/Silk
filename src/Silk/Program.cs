@@ -135,6 +135,8 @@ public class Program
                    .AddRemoraServices()
                    .AddSilkLogging(context.Configuration)
                    .AddHostedService<HeartbeatLogger>()
+                   .AddSingleton<ChannelLockerService>()
+                   .AddHostedService(s => s.GetRequiredService<ChannelLockerService>())
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()

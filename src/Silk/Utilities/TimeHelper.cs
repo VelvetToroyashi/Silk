@@ -17,6 +17,11 @@ public static class TimeHelper
     {
         if (input is null)
             return null;
+
+        var basicParseResult = MicroTimeParser.TryParse(input);
+
+        if (basicParseResult is not null)
+            return DateTimeOffset.UtcNow + basicParseResult;
         
         var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(input, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
+using Silk.Data.Entities.Channels;
 
 namespace Silk.Data;
 
@@ -15,6 +16,7 @@ public class GuildContext : DbContext
     public DbSet<GuildEntity>             Guilds             { get; set; }
     public DbSet<ReminderEntity>          Reminders          { get; set; }
     public DbSet<InfractionEntity>        Infractions        { get; set; }
+    public DbSet<ChannelLockEntity>       ChannelLocks       { get; set; }
     public DbSet<GuildConfigEntity>       GuildConfigs       { get; set; }
     public DbSet<GuildGreetingEntity>     GuildGreetings     { get; set; }
     public DbSet<PendingGreetingEntity>   PendingGreetings   { get; set; }
@@ -34,5 +36,6 @@ public class GuildContext : DbContext
 
         builder.Properties<Snowflake>().HaveConversion(typeof(SnowflakeConverter));
         builder.Properties<Snowflake?>().HaveConversion(typeof(NullableSnowflakeConverter));
+        //builder.Properties<Snowflake[]>().HaveConversion(typeof(SnowflakeArrayConverter));
     }
 }

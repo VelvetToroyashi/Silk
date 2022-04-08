@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Remora.Discord.API;
 using Remora.Rest.Core;
@@ -12,7 +15,7 @@ namespace Silk.Data;
 /// </summary>
 public sealed class SnowflakeConverter : ValueConverter<Snowflake, ulong>
 {
-    private static readonly ConverterMappingHints _defaultHints = new(precision: 20, scale: 0);
+    internal static readonly ConverterMappingHints _defaultHints = new(precision: 20, scale: 0);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SnowflakeConverter"/> class.
@@ -20,6 +23,12 @@ public sealed class SnowflakeConverter : ValueConverter<Snowflake, ulong>
     public SnowflakeConverter()
         : base(sf => sf.Value, value => DiscordSnowflake.New(value), _defaultHints)
     { }
+}
+
+public sealed class SnowflakeArrayConverter : ValueConverter<Snowflake[], ulong[]>
+{
+    public SnowflakeArrayConverter() 
+        : base(sf => sf.Select(x => x.Value).ToArray(), sf => sf.Select(DiscordSnowflake.New).ToArray(), SnowflakeConverter._defaultHints) { }
 }
 
 public sealed class NullableSnowflakeConverter : ValueConverter<Snowflake?, ulong?>
