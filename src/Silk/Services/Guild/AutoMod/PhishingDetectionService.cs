@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -8,6 +9,7 @@ using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using FuzzySharp.SimilarityRatio.Scorer.Composite;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -95,12 +97,17 @@ public class PhishingDetectionService
             return Result.FromError(cdnResult.Error);
         
         var url = cdnResult.Entity;
-        
-        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.85");
 
-        if (!response.Matched)
-            return Result.FromSuccess();
-        
+        RavyAPIResponse response;
+
+        using (SilkMetric.PhishingDetection.WithLabels("avatar").NewTimer())
+        {
+            response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.85");
+
+            if (!response.Matched)
+                return Result.FromSuccess();
+        }
+
         _logger.LogDebug("Detected suspicious avatar in {TimeSpent:N0}ms", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         
         var selfResult = await _users.GetCurrentUserAsync();
@@ -136,12 +143,6 @@ public class PhishingDetectionService
         if (!detection.isSuspicious)
             return Result.FromSuccess();
 
-        if (user.IsBot.IsDefined(out var bot) && bot)
-        {
-            _logger.LogTrace("Suspiciously named bot: {BotName}, similar to {SimilarName}", user.Username, detection.mostSimilarTo);
-            return Result.FromSuccess();
-        }
-
         var self = await _users.GetCurrentUserAsync();
 
         if (!self.IsSuccess)
@@ -166,6 +167,8 @@ public class PhishingDetectionService
     
     private (bool isSuspicious, string mostSimilarTo) IsSuspectedPhishingUsername(string username)
     {
+        using var _ = SilkMetric.PhishingDetection.WithLabels("username").NewTimer();
+        
         var normalized = username.Unidecode();
 
         var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames, s => s, ScorerCache.Get<WeightedRatioScorer>());
@@ -192,7 +195,13 @@ public class PhishingDetectionService
 
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
         
-        var links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value).Where(_phishGateway.IsBlacklisted);
+
+        IEnumerable<string> links;
+
+        using (SilkMetric.PhishingDetection.WithLabels("message").NewTimer())
+        {
+            links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value).Where(_phishGateway.IsBlacklisted);
+        }
 
         foreach (var match in links)
             SilkMetric.SeenPhishingLinks.WithLabels(match).Inc();
