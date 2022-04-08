@@ -132,6 +132,7 @@ public class ChannelLoggingService : IChannelLoggingService
         switch (re.Error.Code)
         {
             case DiscordError.MissingAccess:
+            case DiscordError.MissingPermission:
                 _logger.LogError("Configured logging channel for {Guild}➜{Channel} exists, but is locked.", guildID, channelID);
                 break;
             case DiscordError.UnknownChannel:
