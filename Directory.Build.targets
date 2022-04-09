@@ -22,7 +22,7 @@
         <PackageReference Update="FuzzySharp" Version="2.0.2" />
         <PackageReference Update="JetBrains.Annotations" Version="2021.3.0" />
         
-        <PackageReference Update="FluentAssertions" Version="6.5.1" />
+        <PackageReference Update="FluentAssertions" Version="6.6.0" />
         <PackageReference Update="FluentValidation" Version="10.4.0" />
         <PackageReference Update="FluentValidation.AspNetCore" Version="10.4.0" />
         <PackageReference Update="FluentValidation.DependencyInjectionExtensions" Version="10.4.0" />
