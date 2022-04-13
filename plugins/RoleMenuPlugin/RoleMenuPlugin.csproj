@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyVersion>3.0.2</AssemblyVersion>
+        <AssemblyVersion>3.0.3</AssemblyVersion>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
