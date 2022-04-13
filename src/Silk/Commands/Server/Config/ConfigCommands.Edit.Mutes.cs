@@ -22,13 +22,22 @@ public partial class ConfigCommands
         [Description("Adjust the configured mute role, or setup native mutes (powered by Discord's Timeout feature).")]
         public async Task<IResult> MuteAsync
         (
-            [Description("The role to mute users with.")] IRole? mute,
-            [Option("native")] [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission.")]
+            [Description("The role to mute users with.")] 
+            IRole? mute = null,
+            
+            [Option("native")]
+            [Description("Whether to use the native mute functionality. This requires the `Timeout Members` permission.")]
             bool? useNativeMute = null
             //It's worth noting that there WAS an option here to have Silk automatically configure the role,
             // but between ratelimits and the fact that permissions suck, it was removed.
         )
         {
+            if (mute is null && useNativeMute is null)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
+                
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify either a role or whether to use the native mute functionality.");
+            }
 
             var selfResult = await _guilds.GetCurrentGuildMemberAsync(_users, _context.GuildID.Value);
 

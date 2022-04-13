@@ -67,13 +67,13 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.5" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.7" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
-        <PackageReference Include="Sentry" Version="3.15.0" />
-        <PackageReference Include="Sentry.DiagnosticSource" Version="3.15.0" />
-        <PackageReference Include="Sentry.Extensions.Logging" Version="3.15.0" />
-        <PackageReference Include="Sentry.Serilog" Version="3.15.0" />
+        <PackageReference Include="Sentry" Version="3.16.0" />
+        <PackageReference Include="Sentry.DiagnosticSource" Version="3.16.0" />
+        <PackageReference Include="Sentry.Extensions.Logging" Version="3.16.0" />
+        <PackageReference Include="Sentry.Serilog" Version="3.16.0" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.Expressions" />
         <PackageReference Include="Serilog.Extensions.Hosting" />
