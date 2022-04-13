@@ -60,6 +60,8 @@ public class SilkConfigurationOptions
 	/// </summary>
 	public string? RavyAPIKey { get; set; } = null;
 	
+	public SilkRedisOptions Redis { get; set; } = new();
+	
 	/// <summary>
 	///     Property for holding Persistence options (property name matching sub-key property in configuration file)
 	/// </summary>
@@ -79,6 +81,32 @@ public class SilkConfigurationOptions
 	///     Property for holding serialized emoji Ids in json form to populate <see cref="Silk.Shared.Constants.Emojis" />.
 	/// </summary>
 	public SilkEmojiOptions? Emojis { get; set; }
+}
+
+/// <summary>
+/// Class which holds configuration information for Redis persistence.
+/// </summary>
+public class SilkRedisOptions
+{
+	/// <summary>
+	/// The hostname of the Redis server. Defaults to localhost.
+	/// </summary>
+	public string Host { get; set; } = "localhost";
+	
+	/// <summary>
+	/// The port of the Redis server. Defaults to 6379.
+	/// </summary>
+	public int Port { get; set; } = 6379;
+	
+	/// <summary>
+	/// Optional password for the Redis server.
+	/// </summary>
+	public string? Password { get; set; }
+	
+	/// <summary>
+	/// Optional database index for the Redis server.
+	/// </summary>
+	public int Database { get; set; }
 }
 
 /// <summary>
