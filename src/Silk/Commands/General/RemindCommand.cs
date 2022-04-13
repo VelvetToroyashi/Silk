@@ -192,7 +192,7 @@ public class ReminderCommands : CommandGroup
     [Description("Lists all of your reminders.")]
     public async Task<IResult> ListAsync()
     {
-        var reminders = _reminders.GetReminders(_context.User.ID).OrderBy(r => r.ExpiresAt);
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
 
         if (!reminders.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
@@ -236,7 +236,7 @@ public class ReminderCommands : CommandGroup
     [Description("Cancels a reminder.")]
     public async Task<IResult> CancelAsync([Description("The ID of the reminder you wish to cancel.")] int id)
     {
-        var reminders = _reminders.GetReminders(_context.User.ID);
+        var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
         
         if (reminders.All(r => r.Id != id))
             return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders, or at least not one by that ID!");

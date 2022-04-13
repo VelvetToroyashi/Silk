@@ -14,6 +14,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Reminders;
 using Silk.Services.Guild;
+using Silk.Utilities;
 
 namespace Silk.Tests.Services;
 
@@ -24,7 +25,7 @@ public class ReminderServiceTests
     {
         // Arrange
         var mediatorMock    = new Mock<IMediator>();
-        var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>());
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
 
         // Act
         await reminderService.StartAsync(default);
@@ -40,8 +41,7 @@ public class ReminderServiceTests
     {
         // Arrange
         var mediatorMock    = new Mock<IMediator>();
-        var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>());
-
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
         // Act
         await reminderService.CreateReminderAsync(default, default, default, default, default, default);
 
@@ -57,8 +57,8 @@ public class ReminderServiceTests
         var userAPI      = new Mock<IDiscordRestUserAPI>();
         var channelAPI   = new Mock<IDiscordRestChannelAPI>();
 
-        var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, channelAPI.Object);
-
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
+        
         userAPI.Setup(u => u.CreateDMAsync(It.IsAny<Snowflake>(), default))
                .ReturnsAsync(new Channel(new(1337), ChannelType.DM));
 
@@ -93,8 +93,8 @@ public class ReminderServiceTests
         var userAPI      = new Mock<IDiscordRestUserAPI>();
         var channelAPI   = new Mock<IDiscordRestChannelAPI>();
 
-        var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, channelAPI.Object);
-
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
+        
         userAPI.Setup(u => u.CreateDMAsync(It.IsAny<Snowflake>(), default))
                .ReturnsAsync(new Channel(new(1337), ChannelType.DM));
 
@@ -131,8 +131,7 @@ public class ReminderServiceTests
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
                     .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
-        var reminderService = new ReminderService(NullLogger<ReminderService>.Instance, mediatorMock.Object, userAPI.Object, Mock.Of<IDiscordRestChannelAPI>());
-
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
 
         // Act
         await reminderService.StartAsync(default);
@@ -159,9 +158,8 @@ public class ReminderServiceTests
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
                     .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
-        var reminderService = new ReminderService(loggerMock.Object, mediatorMock.Object, userAPI.Object, Mock.Of<IDiscordRestChannelAPI>());
-
-
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
+        
         // Act
         await reminderService.StartAsync(default);
         await reminderService.StopAsync(default);
@@ -208,7 +206,7 @@ public class ReminderServiceTests
         mediatorMock.Setup(m => m.Send(It.IsAny<IRequest<IEnumerable<ReminderEntity>>>(), default))
                     .ReturnsAsync(new[] { new ReminderEntity { ExpiresAt = DateTime.MinValue } });
 
-        var reminderService = new ReminderService(loggerMock.Object, mediatorMock.Object, userAPI.Object, channelAPI.Object);
+        var reminderService = new ReminderService(mediatorMock.Object, Mock.Of<ShardHelper>(), Mock.Of<IDiscordRestUserAPI>(), Mock.Of<IDiscordRestChannelAPI>(), NullLogger<ReminderService>.Instance);
 
         // Act
         await reminderService.StartAsync(default);

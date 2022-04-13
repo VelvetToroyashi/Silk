@@ -17,29 +17,40 @@ using Silk.Data.MediatR.Reminders;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
 public sealed class ReminderService : IHostedService
 {
+    
+    private readonly IMediator                _mediator;
+    private readonly ShardHelper              _shardhelper;
+    private readonly IDiscordRestUserAPI      _users;
+    private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<ReminderService> _logger;
 
-    private readonly IMediator _mediator;
-
-    private readonly IDiscordRestUserAPI    _userApi;
-    private readonly IDiscordRestChannelAPI _channelApi;
-
+    
     // When it comes to sharding, ideally this is only the reminders for the guilds that are in the shard.
     // Perhaps we'll filter manually with `.Where(r => r.GuildID >> 22 % ShardCount == ShardId)`
     private          List<ReminderEntity> _reminders = new(); 
     private readonly AsyncTimer           _timer;
 
-    public ReminderService(ILogger<ReminderService> logger, IMediator mediator, IDiscordRestUserAPI userApi, IDiscordRestChannelAPI channelApi)
+    public ReminderService
+    (
+        
+        IMediator                mediator,
+        ShardHelper              shardhelper,
+        IDiscordRestUserAPI      users,
+        IDiscordRestChannelAPI   channels,
+        ILogger<ReminderService> logger
+    )
     {
-        _logger     = logger;
-        _mediator   = mediator;
-        _userApi    = userApi;
-        _channelApi = channelApi;
+        _mediator    = mediator;
+        _shardhelper = shardhelper;
+        _users       = users;
+        _channels    = channels;
+        _logger      = logger;
 
         _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
     }
@@ -67,7 +78,8 @@ public sealed class ReminderService : IHostedService
     /// </summary>
     /// <param name="userID">The ID of the user to search reminders for.</param>
     /// <returns>The specified user's reminders.</returns>
-    public IEnumerable<ReminderEntity> GetReminders(Snowflake userID) => _reminders.Where(r => r.OwnerID == userID);
+    public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
+        => _mediator.Send(new GetRemindersForUser.Request(userID));
 
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
@@ -128,17 +140,17 @@ public sealed class ReminderService : IHostedService
         {
             var reply = reminder.ReplyMessageID.Value;
             
-            var replyResult = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reply);
+            var replyResult = await _channels.GetChannelMessageAsync(reminder.ChannelID, reply);
             replyExists = replyResult.IsSuccess;
         }
 
-        var reminderMessage = await _channelApi.GetChannelMessageAsync(reminder.ChannelID, reminder.MessageID.Value);
+        var reminderMessage = await _channels.GetChannelMessageAsync(reminder.ChannelID, reminder.MessageID.Value);
 
         var originalMessageExists = reminderMessage.IsSuccess;
 
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
-        var dispatchResult = await _channelApi.CreateMessageAsync
+        var dispatchResult = await _channels.CreateMessageAsync
             (
              reminder.ChannelID,
              dispatchMessage,
@@ -238,7 +250,7 @@ public sealed class ReminderService : IHostedService
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        Result<IChannel> channelRes = await _userApi.CreateDMAsync(reminder.OwnerID);
+        Result<IChannel> channelRes = await _users.CreateDMAsync(reminder.OwnerID);
 
         if (!channelRes.IsSuccess)
         {
@@ -247,7 +259,7 @@ public sealed class ReminderService : IHostedService
             return Result.FromError(channelRes.Error);
         }
 
-        Result<IMessage> messageRes = await _channelApi.CreateMessageAsync(channelRes.Entity.ID, message);
+        Result<IMessage> messageRes = await _channels.CreateMessageAsync(channelRes.Entity.ID, message);
 
         if (!messageRes.IsSuccess)
         {
@@ -265,7 +277,7 @@ public sealed class ReminderService : IHostedService
         _logger.LogInformation(EventIds.Service, "Loading reminders...");
 
         IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request(), cancellationToken);
-        _reminders = reminders.ToList();
+        _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID ?? default)).ToList();
 
         _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime:N0} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
 
