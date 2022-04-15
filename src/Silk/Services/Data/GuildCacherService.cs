@@ -32,11 +32,10 @@ public class GuildCacherService
 
     private readonly object _obj = new();
 
-    private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n"      +
-                                                    $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "           +
-                                                    $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"           +
-                                                    "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n" +
-                                                    "(Currently unavailable in V3, sorry! :c)";
+    private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n" +
+                                                    $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "      +
+                                                    $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"      +
+                                                    "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n";
     private readonly IDiscordRestChannelAPI _channelApi;
     private readonly IDiscordRestGuildAPI   _guildApi;
 
