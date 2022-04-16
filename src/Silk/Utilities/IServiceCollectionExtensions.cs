@@ -107,7 +107,6 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages  |
@@ -115,7 +114,6 @@ public static class IServiceCollectionExtensions
             })
            .Configure<CacheSettings>(cs =>
             {
-                
                 cs
                   .SetDefaultAbsoluteExpiration(null)
                   .SetSlidingExpiration<IChannel>(null)
