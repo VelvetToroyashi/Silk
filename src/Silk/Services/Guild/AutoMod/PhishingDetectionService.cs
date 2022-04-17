@@ -77,6 +77,9 @@ public class PhishingDetectionService
 
     public async Task<Result> HandlePotentialSuspiciousAvatarAsync(Snowflake guildID, IUser user)
     {
+        if (user.IsBot.IsDefined(out var bot) && bot)
+            return Result.FromSuccess();
+        
         var now = DateTimeOffset.UtcNow;
 
         var config = await _config.GetModConfigAsync(guildID);
