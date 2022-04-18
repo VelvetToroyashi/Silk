@@ -66,9 +66,7 @@ public class MessageLoggerService
         if (exempt)
             return Result.FromSuccess();
 
-        var cacheResult = await _cache.TryGetValueAsync<IMessage>(KeyHelpers.CreateMessageCacheKey(guildID, channelID));
-        
-        
+        var cacheResult = await _cache.TryGetValueAsync<IMessage>(KeyHelpers.CreateMessageCacheKey(channelID, message.ID.Value));
         
         var beforeContent = !cacheResult.IsDefined(out var previousMessage) 
             ? "It doesn't seem I was around when this happened. Sorry." 
