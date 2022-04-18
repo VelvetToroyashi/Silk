@@ -34,7 +34,7 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
             (
              message,
              channel,
-             gatewayEvent.GuildID,
+             cached.GuildID,
              cached.Author,
              cached.Member,
              gatewayEvent.Content.IsDefined(out var content) ? content : cached.Content,
