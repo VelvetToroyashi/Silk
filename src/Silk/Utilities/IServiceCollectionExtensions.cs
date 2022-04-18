@@ -85,8 +85,7 @@ public static class IServiceCollectionExtensions
            .AddDiscordCommands(true)
            .AddSlashCommands(asm)
            .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
-           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>()
-           .AddDiscordCaching();
+           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>();
         
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
