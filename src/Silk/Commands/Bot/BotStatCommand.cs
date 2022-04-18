@@ -17,6 +17,7 @@ using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Gateway;
 using Remora.Discord.Rest.Extensions;
@@ -31,7 +32,7 @@ namespace Silk.Commands.Bot;
 [HelpCategory(Categories.Bot)]
 public class BotStatCommand : CommandGroup
 {
-    private readonly IMemoryCache           _cache;
+    private readonly ICacheProvider         _cache;
     private readonly ICommandContext        _context;
     private readonly IRestHttpClient        _restClient;
     private readonly IDiscordRestChannelAPI _channelApi;
@@ -41,7 +42,7 @@ public class BotStatCommand : CommandGroup
     
     public BotStatCommand
     (
-        IMemoryCache                          cache,
+        ICacheProvider                        cache,
         ICommandContext                       context,
         IRestHttpClient                       restClient,
         IDiscordRestChannelAPI                channelApi,

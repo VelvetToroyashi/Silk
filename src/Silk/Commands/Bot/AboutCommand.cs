@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Commands.Groups;
+using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
@@ -29,9 +30,9 @@ public class AboutCommand : CommandGroup
     private readonly IDiscordRestOAuth2API  _oauthApi;
     private readonly ICommandContext        _context;
     private readonly IRestHttpClient        _restClient;
-    private readonly IMemoryCache           _cache;
+    private readonly ICacheProvider           _cache;
     
-    public AboutCommand(IDiscordRestChannelAPI channelApi, IDiscordRestOAuth2API oauthApi, ICommandContext context, IRestHttpClient restClient, IMemoryCache cache)
+    public AboutCommand(IDiscordRestChannelAPI channelApi, IDiscordRestOAuth2API oauthApi, ICommandContext context, IRestHttpClient restClient, ICacheProvider cache)
     {
         _channelApi = channelApi;
         _oauthApi   = oauthApi;

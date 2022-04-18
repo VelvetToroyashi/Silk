@@ -90,11 +90,12 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
             }
         };
 
-        var renderedMessage = GenerateBulkDeleteData(gatewayEvent.ChannelID, gatewayEvent.IDs);
+        var renderedMessage = await GenerateBulkDeleteDataAsync(gatewayEvent.ChannelID, gatewayEvent.IDs);
 
         return await _logging.LogAsync(guildConfig.Logging.UseWebhookLogging, guildConfig.Logging.MessageDeletes!, null, new[] { embed }, new[] { renderedMessage });
     }
-    private FileData GenerateBulkDeleteData(Snowflake channelID, IReadOnlyList<Snowflake> IDs)
+    
+    private async Task<FileData> GenerateBulkDeleteDataAsync(Snowflake channelID, IReadOnlyList<Snowflake> IDs)
     {
         var sb = new StringBuilder();
 
@@ -103,7 +104,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
             var ID  = IDs[i];
             var key = KeyHelpers.CreateMessageCacheKey(channelID, ID);
 
-            if (!_cache.TryGetPreviousValue<IMessage>(key, out var message))
+            if (!(await _cache.TryGetPreviousValueAsync<IMessage>(key)).IsDefined(out var message))
             {
                 sb.AppendLine($"<Message not found> | {ID}");
                 continue;
@@ -114,9 +115,9 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
             if (message.MessageReference.IsDefined(out var reference))
             {
                 var replyKey = KeyHelpers.CreateMessageCacheKey(channelID, reference.MessageID.Value);
-                var cachedReply = _cache.TryGetPreviousValue<IMessage>(replyKey, out var reply);
+                var replyResult = await _cache.TryGetPreviousValueAsync<IMessage>(replyKey);
 
-                if (!cachedReply)
+                if (!replyResult.IsDefined(out var reply))
                 {
                     sb.AppendLine($"<Reply not found> [{reference.MessageID}]");
                 }
