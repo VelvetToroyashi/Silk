@@ -15,8 +15,8 @@ public static class StringConstants
     /// <summary>
     /// The current version of Silk!.
     /// </summary>
-    public const string Version = "3.3.0";
-    
+    public const string Version = "3.4.1";
+
     /// <summary>
     /// A special expression based log template that allows for conditional event ID insertion.
     /// </summary>

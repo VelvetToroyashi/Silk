@@ -10,15 +10,12 @@ namespace Silk.Responders;
 [ResponderGroup(ResponderGroup.Early)]
 public class SuspiciousMemberAvatarResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberUpdate>
 {
-    private readonly PhishingAvatarDetectionService _avatarService;
-    public SuspiciousMemberAvatarResponder(PhishingAvatarDetectionService avatarService)
-    {
-        _avatarService = avatarService;
-    }
+    private readonly PhishingDetectionService _avatarService;
+    public SuspiciousMemberAvatarResponder(PhishingDetectionService avatarService) => _avatarService = avatarService;
 
-    public Task<Result> RespondAsync(IGuildMemberAdd    gatewayEvent, CancellationToken ct = default) 
-        => _avatarService.CheckAvatarAsync(gatewayEvent);
+    public Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default) 
+        => _avatarService.HandlePotentialSuspiciousAvatarAsync(gatewayEvent.GuildID, gatewayEvent.User.Value);
     
     public Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
-        => _avatarService.CheckAvatarAsync(gatewayEvent);
+        => _avatarService.HandlePotentialSuspiciousAvatarAsync(gatewayEvent.GuildID, gatewayEvent.User);
 }

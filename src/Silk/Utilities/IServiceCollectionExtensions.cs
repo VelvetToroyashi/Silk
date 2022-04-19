@@ -12,6 +12,7 @@ using Remora.Commands.Services;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Conditions;
@@ -19,6 +20,7 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
@@ -39,6 +41,7 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using StackExchange.Redis;
 
 namespace Silk.Utilities;
 
@@ -46,14 +49,19 @@ public static class IServiceCollectionExtensions
 {
     public static IHostBuilder AddRemoraHosting(this IHostBuilder hostBuilder)
     {
-        return hostBuilder.AddDiscordService(s =>
-        {
-            SilkConfigurationOptions? config = s.Get<IConfiguration>()!.GetSilkConfigurationOptionsFromSection();
-
-            return config.Discord.BotToken;
-        });
+        hostBuilder.ConfigureServices
+            (
+             s =>
+             {
+                 s.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
+                 s.AddSingleton<ShardAwareGateweayHelper>();
+                 s.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
+             }
+            );
+        
+        return hostBuilder;
     }
-
+    
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
         var asm = Assembly.GetEntryAssembly()!;
@@ -77,8 +85,7 @@ public static class IServiceCollectionExtensions
            .AddDiscordCommands(true)
            .AddSlashCommands(asm)
            .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
-           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>()
-           .AddDiscordCaching();
+           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>();
         
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
@@ -93,12 +100,12 @@ public static class IServiceCollectionExtensions
         services.AddPostExecutionEvent<AfterSlashHandler>();
 
         services
+           .AddSingleton<IShardIdentification>(s => s.GetRequiredService<IOptions<DiscordGatewayClientOptions>>().Value.ShardIdentification!)
            .Configure<PaginatedAppearanceOptions>(pap => pap with { HelpText = "Use the buttons to navigate and the close button to stop."})
            .Configure<DiscordGatewayClientOptions>(gw =>
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages  |
@@ -106,7 +113,6 @@ public static class IServiceCollectionExtensions
             })
            .Configure<CacheSettings>(cs =>
             {
-                
                 cs
                   .SetDefaultAbsoluteExpiration(null)
                   .SetSlidingExpiration<IChannel>(null)
@@ -157,7 +163,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
+                                    //.MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         Log.Logger = config.LogLevel switch

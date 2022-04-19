@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoFake" Version="0.4.3.6" />
+        <PackageReference Include="AutoFake" Version="0.4.3.7" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />

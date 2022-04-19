@@ -29,6 +29,7 @@ using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
+using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
@@ -44,6 +45,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     private readonly ILogger<InfractionService> _logger;
     private readonly IMediator                  _mediator;
+    private readonly ShardHelper                _shardHelper;
 
     private readonly GuildConfigCacheService _config;
 
@@ -57,24 +59,27 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly List<InfractionEntity> _queue = new();
     public InfractionService
     (
-        ILogger<InfractionService> logger,
+        
         IMediator                  mediator,
+        ShardHelper                shardHelper,
         GuildConfigCacheService    config,
         IDiscordRestUserAPI        users,
         IDiscordRestGuildAPI       guilds,
         IDiscordRestChannelAPI     channels,
         IDiscordRestWebhookAPI     webhooks, 
-        IChannelLoggingService     channelLogger
+        IChannelLoggingService     channelLogger,
+        ILogger<InfractionService> logger
     )
     {
-        _logger        = logger;
         _mediator      = mediator;
+        _shardHelper   = shardHelper;
         _config        = config;
         _users         = users;
         _guilds        = guilds;
         _channels      = channels;
         _webhooks      = webhooks;
         _channelLogger = channelLogger;
+        _logger        = logger;
 
         _queueTimer = new(ProcessQueueAsync, TimeSpan.FromSeconds(5));
     }
@@ -401,7 +406,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         {
             var timeoutDuration = DateTimeOffset.UtcNow + (expirationRelativeToNow ?? _maxTimeoutDuration);
             
-            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration);
+            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration, reason: reason);
 
             if (!timeoutResult.IsSuccess)
             {
@@ -541,7 +546,8 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         _logger.LogDebug("Loading active infractions...");
 
-        var                now         = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
+        
         var infractions = await _mediator.Send(new GetActiveInfractions.Request());
 
         _logger.LogDebug("Loaded infractions in {Time:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
@@ -554,8 +560,9 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         _logger.LogDebug("Enqueuing {Infractions} infractions.", infractions.Count());
 
-        foreach (InfractionEntity infraction in infractions)
-            _queue.Add(infraction);
+        infractions = infractions.Where(inf => _shardHelper.IsRelevantToCurrentShard(inf.GuildID));
+        
+        _queue.AddRange(infractions);
     }
     
     /// <summary>
