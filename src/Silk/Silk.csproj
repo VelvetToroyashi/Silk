@@ -63,7 +63,7 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Recognizers.Text.DateTime.Wrapper" Version="1.0.5" />
         <PackageReference Include="Remora.Discord.Caching" />
-        <PackageReference Include="Remora.Discord.Caching.Redis"/>
+        <PackageReference Include="Remora.Discord.Caching.Redis" />
         <PackageReference Include="Remora.Discord.Commands" />
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />

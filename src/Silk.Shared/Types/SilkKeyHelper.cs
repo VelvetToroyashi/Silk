@@ -33,17 +33,12 @@ public static class SilkKeyHelper
     public static string GenerateGuildPrefixKey(Snowflake guildId)
         => $"guild_prefix:{guildId}";
     
-    public static string GenerateGuildMemberCountKey(Snowflake guildId)
-        => $"guild_member_count:{guildId}";
-    
     public static string GenerateGuildCountKey()
         => "guild_count";
     
-    public static string GenerateCurrentGuildCounterKey()
-        => "current_guild_count";
     
-    public static string GenerateGuildIdentifierKey(Snowflake guildId)
-        => $"guild_identifier:{guildId}";
+    public static string GenerateGuildIdentifierKey()
+        => $"guild_identifier";
     
 
 }
