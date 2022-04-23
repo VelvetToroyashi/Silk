@@ -3,7 +3,7 @@
         <PackageReference Update="AsyncEnumerator" Version="4.0.2" />
         
         <PackageReference Update="Remora.Rest.Core" Version="2.0.2" />
-        <PackageReference Update="Remora.Plugins" Version="3.0.2" />
+        <PackageReference Update="Remora.Plugins" Version="3.0.3" />
         <PackageReference Update="Remora.Discord.Pagination" Version="2.0.9" />
         <PackageReference Update="Remora.Plugins.Abstractions" Version="4.0.3" />
         <PackageReference Update="Remora.Results" Version="7.1.3" />
