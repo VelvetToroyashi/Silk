@@ -65,7 +65,7 @@
         <PackageReference Update="Microsoft.Extensions.Logging" Version="6.0.0"/>
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 
-        <PackageReference Update="Swashbuckle.AspNetCore" Version="6.3.0" />
+        <PackageReference Update="Swashbuckle.AspNetCore" Version="6.3.1" />
         <PackageReference Update="System.CommandLine" Version="2.0.0-beta3.22114.1" />
         <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.17.0" />
 
