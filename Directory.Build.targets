@@ -34,7 +34,7 @@
         <PackageReference Update="MediatR" Version="10.0.1"/>
         <PackageReference Update="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1"/>
                 
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3"/>
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4"/>
 
         <PackageReference Update="Serilog" Version="2.10.1-dev-01366" />
         <PackageReference Update="Serilog.Expressions" Version="3.3.0" />
