@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using Microsoft.Extensions.DependencyInjection;
 
 #endregion
 
@@ -13,4 +14,6 @@ public static class ServiceCollectionExtensions
         _ = provider ?? throw new ArgumentNullException($"{nameof(provider)} is not initialized!", new NullReferenceException());
         return (T?)provider.GetService(typeof(T))!;
     }
+    
+
 }
