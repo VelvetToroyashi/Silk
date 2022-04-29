@@ -9,6 +9,8 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
+using Silk.Extensions;
+using Silk.Utilities.HelpFormatter;
 using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Services.Bot.Help;
@@ -140,22 +142,51 @@ public class DefaultHelpFormatter : IHelpFormatter
     
     public IEnumerable<IEmbed> GetTopLevelHelpEmbeds(IEnumerable<IGrouping<string, IChildNode>> commands)
     {
-        var sorted = commands.OrderBy(x => x.Key);
+        var grouped = commands
+                    .OrderBy(x => x.Key)
+                    .Select
+                         (
+                          node => 
+                          (
+                           nodes: node, 
+                           category: node
+                                    .SelectMany
+                                     (
+                                      n => n is GroupNode pn ?
+                                              pn.GroupTypes
+                                                .Select(gt => gt.GetCustomAttribute<HelpCategoryAttribute>()) :
+                                              ((CommandNode)n).GroupType
+                                                              .GetCustomAttributes(typeof(HelpCategoryAttribute), false)
+                                                              .Cast<HelpCategoryAttribute>()
+                                     )
+                                    .FirstOrDefault(hc => hc is not null)
+                          )
+                         )
+                    .OrderBy(x => Categories.Order.IndexOf(x.Item2?.Name ?? Categories.Uncategorized))
+                    .GroupBy(x => x.category?.Name ?? Categories.Uncategorized);
 
         var sb = new StringBuilder();
+
+        var fields = new List<IEmbedField>();
         
-        foreach (var group in sorted)
+        foreach (var category in grouped)
         {
-            if (group.Count() is 1 || group.All(g => g is not IParentNode))
-                sb.Append($"`{group.Key}` ");
-            else
-                sb.Append($"`{group.Key}*` ");
+            foreach (var command in category)
+            {
+                if (command.nodes.Count() is 1 || command.nodes.All(g => g is not IParentNode))
+                    sb.Append($"`{command.nodes.Key}` ");
+                else
+                    sb.Append($"`{command.nodes.Key}*` ");
+            }
+            
+            fields.Add(new EmbedField(category.Key, sb.ToString()));
+            sb.Clear();
         }
 
         var embed = GetBaseEmbed() with
         {
             Title = "All Commands",
-            Description = sb.ToString(),
+            Fields = fields,
             Footer = new EmbedFooter("Specify a command for more information. Commands with \"*\" are groups that can be used like commands."),
         };
         
