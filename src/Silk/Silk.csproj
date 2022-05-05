@@ -175,5 +175,6 @@
 
     <ItemGroup>
       <Folder Include="Infrastructure\Commands" />
+      <Folder Include="Services\Bot\Help" />
     </ItemGroup>
 </Project>

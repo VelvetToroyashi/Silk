@@ -21,7 +21,7 @@ public class HelpCommand : CommandGroup
         _context = context;
     }
 
-    [Command("help")]
+    //[Command("help")]
     [Description("Shows help for a command or group of commands.")]
     public Task<Result<IMessage>> Help
     (
