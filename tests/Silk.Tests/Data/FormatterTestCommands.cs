@@ -7,7 +7,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Results;
 
-namespace Silk.Tests;
+namespace Silk.Tests.Data;
 
 [ExcludeFromCodeCoverage]
 public class FormatterTestCommands : CommandGroup
@@ -213,5 +213,67 @@ public class FormatterTestCommands : CommandGroup
             public async Task<IResult> ExecutableCommand() => default;
         }
     }
+}
+
+
+[ExcludeFromCodeCoverage]
+public class TopLevelHelp : CommandGroup
+{
+    public class Uncategorized : CommandGroup
+    {
+        [Command("command-1")]
+        public async Task<IResult> Command1() => default;
     
+        [Command("command-2")]
+        public async Task<IResult> Command2() => default;
+    
+        [Command("command-3")]
+        [RequireDiscordPermission(DiscordPermission.Administrator)]
+        public async Task<IResult> Command3() => default;
+    
+        [Group("group-1")]
+        public class GroupOne : CommandGroup
+        {
+            [Command("command-1")]
+            public async Task<IResult> Command1() => default;
+        
+            [Command("command-2")]
+            public async Task<IResult> Command2() => default;
+        
+            [Command("command-3")]
+            public async Task<IResult> Command3() => default;
+        }
+    
+        [Command("group-2")]
+        public async Task<IResult> GroupTwoCommand() => default;
+    
+        [Group("group-2")]
+        public class GroupTwo : CommandGroup
+        {
+            [Command("command-1")]
+            public async Task<IResult> Command1() => default;
+        
+            [Command("command-2")]
+            public async Task<IResult> Command2() => default;
+        
+            [Command("command-3")]
+            public async Task<IResult> Command3() => default;
+        }
+
+    }
+    
+    public class Categorized : CommandGroup
+    {
+        [Command("categorized-command")]
+        [Category("category 1")]
+        public async Task<IResult> CategorizedCommand() => default;
+    
+        [Group("categorized-group")]
+        [Category("category 2")]
+        public class CategorizedGroup : CommandGroup
+        {
+            [Command("command")]
+            public async Task<IResult> CategorizedCommand() => default;
+        }
+    }
 }

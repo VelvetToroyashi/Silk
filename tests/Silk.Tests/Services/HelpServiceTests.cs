@@ -20,6 +20,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Infrastructure;
 using Silk.Services.Bot.Help;
+using Silk.Tests.Data;
 using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Tests;
@@ -461,7 +462,7 @@ public class HelpServiceTests
         var services = new ServiceCollection()
             .AddCommands()
             .AddCommandTree()
-            .WithCommandGroup<TopLevelHelp>()
+            .WithCommandGroup<TopLevelHelp.Uncategorized>()
             .Finish()
             .AddSingleton<TreeWalker>()
             .AddSingleton(conditionMock.Object)
@@ -502,7 +503,7 @@ public class HelpServiceTests
         var services = new ServiceCollection()
             .AddCommands()
             .AddCommandTree()
-            .WithCommandGroup<TopLevelHelp>()
+            .WithCommandGroup<TopLevelHelp.Uncategorized>()
             .Finish()
             .AddSingleton<TreeWalker>()
             .AddSingleton(conditionMock.Object)

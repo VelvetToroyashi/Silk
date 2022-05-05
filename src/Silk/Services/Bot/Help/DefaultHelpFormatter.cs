@@ -1,7 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Options;
+using Remora.Commands;
 using Remora.Commands.Attributes;
 using Remora.Commands.Extensions;
 using Remora.Commands.Trees.Nodes;
@@ -10,13 +15,22 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
 using Silk.Extensions;
+using Silk.Infrastructure;
 using Silk.Utilities.HelpFormatter;
 using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Services.Bot.Help;
 
+[PublicAPI]
 public class DefaultHelpFormatter : IHelpFormatter
 {
+    private readonly HelpSystemOptions _options;
+    
+    public DefaultHelpFormatter(IOptions<HelpSystemOptions> options)
+    {
+        _options = options.Value;
+    }
+    
 
     public IEmbed GetCommandHelp(IChildNode command)
     {
@@ -42,30 +56,32 @@ public class DefaultHelpFormatter : IHelpFormatter
     
     public IEnumerable<IEmbed> GetCommandHelp(IEnumerable<IChildNode> subCommands)
     {
-        Embed embed = null!;
+        Embed embed;
         
         var descriptionBuilder = new StringBuilder();
 
-        if (subCommands.Count() is 1)
+        var subCommandArray = subCommands.ToArray();
+        
+        if (subCommandArray.Length is 1)
         {
-            if (subCommands.Single() is not IParentNode pn)
+            if (subCommandArray.Single() is not IParentNode pn)
             {
-                yield return GetCommandHelp(subCommands.Single());
+                yield return GetCommandHelp(subCommandArray.Single());
                 yield break;
             }
             else
             {
                 var groupedChildren = pn.Children.GroupBy(x => x.Key);
 
-                AddCommandPath(descriptionBuilder, pn as IChildNode);
-                AddCommandAliases(descriptionBuilder, subCommands);
-                AddCommandDescription(descriptionBuilder, subCommands);
+                AddCommandPath(descriptionBuilder, (IChildNode)pn);
+                AddCommandAliases(descriptionBuilder, subCommandArray);
+                AddCommandDescription(descriptionBuilder, subCommandArray);
                 AddSubCommands(groupedChildren);
-                AddRequiredPermissions(descriptionBuilder, pn as IChildNode);
+                AddRequiredPermissions(descriptionBuilder, (IChildNode)pn);
                 
                 embed = GetBaseEmbed() with
                 {
-                    Title = $"Showing sub-command help for {subCommands.Single().Key}",
+                    Title = $"Showing sub-command help for {subCommandArray.Single().Key}",
                     Description = descriptionBuilder.ToString()
                 };
 
@@ -76,18 +92,18 @@ public class DefaultHelpFormatter : IHelpFormatter
         
         // We're looking at a group's children; recall with the group
         // since we have special handling for this case.
-        if (subCommands.DistinctBy(sc => sc.Key).Count() == subCommands.Count())
+        if (subCommandArray.DistinctBy(sc => sc.Key).Count() == subCommandArray.Length)
         {
-            yield return GetCommandHelp(new[] { subCommands.First().Parent as IChildNode }).Single();
+            yield return GetCommandHelp(new[] { (IChildNode)subCommandArray.First().Parent }).Single();
             yield break;
         }
         
-        if (!subCommands.OfType<IParentNode>().Any())
+        if (!subCommandArray.OfType<IParentNode>().Any())
         {
-            var sca = subCommands.ToArray();
+            var sca = subCommandArray.ToArray();
             
             for (int i = 0; i < sca.Length; i++)
-                yield return (GetCommandHelp(sca[i]) as Embed) with { Title = $"Help for {sca[0].Key} (overload {i + 1} of {sca.Length})" };
+                yield return (GetCommandHelp(sca[i]) as Embed)! with { Title = $"Help for {sca[0].Key} (overload {i + 1} of {sca.Length})" };
 
             yield break;
         }
@@ -99,17 +115,17 @@ public class DefaultHelpFormatter : IHelpFormatter
         // by default is because it's somewhat niche? But the code is there in case changes
         // need to be made. There's also the performance impact of re-iterating more than we
         // have to, but we're using LINQ, so allocations > speed anyways.
-        var group = subCommands.First(sc => sc is IParentNode) as GroupNode;
+        var group = (GroupNode)subCommandArray.First(sc => sc is IParentNode);
 
         // This makes the assumption that there are no overloaded groups,
         // which is impossible to do without backtracking anwyay.
-        var executable = subCommands.Where(sc => sc is not IParentNode).Cast<CommandNode>();
+        var executable = subCommandArray.Where(sc => sc is not IParentNode).Cast<CommandNode>();
         
         var gsc = group.Children.GroupBy(x => x.Key);
         
         AddCommandPath(descriptionBuilder, group);
-        AddCommandAliases(descriptionBuilder, subCommands);
-        AddCommandDescription(descriptionBuilder, subCommands);
+        AddCommandAliases(descriptionBuilder, subCommandArray);
+        AddCommandDescription(descriptionBuilder, subCommandArray);
         AddGroupCommandUsage(descriptionBuilder, executable);
         AddSubCommands(gsc);
         AddRequiredPermissions(descriptionBuilder, group);
@@ -142,51 +158,75 @@ public class DefaultHelpFormatter : IHelpFormatter
     
     public IEnumerable<IEmbed> GetTopLevelHelpEmbeds(IEnumerable<IGrouping<string, IChildNode>> commands)
     {
-        var grouped = commands
-                    .OrderBy(x => x.Key)
-                    .Select
-                         (
-                          node => 
-                          (
-                           nodes: node, 
-                           category: node
-                                    .SelectMany
-                                     (
-                                      n => n is GroupNode pn ?
-                                              pn.GroupTypes
-                                                .Select(gt => gt.GetCustomAttribute<HelpCategoryAttribute>()) :
-                                              ((CommandNode)n).GroupType
-                                                              .GetCustomAttributes(typeof(HelpCategoryAttribute), false)
-                                                              .Cast<HelpCategoryAttribute>()
-                                     )
-                                    .FirstOrDefault(hc => hc is not null)
-                          )
-                         )
-                    .OrderBy(x => Categories.Order.IndexOf(x.Item2?.Name ?? Categories.Uncategorized))
-                    .GroupBy(x => x.category?.Name ?? Categories.Uncategorized);
-
         var sb = new StringBuilder();
-
-        var fields = new List<IEmbedField>();
         
-        foreach (var category in grouped)
+        if (!_options.CommandCategories.Any())
         {
-            foreach (var command in category)
-            {
-                if (command.nodes.Count() is 1 || command.nodes.All(g => g is not IParentNode))
-                    sb.Append($"`{command.nodes.Key}` ");
-                else
-                    sb.Append($"`{command.nodes.Key}*` ");
-            }
+            var sorted = commands.OrderBy(x => x.Key);
             
-            fields.Add(new EmbedField(category.Key, sb.ToString()));
-            sb.Clear();
+            foreach (var group in sorted)
+            {
+                if (group.Count() is 1 || group.All(g => g is not IParentNode))
+                    sb.Append($"`{group.Key}` ");
+                else
+                    sb.Append($"`{group.Key}*` ");
+            }
+        }
+        else
+        {
+            // We're gonna need to loop over this a few times.
+            var commandArray = commands.ToArray();
+
+            var categorized = new Dictionary<string, List<IGrouping<string, IChildNode>>>();
+
+            foreach (var group in commandArray)
+            {
+                string category = "Uncategorized";
+                
+                foreach (var command in group)
+                {
+                    var categoryAttribute = command.GetAttributeFromTree<CategoryAttribute>();
+
+                    if (categoryAttribute is null) 
+                        continue;
+
+                    var categoryName = _options.CommandCategories.FirstOrDefault(c => c.Equals(categoryAttribute.Category, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (categoryName is null) 
+                        continue;
+                    
+                    category = categoryName;
+                    break;
+                }
+                
+                if (!categorized.ContainsKey(category))
+                    categorized.Add(category, new());
+                
+                categorized[category].Add(group);
+            }
+
+            var orderedCategories = categorized.OrderByDescending(c => _options.CommandCategories.IndexOf(c.Key));
+            
+            foreach (var category in orderedCategories)
+            {
+                sb.AppendLine($"**`{category.Key}`**");
+                
+                foreach (var group in category.Value)
+                {
+                    if (group.Count() is 1 || group.All(g => g is not IParentNode))
+                        sb.Append($"`{group.Key}` ");
+                    else
+                        sb.Append($"`{group.Key}*` ");
+                }
+                
+                sb.AppendLine();
+            }
         }
 
         var embed = GetBaseEmbed() with
         {
             Title = "All Commands",
-            Fields = fields,
+            Description = sb.ToString(),
             Footer = new EmbedFooter("Specify a command for more information. Commands with \"*\" are groups that can be used like commands."),
         };
         
@@ -228,7 +268,7 @@ public class DefaultHelpFormatter : IHelpFormatter
                 localBuilder.Append(parameter.IsOmissible() ? "[" : "<");
 
                 char? shortName = null;
-                string longName = null;
+                string? longName = null;
 
                 var named = false;
                 var isSwitch = false;
@@ -258,10 +298,7 @@ public class DefaultHelpFormatter : IHelpFormatter
                     }
                     else
                     {
-                        if (shortName is not null)
-                            localBuilder.Append($"-{shortName}");
-                        else
-                            localBuilder.Append($"--{longName}");
+                        localBuilder.Append(shortName is not null ? $"-{shortName}" : $"--{longName}");
                     }
 
                     if (!isSwitch)
@@ -271,10 +308,7 @@ public class DefaultHelpFormatter : IHelpFormatter
                 if (!isSwitch)
                     localBuilder.Append(parameter.Parameter.Name);
 
-                if (parameter.IsOmissible())
-                    localBuilder.Append("]");
-                else
-                    localBuilder.Append(">");
+                localBuilder.Append(parameter.IsOmissible() ? ']' : '>');
 
                 localBuilder.Append(' ');
             }
@@ -307,7 +341,7 @@ public class DefaultHelpFormatter : IHelpFormatter
             builder.Append(parameter.IsOmissible() ? "`[" : "`<");
 
             char? shortName = null;
-            string longName = null;
+            string? longName = null;
 
             var named = false;
             var isSwitch = false;
@@ -347,14 +381,11 @@ public class DefaultHelpFormatter : IHelpFormatter
                     builder.Append(' ');
             }
 
-           if (!isSwitch)
+            if (!isSwitch)
                 builder.Append(parameter.Parameter.Name);
-            
-            if (parameter.IsOmissible())
-                builder.Append("]`");
-            else
-                builder.Append(">`");
-            
+
+            builder.Append(parameter.IsOmissible() ? "]`" : ">`");
+
             builder.AppendLine($" {(string.IsNullOrEmpty(parameter.Description) ? "No description" : parameter.Description)}");
             builder.AppendLine();
         }
@@ -379,7 +410,7 @@ public class DefaultHelpFormatter : IHelpFormatter
 
     private void AddRequiredPermissions(StringBuilder builder, IChildNode node)
     {
-        RequireDiscordPermissionAttribute rpa = null;
+        RequireDiscordPermissionAttribute? rpa = null;
 
         if (node is GroupNode gn)
         {
@@ -389,9 +420,7 @@ public class DefaultHelpFormatter : IHelpFormatter
             if (gn.Children.All(child => child is IParentNode))
                 return; // Don't feel like traversing the tree deeper, so just bail.
             
-            rpa = (gn.Children.First(child => child is CommandNode) as CommandNode).FindCustomAttributeOnLocalTree<RequireDiscordPermissionAttribute>();
-
-            return;
+            rpa = (gn.Children.First(child => child is CommandNode) as CommandNode)!.FindCustomAttributeOnLocalTree<RequireDiscordPermissionAttribute>();
         }
 
         if (node is CommandNode cn)
@@ -407,10 +436,10 @@ public class DefaultHelpFormatter : IHelpFormatter
 
     private void AddCommandPath(StringBuilder builder, IChildNode node, bool appendPath = true)
     {
-        var path = new List<string>();
+        var path = new List<string?>();
         
         path.Add(node.Key);
-        IParentNode parent = null;
+        IParentNode? parent = null;
 
         do
         {
@@ -449,7 +478,7 @@ public class DefaultHelpFormatter : IHelpFormatter
             }
             else if (nodes.First() is GroupNode gn)
             {
-                builder.AppendLine(gn.GetDescription() ?? "No description set.");
+                builder.AppendLine(gn.GetDescription() ?? Constants.DefaultDescription);
             }
         }
         else
@@ -458,8 +487,8 @@ public class DefaultHelpFormatter : IHelpFormatter
             {
                 var description = fgn.GetDescription() ??
                                   nodes.OfType<CommandNode>()
-                                      .FirstOrDefault(cn => cn.Shape.Description is not null)?.Shape.Description ??
-                                  "No description set.";
+                                      .FirstOrDefault(cn => cn.GetDescription() is not null)?.Shape.Description ??
+                                  Constants.DefaultDescription;
            
                 builder.AppendLine(description);
             }
@@ -467,10 +496,10 @@ public class DefaultHelpFormatter : IHelpFormatter
             {
                 var description = nodes
                                       .Cast<CommandNode>()
-                                      .FirstOrDefault(cn => cn.Shape.Description is not null)?
+                                      .FirstOrDefault(cn => cn.GetDescription() is not null)?
                                       .Shape
                                       .Description ??
-                                  "No description set.";
+                                  Constants.DefaultDescription;
             
                 builder.AppendLine(description);
             }

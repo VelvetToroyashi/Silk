@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Remora.Commands.Extensions;
 using Silk.Services.Bot.Help;
+using Silk.Tests.Data;
 
 namespace Silk.Tests;
 

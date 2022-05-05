@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Silk.Infrastructure;
@@ -17,4 +18,10 @@ public class HelpSystemOptions
     /// Whether or not to show commands regardless of if their conditions have been met.
     /// </summary>
     public bool AlwaysShowCommands { get; set; }
+    
+    /// <summary>
+    /// Gets a list of named groups to help categorize commands.
+    /// If any are specified, commands will be grouped by the cateogory listed on command module.
+    /// </summary>
+    public List<string> CommandCategories { get; } = new();
 }

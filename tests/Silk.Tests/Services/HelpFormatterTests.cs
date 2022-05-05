@@ -5,4 +5,7 @@ using Remora.Commands.Extensions;
 
 namespace Silk.Tests;
 
-public partial class HelpFormatterTests { }
+public partial class HelpFormatterTests
+{
+    
+}

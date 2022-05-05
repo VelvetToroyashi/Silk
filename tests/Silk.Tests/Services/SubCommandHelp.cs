@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Remora.Commands.Extensions;
 using Remora.Commands.Trees.Nodes;
 using Silk.Services.Bot.Help;
+using Silk.Tests.Data;
 
 namespace Silk.Tests;
 

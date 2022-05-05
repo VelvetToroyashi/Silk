@@ -29,5 +29,14 @@
       <Compile Update="TopLevelHelp.cs">
         <DependentUpon>HelpFormatterTests.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\SubCommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\CommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\TopLevelHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>
