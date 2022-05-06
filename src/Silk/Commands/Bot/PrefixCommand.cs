@@ -16,7 +16,7 @@ using Silk.Extensions.Remora;
 
 namespace Silk.Commands.Bot;
 
-[HelpCategory(Categories.Bot)]
+[Category(Categories.Bot)]
 public class PrefixCommand : CommandGroup
 {
     private const int PrefixMaxLength = 5;

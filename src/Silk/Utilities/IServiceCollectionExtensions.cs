@@ -44,6 +44,8 @@ using Silk.Services.Bot.Help;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
+using Silk.Utilities.HelpFormatter;
+using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Utilities;
 
@@ -100,6 +102,7 @@ public static class IServiceCollectionExtensions
 
         services
            .AddSingleton<IShardIdentification>(s => s.GetRequiredService<IOptions<DiscordGatewayClientOptions>>().Value.ShardIdentification!)
+           .Configure<HelpSystemOptions>(hso => hso.CommandCategories.AddRange(Categories.Order))
            .Configure<PaginatedAppearanceOptions>(pap => pap with { HelpText = "Use the buttons to navigate and the close button to stop."})
            .Configure<DiscordGatewayClientOptions>(gw =>
             {

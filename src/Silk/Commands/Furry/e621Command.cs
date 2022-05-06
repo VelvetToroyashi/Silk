@@ -20,7 +20,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Furry;
 
 
-[HelpCategory(Categories.Misc)]
+[Category(Categories.Misc)]
 //[ModuleLifespan(ModuleLifespan.Transient)]
 //[Cooldown(1, 10, CooldownBucketType.User)]
 public class e621Command : eBooruBaseCommand

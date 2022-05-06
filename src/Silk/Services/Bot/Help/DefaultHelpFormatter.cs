@@ -205,9 +205,7 @@ public class DefaultHelpFormatter : IHelpFormatter
                 categorized[category].Add(group);
             }
 
-            var orderedCategories = categorized.OrderByDescending(c => _options.CommandCategories.IndexOf(c.Key));
-            
-            foreach (var category in orderedCategories)
+            foreach (var category in categorized.Skip(1).Append(categorized.First()))
             {
                 sb.AppendLine($"**`{category.Key}`**");
                 
@@ -219,7 +217,8 @@ public class DefaultHelpFormatter : IHelpFormatter
                         sb.Append($"`{group.Key}*` ");
                 }
                 
-                sb.AppendLine();
+                sb.AppendLine()
+                  .AppendLine();
             }
         }
 

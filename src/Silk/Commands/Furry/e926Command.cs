@@ -21,7 +21,7 @@ namespace Silk.Commands.Furry;
 
 
 [NSFWChannel]
-[HelpCategory(Categories.Misc)]
+[Category(Categories.Misc)]
 public class e926Command : eBooruBaseCommand
 {
     private readonly SilkConfigurationOptions _options;

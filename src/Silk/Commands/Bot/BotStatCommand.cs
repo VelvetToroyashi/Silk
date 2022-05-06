@@ -29,7 +29,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Bot;
 
-[HelpCategory(Categories.Bot)]
+[Category(Categories.Bot)]
 public class BotStatCommand : CommandGroup
 {
     private readonly ICacheProvider         _cache;

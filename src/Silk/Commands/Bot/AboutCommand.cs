@@ -23,7 +23,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Bot;
 
 
-[HelpCategory(Categories.Bot)]
+[Category(Categories.Bot)]
 public class AboutCommand : CommandGroup
 {
     private readonly IDiscordRestChannelAPI _channelApi;

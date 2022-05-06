@@ -14,7 +14,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class AvatarCommand : CommandGroup
 {
     private readonly ICommandContext        _context;

@@ -23,7 +23,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Server;
 
 [Group("config", "cfg")]
-[HelpCategory(Categories.Server)]
+[Category(Categories.Server)]
 [RequireContext(ChannelContext.Guild)]
 [Description("Configure various settings for your server!")]
 [RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.And)]

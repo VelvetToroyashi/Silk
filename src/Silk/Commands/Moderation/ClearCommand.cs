@@ -19,7 +19,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.General;
 
 
-[HelpCategory(Categories.Mod)]
+[Category(Categories.Mod)]
 public class ClearCommand : CommandGroup
 {
     private readonly ICommandContext        _context;
