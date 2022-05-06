@@ -205,7 +205,7 @@ public class DefaultHelpFormatter : IHelpFormatter
                 categorized[category].Add(group);
             }
 
-            foreach (var category in categorized.Skip(1).Append(categorized.First()))
+            foreach (var category in categorized.Skip(1).OrderBy(c => _options.CommandCategories.IndexOf(c.Key)).Append(categorized.First()))
             {
                 sb.AppendLine($"**`{category.Key}`**");
                 
@@ -437,9 +437,11 @@ public class DefaultHelpFormatter : IHelpFormatter
     {
         var path = new List<string?>();
         
-        path.Add(node.Key);
-        IParentNode? parent = null;
+        IParentNode? parent = node.Parent;
 
+        path.Add(node.Key);
+        path.Add((parent as IChildNode)?.Key);
+        
         do
         {
             parent = (parent as IChildNode)?.Parent;
