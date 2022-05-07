@@ -14,4 +14,31 @@ public sealed class ShardHelper
     
     public bool IsRelevantToCurrentShard(Snowflake snowflake)
         => (int)snowflake.Value >> 22 % _shard.ShardCount == _shard.ShardID;
+    
+    public static string GetShardResumeSessionKey(int shardID)
+        => $"shard:{shardID}:resume:session";
+    
+    public static string GetShardResumeSequenceKey(int shardID)
+        => $"shard:{shardID}:resume:sequence";
+    
+    public static string GetShardIdentificationKey(int shardID)
+        => $"shard:{shardID}";
+    
+    public static string GetShardGuildCountStatKey(int shardID)
+        => $"shard:{shardID}:stat:guilds";
+    
+    public static string GetShardUserCountStatKey(int shardID)
+        => $"shard:{shardID}:stat:users";
+    
+    public static string GetShardCPUUsageStatKey(int shardID)
+        => $"shard:{shardID}:stat:cpu";
+    
+    public static string GetShardMemoryStatKey(int shardID)
+        => $"shard:{shardID}:stat:memory";
+    
+    public static string GetShardLatencyStatKey(int shardID)
+        => $"shard:{shardID}:stat:latency";
+    
+    public static string GetShardUptimeStatKey(int shardID)
+        => $"shard:{shardID}:stat:uptime";
 }

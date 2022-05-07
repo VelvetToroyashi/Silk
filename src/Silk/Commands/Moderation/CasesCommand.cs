@@ -23,7 +23,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Moderation;
 
 
-[HelpCategory(Categories.Mod)]
+[Category(Categories.Mod)]
 public class CasesCommand : CommandGroup
 {
     private readonly IMediator              _mediator;

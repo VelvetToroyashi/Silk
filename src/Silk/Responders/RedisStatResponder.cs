@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,7 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using Silk.Utilities;
 using StackExchange.Redis;
 
 namespace Silk.Responders;
@@ -29,7 +31,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
 
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringSetAsync(key, (long)gatewayEvent.Guilds.Count);
 
         return Result.FromSuccess();
@@ -37,26 +39,45 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
 
     public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
     {
-        if (gatewayEvent.IsUnavailable.IsDefined())
+        var present = gatewayEvent.IsUnavailable.IsDefined(out var unavailable);
+
+        if (unavailable)
             return Result.FromSuccess();
         
         var db = _redis.GetDatabase();
+        
+        if (gatewayEvent.MemberCount.IsDefined(out var gwm) || gatewayEvent.ApproximateMemberCount.IsDefined(out gwm))
+            await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gwm);
 
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        if (present)
+            return Result.FromSuccess();
+        
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringIncrementAsync(key);
-
+        
         return Result.FromSuccess();
     }
 
     public async Task<Result> RespondAsync(IGuildDelete gatewayEvent, CancellationToken ct = default)
     {
-        if (gatewayEvent.IsUnavailable.IsDefined())
+        if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess();
         
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:guild_count";
+        var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringDecrementAsync(key);
+
+        var cacheKey = KeyHelpers.CreateGuildCacheKey(gatewayEvent.ID);
+        
+        if ((await _cache.TryGetValueAsync<IGuild>(cacheKey, ct)).IsDefined(out var guild) || 
+            (await _cache.TryGetPreviousValueAsync<IGuild>(cacheKey)).IsDefined(out guild))
+        {
+            if (!guild.MemberCount.IsDefined(out var gwm))
+                return Result.FromSuccess();
+            
+            await db.StringDecrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gwm);
+        }
         
         return Result.FromSuccess();
     }
@@ -65,8 +86,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
-        await db.StringIncrementAsync(key);
+        await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID));
         
         return Result.FromSuccess();
     }
@@ -74,9 +94,8 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
     {
         var db = _redis.GetDatabase();
-        
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
-        await db.StringDecrementAsync(key);
+
+        await db.StringDecrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID));
         
         return Result.FromSuccess();
     }
@@ -85,13 +104,13 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     {
         var db = _redis.GetDatabase();
         
-        var key = $"shard:{_options.ShardIdentification!.ShardID}:stats:member_count";
+        var key = ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID);
         
         if (gatewayEvent.ChunkIndex is 0)
         {
-            _ = _cache.TryGetValue<IGuild>(KeyHelpers.CreateGuildCacheKey(gatewayEvent.GuildID), out var guild);
+            var guildResult = await _cache.TryGetValueAsync<IGuild>(KeyHelpers.CreateGuildCacheKey(gatewayEvent.GuildID), ct);
             
-            if (guild is null)
+            if (!guildResult.IsDefined(out var guild))
                 return Result.FromSuccess(); // ??
 
             if (guild.Members.IsDefined(out var members) && members.Count > 1)

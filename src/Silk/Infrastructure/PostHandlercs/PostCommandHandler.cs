@@ -12,6 +12,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Sentry;
 using Silk.Errors;
+using Silk.Services.Bot.Help;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk;
@@ -27,7 +28,8 @@ public class PostCommandHandler : IPostExecutionEvent
     public PostCommandHandler
     (
         IHub                        hub,
-        CommandHelpViewer           help,
+        MessageContext              context,
+        ICommandHelpService           help,
         ICommandPrefixMatcher       prefix,
         IDiscordRestChannelAPI      channels,
         ILogger<PostCommandHandler> logger
@@ -59,7 +61,7 @@ public class PostCommandHandler : IPostExecutionEvent
             error = ag.Errors.First().Error;
         
         if (error is CommandNotFoundError)
-            await _help.SendHelpAsync(mc.Message.Content.Value[prefix.ContentStartIndex..], mc.ChannelID);
+            await _help.ShowHelpAsync(mc.ChannelID, _context.Message.Content.Value[prefix.ContentStartIndex..]);
         
         if (error is ConditionNotSatisfiedError)
             await HandleFailedConditionAsync(mc.ChannelID, commandResult.Inner!.Inner!.Inner!.Inner!.Error!, ct);

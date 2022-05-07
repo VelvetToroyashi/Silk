@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -152,18 +153,19 @@ public class RoleMenuService
         
         if (!data.Values.IsDefined(out var values))
                 values ??= Array.Empty<string>();
+
+        var dropdown        = GetDropdownFromMessage(message);
         
-        var dropdownOptions = GetDropdownFromMessage(message).Options;
-        
-        var roleMenuRoleIDs = dropdownOptions
+        var roleMenuRoleIDs = dropdown
+                             .Options
                              .Select
-                             (r => Snowflake.TryParse(r.Value, out var ID)
-                                 ? ID.Value
-                                 : default
-                             )
-                             .ToArray();
+                                  (r => Snowflake.TryParse(r.Value, out var ID)
+                                      ? ID.Value
+                                      : default
+                                  )
+                                  .ToArray();
         
-        var parsedRoleIDs = values.Select(ulong.Parse).Select(ID => new Snowflake(ID));
+        var parsedRoleIDs = values.Select(ulong.Parse).Select(DiscordSnowflake.New);
 
         var newUserRoles = member.Roles
                                  .Except(roleMenuRoleIDs)
@@ -180,7 +182,8 @@ public class RoleMenuService
 
         if (roleResult.IsSuccess)
         {
-            var newOptions = dropdownOptions
+            var newOptions = dropdown
+                            .Options
                             .Select(r => new SelectOption(r.Label, r.Value, r.Description, r.Emoji, values.Contains(r.Value)))
                             .ToArray();
             
@@ -191,7 +194,7 @@ public class RoleMenuService
                  "Done! Enjoy your new roles!",
                  components: new[]
                  {
-                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, GetDropdownFromMessage(message).Placeholder, 0) } )
+                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
                  }
                 );
             

@@ -31,7 +31,7 @@ namespace Silk.Commands.Bot;
 
 // THIS COMMAND WAS RIPPED FROM Emzi0767#1837. I ONLY MADE IT EVAL INLINE CODE  ~Velvet, as always //
 
-[HelpCategory(Categories.Bot)]
+[Category(Categories.Bot)]
 public class EvalCommand : CommandGroup
 {
     private readonly ICommandContext _context;
@@ -69,7 +69,7 @@ public class EvalCommand : CommandGroup
         
         if (!messageResult.IsDefined(out IMessage? msg))
             return Result.FromError(messageResult.Error!);
-
+        
         try
         {
             var context = (MessageContext)_context;

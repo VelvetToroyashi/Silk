@@ -16,7 +16,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.General.DiceRoll;
 
 
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class DiceRollCommand : CommandGroup
 {
     private readonly Random                 _random;

@@ -24,7 +24,7 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace Silk.Commands.Miscellaneous;
 
 
-[HelpCategory(Categories.Misc)]
+[Category(Categories.Misc)]
 public class UserInfo : BaseCommandModule
 {
     [Command("roleinfo")]

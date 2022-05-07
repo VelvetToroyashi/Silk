@@ -66,9 +66,9 @@ public class MessageLoggerService
         if (exempt)
             return Result.FromSuccess();
 
-        _ = _cache.TryGetValue<IMessage>(KeyHelpers.CreateMessageCacheKey(channelID, message.ID.Value), out var previousMessage);
+        var cacheResult = await _cache.TryGetValueAsync<IMessage>(KeyHelpers.CreateMessageCacheKey(channelID, message.ID.Value));
         
-        var beforeContent = previousMessage is null 
+        var beforeContent = !cacheResult.IsDefined(out var previousMessage) 
             ? "It doesn't seem I was around when this happened. Sorry." 
             : string.IsNullOrEmpty(previousMessage.Content) 
             ? "Message did not contain content!"
@@ -157,7 +157,7 @@ public class MessageLoggerService
     {
         var key = KeyHelpers.CreateMessageCacheKey(message.ChannelID, message.ID);
         
-        if (!_cache.TryGetValue<IMessage>(key, out var cachedMessage))
+        if (!(await _cache.TryGetValueAsync<IMessage>(key)).IsDefined(out var cachedMessage))
             return Result.FromSuccess();
 
         if (cachedMessage.Author.IsBot.IsDefined(out var bot) && bot)

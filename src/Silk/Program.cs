@@ -16,6 +16,7 @@ using Prometheus;
 using Remora.Commands.Extensions;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Gateway.Commands;
+using Remora.Discord.Caching.Redis.Extensions;
 using Remora.Discord.Gateway;
 using Remora.Results;
 using Sentry;
@@ -115,13 +116,15 @@ public class Program
         
         var silkConfig  = config.GetSilkConfigurationOptionsFromSection();
         var redisConfig = silkConfig.Redis;
-        
-        var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+
+        var connectionConfig = new ConfigurationOptions()
         {
             EndPoints       = { { redisConfig.Host, redisConfig.Port } },
             Password        = redisConfig.Password,
             DefaultDatabase = redisConfig.Database
-        });
+        };
+        
+        var redis = ConnectionMultiplexer.Connect(connectionConfig);
         
         var db    = redis.GetDatabase();
         var taken = false;
@@ -156,8 +159,9 @@ public class Program
         var si = new ShardIdentification(takenShard, silkConfig.Discord.Shards);
         
         services.AddSingleton<IConnectionMultiplexer>(redis);
-        services.AddSingleton<IShardIdentification>(si);
-        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = si);
+        services.AddDiscordRedisCaching(r => r.ConfigurationOptions = connectionConfig);
+        
+        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = new ShardIdentification(takenShard, silkConfig.Discord.Shards));
     }
     
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)

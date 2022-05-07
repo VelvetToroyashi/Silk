@@ -28,7 +28,7 @@ using Color = System.Drawing.Color;
 
 namespace Silk.Commands.General;
 
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class InfoCommands : CommandGroup
 {
     private readonly IMemoryCache           _cache;
@@ -117,8 +117,6 @@ public class InfoCommands : CommandGroup
                 new("Account Created", user.ID.Timestamp.ToTimestamp(), true),
                 new("Joined", member.JoinedAt.ToTimestamp(), true),
                 new("Flags", user.PublicFlags.IsDefined(out var flags) ? flags.ToString().Split(' ').Join("\n").Humanize(LetterCasing.Title) : "None", true),
-                new("Status", GetUserPresence(user)),
-                new("Currently Doing", GetUserStatus(user)),
                 new("Roles", string.Join(",\n", member.Roles.OrderByDescending(r => roles[r].Position).Select(x => $"<@&{x}>"))),
             }
         };
@@ -183,61 +181,6 @@ public class InfoCommands : CommandGroup
             );
 
         return res;
-    }
-
-    private string GetUserStatus(IUser user)
-    {
-        if (!_cache.TryGetValue(KeyHelpers.CreatePresenceCacheKey(default, user.ID), out IPartialPresence presence))
-            return $"{Emojis.WarningEmoji} User is offline or unavailable";
-
-        if (!presence.Activities.IsDefined(out var activities))
-            return $"{Emojis.WarningEmoji} User is offline or unavailable";
-
-        if (!activities.Any())
-            return "Nothing!";
-        
-        var activity = activities[0];
-
-        var activityEmoji = activity.Emoji.IsDefined(out var ate)
-            ? ate.ID.IsDefined(out var eid) 
-                ? $"<:{ate.Name}:{eid}>" 
-                : ate.Name
-            : Emojis.NoteEmoji;
-
-        return activity.Type switch
-        {
-            ActivityType.Custom => 
-                $"{activityEmoji} {(activity.State.IsDefined(out var state) ? state : "")}",
-            ActivityType.Game      => $"Playing {activity.Name}",
-            ActivityType.Listening => $"Listening to {activity.Name}",
-            ActivityType.Streaming => $"Streaming {activity.Name}",
-            ActivityType.Watching  => $"Watching {activity.Name}",
-            _                      => "Unknown"
-        };
-    }
-    
-    private string GetUserPresence(IUser user)
-    {
-        if (!_cache.TryGetValue(KeyHelpers.CreatePresenceCacheKey(default, user.ID), out IPartialPresence presence))
-            return $"{Emojis.WarningEmoji}  User is offline or unavailable";
-
-        if (!presence.Activities.IsDefined(out var activities))
-            return $"{Emojis.WarningEmoji}  User is offline or unavailable";
-        
-        if (activities.FirstOrDefault(a => a.Type is ActivityType.Streaming) is {} stream)
-            return $"{Emojis.StreamEmoji} {stream.State}";
-
-        if (!presence.Status.IsDefined(out var status))
-            return $"{Emojis.WarningEmoji} Failed to fetch a status for member";
-            
-        return status switch
-        {
-            ClientStatus.Online  => $"{Emojis.OnlineEmoji} Online",
-            ClientStatus.Idle    => $"{Emojis.IdleEmoji} Idle",
-            ClientStatus.DND     => $"{Emojis.DoNotDisturbEmoji} Do Not Disturb",
-            ClientStatus.Offline => $"{Emojis.OfflineEmoji} Offline",
-            _                    => $"{Emojis.WarningEmoji} Unknown status!"
-        };
     }
 
     [Command("info")]

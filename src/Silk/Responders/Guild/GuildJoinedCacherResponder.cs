@@ -6,15 +6,16 @@ using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Data;
 using Silk.Shared.Types;
+using StackExchange.Redis;
 
 namespace Silk.Responders;
 
 public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
 {
-    private readonly IMemoryCache _cache;
+    private readonly IConnectionMultiplexer _cache;
     private readonly GuildCacherService _guildCacherService;
     
-    public GuildJoinedCacherResponder(IMemoryCache cache, GuildCacherService guildCacherService)
+    public GuildJoinedCacherResponder(IConnectionMultiplexer cache, GuildCacherService guildCacherService)
     {
         _cache              = cache;
         _guildCacherService = guildCacherService;
@@ -25,7 +26,9 @@ public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
         if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess(); //Discord sometime sends unavailable guilds, we don't want to cache them
 
-        if (_cache.TryGetValue(SilkKeyHelper.GenerateGuildIdentifierKey(gatewayEvent.ID), out _))
+        var db = _cache.GetDatabase();
+        
+        if (!await db.SetAddAsync(SilkKeyHelper.GenerateGuildIdentifierKey(), gatewayEvent.ID.Value))
             return Result.FromSuccess(); //We already have this guild cached
         
         await _guildCacherService.GreetGuildAsync(gatewayEvent);

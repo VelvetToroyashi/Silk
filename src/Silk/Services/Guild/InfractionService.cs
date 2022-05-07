@@ -417,7 +417,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         {
             var timeoutDuration = DateTimeOffset.UtcNow + (expirationRelativeToNow ?? _maxTimeoutDuration);
             
-            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration);
+            var timeoutResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: timeoutDuration, reason: reason);
 
             if (!timeoutResult.IsSuccess)
             {

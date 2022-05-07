@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -17,11 +18,14 @@ using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
+using Silk.Utilities;
+using StackExchange.Redis;
 
 namespace Silk.Services.Data;
 
 public class GuildCacherService
 {
+
     /// <summary>
     /// The time in which a guild is considered new, if the joined timestamp is within this threshold.
     /// </summary>
@@ -30,27 +34,30 @@ public class GuildCacherService
     // as well as accommodating for any responder delays.
     private readonly TimeSpan _joinedTimestampThreshold = 30.Seconds();
 
-    private readonly object _obj = new();
-
-    private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n"      +
-                                                    $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "           +
-                                                    $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"           +
-                                                    "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n" +
-                                                    "(Currently unavailable in V3, sorry! :c)";
-    private readonly IDiscordRestChannelAPI _channelApi;
+    private int _guildCount;
+    
+    private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n" +
+                                                    $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "      +
+                                                    $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"      +
+                                                    "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n";
+    
+    
+    private readonly IMediator              _mediator;
+    private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestGuildAPI   _guildApi;
-
-    private readonly IMemoryCache _cache;
+    private readonly IDiscordRestChannelAPI _channelApi;
+    private readonly IShardIdentification   _shard;
+    private readonly IConnectionMultiplexer _cache;
     
     private readonly ILogger<GuildCacherService> _logger;
 
-    private readonly IMediator _mediator;
+    
 
     private readonly IEmbed _onGuildJoinEmbed = new Embed(
                                                           Title: "Thank you for adding me!",
                                                           Description: GuildJoinThankYouMessage,
                                                           Colour: Color.CornflowerBlue);
-    private readonly IDiscordRestUserAPI _userApi;
+   
 
     /// <summary>
     ///     Required permissions to send a welcome message to a new guild.
@@ -60,19 +67,21 @@ public class GuildCacherService
     public GuildCacherService
     (
         IMediator                   mediator,
-        IDiscordRestUserAPI         userApi,
+        IDiscordRestUserAPI         users,
         IDiscordRestGuildAPI        guildApi,
         IDiscordRestChannelAPI      channelApi,
         ILogger<GuildCacherService> logger,
-        IMemoryCache cache
+        IShardIdentification        shard,
+        IConnectionMultiplexer      cache
     )
     {
         _mediator   = mediator;
-        _userApi    = userApi;
+        _cache      = cache;
+        _users      = users;
         _guildApi   = guildApi;
         _channelApi = channelApi;
         _logger     = logger;
-        _cache = cache;
+        _shard      = shard;
     }
 
     public async Task<Result> GreetGuildAsync(IGuild guild)
@@ -81,7 +90,7 @@ public class GuildCacherService
         //a guild fetched from REST here, which typically doesn't have
         //channels defined, which is a big issue, but that's on the caller
 
-        var currentUserResult = await _userApi.GetCurrentUserAsync();
+        var currentUserResult = await _users.GetCurrentUserAsync();
 
         if (!currentUserResult.IsSuccess)
             return Result.FromError(currentUserResult.Error);
@@ -171,24 +180,14 @@ public class GuildCacherService
 
         await _mediator.Send(new BulkAddUser.Request(users));
 
-        LogAndCacheGuild(guildID, members);
+        var db = _cache.GetDatabase();
+        
+        var current = Interlocked.Increment(ref _guildCount);
+    
+        var currentGuildCount = await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
+
+        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", current, currentGuildCount);
 
         return Result.FromSuccess();
-    }
-
-    
-    private void LogAndCacheGuild(Snowflake guildID, IReadOnlyList<IGuildMember> members)
-    {
-        lock (_obj)
-        {
-            var currentGuildCount   = _cache.Get<int>(SilkKeyHelper.GenerateGuildCountKey());
-            var currentGuildCounter = _cache.GetOrCreate(SilkKeyHelper.GenerateCurrentGuildCounterKey(), _ => 1);
-
-            _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", currentGuildCounter, currentGuildCount);
-
-            _cache.Set(SilkKeyHelper.GenerateGuildIdentifierKey(guildID), true);
-            _cache.Set(SilkKeyHelper.GenerateGuildMemberCountKey(guildID), members.Count);
-            _cache.Set(SilkKeyHelper.GenerateCurrentGuildCounterKey(), currentGuildCounter + 1);
-        }
     }
 }

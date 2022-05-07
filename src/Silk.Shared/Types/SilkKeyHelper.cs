@@ -14,7 +14,7 @@ public static class SilkKeyHelper
     /// </summary>
     /// <param name="guildId">The ID of the guild.</param>
     /// <returns>The generated key.</returns>
-    public static object GenerateGuildKey(Snowflake guildId)
+    public static string GenerateGuildKey(Snowflake guildId)
         => $"guild_config:{guildId}";
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class SilkKeyHelper
     /// </summary>
     /// <param name="guildId">The ID of the guild.</param>
     /// <returns>The generated key.</returns>
-    public static object GenerateGuildModKey(Snowflake guildId)
+    public static string GenerateGuildModKey(Snowflake guildId)
         => $"guild_mod_config:{guildId}";
 
     /// <summary>
@@ -30,20 +30,15 @@ public static class SilkKeyHelper
     /// </summary>
     /// <param name="guildId">The ID of the guild.</param>
     /// <returns>The generated key.</returns>
-    public static object GenerateGuildPrefixKey(Snowflake guildId)
+    public static string GenerateGuildPrefixKey(Snowflake guildId)
         => $"guild_prefix:{guildId}";
     
-    public static object GenerateGuildMemberCountKey(Snowflake guildId)
-        => $"guild_member_count:{guildId}";
-    
-    public static object GenerateGuildCountKey()
+    public static string GenerateGuildCountKey()
         => "guild_count";
     
-    public static object GenerateCurrentGuildCounterKey()
-        => "current_guild_count";
     
-    public static object GenerateGuildIdentifierKey(Snowflake guildId)
-        => $"guild_identifier:{guildId}";
+    public static string GenerateGuildIdentifierKey()
+        => $"guild_identifier";
     
 
 }

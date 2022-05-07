@@ -16,7 +16,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Commands.Moderation;
 
-[HelpCategory(Categories.Mod)]
+[Category(Categories.Mod)]
 public class MuteCommand : CommandGroup
 {
     private readonly ICommandContext        _context;

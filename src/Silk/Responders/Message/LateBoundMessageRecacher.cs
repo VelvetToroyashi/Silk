@@ -15,24 +15,26 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
     private readonly CacheService _cache;
     public LateBoundMessageRecacher(CacheService cache) => _cache = cache;
 
-    public Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
+    public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
     {
         if (!gatewayEvent.ChannelID.IsDefined(out var channel))
-            return Task.FromResult(Result.FromSuccess());
+            return Result.FromSuccess();
         
         if (!gatewayEvent.ID.IsDefined(out var message))
-            return Task.FromResult(Result.FromSuccess());
+            return Result.FromSuccess();
 
         var key = KeyHelpers.CreateMessageCacheKey(channel, message);
 
-        if (!_cache.TryGetValue<IMessage>(key, out var cached))
-            return Task.FromResult(Result.FromSuccess());
+        var cachedResult = await _cache.TryGetValueAsync<IMessage>(key, ct);
+        
+        if (!cachedResult.IsDefined(out var cached))
+            return Result.FromSuccess();
 
         var updated = new Remora.Discord.API.Objects.Message
             (
              message,
              channel,
-             gatewayEvent.GuildID,
+             cached.GuildID,
              cached.Author,
              cached.Member,
              gatewayEvent.Content.IsDefined(out var content) ? content : cached.Content,
@@ -62,8 +64,8 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
              cached.StickerItems
             );
         
-        _cache.Cache(key, updated);
+        await _cache.CacheAsync(key, updated, ct);
 
-        return Task.FromResult(Result.FromSuccess());
+        return Result.FromSuccess();
     }
 }

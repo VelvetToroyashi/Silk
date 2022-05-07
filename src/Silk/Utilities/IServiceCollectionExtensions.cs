@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,16 +33,19 @@ using Sentry;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
+using Silk.Commands.Bot;
 using Silk.Commands.Conditions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Infrastructure;
 using Silk.Interactivity;
 using Silk.Services.Bot;
+using Silk.Services.Bot.Help;
 using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
-using StackExchange.Redis;
+using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Utilities;
 
@@ -71,11 +75,7 @@ public static class IServiceCollectionExtensions
            .AddInteractivity()
            .AddPagination()
            .AddSilkInteractivity();
-
-        services
-           .AddScoped<CommandHelpViewer>()
-           .AddScoped<IHelpFormatter, HelpFormatter.HelpFormatter>();
-
+        
         services
            .AddCondition<RequireBotDiscordPermissionsCondition>()
            .AddCondition<NonSelfActionableCondition>()
@@ -84,9 +84,9 @@ public static class IServiceCollectionExtensions
         services
            .AddDiscordCommands(true)
            .AddSlashCommands(asm)
+           .AddHelpSystem()
            .AddScoped<ICommandPrefixMatcher, SilkPrefixMatcher>()
-           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>()
-           .AddDiscordCaching();
+           .AddScoped<ITreeNameResolver, SilkTreeNameResolver>();
         
         services
             //.AddPostExecutionEvent<FailedCommandResponder>()
@@ -102,12 +102,12 @@ public static class IServiceCollectionExtensions
 
         services
            .AddSingleton<IShardIdentification>(s => s.GetRequiredService<IOptions<DiscordGatewayClientOptions>>().Value.ShardIdentification!)
+           .Configure<HelpSystemOptions>(hso => hso.CommandCategories.AddRange(Categories.Order))
            .Configure<PaginatedAppearanceOptions>(pap => pap with { HelpText = "Use the buttons to navigate and the close button to stop."})
            .Configure<DiscordGatewayClientOptions>(gw =>
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.GuildPresences |
                     GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
                     GatewayIntents.GuildMessages  |
@@ -115,7 +115,6 @@ public static class IServiceCollectionExtensions
             })
            .Configure<CacheSettings>(cs =>
             {
-                
                 cs
                   .SetDefaultAbsoluteExpiration(null)
                   .SetSlidingExpiration<IChannel>(null)
@@ -181,5 +180,26 @@ public static class IServiceCollectionExtensions
         };
 
         return services.AddLogging(l => l.ClearProviders().AddSerilog());
+    }
+    
+    public static IServiceCollection AddHelpSystem(this IServiceCollection services, string? treeName = null, bool addHelpCommand = true)
+    {
+        services.Configure<HelpSystemOptions>(o => o.TreeName = treeName);
+
+        if (addHelpCommand)
+        {
+            services
+               .AddDiscordCommands()
+               .AddCommandTree(treeName)
+               .WithCommandGroup<HelpCommand>()
+               .Finish();
+        }
+
+        services.TryAddScoped<TreeWalker>();
+
+        services.TryAddScoped<IHelpFormatter, DefaultHelpFormatter>();
+        services.TryAddScoped<ICommandHelpService, CommandHelpService>();
+        
+        return services;
     }
 }

@@ -12,6 +12,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Commands.Conditions;
 using Silk.Commands.Furry.Types;
 using Silk.Shared.Configuration;
 using Silk.Utilities.HelpFormatter;
@@ -19,7 +20,8 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Furry;
 
 
-[HelpCategory(Categories.Misc)]
+[NSFWChannel]
+[Category(Categories.Misc)]
 public class e926Command : eBooruBaseCommand
 {
     private readonly SilkConfigurationOptions _options;
