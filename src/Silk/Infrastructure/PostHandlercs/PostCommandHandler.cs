@@ -20,16 +20,16 @@ namespace Silk;
 public class PostCommandHandler : IPostExecutionEvent
 {
     private readonly IHub                        _hub;
-    private readonly CommandHelpViewer           _help;
+    private readonly ICommandHelpService         _help;
     private readonly ICommandPrefixMatcher       _prefix;
     private readonly IDiscordRestChannelAPI      _channels;
+    
     private readonly ILogger<PostCommandHandler> _logger;
 
     public PostCommandHandler
     (
         IHub                        hub,
-        MessageContext              context,
-        ICommandHelpService           help,
+        ICommandHelpService         help,
         ICommandPrefixMatcher       prefix,
         IDiscordRestChannelAPI      channels,
         ILogger<PostCommandHandler> logger
@@ -61,7 +61,7 @@ public class PostCommandHandler : IPostExecutionEvent
             error = ag.Errors.First().Error;
         
         if (error is CommandNotFoundError)
-            await _help.ShowHelpAsync(mc.ChannelID, _context.Message.Content.Value[prefix.ContentStartIndex..]);
+            await _help.ShowHelpAsync(mc.ChannelID, mc.Message.Content.Value[prefix.ContentStartIndex..]);
         
         if (error is ConditionNotSatisfiedError)
             await HandleFailedConditionAsync(mc.ChannelID, commandResult.Inner!.Inner!.Inner!.Inner!.Error!, ct);
