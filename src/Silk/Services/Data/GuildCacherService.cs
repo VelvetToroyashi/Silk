@@ -17,7 +17,6 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
-using Silk.Shared.Types;
 using Silk.Utilities;
 using StackExchange.Redis;
 

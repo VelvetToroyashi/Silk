@@ -1,14 +1,10 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
-using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Caching;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Data;
-using Silk.Shared.Types;
-using Silk.Utilities;
 using StackExchange.Redis;
 
 namespace Silk.Responders;

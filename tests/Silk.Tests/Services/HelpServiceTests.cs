@@ -21,7 +21,6 @@ using Remora.Results;
 using Silk.Infrastructure;
 using Silk.Services.Bot.Help;
 using Silk.Tests.Data;
-using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Tests;
 

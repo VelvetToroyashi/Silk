@@ -15,7 +15,6 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Reminders;
 using Silk.Services.Guild;
-using Silk.Utilities;
 
 namespace Silk.Tests.Services;
 

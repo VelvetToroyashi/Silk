@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Services;
 using Remora.Results;

@@ -12,7 +12,6 @@ using Remora.Results;
 using Sentry;
 using Silk.Errors;
 using Silk.Services.Bot.Help;
-using Silk.Utilities.HelpFormatter;
 
 namespace Silk;
 

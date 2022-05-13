@@ -14,9 +14,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
-using Silk.Extensions;
 using Silk.Infrastructure;
-using Silk.Utilities.HelpFormatter;
 using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Services.Bot.Help;

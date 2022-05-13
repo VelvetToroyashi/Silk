@@ -1,4 +1,3 @@
-using System;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Rest.Core;
 

@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
