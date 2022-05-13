@@ -1,11 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.Caching;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Data;
 using Silk.Shared.Types;
+using Silk.Utilities;
 using StackExchange.Redis;
 
 namespace Silk.Responders;
@@ -13,12 +16,14 @@ namespace Silk.Responders;
 public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
 {
     private readonly IConnectionMultiplexer _cache;
-    private readonly GuildCacherService _guildCacherService;
+    private readonly GuildCacherService     _cacher;
+    private readonly IShardIdentification   _shard;
     
-    public GuildJoinedCacherResponder(IConnectionMultiplexer cache, GuildCacherService guildCacherService)
+    public GuildJoinedCacherResponder(IConnectionMultiplexer cache, GuildCacherService cacher, IShardIdentification shard)
     {
-        _cache              = cache;
-        _guildCacherService = guildCacherService;
+        _cache  = cache;
+        _cacher = cacher;
+        _shard  = shard;
     }
 
     public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
@@ -28,14 +33,14 @@ public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
 
         var db = _cache.GetDatabase();
         
-        if (!await db.SetAddAsync(SilkKeyHelper.GenerateGuildIdentifierKey(), gatewayEvent.ID.Value))
+        if (await db.KeyExistsAsync(KeyHelpers.CreateGuildCacheKey(gatewayEvent.ID)))
             return Result.FromSuccess(); //We already have this guild cached
         
-        await _guildCacherService.GreetGuildAsync(gatewayEvent);
+        await _cacher.GreetGuildAsync(gatewayEvent);
         
         if (!gatewayEvent.Members.IsDefined())
             return Result.FromError(new InvalidOperationError("Guild did not contain any members."));
 
-        return await _guildCacherService.CacheGuildAsync(gatewayEvent.ID, gatewayEvent.Members.Value);
+        return await _cacher.CacheGuildAsync(gatewayEvent.ID, gatewayEvent.Members.Value);
     }
 }
