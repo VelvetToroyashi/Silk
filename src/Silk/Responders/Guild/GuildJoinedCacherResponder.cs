@@ -17,13 +17,11 @@ public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
 {
     private readonly IConnectionMultiplexer _cache;
     private readonly GuildCacherService     _cacher;
-    private readonly IShardIdentification   _shard;
-    
-    public GuildJoinedCacherResponder(IConnectionMultiplexer cache, GuildCacherService cacher, IShardIdentification shard)
+
+    public GuildJoinedCacherResponder(IConnectionMultiplexer cache, GuildCacherService cacher)
     {
         _cache  = cache;
         _cacher = cacher;
-        _shard  = shard;
     }
 
     public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
