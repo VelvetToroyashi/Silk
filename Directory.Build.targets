@@ -44,7 +44,7 @@
         <PackageReference Update="Serilog.Sinks.File" Version="5.0.0" />
         <PackageReference Update="Serilog.Sinks.Console" Version="4.0.1" />
 
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.4"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.5"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.5"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="6.0.4"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
