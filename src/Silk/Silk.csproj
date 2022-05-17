@@ -33,7 +33,6 @@
 
     <ItemGroup>
         <PackageReference Include="AsyncEnumerator" />
-        <PackageReference Include="Colorful.Console" Version="1.2.15" />
         <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
