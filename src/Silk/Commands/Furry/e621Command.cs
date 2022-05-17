@@ -41,7 +41,16 @@ public class e621Command : eBooruBaseCommand
         username = _options.E621.Username;
     }
 
-    //[RequireNsfw]
+    [NSFWChannel]
+    [Command("e621", "e6")]
+    [Description("Search e621.net for content.")]
+    public Task<IResult> Search
+    (
+        [Greedy]
+        [Description("What tags to search for")]
+        string query
+    )
+    => Search(3, query);
 
     [NSFWChannel]
     [Command("e621", "e6")]

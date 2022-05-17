@@ -36,11 +36,28 @@ public class e926Command : eBooruBaseCommand
         baseUrl  = "https://e926.net/posts.json?tags=";
         _options = options.Value;
     }
-
+    
+    [Command("e926", "e9")]
+    [Description("Get cute furry content from e926.net")]
+    public Task<IResult> Search
+    (
+        [Greedy]
+        [Description("What tags to search for")]
+        string query
+    )
+        => Search(3, query);
+    
     //[RequireNsfw]
     [Command("e926", "e9")]
     [Description("Get cute furry content from e926.net")]
-    public override async Task<IResult> Search(int amount = 3, string? query = null)
+    public override async Task<IResult> Search
+    (
+        [Description("How many posts to show")]
+        int amount = 3,
+        
+        [Description("what tags to search for")]
+        string? query = null
+    )
     {
         if (query?.Split().Length > 5)
             return Result.FromError(new ArgumentOutOfRangeError("You can search 5 tags at a time!"));
