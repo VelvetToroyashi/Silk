@@ -155,8 +155,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleResult.IsSuccess)
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("It appears all the roles you gave me are above mine or can't be applied.\n\n" +
-                                     "Consider moving my role above them first?", TimeSpan.FromSeconds(12));
+            return await DeleteAfter("There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
         }
 
         var (everyoneRole, allRoles) = roleResult.Entity;
@@ -173,7 +172,11 @@ public sealed class RoleMenuCommand : CommandGroup
                         .ToArray();
 
         if (!rolesToAdd.Any())
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter("It appears all the roles you gave me are above mine or can't be applied.\n\n" +
+                                     "Consider moving my role above them first?", TimeSpan.FromSeconds(12));
+        }
 
         if (rolesToAdd.Length + roleMenu.Options.Count > 25)
         {
