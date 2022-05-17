@@ -157,6 +157,14 @@ public class GuildCacherService
 
     public async Task CacheGuildAsync(Snowflake guildID)
     {
+        var db = _cache.GetDatabase();
+        
+        var current = Interlocked.Increment(ref _guildCount);
+    
+        var currentGuildCount = await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
+
+        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", current, currentGuildCount);
+        
         await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
     }
     
@@ -177,13 +185,7 @@ public class GuildCacherService
 
         await _mediator.Send(new BulkAddUser.Request(users));
 
-        var db = _cache.GetDatabase();
         
-        var current = Interlocked.Increment(ref _guildCount);
-    
-        var currentGuildCount = await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
-
-        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", current, currentGuildCount);
 
         return Result.FromSuccess();
     }
