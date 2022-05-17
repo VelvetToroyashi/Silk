@@ -40,7 +40,7 @@ public class e926Command : eBooruBaseCommand
     //[RequireNsfw]
     [Command("e926", "e9")]
     [Description("Get cute furry content from e926.net")]
-    public override async Task<Result> Search(int amount = 3, string? query = null)
+    public override async Task<IResult> Search(int amount = 3, string? query = null)
     {
         if (query?.Split().Length > 5)
             return Result.FromError(new ArgumentOutOfRangeError("You can search 5 tags at a time!"));
@@ -50,9 +50,9 @@ public class e926Command : eBooruBaseCommand
 
         Result<eBooruPostResult?> result;
         if (string.IsNullOrWhiteSpace(username))
-            result = await DoQueryAsync(query); // May return empty results locked behind API key //
+            result = await QueryAsync(query); // May return empty results locked behind API key //
         else
-            result = await DoKeyedQueryAsync(query, _options.E621.ApiKey, true);
+            result = await AuthorizedQueryAsync(query, _options.E621.ApiKey, true);
 
         if (!result.IsSuccess)
         {
