@@ -176,6 +176,7 @@ public class MemberLoggerService
             Title       = "Member Left",
             Description = sb.ToString(),
             Colour      = Color.Firebrick,
+            Thumbnail = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields = fields
         };
         
