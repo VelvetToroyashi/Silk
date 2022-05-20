@@ -80,7 +80,7 @@ public class BulkUserTests
     public async Task InsertsAndUpdatesAllUsers()
     {
         //Arrange
-        await _mediator.Send(new AddUser.Request(GuildId, new(1)));
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
         List<UserEntity> users = new()
         {
             new() { ID = new(1), GuildID = GuildId },
@@ -93,32 +93,5 @@ public class BulkUserTests
 
         //Assert
         Assert.AreEqual(users.Count, result);
-    }
-    
-    [Test]
-    public async Task UpdatesAllUsers()
-    {
-        //Arrange
-        var updatedUsers = new UserEntity[2];
-        List<UserEntity> users = new()
-        {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
-        };
-        users = (await _mediator.Send(new BulkAddUser.Request(users))).ToList();
-        //Act
-        users.CopyTo(updatedUsers);
-
-        foreach (var u in updatedUsers)
-            u.Flags = UserFlag.WarnedPrior;
-
-        await _mediator.Send(new BulkUpdateUser.Request(updatedUsers));
-        updatedUsers = _context.Users.ToArray();
-        //Assert
-        Assert.AreNotEqual(users, updatedUsers);
-
-        var allUsersWarned = users.All(u => u.Flags == UserFlag.WarnedPrior);
-        
-        Assert.True(allUsersWarned);
     }
 }

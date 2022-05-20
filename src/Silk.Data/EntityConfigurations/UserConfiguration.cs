@@ -8,12 +8,10 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 {
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
-        builder.HasKey(u => new { Id= u.ID, GuildId = u.GuildID });
+        builder.HasKey(u => u.ID);
 
-        builder.HasOne(u => u.History)
-               .WithOne(h => h.User)
-               .HasForeignKey<UserHistoryEntity>(u => new {
-                    UserId                                   = u.UserID,
-                    GuildId = u.GuildID });
+        builder.HasMany(u => u.History)
+               .WithOne(u => u.User)
+               .HasForeignKey(u => u.UserID);
     }
 }

@@ -10,7 +10,7 @@ using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Infractions;
 
-public static class GetUserInfractions
+public static class GetUserInfractionsForGuild
 {
     public sealed record Request(Snowflake GuildID, Snowflake TargetID) : IRequest<IEnumerable<InfractionEntity>>;
 
@@ -21,12 +21,11 @@ public static class GetUserInfractions
 
         public async Task<IEnumerable<InfractionEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            UserEntity? user = await _db
-                                    .Users
-                                    .Include(u => u.Infractions)
-                                    .FirstOrDefaultAsync(u => u.ID == request.TargetID && u.GuildID == request.GuildID, cancellationToken);
-
-            return user?.Infractions ?? Array.Empty<InfractionEntity>().AsEnumerable();
+            var query = _db.Infractions
+                           .Where(inf => inf.TargetID == request.TargetID)
+                           .Where(inf => inf.GuildID == request.GuildID);
+            
+            return await query.ToListAsync(cancellationToken);
         }
     }
 }

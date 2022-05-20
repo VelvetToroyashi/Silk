@@ -179,7 +179,7 @@ public class GuildCacherService
                                 {
                                     ID      = id,
                                     GuildID = guildID,
-                                    History = new() { JoinDates = new() {joinedAt} }
+                                    History = new() { new() {JoinDate = joinedAt} }
                                 };
                             });
 

@@ -8,7 +8,7 @@ using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Infractions;
 
-public static class GetUserInfraction
+public static class GetUserInfractionForGuild
 {
     public sealed record Request(
         Snowflake      UserID,

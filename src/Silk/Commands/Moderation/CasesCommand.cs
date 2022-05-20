@@ -46,7 +46,7 @@ public class CasesCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
     public async Task<Result<IMessage>> ViewCaseAsync(int caseID)
     {
-        var infCase = await _mediator.Send(new GetUserInfraction.Request(default, _context.GuildID.Value, default, caseID));
+        var infCase = await _mediator.Send(new GetUserInfractionForGuild.Request(default, _context.GuildID.Value, default, caseID));
         
         if (infCase is null)
             return await _channels.CreateMessageAsync(_context.ChannelID, "Case not found.");
@@ -76,7 +76,7 @@ public class CasesCommand : CommandGroup
     [Description("Fetch all infractions for a user including kicks, mutes, and more.")]
     public async Task<Result<IMessage>> Cases(IUser user)
     {
-        var cases = await _mediator.Send(new GetUserInfractions.Request(_context.GuildID.Value, user.ID));
+        var cases = await _mediator.Send(new GetUserInfractionsForGuild.Request(_context.GuildID.Value, user.ID));
         
         if (!cases.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "It appears this user is clean. They should keep it up!");

@@ -26,29 +26,28 @@ public static class GetOrCreateUser
     
         public async Task<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            UserEntity? user = await _db.Users
-                                        .Include(u => u.Guild)
-                                        .Include(u => u.History)
-                                        .Include(u => u.Infractions)
-                                        .FirstOrDefaultAsync(u => 
-                                                                 u.ID == request.UserID &&
-                                                                 u.GuildID == request.GuildID, cancellationToken);
+            var user = await _db.Users
+                                .Include(u => u.Guilds)
+                                .Include(u => u.History)
+                                .Include(u => u.Infractions)
+                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
     
             if (user is not null)
                 return user;
             
-            //TODO: This could be a MediatR request instead
+            var guild = await _db.Guilds.FirstAsync(g => g.ID == request.GuildID, cancellationToken);
             
-            //Guild guild = await _db.Guilds.FirstAsync(g => g.Id == request.GuildId, cancellationToken);
             user = new()
             {
-                ID      = request.UserID,
-                GuildID = request.GuildID,
-                Flags   = request.Flags ?? UserFlag.None,
-                History = new() { JoinDates = new() { request.JoinedAt ?? DateTimeOffset.UtcNow } }
+                ID          = request.UserID,
+                Infractions = new(), 
+                History     = new() { new() { GuildID = request.GuildID, JoinDate = request.JoinedAt ?? DateTimeOffset.UtcNow } }
             };
     
             _db.Users.Add(user);
+            
+            guild.Users.Add(user);
+            
             try
             {
                 await _db.SaveChangesAsync(cancellationToken);

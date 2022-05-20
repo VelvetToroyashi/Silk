@@ -3,6 +3,7 @@
 namespace Silk.Data.Entities;
 
 [Flags]
+[Obsolete("Silk does not use these flags.")]
 public enum UserFlag
 {
     None        = 0,
