@@ -25,6 +25,11 @@ namespace Silk.Services.Guild;
 /// </summary>
 public class MemberLoggerService
 {
+    private const int JoinWarningThreshold = 3;
+    private const int TwoWeeks             = 14;
+    private const int TwoDays              = 2;
+    private const int HalfDay              = 12;
+    
     private readonly IMediator               _mediator;
     private readonly GuildConfigCacheService _configService;
     private readonly IChannelLoggingService   _channelLogger;
@@ -51,16 +56,23 @@ public class MemberLoggerService
         if (channel is null)
             return Result.FromSuccess();
 
-        var twoWeeksOld = user.ID.Timestamp.AddDays(14) > DateTimeOffset.UtcNow;
-        var twoDaysOld = user.ID.Timestamp.AddDays(2) > DateTimeOffset.UtcNow;
+        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        var twoDaysOld = user.ID.Timestamp.AddDays(TwoDays) > DateTimeOffset.UtcNow;
 
         var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, null, member.JoinedAt));
-        
-        var sb = new StringBuilder();
         
         if (!userResult.IsDefined(out var userData))
             return Result.FromError(userResult.Error!);
 
+        var sb = new StringBuilder();
+
+        sb.AppendLine("Notes:");
+        
+        if (twoDaysOld)
+            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
+        else if (twoWeeksOld)
+            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 weeks old");
+        
         var userFields = new List<EmbedField>()
         {
             new("Username:", user.ToDiscordTag()),
@@ -73,32 +85,39 @@ public class MemberLoggerService
         if (userData.Infractions.Any())
         {
             sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
-            userFields.Add(new("Infractions:", userData
-                                              .Infractions
-                                              .GroupBy(inf => inf.Type)
-                                              .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
-                                              .Join("\n"), true));
+            userFields.Add
+            (
+             new
+                 (
+                  "Infractions:",
+                  userData
+                  .Infractions
+                  .GroupBy(inf => inf.Type)
+                  .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
+                  .Join("\n"), true
+                 )
+            );
         }
-
         
-        var userInfractionJoinBuffer = userData.Infractions.Count(inf => inf.Type is
-                                                                      InfractionType.Kick or
-                                                                      InfractionType.Ban or
-                                                                      InfractionType.SoftBan) + 4;
+        var userInfractionJoinBuffer = JoinWarningThreshold + userData
+                                      .Infractions
+                                      .Count
+                                           (
+                                            inf => 
+                                                inf.Type is
+                                                    InfractionType.Kick or
+                                                    InfractionType.Ban or
+                                                    InfractionType.SoftBan
+                                           );
         
         if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding infractions.");
         
-        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(14) > DateTimeOffset.UtcNow) > 3)
+        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(TwoWeeks) > DateTimeOffset.UtcNow) > JoinWarningThreshold)
             sb.AppendLine("Account has joined more than three times in the last two weeks.");
 
-        if (userData.History.Where(g => g.JoinDate.AddHours(12) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > 3)
+        if (userData.History.Where(g => g.JoinDate.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
             sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
-        
-        if (twoDaysOld)
-            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
-        else if (twoWeeksOld)
-            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 weeks old");
         
         var embed = new Embed()
         {
@@ -126,6 +145,8 @@ public class MemberLoggerService
 
         var sb = new StringBuilder();
         
+        var userResult = await _mediator.Send(new GetUser.Request(guildID, user.ID));
+        
         var fields = new List<EmbedField>()
         {
             new("Username:", user.ToDiscordTag()),
@@ -133,8 +154,6 @@ public class MemberLoggerService
             new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime))
         };
         
-        var userResult = await _mediator.Send(new GetUser.Request(guildID, user.ID));
-
         if (userResult is null)
         {
             sb.AppendLine($"{Emojis.WarningEmoji} I don't have any prior data about this user, sorry!");
