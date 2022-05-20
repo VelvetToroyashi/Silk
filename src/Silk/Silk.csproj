@@ -170,6 +170,15 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.View.Exemptions.cs">
           <DependentUpon>ConfigCommands.View.cs</DependentUpon>
         </Compile>
+        <Compile Update="Commands\SlashCommands\Config\SlashConfigView.cs">
+          <DependentUpon>SlashConfig..cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\SlashCommands\Config\SlashConfigEdit.cs">
+          <DependentUpon>SlashConfig..cs</DependentUpon>
+        </Compile>
+        <Compile Update="Commands\SlashCommands\Config\SlashConfigEdit.Exemptions.cs">
+          <DependentUpon>SlashConfig.Edit.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
