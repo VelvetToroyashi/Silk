@@ -55,19 +55,21 @@ public class MemberLoggerService
         var twoDaysOld = user.ID.Timestamp.AddDays(2) > DateTimeOffset.UtcNow;
 
         var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, null, member.JoinedAt));
-
-        var userFields = new List<EmbedField>()
-        {
-            new("Username:", user.ToDiscordTag()),
-            new("User ID:", user.ID.ToString()),
-            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
-        };
         
         var sb = new StringBuilder();
         
         if (!userResult.IsDefined(out var userData))
             return Result.FromError(userResult.Error!);
 
+        var userFields = new List<EmbedField>()
+        {
+            new("Username:", user.ToDiscordTag()),
+            new("User ID:", user.ID.ToString()),
+            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
+            new("User Joined:", userData.History.Last().JoinDate.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
+                                userData.History.Last().JoinDate.ToTimestamp())
+        };
+        
         if (userData.Infractions.Any())
         {
             sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
@@ -85,7 +87,7 @@ public class MemberLoggerService
                                                                       InfractionType.SoftBan) + 4;
         
         if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
-            sb.AppendLine("Account has joined more than four times excluding removals by infractions.");
+            sb.AppendLine("Account has joined more than four times excluding infractions.");
         
         if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(14) > DateTimeOffset.UtcNow) > 3)
             sb.AppendLine("Account has joined more than three times in the last two weeks.");
