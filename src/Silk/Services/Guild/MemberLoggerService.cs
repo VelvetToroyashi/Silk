@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
@@ -86,8 +87,11 @@ public class MemberLoggerService
         if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding removals by infractions.");
         
-        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(14) < DateTimeOffset.UtcNow) > 3)
+        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(14) > DateTimeOffset.UtcNow) > 3)
             sb.AppendLine("Account has joined more than three times in the last two weeks.");
+
+        if (userData.History.Where(g => g.JoinDate.AddHours(12) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > 2)
+            sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
         
         if (twoDaysOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
@@ -99,6 +103,7 @@ public class MemberLoggerService
             Title       = "Member Joined",
             Description = sb.ToString(),
             Colour      = twoDaysOld ? Color.DarkRed : twoWeeksOld ? Color.Orange : Color.SeaGreen,
+            Thumbnail   = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields      = userFields.ToArray()
         };
         
