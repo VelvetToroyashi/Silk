@@ -352,7 +352,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (inMemory)
             return true;
 
-        var inDatabase = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+        var inDatabase = await _mediator.Send(new GetUserInfractionsForGuild.Request(guildID, targetID));
 
         return inDatabase.FirstOrDefault(Predicate) is not null;
     }
@@ -377,7 +377,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         if (await IsMutedAsync(guildID, targetID))
         {
-            var userInfractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+            var userInfractions = await _mediator.Send(new GetUserInfractionsForGuild.Request(guildID, targetID));
             var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && inf.AppliesToTarget && !inf.Processed);
             
             return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
@@ -457,7 +457,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         (target, enforcer) = hierarchyResult.Entity;
 
-        var infractions = await _mediator.Send(new GetUserInfractions.Request(guildID, targetID));
+        var infractions = await _mediator.Send(new GetUserInfractionsForGuild.Request(guildID, targetID));
 
         var mute = infractions.Last(inf => inf.Type is InfractionType.Mute or InfractionType.AutoModMute && !inf.Processed);
 
@@ -519,7 +519,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         
         var (target, enforcer) = hierarchyResult.Entity;
         
-        var infraction = await _mediator.Send(new GetUserInfraction.Request(targetID, guildID, InfractionType.Strike, caseID));
+        var infraction = await _mediator.Send(new GetUserInfractionForGuild.Request(targetID, guildID, InfractionType.Strike, caseID));
         
         if (infraction is null)
             if (caseID is null)

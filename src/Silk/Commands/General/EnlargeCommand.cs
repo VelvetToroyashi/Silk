@@ -18,7 +18,7 @@ using Svg.Skia;
 namespace Silk.Commands.General;
 
 
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class EnlargeCommand : CommandGroup
 {
     

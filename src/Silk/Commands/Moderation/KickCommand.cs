@@ -15,7 +15,7 @@ using Silk.Shared.Constants;
 
 namespace Silk.Commands.Moderation;
 
-[HelpCategory(Categories.Mod)]
+[Category(Categories.Mod)]
 public class KickCommand : CommandGroup
 {
     private readonly ICommandContext        _context;

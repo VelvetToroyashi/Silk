@@ -16,7 +16,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
 
-[HelpCategory(Categories.Mod)]
+[Category(Categories.Mod)]
 public class StrikeCommand : CommandGroup
 {
     private readonly ICommandContext        _context;

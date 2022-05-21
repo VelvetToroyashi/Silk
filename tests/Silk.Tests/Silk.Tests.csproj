@@ -18,4 +18,25 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Silk\Silk.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Update="CommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="SubCommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="TopLevelHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\SubCommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\CommandHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\TopLevelHelp.cs">
+        <DependentUpon>HelpFormatterTests.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
 </Project>

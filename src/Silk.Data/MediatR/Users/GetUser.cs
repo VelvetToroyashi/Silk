@@ -27,10 +27,7 @@ public static class GetUser
             UserEntity? user = await _db.Users
                                         .Include(u => u.History)
                                         .Include(u => u.Infractions)
-                                        .FirstOrDefaultAsync(u => 
-                                                                 u.ID      == request.UserID && 
-                                                                 u.GuildID == request.GuildID,
-                                                             cancellationToken);
+                                        .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             return user;
         }
     }

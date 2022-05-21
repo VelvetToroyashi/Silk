@@ -23,7 +23,7 @@ namespace Silk.Commands.Server;
 [RequireGuild]
 [Group("tag")]
 
-[HelpCategory(Categories.Server)]
+[Category(Categories.Server)]
 public class TagCommand : BaseCommandModule
 {
     private readonly IMediator _mediator;
@@ -284,7 +284,7 @@ public class TagCommand : BaseCommandModule
 }
 
 [RequireGuild]
-[HelpCategory(Categories.Server)]
+[Category(Categories.Server)]
 public class TagsCommand : BaseCommandModule
 {
     private readonly TagService _tagService;

@@ -21,7 +21,7 @@ using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
 namespace Silk.Commands.Server;
 
-[HelpCategory(Categories.Server)]
+[Category(Categories.Server)]
 public class ServerInfoCommand : CommandGroup
 {
     private readonly ICommandContext        _context;

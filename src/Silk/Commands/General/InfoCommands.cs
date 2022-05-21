@@ -28,7 +28,7 @@ using Color = System.Drawing.Color;
 
 namespace Silk.Commands.General;
 
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class InfoCommands : CommandGroup
 {
     private readonly IMemoryCache           _cache;

@@ -36,15 +36,14 @@ public abstract class eBooruBaseCommand : CommandGroup
     /// </summary>
     /// <param name="amount">Amount of images to return.</param>
     /// <param name="query">Query sent to the booru site.</param>
-    public abstract Task<Result> Search(int amount = 3, [Greedy] string? query = null);
-
-
+    public abstract Task<IResult> Search(int amount = 3, [Greedy] string? query = null);
+    
     /// <summary>
     ///     Make a GET request to the booru site (e6/e9), and return the result.
     /// </summary>
     /// <param name="query"></param>
     /// <returns></returns>
-    private protected async Task<Result<eBooruPostResult?>> DoQueryAsync(string? query)
+    private protected async Task<Result<eBooruPostResult?>> QueryAsync(string? query)
     {
         // Thanks to Spookdot on Discord for showing me this method existed. ~Velvet. //
         //var posts = await _client.GetFromJsonAsync<eBooruPostResult>($"{baseUrl}{query?.Replace(' ', '+')}");
@@ -61,20 +60,20 @@ public abstract class eBooruBaseCommand : CommandGroup
         var posts = JsonConvert.DeserializeObject<eBooruPostResult>(await result.Content.ReadAsStringAsync());
 
         for (var i = 0; i < posts!.Posts?.Count; i++)
-            if (posts.Posts[i]?.File.Url is null || posts.Posts[i].File.Url.ToString() is "")
+            if (posts.Posts?[i].File.Url is null || posts.Posts[i].File.Url.ToString() is "")
                 posts.Posts.Remove(posts.Posts[i]);
 
         return posts.Posts?.Count is 0 ? null : posts;
     }
 
     /// <summary>
-    ///     Similar to <see cref="DoQueryAsync" /> but adds a specified API key when making a GET request.
+    ///     Similar to <see cref="QueryAsync" /> but adds a specified API key when making a GET request.
     /// </summary>
     /// <param name="query">search query to put in the GET request.</param>
     /// <param name="apiKey">The API key.</param>
     /// <param name="requireUsername">Add <see cref="username" /> to the HTTP header or not.</param>
     /// <returns></returns>
-    private protected async Task<eBooruPostResult?> DoKeyedQueryAsync(string? query, string apiKey, bool requireUsername = false)
+    private protected async Task<eBooruPostResult?> AuthorizedQueryAsync(string? query, string apiKey, bool requireUsername = false)
     {
         if (requireUsername)
             _ = username ?? throw new ArgumentNullException($"{nameof(username)} can't be null.");

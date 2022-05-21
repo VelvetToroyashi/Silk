@@ -35,15 +35,20 @@ public static class BulkAddUser
 
         public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
-            var users = await _db.Users
-                                 .Where(u => u.GuildID == request.Users.First().GuildID)
-                                 .Select(u => u.ID)
-                                 .ToListAsync(cancellationToken);
+            //TODO: Improve
+            foreach (var user in request.Users)
+            {
+                try
+                {
+                    _db.Users.Add(user);
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+                catch
+                {
+                    
+                }
+            }
             
-            _db.AddRange(request.Users.ExceptBy(users, u => u.ID));
-            
-            await _db.SaveChangesAsync(cancellationToken);
-
             return request.Users;
         }
 

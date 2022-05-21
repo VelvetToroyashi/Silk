@@ -10,7 +10,7 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
     {
         builder
            .HasMany(u => u.Users)
-           .WithOne(u => u.Guild);
+           .WithMany(u => u.Guilds);
 
         builder
            .HasOne(g => g.Configuration)

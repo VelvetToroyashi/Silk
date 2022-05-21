@@ -5,7 +5,7 @@ namespace Silk.Commands.Furry.Types;
 
 public class eBooruPostResult
 {
-    public List<Post>? Posts { get; set; }
+    public List<Post> Posts { get; set; }
 }
 
 public class Post

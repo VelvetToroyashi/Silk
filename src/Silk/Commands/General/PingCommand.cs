@@ -16,7 +16,7 @@ using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
 
-[HelpCategory(Categories.Misc)]
+[Category(Categories.Misc)]
 public class PingCommand : CommandGroup
 {
     private readonly GuildContext         _db;

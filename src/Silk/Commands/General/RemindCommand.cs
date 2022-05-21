@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -20,7 +21,6 @@ using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
 using Remora.Results;
-using Serilog;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Services.Guild;
@@ -66,8 +66,7 @@ public static class MicroTimeParser
     }
 }
 
-[Group("remind")]
-[HelpCategory(Categories.General)]
+[Category(Categories.General)]
 public class ReminderCommands : CommandGroup
 {
     private const string ReminderDescription =
@@ -82,167 +81,184 @@ public class ReminderCommands : CommandGroup
         "It's recommended to use relative time instead (such as `in three hours`).\n"         +
         "`tomorrow` Also works, and is equivalent to 24 hours from now.\n\n"                  +
         "We're aware this is a less-than ideal solution, and hope to add locale support for this in the future. <3";
-    
-    private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
-                                              "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
 
-    private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
-    
-    private readonly ReminderService           _reminders;
-    private readonly MessageContext            _context;
-    private readonly IDiscordRestChannelAPI    _channels;
-    private readonly InteractiveMessageService _interactivity;
-    private readonly ILogger<ReminderCommands> _logger;
-    
-    
-    public ReminderCommands
-    (
-        ReminderService           reminders,
-        MessageContext            context,
-        IDiscordRestChannelAPI    channels,
-        InteractiveMessageService interactivity,
-        ILogger<ReminderCommands> logger
-    )
+    private readonly ReminderActionCommands _reminderCommands;
+
+    public ReminderCommands(ReminderActionCommands reminderCommands)
     {
-        _context       = context;
-        _channels      = channels;
-        _reminders     = reminders;
-        _interactivity = interactivity;
-        _logger        = logger;
-
+        _reminderCommands = reminderCommands;
     }
+
+    [Command("remind")]
+    [ExcludeFromCodeCoverage]
+    [Description(ReminderDescription)]
+    public Task<IResult> Remind([Greedy] string reminder) => _reminderCommands.RemindAsync(reminder);
     
-    [Command("set", "me", "create")]
-    [Description("Reminds you of something in the future.")]
-    public async Task<IResult> RemindAsync
-    (
-        [Greedy]
-        [Description(ReminderDescription)]
-        string reminder
-    )
+
+    [Group("remind")]
+    public class ReminderActionCommands : CommandGroup
     {
-        if (string.IsNullOrEmpty(reminder))
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a reminder!");
+        private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
+                                                      "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
 
-        var timeResult = MicroTimeParser.TryParse(reminder.Split(' ')[0]);
-
-        if (timeResult.IsDefined(out var time))
+        private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
+        
+        private readonly ReminderService           _reminders;
+        private readonly MessageContext            _context;
+        private readonly IDiscordRestChannelAPI    _channels;
+        private readonly InteractiveMessageService _interactivity;
+        private readonly ILogger<ReminderCommands> _logger;
+        
+        
+        public ReminderActionCommands
+        (
+            ReminderService           reminders,
+            MessageContext            context,
+            IDiscordRestChannelAPI    channels,
+            InteractiveMessageService interactivity,
+            ILogger<ReminderCommands> logger
+        )
         {
-            reminder = reminder.Substring(reminder.IndexOf(' ') + 1);
-        }
-        else
-        {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
+            _context       = context;
+            _channels      = channels;
+            _reminders     = reminders;
+            _interactivity = interactivity;
+            _logger        = logger;
 
-            if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-            var currentYear = DateTime.UtcNow.Year;
-
-            var timeModel = parsedTime
-                           .Resolution
-                           .Values
-                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                           .FirstOrDefault
-                                (
-                                 v => v is DateTimeV2Date dtd
-                                     ? dtd.Value.Year                        >= currentYear
-                                     : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
-                                );
-
-            if (timeModel is null)
-                return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-            if (timeModel is DateTimeV2Date vd)
-                time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-            if (timeModel is DateTimeV2DateTime vdt)
-                time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
         }
 
-        if (time <= TimeSpan.Zero)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
-        
-        if (time < _minimumReminderTime)
-            return await _channels.CreateMessageAsync(_context.ChannelID, $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
-
-        Snowflake? guildID = _context.GuildID.HasValue ? _context.GuildID.Value : null;
-
-        _ = _context.Message.ReferencedMessage.IsDefined(out var reply);
-        
-        var reminderTime = DateTimeOffset.UtcNow + time;
-        
-        await _reminders.CreateReminderAsync
-            (
-             reminderTime,
-             _context.User.ID,
-             _context.ChannelID,
-             _context.MessageID,
-             guildID,
-             reminder,
-             reply?.Content,
-             reply?.ID, 
-             reply?.Author.ID
-            );
-        
-        return await _channels.CreateMessageAsync(_context.ChannelID, $"I'll remind you {reminderTime.ToTimestamp()}!");
-    }
-    
-    [Command("list")]
-    [Description("Lists all of your reminders.")]
-    public async Task<IResult> ListAsync()
-    {
-        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
-
-        if (!reminders.Any())
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
-
-        if (reminders.Count() > 5)
+        [Command("set", "me", "create")]
+        [Description("Reminds you of something in the future.")]
+        public async Task<IResult> RemindAsync
+        (
+            [Greedy]
+            [Description(ReminderDescription)]
+            string reminder
+        )
         {
-            var chunkedReminders = reminders.Select
-               (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                     $"{r.MessageContent.Truncate(50, "[...]")}"         +
-                     (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
-              .Chunk(5)
-              .Select((rs, i) => new Embed
-               {
-                   Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
-                   Colour = Color.DodgerBlue,
-                   Description = rs.Join("\n\n"),
-               })
-              .ToArray();
+            if (string.IsNullOrEmpty(reminder))
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a reminder!");
 
-            return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, chunkedReminders);
-        }
-        else
-        {
-            var formattedReminders = reminders.Select
-                (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                $"{r.MessageContent.Truncate(50, "[...]")}" +
-                (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
+            var timeResult = MicroTimeParser.TryParse(reminder.Split(' ')[0]);
 
-            var embed = new Embed
+            if (timeResult.IsDefined(out var time))
             {
-                Title       = "Your Reminders:",
-                Colour      = Color.DodgerBlue,
-                Description = formattedReminders.Join("\n\n"),
-            };
+                reminder = reminder.Substring(reminder.IndexOf(' ') + 1);
+            }
+            else
+            {
+                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
+
+                if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
+                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+
+                var currentYear = DateTime.UtcNow.Year;
+
+                var timeModel = parsedTime
+                               .Resolution
+                               .Values
+                               .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
+                               .FirstOrDefault
+                                    (
+                                     v => v is DateTimeV2Date dtd
+                                         ? dtd.Value.Year                        >= currentYear
+                                         : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
+                                    );
+
+                if (timeModel is null)
+                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
+
+                if (timeModel is DateTimeV2Date vd)
+                    time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+
+                if (timeModel is DateTimeV2DateTime vdt)
+                    time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
+            }
+
+            if (time <= TimeSpan.Zero)
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new [] {embed});
+            if (time < _minimumReminderTime)
+                return await _channels.CreateMessageAsync(_context.ChannelID, $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
+
+            Snowflake? guildID = _context.GuildID.HasValue ? _context.GuildID.Value : null;
+
+            _ = _context.Message.ReferencedMessage.IsDefined(out var reply);
+            
+            var reminderTime = DateTimeOffset.UtcNow + time;
+            
+            await _reminders.CreateReminderAsync
+                (
+                 reminderTime,
+                 _context.User.ID,
+                 _context.ChannelID,
+                 _context.MessageID,
+                 guildID,
+                 reminder,
+                 reply?.Content,
+                 reply?.ID, 
+                 reply?.Author.ID
+                );
+            
+            return await _channels.CreateMessageAsync(_context.ChannelID, $"I'll remind you {reminderTime.ToTimestamp()}!");
         }
-    }
-
-    [Command("cancel")]
-    [Description("Cancels a reminder.")]
-    public async Task<IResult> CancelAsync([Description("The ID of the reminder you wish to cancel.")] int id)
-    {
-        var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
         
-        if (reminders.All(r => r.Id != id))
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders, or at least not one by that ID!");
+        [Command("list")]
+        [Description("Lists all of your reminders.")]
+        public async Task<IResult> ListAsync()
+        {
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
 
-        await _reminders.RemoveReminderAsync(id);
-        
-        return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
+            if (!reminders.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
+
+            if (reminders.Count() > 5)
+            {
+                var chunkedReminders = reminders.Select
+                   (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                         $"{r.MessageContent.Truncate(50, "[...]")}"         +
+                         (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
+                  .Chunk(5)
+                  .Select((rs, i) => new Embed
+                   {
+                       Title = $"Your Reminders ({i * 5 + 1}-{(i + 1) * 5} out of {reminders.Count()}):",
+                       Colour = Color.DodgerBlue,
+                       Description = rs.Join("\n\n"),
+                   })
+                  .ToArray();
+
+                return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, chunkedReminders);
+            }
+            else
+            {
+                var formattedReminders = reminders.Select
+                    (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                    $"{r.MessageContent.Truncate(50, "[...]")}" +
+                    (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
+
+                var embed = new Embed
+                {
+                    Title       = "Your Reminders:",
+                    Colour      = Color.DodgerBlue,
+                    Description = formattedReminders.Join("\n\n"),
+                };
+                
+                return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new [] {embed});
+            }
+        }
+
+        [Command("cancel")]
+        [Description("Cancels a reminder.")]
+        public async Task<IResult> CancelAsync([Description("The ID of the reminder you wish to cancel.")] int id)
+        {
+            var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
+            
+            if (reminders.All(r => r.Id != id))
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders, or at least not one by that ID!");
+
+            await _reminders.RemoveReminderAsync(id);
+            
+            return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
+        }
     }
 }

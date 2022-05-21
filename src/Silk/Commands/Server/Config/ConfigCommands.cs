@@ -23,7 +23,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Server;
 
 [Group("config", "cfg")]
-[HelpCategory(Categories.Server)]
+[Category(Categories.Server)]
 [RequireContext(ChannelContext.Guild)]
 [Description("Configure various settings for your server!")]
 [RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.And)]
@@ -32,12 +32,14 @@ public partial class ConfigCommands : CommandGroup
     private readonly ICommandContext         _context;
     private readonly GuildConfigCacheService _configCache;
     private readonly IDiscordRestChannelAPI  _channels;
+    private readonly ViewConfigCommands    _viewConfig;
 
-    public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels)
+    public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels, ViewConfigCommands viewConfig)
     {
-        _context     = context;
-        _configCache = configCache;
-        _channels    = channels;
+        _context         = context;
+        _configCache     = configCache;
+        _channels        = channels;
+        _viewConfig = viewConfig;
     }
 
     [Command("reload")]
@@ -52,6 +54,11 @@ public partial class ConfigCommands : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.ReloadEmoji} Config reloaded! Changes should take effect immediately.");
     }
 
+    [Command("view")]
+    [Description("View the settings for your server.")]
+    public Task<IResult> ViewConfigAsync() => _viewConfig.ViewAllAsync();
+    
+    
     [Group("view", "v")]
     [Description("View the settings for your server.")]
     public partial class ViewConfigCommands : CommandGroup

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
@@ -24,6 +25,11 @@ namespace Silk.Services.Guild;
 /// </summary>
 public class MemberLoggerService
 {
+    private const int JoinWarningThreshold = 3;
+    private const int TwoWeeks             = 14;
+    private const int TwoDays              = 2;
+    private const int HalfDay              = 12;
+    
     private readonly IMediator               _mediator;
     private readonly GuildConfigCacheService _configService;
     private readonly IChannelLoggingService   _channelLogger;
@@ -50,55 +56,75 @@ public class MemberLoggerService
         if (channel is null)
             return Result.FromSuccess();
 
-        var twoWeeksOld = user.ID.Timestamp.AddDays(14) > DateTimeOffset.UtcNow;
-        var twoDaysOld = user.ID.Timestamp.AddDays(2) > DateTimeOffset.UtcNow;
+        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        var twoDaysOld = user.ID.Timestamp.AddDays(TwoDays) > DateTimeOffset.UtcNow;
 
         var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, null, member.JoinedAt));
-
-        var userFields = new List<EmbedField>()
-        {
-            new("Username:", user.ToDiscordTag()),
-            new("User ID:", user.ID.ToString()),
-            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
-        };
-        
-        var sb = new StringBuilder();
         
         if (!userResult.IsDefined(out var userData))
             return Result.FromError(userResult.Error!);
 
-        if (userData.Infractions.Any())
-        {
-            sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
-            userFields.Add(new("Infractions:", userData
-                                              .Infractions
-                                              .GroupBy(inf => inf.Type)
-                                              .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
-                                              .Join("\n"), true));
-        }
+        var sb = new StringBuilder();
 
-        
-        var userInfractionJoinBuffer = userData.Infractions.Count(inf => inf.Type is
-                                                                      InfractionType.Kick or
-                                                                      InfractionType.Ban or
-                                                                      InfractionType.SoftBan) + 4;
-        
-        if (userData.History.JoinDates.Count > userInfractionJoinBuffer)
-            sb.AppendLine("Account has joined more than four times excluding removals by infractions.");
-        
-        if (userData.History.JoinDates.Count(jd => jd.AddDays(14) < DateTimeOffset.UtcNow) > 3)
-            sb.AppendLine("Account has joined more than three times in the last two weeks.");
+        sb.AppendLine("Notes:");
         
         if (twoDaysOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
         else if (twoWeeksOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 weeks old");
         
+        var userFields = new List<EmbedField>()
+        {
+            new("Username:", user.ToDiscordTag()),
+            new("User ID:", user.ID.ToString()),
+            new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
+            new("User Joined:", userData.History.Last().JoinDate.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
+                                userData.History.Last().JoinDate.ToTimestamp())
+        };
+        
+        if (userData.Infractions.Any())
+        {
+            sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
+            userFields.Add
+            (
+             new
+                 (
+                  "Infractions:",
+                  userData
+                  .Infractions
+                  .GroupBy(inf => inf.Type)
+                  .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
+                  .Join("\n"), true
+                 )
+            );
+        }
+        
+        var userInfractionJoinBuffer = JoinWarningThreshold + userData
+                                      .Infractions
+                                      .Count
+                                           (
+                                            inf => 
+                                                inf.Type is
+                                                    InfractionType.Kick or
+                                                    InfractionType.Ban or
+                                                    InfractionType.SoftBan
+                                           );
+        
+        if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
+            sb.AppendLine("Account has joined more than four times excluding infractions.");
+        
+        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(TwoWeeks) > DateTimeOffset.UtcNow) > JoinWarningThreshold)
+            sb.AppendLine("Account has joined more than three times in the last two weeks.");
+
+        if (userData.History.Where(g => g.JoinDate.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
+            sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
+        
         var embed = new Embed()
         {
             Title       = "Member Joined",
             Description = sb.ToString(),
             Colour      = twoDaysOld ? Color.DarkRed : twoWeeksOld ? Color.Orange : Color.SeaGreen,
+            Thumbnail   = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields      = userFields.ToArray()
         };
         
@@ -119,6 +145,8 @@ public class MemberLoggerService
 
         var sb = new StringBuilder();
         
+        var userResult = await _mediator.Send(new GetUser.Request(guildID, user.ID));
+        
         var fields = new List<EmbedField>()
         {
             new("Username:", user.ToDiscordTag()),
@@ -126,22 +154,20 @@ public class MemberLoggerService
             new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime))
         };
         
-        var userResult = await _mediator.Send(new GetUser.Request(guildID, user.ID));
-
         if (userResult is null)
         {
             sb.AppendLine($"{Emojis.WarningEmoji} I don't have any prior data about this user, sorry!");
         }
         else
         {
-            var lastJoin = userResult.History.JoinDates.LastOrDefault();
+            var lastJoin = userResult.History.Last();
             
-            fields.Add(new("User Joined:", lastJoin.ToTimestamp(TimestampFormat.LongDateTime)));
+            fields.Add(new("User Joined:", lastJoin.JoinDate.ToTimestamp(TimestampFormat.LongDateTime)));
             
-            if (lastJoin + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
+            if (lastJoin.JoinDate + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than an hour ago");
             
-            else if (lastJoin + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
+            else if (lastJoin.JoinDate + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than a day ago");
         }
 
@@ -150,6 +176,7 @@ public class MemberLoggerService
             Title       = "Member Left",
             Description = sb.ToString(),
             Colour      = Color.Firebrick,
+            Thumbnail = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields = fields
         };
         
