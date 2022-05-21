@@ -86,10 +86,6 @@ public class GuildCacherService
 
     public async Task<Result> GreetGuildAsync(IGuildCreate guild)
     {
-        //It's worth noting that there's a chance that one could pass
-        //a guild fetched from REST here, which typically doesn't have
-        //channels defined, which is a big issue, but that's on the caller
-
         var currentUserResult = await _users.GetCurrentUserAsync();
 
         if (!currentUserResult.IsSuccess)
@@ -155,20 +151,8 @@ public class GuildCacherService
         return Result.FromSuccess();
     }
     
+    public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
-    public async Task CacheGuildAsync(Snowflake guildID)
-    {
-        var db = _cache.GetDatabase();
-        
-        var current = Interlocked.Increment(ref _guildCount);
-    
-        var currentGuildCount = await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
-
-        _logger.LogInformation("Received guild [{CurrentGuild,2}/{GuildCount,-2}]", current, currentGuildCount);
-        
-        await _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
-    }
-    
     public async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
         var users = members.Where(u => u.User.IsDefined())
@@ -184,9 +168,7 @@ public class GuildCacherService
                             });
 
         await _mediator.Send(new BulkAddUser.Request(users));
-
         
-
         return Result.FromSuccess();
     }
 }
