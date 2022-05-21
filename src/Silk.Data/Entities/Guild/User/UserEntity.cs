@@ -13,6 +13,9 @@ public class UserEntity
     [Column("id")]
     public Snowflake ID { get; set; }
     
+    /// <summary>
+    /// The guilds this user is a part of.
+    /// </summary>
     public ICollection<GuildEntity> Guilds { get; set; }
     
     /// <summary>
@@ -21,5 +24,4 @@ public class UserEntity
     public List<UserHistoryEntity> History { get; set; } = new();
 
     public List<InfractionEntity> Infractions { get; set; } = new();
-    //public List<Reminder> Reminders { get; set; } = new();
 }
