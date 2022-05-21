@@ -41,11 +41,16 @@ namespace Silk.Data.Migrations
                 table: "users");
 
             migrationBuilder.Sql("DELETE FROM users WHERE id IN (SELECT id FROM (SELECT id, row_number() OVER w as rnum FROM users WINDOW w AS (PARTITION BY id ORDER BY id) ) AS t WHERE t.rnum > 1);");
+
+            migrationBuilder.Sql("TRUNCATE TABLE user_histories RESTART IDENTITY RESTRICT;");
             
             migrationBuilder.AddPrimaryKey(
                 name: "PK_users",
                 table: "users",
                 column: "id");
+            
+            // Reconstruct any missing users based on their infractions
+            migrationBuilder.Sql("INSERT INTO users(id, flags) SELECT target_id, 0 FROM infractions ON CONFLICT(id) DO NOTHING;");
             
             migrationBuilder.CreateTable(
                 name: "GuildEntityUserEntity",
