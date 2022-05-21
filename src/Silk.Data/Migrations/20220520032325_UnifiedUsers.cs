@@ -54,7 +54,8 @@ namespace Silk.Data.Migrations
                 column: "id");
             
             // Reconstruct any missing users based on their infractions
-            migrationBuilder.Sql("INSERT INTO users(id, flags) SELECT target_id, 0 FROM infractions ON CONFLICT(id) DO NOTHING;");
+            migrationBuilder.Sql("INSERT INTO users(id) SELECT target_id FROM infractions ON CONFLICT(id) DO NOTHING;");
+            migrationBuilder.Sql("INSERT INTO users(id) SELECT enforcer_id FROM infractions ON CONFLICT(id) DO NOTHING;");
             
             migrationBuilder.CreateTable(
                 name: "GuildEntityUserEntity",
