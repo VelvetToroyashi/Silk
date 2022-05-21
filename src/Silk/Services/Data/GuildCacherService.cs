@@ -8,6 +8,7 @@ using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
+using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -83,7 +84,7 @@ public class GuildCacherService
         _shard      = shard;
     }
 
-    public async Task<Result> GreetGuildAsync(IGuild guild)
+    public async Task<Result> GreetGuildAsync(IGuildCreate guild)
     {
         //It's worth noting that there's a chance that one could pass
         //a guild fetched from REST here, which typically doesn't have

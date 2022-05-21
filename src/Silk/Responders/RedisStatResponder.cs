@@ -69,8 +69,8 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
 
         var cacheKey = KeyHelpers.CreateGuildCacheKey(gatewayEvent.ID);
         
-        if ((await _cache.TryGetValueAsync<IGuild>(cacheKey, ct)).IsDefined(out var guild) || 
-            (await _cache.TryGetPreviousValueAsync<IGuild>(cacheKey)).IsDefined(out guild))
+        if ((await _cache.TryGetValueAsync<IGuildCreate>(cacheKey, ct)).IsDefined(out var guild) || 
+            (await _cache.TryGetPreviousValueAsync<IGuildCreate>(cacheKey)).IsDefined(out guild))
         {
             if (!guild.MemberCount.IsDefined(out var gwm))
                 return Result.FromSuccess();
@@ -107,7 +107,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         if (gatewayEvent.ChunkIndex is 0)
         {
-            var guildResult = await _cache.TryGetValueAsync<IGuild>(KeyHelpers.CreateGuildCacheKey(gatewayEvent.GuildID), ct);
+            var guildResult = await _cache.TryGetValueAsync<IGuildCreate>(KeyHelpers.CreateGuildCacheKey(gatewayEvent.GuildID), ct);
             
             if (!guildResult.IsDefined(out var guild))
                 return Result.FromSuccess(); // ??
