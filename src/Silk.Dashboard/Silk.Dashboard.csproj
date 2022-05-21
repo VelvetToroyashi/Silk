@@ -10,12 +10,11 @@
   <ItemGroup>
     <PackageReference Include="MediatR" />
     <PackageReference Include="Humanizer" />
-    <PackageReference Include="MudBlazor" Version="6.0.7" />
-    <PackageReference Include="Remora.Discord.Rest" Version="31.0.0" />
+    <PackageReference Include="MudBlazor" Version="6.0.10" />
     <PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
-    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.4" />
+    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.5" />
   </ItemGroup>
 
   <ItemGroup>
