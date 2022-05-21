@@ -83,10 +83,10 @@ public class MemberLoggerService
                                                                       InfractionType.Ban or
                                                                       InfractionType.SoftBan) + 4;
         
-        if (userData.History.JoinDates.Count > userInfractionJoinBuffer)
+        if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding removals by infractions.");
         
-        if (userData.History.JoinDates.Count(jd => jd.AddDays(14) < DateTimeOffset.UtcNow) > 3)
+        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(14) < DateTimeOffset.UtcNow) > 3)
             sb.AppendLine("Account has joined more than three times in the last two weeks.");
         
         if (twoDaysOld)
@@ -134,14 +134,14 @@ public class MemberLoggerService
         }
         else
         {
-            var lastJoin = userResult.History.JoinDates.LastOrDefault();
+            var lastJoin = userResult.History.Last();
             
-            fields.Add(new("User Joined:", lastJoin.ToTimestamp(TimestampFormat.LongDateTime)));
+            fields.Add(new("User Joined:", lastJoin.JoinDate.ToTimestamp(TimestampFormat.LongDateTime)));
             
-            if (lastJoin + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
+            if (lastJoin.JoinDate + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than an hour ago");
             
-            else if (lastJoin + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
+            else if (lastJoin.JoinDate + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than a day ago");
         }
 

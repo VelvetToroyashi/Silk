@@ -16,13 +16,15 @@ public class UserEntity
     /// <summary>
     /// The ID of the user's guild.
     /// </summary>
-    [Column("guild_id")]
+    [NotMapped]
     public Snowflake GuildID { get; set; }
 
-    /// <summary>
-    /// The guild this user belongs to.
-    /// </summary>
-    public GuildEntity Guild { get; set; } = null!;
+    // /// <summary>
+    // /// The guild this user belongs to.
+    // /// </summary>
+    // public GuildEntity Guild { get; set; } = null!;
+
+    public ICollection<GuildEntity> Guilds { get; set; }
 
     /// <summary>
     /// Any flags associated with this user.
@@ -33,8 +35,8 @@ public class UserEntity
     /// <summary>
     /// Non-infraction related history of the user.
     /// </summary>
-    public UserHistoryEntity History { get; set; }
+    public List<UserHistoryEntity> History { get; set; }
 
-    public List<InfractionEntity> Infractions { get; set; }
+    public List<InfractionEntity> Infractions { get; set; } = new();
     //public List<Reminder> Reminders { get; set; } = new();
 }
