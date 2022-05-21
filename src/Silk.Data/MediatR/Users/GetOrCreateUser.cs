@@ -40,7 +40,7 @@ public static class GetOrCreateUser
             user = new()
             {
                 ID          = request.UserID,
-                Infractions = new(), 
+                Infractions = new(),
                 History     = new() { new() { GuildID = request.GuildID, JoinDate = request.JoinedAt ?? DateTimeOffset.UtcNow } }
             };
     

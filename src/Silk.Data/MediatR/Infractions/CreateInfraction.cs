@@ -51,9 +51,10 @@ public static class CreateInfraction
                 Type       = request.Type
             };
 
-            _db.Infractions.Add(infraction);
             await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.TargetID), cancellationToken);
-
+            await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.GuildID), cancellationToken);
+            
+            _db.Infractions.Add(infraction);
             await _db.SaveChangesAsync(cancellationToken);
 
             return infraction;
