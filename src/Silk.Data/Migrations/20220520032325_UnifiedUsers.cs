@@ -40,13 +40,13 @@ namespace Silk.Data.Migrations
                 name: "guild_id",
                 table: "users");
 
+            migrationBuilder.Sql("DELETE FROM users WHERE id IN (SELECT id FROM (SELECT id, row_number() OVER w as rnum FROM users WINDOW w AS (PARTITION BY id ORDER BY id) ) AS t WHERE t.rnum > 1);");
+            
             migrationBuilder.AddPrimaryKey(
                 name: "PK_users",
                 table: "users",
                 column: "id");
-
-            migrationBuilder.Sql("DELETE FROM \"users\" WHERE ctid NOT IN (SELECT min(ctid) FROM \"users\" GROUP BY id);");
-
+            
             migrationBuilder.CreateTable(
                 name: "GuildEntityUserEntity",
                 columns: table => new
