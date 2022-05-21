@@ -178,7 +178,6 @@ public class GuildCacherService
                                 return new UserEntity
                                 {
                                     ID      = id,
-                                    GuildID = guildID,
                                     History = new() { new() {JoinDate = joinedAt} }
                                 };
                             });

@@ -64,8 +64,8 @@ public class BulkUserTests
         //Arrange
         List<UserEntity> users = new()
         {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
+            new() { ID = new(1) },
+            new() { ID = new(2) }
         };
 
         //Act
@@ -83,8 +83,8 @@ public class BulkUserTests
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
         List<UserEntity> users = new()
         {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
+            new() { ID = new(1) },
+            new() { ID = new(2) }
         };
 
         //Act
