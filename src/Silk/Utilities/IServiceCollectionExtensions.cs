@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -113,7 +114,8 @@ public static class IServiceCollectionExtensions
                   .SetSlidingExpiration<IMessage>(null)
                   .SetSlidingExpiration<IGuild>(null)
                   .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12));
+                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
+                  .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
