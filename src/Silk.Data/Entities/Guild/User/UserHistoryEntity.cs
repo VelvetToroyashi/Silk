@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds.Users;
 
 namespace Silk.Data.Entities;
 
@@ -39,4 +40,7 @@ public class UserHistoryEntity
     /// </summary>
     [Column("leave_date")]
     public DateTimeOffset? LeaveDate { get; set; }
+
+    public static UserHistoryDTO ToDTO(UserHistoryEntity history)
+        => new(history.GuildID, history.JoinDate, history.LeaveDate);
 }

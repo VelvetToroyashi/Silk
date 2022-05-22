@@ -59,7 +59,7 @@ public class MemberLoggerService
         var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
         var twoDaysOld = user.ID.Timestamp.AddDays(TwoDays) > DateTimeOffset.UtcNow;
 
-        var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, null, member.JoinedAt));
+        var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, member.JoinedAt));
         
         if (!userResult.IsDefined(out var userData))
             return Result.FromError(userResult.Error!);
@@ -145,7 +145,7 @@ public class MemberLoggerService
 
         var sb = new StringBuilder();
         
-        var userResult = await _mediator.Send(new GetUser.Request(guildID, user.ID));
+        var userResult = await _mediator.Send(new GetUser.Request(user.ID));
         
         var fields = new List<EmbedField>()
         {
@@ -162,12 +162,12 @@ public class MemberLoggerService
         {
             var lastJoin = userResult.History.Last();
             
-            fields.Add(new("User Joined:", lastJoin.JoinDate.ToTimestamp(TimestampFormat.LongDateTime)));
+            fields.Add(new("User Joined:", lastJoin.Joined.ToTimestamp(TimestampFormat.LongDateTime)));
             
-            if (lastJoin.JoinDate + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
+            if (lastJoin.Joined + TimeSpan.FromHours(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than an hour ago");
             
-            else if (lastJoin.JoinDate + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
+            else if (lastJoin.Joined + TimeSpan.FromDays(1) > DateTimeOffset.UtcNow)
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than a day ago");
         }
 

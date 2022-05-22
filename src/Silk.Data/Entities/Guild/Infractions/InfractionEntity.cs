@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds;
 
 namespace Silk.Data.Entities;
 
@@ -99,4 +100,7 @@ public class InfractionEntity
     /// </summary>
     [NotMapped]
     public TimeSpan? Duration => !ExpiresAt.HasValue ? null : ExpiresAt.Value - CreatedAt;
+
+    public static InfractionDTO ToDTO(InfractionEntity infraction)
+        => new(infraction.TargetID, infraction.EnforcerID, infraction.GuildID, infraction.CreatedAt, infraction.ExpiresAt, infraction.Duration, infraction.CaseNumber, infraction.Reason, infraction.UserNotified, infraction.Processed, !infraction.AppliesToTarget);
 }
