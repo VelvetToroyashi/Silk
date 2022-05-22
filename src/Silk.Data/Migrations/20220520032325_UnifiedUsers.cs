@@ -40,6 +40,10 @@ namespace Silk.Data.Migrations
                 name: "guild_id",
                 table: "users");
 
+            migrationBuilder.DropColumn(
+                name: "flags",
+                table: "users");
+
             migrationBuilder.Sql("DELETE FROM users WHERE id IN (SELECT id FROM (SELECT id, row_number() OVER w as rnum FROM users WINDOW w AS (PARTITION BY id ORDER BY id) ) AS t WHERE t.rnum > 1);");
 
             migrationBuilder.Sql("TRUNCATE TABLE user_histories RESTART IDENTITY RESTRICT;");
@@ -50,7 +54,8 @@ namespace Silk.Data.Migrations
                 column: "id");
             
             // Reconstruct any missing users based on their infractions
-            migrationBuilder.Sql("INSERT INTO users(id, flags) SELECT target_id, 0 FROM infractions ON CONFLICT(id) DO NOTHING;");
+            migrationBuilder.Sql("INSERT INTO users(id) SELECT target_id FROM infractions ON CONFLICT(id) DO NOTHING;");
+            migrationBuilder.Sql("INSERT INTO users(id) SELECT enforcer_id FROM infractions ON CONFLICT(id) DO NOTHING;");
             
             migrationBuilder.CreateTable(
                 name: "GuildEntityUserEntity",
