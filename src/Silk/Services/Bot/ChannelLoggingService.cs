@@ -72,13 +72,13 @@ public class ChannelLoggingService : IChannelLoggingService
             return Result.FromError(channel.Error);
         }
         
-        var result = await _channels
-           .CreateMessageAsync(
-                               loggingData.ChannelID, 
-                               stringContent                                                                       ?? default(Optional<string>), 
-                               embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
-                               attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
-                              );
+        var result = await _channels.CreateMessageAsync
+        (
+         loggingData.ChannelID,
+         stringContent                                                                       ?? default(Optional<string>),
+         embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
+         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
+        );
 
 
         if (!result.IsSuccess)
@@ -101,13 +101,16 @@ public class ChannelLoggingService : IChannelLoggingService
         
         _logger.LogDebug("Preparing to log {EmbedCount} embeds with {FileCount} files with{Without} content", embedContent?.Length ?? 0, fileData?.Length ?? 0, stringContent is null ? "out" : null);
         
-        var result = await _webhooks.ExecuteWebhookAsync(loggingData.WebhookID,
-                                                         loggingData.WebhookToken,
-                                                         true,
-                                                         stringContent                                                                       ?? default(Optional<string>), 
-                                                         embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
-                                                         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>),
-                                                         username: "Silk! Logging");
+        var result = await _webhooks.ExecuteWebhookAsync
+        (
+         loggingData.WebhookID,
+         loggingData.WebhookToken,
+         true,
+         stringContent                                                                       ?? default(Optional<string>),
+         embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
+         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>),
+         username: "Silk! Logging"
+        );
 
         if (!result.IsSuccess)
         {
