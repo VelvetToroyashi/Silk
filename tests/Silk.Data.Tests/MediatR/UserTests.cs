@@ -10,6 +10,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Respawn;
 using Respawn.Graph;
+using Silk.Data.DTOs.Guilds.Users;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 
@@ -64,9 +65,9 @@ public class UserTests
     public async Task GetReturnsNullForNonUser()
     {
         //Arrange
-        UserEntity? user;
+        UserDTO? user;
         //Act
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNull(user);
     }
@@ -75,10 +76,10 @@ public class UserTests
     public async Task GetReturnsUserCorrectly()
     {
         //Arrange
-        UserEntity? user;
+        UserDTO? user;
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Act
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNotNull(user);
     }
@@ -87,10 +88,10 @@ public class UserTests
     public async Task GetOrCreateCreatesForNonUser()
     {
         //Arrange
-        UserEntity? user;
+        UserDTO? user;
         //Act
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNotNull(user);
     }

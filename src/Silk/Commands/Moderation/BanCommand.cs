@@ -65,7 +65,7 @@ namespace Silk.Commands.Moderation
         )
         {
             var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason, banDuration);
-            var notified         = infractionResult.Entity.UserNotified ? "(User notified with DM)" : "(Failed to DM)";
+            var notified         = infractionResult.Entity.Notified ? "(User notified with DM)" : "(Failed to DM)";
             
             return await _channels.CreateMessageAsync
                 (

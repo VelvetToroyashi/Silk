@@ -47,7 +47,7 @@ public class MuteCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
-        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return
             await _channels.CreateMessageAsync
