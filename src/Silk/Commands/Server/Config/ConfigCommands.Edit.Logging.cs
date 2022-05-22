@@ -296,12 +296,12 @@ public partial class ConfigCommands
 
             //Webhook tokens are always returned (if you have permission), so we need to check if the wh is owned by us.
             var webhook = webhooks.Entity.FirstOrDefault
-                (
-                 wh =>
-                     wh.Type is WebhookType.Incoming &&
-                     wh.User.IsDefined(out var user) &&
-                     user.ID == selfResult.Entity.ID
-               );
+            (
+             wh =>
+                 wh.Type is WebhookType.Incoming &&
+                 wh.User.IsDefined(out var user) &&
+                 user.ID == selfResult.Entity.ID
+            );
 
             //Return the webhook if it already exists.
             if (webhook is not null)
