@@ -24,7 +24,7 @@ public static class GetMostRecentUser
                                  .ThenInclude(u => u.History)
                            .FirstAsync(g => g.ID == request.GuildID, cancellationToken);
 
-            var user = guild.Users.OrderByDescending(u => u.History).First();
+            var user = guild.Users.OrderByDescending(u => u.History.Last().JoinDate).First();
 
             return user;
         }
