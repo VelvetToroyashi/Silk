@@ -42,7 +42,7 @@ public class KickCommand : CommandGroup
     public async Task<IResult> Kick([NonSelfActionable] IUser user, [Greedy] string reason = "Not given.")
     {
         var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-        var notified         = infractionResult.Entity.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        var notified         = infractionResult.Entity.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return await _channels.CreateMessageAsync
             (_context.ChannelID,

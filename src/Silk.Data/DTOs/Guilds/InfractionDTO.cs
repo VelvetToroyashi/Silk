@@ -1,5 +1,6 @@
 using System;
 using Remora.Rest.Core;
+using Silk.Data.Entities;
 
 namespace Silk.Data.DTOs.Guilds;
 
@@ -9,6 +10,7 @@ namespace Silk.Data.DTOs.Guilds;
 /// <param name="TargetID">The ID of the user this infraction affects.</param>
 /// <param name="EnforcerID">The ID of the user that generated this infraction.</param>
 /// <param name="GuildID">The ID of the guild this infraction was generated on.</param>
+/// <param name="Type">The type of infraction</param>
 /// <param name="CreatedAt">When this infraction was created.</param>
 /// <param name="ExpiresAt">When this infraction expires, if ever.</param>
 /// <param name="Duration">How long this infraction lasts.</param>
@@ -22,6 +24,7 @@ public record InfractionDTO
     Snowflake       TargetID,
     Snowflake       EnforcerID,
     Snowflake       GuildID,
+    InfractionType  Type,
     DateTimeOffset  CreatedAt,
     DateTimeOffset? ExpiresAt,
     TimeSpan?       Duration,

@@ -14,6 +14,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
+using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
@@ -63,7 +64,7 @@ public class CasesCommand : CommandGroup
                 new EmbedField("Duration:", infCase.Duration?.Humanize() ?? "Permanent", true),
                 new EmbedField("Created:", infCase.CreatedAt.ToTimestamp(),true),
                 new EmbedField("Expires:", infCase.ExpiresAt?.Humanize() ?? "Never", true),
-                new EmbedField("Pardoned:", (!infCase.AppliesToTarget).ToString(), true)
+                new EmbedField("Pardoned:", infCase.Pardoned.ToString(), true)
             }
         };
 
@@ -106,8 +107,8 @@ public class CasesCommand : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
     }
 
-    private string GetCaseDescription(InfractionEntity infraction) =>
-        $"| {infraction.CaseNumber} "                            +
+    private string GetCaseDescription(InfractionDTO infraction) =>
+        $"| {infraction.CaseID} "                            +
         $"| **{infraction.Type.Humanize(LetterCasing.Title)}** " +
         $"| {infraction.CreatedAt.ToTimestamp()} "               +
         $"| {infraction.EnforcerID} "                            +

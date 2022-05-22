@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 
@@ -20,9 +21,9 @@ public static class CreateInfraction
             string          Reason,
             InfractionType  Type,
             DateTimeOffset? Expiration = null
-        ) : IRequest<InfractionEntity>;
+        ) : IRequest<InfractionDTO>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionEntity>
+    internal sealed class Handler : IRequestHandler<Request, InfractionDTO>
     {
         private readonly GuildContext _db;
         private readonly IMediator    _mediator;
@@ -33,7 +34,7 @@ public static class CreateInfraction
             _mediator = mediator;
         }
 
-        public async Task<InfractionEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
         {
             int guildInfractionCount = await _db.Infractions
                                                 .Where(inf => inf.GuildID == request.GuildID)
@@ -57,7 +58,7 @@ public static class CreateInfraction
             _db.Infractions.Add(infraction);
             await _db.SaveChangesAsync(cancellationToken);
 
-            return infraction;
+            return InfractionEntity.ToDTO(infraction);
         }
     }
 }
