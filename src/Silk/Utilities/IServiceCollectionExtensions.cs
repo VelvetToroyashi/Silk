@@ -151,7 +151,7 @@ public static class IServiceCollectionExtensions
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        var config = configuration.GetSilkConfigurationOptionsFromSection();
+        var config = configuration.GetSilkConfigurationOptions();
         
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
