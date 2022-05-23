@@ -33,11 +33,11 @@
 
     <ItemGroup>
         <PackageReference Include="AsyncEnumerator" />
-        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+        <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
-        <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
+        <PackageReference Include="MathParser.org-mXparser" Version="5.0.3" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.2.0" />
@@ -67,7 +67,7 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.16" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.17" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Sentry" Version="3.17.1" />

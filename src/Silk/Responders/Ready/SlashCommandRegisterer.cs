@@ -6,6 +6,7 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using Silk.Shared.Configuration;
 
 namespace Silk.Responders;
 
@@ -39,7 +40,7 @@ public class SlashCommandRegisterer : IResponder<IReady>, IResponder<IGuildCreat
         if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess();
         
-        var config = _config.GetSilkConfigurationOptionsFromSection();
+        var config = _config.GetSilkConfigurationOptions();
 
         if (config.SlashCommandsGuildId != null)
         {
