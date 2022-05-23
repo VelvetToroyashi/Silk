@@ -41,30 +41,68 @@ For the **Database**, look for the `Persistence` section of the file, it will lo
 
 ```json
 "Persistence": {
-    "Host": "localhost",
-    "Port": "5432",
-    "Database": "silk",
-    "Username": "postgres",
-    "Password": ""
+"Host": "localhost",
+"Port": "5432",
+"Database": "silk",
+"Username": "postgres",
+"Password": ""
 }
 ```
 
-From there, just give the `Username` key a value (database user), and the `Password` key a value (password for the Postgres user).  
+From there, just give the `Username` key a value (database user), and the `Password` key a value (password for the Postgres user).
 
 For the **Discord Bot Token**, look for the `Discord` section of the file, it will look something like this:
 
 ```json
 "Discord": {
-    "Shards": 1,
-    "ClientId": "",
-    "ClientSecret": "", 
-    "BotToken": ""
+  "Shards": 1,
+  "ClientId": "",
+  "ClientSecret": "", 
+  "BotToken": ""
 }
 ```
 
-From there, just give the `BotToken` key a value (your Discord Bot Token). If you don't have your token off-hand, you can get it from the [Discord Developer Portal](https://discord.com/developers); Select your application once logged in, then select `Bot` in the menu, and you should be able to Reveal your token from there.
+From there, just give the `BotToken` key a value (your Discord Bot Token). If you are just starting with Discord Bots, then you can generate your Token and then copy it into your configuration file (use App Secrets!) - [Discord Developer Portal](https://discord.com/developers).
 
-#### **App Secrets**
+Once there, locate and click the **Applications** menu item (usually in left side menu), then click on your application. Then you can either generate your token, or if you already have a bot, see if you can get the Token from existing application configuration that you're using, otherwise you'll need to reset your Token to have it revealed.
+
+---
+
+### Plugins + Redis
+
+Silk! uses [Redis](https://redis.io/) for caching, and has a nifty plugin system using `Remora.Plugins`.
+
+These two pieces need just a bit of configuration, so please make not to skip!
+
+In the same template `appSettings.json`, look for the following two sections: **Plugins**, **Redis**
+
+The **Plugins** section will look something like this:
+
+```json
+"Plugins": {
+  "RoleMenu": {
+    "Database": "Host=localhost;Port=5432;Database=silk_role_menu;Username=postgres;Password="
+  }
+}
+```
+
+Make sure to fill the `Password` part of the connection string for the RoleMenu plugin.
+
+For the **Redis** section, it will look something like this:
+
+```json
+"Redis": {
+  "Host": "localhost",
+  "Port": "6379",
+  "Password": ""
+}
+```
+
+Like above, make sure to fill the `Password` part of the connection string for `Redis`, and make any other needed changes to the Redis configuration (host or port changes).
+
+---
+
+### **App Secrets**
 
 The alternative, and more recommended way (but still **NOT** suitable for `Production`) for managing the configuration file is using `User Secrets`
 
