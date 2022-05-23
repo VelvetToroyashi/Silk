@@ -126,7 +126,7 @@ The structure for the file is the same for the [Default](#default) - `appSetting
 
 ### Running the Project
 
-Before you start, you will want to make sure that you have both Postgres and Redis running and available to Silk!. If the services are running in docker, you'll wanna make sure that the appropriate ports are exposed on the container (`5432` and `6375` respectively).
+Before you start, you will want to make sure that you have both Postgres and Redis running and available to Silk!. If the services are running in docker, you'll wanna make sure that the appropriate ports are exposed on the container (`5432` and `6379` respectively).
 
 If Silk! is also running in Docker, ensure that it's within the same network as both Postgres and Redis. To connect, simply reference the container name instead of `localhost` or an IP (e.g. `Server=postgres`).
 
