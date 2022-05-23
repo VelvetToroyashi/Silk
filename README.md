@@ -70,9 +70,7 @@ Once there, locate and click the **Applications** menu item (usually in left sid
 
 ### Plugins + Redis
 
-Silk! uses [Redis](https://redis.io/) for caching, and has a nifty plugin system using `Remora.Plugins`.
-
-These two pieces need just a bit of configuration, so please make not to skip!
+Silk! uses [Redis](https://redis.io/) for caching, and has a nifty plugin system using `Remora.Plugins`. These two pieces need just a bit of configuration, so please make sure not to skip!
 
 In the same template `appSettings.json`, look for the following two sections: **Plugins**, **Redis**
 
