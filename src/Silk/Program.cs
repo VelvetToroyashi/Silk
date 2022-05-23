@@ -89,7 +89,7 @@ public class Program
 
         builder.ConfigureServices((context, container) =>
         {
-            SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+            SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptions();
 
             AddDatabases(container, silkConfig.Persistence);
         });
@@ -101,7 +101,7 @@ public class Program
     {
         var config      = context.Configuration;
         
-        var silkConfig  = config.GetSilkConfigurationOptionsFromSection();
+        var silkConfig  = config.GetSilkConfigurationOptions();
         var redisConfig = silkConfig.Redis;
 
         var connectionConfig = new ConfigurationOptions()
@@ -178,7 +178,7 @@ public class Program
            .ConfigureServices((context, services) =>
             {
                 // There's a more elegant way to do this, but I'm lazy and this works.
-                var silkConfig = context.Configuration.GetSilkConfigurationOptionsFromSection();
+                var silkConfig = context.Configuration.GetSilkConfigurationOptions();
 
                 AddDatabases(services, silkConfig.Persistence);
                 AddSilkConfigurationOptions(services, context.Configuration);
@@ -234,7 +234,7 @@ public class Program
                     "ravy-api",
                     (s, c) =>
                     {
-                        var config = s.GetRequiredService<IConfiguration>().GetSilkConfigurationOptionsFromSection();
+                        var config = s.GetRequiredService<IConfiguration>().GetSilkConfigurationOptions();
 
                         c.BaseAddress = new("https://ravy.org/api/v1/avatars");
                         c.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Ravy {config.RavyAPIKey}");
@@ -269,16 +269,4 @@ public class Program
         services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
         //services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
     }
-}
-
-//Todo: Move this class maybe? 
-public static class IConfigurationExtensions
-{
-    /// <summary>
-    ///     An extension method to get a <see cref="SilkConfigurationOptions" /> instance from the Configuration by Section Key
-    /// </summary>
-    /// <param name="config">the configuration</param>
-    /// <returns>an instance of the SilkConfigurationOptions class, or null if not found</returns>
-    public static SilkConfigurationOptions GetSilkConfigurationOptionsFromSection(this IConfiguration config)
-        => config.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
 }
