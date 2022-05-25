@@ -102,13 +102,13 @@ public class MemberLoggerService
         var userInfractionJoinBuffer = JoinWarningThreshold + userData
                                       .Infractions
                                       .Count
-                                           (
-                                            inf => 
-                                                inf.Type is
-                                                    InfractionType.Kick or
-                                                    InfractionType.Ban or
-                                                    InfractionType.SoftBan
-                                           );
+                                       (
+                                        inf => 
+                                            inf.Type is
+                                                InfractionType.Kick or
+                                                InfractionType.Ban or
+                                                InfractionType.SoftBan
+                                       );
         
         if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding infractions.");
