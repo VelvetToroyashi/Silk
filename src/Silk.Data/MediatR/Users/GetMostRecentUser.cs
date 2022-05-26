@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;
-using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Users;
 

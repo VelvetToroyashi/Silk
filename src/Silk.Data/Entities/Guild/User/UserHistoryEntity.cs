@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;

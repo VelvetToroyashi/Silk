@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Remora.Rest.Core;
-using Silk.Data.DTOs.Guilds;
 using Silk.Data.DTOs.Guilds.Users;
 
 namespace Silk.Data.Entities;
