@@ -12,7 +12,7 @@ using Silk.Data.MediatR.Users.History;
 namespace Silk.Responders;
 
 [ResponderGroup(ResponderGroup.Early)]
-public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
+public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>, IResponder<IGuildMembersChunk>
 {
     private readonly IMediator _mediator;
     public MemberDataCacherResponder(IMediator mediator) => _mediator = mediator;
@@ -35,5 +35,10 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
             await _mediator.Send(new AddUserLeaveDate.Request(gatewayEvent.GuildID, user.ID, DateTimeOffset.UtcNow), ct);
         
         return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
+    }
+    
+    public async Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
+    {
+        return Result.FromSuccess();
     }
 }

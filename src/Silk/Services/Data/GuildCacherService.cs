@@ -167,7 +167,7 @@ public class GuildCacherService
                                 };
                             });
 
-        await _mediator.Send(new BulkAddUser.Request(users));
+        await _mediator.Send(new BulkAddUser.Request(users, guildID));
         
         return Result.FromSuccess();
     }

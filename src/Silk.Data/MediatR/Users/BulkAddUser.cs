@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Remora.Rest.Core;
 using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Users;
@@ -22,7 +23,7 @@ public static class BulkAddUser
     /// branch will be taken if bulk-inserting fails.
     /// </para>
     /// </remarks>
-    public sealed record Request(IEnumerable<UserEntity> Users) : IRequest<IEnumerable<UserEntity>>;
+    public sealed record Request(IEnumerable<UserEntity> Users, Snowflake GuildID) : IRequest<IEnumerable<UserEntity>>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
@@ -35,44 +36,23 @@ public static class BulkAddUser
 
         public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
-            //TODO: Improve
-            foreach (var user in request.Users)
-            {
-                try
-                {
-                    _db.Users.Add(user);
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                catch
-                {
-                    
-                }
-            }
+            var users = await _db.Guilds
+                                 .Where(g => g.ID == request.GuildID)
+                                 .SelectMany(g => g.Users)
+                                 .Select(u => u.ID)
+                                 .ToListAsync(cancellationToken);
+            
+            var guild = await _db.Guilds.FirstAsync(g => g.ID == request.GuildID, cancellationToken);
+
+            var upserting = request.Users.ExceptBy(users, u => u.ID);
+            
+            _db.AttachRange(upserting);
+            
+            guild.Users.AddRange(upserting);
+            
+            await _db.SaveChangesAsync(cancellationToken);
             
             return request.Users;
-        }
-
-        /// <summary>
-        /// Adds users individually to mitigate an entire query failing when adding in bulk.
-        /// <para>This is considerably slower than <see cref="Handle" />.</para>
-        /// </summary>
-        /// <param name="users">The collection of users to add.</param>
-        private async Task AttemptAddUsersSlowAsync(IEnumerable<UserEntity> users)
-        {
-            foreach (UserEntity user in users)
-            {
-                try
-                {
-                    // This is slow and expensive*. //
-                    _db.ChangeTracker.Clear(); // Uncertain that SaveChangesAsync clears this. 
-                    _db.Users.Add(user); // The issue on github (https://github.com/dotnet/efcore/issues/9118) is still open. //
-                    await _db.SaveChangesAsync();
-                }
-                catch (DbUpdateException)
-                {
-                    /* I give up. Screw you. */
-                }
-            }
         }
     }
 }
