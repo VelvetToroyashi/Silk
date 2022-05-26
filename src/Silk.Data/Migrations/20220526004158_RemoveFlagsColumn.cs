@@ -8,9 +8,7 @@ namespace Silk.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "flags",
-                table: "users");
+            migrationBuilder.Sql("ALTER TABLE users DROP COLUMN IF EXISTS flags;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
