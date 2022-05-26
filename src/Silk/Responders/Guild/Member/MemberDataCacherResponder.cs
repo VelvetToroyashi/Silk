@@ -8,14 +8,20 @@ using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
 using Silk.Data.MediatR.Users.History;
+using Silk.Services.Data;
 
 namespace Silk.Responders;
 
 [ResponderGroup(ResponderGroup.Early)]
 public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>, IResponder<IGuildMembersChunk>
 {
-    private readonly IMediator _mediator;
-    public MemberDataCacherResponder(IMediator mediator) => _mediator = mediator;
+    private readonly IMediator          _mediator;
+    private readonly GuildCacherService _cacher;
+    public MemberDataCacherResponder(IMediator mediator, GuildCacherService cacher)
+    {
+        _mediator    = mediator;
+        _cacher = cacher;
+    }
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
@@ -36,9 +42,9 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
         
         return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
     }
-    
-    public async Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
-    {
-        return Result.FromSuccess();
-    }
+
+    public Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
+        => _cacher.CacheMembersAsync(gatewayEvent.GuildID, gatewayEvent.Members);
+
+
 }
