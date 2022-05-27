@@ -163,11 +163,11 @@ public class GuildCacherService
                                 return new UserEntity
                                 {
                                     ID      = id,
-                                    History = new() { new() {JoinDate = joinedAt} }
+                                    History = new() { new() {JoinDate = joinedAt, GuildID = guildID} }
                                 };
                             });
 
-        await _mediator.Send(new BulkAddUser.Request(users, guildID));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users, guildID));
         
         return Result.FromSuccess();
     }

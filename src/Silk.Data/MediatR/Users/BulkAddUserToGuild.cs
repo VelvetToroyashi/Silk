@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Users;
 
-public static class BulkAddUser
+public static class BulkAddUserToGuild
 {
     /// <summary>
     /// Request for adding users to the database en masse.
@@ -30,29 +32,51 @@ public static class BulkAddUser
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<UserEntity>>
     {
-        private readonly GuildContext _db;
+        private readonly GuildContext       _db;
+        private readonly IServiceProvider _services;
 
-        public Handler(GuildContext db) => _db = db;
+        private static readonly SemaphoreSlim _lock = new(1);
+
+        public Handler(GuildContext db, IServiceProvider services)
+        {
+            _db            = db;
+            _services = services;
+        }
 
         public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
+            await _lock.WaitAsync(CancellationToken.None);
+            
+            await BulkInsertUsersAsync(request.Users);
+            
             var users = await _db.Guilds
+                                 .AsNoTracking()
                                  .Where(g => g.ID == request.GuildID)
                                  .SelectMany(g => g.Users)
                                  .Select(u => u.ID)
                                  .ToListAsync(cancellationToken);
             
             var guild = await _db.Guilds.FirstAsync(g => g.ID == request.GuildID, cancellationToken);
-
+            
             var upserting = request.Users.ExceptBy(users, u => u.ID);
             
-            _db.AttachRange(upserting);
             
             guild.Users.AddRange(upserting);
+            _db.AttachRange(upserting.DistinctBy(u => u.ID));
             
             await _db.SaveChangesAsync(cancellationToken);
+
+            _lock.Release();
             
             return request.Users;
+        }
+
+        private async Task BulkInsertUsersAsync(IEnumerable<UserEntity> users)
+        {
+            foreach (var user in users)
+            {
+                await _db.Database.ExecuteSqlRawAsync("INSERT INTO users VALUES(@p0) ON CONFLICT(id) DO NOTHING;", user.ID.Value);
+            }
         }
     }
 }

@@ -70,7 +70,7 @@ public class BulkUserTests
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users,GuildId));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users,GuildId));
         
         var result = _context.Users.Count();
         //Assert
@@ -89,7 +89,7 @@ public class BulkUserTests
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users, GuildId));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users, GuildId));
         var result = _context.Users.ToArray().Length;
 
         //Assert
@@ -102,7 +102,7 @@ public class BulkUserTests
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
         await _mediator.Send(new GetOrCreateGuild.Request(new(20), "??"));
 
-        await _mediator.Send(new BulkAddUser.Request(new[] { new UserEntity() { ID = new(1) }}, new(20)));
+        await _mediator.Send(new BulkAddUserToGuild.Request(new[] { new UserEntity() { ID = new(1) }}, new(20)));
 
         var snowflake = new Snowflake(1);
         

@@ -25,6 +25,7 @@
         <PackageReference Include="Remora.Discord.API" Version="58.0.0" />
         <PackageReference Include="Remora.Rest.Core" Version="2.0.2" />
         <PackageReference Include="Remora.Results" />
+        <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="6.13.21" />
     </ItemGroup>
 
 </Project>
