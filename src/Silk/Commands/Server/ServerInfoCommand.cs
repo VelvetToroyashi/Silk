@@ -101,8 +101,10 @@ public class ServerInfoCommand : CommandGroup
         fields.Add(new EmbedField("Most Recent Member:", $"<@{recent.ID}>", true));
         
         fields.Add(new EmbedField("Server Created:", $"{guild.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)} ({guild.ID.Timestamp.ToTimestamp()})"));
+
+        var features = guild.GuildFeatures.Any() ? guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n") : "None";
         
-        fields.Add(new EmbedField("Features:", guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n")));
+        fields.Add(new EmbedField("Features:", features));
 
         var embed = new Embed
         {
@@ -113,6 +115,8 @@ public class ServerInfoCommand : CommandGroup
             Image     = guildBanner is null ? default(Optional<IEmbedImage>) : new EmbedImage(guildBanner.ToString()),
         };
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        var res = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+
+        return res;
     }
 }
