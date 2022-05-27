@@ -37,22 +37,20 @@ public static class BulkAddUserToGuild
 
         public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
-            var nonExistentUsers = await _db.Users.Select(u => u.ID).ToArrayAsync();
-            
-            var users = await _db.GuildUsers
-                           .Where(gu => gu.GuildID == request.GuildID)
-                           .Select(gu => gu.UserID)
-                           .ToArrayAsync(cancellationToken);
+            var users      = await _db.Users.Select(u => u.ID).ToArrayAsync(cancellationToken);
+            var usersToAdd = request.Users.ExceptBy(users, u => u.ID);
 
-
-
-            var usersToAdd    = request.Users.ExceptBy(nonExistentUsers, u => u.ID);
-            var unique = request.Users.ExceptBy(users, u => u.ID);
-            
             _db.Users.AddRange(usersToAdd);
-            _db.GuildUsers.AddRange(unique.Select(u => new GuildUserEntity { GuildID = request.GuildID, UserID = u.ID }));
 
-            await _db.SaveChangesAsync();
+            var guildUsers = await _db.GuildUsers
+                                 .Where(gu => gu.GuildID == request.GuildID)
+                                 .Select(gu => gu.UserID)
+                                 .ToArrayAsync(cancellationToken);
+
+            var guildUsersToAdd           = request.Users.ExceptBy(guildUsers, u => u.ID);
+            _db.GuildUsers.AddRange(guildUsersToAdd.Select(u => new GuildUserEntity { GuildID = request.GuildID, UserID = u.ID }));
+
+            await _db.SaveChangesAsync(cancellationToken);
             
             return request.Users;
         }
