@@ -33,50 +33,28 @@ public static class BulkAddUserToGuild
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<UserEntity>>
     {
         private readonly GuildContext       _db;
-        private readonly IServiceProvider _services;
-
-        private static readonly SemaphoreSlim _lock = new(1);
-
-        public Handler(GuildContext db, IServiceProvider services)
-        {
-            _db            = db;
-            _services = services;
-        }
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<UserEntity>> Handle(Request request, CancellationToken  cancellationToken)
         {
-            await _lock.WaitAsync(CancellationToken.None);
+            var nonExistentUsers = await _db.Users.Select(u => u.ID).ToArrayAsync();
             
-            await BulkInsertUsersAsync(request.Users);
-            
-            var users = await _db.Guilds
-                                 .AsNoTracking()
-                                 .Where(g => g.ID == request.GuildID)
-                                 .SelectMany(g => g.Users)
-                                 .Select(u => u.ID)
-                                 .ToListAsync(cancellationToken);
-            
-            var guild = await _db.Guilds.FirstAsync(g => g.ID == request.GuildID, cancellationToken);
-            
-            var upserting = request.Users.ExceptBy(users, u => u.ID);
-            
-            
-            guild.Users.AddRange(upserting);
-            _db.AttachRange(upserting.DistinctBy(u => u.ID));
-            
-            await _db.SaveChangesAsync(cancellationToken);
+            var users = await _db.GuildUsers
+                           .Where(gu => gu.GuildID == request.GuildID)
+                           .Select(gu => gu.UserID)
+                           .ToArrayAsync(cancellationToken);
 
-            _lock.Release();
+
+
+            var usersToAdd    = request.Users.ExceptBy(nonExistentUsers, u => u.ID);
+            var unique = request.Users.ExceptBy(users, u => u.ID);
+            
+            _db.Users.AddRange(usersToAdd);
+            _db.GuildUsers.AddRange(unique.Select(u => new GuildUserEntity { GuildID = request.GuildID, UserID = u.ID }));
+
+            await _db.SaveChangesAsync();
             
             return request.Users;
-        }
-
-        private async Task BulkInsertUsersAsync(IEnumerable<UserEntity> users)
-        {
-            foreach (var user in users)
-            {
-                await _db.Database.ExecuteSqlRawAsync("INSERT INTO users VALUES(@p0) ON CONFLICT(id) DO NOTHING;", user.ID.Value);
-            }
         }
     }
 }

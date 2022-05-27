@@ -32,20 +32,10 @@ public static class GetOrCreateUser
                                 .Include(u => u.History)
                                 .Include(u => u.Infractions)
                                 .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
-
-            var guild = user?.Guilds.FirstOrDefault(g => g.ID == request.GuildID) ?? await _db.Guilds.FirstAsync(g => g.ID == request.GuildID, cancellationToken);
             
             if (user is not null)
             {
-                if (user.Guilds.All(g => g.ID != request.GuildID))
-                {
-                    try
-                    {
-                        guild.Users.Add(user);
-                        await _db.SaveChangesAsync(cancellationToken);
-                    }
-                    catch { /* Ignore */ }
-                }
+                _db.Database.ExecuteSqlRaw("INSERT INTO guild_user_joiner(user_id, guild_id) VALUES(@p0, @p1) ON CONFLICT DO NOTHING;", user.ID.Value, request.GuildID.Value);
                     
                 return user;
             }
@@ -58,8 +48,6 @@ public static class GetOrCreateUser
             };
 
             _db.Users.Add(user);
-            
-            guild.Users.Add(user);
             
             try
             {

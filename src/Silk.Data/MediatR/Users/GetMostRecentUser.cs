@@ -21,10 +21,11 @@ public static class GetMostRecentUser
         {
             var guild = await _db.Guilds
                            .Include(g => g.Users)
+                                 .ThenInclude(gu => gu.User)
                                  .ThenInclude(u => u.History)
                            .FirstAsync(g => g.ID == request.GuildID, cancellationToken);
 
-            var user = guild.Users.OrderByDescending(u => u.History.Last().JoinDate).First();
+            var user = guild.Users.OrderByDescending(u => u.User.History.Last().JoinDate).First().User;
 
             return user;
         }

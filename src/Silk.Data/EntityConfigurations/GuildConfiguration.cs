@@ -9,10 +9,6 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
     public void Configure(EntityTypeBuilder<GuildEntity> builder)
     {
         builder
-           .HasMany(u => u.Users)
-           .WithMany(u => u.Guilds);
-
-        builder
            .HasOne(g => g.Configuration)
            .WithOne(g => g.Guild)
            .HasForeignKey<GuildConfigEntity>(g => g.GuildID);
