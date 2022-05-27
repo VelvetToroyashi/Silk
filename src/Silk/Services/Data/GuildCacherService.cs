@@ -25,7 +25,8 @@ namespace Silk.Services.Data;
 
 public class GuildCacherService
 {
-
+    private readonly SemaphoreSlim _lock = new(1);
+    
     /// <summary>
     /// The time in which a guild is considered new, if the joined timestamp is within this threshold.
     /// </summary>
@@ -33,30 +34,24 @@ public class GuildCacherService
     // This is bound to change in the future. For now 30s is good enough to allow for caching,
     // as well as accommodating for any responder delays.
     private readonly TimeSpan _joinedTimestampThreshold = 30.Seconds();
-
-    private int _guildCount;
     
     private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n" +
                                                     $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "      +
                                                     $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"      +
                                                     "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n";
     
-    
     private readonly IMediator              _mediator;
     private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestGuildAPI   _guildApi;
     private readonly IDiscordRestChannelAPI _channelApi;
-    private readonly IShardIdentification   _shard;
-    private readonly IConnectionMultiplexer _cache;
-    
+
     private readonly ILogger<GuildCacherService> _logger;
-
     
-
     private readonly IEmbed _onGuildJoinEmbed = new Embed(
                                                           Title: "Thank you for adding me!",
-                                                          Description: GuildJoinThankYouMessage,
-                                                          Colour: Color.CornflowerBlue);
+                                                          Colour: Color.CornflowerBlue,
+                                                          Description: GuildJoinThankYouMessage
+                                                         );
    
 
     /// <summary>
@@ -70,18 +65,14 @@ public class GuildCacherService
         IDiscordRestUserAPI         users,
         IDiscordRestGuildAPI        guildApi,
         IDiscordRestChannelAPI      channelApi,
-        ILogger<GuildCacherService> logger,
-        IShardIdentification        shard,
-        IConnectionMultiplexer      cache
+        ILogger<GuildCacherService> logger
     )
     {
         _mediator   = mediator;
-        _cache      = cache;
         _users      = users;
         _guildApi   = guildApi;
         _channelApi = channelApi;
         _logger     = logger;
-        _shard      = shard;
     }
 
     public async Task<Result> GreetGuildAsync(IGuildCreate guild)
@@ -155,6 +146,8 @@ public class GuildCacherService
 
     public async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
+        await _lock.WaitAsync();
+        
         var users = members.Where(u => u.User.IsDefined())
                            .Select(u => (u.User.Value.ID, u.JoinedAt))
                            .Select((uj, _) =>
@@ -168,6 +161,8 @@ public class GuildCacherService
                             });
 
         await _mediator.Send(new BulkAddUserToGuild.Request(users, guildID));
+
+        _lock.Release();
         
         return Result.FromSuccess();
     }
