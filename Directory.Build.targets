@@ -12,7 +12,7 @@
         <PackageReference Update="Remora.Discord.Gateway" Version="8.1.0" />
         <PackageReference Update="Remora.Discord.Commands" Version="23.0.0" />
         <PackageReference Update="Remora.Discord.Caching" Version="26.0.0" />
-        <PackageReference Update="Remora.Discord.Caching.Redis" Version="1.0.7" />
+        <PackageReference Update="Remora.Discord.Caching.Redis" Version="1.0.9" />
         <PackageReference Update="Remora.Discord.Caching.Abstractions" Version="1.0.0" />
         <PackageReference Update="Remora.Discord.Extensions" Version="4.2.0" />
         <PackageReference Update="Remora.Discord.Interactivity" Version="3.0.17" />
