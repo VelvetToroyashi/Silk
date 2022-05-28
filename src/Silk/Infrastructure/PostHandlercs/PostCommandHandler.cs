@@ -11,6 +11,7 @@ using Remora.Discord.Commands.Services;
 using Remora.Results;
 using Sentry;
 using Silk.Errors;
+using Silk.Extensions.Remora;
 using Silk.Services.Bot.Help;
 
 namespace Silk;
@@ -44,25 +45,25 @@ public class PostCommandHandler : IPostExecutionEvent
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
     {
+        _hub.ConfigureScope(s => s.User = new() { Other =
+        {
+          ["id"] = _context.User.ID.ToString(),
+          ["guild_id"] = _context.GuildID.IsDefined(out var gid) ? gid.ToString() : "DM",
+        }});
+        
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
 
         var prefixResult = await _prefix.MatchesPrefixAsync(_context.Message.Content.Value, ct);
         
-        if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches)
+        if (!prefixResult.IsDefined(out var prefix) || !prefix.Matches || (context as MessageContext)?.Message.Content.Value.Length <= prefix.ContentStartIndex)
             return Result.FromSuccess();
 
-        var error = commandResult.Error;
-
-        if (error is AggregateError ag)
-            error = ag.Errors.First().Error;
+        var error = commandResult.GetDeepestError();
         
         if (error is CommandNotFoundError)
             await _help.ShowHelpAsync(_context.ChannelID, _context.Message.Content.Value[prefix.ContentStartIndex..]);
         
-        if (error is ConditionNotSatisfiedError)
-            await HandleFailedConditionAsync(commandResult.Inner!.Inner!.Inner!.Inner.Error, ct);
-
         if (error is ExceptionError er)
             _hub.CaptureException(er.Exception);
         

@@ -34,7 +34,7 @@ namespace Silk.Commands.Bot;
 [Category(Categories.Bot)]
 public class EvalCommand : CommandGroup
 {
-    private readonly ICommandContext _context;
+    private readonly MessageContext _context;
     
     private readonly IDiscordRestUserAPI                _users;
     private readonly IDiscordRestGuildAPI               _guilds;
@@ -43,12 +43,44 @@ public class EvalCommand : CommandGroup
 
     private readonly IServiceProvider _services;
 
+    private const string _usings = @"
+System
+System.Collections
+System.Collections.Generic
+System.ComponentModel
+System.Drawing
+System.Linq
+System.Reflection
+System.Text.RegularExpressions
+System.Threading.Tasks
+Remora.Commands.Attributes
+Remora.Commands.Groups
+Remora.Discord.API.Abstractions.Objects
+Remora.Discord.API.Abstractions.Rest
+Remora.Discord.API.Objects
+Remora.Discord.Commands.Contexts
+Remora.Rest.Core
+Remora.Results
+Silk.Commands.Conditions
+Silk.Utilities.HelpFormatter
+MediatR
+Microsoft.EntityFrameworkCore
+Remora.Rest.Core
+Remora.Results
+Silk.Data.Entities
+Silk.Data
+Silk.Extensions
+System.Text
+Silk
+Microsoft.Extensions.Logging
+";
+
     private static readonly IEmbed _evaluatingEmbed = new Embed
     {
         Title  = "Evaluating. Please wait.",
         Colour = Color.HotPink
     };
-    public EvalCommand(ICommandContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events, IServiceProvider services)
+    public EvalCommand(MessageContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events, IServiceProvider services)
     {
         _context       = context;
         _channels      = channels;
@@ -61,9 +93,9 @@ public class EvalCommand : CommandGroup
     [Command("eval")]
     [RequireTeamOrOwner]
     [Description("Evaluates code.")]
-    public async Task<Result> EvalCS([Greedy] string code)
+    public async Task<Result> EvalCS([Greedy] string _)
     {
-        var cs = Regex.Replace(code, @"\`\`\`(?:cs(?:harp)?)?\n?(?<code>[\s\S]+)\n?\`\`\`", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript);
+        var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? )((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
         
         var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {_evaluatingEmbed});
         
@@ -72,15 +104,13 @@ public class EvalCommand : CommandGroup
         
         try
         {
-            var context = (MessageContext)_context;
-            
             var globals = new EvalVariables
             {
-                UserID         = context.User.ID,
-                GuildID        = context.GuildID.IsDefined(out var guildID) ? guildID : default,
-                ChannelID      = context.ChannelID,
-                MessageID      = context.MessageID,
-                ReplyMessageID = context.Message.ReferencedMessage.IsDefined(out var reply) ? reply.ID : default,
+                UserID         = _context.User.ID,
+                GuildID        = _context.GuildID.IsDefined(out var guildID) ? guildID : default,
+                ChannelID      = _context.ChannelID,
+                MessageID      = _context.MessageID,
+                ReplyMessageID = _context.Message.ReferencedMessage.IsDefined(out var reply) ? reply.ID : default,
                 
                 Services = _services,
                 
@@ -91,14 +121,7 @@ public class EvalCommand : CommandGroup
             };
 
             var sopts = ScriptOptions.Default;
-            sopts = sopts.WithImports("System",
-                                      "System.Collections.Generic",
-                                      "System.Linq",
-                                      "System.Text",
-                                      "System.Threading.Tasks",
-                                      "Silk",
-                                      "Silk.Extensions",
-                                      "Microsoft.Extensions.Logging");
+            sopts = sopts.AddImports(_usings.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             IEnumerable<Assembly> asm = AppDomain.CurrentDomain
                                                  .GetAssemblies()
                                                  .Where(xa => 
@@ -108,13 +131,12 @@ public class EvalCommand : CommandGroup
             sopts = sopts.WithReferences(asm);
 
             Script<object> script = CSharpScript.Create(cs, sopts, typeof(EvalVariables));
-            script.Compile();
 
             ScriptState<object> evalResult = await script.RunAsync(globals);
 
             if (string.IsNullOrEmpty(evalResult.ReturnValue?.ToString()))
             {
-                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evaluation returned null or void.");
+                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evaluation returned null or void.", embeds: Array.Empty<IEmbed>());
                 return Result.FromSuccess();
             }
             
@@ -124,7 +146,7 @@ public class EvalCommand : CommandGroup
 
                 if (!edit.IsSuccess)
                 {
-                    await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "Failed to edit message.\n" + edit.Error.Message);
+                    await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "Failed to edit message.\n" + edit.Error);
                     return Result.FromError(edit.Error);
                 }
             }
@@ -175,9 +197,9 @@ public class EvalCommand : CommandGroup
             var entity  = type.GetProperty(nameof(Result<object>.Entity), BindingFlags.Public | BindingFlags.Instance)!.GetValue(result)!;
             
             returnResult = $"Result<{entity.GetType().Name}>:\n" +
-                           $"\tIsSuccess: {success}\n" +
-                           $"\tEntity: {GetHumanFriendlyResultString(entity)}\n" + // Just in case the entity itself is a result or a collection
-                           $"\tError: {error}";
+                           $"\u200b\tIsSuccess: {success}\n" +
+                           $"\u200b\tEntity: {GetHumanFriendlyResultString(entity)}\n" + // Just in case the entity itself is a result or a collection
+                           $"\u200b\tError: {error}";
         }
         else if (type.IsAssignableTo(typeof(IList)))
         {
