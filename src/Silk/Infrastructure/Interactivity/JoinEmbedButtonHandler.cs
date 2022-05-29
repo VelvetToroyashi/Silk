@@ -39,29 +39,21 @@ public class JoinEmbedButtonHandler : IButtonInteractiveEntity
         var action = actionAndUser[0];
         _ = Snowflake.TryParse(actionAndUser[1], out var userID);
 
-        var userResult = await _users.GetUserAsync(userID.Value, ct);
+        var permissions = _context.Member.Value.Permissions.Value;
 
-        if (!userResult.IsDefined())
+        if (!permissions.HasPermission(DiscordPermission.Administrator) && !permissions.HasPermission(action is "kick" ? DiscordPermission.KickMembers : DiscordPermission.BanMembers))
         {
-            return await _interactions.CreateInteractionResponseAsync
+            var permissionResult = await _interactions.CreateFollowupMessageAsync
             (
-             _context.ID,
-             _context.Token,
-             new InteractionResponse
-                 (
-                  InteractionCallbackType.ChannelMessageWithSource,
-                  new
-                  (
-                   new InteractionMessageCallbackData
-                   {
-                       Content = "That user doesn't seem to exist? Oops.",
-                       Flags = MessageFlags.Ephemeral
-                   }
-                  )
-                 )
+                _context.ApplicationID,
+                _context.Token,
+                "Sorry, but you're not allowed to do that.",
+                flags: MessageFlags.Ephemeral
             );
-        }
 
+            return permissionResult.IsSuccess ? Result.FromSuccess() : Result.FromError(permissionResult.Error);
+        }
+            
         var infractionResult = action switch
         {
             "ban"  => ("banned", await _infractions.BanAsync(_context.GuildID.Value, userID.Value, user.ID, 1, "Moderater-initiated action from join.")),
