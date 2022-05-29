@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,11 +46,11 @@ public class PostCommandHandler : IPostExecutionEvent
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
     {
-        _hub.ConfigureScope(s => s.User = new() { Other =
-        {
-          ["id"] = _context.User.ID.ToString(),
-          ["guild_id"] = _context.GuildID.IsDefined(out var gid) ? gid.ToString() : "DM",
-        }});
+        _hub.ConfigureScope(s => s.Contexts[context.User.ID.ToString()] = new Dictionary<string, object>
+        { 
+          ["id"] = _context.User.ID,
+          ["guild_id"] = _context.GuildID.IsDefined(out var gid) ? gid : "DM",
+        });
         
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
