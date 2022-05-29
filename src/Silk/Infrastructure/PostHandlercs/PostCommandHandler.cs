@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
@@ -67,7 +68,10 @@ public class PostCommandHandler : IPostExecutionEvent
         
         if (error is ExceptionError er)
             _hub.CaptureException(er.Exception);
-        
+
+        if (error is ConditionNotSatisfiedError cnse)
+            await HandleFailedConditionAsync(cnse, ct);
+
         return Result.FromSuccess();
     }
 
