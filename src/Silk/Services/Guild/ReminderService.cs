@@ -151,23 +151,23 @@ public sealed class ReminderService : IHostedService
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
         var dispatchResult = await _channels.CreateMessageAsync
-            (
-             reminder.ChannelID,
-             dispatchMessage,
-             allowedMentions: 
-             new AllowedMentions
-                 (
-                  Users: new[] { reminder.OwnerID },
-                  MentionRepliedUser: !reminder.IsReply
-                 ),
-             messageReference: 
-             new MessageReference
-                 (
-                  reminder.ReplyMessageID ?? reminder.MessageID ?? default,
-                  reminder.ChannelID,
-                  FailIfNotExists: false
-                 )
-            ); 
+        (
+         reminder.ChannelID,
+         dispatchMessage,
+         allowedMentions: 
+         new AllowedMentions
+         (
+          Users: new[] { reminder.OwnerID },
+          MentionRepliedUser: !reminder.IsReply
+         ),
+         messageReference: 
+         new MessageReference
+         (
+          reminder.ReplyMessageID ?? reminder.MessageID ?? default,
+          reminder.ChannelID,
+          FailIfNotExists: false
+         )
+        ); 
         
         if (dispatchResult.IsSuccess)
         {
