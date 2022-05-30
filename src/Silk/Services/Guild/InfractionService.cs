@@ -202,7 +202,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (!targetResult.IsSuccess)
             return Result<InfractionDTO>.FromError(targetResult.Error);
         
-        var logResult = await LogInfractionUpdateAsync(newInfraction, updatedBy, enforcerResult.Entity, targetResult.Entity, DateTimeOffset.UtcNow);
+        var logResult = await LogInfractionUpdateAsync(newInfraction, updatedBy, targetResult.Entity, enforcerResult.Entity, DateTimeOffset.UtcNow);
         
         return logResult.IsSuccess 
             ? Result<InfractionDTO>.FromSuccess(newInfraction)
