@@ -191,7 +191,7 @@ public partial class ConfigCommands
                 }
             }
             
-            if (webhook is true && channel is not null)
+            if ((webhook is true || loggingConfig.UseWebhookLogging) && channel is not null)
             {
                 var success = true;
 
