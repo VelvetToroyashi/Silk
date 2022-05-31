@@ -30,7 +30,7 @@ public class StrikeCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("strike", "warn", "bonk")]
+    [Command("strike", "warn", "bonk", "409")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]

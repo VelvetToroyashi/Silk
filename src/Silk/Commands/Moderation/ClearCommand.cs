@@ -31,7 +31,7 @@ public class ClearCommand : CommandGroup
     }
 
 
-    [Command("clear")]
+    [Command("clear", "204")]
     [Description("Cleans all messages from all users.\n"                   +
                  "It's important to understand the order of precedence:\n" +
                  "Skip ➜ User ➜ Regex\n"                                   +

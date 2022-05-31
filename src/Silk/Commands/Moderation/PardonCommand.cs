@@ -30,7 +30,7 @@ public class PardonCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("pardon")]
+    [Command("pardon", "205")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
