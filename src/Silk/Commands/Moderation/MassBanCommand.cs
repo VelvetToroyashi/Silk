@@ -34,6 +34,7 @@ public class MassBanCommand : CommandGroup
     public async Task<IResult> MassBanAsync
     (
         [Greedy]
+        [Range(Min = 1)]
         [Description("The users to ban")]
         IUser[] users,
     
