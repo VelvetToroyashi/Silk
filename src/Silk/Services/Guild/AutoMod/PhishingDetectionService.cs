@@ -97,7 +97,7 @@ public class PhishingDetectionService
         
         var url = cdnResult.Entity;
         
-        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.85");
+        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
 
         if (!response.Matched)
             return Result.FromSuccess();
