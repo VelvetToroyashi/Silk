@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
@@ -249,16 +250,28 @@ public class ReminderCommands : CommandGroup
 
         [Command("cancel")]
         [Description("Cancels a reminder.")]
-        public async Task<IResult> CancelAsync([Description("The ID of the reminder you wish to cancel.")] int id)
+        public async Task<IResult> CancelAsync([Description("The ID(s) of the reminder you wish to cancel.")] int[] reminderIDs)
         {
-            var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
-            
-            if (reminders.All(r => r.Id != id))
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders, or at least not one by that ID!");
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).Select(r => r.Id).ToArray();
 
-            await _reminders.RemoveReminderAsync(id);
+            if (!reminders.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any active reminders!");
+
+            var sb = new StringBuilder();
+
+            sb.Append("Cancelled the following reminders:");
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, "I've cancelled your reminder!");
+            foreach (var reminder in reminderIDs)
+            {
+                if (!reminders.Contains(reminder))
+                    continue;
+
+                sb.Append($"`{reminder}` ");
+                
+                await _reminders.RemoveReminderAsync(reminder);
+            }
+            
+            return await _channels.CreateMessageAsync(_context.ChannelID, sb.ToString());
         }
     }
 }

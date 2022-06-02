@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Caching;
+using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Utilities;
@@ -16,17 +17,29 @@ namespace Silk.Responders;
 /// </summary>
 public class ReadyUserCacher : IResponder<IReady>
 {
-    private readonly IMemoryCache           _cache;
-    public ReadyUserCacher(IMemoryCache cache) => _cache = cache;
+    private readonly CacheService           _cache;
+    private readonly IShardIdentification   _shard;
+    private readonly IConnectionMultiplexer _redis;
+    
+    public ReadyUserCacher
+    (
+        CacheService cache,
+        IShardIdentification shard,
+        IConnectionMultiplexer redis
+    )
+    {
+        _cache = cache;
+        _shard = shard;
+        _redis = redis;
+    }
 
     public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
     {
-        var  currentUserObject   = gatewayEvent.User;
-        var currentUserCacheKey = KeyHelpers.CreateCurrentUserCacheKey();
-
-        _cache.Set(currentUserCacheKey, currentUserObject, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = null });
-        _cache.Set("guild_count", gatewayEvent.Guilds.Count);
-
+        var db = _redis.GetDatabase();
+        await db.StringSetAsync(ShardHelper.GetShardUserCountStatKey(_shard.ShardID), 0);
+        
+        await _cache.CacheAsync(KeyHelpers.CreateCurrentUserCacheKey(), gatewayEvent.User, ct);
+        
         return Result.FromSuccess();
     }
 }

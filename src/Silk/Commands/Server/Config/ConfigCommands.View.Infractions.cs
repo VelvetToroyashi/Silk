@@ -28,6 +28,7 @@ public partial class ConfigCommands
                 return guildResult;
 
             var muteRole     = config.MuteRoleID.Value is 0 ? "Not configured." : $"<@&{config.MuteRoleID}>";
+            var useTimeouts  = config.UseNativeMute ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             var autoEscalate = config.ProgressiveStriking ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             var infractionSteps = !config.InfractionSteps.Any()
                 ? "Not configured."
@@ -47,8 +48,9 @@ public partial class ConfigCommands
             {
                 Colour = Color.MidnightBlue,
                 Title  = $"Infraction settings for {guild.Name}",
-                Description = $"**Mute Role:** {muteRole}\n"                 +
-                              $"{autoEscalate} **Automatically Escalate**\n" +
+                Description = $"{useTimeouts} **Use Timeouts**\n"            +
+                              $"{autoEscalate} **Automatically Escalate**\n\n" +
+                              $"**Mute Role:** {muteRole}\n"                 +
                               $"**Infraction steps:** {infractionSteps}\n"   +
                               $"**Infraction steps (named):** {infractionStepsNamed}"
             };

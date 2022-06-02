@@ -10,6 +10,7 @@ using Remora.Rest.Core;
 using Respawn;
 using Respawn.Graph;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 
 namespace Silk.Data.Tests.MediatR;
@@ -69,7 +70,7 @@ public class BulkUserTests
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users,GuildId));
         
         var result = _context.Users.Count();
         //Assert
@@ -88,10 +89,25 @@ public class BulkUserTests
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users, GuildId));
         var result = _context.Users.ToArray().Length;
 
         //Assert
         Assert.AreEqual(users.Count, result);
+    }
+
+    [Test]
+    public async Task UpdatesUserForMultipleGuilds()
+    {
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
+        await _mediator.Send(new GetOrCreateGuild.Request(new(20), "??"));
+
+        await _mediator.Send(new BulkAddUserToGuild.Request(new[] { new UserEntity() { ID = new(1) }}, new(20)));
+
+        var snowflake = new Snowflake(1);
+        
+        var result = _context.Users.Include(u => u.Guilds).First(u => u.ID == snowflake);
+        
+        Assert.AreEqual(2, result.Guilds.Count);
     }
 }

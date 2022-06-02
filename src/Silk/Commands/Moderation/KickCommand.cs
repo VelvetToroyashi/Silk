@@ -35,7 +35,7 @@ public class KickCommand : CommandGroup
     }
 
 
-    [Command("kick")]
+    [Command("kick", "404", "307")]
     [RequireContext(ChannelContext.Guild)]
     [Description("Boot someone from the guild!")]
     [RequireDiscordPermission(DiscordPermission.KickMembers)]

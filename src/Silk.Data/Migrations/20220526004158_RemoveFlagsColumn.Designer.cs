@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -11,9 +12,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220526004158_RemoveFlagsColumn")]
+    partial class RemoveFlagsColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +23,21 @@ namespace Silk.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("GuildEntityUserEntity", b =>
+                {
+                    b.Property<ulong>("GuildsID")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<ulong>("UsersID")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("GuildsID", "UsersID");
+
+                    b.HasIndex("UsersID");
+
+                    b.ToTable("GuildEntityUserEntity");
+                });
 
             modelBuilder.Entity("Silk.Data.Entities.CommandInvocationEntity", b =>
                 {
@@ -322,23 +339,6 @@ namespace Silk.Data.Migrations
                     b.HasIndex("LoggingId");
 
                     b.ToTable("guild_moderation_config");
-                });
-
-            modelBuilder.Entity("Silk.Data.Entities.GuildUserEntity", b =>
-                {
-                    b.Property<ulong>("UserID")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("user_id");
-
-                    b.Property<ulong>("GuildID")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
-
-                    b.HasKey("UserID", "GuildID");
-
-                    b.HasIndex("GuildID");
-
-                    b.ToTable("guild_user_joiner");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.InfractionEntity", b =>
@@ -681,6 +681,21 @@ namespace Silk.Data.Migrations
                     b.ToTable("user_histories");
                 });
 
+            modelBuilder.Entity("GuildEntityUserEntity", b =>
+                {
+                    b.HasOne("Silk.Data.Entities.GuildEntity", null)
+                        .WithMany()
+                        .HasForeignKey("GuildsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Silk.Data.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UsersID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Silk.Data.Entities.ExemptionEntity", b =>
                 {
                     b.HasOne("Silk.Data.Entities.GuildModConfigEntity", null)
@@ -769,25 +784,6 @@ namespace Silk.Data.Migrations
                     b.Navigation("Logging");
                 });
 
-            modelBuilder.Entity("Silk.Data.Entities.GuildUserEntity", b =>
-                {
-                    b.HasOne("Silk.Data.Entities.GuildEntity", "Guild")
-                        .WithMany("Users")
-                        .HasForeignKey("GuildID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Silk.Data.Entities.UserEntity", "User")
-                        .WithMany("Guilds")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Guild");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Silk.Data.Entities.InfractionEntity", b =>
                 {
                     b.HasOne("Silk.Data.Entities.GuildEntity", "Guild")
@@ -866,8 +862,6 @@ namespace Silk.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Tags");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildModConfigEntity", b =>
@@ -887,8 +881,6 @@ namespace Silk.Data.Migrations
 
             modelBuilder.Entity("Silk.Data.Entities.UserEntity", b =>
                 {
-                    b.Navigation("Guilds");
-
                     b.Navigation("History");
 
                     b.Navigation("Infractions");

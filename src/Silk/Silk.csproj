@@ -37,7 +37,7 @@
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
-        <PackageReference Include="MathParser.org-mXparser" Version="5.0.3" />
+        <PackageReference Include="MathParser.org-mXparser" Version="5.0.4" />
         <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.2.0" />
@@ -67,7 +67,7 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.17" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.19" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Sentry" Version="3.17.1" />
@@ -81,10 +81,10 @@
         <PackageReference Include="Serilog.Settings.Configuration" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.1" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
         <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
-        <PackageReference Include="Svg.Skia" Version="0.5.13" />
+        <PackageReference Include="Svg.Skia" Version="0.5.14" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />

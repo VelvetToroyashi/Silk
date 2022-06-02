@@ -41,23 +41,23 @@ public class ChannelLoggingService : IChannelLoggingService
     /// <param name="useWebhook">Whether to log the message via a webhook.</param>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString, IEmbed? embedContent)
+    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString, IEmbed? embedContent, IMessageComponent[]? components = null)
     {
         if (useWebhook)
-            return LogWebhookAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null);
+            return LogWebhookAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null, components);
         else 
-            return LogChannelAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null);
+            return LogChannelAsync(loggingData, contentString, embedContent is null ? null : new[] {embedContent}, null, components);
     }
 
-    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed[]? embed = null, FileData[]? files = null)
+    public virtual Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed[]? embed = null, FileData[]? files = null, IMessageComponent[]? components = null)
     {
         if (useWebhook)
-            return LogWebhookAsync(loggingData, contentString, embed, files);
+            return LogWebhookAsync(loggingData, contentString, embed, files, components);
         else 
-            return LogChannelAsync(loggingData, contentString, embed, files);
+            return LogChannelAsync(loggingData, contentString, embed, files, components);
     }
     
-    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData)
+    protected virtual async Task<Result> LogChannelAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData, IMessageComponent[]? components = null)
     {
         _logger.LogTrace("[REST] Attempting to log to {Channel} in {Guild}", loggingData.ChannelID, loggingData.GuildID);
         
@@ -77,6 +77,7 @@ public class ChannelLoggingService : IChannelLoggingService
          loggingData.ChannelID,
          stringContent                                                                       ?? default(Optional<string>),
          embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
+         components: components                                                              ?? default(Optional<IReadOnlyList<IMessageComponent>>),
          attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
         );
 
@@ -95,7 +96,7 @@ public class ChannelLoggingService : IChannelLoggingService
     /// </summary>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData = null)
+    protected virtual async Task<Result> LogWebhookAsync(LoggingChannelEntity loggingData, string? stringContent, IEmbed[]? embedContent, FileData[]? fileData = null, IMessageComponent[]? components = null)
     {
         _logger.LogTrace("[WEBHOOK] Attempting to log to {Channel} in {Guild}", loggingData.ChannelID, loggingData.GuildID);
         
@@ -106,10 +107,11 @@ public class ChannelLoggingService : IChannelLoggingService
          loggingData.WebhookID,
          loggingData.WebhookToken,
          true,
-         stringContent                                                                       ?? default(Optional<string>),
+         username: "Silk! Logging",
+         content: stringContent                                                              ?? default(Optional<string>),
          embeds: embedContent                                                                ?? default(Optional<IReadOnlyList<IEmbed>>),
-         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>),
-         username: "Silk! Logging"
+         components: components                                                              ?? default(Optional<IReadOnlyList<IMessageComponent>>),
+         attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
         );
 
         if (!result.IsSuccess)

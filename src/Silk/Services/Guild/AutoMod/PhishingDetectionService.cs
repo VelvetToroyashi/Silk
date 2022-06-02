@@ -195,12 +195,7 @@ public class PhishingDetectionService
 
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
-
-        // As to why I don't use Regex.Match() instead:
-        // Regex.Match casts its return value to a non-nullable Match.
-        // Run(), the method which it invokes returns Match?, which can cause an unexpected null ref.
-        // You'd think this would be documented, but I digress.
-        // Source: https://source.dot.net/#System.Text.RegularExpressions/System/Text/RegularExpressions/Regex.cs,388
+        
         MatchCollection links = LinkRegex.Matches(message.Content);
 
         foreach (Match match in links)

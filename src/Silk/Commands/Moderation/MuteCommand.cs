@@ -29,7 +29,7 @@ public class MuteCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("mute")]
+    [Command("mute", "429", "423")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [Description("Mutes a user either temporarily. Muting an already muted member will update the mute time.")]

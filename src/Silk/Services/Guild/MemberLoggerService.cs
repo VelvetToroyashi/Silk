@@ -102,13 +102,13 @@ public class MemberLoggerService
         var userInfractionJoinBuffer = JoinWarningThreshold + userData
                                       .Infractions
                                       .Count
-                                           (
-                                            inf => 
-                                                inf.Type is
-                                                    InfractionType.Kick or
-                                                    InfractionType.Ban or
-                                                    InfractionType.SoftBan
-                                           );
+                                       (
+                                        inf => 
+                                            inf.Type is
+                                                InfractionType.Kick or
+                                                InfractionType.Ban or
+                                                InfractionType.SoftBan
+                                       );
         
         if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding infractions.");
@@ -127,8 +127,20 @@ public class MemberLoggerService
             Thumbnail   = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields      = userFields.ToArray()
         };
+
+        var buttons = new IMessageComponent[]
+        {
+            new ActionRowComponent
+            (
+                new[]
+                {
+                 new ButtonComponent(ButtonComponentStyle.Success, "Kick", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), $"join-action-kick-{user.ID}"),
+                 new ButtonComponent(ButtonComponentStyle.Danger, "Ban", new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), $"join-action-ban-{user.ID}")
+                }
+            )
+        };
         
-        return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, channel, null, embed);
+        return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, channel, null, embed, buttons);
     }
     
     public async Task<Result> LogMemberLeaveAsync(Snowflake guildID, IUser user)

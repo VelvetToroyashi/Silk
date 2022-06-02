@@ -22,25 +22,22 @@ namespace Silk.Commands.Moderation
     public class BanCommand : CommandGroup
     {
         private readonly ICommandContext        _context;
-        private readonly IDiscordRestUserAPI    _users;
         private readonly IDiscordRestChannelAPI _channels;
         private readonly IInfractionService     _infractions;
         
         public BanCommand
         (
-            ICommandContext context,
-            IDiscordRestUserAPI users,
+            ICommandContext        context,
             IDiscordRestChannelAPI channels,
-            IInfractionService infractions
+            IInfractionService     infractions
         )
         {
             _context     = context;
-            _users       = users;
             _channels    = channels;
             _infractions = infractions;
         }
 
-        [Command("ban")]
+        [Command("ban", "403", "301")]
         [RequireContext(ChannelContext.Guild)]
         [RequireDiscordPermission(DiscordPermission.BanMembers)]
         [Description("Permanently or temporarily ban someone from the server!")]

@@ -29,7 +29,7 @@ public class NoteCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("note")]
+    [Command("note", "202")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
