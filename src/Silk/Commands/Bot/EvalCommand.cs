@@ -51,6 +51,7 @@ System.ComponentModel
 System.Drawing
 System.Linq
 System.Reflection
+System.Runtime.CompilerServices;
 System.Text.RegularExpressions
 System.Threading.Tasks
 Remora.Commands.Attributes
@@ -95,7 +96,7 @@ Microsoft.Extensions.Logging
     [Description("Evaluates code.")]
     public async Task<Result> EvalCS([Greedy] string _)
     {
-        var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? )((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
+        var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? \n?)((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
         
         var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {_evaluatingEmbed});
         
