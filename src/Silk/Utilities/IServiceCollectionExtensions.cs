@@ -102,9 +102,7 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
-                    GatewayIntents.GuildMessages  |
                     GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
