@@ -67,6 +67,7 @@ public static class IServiceCollectionExtensions
            .AddResponders(asm)
            .AddInteractivity()
            .AddInteractiveEntity<JoinEmbedButtonHandler>()
+           .AddInteractiveEntity<ReminderModalHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         
