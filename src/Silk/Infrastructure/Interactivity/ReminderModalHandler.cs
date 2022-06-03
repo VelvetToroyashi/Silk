@@ -127,7 +127,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
                 : Result.FromError(informResult.Error);
         }
 
-        if (parsedTime < TimeSpan.FromMinutes(0))
+        if (parsedTime < TimeSpan.FromMinutes(3))
         {
             var minTimeResult = await _interactions.CreateFollowupMessageAsync
             (
