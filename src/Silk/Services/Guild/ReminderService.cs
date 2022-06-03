@@ -206,7 +206,15 @@ public sealed class ReminderService : IHostedService
         if (reminder.IsPrivate)
         {
             dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
-            dispatchMessage.AppendLine(reminder.MessageContent);
+            dispatchMessage.AppendLine(reminder.MessageContent ?? "(You didn't set a message!)");
+
+            if (reminder.IsReply)
+            {
+                dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:");
+                dispatchMessage.AppendLine(reminder.ReplyMessageContent);
+                dispatchMessage.AppendLine();
+                dispatchMessage.AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
+            }
         }
         else if (reminder.IsReply)
         {
