@@ -49,6 +49,8 @@ public class ReminderModalHandler : IModalInteractiveEntity
         components = components.SelectMany(c => (c as PartialActionRowComponent)!.Components.Value).ToArray();
         
         var raw = (components[0] as PartialTextInputComponent)!.Value.Value;
+
+        var reply = new Snowflake(ulong.Parse((components[1] as PartialTextInputComponent)!.CustomID.Value));
         
         var parseResult = MicroTimeParser.TryParse(raw);
         
@@ -125,7 +127,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
                 : Result.FromError(informResult.Error);
         }
 
-        if (parsedTime < TimeSpan.FromMinutes(3))
+        if (parsedTime < TimeSpan.FromMinutes(0))
         {
             var minTimeResult = await _interactions.CreateFollowupMessageAsync
             (
@@ -143,7 +145,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
         
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
 
-        var messageResult = await _channels.GetChannelMessageAsync(_context.ChannelID, new(ulong.Parse((components[1] as PartialTextInputComponent)!.CustomID.Value)), ct);
+        var messageResult = await _channels.GetChannelMessageAsync(_context.ChannelID, reply, ct);
         
         if (!messageResult.IsDefined(out var message))
             return Result.FromError(messageResult.Error!);
@@ -156,7 +158,9 @@ public class ReminderModalHandler : IModalInteractiveEntity
          null,
          null,
          (components[1] as PartialTextInputComponent)!.Value.IsDefined(out var reminderText) ? reminderText : null,
-         message.Content + "\n https://discordapp.com/channels" + (_context.GuildID.IsDefined(out var guildID) ? $"/{guildID}" : null) + "/" + _context.ChannelID + "/" + message.ID
+         message.Content,
+         reply,
+         message.Author.ID
         );
 
         var res =  await _interactions.CreateFollowupMessageAsync
