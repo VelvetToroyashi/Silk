@@ -1,4 +1,6 @@
-﻿namespace RoleMenuPlugin.Database
+﻿using System;
+
+namespace RoleMenuPlugin.Database
 {
     public sealed record RoleMenuOptionModel
     {
@@ -17,10 +19,10 @@
         public string? EmojiName { get; set; }
 
         public string? Description { get; set; }
+
+        public ulong[] MutuallyInclusiveRoleIds { get; set; } = Array.Empty<ulong>();
         
-        public ulong[] MutuallyInclusiveRoleIds { get; set; }
-        
-        public ulong[] MutuallyExclusiveRoleIds { get; set; }
+        public ulong[] MutuallyExclusiveRoleIds { get; set; } = Array.Empty<ulong>();
     }
 
 }
