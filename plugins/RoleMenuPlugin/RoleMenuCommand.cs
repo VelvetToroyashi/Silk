@@ -124,7 +124,7 @@ public sealed class RoleMenuCommand : CommandGroup
         [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
         IRole[] roles
     )
-        => AddAsync(message.ID, roles);
+    => AddAsync(message.ID, roles);
     
     [Command("add", "a")]
     [Description("Adds one or more role(s) to the role menu.\n"                                             +
