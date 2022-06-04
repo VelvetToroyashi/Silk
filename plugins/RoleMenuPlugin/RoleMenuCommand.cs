@@ -241,12 +241,12 @@ public sealed class RoleMenuCommand : CommandGroup
         [Description("The ID of the role menu message.")]
         Snowflake messageID,
 
+        [Range(Min = 1, Max = 25)]
         [Description("The roles to remove, roles can be removed by mention (@Role) or by ID (123456789).\n" +
                      "You must have at least one role in the role menu, however.")]
         IRole[] roles
     )
     {
-        
         if (!roles.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
@@ -278,14 +278,14 @@ public sealed class RoleMenuCommand : CommandGroup
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, newRoles));
         
         var roleMenuMessageResult = await _channels.EditMessageAsync
-            (
-             new(roleMenu.ChannelId),
-             messageID,
-             "**Role Menu!**\n"                               +
-             "Use the button below to select your roles!\n\n" +
-             "Available roles:\n"                             +
-             string.Join('\n', newRoles.Select(r => $"<@&{r.RoleId}>"))
-            );
+        (
+         new(roleMenu.ChannelId),
+         messageID,
+         "**Role Menu!**\n"                              +
+         "Use the button below to select your roles!\n\n" +
+         "Available roles:\n"                             +
+         string.Join('\n', newRoles.Select(r => $"<@&{r.RoleId}>"))
+        );
 
         if (!roleMenuMessageResult.IsSuccess)
         {
@@ -328,7 +328,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  {
                      new ActionRowComponent(new[]
                      {
-                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix)
+                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: true)
                      })
                  }
                 );
@@ -358,25 +358,25 @@ public sealed class RoleMenuCommand : CommandGroup
     [Command("delete", "d")]
     [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public Task<IResult> DeleteAsync
-        (
-            [Description("A link to the role menu you'd like to delete.")]
-            IMessage message,
-            
-            [Switch("confirm")]
-            [Description("Ensures you don't accidentally delete a role menu!")]
-            bool confirm = false
-        ) => Task.FromResult((IResult)Result.FromSuccess());
+    (
+        [Description("A link to the role menu you'd like to delete.")]
+        IMessage message,
+        
+        [Switch("confirm")]
+        [Description("Ensures you don't accidentally delete a role menu!")]
+        bool confirm = false
+    ) => Task.FromResult((IResult)Result.FromSuccess());
 
     [Command("delete", "d")]
     [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public async Task<IResult> DeleteAsync
-        (
-            [Description("The ID of the role menu you'd like to delete.")]
-            Snowflake messageID,
+    (
+        [Description("The ID of the role menu you'd like to delete.")]
+        Snowflake messageID,
 
-            [Switch("confirm")] [Description("Ensures you don't accidentally delete a role menu!")]
-            bool confirm = false
-        )
+        [Switch("confirm")] [Description("Ensures you don't accidentally delete a role menu!")]
+        bool confirm = false
+    )
     {
         if (!confirm)
         {
