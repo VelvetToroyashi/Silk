@@ -223,9 +223,190 @@ public sealed class RoleMenuCommand : CommandGroup
 
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
-    
 
-    
+
+    [Group("edit", "e")]
+    [Description("Edits aspects about a role menu such as max options, or required roles.")]
+    public class EditGroup : CommandGroup
+    {
+        private readonly IMediator              _mediator;
+        private readonly MessageContext         _context;
+        private readonly IDiscordRestChannelAPI _channels;
+        
+        public EditGroup(IMediator mediator, MessageContext context, IDiscordRestChannelAPI channels)
+        {
+            _mediator      = mediator;
+            _context       = context;
+            _channels = channels;
+        }
+
+        [Command("menu", "m")]
+        [Description("Edits the role menu message.\n" +
+                     "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
+                     "**This is required if you set the role menu to the current channel.**")]
+        public Task<IResult> EditAsync
+        (
+            [Description("A link to the role menu message. \n"                                                                +
+                         "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
+                         "**This is required if you set the role menu to the current channel.**")]
+            IMessage message,
+            
+            [Range(Min = 1, Max = 25)]
+            [Description("The maximum number of roles that can be selected.")]
+            int maxOptions
+        )
+        => EditAsync(message.ID, maxOptions);
+        
+        [Command("menu", "m")]
+        [Description("Edits the role menu message.\n"                                                                     +
+                     "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
+                     "**This is required if you set the role menu to the current channel.**")]
+        public async Task<IResult> EditAsync
+        (
+            [Description("The ID of the role menu message, provided when creating the role menu.")]
+            Snowflake messageID,
+
+            
+            [Range(Min = 1, Max = 25)]
+            [Description("The maximum number of roles that can be selected.")]
+            int maxOptions
+        )
+        {
+            var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+
+            if (!roleMenuResult.IsSuccess)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+            }
+            
+            var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions));
+
+            if (!res.IsSuccess)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
+            }
+            
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        }
+
+        [Command("role", "r")]
+        [Description("Edits various attributes of a role menu option.")]
+        public Task<IResult> EditAsync
+        (
+            [Description("A link to the role menu message. \n"                                                                +
+                         "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
+                         "**This is required if you set the role menu to the current channel.**")]
+            IMessage message,
+            
+            [Description("The ID of the role menu option to edit.")]
+            IRole role,
+            
+            [Range(Min = 0, Max = 25)]
+            [Option('x', "exclusive")]
+            [Description("What role should be mutually exclusive with this option?")]
+            IRole[]? exclusiveRoles = null,
+
+            [Range(Min = 0, Max = 25)]
+            [Option('i', "inclusive")]
+            [Description("What roles should be mutually inclusive with this option?")]
+            IRole[]? inclusiveRoles = null,
+            
+            
+            [Option('d', "description")]
+            [Description("The description of the role menu option.")]
+            string? description = null
+        )
+        => EditAsync(message.ID, role, exclusiveRoles, inclusiveRoles, description);
+
+        [Command("role", "r")]
+        [Description("Edits various attributes of a role menu option.")]
+        public async Task<IResult> EditAsync
+        (
+            [Description("The ID of the role menu message, provided when creating the role menu.")] 
+            Snowflake messageId,
+
+            [Description("The ID of the role menu option to edit.")]
+            IRole role,
+            
+            [Range(Min = 0, Max = 25)]
+            [Option('x', "exclusive")]
+            [Description("What role should be mutually exclusive with this option?")]
+            IRole[]? exclusiveRoles = null,
+
+            [Range(Min = 0, Max = 25)]
+            [Option('i', "inclusive")]
+            [Description("What roles should be mutually inclusive with this option?")]
+            IRole[]? inclusiveRoles = null,
+            
+            [Option('d', "description")]
+            [Description("The description of the role menu option.")]
+            string? description = null
+        )
+        {
+            var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageId.Value));
+
+            if (!roleMenuResult.IsSuccess)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+            }
+
+            var roleMenu = roleMenuResult.Entity;
+
+            var roleMenuOption = roleMenu.Options.FirstOrDefault(r => r.RoleId == role.ID.Value);
+
+            if (roleMenuOption == null)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                return await DeleteAfter(_context, _channels, "I don't see that role in the role menu, are you sure it still exists?", TimeSpan.FromSeconds(5));
+            }
+
+            if (description != null)
+                roleMenuOption.Description = description;
+
+            if (exclusiveRoles != null)
+            {
+                if (exclusiveRoles.Contains(role))
+                {
+                    await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                    return await DeleteAfter(_context, _channels, "You can't exclude a role from itself.", TimeSpan.FromSeconds(5));
+                }
+
+                roleMenuOption.MutuallyExclusiveRoleIds = exclusiveRoles
+                                                         .ExceptBy(new[] { role.ID, _context.GuildID.Value }, r => r.ID)
+                                                         .Select(r => r.ID.Value)
+                                                         .ToArray();
+            }
+
+            if (inclusiveRoles != null)
+            {
+                if (inclusiveRoles.Contains(role))
+                {
+                    await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                    return await DeleteAfter(_context, _channels, "You can't make a role depend on itself.", TimeSpan.FromSeconds(5));
+                }
+                
+                roleMenuOption.MutuallyInclusiveRoleIds = inclusiveRoles
+                                                         .ExceptBy(new[] { role.ID, _context.GuildID.Value }, r => r.ID)
+                                                         .Select(r => r.ID.Value)
+                                                         .ToArray();
+            }
+
+            if (inclusiveRoles?.Intersect(exclusiveRoles ?? Array.Empty<IRole>())?.Any() ?? false)
+            {
+                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+                return await DeleteAfter(_context, _channels, "You can't make a role mutually exclusive and inclusive.", TimeSpan.FromSeconds(5));
+            }
+
+            await _mediator.Send(new UpdateRoleMenu.Request(messageId, roleMenu.Options));
+
+            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        }
+    }
+
+
     [Command("remove", "rm", "r")]
     [Description("Removes one or more roles from the role menu.")]
     public Task<IResult> RemoveAsync
