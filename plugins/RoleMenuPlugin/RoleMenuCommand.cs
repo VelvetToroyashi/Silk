@@ -141,7 +141,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roles.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("You must provide at least one role!", TimeSpan.FromSeconds(5));
+            return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
 
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
@@ -149,7 +149,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenuResult.IsSuccess)
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
         }
 
         var roleResult = await GetRolesAsync();
@@ -157,7 +157,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleResult.IsSuccess)
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
+            return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
         }
 
         var (everyoneRole, allRoles) = roleResult.Entity;
@@ -176,8 +176,8 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!rolesToAdd.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("It appears all the roles you gave me are above mine or can't be applied.\n\n" +
-                                     "Consider moving my role above them first?", TimeSpan.FromSeconds(12));
+            return await DeleteAfter(_context, _channels, "It appears all the roles you gave me are above mine or can't be applied.\n\n" +
+                                                          "Consider moving my role above them first?", TimeSpan.FromSeconds(12));
         }
 
         if (rolesToAdd.Length + roleMenu.Options.Count > 25)
@@ -185,7 +185,7 @@ public sealed class RoleMenuCommand : CommandGroup
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
 
             return await
-                DeleteAfter($"You can only have 25 roles in a role menu! You're {roles.Length + roleMenu.Options.Count - 25} roles over!",
+                DeleteAfter(_context, _channels, $"You can only have 25 roles in a role menu! You're {roles.Length + roleMenu.Options.Count - 25} roles over!",
                             TimeSpan.FromSeconds(15));
         }
 
@@ -215,7 +215,7 @@ public sealed class RoleMenuCommand : CommandGroup
             _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
+            return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
         }
 
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
@@ -252,7 +252,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roles.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("You must provide at least one role!", TimeSpan.FromSeconds(5));
+            return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
         
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
@@ -260,7 +260,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenuResult.IsSuccess)
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
+            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
         }
         
         var roleMenu = roleMenuResult.Entity;
@@ -273,8 +273,8 @@ public sealed class RoleMenuCommand : CommandGroup
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("It appears you're trying to clear the role menu." +
-                                     "\n\nPerhaps you meant to use `rolemenu delete` instead?", TimeSpan.FromSeconds(25));
+            return await DeleteAfter(_context, _channels, "It appears you're trying to clear the role menu." +
+                                                          "\n\nPerhaps you meant to use `rolemenu delete` instead?", TimeSpan.FromSeconds(25));
         }
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, newRoles));
@@ -294,23 +294,23 @@ public sealed class RoleMenuCommand : CommandGroup
             _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
+            return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
         }
         
         return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
     
-    private async Task<IResult> DeleteAfter(string content, TimeSpan delay)
+    private static async Task<IResult> DeleteAfter(MessageContext context, IDiscordRestChannelAPI api,  string content, TimeSpan delay)
     {
-        var sendResult = await _channels.CreateMessageAsync(_context.ChannelID, content);
+        var sendResult = await api.CreateMessageAsync(context.ChannelID, content);
 
         if (!sendResult.IsSuccess)
             return sendResult;
 
         await Task.Delay(delay);
 
-        return await _channels.DeleteMessageAsync(_context.ChannelID, sendResult.Entity.ID);
+        return await api.DeleteMessageAsync(context.ChannelID, sendResult.Entity.ID);
     }
     
     private async Task<IResult> CreateRoleMenuMessageAsync(Snowflake channelID, IReadOnlyList<IRole> roles)
@@ -384,7 +384,7 @@ public sealed class RoleMenuCommand : CommandGroup
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("To ensure rolemenus aren't accidentally deleted, you must confirm this action by adding `--confirm` to the end of your command.", TimeSpan.FromSeconds(10));
+            return await DeleteAfter(_context, _channels, "To ensure rolemenus aren't accidentally deleted, you must confirm this action by adding `--confirm` to the end of your command.", TimeSpan.FromSeconds(10));
         }
 
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
@@ -395,7 +395,7 @@ public sealed class RoleMenuCommand : CommandGroup
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter("I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(10));
+            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(10));
         }
         
         if (roleMenuResult.IsSuccess)
