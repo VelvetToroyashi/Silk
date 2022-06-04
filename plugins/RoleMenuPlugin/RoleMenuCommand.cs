@@ -70,7 +70,9 @@ public sealed class RoleMenuCommand : CommandGroup
     (
         [Description("The channel the role menu will be created in.\n" +
                      "This channel must be a text channel, and must allow sending messages.")]
+        [RequireBotDiscordPermissions(DiscordPermission.SendMessages)]
         IChannel channel,
+        
         [Description("The roles to add to the role menu. This is optional!\n" +
                      "Any roles above my own and the @everyone role will be discarded!")]
         IRole[]? roles = null
