@@ -200,15 +200,18 @@ public sealed class RoleMenuCommand : CommandGroup
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
 
+        var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: false) });
+        
         var roleMenuMessageResult = await _channels.EditMessageAsync
-            (
-             new(roleMenu.ChannelId),
-             messageID,
-             "**Role Menu!**\n"                               +
-             "Use the button below to select your roles!\n\n" +
-             "Available roles:\n"                             +
-             string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>"))
-            );
+        (
+         new(roleMenu.ChannelId),
+         messageID,
+         "**Role Menu!**\n"                               +
+         "Use the button below to select your roles!\n\n" +
+         "Available roles:\n"                             +
+         string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>")),
+         components: new[] {components}
+        );
 
         if (!roleMenuMessageResult.IsSuccess)
         {
