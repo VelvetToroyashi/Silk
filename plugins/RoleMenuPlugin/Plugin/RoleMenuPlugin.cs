@@ -16,6 +16,7 @@ using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Responders;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
+
 namespace RoleMenuPlugin;
 
 public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
