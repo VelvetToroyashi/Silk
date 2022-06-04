@@ -17,6 +17,10 @@
         public string? EmojiName { get; set; }
 
         public string? Description { get; set; }
+        
+        public ulong[] MutuallyInclusiveRoleIds { get; set; }
+        
+        public ulong[] MutuallyExclusiveRoleIds { get; set; }
     }
 
 }
