@@ -92,7 +92,7 @@ public class RoleMenuService
                            var roleId   = o.RoleId.ToString();
                            var roleName = guildRoles.FirstOrDefault(r => r.ID.Value == o.RoleId)?.Name ?? "Unknown Role";
                            
-                           return new SelectOption(roleName, roleId, default, GetRoleEmoji(), HasRoleMenuRole());
+                           return new SelectOption(roleName, roleId, o.Description ?? "", GetRoleEmoji(), HasRoleMenuRole());
 
                            bool HasRoleMenuRole() => member.Roles.Any(r => r.Value == o.RoleId);
                            
@@ -110,20 +110,20 @@ public class RoleMenuService
                       .ToArray(),
                    "Select the roles you'd like!",
                    0,
-                   rolemenu.Options.Count
+                   rolemenu.MaxSelections is 0 ? rolemenu.Options.Count : rolemenu.MaxSelections
                 );
 
-            var result = await _interactions
-               .CreateFollowupMessageAsync
-                    (
-                     interaction.ApplicationID, 
-                     interaction.Token,
-                     "Use the dropdown below to assign yourself some roles!",
-                     flags: MessageFlags.Ephemeral,
-                     components: new[]
-                     {
-                        new ActionRowComponent(new[] { dropdown })
-                     });
+            var result = await _interactions.CreateFollowupMessageAsync
+            (
+             interaction.ApplicationID, 
+             interaction.Token,
+             "Use the dropdown below to assign yourself some roles!",
+             flags: MessageFlags.Ephemeral,
+             components: new[]
+             {
+                new ActionRowComponent(new[] { dropdown })
+             });
+            
             return result.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(result.Error);
@@ -154,31 +154,80 @@ public class RoleMenuService
         if (!data.Values.IsDefined(out var values))
                 values ??= Array.Empty<string>();
 
-        var dropdown        = GetDropdownFromMessage(message);
+        var dropdown = GetDropdownFromMessage(message);
         
         var roleMenuRoleIDs = dropdown
                              .Options
                              .Select
-                                  (r => Snowflake.TryParse(r.Value, out var ID)
-                                      ? ID.Value
-                                      : default
-                                  )
-                                  .ToArray();
+                              (
+                               r => Snowflake.TryParse(r.Value, out var ID)
+                                  ? ID.Value
+                                  : default
+                              )
+                              .ToArray();
+
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(interaction.Message.Value.MessageReference.Value.MessageID.Value.Value));
+
+        if (!roleMenuResult.IsDefined(out var roleMenu))
+        {
+            await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID, interaction.Token, "Sorry, but this role menu is no longer available!", flags: MessageFlags.Ephemeral);
+            return Result.FromError(roleMenuResult.Error!);
+        }
         
         var parsedRoleIDs = values.Select(ulong.Parse).Select(DiscordSnowflake.New);
-
+        
         var newUserRoles = member.Roles
                                  .Except(roleMenuRoleIDs)
                                  .Union(parsedRoleIDs)
-                                 .ToArray();
+                                 .ToList();
 
-        var roleResult = await _guilds
-           .ModifyGuildMemberAsync
-                (
-                 interaction.GuildID.Value,
-                 user.ID,
-                 roles: newUserRoles
-                );
+        var newRoleIDs = newUserRoles.Select(s => s.Value).ToArray();
+
+        var failedExclusions = roleMenu.Options
+                                       .Where(o => newRoleIDs.Contains(o.RoleId))
+                                       .Where(o => o.MutuallyExclusiveRoleIds.Any())
+                                       .Where(o => o.MutuallyExclusiveRoleIds.Intersect(newRoleIDs).Any())
+                                       .ToArray();
+        
+        var failedInclusions = roleMenu.Options
+                                       .Where(o => newRoleIDs.Contains(o.RoleId))
+                                       .Where(o => o.MutuallyInclusiveRoleIds.Any())
+                                       .Where(o => o.MutuallyInclusiveRoleIds.Intersect(newRoleIDs).Count() < o.MutuallyInclusiveRoleIds.Length)
+                                       .ToArray();
+        
+        newUserRoles = newUserRoles.Except(failedExclusions.Union(failedInclusions).Select(u => new Snowflake(u.RoleId))).ToList();
+        
+        var sb = new StringBuilder();
+        
+        if (newUserRoles.Count > member.Roles.Count)
+        {
+            var assigned = newUserRoles.Except(member.Roles).ToArray();
+            sb.AppendLine($"I've successfully assigned the following roles to you: {string.Join(", ", assigned.Select(r => $"<@&{r.Value}>"))}");
+        }
+        
+        if (failedInclusions.Any() || failedExclusions.Any())
+            sb.AppendLine("There were some errors trying to assign your roles:");
+        
+        if (failedExclusions.Any())
+        {
+            foreach (var exclusion in failedExclusions)
+                sb.AppendLine($"<@&{exclusion.RoleId}> is mutually exclusive with {string.Join(", ", exclusion.MutuallyExclusiveRoleIds.Select(r => $"<@&{r}>"))}");
+        }
+        
+        if (failedInclusions.Any())
+        {
+            foreach (var inclusion in failedInclusions)
+                sb.AppendLine($"<@&{inclusion.RoleId}> is mutually inclusive with {string.Join(", ", inclusion.MutuallyInclusiveRoleIds.Select(r => $"<@&{r}>"))}");
+        }
+        
+        // Possible optimization: Elide the API call if we're
+        // not changing roles, and instead return Result.FromSuccess()
+        var roleResult = await _guilds.ModifyGuildMemberAsync
+        (
+         interaction.GuildID.Value,
+         user.ID,
+         roles: newUserRoles
+        );
 
         if (roleResult.IsSuccess)
         {
@@ -188,15 +237,15 @@ public class RoleMenuService
                             .ToArray();
             
             var interactionResult = await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 interaction.ApplicationID,
-                 interaction.Token,
-                 "Done! Enjoy your new roles!",
-                 components: new[]
-                 {
-                     new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
-                 }
-                );
+            (
+             interaction.ApplicationID,
+             interaction.Token,
+             sb.ToString(),
+             components: new[]
+             {
+                 new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
+             }
+            );
             
             return interactionResult.IsSuccess 
                 ? Result.FromSuccess()
