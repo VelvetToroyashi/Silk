@@ -333,7 +333,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  {
                      new ActionRowComponent(new[]
                      {
-                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: true)
+                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
                      })
                  }
                 );
