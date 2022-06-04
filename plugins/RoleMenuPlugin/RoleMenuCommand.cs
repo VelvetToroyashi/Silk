@@ -97,7 +97,7 @@ public sealed class RoleMenuCommand : CommandGroup
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
 
-            await _channels.CreateMessageAsync(channel.ID,
+            await _channels.CreateMessageAsync(_context.ChannelID,
                                                "Failed to create role menu: " + roleMenuResult.Error!.Message);
 
             return roleMenuResult;
