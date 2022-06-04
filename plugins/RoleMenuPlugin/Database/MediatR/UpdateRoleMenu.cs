@@ -12,7 +12,7 @@ namespace RoleMenuPlugin.Database.MediatR
 {
     public static class UpdateRoleMenu
     {
-        public record Request(Snowflake RoleMenuID, IEnumerable<RoleMenuOptionModel> Options) : IRequest<Result>;
+        public record Request(Snowflake RoleMenuID, IEnumerable<RoleMenuOptionModel> Options, int? MaxOptions = null) : IRequest<Result>;
 
         internal class Handler : IRequestHandler<Request, Result>
         {
@@ -36,6 +36,8 @@ namespace RoleMenuPlugin.Database.MediatR
                 
                 
                 _db.RemoveRange(roleMenu.Options.Except(request.Options));
+                
+                roleMenu.MaxSelections = request.MaxOptions ?? roleMenu.MaxSelections;
                 
                 roleMenu.Options.Clear();
                 roleMenu.Options.AddRange(request.Options);
