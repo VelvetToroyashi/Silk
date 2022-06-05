@@ -15,7 +15,7 @@ public class RoleMenuCondition : ICondition<RoleMenuAttribute, IMessage>, ICondi
     
     public RoleMenuCondition(IMediator mediator) => _mediator = mediator;
 
-    public ValueTask<Result> CheckAsync(RoleMenuAttribute attribute, IMessage  data, CancellationToken ct = default) => CheckAsync(attribute, data.ID, ct);
+    public ValueTask<Result> CheckAsync(RoleMenuAttribute attribute, IMessage data, CancellationToken ct = default) => CheckAsync(attribute, data.ID, ct);
     
     public async ValueTask<Result> CheckAsync(RoleMenuAttribute attribute, Snowflake data, CancellationToken ct = default)
     {
