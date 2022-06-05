@@ -170,6 +170,12 @@ public sealed class RoleMenuCommand : CommandGroup
                         .Except(duplicateRoles)
                         .ToArray();
 
+        if (duplicateRoles.Count() == roles.Length)
+        {
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter(_context, _channels, "All the roles you're trying to add are already added!", TimeSpan.FromSeconds(5));
+        }
+        
         if (!rolesToAdd.Any())
         {
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
