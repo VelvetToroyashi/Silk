@@ -49,14 +49,14 @@ public class RoleMenuService
             var messageID = interaction.Message.Value.ID;
 
             await _interactions.CreateFollowupMessageAsync
-                (
-                 interaction.ApplicationID,
-                 interaction.Token,
-                 "Hmm, it looks like this message was a role menu, but it's gone missing.\n"              +
-                 "Please notify server staff to fix this! Here is a message link for you to give them:\n" +
-                 $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
-                 flags: MessageFlags.Ephemeral
-                );
+            (
+             interaction.ApplicationID,
+             interaction.Token,
+             "Hmm, it looks like this message was a role menu, but it's gone missing.\n"              +
+             "Please notify server staff to fix this! Here is a message link for you to give them:\n" +
+             $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
+             flags: MessageFlags.Ephemeral
+            );
             
             _logger.LogError("Role menu defined in {GuildID}/{ChannelID}/{MessageID} but missing from database", guildID, channelID, messageID);
         }
@@ -64,10 +64,13 @@ public class RoleMenuService
         {
             if (!rolemenu.Options.Any())
             {
-                var followupResult = await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
-                                                                                    interaction.Token,
-                                                                                    "This role menu is being set up! Please wait until options have been added.",
-                                                                                    flags: MessageFlags.Ephemeral);
+                var followupResult = await _interactions.CreateFollowupMessageAsync
+                (
+                 interaction.ApplicationID,
+                 interaction.Token,
+                 "This role menu is being set up! Please wait until options have been added.",
+                 flags: MessageFlags.Ephemeral
+                );
                 
                 return followupResult.IsSuccess
                     ? Result.FromSuccess() 
@@ -133,8 +136,7 @@ public class RoleMenuService
 
     public async Task<Result> HandleDropdownAsync(IInteraction interaction)
     {
-        await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
-                                                           new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage));
+        await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token, new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage));
 
         if (!interaction.Member.IsDefined(out var member) || !member.User.IsDefined(out var user))
             throw new InvalidOperationException("Member was not defined but the interaction referred to a role menu.");
@@ -204,9 +206,13 @@ public class RoleMenuService
             var assigned = newUserRoles.Except(member.Roles).ToArray();
             sb.AppendLine($"I've successfully assigned the following roles to you: {string.Join(", ", assigned.Select(r => $"<@&{r.Value}>"))}");
         }
-        
-        if (failedInclusions.Any() || failedExclusions.Any())
+
+        if (!failedInclusions.Any() && !failedExclusions.Any())
+            sb.AppendLine("Enjoy your new roles!");
+        else
             sb.AppendLine("There were some errors trying to assign your roles:");
+
+        sb.AppendLine();
         
         if (failedExclusions.Any())
         {
@@ -220,14 +226,14 @@ public class RoleMenuService
                 sb.AppendLine($"<@&{inclusion.RoleId}> is mutually inclusive with {string.Join(", ", inclusion.MutuallyInclusiveRoleIds.Select(r => $"<@&{r}>"))}");
         }
         
-        // Possible optimization: Elide the API call if we're
-        // not changing roles, and instead return Result.FromSuccess()
-        var roleResult = await _guilds.ModifyGuildMemberAsync
-        (
-         interaction.GuildID.Value,
-         user.ID,
-         roles: newUserRoles
-        );
+        var roleResult = newUserRoles.Count == member.Roles.Count 
+            ? Result.FromSuccess()
+            : await _guilds.ModifyGuildMemberAsync
+              (
+               interaction.GuildID.Value,
+               user.ID,
+               roles: newUserRoles
+              );
 
         if (roleResult.IsSuccess)
         {
