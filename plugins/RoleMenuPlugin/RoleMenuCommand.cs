@@ -313,7 +313,7 @@ public sealed class RoleMenuCommand : CommandGroup
             [Description("What roles should be mutually inclusive with this option?")]
             IRole[]? inclusiveRoles = null,
             
-            
+            [Greedy]
             [Option('d', "description")]
             [Description("The description of the role menu option.")]
             string? description = null
