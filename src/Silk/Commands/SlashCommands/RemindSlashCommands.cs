@@ -47,7 +47,7 @@ public class RemindContextCommands : CommandGroup
             }),
             new ActionRowComponent(new[]
             {
-                new TextInputComponent(_context.Data.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), TextInputStyle.Paragraph, "Additional context?", default, default, false, default, "Add pineapples out of spite.")
+                new TextInputComponent(_context.Data.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), TextInputStyle.Paragraph, "Additional context?", default, 1500, false, default, "Add pineapples out of spite.")
             })
         };
 
