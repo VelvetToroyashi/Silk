@@ -48,9 +48,6 @@ public class PostCommandHandler : IPostExecutionEvent
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
     {
-        if (context is not MessageContext mc)
-            return Result.FromSuccess();
-        
         if (commandResult.IsSuccess)
             return Result.FromSuccess();
         
