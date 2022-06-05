@@ -341,6 +341,7 @@ public sealed class RoleMenuCommand : CommandGroup
             [Description("What roles should be mutually inclusive with this option?")]
             IRole[]? inclusiveRoles = null,
             
+            [Greedy]
             [Option('d', "description")]
             [Description("The description of the role menu option.")]
             string? description = null
@@ -389,7 +390,7 @@ public sealed class RoleMenuCommand : CommandGroup
                                                          .ToArray();
             }
 
-            if (inclusiveRoles?.Intersect(exclusiveRoles ?? Array.Empty<IRole>())?.Any() ?? false)
+            if (inclusiveRoles?.Intersect(exclusiveRoles ?? Array.Empty<IRole>()).Any() ?? false)
             {
                 await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
                 return await DeleteAfter(_context, _channels, "You can't make a role mutually exclusive and inclusive.", TimeSpan.FromSeconds(5));
