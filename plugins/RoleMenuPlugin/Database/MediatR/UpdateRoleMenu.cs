@@ -43,8 +43,7 @@ namespace RoleMenuPlugin.Database.MediatR
                 roleMenu.Options.AddRange(request.Options);
 
                 _db.Update(roleMenu);
-                _db.UpdateRange(roleMenu.Options);
-                
+
                 var        saved = 0;
                 Exception? ex    = null;
                 
