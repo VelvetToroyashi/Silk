@@ -29,8 +29,7 @@ public class MessageParser : AbstractTypeParser<IMessage>
     public override async ValueTask<Result<IMessage>> TryParseAsync(string token, CancellationToken ct = default)
     {
         Snowflake? channel = null;
-
-
+        
         if (!Snowflake.TryParse(token, out var message, Constants.DiscordEpoch))
         {
             var match = _messageLinkRegex.Match(token);
@@ -51,7 +50,7 @@ public class MessageParser : AbstractTypeParser<IMessage>
 
     public override ValueTask<Result<IMessage>> TryParseAsync(IReadOnlyList<string> tokens, CancellationToken ct = default)
     {
-        if (tokens.Any())
+        if (!tokens.Any())
             return ValueTask.FromResult(Result<IMessage>.FromError(new InvalidOperationError("No tokens were provided.")));
 
         return TryParseAsync(tokens.First(), ct);
