@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
@@ -10,6 +9,7 @@ using Recognizers.Text.DateTime.Wrapper;
 using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
@@ -21,6 +21,41 @@ using Silk.Extensions.Remora;
 using Silk.Services.Guild;
 
 namespace Silk.Commands.SlashCommands;
+
+[SlashCommand]
+public class RemindContextCommands : CommandGroup
+{
+    private readonly InteractionContext         _context;
+    private readonly IDiscordRestInteractionAPI _interactions;
+    
+    public RemindContextCommands(InteractionContext context, IDiscordRestInteractionAPI interactions)
+    {
+        _context      = context;
+        _interactions = interactions;
+    }
+
+    [Command("Remind Me!")]
+    [SuppressInteractionResponse(true)]
+    [CommandType(ApplicationCommandType.Message)]
+    public async Task<IResult> RemindAsync()
+    {
+        var components = new IMessageComponent[]
+        {
+            new ActionRowComponent(new[]
+            {
+                new TextInputComponent("time", TextInputStyle.Short, "When?", 2, 100, true, "10 minutes from now", "\"10m\", \"in three days\", etc.")
+            }),
+            new ActionRowComponent(new[]
+            {
+                new TextInputComponent(_context.Data.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), TextInputStyle.Paragraph, "Additional context?", default, 1500, false, default, "Add pineapples out of spite.")
+            })
+        };
+
+        var data = new InteractionModalCallbackData("reminder-modal", "Set a reminder!", components);
+
+        return await _interactions.CreateInteractionResponseAsync(_context.ID, _context.Token, new InteractionResponse(InteractionCallbackType.Modal, new(data)));
+    }
+}
 
 [Ephemeral]
 [SlashCommand]
@@ -47,7 +82,6 @@ public class RemindSlashCommands : CommandGroup
         _context      = context;
         _interactions = interactions;
     }
-
 
     [Command("set")]
     [Description("Set a reminder!")]

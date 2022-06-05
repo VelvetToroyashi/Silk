@@ -29,7 +29,7 @@ public class MuteCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("mute")]
+    [Command("mute", "429", "423")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [Description("Mutes a user either temporarily. Muting an already muted member will update the mute time.")]
@@ -47,7 +47,7 @@ public class MuteCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
-        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return
             await _channels.CreateMessageAsync

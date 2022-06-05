@@ -34,7 +34,7 @@ public class ChannelLoggingServiceTests
         var channelLogger  = new ChannelLoggingService(default!, webhookAPIMock.Object, NullLogger<ChannelLoggingService>.Instance);
         
         // Act
-        await channelLogger.LogAsync(true, loggingData, LoremIpsum, null);
+        await channelLogger.LogAsync(true, loggingData, LoremIpsum, null, null);
         
         // Assert
         webhookAPIMock.Verify(x => x.ExecuteWebhookAsync(
@@ -43,9 +43,8 @@ public class ChannelLoggingServiceTests
                                                          It.IsAny<Optional<bool>>(),
                                                          It.IsAny<Optional<string>>(),
                                                          It.IsAny<Optional<string>>(),
-                                                         default, default,
-                                                         default, default, default,
-                                                         default, default, default, default), Times.Once);
+                                                         default, default, default, default, default,
+                                                         default, default, default, default, default), Times.Once);
 
     }
     
@@ -57,7 +56,7 @@ public class ChannelLoggingServiceTests
         var channelLogger  = new ChannelLoggingService(channelAPIMock.Object, default!, NullLogger<ChannelLoggingService>.Instance);
 
         // Act
-        await channelLogger.LogAsync(false, loggingData, LoremIpsum, null);
+        await channelLogger.LogAsync(false, loggingData, LoremIpsum, null, null);
 
         // Assert
         channelAPIMock.Verify(x => x.CreateMessageAsync(

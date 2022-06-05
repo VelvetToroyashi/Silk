@@ -30,7 +30,7 @@ public class StrikeCommand : CommandGroup
         _infractions = infractions;
     }
 
-    [Command("strike", "warn", "bonk")]
+    [Command("strike", "warn", "bonk", "409")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
     [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
@@ -48,7 +48,7 @@ public class StrikeCommand : CommandGroup
     )
     {
         var infractionResult = await _infractions.StrikeAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return await _channels.CreateMessageAsync
             (

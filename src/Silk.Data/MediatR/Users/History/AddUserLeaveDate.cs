@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -21,12 +22,16 @@ public static class AddUserLeaveDate
         {
             var user = await _db.Users
                                 .Include(u => u.History)
-                                .FirstOrDefaultAsync(u => u.GuildID == request.GuildID && u.ID == request.UserID, cancellationToken);
+                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             if (user is null)
                 return new NotFoundError($"No user exists by the ID of {request.UserID} in guild {request.GuildID}");
 
-            user.History.LeaveDates.Add(request.Date);
+            var latestJoin = user.History.LastOrDefault(l => l.LeaveDate is null);
+
+            latestJoin ??= new() { GuildID = request.GuildID };
+
+            latestJoin.LeaveDate = request.Date;
             
             _db.Update(user);
             

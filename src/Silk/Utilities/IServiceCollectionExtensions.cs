@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,33 +10,25 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
-using Remora.Commands.Services;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
-using Remora.Discord.API.Gateway.Commands;
-using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
-using Remora.Discord.Commands.Responders;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
-using Remora.Discord.Hosting.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Results;
-using Sentry;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
-using Silk.Commands.Bot;
 using Silk.Commands.Conditions;
-using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Infrastructure;
 using Silk.Interactivity;
@@ -73,6 +66,8 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
+           .AddInteractiveEntity<JoinEmbedButtonHandler>()
+           .AddInteractiveEntity<ReminderModalHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         
@@ -108,9 +103,7 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
-                    GatewayIntents.GuildMessages  |
                     GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
@@ -121,7 +114,8 @@ public static class IServiceCollectionExtensions
                   .SetSlidingExpiration<IMessage>(null)
                   .SetSlidingExpiration<IGuild>(null)
                   .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12));
+                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
+                  .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
@@ -157,7 +151,7 @@ public static class IServiceCollectionExtensions
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        var config = configuration.GetSilkConfigurationOptionsFromSection();
+        var config = configuration.GetSilkConfigurationOptions();
         
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()

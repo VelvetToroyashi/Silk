@@ -14,8 +14,8 @@ public interface IChannelLoggingService
     /// <param name="useWebhook">Whether to log the message via a webhook.</param>
     /// <param name="loggingData">The logging configuration to use.</param>
     /// <param name="content">The content to log.</param>
-    Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed? embedContent = null);
+    Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed? embedContent = null, IMessageComponent[]? components = null);
 
     /// <inheritdoc cref="LogAsync(bool,Silk.Data.Entities.LoggingChannelEntity,string?,Remora.Discord.API.Abstractions.Objects.IEmbed?)"/>
-    Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed[]? embed = null, FileData[]? files = null);
+    Task<Result> LogAsync(bool useWebhook, LoggingChannelEntity loggingData, string? contentString = null, IEmbed[]? embed = null, FileData[]? files = null, IMessageComponent[]? components = null);
 }

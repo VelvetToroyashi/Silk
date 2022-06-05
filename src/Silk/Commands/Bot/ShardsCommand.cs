@@ -12,7 +12,6 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Shared.Constants;
 using Silk.Utilities;
-using SixLabors.ImageSharp;
 using StackExchange.Redis;
 using Color = System.Drawing.Color;
 

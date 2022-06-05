@@ -35,7 +35,7 @@ public class GuildEntity
     /// <summary>
     /// Users that are a part of this guild.
     /// </summary>
-    public List<UserEntity>       Users         { get; set; } = new();
+    public List<GuildUserEntity>       Users         { get; set; } = new();
     
     /// <summary>
     /// Infractions that are a part of this guild.

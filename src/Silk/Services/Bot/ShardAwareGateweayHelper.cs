@@ -1,15 +1,11 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
-using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Gateway;
-using Silk.Shared.Configuration;
 using StackExchange.Redis;
 
 namespace Silk.Services.Bot;

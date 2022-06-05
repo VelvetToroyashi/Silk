@@ -101,20 +101,21 @@ public sealed class ReminderService : IHostedService
     ///     Removes a reminder.
     /// </summary>
     /// <param name="id">The ID of the reminder to remove.</param>
-    public async Task RemoveReminderAsync(int id)
+    public async Task<Result> RemoveReminderAsync(int id)
     {
         ReminderEntity? reminder = _reminders.SingleOrDefault(r => r.Id == id);
         if (reminder is null)
         {
             _logger.LogWarning(EventIds.Service, "Reminder was not present in memory. Was it dispatched already?");
+            return new NotFoundError();
         }
         else
         {
             _reminders.Remove(reminder);
             _logger.LogDebug("Removed reminder {Reminder}", id);
-            await _mediator.Send(new RemoveReminder.Request(id));
             
             SilkMetric.LoadedReminders.Dec();
+            return await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
@@ -158,23 +159,23 @@ public sealed class ReminderService : IHostedService
         var dispatchMessage = GetReminderMessageString(reminder, replyExists, originalMessageExists).ToString();
 
         var dispatchResult = await _channels.CreateMessageAsync
-            (
-             reminder.ChannelID,
-             dispatchMessage,
-             allowedMentions: 
-             new AllowedMentions
-                 (
-                  Users: new[] { reminder.OwnerID },
-                  MentionRepliedUser: !reminder.IsReply
-                 ),
-             messageReference: 
-             new MessageReference
-                 (
-                  reminder.ReplyMessageID ?? reminder.MessageID ?? default,
-                  reminder.ChannelID,
-                  FailIfNotExists: false
-                 )
-            ); 
+        (
+         reminder.ChannelID,
+         dispatchMessage,
+         allowedMentions: 
+         new AllowedMentions
+         (
+          Users: new[] { reminder.OwnerID },
+          MentionRepliedUser: !reminder.IsReply
+         ),
+         messageReference: 
+         new MessageReference
+         (
+          reminder.ReplyMessageID ?? reminder.MessageID ?? default,
+          reminder.ChannelID,
+          FailIfNotExists: false
+         )
+        ); 
         
         if (dispatchResult.IsSuccess)
         {
@@ -212,7 +213,15 @@ public sealed class ReminderService : IHostedService
         if (reminder.IsPrivate)
         {
             dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
-            dispatchMessage.AppendLine(reminder.MessageContent);
+            dispatchMessage.AppendLine(reminder.MessageContent ?? "(You didn't set a message!)");
+
+            if (reminder.IsReply)
+            {
+                dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:");
+                dispatchMessage.AppendLine(reminder.ReplyMessageContent);
+                dispatchMessage.AppendLine();
+                dispatchMessage.AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
+            }
         }
         else if (reminder.IsReply)
         {
@@ -251,7 +260,10 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug(EventIds.Service, "Attempting to dispatch reminder to {OwnerID}.", reminder.OwnerID);
         
-        await RemoveReminderAsync(reminder.Id);
+        var removalResult = await RemoveReminderAsync(reminder.Id);
+
+        if (!removalResult.IsSuccess)
+            return Result.FromSuccess();
 
         var message = GetReminderMessageString(reminder, false, true).ToString();
 

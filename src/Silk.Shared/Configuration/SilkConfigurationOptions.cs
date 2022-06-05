@@ -48,39 +48,39 @@ public class SilkConfigurationOptions
 	///     Property for determining whether to use global or guild specific slash commands.
 	///     Leave null for global slash commands.
 	/// </summary>
-	public ulong? SlashCommandsGuildId { get; set; } = null;
+	public ulong? SlashCommandsGuildId { get; set; }
 
 	/// <summary>
 	///		Property for holding the DSN url for Sentry and it's related services.
 	/// </summary>
-	public string? SentryDSN { get; set; } = null;
+	public string? SentryDSN { get; set; }
 	
 	/// <summary>
 	/// Property for holding a Ravy API (https://ravy.org/api) key.
 	/// </summary>
-	public string? RavyAPIKey { get; set; } = null;
+	public string? RavyAPIKey { get; set; }
 	
 	public SilkRedisOptions Redis { get; set; } = new();
 	
 	/// <summary>
 	///     Property for holding Persistence options (property name matching sub-key property in configuration file)
 	/// </summary>
-	public SilkPersistenceOptions Persistence { get; set; }
+	public SilkPersistenceOptions Persistence { get; set; } = new();
 
 	/// <summary>
 	///     Property for holding Discord Developer Api options (property name matching sub-key property in configuration file)
 	/// </summary>
-	public SilkDiscordOptions Discord { get; set; }
+	public SilkDiscordOptions Discord { get; set; } = new();
 
 	/// <summary>
 	///     Property for holding Discord Developer Api options (property name matching sub-key property in configuration file)
 	/// </summary>
-	public SilkE621Options E621 { get; set; }
+	public SilkE621Options E621 { get; set; } = new();
 
 	/// <summary>
 	///     Property for holding serialized emoji Ids in json form to populate <see cref="Silk.Shared.Constants.Emojis" />.
 	/// </summary>
-	public SilkEmojiOptions? Emojis { get; set; }
+	public SilkEmojiOptions Emojis { get; set; } = new();
 }
 
 /// <summary>
@@ -163,7 +163,7 @@ public class SilkE621Options
 
 public class SilkEmojiOptions
 {
-    public Dictionary<string, ulong> EmojiIds { get; set; }
+    public Dictionary<string, ulong> EmojiIds { get; set; } = new();
 
     public void PopulateEmojiConstants()
     {

@@ -10,6 +10,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Respawn;
 using Respawn.Graph;
+using Silk.Data.DTOs.Guilds.Users;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Users;
 
@@ -61,39 +62,12 @@ public class UserTests
     }
 
     [Test]
-    public async Task AddInsertsUserSuccessfully()
-    {
-        // Arrange
-        UserEntity? result;
-
-        //Act
-        await _mediator.Send(new AddUser.Request(GuildId, UserId));
-        result = await _context.Users.FirstOrDefaultAsync(u => u.ID == UserId && u.GuildID == GuildId);
-
-        //Assert
-        Assert.IsNotNull(result);
-    }
-
-    [Test]
-    public async Task AddDoesNotAllowDuplicateUsers()
-    {
-        //Arrange
-        var               request = new AddUser.Request(GuildId, UserId);
-        AsyncTestDelegate send;
-        //Act
-        await _mediator.Send(request);
-        send = async () => await _mediator.Send(request);
-        //Assert
-        Assert.ThrowsAsync<DbUpdateException>(send);
-    }
-
-    [Test]
     public async Task GetReturnsNullForNonUser()
     {
         //Arrange
-        UserEntity? user;
+        UserDTO? user;
         //Act
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNull(user);
     }
@@ -102,46 +76,22 @@ public class UserTests
     public async Task GetReturnsUserCorrectly()
     {
         //Arrange
-        UserEntity? user;
-        await _mediator.Send(new AddUser.Request(GuildId, UserId));
+        UserDTO? user;
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Act
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNotNull(user);
-    }
-
-    [Test]
-    public async Task UpdateReturnsUpdatedUser()
-    {
-        //Arrange
-        UserEntity before;
-        UserEntity after;
-        before = await _mediator.Send(new AddUser.Request(GuildId, UserId));
-        //Act
-        after = await _mediator.Send(new UpdateUser.Request(GuildId, UserId, UserFlag.WarnedPrior));
-        //Assert
-        Assert.AreNotEqual(before, after);
-    }
-
-    [Test]
-    public async Task UpdateThrowsForNonUser()
-    {
-        //Arrange
-        AsyncTestDelegate send;
-        //Act
-        send = async () => await _mediator.Send(new UpdateUser.Request(GuildId, UserId));
-        //Assert
-        Assert.ThrowsAsync<InvalidOperationException>(send);
     }
 
     [Test]
     public async Task GetOrCreateCreatesForNonUser()
     {
         //Arrange
-        UserEntity? user;
+        UserDTO? user;
         //Act
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
-        user = await _mediator.Send(new GetUser.Request(GuildId, UserId));
+        user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
         Assert.IsNotNull(user);
     }
@@ -151,7 +101,7 @@ public class UserTests
     {
         //Arrange
         Result<UserEntity> user;
-        await _mediator.Send(new AddUser.Request(GuildId, UserId));
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Act
         user = await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Assert

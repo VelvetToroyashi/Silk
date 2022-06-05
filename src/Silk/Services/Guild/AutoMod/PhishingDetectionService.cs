@@ -100,8 +100,8 @@ public class PhishingDetectionService
             return Result.FromError(cdnResult.Error);
         
         var url = cdnResult.Entity;
-
-        RavyAPIResponse response;
+        
+        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
 
         using (SilkMetric.PhishingDetection.WithLabels("avatar").NewTimer())
         {
@@ -212,10 +212,8 @@ public class PhishingDetectionService
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
         
-        if (links.Any())
+        foreach (var link in links)
         {
-            var link = links.First();
-
             if (_phishGateway.IsBlacklisted(link))
             {
                 _logger.LogInformation("Detected phishing link.");

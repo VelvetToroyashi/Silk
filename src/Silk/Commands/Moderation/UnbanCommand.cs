@@ -35,7 +35,7 @@ public class UnbanCommand : CommandGroup
     public async Task<IResult> UnbanAsync(IUser user, [Greedy] string reason = "Not Given.")
     {
         var infractionResult = await _infractions.UnBanAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
-        var notified         = infractionResult.IsDefined(out var result) && result.UserNotified ? "(User notified via DM)" : "(Failed to DM)";
+        var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         
         return await _channels.CreateMessageAsync

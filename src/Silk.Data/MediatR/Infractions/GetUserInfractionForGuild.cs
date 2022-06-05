@@ -4,24 +4,25 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Infractions;
 
-public static class GetUserInfraction
+public static class GetUserInfractionForGuild
 {
     public sealed record Request(
         Snowflake      UserID,
         Snowflake      GuildID,
         InfractionType Type,
-        int?           CaseId = null) : IRequest<InfractionEntity?>;
+        int?           CaseId = null) : IRequest<InfractionDTO?>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionEntity?>
+    internal sealed class Handler : IRequestHandler<Request, InfractionDTO?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<InfractionEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<InfractionDTO?> Handle(Request request, CancellationToken cancellationToken)
         {
             InfractionEntity? infraction;
 
@@ -42,7 +43,7 @@ public static class GetUserInfraction
                                       .LastOrDefaultAsync(cancellationToken);
             }
 
-            return infraction;
+            return InfractionEntity.ToDTO(infraction);
         }
     }
 }

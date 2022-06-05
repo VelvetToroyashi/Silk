@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -14,6 +12,7 @@ public class GuildContext : DbContext
     public DbSet<UserEntity>              Users              { get; set; }
     public DbSet<GuildEntity>             Guilds             { get; set; }
     public DbSet<ReminderEntity>          Reminders          { get; set; }
+    public DbSet<GuildUserEntity>         GuildUsers         { get; set; }
     public DbSet<InfractionEntity>        Infractions        { get; set; }
     public DbSet<GuildConfigEntity>       GuildConfigs       { get; set; }
     public DbSet<GuildGreetingEntity>     GuildGreetings     { get; set; }

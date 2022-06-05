@@ -18,7 +18,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
         if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess(); // Thanks, Night.
         
-        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID));
+        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit:0));
         
         return Result.FromSuccess();
     }

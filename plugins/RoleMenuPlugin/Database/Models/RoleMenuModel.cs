@@ -8,13 +8,16 @@ namespace RoleMenuPlugin.Database
 	/// </summary>
 	public sealed class RoleMenuModel
     {
-        [Key]
+	    [Key]
         public ulong MessageId { get; set; }
 
         public ulong ChannelId { get; set; }
 
         public ulong GuildId { get; set; }
 
+        [Range(1, 25)]
+		public int MaxSelections { get; set; }
+        
         public List<RoleMenuOptionModel> Options { get; set; }
     }
 }

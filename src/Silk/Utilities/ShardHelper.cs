@@ -1,4 +1,3 @@
-using System;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Rest.Core;
 
@@ -41,4 +40,7 @@ public sealed class ShardHelper
     
     public static string GetShardUptimeStatKey(int shardID)
         => $"shard:{shardID}:stat:uptime";
+
+    public static string GetShardGuildsKey(int shardID)
+        => $"shard:{shardID}:guilds";
 }

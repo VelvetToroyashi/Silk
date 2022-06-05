@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Silk.Data.Entities;
 
@@ -11,8 +10,8 @@ public class InfractionEntityConfiguration : IEntityTypeConfiguration<Infraction
     {
         builder.HasOne(inf => inf.Target)
                .WithMany(u => u.Infractions)
-               .HasForeignKey(inf => new {
-                    TargetId = inf.TargetID,
-                    GuildId  = inf.GuildID });
+               .HasForeignKey(inf => inf.TargetID);
+
+        builder.HasIndex(inf => inf.GuildID);
     }
 }

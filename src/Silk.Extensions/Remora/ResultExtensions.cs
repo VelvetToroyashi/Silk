@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Remora.Results;
 
 namespace Silk.Extensions.Remora;
@@ -23,4 +22,13 @@ public static class ResultExtensions
     /// <returns>A stringified version of the initial error, delimited by a newline.</returns>
     public static string Unpack(this AggregateError error)
         => error.Errors.Aggregate("", (c, n) => c + Environment.NewLine + (n.Error is AggregateError ae ? Unpack(ae) : n.Error!.Message));
+
+    public static IResultError? GetDeepestError(this IResult error)
+        => error.IsSuccess 
+            ? error.Error
+            : error.Error is AggregateError ag      
+                ? GetDeepestError(ag.Errors.First())
+                : error.Inner is null 
+                    ? error.Error 
+                    : GetDeepestError(error.Inner!);
 }

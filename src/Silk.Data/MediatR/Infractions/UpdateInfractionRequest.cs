@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Infractions;
@@ -11,25 +12,27 @@ namespace Silk.Data.MediatR.Infractions;
 public static class UpdateInfraction
 {
     public sealed record Request
-        (
-            int                       InfractionId,
-            Optional<DateTimeOffset?> Expiration      = default,
-            Optional<string>          Reason          = default,
-            Optional<bool>            AppliesToTarget = default,
-            Optional<bool>            Processed       = default,
-            Optional<bool>            Escalated        = default,
-            Optional<bool>            Notified        = default
-        ) : IRequest<InfractionEntity>;
+    (
+        int CaseID,
+        Snowflake GuildID,
+        Optional<DateTimeOffset?> Expiration      = default,
+        Optional<string>          Reason          = default,
+        Optional<bool>            AppliesToTarget = default,
+        Optional<bool>            Processed       = default,
+        Optional<bool>            Escalated       = default,
+        Optional<bool>            Notified        = default
+    ) : IRequest<InfractionDTO>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionEntity>
+    internal sealed class Handler : IRequestHandler<Request, InfractionDTO>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<InfractionEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
         {
             var infraction = await _db.Infractions
-                                      .FirstAsync(inf => inf.Id == request.InfractionId, cancellationToken);
+                                      .FirstAsync(inf => inf.CaseNumber == request.CaseID &&
+                                                         inf.GuildID == request.GuildID, cancellationToken);
 
             if (request.Expiration.HasValue)
                 infraction.ExpiresAt = request.Expiration.Value;
@@ -50,7 +53,7 @@ public static class UpdateInfraction
                 infraction.UserNotified = request.Notified.Value;
 
             await _db.SaveChangesAsync(cancellationToken);
-            return infraction;
+            return InfractionEntity.ToDTO(infraction);
         }
     }
 }

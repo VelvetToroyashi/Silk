@@ -14,6 +14,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
+using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
@@ -46,7 +47,7 @@ public class CasesCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
     public async Task<Result<IMessage>> ViewCaseAsync(int caseID)
     {
-        var infCase = await _mediator.Send(new GetUserInfraction.Request(default, _context.GuildID.Value, default, caseID));
+        var infCase = await _mediator.Send(new GetUserInfractionForGuild.Request(default, _context.GuildID.Value, default, caseID));
         
         if (infCase is null)
             return await _channels.CreateMessageAsync(_context.ChannelID, "Case not found.");
@@ -63,7 +64,7 @@ public class CasesCommand : CommandGroup
                 new EmbedField("Duration:", infCase.Duration?.Humanize() ?? "Permanent", true),
                 new EmbedField("Created:", infCase.CreatedAt.ToTimestamp(),true),
                 new EmbedField("Expires:", infCase.ExpiresAt?.Humanize() ?? "Never", true),
-                new EmbedField("Pardoned:", (!infCase.AppliesToTarget).ToString(), true)
+                new EmbedField("Pardoned:", infCase.Pardoned.ToString(), true)
             }
         };
 
@@ -76,7 +77,7 @@ public class CasesCommand : CommandGroup
     [Description("Fetch all infractions for a user including kicks, mutes, and more.")]
     public async Task<Result<IMessage>> Cases(IUser user)
     {
-        var cases = await _mediator.Send(new GetUserInfractions.Request(_context.GuildID.Value, user.ID));
+        var cases = await _mediator.Send(new GetUserInfractionsForGuild.Request(_context.GuildID.Value, user.ID));
         
         if (!cases.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "It appears this user is clean. They should keep it up!");
@@ -106,8 +107,8 @@ public class CasesCommand : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
     }
 
-    private string GetCaseDescription(InfractionEntity infraction) =>
-        $"| {infraction.CaseNumber} "                            +
+    private string GetCaseDescription(InfractionDTO infraction) =>
+        $"| {infraction.CaseID} "                            +
         $"| **{infraction.Type.Humanize(LetterCasing.Title)}** " +
         $"| {infraction.CreatedAt.ToTimestamp()} "               +
         $"| {infraction.EnforcerID} "                            +

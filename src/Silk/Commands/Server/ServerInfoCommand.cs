@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
+using MediatR;
 using Remora.Commands.Attributes;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
@@ -14,6 +15,8 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
+using Serilog;
+using Silk.Data.MediatR.Users;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Utilities.HelpFormatter;
@@ -24,11 +27,15 @@ namespace Silk.Commands.Server;
 [Category(Categories.Server)]
 public class ServerInfoCommand : CommandGroup
 {
+    private readonly IMediator              _mediator;
     private readonly ICommandContext        _context;
     private readonly IDiscordRestGuildAPI   _guilds;
     private readonly IDiscordRestChannelAPI _channels;
-    public ServerInfoCommand(ICommandContext context, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
+    
+    
+    public ServerInfoCommand(IMediator mediator, ICommandContext context, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
     {
+        _mediator = mediator;
         _context  = context;
         _guilds   = guilds;
         _channels = channels;
@@ -40,6 +47,7 @@ public class ServerInfoCommand : CommandGroup
     [Description("Get info about the current Guild")]
     public async Task<IResult> ServerInfo()
     {
+        Log.Verbose("Entered serverinfo");
         var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value, true);
 
         if (!guildResult.IsDefined(out var guild))
@@ -57,7 +65,9 @@ public class ServerInfoCommand : CommandGroup
 
         fields.Add(new EmbedField("Members:" , memberInformation, true));
 
-        if (!guild.Channels.IsDefined(out var channels))
+        var channelsResult = await _guilds.GetGuildChannelsAsync(_context.GuildID.Value); 
+        
+        if (!channelsResult.IsDefined(out var channels))
         {
             fields.Add(new EmbedField("Channels:", "Channel information is unavailable. Sorry.", true));
         }
@@ -87,11 +97,21 @@ public class ServerInfoCommand : CommandGroup
 
 
         fields.Add(new EmbedField("Server Owner:", $"<@{guild.OwnerID}>", true));
-        fields.Add(new EmbedField("Most Recent Member:", guild.Members.IsDefined(out var members) ? members.OrderByDescending(m => m.JoinedAt).First().Mention() : "Unknown :(", true));
+
+        Log.Verbose("Added fields");
+        
+        var recent = await _mediator.Send(new GetMostRecentUser.Request(_context.GuildID.Value));
+        
+        Log.Verbose("Got most recent member");
+        
+        fields.Add(new EmbedField("Most Recent Member:", $"<@{recent.ID}>", true));
         
         fields.Add(new EmbedField("Server Created:", $"{guild.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)} ({guild.ID.Timestamp.ToTimestamp()})"));
+
+        Log.Verbose("Adding features");
+        var features = guild.GuildFeatures.Any() ? guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n") : "None";
         
-        fields.Add(new EmbedField("Features:", guild.GuildFeatures.Select(f => f.Humanize(LetterCasing.Title)).OrderBy(o => o.Length).Join("\n")));
+        fields.Add(new EmbedField("Features:", features));
 
         var embed = new Embed
         {
@@ -102,6 +122,11 @@ public class ServerInfoCommand : CommandGroup
             Image     = guildBanner is null ? default(Optional<IEmbedImage>) : new EmbedImage(guildBanner.ToString()),
         };
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        Log.Verbose("Sending embed: {@Embed}", embed);
+        var res = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        
+        Log.Verbose("Result: {@Result}", res);
+        
+        return res;
     }
 }

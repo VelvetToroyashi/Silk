@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds.Users;
 
 namespace Silk.Data.Entities;
 
@@ -13,29 +14,21 @@ public class UserEntity
     /// </summary>
     [Column("id")]
     public Snowflake ID { get; set; }
-    
-    /// <summary>
-    /// The ID of the user's guild.
-    /// </summary>
-    [Column("guild_id")]
-    public Snowflake GuildID { get; set; }
 
     /// <summary>
-    /// The guild this user belongs to.
+    /// The guilds this user is a part of.
     /// </summary>
-    public GuildEntity Guild { get; set; } = null!;
-
-    /// <summary>
-    /// Any flags associated with this user.
-    /// </summary>
-    [Column("flags")]
-    public UserFlag Flags { get; set; }
+    public List<GuildUserEntity> Guilds { get; set; } = new();
     
     /// <summary>
     /// Non-infraction related history of the user.
     /// </summary>
-    public UserHistoryEntity History { get; set; }
+    public List<UserHistoryEntity> History { get; set; } = new();
 
-    public List<InfractionEntity> Infractions { get; set; }
-    //public List<Reminder> Reminders { get; set; } = new();
+    public List<InfractionEntity> Infractions { get; set; } = new();
+
+    public static implicit operator UserDTO?(UserEntity? user) => ToDTO(user);
+    
+    public static UserDTO? ToDTO(UserEntity? user)
+        => user is null ? null : new(user.ID, user.Guilds.Select(g => g.GuildID).ToArray(), user.History.Select(UserHistoryEntity.ToDTO).ToArray(), user.Infractions.Select(InfractionEntity.ToDTO).ToArray()!);
 }

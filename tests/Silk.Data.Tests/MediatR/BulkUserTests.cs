@@ -10,6 +10,7 @@ using Remora.Rest.Core;
 using Respawn;
 using Respawn.Graph;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 
 namespace Silk.Data.Tests.MediatR;
@@ -64,12 +65,12 @@ public class BulkUserTests
         //Arrange
         List<UserEntity> users = new()
         {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
+            new() { ID = new(1) },
+            new() { ID = new(2) }
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users,GuildId));
         
         var result = _context.Users.Count();
         //Assert
@@ -80,45 +81,33 @@ public class BulkUserTests
     public async Task InsertsAndUpdatesAllUsers()
     {
         //Arrange
-        await _mediator.Send(new AddUser.Request(GuildId, new(1)));
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
         List<UserEntity> users = new()
         {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
+            new() { ID = new(1) },
+            new() { ID = new(2) }
         };
 
         //Act
-        await _mediator.Send(new BulkAddUser.Request(users));
+        await _mediator.Send(new BulkAddUserToGuild.Request(users, GuildId));
         var result = _context.Users.ToArray().Length;
 
         //Assert
         Assert.AreEqual(users.Count, result);
     }
-    
+
     [Test]
-    public async Task UpdatesAllUsers()
+    public async Task UpdatesUserForMultipleGuilds()
     {
-        //Arrange
-        var updatedUsers = new UserEntity[2];
-        List<UserEntity> users = new()
-        {
-            new() { ID = new(1), GuildID = GuildId },
-            new() { ID = new(2), GuildID = GuildId }
-        };
-        users = (await _mediator.Send(new BulkAddUser.Request(users))).ToList();
-        //Act
-        users.CopyTo(updatedUsers);
+        await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
+        await _mediator.Send(new GetOrCreateGuild.Request(new(20), "??"));
 
-        foreach (var u in updatedUsers)
-            u.Flags = UserFlag.WarnedPrior;
+        await _mediator.Send(new BulkAddUserToGuild.Request(new[] { new UserEntity() { ID = new(1) }}, new(20)));
 
-        await _mediator.Send(new BulkUpdateUser.Request(updatedUsers));
-        updatedUsers = _context.Users.ToArray();
-        //Assert
-        Assert.AreNotEqual(users, updatedUsers);
-
-        var allUsersWarned = users.All(u => u.Flags == UserFlag.WarnedPrior);
+        var snowflake = new Snowflake(1);
         
-        Assert.True(allUsersWarned);
+        var result = _context.Users.Include(u => u.Guilds).First(u => u.ID == snowflake);
+        
+        Assert.AreEqual(2, result.Guilds.Count);
     }
 }

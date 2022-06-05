@@ -27,24 +27,42 @@ public class e621Command : eBooruBaseCommand
 {
     private readonly SilkConfigurationOptions _options;
 
-    public e621Command(
+    public e621Command
+    (
         HttpClient                         client,
         IOptions<SilkConfigurationOptions> options,
         ICommandContext                    context,
-        IDiscordRestChannelAPI             channel)
-        : base(client, context, channel)
+        IDiscordRestChannelAPI             channel
+    )
+    : base(client, context, channel)
     {
         baseUrl  = "https://e621.net/posts.json?tags=";
         _options = options.Value;
         username = _options.E621.Username;
     }
 
-    //[RequireNsfw]
+    [NSFWChannel]
+    [Command("e621", "e6")]
+    [Description("Search e621.net for content.")]
+    public Task<IResult> Search
+    (
+        [Greedy]
+        [Description("What tags to search for")]
+        string query
+    )
+    => Search(3, query);
 
     [NSFWChannel]
     [Command("e621", "e6")]
-    [Description("Lewd~ Get hot stuff of e621; requires channel to be marked as NSFW.")]
-    public override async Task<Result> Search(int amount = 3, string? query = null)
+    [Description("Search e621.net for content. All parameters are optional.")]
+    public override async Task<IResult> Search
+    (
+        [Description("How many posts to return; default of 3")]
+        int amount = 3,
+        
+        [Description("What tags to search for")]
+        string? query = null
+    )
     {
         if (query?.Split().Length > 5)
             return Result.FromError(new ArgumentOutOfRangeError("You can search 5 tags at a time!"));
@@ -53,10 +71,11 @@ public class e621Command : eBooruBaseCommand
             return Result.FromError(new ArgumentOutOfRangeError("You can only request 10 images every 10 seconds."));
 
         Result<eBooruPostResult?> result;
+        
         if (string.IsNullOrWhiteSpace(username))
-            result = await DoQueryAsync(query); // May return empty results locked behind API key //
+            result = await QueryAsync(query); // May return empty results locked behind API key //
         else
-            result = await DoKeyedQueryAsync(query, _options.E621.ApiKey, true);
+            result = await AuthorizedQueryAsync(query, _options.E621.ApiKey, true);
 
         if (!result.IsSuccess)
         {

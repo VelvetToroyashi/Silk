@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
+using Silk.Data.DTOs.Guilds.Users;
 
 namespace Silk.Data.Entities;
 
@@ -12,6 +12,7 @@ namespace Silk.Data.Entities;
 public class UserHistoryEntity
 {
     public int Id { get; set; }
+    
     /// <summary>
     ///     The Id of the user this history is reflective of.
     /// </summary>
@@ -26,23 +27,19 @@ public class UserHistoryEntity
     /// </summary>
     [Column("guild_id")]
     public Snowflake GuildID { get; set; }
-
+    
     /// <summary>
-    ///     When this user initially joined.
+    /// When this user joined.
     /// </summary>
-    [Column("initial_join_date")]
-    [Obsolete($"Use {nameof(JoinDates)}[0] instead.")]
+    [Column("join_date")]
     public DateTimeOffset JoinDate { get; set; }
 
     /// <summary>
-    ///     Times this user joined.
+    /// When this user left.
     /// </summary>
-    [Column("join_dates")]
-    public List<DateTimeOffset> JoinDates { get; set; } = new();
+    [Column("leave_date")]
+    public DateTimeOffset? LeaveDate { get; set; }
 
-    /// <summary>
-    ///     Times this user left.
-    /// </summary>
-    [Column("leave_dates")]
-    public List<DateTimeOffset> LeaveDates { get; set; } = new();
+    public static UserHistoryDTO ToDTO(UserHistoryEntity history)
+        => new(history.GuildID, history.JoinDate, history.LeaveDate);
 }

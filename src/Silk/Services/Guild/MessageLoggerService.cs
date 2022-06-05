@@ -11,7 +11,6 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching;
 using Remora.Discord.Caching.Services;
-using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Extensions;
