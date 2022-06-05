@@ -83,35 +83,35 @@ public class RoleMenuService
                 throw new InvalidOperationException("Member was not defined in the interaction, but the role menu was found.");
 
             var dropdown = new SelectMenuComponent
-                (
-                   RoleMenuDropdownPrefix,
-                   rolemenu
-                      .Options
-                      .Select(o =>
+            (
+               RoleMenuDropdownPrefix,
+               rolemenu
+                  .Options
+                  .Select(o =>
+                   {
+                       var roleId   = o.RoleId.ToString();
+                       var roleName = guildRoles.FirstOrDefault(r => r.ID.Value == o.RoleId)?.Name ?? "Unknown Role";
+                       
+                       return new SelectOption(roleName, roleId, o.Description ?? "", GetRoleEmoji(), HasRoleMenuRole());
+
+                       bool HasRoleMenuRole() => member.Roles.Any(r => r.Value == o.RoleId);
+                       
+                       Optional<IPartialEmoji> GetRoleEmoji()
                        {
-                           var roleId   = o.RoleId.ToString();
-                           var roleName = guildRoles.FirstOrDefault(r => r.ID.Value == o.RoleId)?.Name ?? "Unknown Role";
-                           
-                           return new SelectOption(roleName, roleId, o.Description ?? "", GetRoleEmoji(), HasRoleMenuRole());
+                           if (o.EmojiName is null)
+                               return default;
 
-                           bool HasRoleMenuRole() => member.Roles.Any(r => r.Value == o.RoleId);
+                           if (ulong.TryParse(o.EmojiName, out var emojiID))
+                               return new PartialEmoji(new Snowflake(emojiID));
                            
-                           Optional<IPartialEmoji> GetRoleEmoji()
-                           {
-                               if (o.EmojiName is null)
-                                   return default;
-
-                               if (ulong.TryParse(o.EmojiName, out var emojiID))
-                                   return new PartialEmoji(new Snowflake(emojiID));
-                               
-                               return new PartialEmoji(default, o.EmojiName);
-                           }
-                       })
-                      .ToArray(),
-                   "Select the roles you'd like!",
-                   0,
-                   rolemenu.MaxSelections is 0 ? rolemenu.Options.Count : rolemenu.MaxSelections
-                );
+                           return new PartialEmoji(default, o.EmojiName);
+                       }
+                   })
+                  .ToArray(),
+               "Select the roles you'd like!",
+               0,
+               rolemenu.MaxSelections is 0 ? rolemenu.Options.Count : rolemenu.MaxSelections
+            );
 
             var result = await _interactions.CreateFollowupMessageAsync
             (

@@ -16,6 +16,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
 using Remora.Rest.Core;
 using Remora.Results;
+using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Database.MediatR;
 
@@ -116,6 +117,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n")]
     public Task<IResult> AddAsync
     (
+        [RoleMenu]
         [Description("A link to the role menu message. \n"                                                                +
                      "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
                      "**This is required if you set the role menu to the current channel.**")]
@@ -131,6 +133,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  "Roles can be added at this stage via mentions (@Role) or IDs (123456789)")]
     public async Task<IResult> AddAsync
     (
+        [RoleMenu]
         [Description("The ID of the role menu message, provided when creating the role menu.")]
         Snowflake messageID,
         
@@ -145,12 +148,6 @@ public sealed class RoleMenuCommand : CommandGroup
         }
 
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
-
-        if (!roleMenuResult.IsSuccess)
-        {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
-        }
 
         var roleResult = await GetRolesAsync();
 
@@ -246,6 +243,7 @@ public sealed class RoleMenuCommand : CommandGroup
                      "**This is required if you set the role menu to the current channel.**")]
         public Task<IResult> EditAsync
         (
+            [RoleMenu]
             [Description("A link to the role menu message. \n"                                                                +
                          "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
                          "**This is required if you set the role menu to the current channel.**")]
@@ -263,6 +261,7 @@ public sealed class RoleMenuCommand : CommandGroup
                      "**This is required if you set the role menu to the current channel.**")]
         public async Task<IResult> EditAsync
         (
+            [RoleMenu]
             [Description("The ID of the role menu message, provided when creating the role menu.")]
             Snowflake messageID,
 
@@ -273,12 +272,6 @@ public sealed class RoleMenuCommand : CommandGroup
         )
         {
             var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
-
-            if (!roleMenuResult.IsSuccess)
-            {
-                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-                return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
-            }
             
             var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions));
 
@@ -295,6 +288,7 @@ public sealed class RoleMenuCommand : CommandGroup
         [Description("Edits various attributes of a role menu option.")]
         public Task<IResult> EditAsync
         (
+            [RoleMenu]
             [Description("A link to the role menu message. \n"                                                                +
                          "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
                          "**This is required if you set the role menu to the current channel.**")]
@@ -324,6 +318,7 @@ public sealed class RoleMenuCommand : CommandGroup
         [Description("Edits various attributes of a role menu option.")]
         public async Task<IResult> EditAsync
         (
+            [RoleMenu]
             [Description("The ID of the role menu message, provided when creating the role menu.")] 
             Snowflake messageId,
 
@@ -346,13 +341,7 @@ public sealed class RoleMenuCommand : CommandGroup
         )
         {
             var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageId.Value));
-
-            if (!roleMenuResult.IsSuccess)
-            {
-                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-                return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
-            }
-
+            
             var roleMenu = roleMenuResult.Entity;
 
             var roleMenuOption = roleMenu.Options.FirstOrDefault(r => r.RoleId == role.ID.Value);
@@ -411,6 +400,7 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Removes one or more roles from the role menu.")]
     public Task<IResult> RemoveAsync
     (
+        [RoleMenu]
         [Description("A link to the role menu message. This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.")]
         IMessage message,
         
@@ -424,6 +414,7 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Removes one or more roles from the role menu.")]
     public async Task<IResult> RemoveAsync
     (
+        [RoleMenu]
         [Description("The ID of the role menu message.")]
         Snowflake messageID,
 
@@ -441,12 +432,6 @@ public sealed class RoleMenuCommand : CommandGroup
         
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
 
-        if (!roleMenuResult.IsSuccess)
-        {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(5));
-        }
-        
         var roleMenu = roleMenuResult.Entity;
 
         var roleOptions = roleMenu.Options;
@@ -545,18 +530,20 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public Task<IResult> DeleteAsync
     (
+        [RoleMenu]
         [Description("A link to the role menu you'd like to delete.")]
         IMessage message,
         
         [Switch("confirm")]
         [Description("Ensures you don't accidentally delete a role menu!")]
         bool confirm = false
-    ) => Task.FromResult((IResult)Result.FromSuccess());
+    ) => DeleteAsync(message.ID, confirm);
 
     [Command("delete", "d")]
     [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
     public async Task<IResult> DeleteAsync
     (
+        [RoleMenu]
         [Description("The ID of the role menu you'd like to delete.")]
         Snowflake messageID,
 
@@ -575,12 +562,7 @@ public sealed class RoleMenuCommand : CommandGroup
         
         var deleteResult   = await _mediator.Send(new DeleteRoleMenu.Request(messageID.Value));
 
-        if (!deleteResult.IsSuccess)
-        {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            
-            return await DeleteAfter(_context, _channels, "I don't see a role menu with that ID, are you sure it still exists?", TimeSpan.FromSeconds(10));
-        }
+
         
         if (roleMenuResult.IsSuccess)
             await _channels.DeleteMessageAsync(new(roleMenuResult.Entity.ChannelId), new(roleMenuResult.Entity.MessageId));
