@@ -292,7 +292,9 @@ public sealed class ReminderService : IHostedService
         _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID ?? default)).ToList();
 
         _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime:N0} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
-
+        
+        SilkMetric.LoadedReminders.IncTo(_reminders.Count);
+        
         _timer.Start();
 
         _logger.LogInformation(EventIds.Service, "Reminder service started.");
