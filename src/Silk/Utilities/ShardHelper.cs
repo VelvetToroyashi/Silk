@@ -11,8 +11,8 @@ public sealed class ShardHelper
     private readonly IShardIdentification _shard;
     public ShardHelper(IShardIdentification shard) => _shard = shard;
     
-    public bool IsRelevantToCurrentShard(Snowflake snowflake)
-        => (int)snowflake.Value >> 22 % _shard.ShardCount == _shard.ShardID;
+    public bool IsRelevantToCurrentShard(Snowflake? snowflake)
+        => snowflake is {} sf ? (int)(sf.Value >> 22) % _shard.ShardCount == _shard.ShardID : _shard.ShardID is 0;
     
     public static string GetShardResumeSessionKey(int shardID)
         => $"shard:{shardID}:resume:session";

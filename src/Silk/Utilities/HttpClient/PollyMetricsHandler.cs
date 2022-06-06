@@ -8,7 +8,7 @@ using Polly.NoOp;
 
 namespace Silk.Utilities.HttpClient;
 
-public class PolyMetricsHandler : AsyncPolicy<HttpResponseMessage>
+public class PollyMetricsHandler : AsyncPolicy<HttpResponseMessage>
 {
     protected override async Task<HttpResponseMessage> ImplementationAsync
     (
@@ -33,14 +33,12 @@ public class PolyMetricsHandler : AsyncPolicy<HttpResponseMessage>
             var sanitizedEndpoint = SanitizeEndpoint(endpoint);
         
             SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
-            
-            Console.WriteLine("Request: " + request.Method.Method + " " + sanitizedEndpoint);
         }
 
         return res;
     }
 
-    public static PolyMetricsHandler Create() => new();
+    public static PollyMetricsHandler Create() => new();
 
     private static string SanitizeEndpoint(string endpoint)
     {

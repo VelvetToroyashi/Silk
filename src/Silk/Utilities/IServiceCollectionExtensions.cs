@@ -64,7 +64,7 @@ public static class IServiceCollectionExtensions
                  // Add REST and tack on our own policy
                  serviceCollection
                     .AddDiscordRest(s => s.Get<IConfiguration>()!.GetSilkConfigurationOptions().Discord.BotToken,
-                                    b => b.AddPolicyHandler(PolyMetricsHandler.Create()));
+                                    b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
 
                 serviceCollection.TryAddSingleton<Random>();
                 serviceCollection.TryAddSingleton<ResponderDispatchService>();

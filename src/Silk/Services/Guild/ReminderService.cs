@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -27,6 +28,7 @@ public sealed class ReminderService : IHostedService
     
     private readonly IMediator                _mediator;
     private readonly ShardHelper              _shardhelper;
+    private readonly IShardIdentification     _shard;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<ReminderService> _logger;
@@ -39,9 +41,9 @@ public sealed class ReminderService : IHostedService
 
     public ReminderService
     (
-        
         IMediator                mediator,
         ShardHelper              shardhelper,
+        IShardIdentification     shard,
         IDiscordRestUserAPI      users,
         IDiscordRestChannelAPI   channels,
         ILogger<ReminderService> logger
@@ -49,6 +51,7 @@ public sealed class ReminderService : IHostedService
     {
         _mediator    = mediator;
         _shardhelper = shardhelper;
+        _shard       = shard;
         _users       = users;
         _channels    = channels;
         _logger      = logger;
@@ -296,7 +299,7 @@ public sealed class ReminderService : IHostedService
         _logger.LogInformation(EventIds.Service, "Loading reminders...");
 
         IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request(), cancellationToken);
-        _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID ?? default)).ToList();
+        _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID)).ToList();
 
         _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime:N0} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
         
