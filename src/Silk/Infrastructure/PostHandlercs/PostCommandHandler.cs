@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using Sentry;
 using Silk.Commands.Furry.Types;
@@ -26,21 +27,22 @@ public class PostCommandHandler : IPostExecutionEvent
     private readonly ICommandHelpService        _help;
     private readonly ICommandPrefixMatcher      _prefix;
     private readonly IDiscordRestChannelAPI     _channels;
+    
     private readonly IDiscordRestInteractionAPI _interactions;
 
     public PostCommandHandler
     (
         IHub                       hub,
-        ICommandHelpService        help,
-        ICommandPrefixMatcher      prefix,
-        IDiscordRestChannelAPI     channels,
+        ICommandHelpService         help,
+        ICommandPrefixMatcher       prefix,
+        IDiscordRestChannelAPI      channels,
         IDiscordRestInteractionAPI interactions
     )
     {
-        _hub               = hub;
-        _help              = help;
-        _prefix            = prefix;
-        _channels          = channels;
+        _hub      = hub;
+        _help     = help;
+        _prefix   = prefix;
+        _channels = channels;
         _interactions      = interactions;
     }
 

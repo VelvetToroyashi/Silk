@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
@@ -7,6 +9,7 @@ using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using FuzzySharp.SimilarityRatio.Scorer.Composite;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -17,6 +20,7 @@ using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Unidecode.NET;
 
 namespace Silk.Services.Guild;
@@ -96,12 +100,17 @@ public class PhishingDetectionService
             return Result.FromError(cdnResult.Error);
         
         var url = cdnResult.Entity;
-        
-        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
 
-        if (!response.Matched)
-            return Result.FromSuccess();
-        
+        RavyAPIResponse response;
+
+        using (SilkMetric.PhishingDetection.WithLabels("avatar").NewTimer())
+        {
+            response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
+
+            if (!response.Matched)
+                return Result.FromSuccess();
+        }
+
         _logger.LogDebug("Detected suspicious avatar in {TimeSpent:N0}ms", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         
         var selfResult = await _users.GetCurrentUserAsync();
@@ -110,14 +119,14 @@ public class PhishingDetectionService
             return Result.FromError(selfResult.Error!);
         
         var infractionResult = await _infractions.BanAsync
-            (
-             guildID,
-             user.ID,
-             self.ID,
-             1,
-             $"Potential Phishing UserBot; Matched Avatar: Similarity of {response.Similarity * 100}%",
-             notify: false
-            );
+        (
+         guildID,
+         user.ID,
+         self.ID,
+         1,
+         $"Potential Phishing UserBot; Matched Avatar: Similarity of {response.Similarity * 100}%",
+         notify: false
+        );
         
         return infractionResult.IsSuccess
             ? Result.FromSuccess()
@@ -136,12 +145,6 @@ public class PhishingDetectionService
         
         if (!detection.isSuspicious)
             return Result.FromSuccess();
-
-        if (user.IsBot.IsDefined(out var bot) && bot)
-        {
-            _logger.LogTrace("Suspiciously named bot: {BotName}, similar to {SimilarName}", user.Username, detection.mostSimilarTo);
-            return Result.FromSuccess();
-        }
 
         var self = await _users.GetCurrentUserAsync();
 
@@ -167,6 +170,8 @@ public class PhishingDetectionService
     
     private (bool isSuspicious, string mostSimilarTo) IsSuspectedPhishingUsername(string username)
     {
+        using var _ = SilkMetric.PhishingDetection.WithLabels("username").NewTimer();
+        
         var normalized = username.Unidecode();
 
         var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames, s => s, ScorerCache.Get<WeightedRatioScorer>());
@@ -192,33 +197,34 @@ public class PhishingDetectionService
             return Result.FromSuccess(); // DM channels are exempted.
 
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
+        
 
+        IEnumerable<string> links;
+
+        using (SilkMetric.PhishingDetection.WithLabels("message").NewTimer())
+        {
+            links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value).Where(_phishGateway.IsBlacklisted);
+        }
+
+        foreach (var match in links)
+            SilkMetric.SeenPhishingLinks.WithLabels(match).Inc();
+        
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
         
-        MatchCollection links = LinkRegex.Matches(message.Content);
-
-        foreach (Match match in links)
+        foreach (var link in links)
         {
-            if (match is null)
-                continue;
-
-            if (match.Success)
+            if (_phishGateway.IsBlacklisted(link))
             {
-                string link = match.Groups["link"].Value;
+                _logger.LogInformation("Detected phishing link.");
 
-                if (_phishGateway.IsBlacklisted(link))
-                {
-                    _logger.LogInformation("Detected phishing link.");
+                var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
 
-                    Result<bool> exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
+                if (!exemptionResult.IsSuccess)
+                    return Result.FromError(exemptionResult.Error);
 
-                    if (!exemptionResult.IsSuccess)
-                        return Result.FromError(exemptionResult.Error);
-
-                    if (!exemptionResult.Entity)
-                        return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
-                }
+                if (!exemptionResult.Entity)
+                    return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
             }
         }
 

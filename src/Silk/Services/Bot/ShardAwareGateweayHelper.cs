@@ -12,8 +12,6 @@ namespace Silk.Services.Bot;
 
 public class ShardAwareGateweayHelper : BackgroundService
 {
-    public int ShardID { get; private set; }
-
     private static readonly TimeSpan ShardRefreshInterval = TimeSpan.FromSeconds(3);
     private static readonly TimeSpan ShardRefreshTimeout = TimeSpan.FromSeconds(5);
     
@@ -78,7 +76,15 @@ public class ShardAwareGateweayHelper : BackgroundService
             sequenceField!.SetValue(_client, resume.Sequence);
         }
 
-        try { await _client.RunAsync(stoppingToken); }
+        try
+        {
+            var res = await _client.RunAsync(stoppingToken);
+
+            if (!res.IsSuccess)
+            {
+                _logger.LogError("Shard aware gateway helper failed with error {@Error}", res.Error);
+            }
+        }
         catch { /* ignored */ }
 
         _cts.Cancel();
@@ -93,14 +99,14 @@ public class ShardAwareGateweayHelper : BackgroundService
     {
         var redis = _redis.GetDatabase();
         
-        var shardKey = $"{ShardPrefix}{ShardID}";
+        var shardKey = $"{ShardPrefix}{_shard.ShardID}";
         
         var session = await redis.StringGetAsync(shardKey + ShardSessionPostfix);
         var sequence = await redis.StringGetAsync(shardKey + ShardSequencePostfix);
         
         if (session.IsNull || sequence.IsNull)
         {
-            _logger.LogInformation("No resume data found for shard {ShardID}", ShardID);
+            _logger.LogInformation("No resume data found for shard {ShardID}", _shard.ShardID);
             
             return (null, 0);
         }
@@ -112,7 +118,7 @@ public class ShardAwareGateweayHelper : BackgroundService
     {
         var redis = _redis.GetDatabase();
         
-        var shardKey = $"{ShardPrefix}{ShardID}";
+        var shardKey = $"{ShardPrefix}{_shard.ShardID}";
         
         var sessionID = typeof(DiscordGatewayClient).GetField("_sessionID", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client) as string;
         var sequence  = typeof(DiscordGatewayClient).GetField("_lastSequenceNumber", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client) as int?;
