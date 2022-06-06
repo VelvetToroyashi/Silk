@@ -54,4 +54,8 @@ public static class SilkMetric
     /// </summary>
     public static readonly Counter GatewayEventReceieved = Metrics.CreateCounter("gateway_event_received", "Number of gateway events received", "type");
     
+    /// <summary>
+    /// API calls to Discord.
+    /// </summary>
+    public static readonly Counter HttpRequests = Metrics.CreateCounter("http_requests", "Number of HTTP requests", "method", "response", "endpoint");
 }
