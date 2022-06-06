@@ -53,7 +53,7 @@ public class ShardAwareGateweayHelper : BackgroundService
         
         while (!_cts.Token.IsCancellationRequested)
         {
-            await redis.StringSetAsync(shardKey, "", ShardRefreshTimeout);
+            await redis.KeyExpireAsync(shardKey, ShardRefreshTimeout);
             
             await Task.Delay(ShardRefreshInterval, _cts.Token);
         }
@@ -82,7 +82,7 @@ public class ShardAwareGateweayHelper : BackgroundService
 
             if (!res.IsSuccess)
             {
-                _logger.LogError(res.Error.ToString());
+                _logger.LogError("Shard aware gateway helper failed with error {@Error}", res.Error);
             }
         }
         catch { /* ignored */ }
