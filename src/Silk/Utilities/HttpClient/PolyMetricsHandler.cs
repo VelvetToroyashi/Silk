@@ -30,7 +30,7 @@ public class PolyMetricsHandler : AsyncPolicy<HttpResponseMessage>
         // If we haven't, don't log metrics; we're retrying the request via Polly
         if (res.RequestMessage is { } request)
         {
-            var sanitizedEndpoint = Regex.Replace(Regex.Replace(endpoint, @"(webhooks/\d+/(?!/)\S+)", "webhooks/:webhook_id/:webhook_token"), @"(([a-z-_]+\B)(s)?/\d+)", "$2$3/:$2_id");
+            var sanitizedEndpoint = Regex.Replace(Regex.Replace(endpoint, @"(webhooks/\d+/((?!/)\S)+)", "webhooks/:webhook_id/:webhook_token"), @"([a-z]-)*([a-z]+\B)(s)?/(\d+|\S+(/@me))", "$1$2$3/:$2_id$5");
         
             SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
         }
