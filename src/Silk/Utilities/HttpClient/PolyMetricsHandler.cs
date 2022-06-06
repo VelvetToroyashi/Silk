@@ -30,20 +30,7 @@ public class PolyMetricsHandler : AsyncPolicy<HttpResponseMessage>
         // If we haven't, don't log metrics; we're retrying the request via Polly
         if (res.RequestMessage is { } request)
         {
-            var sanitizedEndpoint =
-            Regex.Replace
-            (
-                Regex.Replace
-                (
-                    Regex.Replace
-                    (
-                      endpoint, @"(webhooks/\d+/((?!/)\S)+)", "webhooks/:webhook_id/:webhook_token"
-                    ),
-                   @"(interactions/\d+/((?!/)\S)+)", "interactions/:interaction_id/:interaction_token"
-                ),
-                @"([a-z]-)*([a-z]+\B)(s)?/(\d+|\S+(/@me))", 
-                "$1$2$3/:$2_id$5"
-            );
+            var sanitizedEndpoint = SanitizeEndpoint(endpoint);
         
             SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
             
@@ -54,4 +41,28 @@ public class PolyMetricsHandler : AsyncPolicy<HttpResponseMessage>
     }
 
     public static PolyMetricsHandler Create() => new();
+
+    private static string SanitizeEndpoint(string endpoint)
+    {
+        var split = endpoint.Split('/');
+
+        for (int i = 0; i < split.Length; i++)
+        {
+            if (i > 0 && split[i - 1] is "webhooks" or "interactions")
+            {
+                // Edge case: GET /webhooks/:webhook_id will throw IOOBE
+                split[i + 1] = ':' + split[i - 1][..^2] + "_id";
+                split[i + 2] = ':' + split[i - 1][..^2] + "_token";
+            }
+            
+            // Edge case: GET /channels/:channel_id/messages/:message_id/reactions will throw IOOBE
+            if (split[i] is "reactions")
+                split[i + 1] = ":emoji";
+            
+            if (ulong.TryParse(split[i], out _))
+                split[i] = ':' + split[i - 1].Split('-')[^1][..^2] + "_id";
+        }
+      
+        return string.Join('/', split);
+    }
 }
