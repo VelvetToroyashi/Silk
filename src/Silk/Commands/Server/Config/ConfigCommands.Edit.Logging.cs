@@ -71,6 +71,9 @@ public partial class ConfigCommands
             if (mobile is {} useMobile)
                 loggingConfig.UseMobileFriendlyLogging = useMobile;
 
+            if (webhook is { } useWebhook)
+                loggingConfig.UseWebhookLogging = useWebhook;
+
             if (remove)
             {
                 if (logJoins)
