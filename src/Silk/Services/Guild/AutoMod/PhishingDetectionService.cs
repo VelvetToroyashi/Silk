@@ -100,12 +100,12 @@ public class PhishingDetectionService
             return Result.FromError(cdnResult.Error);
         
         var url = cdnResult.Entity;
-        
-        var response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
+
+        RavyAPIResponse response;
 
         using (SilkMetric.PhishingDetection.WithLabels("avatar").NewTimer())
         {
-            response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.85");
+            response = await _http.GetFromJsonAsync<RavyAPIResponse>($"?avatar={url}&threshold=0.90");
 
             if (!response.Matched)
                 return Result.FromSuccess();
@@ -119,14 +119,14 @@ public class PhishingDetectionService
             return Result.FromError(selfResult.Error!);
         
         var infractionResult = await _infractions.BanAsync
-            (
-             guildID,
-             user.ID,
-             self.ID,
-             1,
-             $"Potential Phishing UserBot; Matched Avatar: Similarity of {response.Similarity * 100}%",
-             notify: false
-            );
+        (
+         guildID,
+         user.ID,
+         self.ID,
+         1,
+         $"Potential Phishing UserBot; Matched Avatar: Similarity of {response.Similarity * 100}%",
+         notify: false
+        );
         
         return infractionResult.IsSuccess
             ? Result.FromSuccess()
