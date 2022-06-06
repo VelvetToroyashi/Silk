@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -58,18 +59,19 @@ public sealed class ReminderService : IHostedService
     public async Task CreateReminderAsync
     (
         DateTimeOffset expiry,
-        Snowflake  ownerID,
-        Snowflake  channelID,
-        Snowflake?  messageID,
-        Snowflake? guildID,
-        string?    content,
-        string?    replyContent = null,
-        Snowflake? replyID       = null,
-        Snowflake? replyAuthorID = null
+        Snowflake      ownerID,
+        Snowflake      channelID,
+        Snowflake?     messageID,
+        Snowflake?     guildID,
+        string?        content,
+        string?        replyContent  = null,
+        Snowflake?     replyID       = null,
+        Snowflake?     replyAuthorID = null
     )
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
+        SilkMetric.LoadedReminders.Inc();
         _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);
     }
 
@@ -111,18 +113,23 @@ public sealed class ReminderService : IHostedService
         {
             _reminders.Remove(reminder);
             _logger.LogDebug("Removed reminder {Reminder}", id);
+            
+            SilkMetric.LoadedReminders.Dec();
             return await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
-    private Task<Result> DispatchReminderAsync(ReminderEntity reminder)
+    private async Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
         _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
-
-        if (reminder.MessageID is null)
-            return AttemptDispatchDMReminderAsync(reminder);
-
-        return AttemptDispatchReminderAsync(reminder);
+        
+        using (SilkMetric.ReminderDispatchTime.NewTimer())
+        {
+            if (reminder.IsPrivate)
+                return await AttemptDispatchDMReminderAsync(reminder);
+            
+            return await AttemptDispatchReminderAsync(reminder);
+        }
     }
 
     /// <summary>
@@ -134,7 +141,7 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug("Attempting to dispatch reminder to guild channel {ChannelID}", reminder.ChannelID);
         
-        var now       = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var replyExists = false;
 
         if (reminder.ReplyMessageID is not null)
