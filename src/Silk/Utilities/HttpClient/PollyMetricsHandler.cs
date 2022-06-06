@@ -49,8 +49,8 @@ public class PollyMetricsHandler : AsyncPolicy<HttpResponseMessage>
             if (i > 0 && split[i - 1] is "webhooks" or "interactions")
             {
                 // Edge case: GET /webhooks/:webhook_id will throw IOOBE
-                split[i + 1] = ':' + split[i - 1][..^2] + "_id";
-                split[i + 2] = ':' + split[i - 1][..^2] + "_token";
+                split[i + 1] = ':' + split[i - 1][..^1] + "_id";
+                split[i + 2] = ':' + split[i - 1][..^1] + "_token";
             }
             
             // Edge case: GET /channels/:channel_id/messages/:message_id/reactions will throw IOOBE
@@ -58,7 +58,7 @@ public class PollyMetricsHandler : AsyncPolicy<HttpResponseMessage>
                 split[i + 1] = ":emoji";
             
             if (ulong.TryParse(split[i], out _))
-                split[i] = ':' + split[i - 1].Split('-')[^1][..^2] + "_id";
+                split[i] = ':' + split[i - 1].Split('-')[^1][..^1] + "_id";
         }
       
         return string.Join('/', split);
