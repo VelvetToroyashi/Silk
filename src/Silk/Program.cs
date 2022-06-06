@@ -83,11 +83,11 @@ public class Program
 
         var metrics = new KestrelMetricServer(6000);
 
-        try { metrics.Start(); } catch {}
+        try { metrics.Start(); } catch { /* ignored */ }
         
         await host.RunAsync();
         
-        metrics.Stop();
+        await metrics.StopAsync();
     }
 
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
@@ -152,8 +152,6 @@ public class Program
         }
 
         Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
-        
-        var si = new ShardIdentification(takenShard, silkConfig.Discord.Shards);
         
         services.AddSingleton<IConnectionMultiplexer>(redis);
         services.AddDiscordRedisCaching(r => r.ConfigurationOptions = connectionConfig);
