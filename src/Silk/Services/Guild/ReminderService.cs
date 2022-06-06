@@ -141,7 +141,7 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug("Attempting to dispatch reminder to guild channel {ChannelID}", reminder.ChannelID);
         
-        var now       = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var replyExists = false;
 
         if (reminder.ReplyMessageID is not null)
