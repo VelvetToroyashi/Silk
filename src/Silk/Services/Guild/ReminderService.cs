@@ -125,7 +125,7 @@ public sealed class ReminderService : IHostedService
         
         using (SilkMetric.ReminderDispatchTime.NewTimer())
         {
-            if ((reminder.GuildID ?? reminder.MessageID) is null)
+            if (reminder.IsPrivate)
                 return await AttemptDispatchDMReminderAsync(reminder);
             
             return await AttemptDispatchReminderAsync(reminder);
