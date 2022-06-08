@@ -119,7 +119,6 @@ public class ReminderCommands : CommandGroup
             MessageContext            context,
             IDiscordRestChannelAPI    channels,
             InteractiveMessageService interactivity,
-            TimeHelper                _timeHelper,
             TimeHelper                timeHelper
         )
         {
@@ -127,8 +126,7 @@ public class ReminderCommands : CommandGroup
             _channels        = channels;
             _reminders       = reminders;
             _interactivity   = interactivity;
-            this._timeHelper = timeHelper;
-            _timeHelper      = _timeHelper;
+            _timeHelper = timeHelper;
         }
 
         [Command("set", "me", "create")]

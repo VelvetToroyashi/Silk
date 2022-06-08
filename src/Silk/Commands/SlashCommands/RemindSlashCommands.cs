@@ -75,13 +75,13 @@ public class RemindSlashCommands : CommandGroup
     
     public RemindSlashCommands
     (
-        TimeHelper _timeHelper,
-        ReminderService reminders,
-        InteractionContext context,
+        TimeHelper                 timeHelper,
+        ReminderService            reminders,
+        InteractionContext         context,
         IDiscordRestInteractionAPI interactions
     )
     {
-        _timeHelper = _timeHelper;
+        _timeHelper      = timeHelper;
         _reminders       = reminders;
         _context         = context;
         _interactions    = interactions;

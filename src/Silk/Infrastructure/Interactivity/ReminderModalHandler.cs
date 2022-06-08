@@ -44,11 +44,11 @@ public class ReminderModalHandler : IModalInteractiveEntity
         IDiscordRestInteractionAPI interactions
     )
     {
-        _timeHelper = timeHelper;
-        _reminders       = reminders;
-        _context         = context;
-        _channels        = channels;
-        _interactions    = interactions;
+        _timeHelper   = timeHelper;
+        _reminders    = reminders;
+        _context      = context;
+        _channels     = channels;
+        _interactions = interactions;
     }
 
     public Task<Result<bool>> IsInterestedAsync(ComponentType? componentType, string customID, CancellationToken ct = default) 

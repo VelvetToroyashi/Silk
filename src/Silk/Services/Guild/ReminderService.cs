@@ -53,7 +53,7 @@ public sealed class ReminderService : IHostedService
         _channels    = channels;
         _logger      = logger;
 
-        _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
+        _timer = new(DispatchShim, TimeSpan.FromSeconds(1), true);
     }
 
     public async Task CreateReminderAsync
@@ -83,17 +83,28 @@ public sealed class ReminderService : IHostedService
     public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
         => _mediator.Send(new GetRemindersForUser.Request(userID));
 
+
+    // While this technically does allocate, the goal is to allocate
+    // less than async Task, but a state machine still has to be generated
+    // so this may actually be worse.
+    // 9 times out of 10, TryDispatchRemindersAsync returns synchronously
+    // So if AysncTimer supported VTs, we'd get huge uplifts.
+    private Task DispatchShim() => TryDispatchRemindersAsync().AsTask();
+    
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
     /// </summary>
-    private async Task TryDispatchRemindersAsync()
+    private async ValueTask TryDispatchRemindersAsync()
     {
         if (!_reminders.Any())
             return;
 
         DateTime                    now       = DateTime.UtcNow;
-        IEnumerable<ReminderEntity> reminders = _reminders.Where(r => r.ExpiresAt <= now);
+        ReminderEntity[] reminders = _reminders.Where(r => r.ExpiresAt <= now).ToArray();
 
+        if (reminders.Length is 0)
+            return;
+        
         await Task.WhenAll(reminders.ToList().Select(DispatchReminderAsync));
     }
 
