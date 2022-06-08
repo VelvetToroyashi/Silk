@@ -51,6 +51,7 @@ System.ComponentModel
 System.Drawing
 System.Linq
 System.Reflection
+System.Runtime.CompilerServices
 System.Text.RegularExpressions
 System.Threading.Tasks
 Remora.Commands.Attributes
@@ -95,7 +96,7 @@ Microsoft.Extensions.Logging
     [Description("Evaluates code.")]
     public async Task<Result> EvalCS([Greedy] string _)
     {
-        var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? )((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
+        var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? \n?)((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
         
         var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {_evaluatingEmbed});
         
@@ -177,8 +178,11 @@ Microsoft.Extensions.Logging
         return Result.FromSuccess();
     }
 
-    private string? GetHumanFriendlyResultString(object result)
+    private string? GetHumanFriendlyResultString(object? result)
     {
+        if (result is null)
+            return "null";
+        
         var type = result.GetType();
 
         string? returnResult = result.ToString();
@@ -192,11 +196,11 @@ Microsoft.Extensions.Logging
         }
         else if (type.IsGenericType && type.GetGenericTypeDefinition().IsAssignableTo(typeof(Result<>)))
         {
-            var success = type.GetProperty(nameof(Result.IsSuccess), BindingFlags.Public      | BindingFlags.Instance)!.GetValue(result)!;
-            var error   = type.GetProperty(nameof(Result.Error), BindingFlags.Public          | BindingFlags.Instance)!.GetValue(result)!;
+            var error   = type.GetProperty(nameof(Result.Error),          BindingFlags.Public | BindingFlags.Instance)!.GetValue(result)!;
+            var success = type.GetProperty(nameof(Result.IsSuccess),      BindingFlags.Public | BindingFlags.Instance)!.GetValue(result)!;
             var entity  = type.GetProperty(nameof(Result<object>.Entity), BindingFlags.Public | BindingFlags.Instance)!.GetValue(result)!;
             
-            returnResult = $"Result<{entity.GetType().Name}>:\n" +
+            returnResult = $"Result<{type.GenericTypeArguments[0].Name}>:\n" +
                            $"\u200b\tIsSuccess: {success}\n" +
                            $"\u200b\tEntity: {GetHumanFriendlyResultString(entity)}\n" + // Just in case the entity itself is a result or a collection
                            $"\u200b\tError: {error}";

@@ -43,9 +43,8 @@ public class ChannelLoggingServiceTests
                                                          It.IsAny<Optional<bool>>(),
                                                          It.IsAny<Optional<string>>(),
                                                          It.IsAny<Optional<string>>(),
-                                                         default, default,
-                                                         default, default, default,
-                                                         default, default, default, default), Times.Once);
+                                                         default, default, default, default, default,
+                                                         default, default, default, default, default), Times.Once);
 
     }
     

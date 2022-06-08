@@ -2,33 +2,43 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Reflection;
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 using Remora.Commands.Extensions;
 using Remora.Commands.Tokenization;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Gateway.Services;
+using Remora.Discord.Gateway.Transport;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
+using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
+using Remora.Rest;
+using Remora.Rest.Extensions;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
+using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Infrastructure;
 using Silk.Interactivity;
@@ -38,6 +48,7 @@ using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using Silk.Utilities.HttpClient;
 using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Utilities;
@@ -48,11 +59,31 @@ public static class IServiceCollectionExtensions
     {
         hostBuilder.ConfigureServices
             (
-             s =>
+             serviceCollection =>
              {
-                 s.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
-                 s.AddSingleton<ShardAwareGateweayHelper>();
-                 s.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
+                 // Add REST and tack on our own policy
+                 serviceCollection
+                    .AddDiscordRest(s => s.Get<IConfiguration>()!.GetSilkConfigurationOptions().Discord.BotToken,
+                                    b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
+
+                serviceCollection.TryAddSingleton<Random>();
+                serviceCollection.TryAddSingleton<ResponderDispatchService>();
+                serviceCollection.TryAddSingleton<IResponderTypeRepository>(s => s.GetRequiredService<IOptions<ResponderService>>().Value);
+                serviceCollection.TryAddSingleton<DiscordGatewayClient>();
+
+                serviceCollection.TryAddTransient<ClientWebSocket>();
+                serviceCollection.TryAddTransient<IPayloadTransportService>(s => new WebSocketPayloadTransportService
+                (
+                    s,
+                    s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>().Get("Discord"),
+                    s.GetRequiredService<ILogger<WebSocketPayloadTransportService>>()
+                ));
+                 
+
+                 serviceCollection.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
+                 serviceCollection.AddSingleton<ShardAwareGateweayHelper>();
+                 serviceCollection.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
+                 
              }
             );
         
@@ -67,6 +98,7 @@ public static class IServiceCollectionExtensions
            .AddResponders(asm)
            .AddInteractivity()
            .AddInteractiveEntity<JoinEmbedButtonHandler>()
+           .AddInteractiveEntity<ReminderModalHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         
@@ -102,9 +134,7 @@ public static class IServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.Guilds         |
                     GatewayIntents.DirectMessages |
-                    GatewayIntents.GuildMessages  |
                     GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
@@ -153,14 +183,14 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
     {
         var config = configuration.GetSilkConfigurationOptions();
-        
+
         LoggerConfiguration logger = new LoggerConfiguration()
                                     .Enrich.FromLogContext()
                                     .WriteTo.Sentry()
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    //.MinimumLevel.Override("Remora", LogEventLevel.Error)
+                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         Log.Logger = config.LogLevel switch

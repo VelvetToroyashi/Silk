@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -26,6 +28,7 @@ public sealed class ReminderService : IHostedService
     
     private readonly IMediator                _mediator;
     private readonly ShardHelper              _shardhelper;
+    private readonly IShardIdentification     _shard;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<ReminderService> _logger;
@@ -38,9 +41,9 @@ public sealed class ReminderService : IHostedService
 
     public ReminderService
     (
-        
         IMediator                mediator,
         ShardHelper              shardhelper,
+        IShardIdentification     shard,
         IDiscordRestUserAPI      users,
         IDiscordRestChannelAPI   channels,
         ILogger<ReminderService> logger
@@ -48,6 +51,7 @@ public sealed class ReminderService : IHostedService
     {
         _mediator    = mediator;
         _shardhelper = shardhelper;
+        _shard       = shard;
         _users       = users;
         _channels    = channels;
         _logger      = logger;
@@ -56,20 +60,21 @@ public sealed class ReminderService : IHostedService
     }
 
     public async Task CreateReminderAsync
-        (
-            DateTimeOffset   expiry,
-            Snowflake  ownerID,
-            Snowflake  channelID,
-            Snowflake?  messageID,
-            Snowflake? guildID,
-            string?    content,
-            string?    replyContent = null,
-            Snowflake? replyID       = null,
-            Snowflake? replyAuthorID = null
-        )
+    (
+        DateTimeOffset expiry,
+        Snowflake      ownerID,
+        Snowflake      channelID,
+        Snowflake?     messageID,
+        Snowflake?     guildID,
+        string?        content,
+        string?        replyContent  = null,
+        Snowflake?     replyID       = null,
+        Snowflake?     replyAuthorID = null
+    )
     {
         ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
         _reminders.Add(reminder);
+        SilkMetric.LoadedReminders.Inc();
         _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);
     }
 
@@ -111,18 +116,23 @@ public sealed class ReminderService : IHostedService
         {
             _reminders.Remove(reminder);
             _logger.LogDebug("Removed reminder {Reminder}", id);
+            
+            SilkMetric.LoadedReminders.Dec();
             return await _mediator.Send(new RemoveReminder.Request(id));
         }
     }
 
-    private Task<Result> DispatchReminderAsync(ReminderEntity reminder)
+    private async Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
         _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
-
-        if (reminder.MessageID is null)
-            return AttemptDispatchDMReminderAsync(reminder);
-
-        return AttemptDispatchReminderAsync(reminder);
+        
+        using (SilkMetric.ReminderDispatchTime.NewTimer())
+        {
+            if (reminder.IsPrivate)
+                return await AttemptDispatchDMReminderAsync(reminder);
+            
+            return await AttemptDispatchReminderAsync(reminder);
+        }
     }
 
     /// <summary>
@@ -134,7 +144,7 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug("Attempting to dispatch reminder to guild channel {ChannelID}", reminder.ChannelID);
         
-        var now       = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var replyExists = false;
 
         if (reminder.ReplyMessageID is not null)
@@ -206,7 +216,15 @@ public sealed class ReminderService : IHostedService
         if (reminder.IsPrivate)
         {
             dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
-            dispatchMessage.AppendLine(reminder.MessageContent);
+            dispatchMessage.AppendLine(reminder.MessageContent ?? "(You didn't set a message!)");
+
+            if (reminder.IsReply)
+            {
+                dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:");
+                dispatchMessage.AppendLine(reminder.ReplyMessageContent);
+                dispatchMessage.AppendLine();
+                dispatchMessage.AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
+            }
         }
         else if (reminder.IsReply)
         {
@@ -281,10 +299,12 @@ public sealed class ReminderService : IHostedService
         _logger.LogInformation(EventIds.Service, "Loading reminders...");
 
         IEnumerable<ReminderEntity> reminders = await _mediator.Send(new GetAllReminders.Request(), cancellationToken);
-        _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID ?? default)).ToList();
+        _reminders = reminders.Where(r => _shardhelper.IsRelevantToCurrentShard(r.GuildID)).ToList();
 
         _logger.LogInformation(EventIds.Service, "Loaded {ReminderCount} reminders in {ExecutionTime:N0} ms", _reminders.Count, (DateTime.UtcNow - now).TotalMilliseconds);
-
+        
+        SilkMetric.LoadedReminders.IncTo(_reminders.Count);
+        
         _timer.Start();
 
         _logger.LogInformation(EventIds.Service, "Reminder service started.");

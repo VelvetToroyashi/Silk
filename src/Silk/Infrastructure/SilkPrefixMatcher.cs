@@ -13,11 +13,11 @@ public class SilkPrefixMatcher : ICommandPrefixMatcher
 {
     private static readonly Regex MentionRegex = new(@"^(<@!?(?<ID>\d+)> ?)");
     
-    private readonly MessageContext      _context;
+    private readonly ICommandContext      _context;
     private readonly IDiscordRestUserAPI _users;
     private readonly IPrefixCacheService _prefixCache;
     
-    public SilkPrefixMatcher(MessageContext context, IDiscordRestUserAPI users, IPrefixCacheService prefixCache)
+    public SilkPrefixMatcher(ICommandContext context, IDiscordRestUserAPI users, IPrefixCacheService prefixCache)
     {
         _context          = context;
         _users            = users;

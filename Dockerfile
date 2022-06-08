@@ -8,7 +8,7 @@ RUN dotnet restore
 RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out 
 
 # Run it
-FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs

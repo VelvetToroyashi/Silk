@@ -12,10 +12,12 @@ using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
+using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Responders;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
+
 namespace RoleMenuPlugin;
 
 public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
@@ -32,7 +34,10 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
                .AddMediatR(typeof(RoleMenuPlugin))
                .AddSingleton<RoleMenuService>()
                .AddResponder<RoleMenuComponentResponder>()
-               .AddCommandGroup<RoleMenuCommand>()
+               .AddCommandTree()
+               .WithCommandGroup<RoleMenuCommand>()
+               .Finish()
+               .AddCondition<RoleMenuCondition>()
                .AddDbContext<RoleMenuContext>((s, b) =>
                 {
                     var config = s.GetRequiredService<IConfiguration>();

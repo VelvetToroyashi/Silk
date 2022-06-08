@@ -24,7 +24,11 @@ public static class ResultExtensions
         => error.Errors.Aggregate("", (c, n) => c + Environment.NewLine + (n.Error is AggregateError ae ? Unpack(ae) : n.Error!.Message));
 
     public static IResultError? GetDeepestError(this IResult error)
-        => error.IsSuccess || error.Inner is null ? error.Error :
-            error.Error is AggregateError ag      ? GetDeepestError(ag.Errors.First()) 
-                                                  : GetDeepestError(error.Inner!);
+        => error.IsSuccess 
+            ? error.Error
+            : error.Error is AggregateError ag      
+                ? GetDeepestError(ag.Errors.First())
+                : error.Inner is null 
+                    ? error.Error 
+                    : GetDeepestError(error.Inner!);
 }
