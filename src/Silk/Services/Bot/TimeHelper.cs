@@ -42,7 +42,7 @@ public sealed class TimeHelper
         var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(input, CultureInfo.InvariantCulture.DisplayName, refTime);
 
         if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-            return Result<TimeSpan>.FromError(new ParsingError<TimeSpan>(ReminderTimeNotPresent));
+            return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
         
         var timeModel = parsedTime
                        .Resolution
@@ -56,7 +56,7 @@ public sealed class TimeHelper
                        );
 
         if (timeModel is null)
-            return Result<TimeSpan>.FromError(new ParsingError<TimeSpan>(ReminderTimeNotPresent));
+            return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
 
 
         return timeModel is DateTimeV2Date vd
