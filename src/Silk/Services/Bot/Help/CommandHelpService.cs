@@ -47,10 +47,10 @@ public class CommandHelpService : ICommandHelpService
         {
             var evaluated = await EvaluateNodeConditionsAsync(nodes);
             
-            var evaluatedNodes = evaluated.Item1.ToArray();
+            var evaluatedNodes = evaluated.Nodes.ToArray();
             
             if (!string.IsNullOrEmpty(commandName) && nodes.Count > evaluatedNodes.Length)
-                return Result.FromError(new ConditionNotSatisfiedError("One or more conditions were not satisfied.", evaluated.Item2!));
+                return Result.FromError(new ConditionNotSatisfiedError("One or more conditions were not satisfied.", evaluated.FirstFailedCondition!));
 
             nodes = evaluatedNodes;
         }
@@ -78,7 +78,7 @@ public class CommandHelpService : ICommandHelpService
         return sendResult.IsSuccess ? Result.FromSuccess() : Result.FromError(sendResult.Error);
     }
     
-    public async Task<(IEnumerable<IChildNode>, ConditionAttribute?)> EvaluateNodeConditionsAsync(IReadOnlyList<IChildNode> nodes)
+    public async Task<(IEnumerable<IChildNode> Nodes, ConditionAttribute? FirstFailedCondition)> EvaluateNodeConditionsAsync(IReadOnlyList<IChildNode> nodes)
     {
         var returnNode      = default(ConditionAttribute?);
         
