@@ -28,7 +28,6 @@ public sealed class ReminderService : IHostedService
     
     private readonly IMediator                _mediator;
     private readonly ShardHelper              _shardhelper;
-    private readonly IShardIdentification     _shard;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<ReminderService> _logger;
@@ -43,7 +42,6 @@ public sealed class ReminderService : IHostedService
     (
         IMediator                mediator,
         ShardHelper              shardhelper,
-        IShardIdentification     shard,
         IDiscordRestUserAPI      users,
         IDiscordRestChannelAPI   channels,
         ILogger<ReminderService> logger
@@ -51,7 +49,6 @@ public sealed class ReminderService : IHostedService
     {
         _mediator    = mediator;
         _shardhelper = shardhelper;
-        _shard       = shard;
         _users       = users;
         _channels    = channels;
         _logger      = logger;
