@@ -159,17 +159,17 @@ public class ReminderCommands : CommandGroup
             var reminderTime = DateTimeOffset.UtcNow + time;
             
             await _reminders.CreateReminderAsync
-                (
-                 reminderTime,
-                 _context.User.ID,
-                 _context.ChannelID,
-                 _context.MessageID,
-                 guildID,
-                 reminder,
-                 reply?.Content,
-                 reply?.ID, 
-                 reply?.Author.ID
-                );
+            (
+             reminderTime,
+             _context.User.ID,
+             _context.ChannelID,
+             _context.MessageID,
+             guildID,
+             reminder,
+             reply?.Content,
+             reply?.ID, 
+             reply?.Author.ID
+            );
             
             return await _channels.CreateMessageAsync(_context.ChannelID, $"I'll remind you {reminderTime.ToTimestamp()}!");
         }

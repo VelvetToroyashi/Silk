@@ -130,14 +130,14 @@ public class RemindSlashCommands : CommandGroup
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
         
         await _reminders.CreateReminderAsync
-            (
-             reminderTime,
-             _context.User.ID,
-             _context.ChannelID,
-             null,
-             _context.GuildID.IsDefined(out var guild) ? guild : null,
-             about
-            );
+        (
+         reminderTime,
+         _context.User.ID,
+         _context.ChannelID,
+         null,
+         _context.GuildID.IsDefined(out var guild) ? guild : null,
+         about
+        );
 
         return await _interactions.EditOriginalInteractionResponseAsync
             (

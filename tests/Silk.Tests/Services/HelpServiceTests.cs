@@ -352,7 +352,7 @@ public class HelpServiceTests
 
         var result = await help.EvaluateNodeConditionsAsync(services.GetRequiredService<TreeWalker>().FindNodes("group"));
         
-        Assert.AreEqual(1, result.Count());
+        Assert.AreEqual(1, result.Item1.Count());
     }
 
     [Test]
@@ -386,7 +386,7 @@ public class HelpServiceTests
 
         var result = await help.EvaluateNodeConditionsAsync(services.GetRequiredService<TreeWalker>().FindNodes("conditioned-group-2 command"));
         
-        Assert.IsEmpty(result);
+        Assert.IsEmpty(result.Item1);
         
         conditionMock.Verify
         (   
@@ -432,7 +432,7 @@ public class HelpServiceTests
 
         var result = await help.EvaluateNodeConditionsAsync(services.GetRequiredService<TreeWalker>().FindNodes("conditioned-group-2 command"));
         
-        Assert.IsEmpty(result);
+        Assert.IsEmpty(result.Item1);
         
         conditionMock.Verify
         (   

@@ -45,10 +45,12 @@ public class CommandHelpService : ICommandHelpService
 
         if (!_options.AlwaysShowCommands)
         {
-            var evaluatedNodes = (await EvaluateNodeConditionsAsync(nodes)).ToArray();
+            var evaluated = await EvaluateNodeConditionsAsync(nodes);
             
-            if (!string.IsNullOrEmpty(commandName) && nodes.Count() > evaluatedNodes.Count())
-                return Result.FromError(new ConditionNotSatisfiedError("One or more conditions were not satisfied."));
+            var evaluatedNodes = evaluated.Item1.ToArray();
+            
+            if (!string.IsNullOrEmpty(commandName) && nodes.Count > evaluatedNodes.Length)
+                return Result.FromError(new ConditionNotSatisfiedError("One or more conditions were not satisfied.", evaluated.Item2!));
 
             nodes = evaluatedNodes;
         }
@@ -76,8 +78,10 @@ public class CommandHelpService : ICommandHelpService
         return sendResult.IsSuccess ? Result.FromSuccess() : Result.FromError(sendResult.Error);
     }
     
-    public async Task<IEnumerable<IChildNode>> EvaluateNodeConditionsAsync(IReadOnlyList<IChildNode> nodes)
+    public async Task<(IEnumerable<IChildNode>, ConditionAttribute?)> EvaluateNodeConditionsAsync(IReadOnlyList<IChildNode> nodes)
     {
+        var returnNode      = default(ConditionAttribute?);
+        
         var successfulNodes = new HashSet<IChildNode>();
 
         foreach (var node in nodes)
@@ -115,7 +119,7 @@ public class CommandHelpService : ICommandHelpService
 
                 foreach (var condition in conditionServices)
                 {
-                    var result = await (ValueTask<Result>) conditionMethod.Invoke(condition, new object[] {setCondition, CancellationToken.None});
+                    var result = await (ValueTask<Result>) conditionMethod!.Invoke(condition, new object[] {setCondition, CancellationToken.None})!;
 
                     if (result.IsSuccess)
                     {
@@ -123,7 +127,9 @@ public class CommandHelpService : ICommandHelpService
                     }
                     else
                     {
+                        returnNode = setCondition;
                         successfulNodes.Remove(node);
+                        
                         goto next;
                     }
                 }
@@ -135,6 +141,6 @@ public class CommandHelpService : ICommandHelpService
             }
         }
 
-        return successfulNodes;
+        return (successfulNodes, returnNode);
     }
 }
