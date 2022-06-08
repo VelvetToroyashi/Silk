@@ -18,6 +18,7 @@ using Remora.Results;
 using Silk.Commands.General;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Services.Bot;
 using Silk.Services.Guild;
 
 namespace Silk.Commands.SlashCommands;
@@ -66,21 +67,24 @@ public class RemindSlashCommands : CommandGroup
                                                   "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
     
     private static readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
-    
-    private readonly ReminderService    _reminders;
-    private readonly InteractionContext _context;
+
+    private readonly TimeHelper                 _timeHelper;
+    private readonly ReminderService            _reminders;
+    private readonly InteractionContext         _context;
     private readonly IDiscordRestInteractionAPI _interactions;
     
     public RemindSlashCommands
     (
+        TimeHelper _timeHelper,
         ReminderService reminders,
         InteractionContext context,
         IDiscordRestInteractionAPI interactions
     )
     {
-        _reminders    = reminders;
-        _context      = context;
-        _interactions = interactions;
+        _timeHelper = _timeHelper;
+        _reminders       = reminders;
+        _context         = context;
+        _interactions    = interactions;
     }
 
     [Command("set")]
@@ -96,61 +100,33 @@ public class RemindSlashCommands : CommandGroup
         string about
     )
     {
-        var parseResult = MicroTimeParser.TryParse(rawTime);
+        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+        var timeResult = _timeHelper.ExtractTime(rawTime, offset);
 
-        if (!parseResult.IsDefined(out TimeSpan parsedTime))
-        {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(rawTime, refTime: DateTime.UtcNow);
-
-            if (parsedTimes.FirstOrDefault() is not { } parsed || !parsed.Resolution.Values.Any())
-                return await _interactions.EditOriginalInteractionResponseAsync
-                    (
-                     _context.ApplicationID,
-                     _context.Token,
-                     ReminderTimeNotPresent
-                    );
-
-            var currentYear = DateTime.UtcNow.Year;
-            
-            var timeModel = parsed
-                           .Resolution
-                           .Values
-                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
-                                               ? dtd.Value.Year                        >= currentYear 
-                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
-
-            if (timeModel is null)
-                return await _interactions.EditOriginalInteractionResponseAsync
-                    (
-                     _context.ApplicationID,
-                     _context.Token,
-                     ReminderTimeNotPresent
-                    );
-
-            if (timeModel is DateTimeV2Date vd)
-                parsedTime = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-            if (timeModel is DateTimeV2DateTime vdt)
-                parsedTime = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-        }
+        if (!timeResult.IsDefined(out var parsedTime))
+            return await _interactions.EditOriginalInteractionResponseAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             timeResult.Error!.Message
+            );
         
         if (parsedTime <= TimeSpan.Zero)
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                "You can't set a reminder in the past!"
-                );
+            (
+             _context.ApplicationID,
+             _context.Token,
+            "You can't set a reminder in the past!"
+            );
         
         if (parsedTime < _minimumReminderTime)
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!"
-                );
-        
+            (
+             _context.ApplicationID,
+             _context.Token,
+             $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!"
+            );
+    
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
         
         await _reminders.CreateReminderAsync

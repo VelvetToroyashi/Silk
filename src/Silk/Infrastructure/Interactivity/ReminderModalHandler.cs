@@ -17,6 +17,7 @@ using Remora.Results;
 using Silk.Commands.Furry.Types;
 using Silk.Commands.General;
 using Silk.Extensions;
+using Silk.Services.Bot;
 using Silk.Services.Guild;
 
 namespace Silk.Interactivity;
@@ -26,19 +27,28 @@ public class ReminderModalHandler : IModalInteractiveEntity
 {
     private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
                                                   "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
-    
+
+    private readonly TimeHelper                 _timeHelper;
     private readonly ReminderService            _reminders;
     private readonly InteractionContext         _context;
     private readonly IDiscordRestChannelAPI     _channels;
     private readonly IDiscordRestInteractionAPI _interactions;
     
     
-    public ReminderModalHandler(ReminderService reminders, InteractionContext context, IDiscordRestChannelAPI channels, IDiscordRestInteractionAPI interactions)
+    public ReminderModalHandler
+    (
+        TimeHelper timeHelper,
+        ReminderService reminders,
+        InteractionContext context,
+        IDiscordRestChannelAPI channels,
+        IDiscordRestInteractionAPI interactions
+    )
     {
-        _reminders    = reminders;
-        _context      = context;
-        _channels     = channels;
-        _interactions = interactions;
+        _timeHelper = timeHelper;
+        _reminders       = reminders;
+        _context         = context;
+        _channels        = channels;
+        _interactions    = interactions;
     }
 
     public Task<Result<bool>> IsInterestedAsync(ComponentType? componentType, string customID, CancellationToken ct = default) 
@@ -52,63 +62,22 @@ public class ReminderModalHandler : IModalInteractiveEntity
 
         var reply = new Snowflake(ulong.Parse((components[1] as PartialTextInputComponent)!.CustomID.Value));
         
-        var parseResult = MicroTimeParser.TryParse(raw);
-        
-        if (!parseResult.IsDefined(out TimeSpan parsedTime))
+        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+        var timeResult = _timeHelper.ExtractTime(raw, offset);
+
+        if (!timeResult.IsDefined(out var parsedTime))
         {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(raw, refTime: DateTime.UtcNow);
-
-            if (parsedTimes.FirstOrDefault() is not { } parsed || !parsed.Resolution.Values.Any())
-            {
-                var informResult = await _interactions.CreateFollowupMessageAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 ReminderTimeNotPresent,
-                 flags: MessageFlags.Ephemeral,
-                 ct: ct
-                );
-                
-                return informResult.IsSuccess
-                    ? Result.FromSuccess()
-                    : Result.FromError(informResult.Error);
-            }
-
-            var currentYear = DateTime.UtcNow.Year;
+            var informResult = await _interactions.CreateFollowupMessageAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             timeResult.Error!.Message,
+             ct: ct
+            );
             
-            var timeModel = parsed
-                           .Resolution
-                           .Values
-                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime or DateTimeV2Duration)
-                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
-                                               ? dtd.Value.Year                            >= currentYear 
-                                               : v is DateTimeV2Duration dtdt ? dtdt.Value > TimeSpan.FromMinutes(3)
-                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
-
-            if (timeModel is null)
-            {
-                var informResult = await _interactions.CreateFollowupMessageAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 ReminderTimeNotPresent,
-                 flags: MessageFlags.Ephemeral,
-                 ct: ct
-                );
-                
-                return informResult.IsSuccess
-                    ? Result.FromSuccess()
-                    : Result.FromError(informResult.Error);
-            }
-
-            if (timeModel is DateTimeV2Date vd)
-                parsedTime = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-            if (timeModel is DateTimeV2DateTime vdt)
-                parsedTime = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-            
-            if (timeModel is DateTimeV2Duration vdd)
-                parsedTime = vdd.Value;
+            return informResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(informResult.Error);
         }
 
         if (parsedTime <= TimeSpan.Zero)

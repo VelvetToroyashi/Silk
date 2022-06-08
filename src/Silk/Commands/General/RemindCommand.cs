@@ -24,6 +24,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Services.Bot;
 using Silk.Services.Guild;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
@@ -108,24 +109,26 @@ public class ReminderCommands : CommandGroup
         private readonly MessageContext            _context;
         private readonly IDiscordRestChannelAPI    _channels;
         private readonly InteractiveMessageService _interactivity;
-        private readonly ILogger<ReminderCommands> _logger;
-        
-        
+        private readonly TimeHelper                _timeHelper;
+
+
+
         public ReminderActionCommands
         (
             ReminderService           reminders,
             MessageContext            context,
             IDiscordRestChannelAPI    channels,
             InteractiveMessageService interactivity,
-            ILogger<ReminderCommands> logger
+            TimeHelper                _timeHelper,
+            TimeHelper                timeHelper
         )
         {
-            _context       = context;
-            _channels      = channels;
-            _reminders     = reminders;
-            _interactivity = interactivity;
-            _logger        = logger;
-
+            _context         = context;
+            _channels        = channels;
+            _reminders       = reminders;
+            _interactivity   = interactivity;
+            this._timeHelper = timeHelper;
+            _timeHelper      = _timeHelper;
         }
 
         [Command("set", "me", "create")]
@@ -137,44 +140,11 @@ public class ReminderCommands : CommandGroup
             string reminder
         )
         {
-            if (string.IsNullOrEmpty(reminder))
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a reminder!");
+            var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+            var timeResult = _timeHelper.ExtractTime(reminder, offset);
 
-            var timeResult = MicroTimeParser.TryParse(reminder.Split(' ')[0]);
-
-            if (timeResult.IsDefined(out var time))
-            {
-                reminder = reminder.Substring(reminder.IndexOf(' ') + 1);
-            }
-            else
-            {
-                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
-
-                if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-                var currentYear = DateTime.UtcNow.Year;
-
-                var timeModel = parsedTime
-                               .Resolution
-                               .Values
-                               .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                               .FirstOrDefault
-                                    (
-                                     v => v is DateTimeV2Date dtd
-                                         ? dtd.Value.Year                        >= currentYear
-                                         : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
-                                    );
-
-                if (timeModel is null)
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-                if (timeModel is DateTimeV2Date vd)
-                    time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-                if (timeModel is DateTimeV2DateTime vdt)
-                    time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-            }
+            if (!timeResult.IsDefined(out var time))
+                return await _channels.CreateMessageAsync(_context.ChannelID, timeResult.Error!.Message);
 
             if (time <= TimeSpan.Zero)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");

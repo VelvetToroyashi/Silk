@@ -27,8 +27,18 @@ public class UserEntity
 
     public List<InfractionEntity> Infractions { get; set; } = new();
 
+    /// <summary>
+    /// The timezone ID of the user (e.g. America/New_York). Null indicates the user has not set a timezone.
+    /// </summary>
+    public string? TimezoneID { get; set; } = null;
+    
+    /// <summary>
+    /// Whether the user chooses to share their timezone,
+    /// </summary>
+    public bool ShareTimezone { get; set; }
+
     public static implicit operator UserDTO?(UserEntity? user) => ToDTO(user);
     
     public static UserDTO? ToDTO(UserEntity? user)
-        => user is null ? null : new(user.ID, user.Guilds.Select(g => g.GuildID).ToArray(), user.History.Select(UserHistoryEntity.ToDTO).ToArray(), user.Infractions.Select(InfractionEntity.ToDTO).ToArray()!);
+        => user is null ? null : new(user.ID,user.TimezoneID, user.ShareTimezone, user.Guilds.Select(g => g.GuildID).ToArray(), user.History.Select(UserHistoryEntity.ToDTO).ToArray(), user.Infractions.Select(InfractionEntity.ToDTO).ToArray()!);
 }
