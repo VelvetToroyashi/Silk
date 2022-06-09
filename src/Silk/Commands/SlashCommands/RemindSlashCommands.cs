@@ -101,7 +101,7 @@ public class RemindSlashCommands : CommandGroup
     )
     {
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
-        var timeResult = _timeHelper.ExtractTime(rawTime, offset);
+        var timeResult = _timeHelper.ExtractTime(rawTime, offset, out _);
 
         if (!timeResult.IsDefined(out var parsedTime))
             return await _interactions.EditOriginalInteractionResponseAsync

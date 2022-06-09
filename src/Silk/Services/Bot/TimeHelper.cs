@@ -22,6 +22,8 @@ public sealed class TimeHelper
     
     private readonly IMediator             _mediator;
     private readonly IDateTimeZoneProvider _timezones;
+
+    private static readonly TimeSpan _buffer = TimeSpan.FromSeconds(2);
     
     public TimeHelper(IMediator mediator, IDateTimeZoneProvider timezones)
     {
@@ -29,8 +31,10 @@ public sealed class TimeHelper
         _timezones = timezones;
     }
 
-    public Result<TimeSpan> ExtractTime(string input, Offset? offset)
+    public Result<TimeSpan> ExtractTime(string input, Offset? offset, out string remainder)
     {
+        remainder = input;
+        
         if (string.IsNullOrEmpty(input))
             throw new InvalidOperationException("Cannot extract time from empty string.");
 
@@ -58,10 +62,11 @@ public sealed class TimeHelper
         if (timeModel is null)
             return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
 
+        remainder = input[..parsedTime.Start] + input[(parsedTime.End + 1)..];
 
         return timeModel is DateTimeV2Date vd
-            ? Result<TimeSpan>.FromSuccess(vd.Value.ToUniversalTime() - DateTime.UtcNow)
-            : Result<TimeSpan>.FromSuccess((timeModel as DateTimeV2DateTime)!.Value.ToUniversalTime() - DateTime.UtcNow);
+            ? (vd.Value.ToUniversalTime() - DateTime.UtcNow).Add(_buffer)
+            : ((timeModel as DateTimeV2DateTime)!.Value.ToUniversalTime() - DateTime.UtcNow).Add(_buffer);
     }
     
     public async Task<Offset?> GetOffsetForUserAsync(Snowflake userID)

@@ -63,7 +63,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
         var reply = new Snowflake(ulong.Parse((components[1] as PartialTextInputComponent)!.CustomID.Value));
         
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
-        var timeResult = _timeHelper.ExtractTime(raw, offset);
+        var timeResult = _timeHelper.ExtractTime(raw, offset, out _);
 
         if (!timeResult.IsDefined(out var parsedTime))
         {

@@ -122,11 +122,11 @@ public class ReminderCommands : CommandGroup
             TimeHelper                timeHelper
         )
         {
-            _context         = context;
-            _channels        = channels;
-            _reminders       = reminders;
-            _interactivity   = interactivity;
-            _timeHelper = timeHelper;
+            _context       = context;
+            _channels      = channels;
+            _reminders     = reminders;
+            _interactivity = interactivity;
+            _timeHelper    = timeHelper;
         }
 
         [Command("set", "me", "create")]
@@ -139,7 +139,7 @@ public class ReminderCommands : CommandGroup
         )
         {
             var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
-            var timeResult = _timeHelper.ExtractTime(reminder, offset);
+            var timeResult = _timeHelper.ExtractTime(reminder, offset, out reminder);
 
             if (!timeResult.IsDefined(out var time))
                 return await _channels.CreateMessageAsync(_context.ChannelID, timeResult.Error!.Message);
