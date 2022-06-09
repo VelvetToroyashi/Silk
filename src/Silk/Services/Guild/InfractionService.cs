@@ -993,13 +993,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
         }
 
         IDiscordPermissionSet loggingChannelPermissions = DiscordPermissionSet.ComputePermissions
-            (
-             currentUser.ID,
-             roles.Single(r => r.ID == guildID),
-             roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray()
-            );
-
-        //TODO: Log errors to DB
+        (
+         currentUser.ID,
+         roles.Single(r => r.ID == guildID),
+         roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray()
+        );
 
         if (!loggingChannelPermissions.HasPermission(DiscordPermission.SendMessages))
         {
@@ -1027,7 +1025,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
             if (config.Logging.Infractions.WebhookID.Value is 0)
             {
                 _logger.LogDebug("Attempting to create new webhook for infraction channel.");
-
             }
             else
             {
