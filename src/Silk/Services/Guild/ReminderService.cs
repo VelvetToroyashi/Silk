@@ -118,7 +118,6 @@ public sealed class ReminderService : IHostedService
         if (reminder is null)
         {
             _logger.LogWarning(EventIds.Service, "Reminder was not present in memory. Was it dispatched already?");
-            return new NotFoundError();
         }
         else
         {
@@ -126,13 +125,16 @@ public sealed class ReminderService : IHostedService
             _logger.LogDebug("Removed reminder {Reminder}", id);
             
             SilkMetric.LoadedReminders.Dec();
-            return await _mediator.Send(new RemoveReminder.Request(id));
         }
+        
+        return await _mediator.Send(new RemoveReminder.Request(id));
     }
 
     private async Task<Result> DispatchReminderAsync(ReminderEntity reminder)
     {
         _logger.LogDebug(EventIds.Service, "Dispatching expired reminder");
+        
+        await RemoveReminderAsync(reminder.Id);
         
         using (SilkMetric.ReminderDispatchTime.NewTimer())
         {
@@ -191,8 +193,6 @@ public sealed class ReminderService : IHostedService
         if (dispatchResult.IsSuccess)
         {
             _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
-
-            await RemoveReminderAsync(reminder.Id);
 
             return Result.FromSuccess();
         }
@@ -276,11 +276,6 @@ public sealed class ReminderService : IHostedService
     {
         _logger.LogDebug(EventIds.Service, "Attempting to dispatch reminder to {OwnerID}.", reminder.OwnerID);
         
-        var removalResult = await RemoveReminderAsync(reminder.Id);
-
-        if (!removalResult.IsSuccess)
-            return Result.FromSuccess();
-
         var message = GetReminderMessageString(reminder, false, true).ToString();
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
