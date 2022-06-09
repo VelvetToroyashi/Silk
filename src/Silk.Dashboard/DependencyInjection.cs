@@ -82,17 +82,10 @@ public static class DependencyInjection
                      
                      opt.Events.OnCreatingTicket = context => 
                      {
-                         var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordTokenStore>(); 
-                         
-                         var userId      = context.Principal.GetUserId();
-                         
-                         var tokenExpiry = DiscordTokenStoreExtensions.GetTokenExpiry(context);
-                         
-                         var tokenEntry = new DiscordTokenStoreEntry(context.AccessToken,
-                                                                     context.RefreshToken,
-                                                                     tokenExpiry,
-                                                                     context.TokenType); 
-                         tokenStore.SetToken(userId!, tokenEntry); 
+                         var userId     = context.Principal.GetUserId();
+                         var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordTokenStore>();
+
+                         tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
                          return Task.CompletedTask;
                      };
                  })
@@ -152,14 +145,5 @@ public static class DependencyInjection
         services.AddHostedService(s => s.GetRequiredService<IDiscordTokenStoreWatcher>());
         
         return services;
-    }
-
-    private static SilkConfigurationOptions GetSilkConfigurationOptions
-    (
-        this IConfiguration configuration
-    )
-    {
-        // Todo: Consolidate Adding SilkConfigurationOptions to common location?
-        return configuration.GetSection(SilkConfigurationOptions.SectionKey).Get<SilkConfigurationOptions>();
     }
 }

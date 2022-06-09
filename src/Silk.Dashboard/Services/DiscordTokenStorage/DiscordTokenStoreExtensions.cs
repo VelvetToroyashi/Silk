@@ -15,7 +15,7 @@ public static class DiscordTokenStoreExtensions
             : null;
     }
     
-    public static DateTimeOffset? GetTokenExpiry(OAuthCreatingTicketContext context)
+    public static DateTimeOffset? GetTokenExpiry(this OAuthCreatingTicketContext context)
     {
         return GetTokenExpiry(context.Properties.Items[DiscordAuthenticationTokenExpiryKey]);
     }
