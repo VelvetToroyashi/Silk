@@ -2,17 +2,12 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
-using Microsoft.Extensions.Logging;
-
-using Recognizers.Text.DateTime.Wrapper;
-using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
 using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
@@ -24,6 +19,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
+using Silk.Services.Bot;
 using Silk.Services.Guild;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
@@ -70,18 +66,12 @@ public static class MicroTimeParser
 [Category(Categories.General)]
 public class ReminderCommands : CommandGroup
 {
-    private const string ReminderDescription =
-        "The reminder to set. A time is required.\n"                                          +
-        "You can use natural language like `three hours from now` and `in 2 days`\n"          +
-        "If you're accustomed to other bots (or the behavior of V2), you can\n"               +
-        "set reminders in the format of `remind 2h30m to go to the gym`.\n\n"                 +
-        "Keep in mind that the time will be extrapolated from the first mention of a time.\n" +
-        "Time ranges (such as `for 2 days`) are ignored.\n"                                   +
-        "Mentions of `in X days` `X hours from now`, and similar are detected.\n\n"           +
-        "**NOTE:**: Absolute time (such as `at 5PM`) uses UTC as a reference point.\n"        +
-        "It's recommended to use relative time instead (such as `in three hours`).\n"         +
-        "`tomorrow` Also works, and is equivalent to 24 hours from now.\n\n"                  +
-        "We're aware this is a less-than ideal solution, and hope to add locale support for this in the future. <3";
+    private const string ReminderDescription = "The reminder to set. \n"                                            +
+                                               "Natural language such as \"in six hours\" as well as \n"            +
+                                               "formats such as `2d` and `15m` are supported."                      +
+                                               "You can set your timezone via the `timezone` command;\n"            +
+                                               " reminders like `tonight at 8` will reflect local time, otherwise " +
+                                               "the reference point is UTC.";
 
     private readonly ReminderActionCommands _reminderCommands;
 
@@ -108,24 +98,24 @@ public class ReminderCommands : CommandGroup
         private readonly MessageContext            _context;
         private readonly IDiscordRestChannelAPI    _channels;
         private readonly InteractiveMessageService _interactivity;
-        private readonly ILogger<ReminderCommands> _logger;
-        
-        
+        private readonly TimeHelper                _timeHelper;
+
+
+
         public ReminderActionCommands
         (
             ReminderService           reminders,
             MessageContext            context,
             IDiscordRestChannelAPI    channels,
             InteractiveMessageService interactivity,
-            ILogger<ReminderCommands> logger
+            TimeHelper                timeHelper
         )
         {
             _context       = context;
             _channels      = channels;
             _reminders     = reminders;
             _interactivity = interactivity;
-            _logger        = logger;
-
+            _timeHelper    = timeHelper;
         }
 
         [Command("set", "me", "create")]
@@ -137,44 +127,11 @@ public class ReminderCommands : CommandGroup
             string reminder
         )
         {
-            if (string.IsNullOrEmpty(reminder))
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a reminder!");
+            var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+            var timeResult = _timeHelper.ExtractTime(reminder, offset, out reminder);
 
-            var timeResult = MicroTimeParser.TryParse(reminder.Split(' ')[0]);
-
-            if (timeResult.IsDefined(out var time))
-            {
-                reminder = reminder.Substring(reminder.IndexOf(' ') + 1);
-            }
-            else
-            {
-                var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(reminder, CultureInfo.InvariantCulture.DisplayName, DateTime.UtcNow);
-
-                if (parsedTimes.FirstOrDefault() is not { } parsedTime || !parsedTime.Resolution.Values.Any())
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-                var currentYear = DateTime.UtcNow.Year;
-
-                var timeModel = parsedTime
-                               .Resolution
-                               .Values
-                               .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                               .FirstOrDefault
-                                    (
-                                     v => v is DateTimeV2Date dtd
-                                         ? dtd.Value.Year                        >= currentYear
-                                         : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
-                                    );
-
-                if (timeModel is null)
-                    return await _channels.CreateMessageAsync(_context.ChannelID, ReminderTimeNotPresent);
-
-                if (timeModel is DateTimeV2Date vd)
-                    time = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-                if (timeModel is DateTimeV2DateTime vdt)
-                    time = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-            }
+            if (!timeResult.IsDefined(out var time))
+                return await _channels.CreateMessageAsync(_context.ChannelID, timeResult.Error!.Message);
 
             if (time <= TimeSpan.Zero)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
@@ -189,17 +146,17 @@ public class ReminderCommands : CommandGroup
             var reminderTime = DateTimeOffset.UtcNow + time;
             
             await _reminders.CreateReminderAsync
-                (
-                 reminderTime,
-                 _context.User.ID,
-                 _context.ChannelID,
-                 _context.MessageID,
-                 guildID,
-                 reminder,
-                 reply?.Content,
-                 reply?.ID, 
-                 reply?.Author.ID
-                );
+            (
+             reminderTime,
+             _context.User.ID,
+             _context.ChannelID,
+             _context.MessageID,
+             guildID,
+             reminder,
+             reply?.Content,
+             reply?.ID, 
+             reply?.Author.ID
+            );
             
             return await _channels.CreateMessageAsync(_context.ChannelID, $"I'll remind you {reminderTime.ToTimestamp()}!");
         }
@@ -246,6 +203,51 @@ public class ReminderCommands : CommandGroup
                 
                 return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new [] {embed});
             }
+        }
+
+        [Command("view")]
+        [Description("View a specific reminder in full.")]
+        public async Task<IResult> ViewAsync
+        (
+            [Description("The ID of the reminder to view.")]
+            int reminderID
+        )
+        {
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+
+            if (!reminders.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any active reminders!");
+
+            var reminder = reminders.FirstOrDefault(r => r.Id == reminderID);
+
+            if (reminder is null)
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have a reminder by that ID!");
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Your reminder (ID `{reminder.Id}`) was set {reminder.CreatedAt.ToTimestamp()}.");
+
+            if (!string.IsNullOrEmpty(reminder.MessageContent))
+            {
+                sb.AppendLine();
+                sb.AppendLine("Your reminder was:");
+
+                sb.AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                
+            }
+
+            if (reminder.IsReply)
+            {
+                sb.AppendLine();
+
+                sb.AppendLine($"You replied to [this message](https://discord.com/channels/{reminder.GuildID?.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.MessageID}).");
+                sb.AppendLine("In case it's gone missing (I haven't checked!), the content of the message was:");
+                sb.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+            }
+
+            var embed = new Embed { Colour = Color.DodgerBlue, Description = sb.ToString() };
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
         }
 
         [Command("cancel")]

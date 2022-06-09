@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -11,9 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NodaTime;
+using NodaTime.TimeZones;
 using Prometheus;
 using Remora.Commands.Extensions;
-using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching.Redis.Extensions;
 using Remora.Discord.Gateway;
@@ -222,6 +222,10 @@ public class Program
                    .AddSingleton<GuildConfigCacheService>()
                    .AddSingleton<GuildCacherService>()
                    .AddSingleton<GuildGreetingService>()
+                   .AddSingleton<IClock>(SystemClock.Instance)
+                   .AddSingleton<IDateTimeZoneSource>(TzdbDateTimeZoneSource.Default)
+                   .AddSingleton<IDateTimeZoneProvider, DateTimeZoneCache>()
+                   .AddTransient<TimeHelper>()
                    .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
                    .AddSingleton<MessageLoggerService>()

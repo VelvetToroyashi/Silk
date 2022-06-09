@@ -14,6 +14,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching;
+using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
@@ -31,7 +32,7 @@ namespace Silk.Commands.General;
 [Category(Categories.General)]
 public class InfoCommands : CommandGroup
 {
-    private readonly IMemoryCache           _cache;
+    private readonly ICacheProvider _cache;
     private readonly MessageContext         _context;
     private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestEmojiAPI   _emojis;
@@ -40,7 +41,7 @@ public class InfoCommands : CommandGroup
 
     public InfoCommands
     (
-        IMemoryCache           cache,
+        ICacheProvider         cache,
         MessageContext         context,
         IDiscordRestUserAPI    users,
         IDiscordRestEmojiAPI   emojis,
@@ -50,7 +51,7 @@ public class InfoCommands : CommandGroup
     {
         _cache    = cache;
         _context  = context;
-        _users  = users;
+        _users    = users;
         _emojis   = emojis;
         _guilds   = guilds;
         _channels = channels;
@@ -85,7 +86,7 @@ public class InfoCommands : CommandGroup
 
         var roles = roleList.ToDictionary(r => r.ID, r => r);
         
-        UncacheUser(member.User.Value.ID);
+        await UncacheUserAsync(member.User.Value.ID);
         
         var userResult = await _users.GetUserAsync(member.User.Value.ID);
 
@@ -137,7 +138,7 @@ public class InfoCommands : CommandGroup
     {
         user ??= _context.User;
         
-        UncacheUser(user.ID);
+        await UncacheUserAsync(user.ID);
         
         var userResult = await _users.GetUserAsync(user.ID);
         
@@ -234,11 +235,11 @@ public class InfoCommands : CommandGroup
         await using var swatchImage = await GenerateRoleColorSwatchAsync(role.Colour);
         
         var res = await _channels.CreateMessageAsync
-            (
-             _context.ChannelID,
-             embeds: new[] {embed},
-             attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("swatch.png", swatchImage)) }
-            );
+        (
+         _context.ChannelID,
+         embeds: new[] {embed},
+         attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("swatch.png", swatchImage)) }
+        );
 
         return res;
     }
@@ -319,7 +320,7 @@ public class InfoCommands : CommandGroup
 
         var sb = new StringBuilder();
         
-        if (currentIndex < roles.Count)
+        if (currentIndex < roles.Count - 1)
         {
             var next = roles[currentIndex + 1];
             
@@ -340,7 +341,7 @@ public class InfoCommands : CommandGroup
         return Result<string>.FromSuccess(sb.ToString());
     }
 
-    private void UncacheUser(Snowflake userID) => _cache.Remove(KeyHelpers.CreateUserCacheKey(userID));
+    private async Task UncacheUserAsync(Snowflake userID) => await _cache.EvictAsync(KeyHelpers.CreateUserCacheKey(userID));
 
     private async Task<Stream> GenerateRoleColorSwatchAsync(Color roleColor)
     {
@@ -357,7 +358,7 @@ public class InfoCommands : CommandGroup
     
     private async Task<Stream> GenerateBannerColorImageAsync(Color bannerColor)
     {
-        using var image = new Image<Rgba32>(4096, 2048, new Rgba32(bannerColor.R, bannerColor.G, bannerColor.B, 255));
+        using var image = new Image<Rgba32>(4096, 2048, new(bannerColor.R, bannerColor.G, bannerColor.B, 255));
 
         var stream = new MemoryStream();
         

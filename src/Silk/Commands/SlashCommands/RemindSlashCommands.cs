@@ -2,11 +2,10 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
-using Recognizers.Text.DateTime.Wrapper;
-using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -15,9 +14,9 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
-using Silk.Commands.General;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Services.Bot;
 using Silk.Services.Guild;
 
 namespace Silk.Commands.SlashCommands;
@@ -66,21 +65,24 @@ public class RemindSlashCommands : CommandGroup
                                                   "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
     
     private static readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
-    
-    private readonly ReminderService    _reminders;
-    private readonly InteractionContext _context;
+
+    private readonly TimeHelper                 _timeHelper;
+    private readonly ReminderService            _reminders;
+    private readonly InteractionContext         _context;
     private readonly IDiscordRestInteractionAPI _interactions;
     
     public RemindSlashCommands
     (
-        ReminderService reminders,
-        InteractionContext context,
+        TimeHelper                 timeHelper,
+        ReminderService            reminders,
+        InteractionContext         context,
         IDiscordRestInteractionAPI interactions
     )
     {
-        _reminders    = reminders;
-        _context      = context;
-        _interactions = interactions;
+        _timeHelper      = timeHelper;
+        _reminders       = reminders;
+        _context         = context;
+        _interactions    = interactions;
     }
 
     [Command("set")]
@@ -88,7 +90,7 @@ public class RemindSlashCommands : CommandGroup
     public async Task<IResult> SetReminderAsync
     (
         [Option("time")]
-        [Description("When should I remind you? (e.g. in 5 minutes, in an hour, in 2 days, etc.)")]
+        [Description("When should I remind you? (e.g. 5m, in 5 minutes, tonight at 5 (requires timezone), etc.)")]
         string rawTime,
         
         [Option("about")]
@@ -96,72 +98,44 @@ public class RemindSlashCommands : CommandGroup
         string about
     )
     {
-        var parseResult = MicroTimeParser.TryParse(rawTime);
+        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+        var timeResult = _timeHelper.ExtractTime(rawTime, offset, out _);
 
-        if (!parseResult.IsDefined(out TimeSpan parsedTime))
-        {
-            var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(rawTime, refTime: DateTime.UtcNow);
-
-            if (parsedTimes.FirstOrDefault() is not { } parsed || !parsed.Resolution.Values.Any())
-                return await _interactions.EditOriginalInteractionResponseAsync
-                    (
-                     _context.ApplicationID,
-                     _context.Token,
-                     ReminderTimeNotPresent
-                    );
-
-            var currentYear = DateTime.UtcNow.Year;
-            
-            var timeModel = parsed
-                           .Resolution
-                           .Values
-                           .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
-                           .FirstOrDefault(v => v is DateTimeV2Date dtd 
-                                               ? dtd.Value.Year                        >= currentYear 
-                                               : (v as DateTimeV2DateTime)!.Value.Year >= currentYear);
-
-            if (timeModel is null)
-                return await _interactions.EditOriginalInteractionResponseAsync
-                    (
-                     _context.ApplicationID,
-                     _context.Token,
-                     ReminderTimeNotPresent
-                    );
-
-            if (timeModel is DateTimeV2Date vd)
-                parsedTime = vd.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-
-            if (timeModel is DateTimeV2DateTime vdt)
-                parsedTime = vdt.Value - DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(2));
-        }
+        if (!timeResult.IsDefined(out var parsedTime))
+            return await _interactions.EditOriginalInteractionResponseAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             timeResult.Error!.Message
+            );
         
         if (parsedTime <= TimeSpan.Zero)
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                "You can't set a reminder in the past!"
-                );
+            (
+             _context.ApplicationID,
+             _context.Token,
+            "You can't set a reminder in the past!"
+            );
         
         if (parsedTime < _minimumReminderTime)
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!"
-                );
-        
+            (
+             _context.ApplicationID,
+             _context.Token,
+             $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!"
+            );
+    
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
         
         await _reminders.CreateReminderAsync
-            (
-             reminderTime,
-             _context.User.ID,
-             _context.ChannelID,
-             null,
-             _context.GuildID.IsDefined(out var guild) ? guild : null,
-             about
-            );
+        (
+         reminderTime,
+         _context.User.ID,
+         _context.ChannelID,
+         null,
+         _context.GuildID.IsDefined(out var guild) ? guild : null,
+         about
+        );
 
         return await _interactions.EditOriginalInteractionResponseAsync
             (
@@ -204,6 +178,67 @@ public class RemindSlashCommands : CommandGroup
             );
     }
     
+    [Command("view")]
+    [Description("View a specific reminder in full.")]
+    public async Task<IResult> ViewAsync
+    (
+        [Description("The ID of the reminder to view.")]
+        int reminderID
+    )
+    {
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+
+        if (!reminders.Any())
+            return await _interactions.EditOriginalInteractionResponseAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have any active reminders!"
+            );
+
+        var reminder = reminders.FirstOrDefault(r => r.Id == reminderID);
+
+        if (reminder is null)
+            return await _interactions.EditOriginalInteractionResponseAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have a reminder by that ID!"
+            );
+
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"Your reminder (ID `{reminder.Id}`) was set {reminder.CreatedAt.ToTimestamp()}.");
+
+        if (!string.IsNullOrEmpty(reminder.MessageContent))
+        {
+            sb.AppendLine();
+            sb.AppendLine("Your reminder was:");
+
+            sb.AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                
+        }
+
+        if (reminder.IsReply)
+        {
+            sb.AppendLine();
+
+            sb.AppendLine($"You replied to [this message](https://discord.com/channels/{reminder.GuildID?.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.MessageID}).");
+            sb.AppendLine("In case it's gone missing (I haven't checked!), the content of the message was:");
+            sb.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+        }
+
+        var embed = new Embed { Colour = Color.DodgerBlue, Description = sb.ToString() };
+
+        return await _interactions.EditOriginalInteractionResponseAsync
+        (
+         _context.ApplicationID,
+         _context.Token,
+         embeds: new[] { embed }
+        );
+    }
+
+    
     [Command("remove")]
     [Description("Remove a reminder!")]
     public async Task<IResult> RemoveReminderAsync
@@ -217,19 +252,19 @@ public class RemindSlashCommands : CommandGroup
         
         if (reminders.All(r => r.Id != reminderID))
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 "You don't have any reminders, or at least not one by that ID!"
-                );
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have any reminders, or at least not one by that ID!"
+            );
 
         await _reminders.RemoveReminderAsync(reminderID);
         
         return await _interactions.EditOriginalInteractionResponseAsync
-            (
-             _context.ApplicationID,
-             _context.Token,
-             "I've cancelled your reminder!"
-            );
+        (
+         _context.ApplicationID,
+         _context.Token,
+         "I've cancelled your reminder!"
+        );
     }
 }
