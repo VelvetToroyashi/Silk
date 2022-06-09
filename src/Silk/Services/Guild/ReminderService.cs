@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -213,52 +214,57 @@ public sealed class ReminderService : IHostedService
     ///     Creates a formatted reminder message string.
     /// </summary>
     /// <param name="reminder">The reminder.</param>
-    /// <param name="inDMs">Whether this reminder is being sent in DMs.</param>
     /// <param name="replyExists">Whether the reply (if any) still exists.</param>
     /// <param name="originalMessageExists">Whether the invocation message for the reminder still exists.</param>
     /// <returns>A StringBuilder containing the built message.</returns>
     private static StringBuilder GetReminderMessageString(ReminderEntity reminder, bool replyExists, bool originalMessageExists)
     {
         var dispatchMessage = new StringBuilder();
-        
+
         if (reminder.IsPrivate)
         {
-            dispatchMessage.AppendLine("Hey! You asked me to remind you about this:");
-            dispatchMessage.AppendLine(reminder.MessageContent ?? "(You didn't set a message!)");
+            dispatchMessage.AppendLine($"Hi! {reminder.CreatedAt.ToTimestamp()}, you asked me to remind you about this!");
+
+            if (!string.IsNullOrEmpty(reminder.MessageContent))
+                dispatchMessage.AppendLine($"> {reminder.MessageContent}");            
 
             if (reminder.IsReply)
             {
                 dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:");
-                dispatchMessage.AppendLine(reminder.ReplyMessageContent);
+                dispatchMessage.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
                 dispatchMessage.AppendLine();
                 dispatchMessage.AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
             }
         }
         else if (reminder.IsReply)
         {
-            dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerID}>! You asked me to remind you about this!");
-
-            if (!replyExists)
-                dispatchMessage.AppendLine("I couldn't find the message I was supposed to reply to.")
-                               .AppendLine("Here's what you replied to, when you set the reminder, though!")
+            if (replyExists)
+            {
+                dispatchMessage.AppendLine($"Hey, <@{reminder.OwnerID}>, you set a reminder on this message {reminder.CreatedAt.ToTimestamp()}!");
+            }
+            else
+            {
+                dispatchMessage.AppendLine($"{reminder.CreatedAt.ToTimestamp()}, you asked me to remind ytou about a message, but it's disappeared!.")
+                               .AppendLine("Here's what you replied to when you set the reminder, though!")
                                .AppendLine($"From <@{reminder.ReplyAuthorID}>:")
-                               .AppendLine("> " + reminder.ReplyMessageContent);
+                               .AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+            }
 
             if (!string.IsNullOrEmpty(reminder.MessageContent))
+            {
                 dispatchMessage.AppendLine("There was also additional context:")
-                               .AppendLine($"> {reminder.MessageContent}");
+                            .AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+            }
         }
         else
         {
-            dispatchMessage.AppendLine("Hey, you wanted to be reminded of this!");
+            dispatchMessage.AppendLine($"Hi! {reminder.CreatedAt.ToTimestamp()}, you set a reminder.");
 
             if (!originalMessageExists)
                 dispatchMessage.AppendLine("I couldn't find the original message, but here's what you wanted to be reminded of:");
 
             dispatchMessage.AppendLine($"> {reminder.MessageContent} \n\n");
         }
-
-        dispatchMessage.AppendLine($"This reminder was set {reminder.CreatedAt.ToTimestamp()}!");
         return dispatchMessage;
     }
 
