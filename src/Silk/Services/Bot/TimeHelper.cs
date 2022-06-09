@@ -31,6 +31,7 @@ public sealed class TimeHelper
 
     public Result<TimeSpan> ExtractTime(string input, Offset? offset, out string remainder)
     {
+        
         remainder = input;
         
         if (string.IsNullOrEmpty(input))
@@ -61,10 +62,12 @@ public sealed class TimeHelper
             return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
 
         remainder = input[..parsedTime.Start] + input[(parsedTime.End + 1)..];
-
+        
+        
         return timeModel is DateTimeV2Date vd
-            ? (vd.Value.ToUniversalTime() - DateTime.UtcNow).Add(_buffer)
-            : ((timeModel as DateTimeV2DateTime)!.Value.ToUniversalTime() - DateTime.UtcNow).Add(_buffer);
+            ? (DateTime.SpecifyKind(vd.Value, DateTimeKind.Local).ToUniversalTime() - DateTimeOffset.UtcNow).Add(_buffer)
+            : (DateTime.SpecifyKind((timeModel as DateTimeV2DateTime)!.Value, DateTimeKind.Local).ToUniversalTime() - DateTimeOffset.UtcNow).Add(_buffer);
+        
     }
     
     public async Task<Offset?> GetOffsetForUserAsync(Snowflake userID)
