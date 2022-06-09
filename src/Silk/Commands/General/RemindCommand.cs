@@ -71,18 +71,12 @@ public static class MicroTimeParser
 [Category(Categories.General)]
 public class ReminderCommands : CommandGroup
 {
-    private const string ReminderDescription =
-        "The reminder to set. A time is required.\n"                                          +
-        "You can use natural language like `three hours from now` and `in 2 days`\n"          +
-        "If you're accustomed to other bots (or the behavior of V2), you can\n"               +
-        "set reminders in the format of `remind 2h30m to go to the gym`.\n\n"                 +
-        "Keep in mind that the time will be extrapolated from the first mention of a time.\n" +
-        "Time ranges (such as `for 2 days`) are ignored.\n"                                   +
-        "Mentions of `in X days` `X hours from now`, and similar are detected.\n\n"           +
-        "**NOTE:**: Absolute time (such as `at 5PM`) uses UTC as a reference point.\n"        +
-        "It's recommended to use relative time instead (such as `in three hours`).\n"         +
-        "`tomorrow` Also works, and is equivalent to 24 hours from now.\n\n"                  +
-        "We're aware this is a less-than ideal solution, and hope to add locale support for this in the future. <3";
+    private const string ReminderDescription = "The reminder to set. \n"                                            +
+                                               "Natural language such as \"in six hours\" as well as \n"            +
+                                               "formats such as `2d` and `15m` are supported."                      +
+                                               "You can set your timezone via the `timezone` command;\n"            +
+                                               " reminders like `tonight at 8` will reflect local time, otherwise " +
+                                               "the reference point is UTC.";
 
     private readonly ReminderActionCommands _reminderCommands;
 

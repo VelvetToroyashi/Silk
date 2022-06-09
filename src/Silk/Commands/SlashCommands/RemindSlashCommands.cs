@@ -92,7 +92,7 @@ public class RemindSlashCommands : CommandGroup
     public async Task<IResult> SetReminderAsync
     (
         [Option("time")]
-        [Description("When should I remind you? (e.g. in 5 minutes, in an hour, in 2 days, etc.)")]
+        [Description("When should I remind you? (e.g. 5m, in 5 minutes, tonight at 5 (requires timezone), etc.)")]
         string rawTime,
         
         [Option("about")]
