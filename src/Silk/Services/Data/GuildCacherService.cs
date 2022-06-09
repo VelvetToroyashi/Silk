@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -18,8 +17,6 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
-using Silk.Utilities;
-using StackExchange.Redis;
 
 namespace Silk.Services.Data;
 

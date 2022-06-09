@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
-using Recognizers.Text.DateTime.Wrapper;
-using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -16,7 +14,6 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
-using Silk.Commands.General;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Bot;
@@ -203,11 +200,11 @@ public class RemindSlashCommands : CommandGroup
 
         if (reminder is null)
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 "You don't have a reminder by that ID!"
-                );
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have a reminder by that ID!"
+            );
 
         var sb = new StringBuilder();
 

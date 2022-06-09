@@ -18,7 +18,6 @@ using Remora.Results;
 using Serilog;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
-using Silk.Extensions.Remora;
 using Silk.Utilities.HelpFormatter;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 

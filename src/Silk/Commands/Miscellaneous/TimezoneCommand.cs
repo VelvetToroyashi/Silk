@@ -1,19 +1,14 @@
 using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Humanizer;
 using MediatR;
 using NodaTime;
-using NodaTime.TimeZones;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
-using Silk.Extensions;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Miscellaneous;

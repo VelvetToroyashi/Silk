@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Gateway.Events;
-using Remora.Discord.Caching;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Data;

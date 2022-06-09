@@ -15,7 +15,6 @@ using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
 using Silk.Data.DTOs.Guilds;
-using Silk.Data.Entities;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;

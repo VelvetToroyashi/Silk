@@ -4,7 +4,6 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.DTOs.Guilds;
-using Silk.Data.Entities;
 
 namespace Silk.Services.Interfaces;
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -15,7 +14,6 @@ using NodaTime;
 using NodaTime.TimeZones;
 using Prometheus;
 using Remora.Commands.Extensions;
-using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching.Redis.Extensions;
 using Remora.Discord.Gateway;
