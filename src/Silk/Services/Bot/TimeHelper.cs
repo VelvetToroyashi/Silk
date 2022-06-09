@@ -65,9 +65,8 @@ public sealed class TimeHelper
         
         
         return timeModel is DateTimeV2Date vd
-            ? (DateTime.SpecifyKind(vd.Value, DateTimeKind.Local).ToUniversalTime() - DateTimeOffset.UtcNow).Add(_buffer)
-            : (DateTime.SpecifyKind((timeModel as DateTimeV2DateTime)!.Value, DateTimeKind.Local).ToUniversalTime() - DateTimeOffset.UtcNow).Add(_buffer);
-        
+            ? (vd.Value - refTime).Add(_buffer)
+            : ((timeModel as DateTimeV2DateTime)!.Value - refTime).Add(_buffer);
     }
     
     public async Task<Offset?> GetOffsetForUserAsync(Snowflake userID)
