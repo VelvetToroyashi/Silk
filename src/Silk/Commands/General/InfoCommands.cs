@@ -358,7 +358,7 @@ public class InfoCommands : CommandGroup
     
     private async Task<Stream> GenerateBannerColorImageAsync(Color bannerColor)
     {
-        using var image = new Image<Rgba32>(4096, 2048, new Rgba32(bannerColor.R, bannerColor.G, bannerColor.B, 255));
+        using var image = new Image<Rgba32>(4096, 2048, new(bannerColor.R, bannerColor.G, bannerColor.B, 255));
 
         var stream = new MemoryStream();
         
