@@ -235,11 +235,11 @@ public class InfoCommands : CommandGroup
         await using var swatchImage = await GenerateRoleColorSwatchAsync(role.Colour);
         
         var res = await _channels.CreateMessageAsync
-            (
-             _context.ChannelID,
-             embeds: new[] {embed},
-             attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("swatch.png", swatchImage)) }
-            );
+        (
+         _context.ChannelID,
+         embeds: new[] {embed},
+         attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("swatch.png", swatchImage)) }
+        );
 
         return res;
     }
@@ -320,7 +320,7 @@ public class InfoCommands : CommandGroup
 
         var sb = new StringBuilder();
         
-        if (currentIndex < roles.Count)
+        if (currentIndex < roles.Count - 1)
         {
             var next = roles[currentIndex + 1];
             
