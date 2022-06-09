@@ -61,9 +61,8 @@ public sealed class TimeHelper
         if (timeModel is null)
             return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
 
-        remainder = input[..parsedTime.Start] + input[(parsedTime.End + 1)..];
-        
-        
+        remainder = (input[..parsedTime.Start] + input[(parsedTime.End + 1)..]).Trim();
+
         return timeModel is DateTimeV2Date vd
             ? (vd.Value - refTime).Add(_buffer)
             : ((timeModel as DateTimeV2DateTime)!.Value - refTime).Add(_buffer);

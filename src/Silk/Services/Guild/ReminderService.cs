@@ -53,7 +53,7 @@ public sealed class ReminderService : IHostedService
         _channels    = channels;
         _logger      = logger;
 
-        _timer = new(DispatchShim, TimeSpan.FromSeconds(1), true);
+        _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
     }
 
     public async Task CreateReminderAsync
@@ -83,29 +83,21 @@ public sealed class ReminderService : IHostedService
     public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
         => _mediator.Send(new GetRemindersForUser.Request(userID));
 
-
-    // While this technically does allocate, the goal is to allocate
-    // less than async Task, but a state machine still has to be generated
-    // so this may actually be worse.
-    // 9 times out of 10, TryDispatchRemindersAsync returns synchronously
-    // So if AysncTimer supported VTs, we'd get huge uplifts.
-    private Task DispatchShim() => TryDispatchRemindersAsync().AsTask();
-    
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
     /// </summary>
-    private async ValueTask TryDispatchRemindersAsync()
+    private async Task TryDispatchRemindersAsync()
     {
         if (!_reminders.Any())
             return;
 
-        DateTime                    now       = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
         ReminderEntity[] reminders = _reminders.Where(r => r.ExpiresAt <= now).ToArray();
 
         if (reminders.Length is 0)
             return;
         
-        await Task.WhenAll(reminders.ToList().Select(DispatchReminderAsync));
+        await Task.WhenAll(reminders.Select(DispatchReminderAsync));
     }
 
     /// <summary>
@@ -224,7 +216,7 @@ public sealed class ReminderService : IHostedService
         {
             dispatchMessage.AppendLine($"Hi! {reminder.CreatedAt.ToTimestamp()}, you asked me to remind you about this!");
 
-            if (!string.IsNullOrEmpty(reminder.MessageContent))
+            if (!string.IsNullOrWhiteSpace(reminder.MessageContent))
                 dispatchMessage.AppendLine($"> {reminder.MessageContent}");            
 
             if (reminder.IsReply)
@@ -249,10 +241,11 @@ public sealed class ReminderService : IHostedService
                                .AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
             }
 
-            if (!string.IsNullOrEmpty(reminder.MessageContent))
+            if (!string.IsNullOrWhiteSpace(reminder.MessageContent))
             {
-                dispatchMessage.AppendLine("There was also additional context:")
-                            .AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                dispatchMessage
+                   .AppendLine("There was also additional context:")
+                   .AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
             }
         }
         else
