@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
@@ -180,6 +181,67 @@ public class RemindSlashCommands : CommandGroup
             );
     }
     
+    [Command("view")]
+    [Description("View a specific reminder in full.")]
+    public async Task<IResult> ViewAsync
+    (
+        [Description("The ID of the reminder to view.")]
+        int reminderID
+    )
+    {
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+
+        if (!reminders.Any())
+            return await _interactions.EditOriginalInteractionResponseAsync
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have any active reminders!"
+            );
+
+        var reminder = reminders.FirstOrDefault(r => r.Id == reminderID);
+
+        if (reminder is null)
+            return await _interactions.EditOriginalInteractionResponseAsync
+                (
+                 _context.ApplicationID,
+                 _context.Token,
+                 "You don't have a reminder by that ID!"
+                );
+
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"Your reminder (ID `{reminder.Id}`) was set {reminder.CreatedAt.ToTimestamp()}.");
+
+        if (!string.IsNullOrEmpty(reminder.MessageContent))
+        {
+            sb.AppendLine();
+            sb.AppendLine("Your reminder was:");
+
+            sb.AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                
+        }
+
+        if (reminder.IsReply)
+        {
+            sb.AppendLine();
+
+            sb.AppendLine($"You replied to [this message](https://discord.com/channels/{reminder.GuildID?.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.MessageID}).");
+            sb.AppendLine("In case it's gone missing (I haven't checked!), the content of the message was:");
+            sb.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+        }
+
+        var embed = new Embed { Colour = Color.DodgerBlue, Description = sb.ToString() };
+
+        return await _interactions.EditOriginalInteractionResponseAsync
+        (
+         _context.ApplicationID,
+         _context.Token,
+         embeds: new[] { embed }
+        );
+    }
+
+    
     [Command("remove")]
     [Description("Remove a reminder!")]
     public async Task<IResult> RemoveReminderAsync
@@ -193,19 +255,19 @@ public class RemindSlashCommands : CommandGroup
         
         if (reminders.All(r => r.Id != reminderID))
             return await _interactions.EditOriginalInteractionResponseAsync
-                (
-                 _context.ApplicationID,
-                 _context.Token,
-                 "You don't have any reminders, or at least not one by that ID!"
-                );
+            (
+             _context.ApplicationID,
+             _context.Token,
+             "You don't have any reminders, or at least not one by that ID!"
+            );
 
         await _reminders.RemoveReminderAsync(reminderID);
         
         return await _interactions.EditOriginalInteractionResponseAsync
-            (
-             _context.ApplicationID,
-             _context.Token,
-             "I've cancelled your reminder!"
-            );
+        (
+         _context.ApplicationID,
+         _context.Token,
+         "I've cancelled your reminder!"
+        );
     }
 }

@@ -210,6 +210,51 @@ public class ReminderCommands : CommandGroup
             }
         }
 
+        [Command("view")]
+        [Description("View a specific reminder in full.")]
+        public async Task<IResult> ViewAsync
+        (
+            [Description("The ID of the reminder to view.")]
+            int reminderID
+        )
+        {
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+
+            if (!reminders.Any())
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any active reminders!");
+
+            var reminder = reminders.FirstOrDefault(r => r.Id == reminderID);
+
+            if (reminder is null)
+                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have a reminder by that ID!");
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Your reminder (ID `{reminder.Id}`) was set {reminder.CreatedAt.ToTimestamp()}.");
+
+            if (!string.IsNullOrEmpty(reminder.MessageContent))
+            {
+                sb.AppendLine();
+                sb.AppendLine("Your reminder was:");
+
+                sb.AppendLine("> " + reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                
+            }
+
+            if (reminder.IsReply)
+            {
+                sb.AppendLine();
+
+                sb.AppendLine($"You replied to [this message](https://discord.com/channels/{reminder.GuildID?.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.MessageID}).");
+                sb.AppendLine("In case it's gone missing (I haven't checked!), the content of the message was:");
+                sb.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+            }
+
+            var embed = new Embed { Colour = Color.DodgerBlue, Description = sb.ToString() };
+
+            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        }
+
         [Command("cancel")]
         [Description("Cancels a reminder.")]
         public async Task<IResult> CancelAsync([Description("The ID(s) of the reminder you wish to cancel.")] int[] reminderIDs)
