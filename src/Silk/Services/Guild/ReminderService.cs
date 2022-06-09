@@ -53,7 +53,7 @@ public sealed class ReminderService : IHostedService
         _channels    = channels;
         _logger      = logger;
 
-        _timer = new(DispatchShim, TimeSpan.FromSeconds(1), true);
+        _timer = new(TryDispatchRemindersAsync, TimeSpan.FromSeconds(1), true);
     }
 
     public async Task CreateReminderAsync
@@ -83,18 +83,11 @@ public sealed class ReminderService : IHostedService
     public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
         => _mediator.Send(new GetRemindersForUser.Request(userID));
 
-
-    // While this technically does allocate, the goal is to allocate
-    // less than async Task, but a state machine still has to be generated
-    // so this may actually be worse.
-    // 9 times out of 10, TryDispatchRemindersAsync returns synchronously
-    // So if AysncTimer supported VTs, we'd get huge uplifts.
-    private Task DispatchShim() => TryDispatchRemindersAsync().AsTask();
     
     /// <summary>
     ///     The main dispatch loop, which iterates all active reminders, and dispatches them if they're due.
     /// </summary>
-    private async ValueTask TryDispatchRemindersAsync()
+    private async Task TryDispatchRemindersAsync()
     {
         if (!_reminders.Any())
             return;
@@ -118,7 +111,6 @@ public sealed class ReminderService : IHostedService
         if (reminder is null)
         {
             _logger.LogWarning(EventIds.Service, "Reminder was not present in memory. Was it dispatched already?");
-            return new NotFoundError();
         }
         else
         {
@@ -126,8 +118,9 @@ public sealed class ReminderService : IHostedService
             _logger.LogDebug("Removed reminder {Reminder}", id);
             
             SilkMetric.LoadedReminders.Dec();
-            return await _mediator.Send(new RemoveReminder.Request(id));
         }
+        
+        return await _mediator.Send(new RemoveReminder.Request(id));
     }
 
     private async Task<Result> DispatchReminderAsync(ReminderEntity reminder)
