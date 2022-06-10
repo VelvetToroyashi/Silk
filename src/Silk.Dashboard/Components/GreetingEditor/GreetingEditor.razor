@@ -10,23 +10,24 @@
 @inherits DashboardComponentBase
 
 <MudCard Class="m-4">
-    <MudForm Model="@Greeting" @ref="@_form">
-        <MudCardContent>
+    <MudCardContent>
+        <MudForm Model="Greeting" @ref="_form">
+
             @* Guild ID *@
             <MudContainer Class="mb-4">
                 <MudTooltip Placement="Placement.Bottom"
-                            Text="The ID of the Guild to greet members in">
+                            Text="The ID of the guild to greet members in">
                     <MudText Typo="Typo.h5">
                         @LabelFor(nameof(Greeting.GuildID))
                     </MudText>
                 </MudTooltip>
 
                 <MudTextField T="Snowflake"
-                              @bind-Value="@Greeting.GuildID"
+                              @bind-Value="Greeting.GuildID"
                               Variant="Variant.Outlined"
                               Immediate="false"
-                              Validation="@NonNullableValidator"
-                              Converter="@NonNullableConverter"/>
+                              Validation="NonNullableValidator"
+                              Converter="NonNullableConverter"/>
             </MudContainer>
 
             @* Channel ID *@
@@ -39,25 +40,25 @@
                 </MudTooltip>
 
                 <MudTextField T="Snowflake"
-                              @bind-Value="@Greeting.ChannelID"
+                              @bind-Value="Greeting.ChannelID"
                               Variant="Variant.Outlined"
                               Immediate="false"
-                              Validation="@NonNullableValidator"
-                              Converter="@NonNullableConverter"/>
+                              Validation="NonNullableValidator"
+                              Converter="NonNullableConverter"/>
             </MudContainer>
 
             @* Greeting Option *@
             <MudContainer Class="mb-4">
                 <MudTooltip Placement="Placement.Bottom"
-                            Text="How/when to greet new members">
+                            Text="How / when to greet new members">
                     <MudText Typo="Typo.h5">
                         @LabelFor(nameof(Greeting.Option))
                     </MudText>
                 </MudTooltip>
 
-                <MudSelect @bind-Value="@Greeting.Option"
+                <MudSelect @bind-Value="Greeting.Option"
                            Variant="Variant.Outlined">
-                    @foreach (var greetingOption in _greetingOptions)
+                    @foreach (var greetingOption in GreetingOptions)
                     {
                         <MudSelectItem Value="@greetingOption">
                             @greetingOption.Humanize(LetterCasing.Title)
@@ -65,7 +66,7 @@
                     }
                 </MudSelect>
             </MudContainer>
-            
+
             @if (Greeting.Option is GreetingOption.GreetOnRole)
             {
                 <MudContainer>
@@ -77,11 +78,11 @@
                     </MudTooltip>
 
                     <MudTextField T="Snowflake?"
-                                  @bind-Value="@Greeting.MetadataID"
+                                  @bind-Value="Greeting.MetadataID"
                                   Variant="Variant.Outlined"
                                   Immediate="false"
-                                  Validation="@NullableValidator"
-                                  Converter="@NullableConverter"/>
+                                  Validation="NullableValidator"
+                                  Converter="NullableConverter"/>
                 </MudContainer>
             }
 
@@ -89,18 +90,15 @@
             <MudContainer Class="mb-4">
                 <MudList Clickable="false">
                     <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{u} </span>
-                        Gets replaced with the member's username
+                        <span class="mud-info-text">{u}</span> = Member's username
                     </MudListItem>
 
                     <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{s} </span>
-                        Gets replaced with the Guild's name
+                        <span class="mud-info-text">{s}</span> = Guild's name
                     </MudListItem>
 
                     <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{@@u} </span>
-                        Gets replaced with the member's mention
+                        <span class="mud-info-text">{@@u}</span> = Member's mention
                     </MudListItem>
                 </MudList>
 
@@ -111,25 +109,26 @@
                     </MudText>
                 </MudTooltip>
 
-                <MudTextField @bind-Value="@Greeting.Message"
+                <MudTextField @bind-Value="Greeting.Message"
                               Class="mb-2"
                               Immediate="true"
                               Variant="Variant.Outlined"
                               DisableUnderLine="true"
                               Lines="6"
                               Placeholder="@("Welcome {@u}! This is {s}, the best server around!")"
-                              MaxLength="@MaxMessageLength"/>
+                              MaxLength="MaxMessageLength"/>
             </MudContainer>
 
             @* Save Button *@
             <MudContainer>
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           Disabled="@IsBusy"
-                           OnClick="@SubmitAsync">
+                           Disabled="IsBusy"
+                           OnClick="SubmitAsync">
                     Save Changes
                 </MudButton>
             </MudContainer>
-        </MudCardContent>
-    </MudForm>
+
+        </MudForm>
+    </MudCardContent>
 </MudCard>

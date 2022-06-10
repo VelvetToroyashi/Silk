@@ -28,44 +28,44 @@
     <link href="css/site.css" rel="stylesheet"/>
     <link href="Silk.Dashboard.styles.css" rel="stylesheet"/>
 
-    <component type="typeof(HeadOutlet)" render-mode="Server"/>
+    <component type="@typeof(HeadOutlet)" render-mode="Server"/>
 </head>
 <body>
-@RenderBody()
+    @RenderBody()
 
-<div id="blazor-error-ui">
-    <environment include="Staging,Production">
-        An error has occurred. This application may no longer respond until reloaded.
-    </environment>
-    <environment include="Development">
-        An unhandled exception has occurred. See browser dev tools for details.
-    </environment>
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
-
-<div id="components-reconnect-modal">
-    <div id="blazorReconnect" style="color: white">
-        Attempting to reconnect to webserver ...
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
     </div>
 
-    <div id="blazorFailedOrRejected" style="color: white">
-        Could not reconnect to webserver
-        <p onclick="location.reload()"
-           style="text-decoration: underline;color: white;cursor: pointer">
-            Reload the page
-        </p>
+    <div id="components-reconnect-modal">
+        <div id="blazorReconnect" style="color: white">
+            Attempting to reconnect...
+        </div>
+
+        <div id="blazorFailedOrRejected" style="color: white">
+            Could not reconnect
+            <p onclick="location.reload()"
+               style="text-decoration: underline;color: white;cursor: pointer">
+                Reload the page
+            </p>
+        </div>
     </div>
-</div>
 
-@* Blazor *@
-<script src="_framework/blazor.server.js" autostart="false"></script>
+    @* Blazor *@
+    <script src="_framework/blazor.server.js" autostart="false"></script>
 
-@* Blazor options *@
-<script>
-    Blazor.start({ reconnectionOptions: { maxRetries: 4, retryIntervalMilliseconds: 3000 } });
-</script>
+    @* Blazor options *@
+    <script>
+        Blazor.start({ reconnectionOptions: { maxRetries: 4, retryIntervalMilliseconds: 3000 } });
+    </script>
 
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 </body>
 </html>

@@ -18,12 +18,11 @@
     {
         <MudGrid>
             <MudItem xs="12">
-                <MudGrid Spacing="4" 
-                         Justify="Justify.Center">
-                    <CollectionView Data="@_contributors">
+                <MudGrid Spacing="4" Justify="Justify.Center">
+                    <CollectionView Data="_contributors">
                         <ItemTemplate>
-                            <MudItem @key="@context.Id">
-                                <ContributorCardView Contributor="@context"/>
+                            <MudItem @key="context.Id">
+                                <ContributorCardView Contributor="context"/>
                             </MudItem>
                         </ItemTemplate>
                     </CollectionView>
@@ -31,5 +30,4 @@
             </MudItem>
         </MudGrid>
     }
-
 </MudContainer>

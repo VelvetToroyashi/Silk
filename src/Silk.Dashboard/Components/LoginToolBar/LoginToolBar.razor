@@ -4,26 +4,28 @@
 
 @if (_authState.User.IsAuthenticated())
 {
-    @* Todo: Check this doesn't look weird if other elements are added *@
     <MudButtonGroup OverrideStyles="false">
-        <MudButton Variant="Variant.Text" Link="dashboard/profile">
+        <MudButton Variant="Variant.Text"
+                   Href="profile">
             @_authState.User.Identity?.Name
         </MudButton>
-        
-        <MudButton Variant="Variant.Text" Link="api/account/logout">
+
+        <MudButton Variant="Variant.Text"
+                   Href="api/account/logout">
             Logout
         </MudButton>
     </MudButtonGroup>
 }
 else
 {
-    <MudButton Variant="Variant.Text" Link="api/account/login">
+    <MudButton Variant="Variant.Text"
+               Href="api/account/login">
         Login
     </MudButton>
 }
 
-@code
-{
+@code {
+
     [CascadingParameter]
     private Task<AuthenticationState> AuthTask { get; set; }
 
@@ -34,4 +36,5 @@ else
         await base.OnInitializedAsync();
         _authState = await AuthTask;
     }
+
 }

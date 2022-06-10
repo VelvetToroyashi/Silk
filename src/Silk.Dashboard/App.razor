@@ -10,7 +10,9 @@
                     {
                         <ProblemView Message="Please login to get started with the Dashboard"
                                      ImageUrl="imgs/rp_scare.png">
-                            <MudButton Size="Size.Large" Color="Color.Info" Link="api/account/login"
+                            <MudButton Size="Size.Large" 
+                                       Color="Color.Info" 
+                                       Href="api/account/login"
                                        StartIcon="@Icons.Material.Filled.Login">
                                 Login
                             </MudButton>
@@ -28,7 +30,9 @@
         <NotFound>
             <LayoutView Layout="@typeof(MainLayout)">
                 <ProblemView>
-                    <MudButton Size="Size.Large" Color="Color.Info" Link="/"
+                    <MudButton Size="Size.Large" 
+                               Color="Color.Info" 
+                               Href="/"
                                StartIcon="@Icons.Material.Filled.Home">
                         Home
                     </MudButton>

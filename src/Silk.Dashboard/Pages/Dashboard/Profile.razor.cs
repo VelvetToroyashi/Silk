@@ -8,7 +8,7 @@ namespace Silk.Dashboard.Pages.Dashboard;
 
 public partial class Profile
 {
-    [Inject] public  ISnackbar                Snackbar          { get; set; }
+    [Inject] public  ISnackbar                Snackbar      { get; set; }
     [Inject] private IDashboardDiscordClient  DiscordClient { get; set; }
 
     private bool _showJoinedGuilds;
@@ -19,9 +19,10 @@ public partial class Profile
 
     protected override async Task OnInitializedAsync()
     {
-        _user         = await DiscordClient.GetCurrentUserAsync(true);
-        _joinedGuilds = await DiscordClient.GetCurrentUserGuildsAsync(true);
-        _managedGuilds  = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
+        _user          = await DiscordClient.GetCurrentUserAsync(true);
+        _joinedGuilds  = await DiscordClient.GetCurrentUserGuildsAsync(true);
+
+        _managedGuilds = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }
 
     private string CurrentUserAvatar => GetUserAvatarUrl();
@@ -32,13 +33,14 @@ public partial class Profile
         var result = CDN.GetUserAvatarUrl(_user, imageSize: 256);
 
         if (!result.IsSuccess) return avatarUrl;
+
         if (result.IsDefined(out var uri))
             avatarUrl = uri.ToString();
-        
+
         return avatarUrl;
     }
 
-    private string CurrentUserName => _user.Username;
+    private string CurrentUserName            => _user.Username;
     private string HeaderViewGreeting         => CurrentUserName;
     private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers"; 
 
@@ -46,13 +48,13 @@ public partial class Profile
 
     private void HandleGuildNavigation(IPartialGuild guild)
     {
-        var navUrl = $"/dashboard/manage-guild/{guild.ID.Value.Value}";
-        var canNavigate = guild.Permissions.IsDefined(out var permissionSet) &&
+        var navUrl = $"/manage-guild/{guild.ID.Value.Value}";
+        var canNavigate = guild.Permissions.IsDefined(out var permissionSet) && 
                           permissionSet.HasPermission(DiscordPermission.ManageGuild);
 
         if (!canNavigate)
         {
-            Snackbar.Add("<h2>Missing Permissions</h2><br/>" + 
+            Snackbar.Add("<h2>Missing Permissions</h2><br/>" +
                          "<h3>Please ask an admin or moderator to invite the bot to the desired server 🙂</h3>", 
                          Severity.Info);
             return;

@@ -7,9 +7,9 @@
            Dense="false">
 
     <MudButtonGroup OverrideStyles="false">
-        <MudButton Link="/"
+        <MudButton Href="/"
                    Variant="Variant.Text">
-            <MudImage Class="mr-3" 
+            <MudImage Class="mr-3"
                       Src="@IconLink"
                       ObjectFit="ObjectFit.Contain"
                       ObjectPosition="ObjectPosition.Center"
@@ -19,18 +19,18 @@
 
         <MudButton Size="Size.Large"
                    Variant="Variant.Text"
-                   Link="/about">
+                   Href="/about">
             About
         </MudButton>
 
         <MudButton Variant="Variant.Text"
-                   Link="https://github.com/VTPDevelopment/Silk"
+                   Href="@GithubLink"
                    Target="_blank">
             Github
         </MudButton>
 
         <MudButton Variant="Variant.Text"
-                   Link="@InviteLink"
+                   Href="@InviteLink"
                    Target="_blank">
             Invite Me
         </MudButton>
@@ -40,11 +40,3 @@
 
     <LoginToolBar/>
 </MudAppBar>
-
-@code {
-        private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
-
-        private const string InviteLink = "https://discord.com/api/oauth2/authorize?" +
-                                          "client_id=721514294587424888&permissions=502656214&scope=bot%20applications.commands";
-
-}
