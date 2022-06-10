@@ -11,14 +11,10 @@ public static class MudBlazorSnowflakeConverter
     public static NonNullableSnowflakeConverter NonNullableConverter = new();
 
     public static Func<Snowflake, string> NonNullableValidator =
-        s => s != default ? null : IdValidationError;
+        s => (s != default) ? null : IdValidationError;
 
     public static Func<Snowflake?, string> NullableValidator =
-        s =>
-        {
-            if (s is not null) return s.Value != default ? null : IdValidationError;
-            return null;
-        };
+        s => s is not null ? NonNullableValidator((Snowflake) s) : null;
 
     public class NonNullableSnowflakeConverter : MudBlazor.Converter<Snowflake>
     {
@@ -47,10 +43,8 @@ public static class MudBlazorSnowflakeConverter
         
         private Snowflake? ConvertFrom(string value)
         {
-            var r = Snowflake.TryParse(value, out var snowflake, Constants.DiscordEpoch)
-                ? snowflake
-                : new();
-            return r;
+            _ = Snowflake.TryParse(value, out var snowflake, Constants.DiscordEpoch);
+            return snowflake;
         }
     }
 }
