@@ -98,15 +98,6 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddSilkConfigurationOptions
-    (
-        this IServiceCollection services,
-        IConfiguration configuration
-    )
-    {
-        return services.Configure<SilkConfigurationOptions>(configuration.GetSection(SilkConfigurationOptions.SectionKey));
-    }
-
     private static IServiceCollection AddSilkDatabase
     (
         this IServiceCollection  services,
