@@ -1,5 +1,6 @@
 #nullable enable
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
@@ -26,5 +27,27 @@ public record DiscordTokenStoreEntry
          context.GetTokenExpiry()
         )
     {
+    }
+
+    public static async Task<DiscordTokenStoreEntry> FromHttpContext(HttpContext context)
+    {
+        var tasks = new[]
+        {
+            context.GetTokenAsync("access_token"),
+            context.GetTokenAsync("refresh_token"),
+            context.GetTokenAsync("token_type"),
+            context.GetTokenAsync("expires_at"),
+        };
+
+        // Wait for all tokens to be retrieved
+        await Task.WhenAll(tasks);
+
+        return new DiscordTokenStoreEntry
+        (
+         tasks[0].Result,
+         tasks[1].Result,
+         tasks[2].Result,
+         DiscordTokenStoreExtensions.GetTokenExpiry(tasks[3].Result)
+        );
     }
 }
