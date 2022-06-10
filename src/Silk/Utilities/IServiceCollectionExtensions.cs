@@ -114,7 +114,8 @@ public static class IServiceCollectionExtensions
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
            .AddCommands()
-           .AddPostExecutionEvent<PostCommandHandler>();   // Register commands
+           .AddPostExecutionEvent<PostCommandHandler>()
+           .AddPostExecutionEvent<CommandMetricsHandler>();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>()
