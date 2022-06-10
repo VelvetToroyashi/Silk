@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components
 @using Humanizer
 @using Remora.Rest.Core
+@using Silk.Data.Entities
 @using static Silk.Dashboard.Converters.MudBlazorSnowflakeConverter
 @using static Silk.Dashboard.Helpers.StringHelpers
 
@@ -44,23 +45,6 @@
                               Validation="@NonNullableValidator"
                               Converter="@NonNullableConverter"/>
             </MudContainer>
-            
-            @* Metadata ID *@
-            <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Bottom"
-                            Text="@MetaDataIdHelpText">
-                    <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(Greeting.MetadataID))
-                    </MudText>
-                </MudTooltip>
-
-                <MudTextField T="Snowflake?"
-                              @bind-Value="@Greeting.MetadataID"
-                              Variant="Variant.Outlined"
-                              Immediate="false"
-                              Validation="@NullableValidator"
-                              Converter="@NullableConverter"/>
-            </MudContainer>
 
             @* Greeting Option *@
             <MudContainer Class="mb-4">
@@ -73,14 +57,33 @@
 
                 <MudSelect @bind-Value="@Greeting.Option"
                            Variant="Variant.Outlined">
-                    @foreach (var go in _greetingOptions)
+                    @foreach (var greetingOption in _greetingOptions)
                     {
-                        <MudSelectItem Value="@go">
-                            @go.Humanize(LetterCasing.Title)
+                        <MudSelectItem Value="@greetingOption">
+                            @greetingOption.Humanize(LetterCasing.Title)
                         </MudSelectItem>
                     }
                 </MudSelect>
             </MudContainer>
+            
+            @if (Greeting.Option is GreetingOption.GreetOnRole)
+            {
+                <MudContainer>
+                    <MudTooltip Placement="Placement.Bottom"
+                                Text="@MetaDataIdHelpText">
+                        <MudText Typo="Typo.h5">
+                            Role ID
+                        </MudText>
+                    </MudTooltip>
+
+                    <MudTextField T="Snowflake?"
+                                  @bind-Value="@Greeting.MetadataID"
+                                  Variant="Variant.Outlined"
+                                  Immediate="false"
+                                  Validation="@NullableValidator"
+                                  Converter="@NullableConverter"/>
+                </MudContainer>
+            }
 
             @* Greeting Message *@
             <MudContainer Class="mb-4">
