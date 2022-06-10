@@ -194,13 +194,13 @@ public class Program
                 var silkConfig = context.Configuration.GetSilkConfigurationOptions();
 
                 AddDatabases(services, silkConfig.Persistence);
-                AddSilkConfigurationOptions(services, context.Configuration);
                 
                 // A little note on Sentry; it's important to initialize logging FIRST
                 // And then sentry, because we set the settings for sentry later. 
                 // If we configure logging after, it'll override the settings with defaults.
 
                 services
+                   .AddSilkConfigurationOptions(context.Configuration)
                    .AddRemoraServices()
                    .AddSingleton<ShardHelper>()
                    .AddHostedService<ShardStatService>()
@@ -263,14 +263,6 @@ public class Program
         return builder;
     }
 
-    private static void AddSilkConfigurationOptions(IServiceCollection services, IConfiguration configuration)
-    {
-        // Add and Bind IOptions configuration for appSettings.json and UserSecrets configuration structure
-        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-5.0
-        IConfigurationSection? silkConfigurationSection = configuration.GetSection(SilkConfigurationOptions.SectionKey);
-        services.Configure<SilkConfigurationOptions>(silkConfigurationSection);
-    }
-
     private static void AddDatabases(IServiceCollection services, SilkPersistenceOptions persistenceOptions)
     {
         void Builder(DbContextOptionsBuilder b)
@@ -284,6 +276,5 @@ public class Program
 
         services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
         services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
-        //services.TryAdd(new ServiceDescriptor(typeof(GuildContext), p => p.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext(), ServiceLifetime.Transient));
     }
 }
