@@ -51,8 +51,8 @@ public class PostCommandHandler : IPostExecutionEvent
         
         _hub.ConfigureScope(s => s.Contexts[context.User.ID.ToString()] = new Dictionary<string, object>
         { 
-            ["id"]       = context.User.ID,
-            ["guild_id"] = context.GuildID.IsDefined(out var gid) ? gid : "DM",
+            ["id"]       = context.User.ID.ToString(),
+            ["guild_id"] = context.GuildID.IsDefined(out var gid) ? gid.ToString() : "DM",
         });
 
         if (context is MessageContext mc)
