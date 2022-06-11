@@ -117,8 +117,8 @@ public class InfoCommands : CommandGroup
             {
                 new("Account Created", user.ID.Timestamp.ToTimestamp(), true),
                 new("Joined", member.JoinedAt.ToTimestamp(), true),
-                new("Flags", user.PublicFlags.IsDefined(out var flags) ? ((int)flags) is 0 ? "None" : flags.ToString().Split(' ').Join("\n").Humanize(LetterCasing.Title) : "None", true),
-                new("Roles", string.Join(",\n", member.Roles.OrderByDescending(r => roles[r].Position).Select(x => $"<@&{x}>"))),
+                new("Flags", user.PublicFlags.IsDefined(out var flags) ? (int)flags is 0 ? "None" : flags.ToString().Split(' ').Join("\n").Humanize(LetterCasing.Title) : "None", true),
+                new("Roles", string.Join(",\n", member.Roles.Append(roles[_context.GuildID.Value].ID).OrderByDescending(r => roles[r].Position).Select(x => $"<@&{x}>"))),
             }
         };
 
