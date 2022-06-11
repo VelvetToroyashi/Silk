@@ -128,9 +128,7 @@ public class PhishingDetectionService
          notify: false
         );
         
-        return infractionResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(infractionResult.Error);
+       return (Result)infractionResult;
     }
     
     public async Task<Result> HandlePotentialSuspiciousUsernameAsync(Snowflake guildID, IUser user)

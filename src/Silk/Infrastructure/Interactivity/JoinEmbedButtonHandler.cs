@@ -48,7 +48,7 @@ public class JoinEmbedButtonHandler : IButtonInteractiveEntity
                 flags: MessageFlags.Ephemeral
             );
 
-            return permissionResult.IsSuccess ? Result.FromSuccess() : Result.FromError(permissionResult.Error);
+            return (Result)permissionResult;
         }
             
         var infractionResult = action switch
@@ -65,6 +65,6 @@ public class JoinEmbedButtonHandler : IButtonInteractiveEntity
             flags: MessageFlags.Ephemeral
         );
 
-        return logResult.IsSuccess ? Result.FromSuccess() : Result.FromError(logResult.Error);
+        return (Result)logResult;
     }
 }

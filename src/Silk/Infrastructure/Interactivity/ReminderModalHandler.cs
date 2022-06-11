@@ -70,9 +70,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
              ct: ct
             );
             
-            return informResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(informResult.Error);
+           return (Result)informResult;
         }
 
         if (parsedTime <= TimeSpan.Zero)
@@ -86,9 +84,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
              ct: ct
             );
             
-            return informResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(informResult.Error);
+           return (Result)informResult;
         }
 
         if (parsedTime < TimeSpan.FromMinutes(3))
@@ -102,9 +98,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
              ct: ct
             );
             
-            return minTimeResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(minTimeResult.Error);
+           return (Result)minTimeResult;
         }
         
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
@@ -136,6 +130,6 @@ public class ReminderModalHandler : IModalInteractiveEntity
          ct: ct
         );
 
-        return res.IsSuccess ? Result.FromSuccess() : Result.FromError(res.Error);
+        return (Result)res;
     }
 }

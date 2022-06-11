@@ -80,9 +80,7 @@ public class e621Command : eBooruBaseCommand
         if (!result.IsSuccess)
         {
             Result<IMessage> errorResult = await _channelApi.CreateMessageAsync(_context.ChannelID, result.Error!.Message);
-            return errorResult.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(errorResult.Error);
+           return (Result)errorResult;
         }
 
         List<Post>? booruPosts = result.Entity?.Posts;
@@ -110,8 +108,6 @@ public class e621Command : eBooruBaseCommand
 
         Result<IMessage> send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
 
-        return send.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(send.Error);
+       return (Result)send;
     }
 }

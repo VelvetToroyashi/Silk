@@ -98,8 +98,6 @@ public class BotStatCommand : CommandGroup
         
         var res = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
         
-        return res.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(res.Error);
+       return (Result)res;
     }
 }

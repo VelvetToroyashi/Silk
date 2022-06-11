@@ -30,7 +30,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
         if (cacheResult.IsDefined(out var user) && user.History.Last().JoinDate != gatewayEvent.JoinedAt)
             await _mediator.Send(new AddUserJoinDate.Request(gatewayEvent.GuildID, user.ID, gatewayEvent.JoinedAt), ct);
 
-        return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
+        return (Result)cacheResult;
     }
 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
@@ -40,7 +40,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
         if (cacheResult.IsDefined(out var user) && user.History.Last().LeaveDate is null)
             await _mediator.Send(new AddUserLeaveDate.Request(gatewayEvent.GuildID, user.ID, DateTimeOffset.UtcNow), ct);
         
-        return cacheResult.IsSuccess ? Result.FromSuccess() : Result.FromError(cacheResult.Error);
+        return (Result)cacheResult;
     }
 
     public Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)

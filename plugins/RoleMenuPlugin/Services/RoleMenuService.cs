@@ -72,9 +72,7 @@ public class RoleMenuService
                  flags: MessageFlags.Ephemeral
                 );
                 
-                return followupResult.IsSuccess
-                    ? Result.FromSuccess() 
-                    : Result.FromError(followupResult);
+                return (Result)followupResult;
             }
 
             var guildRolesResult = await _guilds.GetGuildRolesAsync(interaction.GuildID.Value);
@@ -127,9 +125,7 @@ public class RoleMenuService
                 new ActionRowComponent(new[] { dropdown })
              });
             
-            return result.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(result.Error);
+           return (Result)result;
         }
         return Result.FromSuccess();
     }
