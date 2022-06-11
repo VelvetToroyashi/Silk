@@ -29,9 +29,9 @@ public class PostCommandHandler : IPostExecutionEvent
     public PostCommandHandler
     (
         IHub                       hub,
-        ICommandHelpService         help,
-        ICommandPrefixMatcher       prefix,
-        IDiscordRestChannelAPI      channels,
+        ICommandHelpService        help,
+        ICommandPrefixMatcher      prefix,
+        IDiscordRestChannelAPI     channels,
         IDiscordRestInteractionAPI interactions
     )
     {
