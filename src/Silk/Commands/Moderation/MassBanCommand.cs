@@ -52,7 +52,7 @@ public class MassBanCommand : CommandGroup
 
         days = Math.Min((byte)7, days);
         
-        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GuildID.Value, u.ID, _context.User.ID, days, reason, notify: i > 15)));
+        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GuildID.Value, u.ID, _context.User.ID, days, reason, notify: i < 15)));
 
         var failed = result.Count(r => !r.IsSuccess);
 
