@@ -261,9 +261,7 @@ public class PhishingDetectionService
             _                     => throw new InvalidOperationException("Invalid infraction type.")
         };
 
-        return infractionResult.IsSuccess 
-            ? Result.FromSuccess() 
-            : Result.FromError(infractionResult.Error);
+        return (Result)infractionResult;
     }
 
 }

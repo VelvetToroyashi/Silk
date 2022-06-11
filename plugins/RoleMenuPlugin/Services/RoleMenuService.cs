@@ -249,9 +249,7 @@ public class RoleMenuService
              }
             );
             
-            return interactionResult.IsSuccess 
-                ? Result.FromSuccess()
-                : Result.FromError(interactionResult.Error);
+            return (Result)interactionResult;
         }
 
         return await DisplayRoleMenuErrorAsync(interaction, guildID, roleMenuRoleIDs, roleResult);
