@@ -491,25 +491,29 @@ public sealed class RoleMenuCommand : CommandGroup
     
     private async Task<IResult> CreateRoleMenuMessageAsync(Snowflake channelID, IReadOnlyList<IRole> roles)
     {
-        var roleMenuMessageResult = await _channels
-           .CreateMessageAsync
-                (
-                 channelID,
-                 !roles.Any()
-                     ? "This role menu is being set up, please wait!"
-                     : "**Role Menu!**\n"                               +
-                       "Use the button below to select your roles!\n\n" +
-                       "Available roles:\n"                             +
-                       string.Join('\n', roles.Select(r => $"<@&{r.ID}>")),
-                 components:
-                 new[]
-                 {
-                     new ActionRowComponent(new[]
-                     {
-                         new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
-                     })
-                 }
-                );
+        var roleMenuMessageResult = await _channels.CreateMessageAsync
+        (
+         channelID,
+         !roles.Any()
+             ? "This role menu is being set up, please wait!"
+             : "**Role Menu!**\n"                               +
+               "Use the button below to select your roles!\n\n" +
+               "Available roles:\n"                             +
+               string.Join('\n', roles.Select(r => $"<@&{r.ID}>")),
+         components:
+         new[]
+         {
+             new ActionRowComponent(new[]
+             {
+                 new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
+             })
+         },
+         allowedMentions: new AllowedMentions
+         (
+            Parse: Array.Empty<MentionType>(),
+            Roles: Array.Empty<Snowflake>()
+         )
+        );
 
         if (!roleMenuMessageResult.IsSuccess)
             return roleMenuMessageResult;
