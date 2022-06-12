@@ -1,24 +1,37 @@
-using System.Collections.Concurrent;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Results;
 
 namespace Silk.Interactivity;
 
-public class InteractivityWaiter<T> where T : IGatewayEvent
+public class InteractivityWaiter
 {
-    private readonly ConcurrentBag<InteractivityRequest<T>> _events = new();
+    private readonly List<InteractivityRequest> _events = new();
 
-    public void TryEvaluateEvents(T gatewayEvent)
+    internal void TryEvaluateEvents(IGatewayEvent gatewayEvent)
     {
         foreach (var request in _events)
-            if (request.Predicate(gatewayEvent))
-                request.Wait.TrySetResult(gatewayEvent);
+        {
+            if (request.GetType().GenericTypeArguments[0] != gatewayEvent.GetType())
+                continue;
+
+            var wait      = request.GetType().GetProperty("Wait",      BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
+            var predicate = request.GetType().GetProperty("Predicate", BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
+            
+            
+            if (Unsafe.As<Func<IGatewayEvent, bool>>(predicate)(gatewayEvent))
+            {
+                Unsafe.As<TaskCompletionSource<IGatewayEvent>>(wait).TrySetResult(gatewayEvent);
+                _events.Remove(request);
+            }
+        }
     }
     
-    public async Task<Result<T?>> WaitForEventAsync(Func<T, bool> predicate, CancellationToken ct = default)
+    public async Task<Result<T?>> WaitForEventAsync<T>(Func<T, bool> predicate, CancellationToken ct = default) where T : IGatewayEvent
     {
         var tcs = new TaskCompletionSource<Result<T?>>(ct);
-        _events.Add(new(tcs, predicate));
+        _events.Add(new InteractivityRequest<T>(tcs, predicate));
 
         try
         {

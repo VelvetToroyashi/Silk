@@ -4,13 +4,13 @@ using Remora.Results;
 
 namespace Silk.Interactivity;
 
-public class InteractivityResponder<T> : IResponder<T> where T : IGatewayEvent
+public class InteractivityResponder : IResponder<IGatewayEvent>
 {
-    private readonly InteractivityWaiter<T> _waiter;
-    public InteractivityResponder(InteractivityWaiter<T> waiter)
+    private readonly InteractivityWaiter _waiter;
+    public InteractivityResponder(InteractivityWaiter waiter)
         => _waiter = waiter;
 
-    public  Task<Result> RespondAsync(T gatewayEvent, CancellationToken ct = default)
+    public Task<Result> RespondAsync(IGatewayEvent gatewayEvent, CancellationToken ct = default)
     {
         _waiter.TryEvaluateEvents(gatewayEvent);
         return Task.FromResult(Result.FromSuccess());

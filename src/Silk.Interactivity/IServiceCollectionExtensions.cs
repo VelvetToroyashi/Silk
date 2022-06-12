@@ -9,14 +9,9 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSilkInteractivity(this IServiceCollection services)
     {
         services.AddSingleton<InteractivityExtension>();
+
         
-        services.AddSingleton<InteractivityWaiter<IMessageCreate>>();
-        services.AddSingleton<InteractivityWaiter<IInteractionCreate>>();
-
-
-        services.AddResponder<InteractivityResponder<IMessageCreate>>();
-        services.AddResponder<InteractivityResponder<IInteractionCreate>>();
-
+        
         return services;
     }
 }
