@@ -13,12 +13,11 @@ public class InteractivityWaiter
     {
         foreach (var request in _events)
         {
-            if (request.GetType().GenericTypeArguments[0] != gatewayEvent.GetType())
+            if (gatewayEvent.GetType().GetInterfaces().Contains(request.GetType().GenericTypeArguments[0]))
                 continue;
 
             var wait      = request.GetType().GetProperty("Wait",      BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
             var predicate = request.GetType().GetProperty("Predicate", BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
-            
             
             if (Unsafe.As<Func<IGatewayEvent, bool>>(predicate)(gatewayEvent))
             {
