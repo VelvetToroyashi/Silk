@@ -141,7 +141,7 @@ public class PhishingDetectionService
         // TODO: add to config and make toggelable. This will go under phishing settings.
         var detection = IsSuspectedPhishingUsername(user.Username);
         
-        if (!detection.isSuspicious)
+        if (!detection.IsSuspicious)
             return Result.FromSuccess();
 
         var self = await _users.GetCurrentUserAsync();
@@ -156,7 +156,7 @@ public class PhishingDetectionService
              user.ID,
              self.Entity.ID,
              1,
-             $"Suspicious username similar to  '{detection.mostSimilarTo}' detected",
+             $"Suspicious username similar to  '{detection.MostSimilarTo}' detected",
              notify: false
             );
         
@@ -166,7 +166,7 @@ public class PhishingDetectionService
         return Result.FromSuccess();
     }
     
-    private (bool isSuspicious, string mostSimilarTo) IsSuspectedPhishingUsername(string username)
+    public (bool IsSuspicious, string MostSimilarTo) IsSuspectedPhishingUsername(string username)
     {
         using var _ = SilkMetric.PhishingDetection.WithLabels("username").NewTimer();
         
@@ -174,11 +174,8 @@ public class PhishingDetectionService
 
         var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames, s => s, ScorerCache.Get<WeightedRatioScorer>());
 
-        if (fuzzy.Score > 80)
-            _logger.LogTrace("Potentially suspicious Username: {Normalized}, most similar to {FuzzyMatched}, Score: {Score}", normalized, fuzzy.Value, fuzzy.Score);
-        
         // This is somewhat arbitrary, and may be adjusted to be more or less sensitive.
-        return (fuzzy.Score > 95, fuzzy.Value);
+        return (fuzzy.Score > 93, fuzzy.Value);
     }
     
     
