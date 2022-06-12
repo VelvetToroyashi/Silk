@@ -137,13 +137,14 @@ public static class IServiceCollectionExtensions
            .Configure<CacheSettings>(cs =>
             {
                 cs
-                  .SetDefaultAbsoluteExpiration(null)
-                  .SetSlidingExpiration<IChannel>(null)
-                  .SetSlidingExpiration<IMessage>(null)
-                  .SetSlidingExpiration<IGuild>(null)
-                  .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
-                  .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
+                   .SetDefaultAbsoluteExpiration(null)
+                   .SetSlidingExpiration<IChannel>(null)
+                   .SetSlidingExpiration<IMessage>(null)
+                   .SetSlidingExpiration<IGuild>(null)
+                   .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
+                   .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
+                   .SetSlidingExpiration<IReadOnlyList<IGuildMember>>(TimeSpan.FromHours(12))
+                   .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
