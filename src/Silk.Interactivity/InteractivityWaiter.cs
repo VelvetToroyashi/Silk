@@ -13,7 +13,7 @@ public class InteractivityWaiter
     {
         foreach (var request in _events)
         {
-            if (gatewayEvent.GetType().GetInterfaces().Contains(request.GetType().GenericTypeArguments[0]))
+            if (!gatewayEvent.GetType().GetInterfaces().Contains(request.GetType().GenericTypeArguments[0]))
                 continue;
 
             var wait      = request.GetType().GetProperty("Wait",      BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
