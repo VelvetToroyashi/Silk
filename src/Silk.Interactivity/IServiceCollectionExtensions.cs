@@ -10,7 +10,8 @@ public static class IServiceCollectionExtensions
     {
         services.AddSingleton<InteractivityExtension>();
 
-        
+        services.AddSingleton<InteractivityWaiter>();
+        services.AddResponder<InteractivityResponder>();
         
         return services;
     }
