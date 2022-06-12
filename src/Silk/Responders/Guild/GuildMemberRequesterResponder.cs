@@ -33,6 +33,8 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
             await Task.Delay(_minimum - (now - _last), ct);
         
         _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit:0));
+
+        _sync.Release();
         
         return Result.FromSuccess();
     }
