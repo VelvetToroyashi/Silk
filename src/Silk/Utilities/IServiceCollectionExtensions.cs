@@ -29,6 +29,7 @@ using Remora.Discord.Pagination.Extensions;
 using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
@@ -93,8 +94,9 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           .AddInteractiveEntity<JoinEmbedButtonHandler>()
            .AddInteractiveEntity<ReminderModalHandler>()
+           .AddInteractiveEntity<JoinEmbedButtonHandler>()
+           .AddInteractiveEntity<MemberScanButtonHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         
@@ -138,6 +140,8 @@ public static class IServiceCollectionExtensions
             {
                 cs
                    .SetDefaultAbsoluteExpiration(null)
+                   .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(null)
+                   .SetSlidingExpiration<IReadOnlyList<Snowflake>>(TimeSpan.FromDays(30))
                    .SetSlidingExpiration<IChannel>(null)
                    .SetSlidingExpiration<IMessage>(null)
                    .SetSlidingExpiration<IGuild>(null)

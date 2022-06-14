@@ -73,7 +73,7 @@ public class MemberScannerService
                       .Select(s => s.User.Value)
                       .ToArray();
 
-        await _cache.CacheAsync($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing.Select(u => u.ID), ct);
+        await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing.Select(u => u.ID).ToArray(), ct);
         
         return phishing;
     }
