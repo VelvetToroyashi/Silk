@@ -23,9 +23,9 @@ public class MassBanCommand : CommandGroup
     
     public MassBanCommand(ICommandContext context, IInfractionService infractions, IDiscordRestChannelAPI channels)
     {
-        _context       = context;
-        _infractions   = infractions;
-        _channels = channels;
+        _context     = context;
+        _infractions = infractions;
+        _channels    = channels;
     }
 
     [Command("massban", "mass-ban", "m-ban", "503")]
