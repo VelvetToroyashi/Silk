@@ -212,6 +212,7 @@ public class Program
                    .AddSingleton<PhishingDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
+                   .AddSingleton<MemberScannerService>()
                    .AddSingleton<IPrefixCacheService, PrefixCacheService>()
                    .AddSingleton<IInfractionService, InfractionService>()
                    .AddHostedService(s => (s.GetRequiredService<IInfractionService>() as InfractionService)!)
