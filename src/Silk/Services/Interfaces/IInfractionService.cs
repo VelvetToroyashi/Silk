@@ -39,7 +39,7 @@ public interface IInfractionService
 	/// <param name="enforcerID">The ID of the user that kicked the target.</param>
 	/// <param name="reason">The reason the target was kicked.</param>
 	/// <param name="notify">Whether to notify the target of the infraction.</param>
-	public Task<Result<InfractionDTO>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", bool notify = false);
+	public Task<Result<InfractionDTO>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", bool notify = true);
 
 	/// <summary>
 	///     Bans a member from the specified guild, generating an infraction.
