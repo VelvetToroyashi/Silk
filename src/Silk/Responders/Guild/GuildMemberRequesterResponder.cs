@@ -23,7 +23,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
     {
         if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess(); // Thanks, Night.
-
+        
         await _sync.WaitAsync(ct);
 
         var now = _last;
@@ -34,7 +34,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
         if (delta < _minimumDelta)
             await Task.Delay(_minimumDelta - delta, ct);
         
-        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID));
+        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit: 20000));
 
         _sync.Release();
         
