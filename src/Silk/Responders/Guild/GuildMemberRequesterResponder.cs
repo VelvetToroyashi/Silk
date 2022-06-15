@@ -34,7 +34,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
         if (delta < _minimumDelta)
             await Task.Delay(_minimumDelta - delta, ct);
         
-        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit: 20000));
+        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit: 5000));
 
         _sync.Release();
         
