@@ -39,7 +39,6 @@ public class Program
 {
     public static async Task Main()
     {
-
         Console.WriteLine("Starting Silk...");
         
         
@@ -118,7 +117,9 @@ public class Program
         {
             EndPoints       = { { redisConfig.Host, redisConfig.Port } },
             Password        = redisConfig.Password,
-            DefaultDatabase = redisConfig.Database
+            DefaultDatabase = redisConfig.Database,
+            SyncTimeout = 90000,
+            AbortOnConnectFail = false
         };
         
         var redis = ConnectionMultiplexer.Connect(connectionConfig);

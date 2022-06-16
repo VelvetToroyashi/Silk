@@ -11,6 +11,7 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Extensions;
 using Silk.Interactivity;
 using StackExchange.Redis;
 
@@ -42,35 +43,49 @@ public class MemberScannerService
         _phishing      = phishing;
     }
 
-    public async Task<IReadOnlyList<IUser>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
+    public async Task<Result<IReadOnlyList<IUser>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
     {
         var db = _redis.GetDatabase();
 
         var lastCheck = (string?)await db.StringGetAsync($"Silk:SuspiciousMemberCheck:{guildID}");
-        var time      = lastCheck is null ? DateTimeOffset.UtcNow : DateTimeOffset.Parse(lastCheck);
-            
-        if (DateTimeOffset.UtcNow > time + TimeSpan.FromHours(6))
+        var time      = lastCheck is null ? DateTimeOffset.UtcNow.AddHours(7) : DateTimeOffset.Parse(lastCheck);
+
+        var delta = DateTimeOffset.UtcNow - time;
+
+        var members = new List<IUser>();
+        
+        if (delta < TimeSpan.FromHours(6))
         {
-            // While we technically store members for 12 hours, we allow re-checking every 6 in case we've missed some gateway events
-                
+            return Result<IReadOnlyList<IUser>>.FromError(new InvalidOperationError($"Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
+        }
+        else
+        {
+            await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
+            
             _gateway.SubmitCommand(new RequestGuildMembers(guildID));
 
             var holder = 0; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
-            await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc => gmc.GuildID == guildID && holder++ > gmc.ChunkCount, ct);
+            await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
+            {
+                if (gmc.GuildID != guildID)
+                    return false;
+                
+                members.AddRange(gmc.Members.Select(m => m.User.Value));
+                
+                return holder++ > gmc.ChunkCount;
+            }, ct);
 
             await Task.CompletedTask;
         }
+
         
-        await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
 
         // Unless 12h has magically passed, this will be here.
-        var members = await _cache.TryGetValueAsync<IReadOnlyList<IGuildMember>>(KeyHelpers.CreateGuildMembersKey(guildID, default, default), ct);
 
-        var query = members.Entity.Count > 5_000 ? members.Entity.AsParallel() : members.Entity.AsEnumerable();
+        var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
 
         var phishing = query
-                      .Where(u => _phishing.IsSuspectedPhishingUsername(u.User.Value.Username).IsSuspicious)
-                      .Select(s => s.User.Value)
+                      .Where(u => _phishing.IsSuspectedPhishingUsername(u.Username).IsSuspicious)
                       .ToArray();
 
         await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing.Select(u => u.ID).ToArray(), ct);

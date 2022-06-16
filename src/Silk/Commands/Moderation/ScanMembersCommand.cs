@@ -36,8 +36,11 @@ public class ScanMembersCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.KickMembers, DiscordPermission.BanMembers)]
     public async Task<IResult> ScanAsync()
     {
-        var IDs = await _scanner.GetSuspicousMembersAsync(_context.GuildID.Value, CancellationToken);
+        var idResult = await _scanner.GetSuspicousMembersAsync(_context.GuildID.Value, CancellationToken);
 
+        if (!idResult.IsDefined(out var IDs))
+            return await _channels.CreateMessageAsync(_context.ChannelID, idResult.Error!.Message);
+        
         if (!IDs.Any())
             return await _channels.CreateMessageAsync(_context.ChannelID, "It appears your server is clean!");
         

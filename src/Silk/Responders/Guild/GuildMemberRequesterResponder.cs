@@ -9,12 +9,13 @@ using Remora.Results;
 
 namespace Silk.Responders;
 
-public class GuildMemberRequesterResponder //: IResponder<IGuildCreate>
+public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IResponder<IGatewayEvent>
+
 {
     private static readonly SemaphoreSlim  _sync = new(1);
     private static          DateTimeOffset _last = DateTimeOffset.UtcNow;
 
-    private static readonly TimeSpan _minimumDelta = TimeSpan.FromMilliseconds(5000);
+    private static readonly TimeSpan _minimumDelta = TimeSpan.FromMilliseconds(500);
     
     private readonly DiscordGatewayClient _client;
     public GuildMemberRequesterResponder(DiscordGatewayClient client) => _client = client;

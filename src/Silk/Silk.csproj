@@ -86,7 +86,7 @@
         <PackageReference Include="Serilog.Sinks.File" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
+        <PackageReference Include="StackExchange.Redis" Version="2.6.45" />
         <PackageReference Include="Svg.Skia" Version="0.5.14" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
@@ -173,6 +173,7 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.View.Exemptions.cs">
           <DependentUpon>ConfigCommands.View.cs</DependentUpon>
         </Compile>
+        <Compile Remove="Responders\Guild\Member\MemberChunkedHandler.cs" />
     </ItemGroup>
 
     <ItemGroup>
