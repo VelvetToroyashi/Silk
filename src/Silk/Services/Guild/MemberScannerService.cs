@@ -50,7 +50,7 @@ public class MemberScannerService
         var lastCheck = (string?)await db.StringGetAsync($"Silk:SuspiciousMemberCheck:{guildID}");
         var time      = lastCheck is null ? DateTimeOffset.UtcNow.AddHours(7) : DateTimeOffset.Parse(lastCheck);
 
-        var delta = DateTimeOffset.UtcNow - time;
+        var delta = time - DateTimeOffset.UtcNow;
 
         var members = new List<IUser>();
         
