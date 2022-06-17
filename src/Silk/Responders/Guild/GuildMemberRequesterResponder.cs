@@ -15,7 +15,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IRespon
     private static readonly SemaphoreSlim  _sync = new(1);
     private static          DateTimeOffset _last = DateTimeOffset.UtcNow;
 
-    private static readonly TimeSpan _minimumDelta = TimeSpan.FromMilliseconds(2000);
+    private static readonly TimeSpan _minimumDelta = TimeSpan.FromMilliseconds(500);
     
     private readonly DiscordGatewayClient _client;
     public GuildMemberRequesterResponder(DiscordGatewayClient client) => _client = client;

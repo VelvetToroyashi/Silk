@@ -19,8 +19,8 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     private readonly GuildCacherService _cacher;
     public MemberDataCacherResponder(IMediator mediator, GuildCacherService cacher)
     {
-        _mediator    = mediator;
-        _cacher = cacher;
+        _mediator = mediator;
+        _cacher   = cacher;
     }
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
@@ -43,6 +43,10 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
         return (Result)cacheResult;
     }
 
-    public Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
-        => _cacher.CacheMembersAsync(gatewayEvent.GuildID, gatewayEvent.Members);
+    public async Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
+    {
+        _ = _cacher.CacheMembersAsync(gatewayEvent.GuildID, gatewayEvent.Members);
+
+        return Result.FromSuccess();
+    }
 }

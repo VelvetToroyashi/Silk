@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -277,7 +276,7 @@ public class Program
             #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
         }
 
-        services.AddPooledDbContextFactory<GuildContext>(Builder);
-        services.AddTransient(s => s.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext());
+        services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
+        services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
     }
 }

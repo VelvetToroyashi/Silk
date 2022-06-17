@@ -45,15 +45,11 @@ public static class BulkAddUserToGuild
         {
             await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, "s!"), cancellationToken);
             
-            await using var trans = await _db.Database.BeginTransactionAsync(cancellationToken);
-
             var users      = request.Users.Select(u => new UserEntity() { ID          = u.ID, History = new() { new() { UserID = u.ID, GuildID = request.GuildID, JoinDate = u.JoinedAt } } });
             var guildUsers = request.Users.Select(u => new GuildUserEntity() { UserID = u.ID, GuildID = request.GuildID });
             
             await _db.Users.UpsertRange(users).NoUpdate().RunAsync(cancellationToken);
             await _db.GuildUsers.UpsertRange(guildUsers).NoUpdate().RunAsync(cancellationToken);
-
-            await trans.CommitAsync(cancellationToken);
             
             return Unit.Value;
         }
