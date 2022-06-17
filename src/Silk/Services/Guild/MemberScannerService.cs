@@ -72,15 +72,11 @@ public class MemberScannerService
                 
                 members.AddRange(gmc.Members.Select(m => m.User.Value));
                 
-                return holder++ > gmc.ChunkCount;
+                return holder++ >= gmc.ChunkCount;
             }, ct);
 
             await Task.CompletedTask;
         }
-
-        
-
-        // Unless 12h has magically passed, this will be here.
 
         var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
 
