@@ -105,7 +105,7 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
             
-            await _interactions.CreateFollowupMessageAsync
+            var followupResult = await _interactions.CreateFollowupMessageAsync
             (
              _context.ApplicationID,
              _context.Token,
@@ -114,16 +114,19 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
 
+            if (followupResult.IsDefined(out var followup))
+                return (Result)followupResult;
+            
             var kicked = await Task.WhenAll(IDs.Select(id => _infractions.KickAsync(guildID, id, user.ID, "Phishing detected: Moderater initiated manual mass-kick.", false)));
             
             var failed = kicked.Count(r => !r.IsSuccess);
             
-            return (Result)await _interactions.CreateFollowupMessageAsync
+            return (Result)await _interactions.EditFollowupMessageAsync
             (
              _context.ApplicationID,
              _context.Token,
+             followup!.ID,
              $"Done! Kicked {IDs.Count - failed}/{IDs.Count} users.",
-             flags: MessageFlags.Ephemeral,
              ct: ct
             );
         }
@@ -141,7 +144,7 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
             
-            await _interactions.CreateFollowupMessageAsync
+            var followupResult = await _interactions.CreateFollowupMessageAsync
             (
              _context.ApplicationID,
              _context.Token,
@@ -150,16 +153,19 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
 
+            if (followupResult.IsDefined(out var followup))
+                return (Result)followupResult;
+
             var kicked = await Task.WhenAll(IDs.Select(id => _infractions.BanAsync(guildID, id, user.ID, 0, "Phishing detected: Moderater initiated manual mass-kick.", notify: false)));
             
             var failed = kicked.Count(r => !r.IsSuccess);
             
-            return (Result)await _interactions.CreateFollowupMessageAsync
+            return (Result)await _interactions.EditFollowupMessageAsync
             (
              _context.ApplicationID,
              _context.Token,
+             followup!.ID,
              $"Done! Banned {IDs.Count - failed}/{IDs.Count} users.",
-             flags: MessageFlags.Ephemeral,
              ct: ct
             );
         }
