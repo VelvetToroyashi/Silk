@@ -146,19 +146,10 @@ public class GuildCacherService
         await _lock.WaitAsync();
         
         var users = members.Where(u => u.User.IsDefined())
-                           .Select(u => (u.User.Value.ID, u.JoinedAt))
-                           .Select((uj, _) =>
-                            {
-                                (var id, var joinedAt) = uj;
-                                return new UserEntity
-                                {
-                                    ID      = id,
-                                    History = new() { new() {JoinDate = joinedAt, GuildID = guildID} }
-                                };
-                            });
+                           .Select(u => (u.User.Value.ID, u.JoinedAt));
 
         await _mediator.Send(new BulkAddUserToGuild.Request(users, guildID));
-
+        
         _lock.Release();
         
         return Result.FromSuccess();
