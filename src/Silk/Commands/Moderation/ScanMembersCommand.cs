@@ -34,15 +34,25 @@ public class ScanMembersCommand : CommandGroup
     [Command("scan")]
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.KickMembers, DiscordPermission.BanMembers)]
-    public async Task<IResult> ScanAsync()
+    public async Task<Result> ScanAsync()
     {
+        var cooldownResult = await _scanner.ValidateCooldownAsync(_context.GuildID.Value);
+
+        if (!cooldownResult.IsSuccess)
+            return (Result)await _channels.CreateMessageAsync(_context.ChannelID, cooldownResult.Error.Message);
+        
+        var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.ScanEmoji} This could take a while.");
+
+        if (!messageResult.IsDefined(out var message))
+            return (Result)messageResult;
+        
         var idResult = await _scanner.GetSuspicousMembersAsync(_context.GuildID.Value, CancellationToken);
 
         if (!idResult.IsDefined(out var IDs))
-            return await _channels.CreateMessageAsync(_context.ChannelID, idResult.Error!.Message);
+            return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, idResult.Error!.Message);
         
         if (!IDs.Any())
-            return await _channels.CreateMessageAsync(_context.ChannelID, "It appears your server is clean!");
+            return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, $"{Emojis.ConfirmEmoji} It appears your server is clean!");
         
         var buttons = new ActionRowComponent
         (
@@ -54,10 +64,11 @@ public class ScanMembersCommand : CommandGroup
          }
         );
 
-        return await _channels.CreateMessageAsync
+        return (Result)await _channels.EditMessageAsync
         (
          _context.ChannelID,
-         $"There appears to be {IDs.Count} user{(IDs.Count > 1 ? 's' : null)} detected as phishing.", 
+         message.ID,
+         $"{Emojis.WarningEmoji} There appears to be {IDs.Count} user{(IDs.Count > 1 ? 's' : null)} detected as phishing.", 
          components: new[] {buttons}
         );
     }

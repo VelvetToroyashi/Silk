@@ -43,40 +43,44 @@ public class MemberScannerService
         _phishing      = phishing;
     }
 
-    public async Task<Result<IReadOnlyList<IUser>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
+
+    public async Task<Result> ValidateCooldownAsync(Snowflake guildID)
     {
         var db = _redis.GetDatabase();
 
         var lastCheck = (string?)await db.StringGetAsync($"Silk:SuspiciousMemberCheck:{guildID}");
         var time      = lastCheck is null ? DateTimeOffset.UtcNow.AddHours(7) : DateTimeOffset.Parse(lastCheck);
 
-        var delta = time - DateTimeOffset.UtcNow;
+        var delta = DateTimeOffset.UtcNow - time;
+
+        if (delta < TimeSpan.FromHours(6))
+            return Result.FromError(new InvalidOperationError($"Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
+        
+        return Result.FromSuccess();
+    }
+    
+    public async Task<Result<IReadOnlyList<IUser>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
+    {
+        var db = _redis.GetDatabase();
 
         var members = new List<IUser>();
         
-        if (delta < TimeSpan.FromHours(6))
+        _gateway.SubmitCommand(new RequestGuildMembers(guildID));
+        
+        await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
+        
+        var holder = 0; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
+        await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
         {
-            return Result<IReadOnlyList<IUser>>.FromError(new InvalidOperationError($"Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
-        }
-        else
-        {
-            await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
+            if (gmc.GuildID != guildID)
+                return false;
             
-            _gateway.SubmitCommand(new RequestGuildMembers(guildID));
+            members.AddRange(gmc.Members.Select(m => m.User.Value));
+            
+            return ++holder >= gmc.ChunkCount;
+        }, ct);
+        
 
-            var holder = 0; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
-            await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
-            {
-                if (gmc.GuildID != guildID)
-                    return false;
-                
-                members.AddRange(gmc.Members.Select(m => m.User.Value));
-                
-                return holder++ >= gmc.ChunkCount;
-            }, ct);
-
-            await Task.CompletedTask;
-        }
 
         var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
 
