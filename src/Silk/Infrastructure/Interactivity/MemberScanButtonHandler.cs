@@ -114,7 +114,7 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
 
-            if (followupResult.IsDefined(out var followup))
+            if (!followupResult.IsDefined(out var followup))
                 return (Result)followupResult;
             
             var kicked = await Task.WhenAll(IDs.Select(id => _infractions.KickAsync(guildID, id, user.ID, "Phishing detected: Moderater initiated manual mass-kick.", false)));
@@ -153,7 +153,7 @@ public class MemberScanButtonHandler : IButtonInteractiveEntity
              ct: ct
             );
 
-            if (followupResult.IsDefined(out var followup))
+            if (!followupResult.IsDefined(out var followup))
                 return (Result)followupResult;
 
             var kicked = await Task.WhenAll(IDs.Select(id => _infractions.BanAsync(guildID, id, user.ID, 0, "Phishing detected: Moderater initiated manual mass-kick.", notify: false)));
