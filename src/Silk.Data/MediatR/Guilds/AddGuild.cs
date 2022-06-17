@@ -26,10 +26,7 @@ public static class AddGuild
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            if (await _db.Guilds.FirstOrDefaultAsync(x => x.ID == request.GuildID, cancellationToken) is {} existingGuild)
-                return existingGuild;
-            
-            GuildEntity guild = new()
+            var guild = new GuildEntity()
             {
                 ID            = request.GuildID,
                 Prefix        = request.Prefix,
@@ -37,10 +34,9 @@ public static class AddGuild
                 ModConfig     = new() { GuildID = request.GuildID },
             };
 
-            _db.Guilds.Add(guild);
-            await _db.SaveChangesAsync(cancellationToken);
+            await _db.Guilds.Upsert(guild).NoUpdate().RunAsync(cancellationToken);
 
-            return guild;
+            return (await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken))!;
         }
     }
 }

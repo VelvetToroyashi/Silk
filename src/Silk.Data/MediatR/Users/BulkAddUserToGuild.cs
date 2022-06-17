@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 
 namespace Silk.Data.MediatR.Users;
 
@@ -31,11 +32,19 @@ public static class BulkAddUserToGuild
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request>
     {
-        private readonly GuildContext       _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly GuildContext _db;
+        private readonly IMediator    _mediator;
+        
+        public Handler(GuildContext db, IMediator mediator)
+        {
+            _db       = db;
+            _mediator = mediator;
+        }
 
         public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
+            await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, "s!"));
+            
             await using var trans = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             var users      = request.Users.Select(u => new UserEntity() { ID          = u.ID, History = new() { new() { UserID = u.ID, GuildID = request.GuildID, JoinDate = u.JoinedAt } } });
