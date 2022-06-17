@@ -11,14 +11,18 @@ public class InteractivityWaiter
 
     internal void TryEvaluateEvents(IGatewayEvent gatewayEvent)
     {
-        foreach (var request in _events)
+        if (!_events.Any())
+            return;
+        
+        for (var i = _events.Count - 1; i >= 0; i--)
         {
+            var request = _events[i];
             if (!gatewayEvent.GetType().GetInterfaces().Contains(request.GetType().GenericTypeArguments[0]))
                 continue;
 
-            var wait      = request.GetType().GetProperty("Wait",      BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
+            var wait      = request.GetType().GetProperty("Wait", BindingFlags.Public      | BindingFlags.Instance)!.GetValue(request)!;
             var predicate = request.GetType().GetProperty("Predicate", BindingFlags.Public | BindingFlags.Instance)!.GetValue(request)!;
-            
+
             if (Unsafe.As<Func<IGatewayEvent, bool>>(predicate)(gatewayEvent))
             {
                 Unsafe.As<TaskCompletionSource<IGatewayEvent>>(wait).TrySetResult(gatewayEvent);
