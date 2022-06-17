@@ -43,7 +43,7 @@ public static class BulkAddUserToGuild
 
         public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
-            await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, "s!"));
+            await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, "s!"), cancellationToken);
             
             await using var trans = await _db.Database.BeginTransactionAsync(cancellationToken);
 

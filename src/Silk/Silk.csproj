@@ -173,7 +173,6 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.View.Exemptions.cs">
           <DependentUpon>ConfigCommands.View.cs</DependentUpon>
         </Compile>
-        <Compile Remove="Responders\Guild\Member\MemberChunkedHandler.cs" />
     </ItemGroup>
 
     <ItemGroup>

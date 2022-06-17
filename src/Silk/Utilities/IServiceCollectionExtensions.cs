@@ -139,16 +139,15 @@ public static class IServiceCollectionExtensions
            .Configure<CacheSettings>(cs =>
             {
                 cs
-                   .SetDefaultAbsoluteExpiration(null)
+                   .SetDefaultAbsoluteExpiration(TimeSpan.Zero)
+                   .SetDefaultSlidingExpiration(null)
                    .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(null)
-                   .SetSlidingExpiration<IReadOnlyList<Snowflake>>(TimeSpan.FromDays(30))
-                   .SetSlidingExpiration<IChannel>(null)
-                   .SetSlidingExpiration<IMessage>(null)
-                   .SetSlidingExpiration<IGuild>(null)
-                   .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
-                   .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
-                   .SetSlidingExpiration<IReadOnlyList<IGuildMember>>(TimeSpan.FromHours(12))
-                   .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
+                   .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(TimeSpan.FromDays(30))
+                   .SetAbsoluteExpiration<IChannel>(null)
+                   .SetAbsoluteExpiration<IMessage>(null)
+                   .SetAbsoluteExpiration<IGuild>(null)
+                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
+                   .SetSlidingExpiration<IReadOnlyList<IGuildMember>>(TimeSpan.FromHours(12));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
