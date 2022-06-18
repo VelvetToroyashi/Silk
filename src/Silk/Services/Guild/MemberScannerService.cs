@@ -71,7 +71,7 @@ public class MemberScannerService
         
         await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
         
-        var nonce = $"{guildID}-{Random.Shared.NextInt64(long.MaxValue)}";
+        var nonce = $"{guildID}-{Random.Shared.Next(int.MaxValue)}";
         
         _gateway.SubmitCommand(new RequestGuildMembers(guildID, nonce: nonce));
         
