@@ -35,7 +35,6 @@ public static class AddGuild
             };
 
             await _db.Guilds.Upsert(guild).NoUpdate().RunAsync(cancellationToken);
-
             return (await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken))!;
         }
     }
