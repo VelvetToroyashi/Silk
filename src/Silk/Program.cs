@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -24,6 +25,7 @@ using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
+using Silk.Data.MediatR.Users;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -222,7 +224,7 @@ public class Program
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
                    .AddSingleton<MemberLoggerService>()
                    .AddSingleton<GuildConfigCacheService>()
-                   .AddSingleton<GuildCacherService>()
+                   .AddScoped<GuildCacherService>()
                    .AddSingleton<GuildGreetingService>()
                    .AddSingleton<IClock>(SystemClock.Instance)
                    .AddSingleton<IDateTimeZoneSource>(TzdbDateTimeZoneSource.Default)
@@ -233,6 +235,9 @@ public class Program
                    .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
                    .AddMediatR(typeof(GuildContext))
+                    // Very high throuput handler that needs to be explitily disposed of,
+                    // else it'll gobble up connections.
+                   .AddScoped(typeof(BulkAddUserToGuild).GetNestedTypes(BindingFlags.NonPublic)[0])
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (

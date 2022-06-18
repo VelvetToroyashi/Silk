@@ -30,7 +30,7 @@ public static class BulkAddUserToGuild
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request>
+    internal sealed class Handler : IRequestHandler<Request>, IAsyncDisposable
     {
         private readonly GuildContext _db;
         private readonly IMediator    _mediator;
@@ -53,5 +53,7 @@ public static class BulkAddUserToGuild
             
             return Unit.Value;
         }
+        
+        public ValueTask DisposeAsync() => _db.DisposeAsync();
     }
 }

@@ -43,10 +43,6 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
         return (Result)cacheResult;
     }
 
-    public async Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
-    {
-        _ = Task.Run(() => _cacher.CacheMembersAsync(gatewayEvent.GuildID, gatewayEvent.Members), ct);
-
-        return Result.FromSuccess();
-    }
+    public Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
+        => _cacher.CacheMembersAsync(gatewayEvent.GuildID, gatewayEvent.Members);
 }
