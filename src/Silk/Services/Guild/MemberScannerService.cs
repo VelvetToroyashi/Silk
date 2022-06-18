@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Gateway.Commands;
@@ -20,20 +21,22 @@ namespace Silk.Services.Guild;
 
 public class MemberScannerService
 {
-    private readonly CacheService             _cache;
-    private readonly InteractivityWaiter      _interactivity;
-    private readonly DiscordGatewayClient     _gateway;
-    private readonly IConnectionMultiplexer   _redis;
-    private readonly PhishingDetectionService _phishing;
+    private readonly CacheService                  _cache;
+    private readonly InteractivityWaiter           _interactivity;
+    private readonly DiscordGatewayClient          _gateway;
+    private readonly IConnectionMultiplexer        _redis;
+    private readonly PhishingDetectionService      _phishing;
+    private readonly ILogger<MemberScannerService> _logger;
 
     
     public MemberScannerService
     (
-        CacheService             cache,
-        InteractivityWaiter      interactivity,
-        DiscordGatewayClient     gateway,
-        IConnectionMultiplexer   redis,
-        PhishingDetectionService phishing
+        CacheService                  cache,
+        InteractivityWaiter           interactivity,
+        DiscordGatewayClient          gateway,
+        IConnectionMultiplexer        redis,
+        PhishingDetectionService      phishing,
+        ILogger<MemberScannerService> logger
     )
     {
         _cache         = cache;
@@ -41,9 +44,9 @@ public class MemberScannerService
         _gateway       = gateway;
         _redis         = redis;
         _phishing      = phishing;
+        _logger        = logger;
     }
-
-
+    
     public async Task<Result> ValidateCooldownAsync(Snowflake guildID)
     {
         var db = _redis.GetDatabase();
@@ -59,8 +62,10 @@ public class MemberScannerService
         return Result.FromSuccess();
     }
     
-    public async Task<Result<IReadOnlyList<IUser>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
+    public async Task<Result<IReadOnlyList<Snowflake>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
     {
+        _logger.LogTrace("Begin member scan");
+        
         var db      = _redis.GetDatabase();
         var members = new List<IUser>();
         
@@ -70,7 +75,9 @@ public class MemberScannerService
         
         _gateway.SubmitCommand(new RequestGuildMembers(guildID, nonce: nonce));
         
-        var holder = 0; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
+        _logger.LogDebug("Submitted gateway command; waiting for feedback");
+        
+        var holder = 1; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
         await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
         {
             if (!gmc.Nonce.IsDefined(out var eventNonce) || eventNonce != nonce)
@@ -78,16 +85,23 @@ public class MemberScannerService
             
             members.AddRange(gmc.Members.Select(m => m.User.Value));
             
-            return ++holder >= gmc.ChunkCount;
+            return holder++ >= gmc.ChunkCount;
         }, ct);
         
+        _logger.LogTrace("Received {MemberCount} members, filtering...", members.Count);
+        
         var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
-
+        
         var phishing = query
                       .Where(u => _phishing.IsSuspectedPhishingUsername(u.Username).IsSuspicious)
+                      .Select(u => u.ID)
                       .ToArray();
-
-        await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing.Select(u => u.ID).ToArray(), ct);
+        
+        _logger.LogDebug("Filtered {Members} as suspicious from initial set", phishing.Length);
+        
+        await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing, ct);
+        
+        _logger.LogDebug("Cached members list");
         
         return phishing;
     }
