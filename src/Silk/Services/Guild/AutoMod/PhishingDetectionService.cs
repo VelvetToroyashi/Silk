@@ -11,6 +11,7 @@ using FuzzySharp.SimilarityRatio.Scorer.Composite;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
@@ -183,7 +184,7 @@ public class PhishingDetectionService
     ///     Detects any phishing links in a given message.
     /// </summary>
     /// <param name="message">The message to scan.</param>
-    public async Task<Result> DetectPhishingAsync(IMessage message)
+    public async Task<Result> DetectPhishingAsync(IMessageCreate message)
     {
         if (message.Author.IsBot.IsDefined(out bool bot) && bot)
             return Result.FromSuccess(); // Sus.

@@ -18,15 +18,13 @@ public class RoleMenuComponentResponder : IResponder<IInteractionCreate>
         if (gatewayEvent.Type is not InteractionType.MessageComponent)
             return Result.FromSuccess();
 
-        if (!gatewayEvent.Data.IsDefined(out var data)  ||
-            !data.ComponentType.IsDefined(out var type) || 
-            !data.CustomID.IsDefined(out var customID))
+        if (!gatewayEvent.Data.IsDefined(out var data) || !data.IsT1)
             throw new InvalidOperationException("Component interaction without data?");
         
-        if (!customID.Equals(RoleMenuService.RoleMenuButtonPrefix) && !customID.Equals(RoleMenuService.RoleMenuDropdownPrefix))
+        if (!data.AsT1.CustomID.Equals(RoleMenuService.RoleMenuButtonPrefix) && !data.AsT1.CustomID.Equals(RoleMenuService.RoleMenuDropdownPrefix))
             return Result.FromSuccess();
 
-        return type switch
+        return data.AsT1.ComponentType switch
         {
             ComponentType.Button     => await _roleMenus.HandleButtonAsync(gatewayEvent),
             ComponentType.SelectMenu => await _roleMenus.HandleDropdownAsync(gatewayEvent),

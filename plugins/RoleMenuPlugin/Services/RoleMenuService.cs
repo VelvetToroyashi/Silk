@@ -143,11 +143,11 @@ public class RoleMenuService
         if (!interaction.Message.IsDefined(out var message))
             return Result.FromError(new InvalidOperationError("Message was not defined but the interaction referred to a role menu."));
 
-        if (!interaction.Data.IsDefined(out var data))
+        if (!interaction.Data.IsDefined() || interaction.Data.Value.Value is not IMessageComponentData data)
             throw new InvalidOperationException("Interaction without data?");
 
-        if (!data.ComponentType.IsDefined(out var type) || type is not ComponentType.SelectMenu)
-            return Result.FromError(new InvalidOperationError($"Expected a select menu but got {type}."));
+        if (data.ComponentType is not ComponentType.SelectMenu)
+            return Result.FromError(new InvalidOperationError($"Expected a select menu but got {data.ComponentType}."));
         
         if (!data.Values.IsDefined(out var values))
                 values ??= Array.Empty<string>();

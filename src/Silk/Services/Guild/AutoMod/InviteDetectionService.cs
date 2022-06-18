@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Results;
@@ -52,7 +53,7 @@ public class InviteDetectionService
    /// </summary>
    /// <param name="message">The message to check. Messages in DMs and empty messages will be ignored.</param>
    // The ONLY reason a result here is returned here is fluidity in the responder. It's a bit of a waste but meh.
-   public async Task<Result> CheckForInviteAsync(IMessage message)
+   public async Task<Result> CheckForInviteAsync(IMessageCreate message)
    {
       if (!message.GuildID.IsDefined(out var guildID))
          return Result.FromSuccess(); // We don't process DM messages here. //
