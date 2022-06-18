@@ -49,7 +49,7 @@ public class MemberScannerService
         var db = _redis.GetDatabase();
 
         var lastCheck = (string?)await db.StringGetAsync($"Silk:SuspiciousMemberCheck:{guildID}");
-        var time      = lastCheck is null ? DateTimeOffset.UtcNow.AddHours(7) : DateTimeOffset.Parse(lastCheck);
+        var time      = lastCheck is null ? DateTimeOffset.UtcNow.AddHours(-7) : DateTimeOffset.Parse(lastCheck);
 
         var delta = DateTimeOffset.UtcNow - time;
 
