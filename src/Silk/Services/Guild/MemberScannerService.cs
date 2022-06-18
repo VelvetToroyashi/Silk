@@ -61,18 +61,19 @@ public class MemberScannerService
     
     public async Task<Result<IReadOnlyList<IUser>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
     {
-        var db = _redis.GetDatabase();
-
+        var db      = _redis.GetDatabase();
         var members = new List<IUser>();
         
-        _gateway.SubmitCommand(new RequestGuildMembers(guildID));
-        
         await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
+        
+        var nonce = $"{guildID}-{Random.Shared.NextInt64(long.MaxValue)}";
+        
+        _gateway.SubmitCommand(new RequestGuildMembers(guildID, nonce: nonce));
         
         var holder = 0; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
         await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
         {
-            if (gmc.GuildID != guildID)
+            if (!gmc.Nonce.IsDefined(out var eventNonce) || eventNonce != nonce)
                 return false;
             
             members.AddRange(gmc.Members.Select(m => m.User.Value));
@@ -80,8 +81,6 @@ public class MemberScannerService
             return ++holder >= gmc.ChunkCount;
         }, ct);
         
-
-
         var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
 
         var phishing = query
