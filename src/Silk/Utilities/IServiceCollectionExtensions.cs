@@ -140,10 +140,9 @@ public static class IServiceCollectionExtensions
             {
                 cs
                    .SetDefaultAbsoluteExpiration(TimeSpan.Zero)
-                   .SetAbsoluteExpiration<IGuildMember>(TimeSpan.Zero)
                    .SetDefaultSlidingExpiration(null)
                    .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(null)
-                   .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(TimeSpan.FromDays(30))
+                   .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1))
                    .SetAbsoluteExpiration<IChannel>(null)
                    .SetAbsoluteExpiration<IMessage>(null)
                    .SetAbsoluteExpiration<IGuild>(null)

@@ -6,24 +6,8 @@ using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
-using Serilog;
 
 namespace Silk.Responders;
-
-
-public class A : IResponder<IGatewayEvent>
-{
-
-    public async Task<Result> RespondAsync(IGatewayEvent gatewayEvent, CancellationToken ct = default)
-    {
-        if (gatewayEvent is not IGuildMembersChunk gmc)
-            Log.Information("Received event: {EventType}", gatewayEvent.GetType().Name);
-        else 
-            Log.Information("Received event: {EventName} ({Chunk}/{Chunks} {Members})", gatewayEvent.GetType().Name, gmc.ChunkIndex + 1, gmc.ChunkCount, gmc.Members.Count);
-        
-        return Result.FromSuccess();
-    }
-}
 
 public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IResponder<IGatewayEvent>
 
@@ -51,7 +35,7 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IRespon
         if (delta < _minimumDelta)
             await Task.Delay(_minimumDelta - delta, ct);
         
-        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit: 5000));
+        _client.SubmitCommand(new RequestGuildMembers(gatewayEvent.ID, limit: 10000));
 
         _sync.Release();
         
