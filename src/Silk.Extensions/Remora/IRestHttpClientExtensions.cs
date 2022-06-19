@@ -22,7 +22,7 @@ public static class IRestHttpClientExtensions
     /// <remarks>Given that this method uses a bare rest client, it is up to the consumer to handle any caching of the return result.</remarks>
     public static async Task<Result<IReadOnlyList<IGuildMember>>> GetGuildMembersAsync(this IRestHttpClient client, ICacheProvider cache, Snowflake guildID)
     {
-        var last    = default(Snowflake);
+        var last    = new Snowflake(0);
         var members = new List<IGuildMember>(1000);
         
         while (true)
@@ -38,11 +38,11 @@ public static class IRestHttpClientExtensions
             if (!result.IsDefined(out var receivedMembers))
                 return Result<IReadOnlyList<IGuildMember>>.FromError(result.Error!);
             
-            // We've hit the end of the members list.
-            if (!members.Any() || members.Count < 1000)
-                return Result<IReadOnlyList<IGuildMember>>.FromSuccess(members);
-            
             members.AddRange(receivedMembers);
+            
+            // We've hit the end of the members list.
+            if (receivedMembers.Count < 1000)
+                return Result<IReadOnlyList<IGuildMember>>.FromSuccess(members);
 
             last = members[^1].User.Value.ID;
         }
