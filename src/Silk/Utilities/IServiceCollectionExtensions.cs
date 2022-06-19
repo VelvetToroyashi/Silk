@@ -191,7 +191,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
+                                    .MinimumLevel.Override("Remora", LogEventLevel.Information)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         Log.Logger = config.LogLevel switch
