@@ -17,17 +17,10 @@ using Silk.Services.Data;
 namespace Silk.Responders;
 
 [ResponderGroup(ResponderGroup.Early)]
-public class MemberDataCacherResponder : IResponder<IReady>, IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>, IResponder<IGuildMembersChunk>
+public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
-    private static readonly ConcurrentDictionary<Snowflake, List<IGuildMember>> _queue = new();
-
-    private readonly IMediator          _mediator;
-    private readonly GuildCacherService _cacher;
-    public MemberDataCacherResponder(IMediator mediator, GuildCacherService cacher)
-    {
-        _mediator = mediator;
-        _cacher   = cacher;
-    }
+    private readonly IMediator _mediator;
+    public MemberDataCacherResponder(IMediator mediator, GuildCacherService cacher) => _mediator = mediator;
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
@@ -47,35 +40,5 @@ public class MemberDataCacherResponder : IResponder<IReady>, IResponder<IGuildMe
             await _mediator.Send(new AddUserLeaveDate.Request(gatewayEvent.GuildID, user.ID, DateTimeOffset.UtcNow), ct);
         
         return (Result)cacheResult;
-    }
-
-    public Task<Result> RespondAsync(IGuildMembersChunk gatewayEvent, CancellationToken ct = default)
-    {
-        if (gatewayEvent.Nonce.IsDefined())
-            return Task.FromResult(Result.FromSuccess());
-
-        if (gatewayEvent.ChunkIndex + 1 < gatewayEvent.ChunkCount)
-        {
-            _queue.GetOrAdd(gatewayEvent.GuildID, _ => new()).AddRange(gatewayEvent.Members);
-            return Task.FromResult(Result.FromSuccess());
-        }
-
-        if (!_queue.TryRemove(gatewayEvent.GuildID, out var members))
-        {
-            // We've received them out of order. Drat.
-            return Task.FromResult(Result.FromSuccess());
-        }
-
-        return _cacher.CacheMembersAsync(gatewayEvent.GuildID, members);
-    }
-
-    public Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
-    {
-        _queue.Clear();
-
-        foreach (var guild in gatewayEvent.Guilds)
-            _queue[guild.ID] = new();
-
-        return Task.FromResult(Result.FromSuccess());
     }
 }
