@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -63,10 +64,10 @@ public class BulkUserTests
     public async Task InsertsAllUsers()
     {
         //Arrange
-        List<UserEntity> users = new()
+        List<(Snowflake, DateTimeOffset)> users = new()
         {
-            new() { ID = new(1) },
-            new() { ID = new(2) }
+            (new(1), default),
+            (new(2), default)
         };
 
         //Act
@@ -82,10 +83,10 @@ public class BulkUserTests
     {
         //Arrange
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
-        List<UserEntity> users = new()
+        List<(Snowflake, DateTimeOffset)> users = new()
         {
-            new() { ID = new(1) },
-            new() { ID = new(2) }
+            (new(1), default),
+            (new(2), default)
         };
 
         //Act
@@ -102,7 +103,7 @@ public class BulkUserTests
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, new(1)));
         await _mediator.Send(new GetOrCreateGuild.Request(new(20), "??"));
 
-        await _mediator.Send(new BulkAddUserToGuild.Request(new[] { new UserEntity() { ID = new(1) }}, new(20)));
+        await _mediator.Send(new BulkAddUserToGuild.Request(new[] { (new Snowflake(1), default(DateTimeOffset)) }, new(20)));
 
         var snowflake = new Snowflake(1);
         
