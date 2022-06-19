@@ -143,11 +143,11 @@ public static class IServiceCollectionExtensions
                    .SetDefaultSlidingExpiration(null)
                    .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(null)
                    .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1))
+                   .SetAbsoluteExpiration<IReadOnlyList<IRole>>(TimeSpan.FromMinutes(30))
                    .SetAbsoluteExpiration<IChannel>(null)
                    .SetAbsoluteExpiration<IMessage>(null)
                    .SetAbsoluteExpiration<IGuild>(null)
-                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromHours(12))
-                   .SetSlidingExpiration<IReadOnlyList<IGuildMember>>(TimeSpan.FromHours(12));
+                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromDays(7));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
