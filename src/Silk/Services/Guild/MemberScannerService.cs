@@ -8,11 +8,14 @@ using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching;
+using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway;
+using Remora.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Interactivity;
 using StackExchange.Redis;
 
@@ -22,26 +25,25 @@ namespace Silk.Services.Guild;
 public class MemberScannerService
 {
     private readonly CacheService                  _cache;
-    private readonly InteractivityWaiter           _interactivity;
-    private readonly DiscordGatewayClient          _gateway;
+    private readonly ICacheProvider                _cacheProvider;
+    private readonly IRestHttpClient               _rest;
     private readonly IConnectionMultiplexer        _redis;
     private readonly PhishingDetectionService      _phishing;
     private readonly ILogger<MemberScannerService> _logger;
-
     
     public MemberScannerService
     (
-        CacheService                  cache,
-        InteractivityWaiter           interactivity,
-        DiscordGatewayClient          gateway,
-        IConnectionMultiplexer        redis,
-        PhishingDetectionService      phishing,
+        CacheService cache,
+        ICacheProvider cacheProvider,
+        IRestHttpClient rest,
+        IConnectionMultiplexer redis,
+        PhishingDetectionService phishing,
         ILogger<MemberScannerService> logger
     )
     {
         _cache         = cache;
-        _interactivity = interactivity;
-        _gateway       = gateway;
+        _cacheProvider = cacheProvider;
+        _rest          = rest;
         _redis         = redis;
         _phishing      = phishing;
         _logger        = logger;
@@ -65,34 +67,18 @@ public class MemberScannerService
     public async Task<Result<IReadOnlyList<Snowflake>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
     {
         _logger.LogTrace("Begin member scan");
+
+        var memberResult = await _rest.GetGuildMembersAsync(_cacheProvider, guildID);
         
-        var db      = _redis.GetDatabase();
-        var members = new List<IUser>();
-        
-        await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
-        
-        var nonce = $"{guildID}-{Random.Shared.Next(int.MaxValue)}";
-        
-        _gateway.SubmitCommand(new RequestGuildMembers(guildID, nonce: nonce));
-        
-        _logger.LogDebug("Submitted gateway command; waiting for feedback");
-        
-        var holder = 1; // Used instead of chunk.ChunkIndex >= ChunkCount because chunks arrive aysnchronously
-        await _interactivity.WaitForEventAsync<IGuildMembersChunk>(gmc =>
-        {
-            if (!gmc.Nonce.IsDefined(out var eventNonce) || eventNonce != nonce)
-                return false;
-            
-            members.AddRange(gmc.Members.Select(m => m.User.Value));
-            
-            return holder++ >= gmc.ChunkCount;
-        }, ct);
+        if (!memberResult.IsDefined(out var members))
+            return Result<IReadOnlyList<Snowflake>>.FromError(new NotFoundError("There was an issue while fetching server members. Sorry."));
         
         _logger.LogTrace("Received {MemberCount} members, filtering...", members.Count);
         
         var query = members.Count > 5_000 ? members.AsParallel() : members.AsEnumerable();
         
         var phishing = query
+                      .Select(g => g.User.Value)
                       .Where(u => _phishing.IsSuspectedPhishingUsername(u.Username).IsSuspicious)
                       .Select(u => u.ID)
                       .ToArray();
