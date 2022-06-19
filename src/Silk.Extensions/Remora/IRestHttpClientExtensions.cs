@@ -29,7 +29,7 @@ public static class IRestHttpClientExtensions
         {
             var result = await client.GetAsync<IReadOnlyList<IGuildMember>>
             (
-             $"/guilds/{guildID}/members",
+             $"guilds/{guildID}/members",
              b => b.WithRateLimitContext(cache)
                    .AddQueryParameter("limit", "1000")
                    .AddQueryParameter("after", last.ToString())
