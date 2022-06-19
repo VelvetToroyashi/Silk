@@ -172,11 +172,11 @@ public class PhishingDetectionService
         using var _ = SilkMetric.PhishingDetection.WithLabels("username").NewTimer();
         
         var normalized = username.Unidecode();
-
+        
         var fuzzy = Process.ExtractOne(normalized, SuspiciousUsernames, s => s, ScorerCache.Get<WeightedRatioScorer>());
 
         // This is somewhat arbitrary, and may be adjusted to be more or less sensitive.
-        return (fuzzy.Score > 93, fuzzy.Value);
+        return (fuzzy.Score > 95, fuzzy.Value);
     }
     
     
