@@ -31,6 +31,8 @@ public static class AddUserJoinDate
             _db.Update(user);
             
             await _db.SaveChangesAsync(cancellationToken);
+
+            await _db.DisposeAsync();
             
             return Result.FromSuccess();
         }
