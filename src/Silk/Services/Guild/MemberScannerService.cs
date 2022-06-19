@@ -17,6 +17,7 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Interactivity;
+using Silk.Shared.Constants;
 using StackExchange.Redis;
 
 namespace Silk.Services.Guild;
@@ -59,7 +60,7 @@ public class MemberScannerService
         var delta = DateTimeOffset.UtcNow - time;
 
         if (delta < TimeSpan.FromHours(6))
-            return Result.FromError(new InvalidOperationError($"Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
+            return Result.FromError(new InvalidOperationError($"{Emojis.DeclineEmoji} Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
         
         return Result.FromSuccess();
     }
@@ -85,6 +86,10 @@ public class MemberScannerService
                       .ToArray();
         
         _logger.LogDebug("Filtered {Members} as suspicious from initial set", phishing.Length);
+
+        var db = _redis.GetDatabase();
+
+        await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
         
         await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing, ct);
         
