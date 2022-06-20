@@ -37,8 +37,6 @@ public static class AddUserLeaveDate
             
             await _db.SaveChangesAsync(cancellationToken);
 
-            await _db.DisposeAsync();
-            
             return Result.FromSuccess();
         }
     }
