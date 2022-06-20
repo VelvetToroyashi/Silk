@@ -20,7 +20,7 @@ namespace Silk.Responders;
 public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
     private readonly IMediator _mediator;
-    public MemberDataCacherResponder(IMediator mediator, GuildCacherService cacher) => _mediator = mediator;
+    public MemberDataCacherResponder(IMediator mediator) => _mediator = mediator;
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
