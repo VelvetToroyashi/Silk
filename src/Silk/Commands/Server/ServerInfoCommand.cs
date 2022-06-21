@@ -15,7 +15,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
-using Serilog;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
 using Silk.Utilities.HelpFormatter;

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
-using Microsoft.Extensions.Caching.Memory;
 using OneOf;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;

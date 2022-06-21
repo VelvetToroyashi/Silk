@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;
 

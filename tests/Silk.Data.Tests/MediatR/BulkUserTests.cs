@@ -10,7 +10,6 @@ using NUnit.Framework;
 using Remora.Rest.Core;
 using Respawn;
 using Respawn.Graph;
-using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 

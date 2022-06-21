@@ -1,27 +1,21 @@
 #pragma warning disable CA1822 // Mark members as static
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using Humanizer.Localisation;
-using Microsoft.Extensions.Options;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Gateway;
-using Remora.Discord.Rest.Extensions;
-using Remora.Rest;
 using Remora.Results;
 using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;

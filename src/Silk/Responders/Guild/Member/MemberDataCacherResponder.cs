@@ -1,18 +1,13 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Remora.Discord.API.Abstractions.Gateway.Events;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Gateway.Responders;
-using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
 using Silk.Data.MediatR.Users.History;
-using Silk.Services.Data;
 
 namespace Silk.Responders;
 
