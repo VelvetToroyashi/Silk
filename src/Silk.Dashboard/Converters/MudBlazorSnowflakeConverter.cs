@@ -7,13 +7,13 @@ public static class MudBlazorSnowflakeConverter
 {
     private const string IdValidationError = "Not a valid ID";
 
-    public static NullableSnowflakeConverter    NullableConverter    = new();
-    public static NonNullableSnowflakeConverter NonNullableConverter = new();
+    public static readonly NullableSnowflakeConverter    NullableConverter    = new();
+    public static readonly NonNullableSnowflakeConverter NonNullableConverter = new();
 
-    public static Func<Snowflake, string> NonNullableValidator =
-        s => (s != default) ? null : IdValidationError;
+    public static readonly Func<Snowflake, string> NonNullableValidator =
+        s => s != default ? null : IdValidationError;
 
-    public static Func<Snowflake?, string> NullableValidator =
+    public static readonly Func<Snowflake?, string> NullableValidator =
         s => s is not null ? NonNullableValidator((Snowflake) s) : null;
 
     public class NonNullableSnowflakeConverter : MudBlazor.Converter<Snowflake>
@@ -26,7 +26,7 @@ public static class MudBlazorSnowflakeConverter
 
         private Snowflake ConvertFrom(string value)
         {
-            var r = Snowflake.TryParse(value, out var snowflake, Constants.DiscordEpoch)
+            var r = DiscordSnowflake.TryParse(value, out var snowflake)
                 ? snowflake.Value
                 : default;
             return r;
@@ -43,7 +43,7 @@ public static class MudBlazorSnowflakeConverter
         
         private Snowflake? ConvertFrom(string value)
         {
-            _ = Snowflake.TryParse(value, out var snowflake, Constants.DiscordEpoch);
+            _ = DiscordSnowflake.TryParse(value, out var snowflake);
             return snowflake;
         }
     }
