@@ -26,21 +26,19 @@ public static class GetOrCreateUser
     
         public async Task<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var user = new UserEntity
-            {
-                ID      = request.UserID,
-                History = { new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, JoinDate = request.JoinedAt } }
-            };
-            
-            await _db.Upsert(user)
+            await _db.Upsert(new UserEntity { ID = request.UserID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
 
+            await _db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
+                     .NoUpdate()
+                     .RunAsync(cancellationToken);
+            
             await _db.Upsert(new GuildUserEntity { UserID = request.UserID, GuildID = request.GuildID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            user = await _db.Users
+            var user = await _db.Users
                                 .AsNoTracking()
                                 .Include(u => u.Guilds)
                                 .Include(u => u.History)

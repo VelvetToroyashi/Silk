@@ -25,7 +25,7 @@ public static class GetMostRecentUser
                                  .ThenInclude(u => u.History)
                            .FirstAsync(g => g.ID == request.GuildID, cancellationToken);
 
-            var user = guild.Users.MaxBy(u => u.User.History.Last().JoinDate)?.User;
+            var user = guild.Users.MaxBy(u => u.User.History.Last(h => h.IsJoin).Date)?.User;
 
             return user;
         }

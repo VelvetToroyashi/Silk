@@ -20,12 +20,12 @@ public static class AddUserJoinDate
         {
             try
             {
-                _db.Histories.Add(new() { UserID = request.UserID, GuildID = request.GuildID, JoinDate = request.Date });
+                _db.Histories.Add(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true });
                 await _db.SaveChangesAsync(cancellationToken);
             }
             catch
             {
-                return new NotFoundError($"There is no user by the ID of {request.UserID}.");
+                return new NotFoundError($"There is no user by the ID of {request.UserID} on {request.GuildID}.");
             }
 
             return Result.FromSuccess();

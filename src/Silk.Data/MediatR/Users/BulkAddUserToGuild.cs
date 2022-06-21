@@ -37,11 +37,13 @@ public static class BulkAddUserToGuild
 
         public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
-            var users      = request.Users.Select(u => new UserEntity()      { ID     = u.ID, History = { new() { UserID = u.ID, GuildID = request.GuildID, JoinDate = u.JoinedAt } } });
-            var guildUsers = request.Users.Select(u => new GuildUserEntity() { UserID = u.ID, GuildID = request.GuildID });
+            var users         = request.Users.Select(u => new UserEntity()      { ID       = u.ID });
+            var guildUsers    = request.Users.Select(u => new GuildUserEntity() { UserID   = u.ID, GuildID = request.GuildID });
+            var userHistories = request.Users.Select(u => new UserHistoryEntity() { UserID = u.ID, GuildID = request.GuildID, Date = u.JoinedAt, IsJoin = true });
             
             await _db.Users.UpsertRange(users).On(u => u.ID).NoUpdate().RunAsync(cancellationToken);
             await _db.GuildUsers.UpsertRange(guildUsers).On(gu => new { gu.UserID, gu.GuildID }).NoUpdate().RunAsync(cancellationToken);
+            await _db.Histories.UpsertRange(userHistories).On(u => new { u.UserID, u.GuildID, JoinDate = u.Date }).NoUpdate().RunAsync(cancellationToken);
             
             return Unit.Value;
         }
