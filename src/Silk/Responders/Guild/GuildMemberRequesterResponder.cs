@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using OneOf.Types;
+using Polly;
+using Polly.RateLimit;
 using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Gateway.Commands;
 using Remora.Discord.Caching;
 using Remora.Discord.Caching.Abstractions.Services;
@@ -20,11 +23,7 @@ namespace Silk.Responders;
 
 [ResponderGroup(ResponderGroup.Late)]
 public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IResponder<IGatewayEvent>
-
 {
-    private static readonly SemaphoreSlim _sync         = new(1);
-    private static readonly TimeSpan      _minimumDelta = TimeSpan.FromMinutes(1);
-    
     private readonly CacheService                           _cache;
     private readonly ICacheProvider                         _provider;
     private readonly IRestHttpClient                        _client;
@@ -51,45 +50,17 @@ public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IRespon
     {
         if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
             return Result.FromSuccess(); // Thanks, Night.
-        
-        await _sync.WaitAsync(ct);
+        var memberResult = await _client.GetGuildMembersAsync(_provider, gatewayEvent.ID);
 
-        var attempts = 1;
-        var chunks   = Math.Max(1, gatewayEvent.MemberCount.Value / 1000);
-
-        var backoff = _minimumDelta * (chunks % 5);
-
-        while (true)
+        if (memberResult.IsDefined(out var members))
         {
-            var memberResult = await _client.GetGuildMembersAsync(_provider, gatewayEvent.ID);
-
-            if (memberResult.IsDefined(out var members))
-            {
-                await _cache.CacheAsync(KeyHelpers.CreateGuildMembersKey(gatewayEvent.ID, default, default), members, ct);
-                await _memberCacher.CacheMembersAsync(gatewayEvent.ID, members);
-                
-                break;
-            }
-            else
-            {
-                if (attempts++ < 3)
-                {
-                    _logger.LogError("Failed to query members for {Guild} after 3 attempts. Giving up.", gatewayEvent.ID);
-
-                    return Result.FromError(new NotFoundError($"Failed to retreive guild members for {gatewayEvent.ID}."));
-                }
-
-                var expBackoff = backoff / 2 * attempts;
-
-                _logger.LogError("Failed to fetch guild members for {Guild}, trying again in {Attempt:hh:mm:ss}", gatewayEvent.ID, expBackoff);
-
-                await Task.Delay(expBackoff, ct);
-            }
+            await _cache.CacheAsync(KeyHelpers.CreateGuildMembersKey(gatewayEvent.ID, default, default), members, ct);
+            await _memberCacher.CacheMembersAsync(gatewayEvent.ID, members);
         }
-
-        await Task.Delay(backoff / attempts, ct);
-        
-        _sync.Release();
+        else
+        {
+            _logger.LogError("Failed to grab members for {GuildID}", gatewayEvent.ID);
+        }
         
         return Result.FromSuccess();
     }
