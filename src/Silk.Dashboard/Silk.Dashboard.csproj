@@ -8,18 +8,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MediatR"/>
-        <PackageReference Include="Humanizer"/>
-        <PackageReference Include="MudBlazor" Version="6.0.10"/>
-        <PackageReference Include="BlazorComponentUtilities" Version="1.8.0"/>
-        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6"/>
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.5"/>
+        <PackageReference Include="MediatR" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="FluentValidation.AspNetCore" />
+        <PackageReference Include="MudBlazor" Version="6.0.10" />
+        <PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.6" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.5" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Silk.Data\Silk.Data.csproj"/>
-        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj"/>
+        <ProjectReference Include="..\Silk.Data\Silk.Data.csproj" />
+        <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
     </ItemGroup>
 
 </Project>
