@@ -29,6 +29,7 @@ using Remora.Discord.Pagination.Extensions;
 using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
@@ -93,8 +94,9 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           .AddInteractiveEntity<JoinEmbedButtonHandler>()
            .AddInteractiveEntity<ReminderModalHandler>()
+           .AddInteractiveEntity<JoinEmbedButtonHandler>()
+           .AddInteractiveEntity<MemberScanButtonHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         
@@ -114,7 +116,8 @@ public static class IServiceCollectionExtensions
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
            .AddCommands()
-           .AddPostExecutionEvent<PostCommandHandler>();   // Register commands
+           .AddPostExecutionEvent<PostCommandHandler>()
+           .AddPostExecutionEvent<CommandMetricsHandler>();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));
         
         services.AddParser<EmojiParser>()
@@ -136,13 +139,15 @@ public static class IServiceCollectionExtensions
            .Configure<CacheSettings>(cs =>
             {
                 cs
-                  .SetDefaultAbsoluteExpiration(null)
-                  .SetSlidingExpiration<IChannel>(null)
-                  .SetSlidingExpiration<IMessage>(null)
-                  .SetSlidingExpiration<IGuild>(null)
-                  .SetSlidingExpiration<IUser>(TimeSpan.FromHours(12))
-                  .SetSlidingExpiration<IGuildMember>(TimeSpan.FromHours(12))
-                  .SetAbsoluteExpiration<IReadOnlyList<IWebhook>>(TimeSpan.Zero);
+                   .SetDefaultAbsoluteExpiration(TimeSpan.Zero)
+                   .SetDefaultSlidingExpiration(null)
+                   .SetAbsoluteExpiration<IReadOnlyList<Snowflake>>(null)
+                   .SetAbsoluteExpiration<IGuildMember>(TimeSpan.FromDays(1))
+                   .SetAbsoluteExpiration<IReadOnlyList<IRole>>(TimeSpan.FromMinutes(30))
+                   .SetAbsoluteExpiration<IChannel>(null)
+                   .SetAbsoluteExpiration<IMessage>(null)
+                   .SetAbsoluteExpiration<IGuild>(null)
+                   .SetAbsoluteExpiration<IUser>(TimeSpan.FromDays(7));
             })
            .Configure<TokenizerOptions>(t => t with { RetainQuotationMarks = true, IgnoreEmptyValues = false });
 
@@ -186,7 +191,7 @@ public static class IServiceCollectionExtensions
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
                                     .WriteTo.File("./logs/silkLog.log", LogEventLevel.Verbose, StringConstants.FileLogFormat, retainedFileCountLimit: null, rollingInterval: RollingInterval.Day, flushToDiskInterval: TimeSpan.FromMinutes(1))
                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-                                    .MinimumLevel.Override("Remora", LogEventLevel.Error)
+                                    .MinimumLevel.Override("Remora", LogEventLevel.Information)
                                     .MinimumLevel.Override("System.Net", LogEventLevel.Fatal);
 
         Log.Logger = config.LogLevel switch

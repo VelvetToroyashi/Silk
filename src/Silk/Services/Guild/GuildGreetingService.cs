@@ -250,9 +250,7 @@ public class GuildGreetingService : IHostedService
                     );
         }
 
-        return sendResult.IsSuccess
-            ? Result.FromSuccess()
-            : Result.FromError(sendResult.Error);
+       return (Result)sendResult;
     }
 
     /// <summary>

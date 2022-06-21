@@ -173,9 +173,17 @@ public class ReminderCommands : CommandGroup
             if (reminders.Count() > 5)
             {
                 var chunkedReminders = reminders.Select
-                   (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                         $"{r.MessageContent.Truncate(50, "[...]")}"         +
-                         (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""))
+                (r =>
+                 {
+                     var ret = r.MessageID is null
+                         ? $"`[{r.Id}]`"
+                         : $"[`[{r.Id}]`](https://discord.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.MessageID}";
+
+                     return  ret + $" expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                             $"{r.MessageContent.Truncate(100, "[...]")}" +
+                             (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.ReplyMessageID})" : "");
+                    }
+                   )
                   .Chunk(5)
                   .Select((rs, i) => new Embed
                    {
@@ -190,10 +198,18 @@ public class ReminderCommands : CommandGroup
             else
             {
                 var formattedReminders = reminders.Select
-                    (r => $"`{r.Id}` expiring {r.ExpiresAt.ToTimestamp()}:\n" +
-                    $"{r.MessageContent.Truncate(50, "[...]")}" +
-                    (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID}/{r.ChannelID}/{r.ReplyMessageID})" : ""));
+                (r =>
+                 {
+                     var ret = r.MessageID is null
+                         ? $"`[{r.Id}]`"
+                         : $"[`[{r.Id}]`](https://discord.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.MessageID})";
 
+                     return  ret                                          + $" expiring {r.ExpiresAt.ToTimestamp()}:\n" +
+                             $"{r.MessageContent.Truncate(100, "[...]")}" +
+                             (r.IsReply ? $"\nReplying to [message](https://discordapp.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.ReplyMessageID})" : "");
+                 }
+                );
+                
                 var embed = new Embed
                 {
                     Title       = "Your Reminders:",

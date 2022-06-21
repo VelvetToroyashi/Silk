@@ -106,7 +106,7 @@ public class InfoCommands : CommandGroup
             bannerImage = !user.AccentColour.IsDefined(out var accent)
                 ? default
                 : await GenerateBannerColorImageAsync(accent.Value);
-        
+
         var embed = new Embed
         {
             Title     = user.ToDiscordTag(),
@@ -117,19 +117,19 @@ public class InfoCommands : CommandGroup
             {
                 new("Account Created", user.ID.Timestamp.ToTimestamp(), true),
                 new("Joined", member.JoinedAt.ToTimestamp(), true),
-                new("Flags", user.PublicFlags.IsDefined(out var flags) ? flags.ToString().Split(' ').Join("\n").Humanize(LetterCasing.Title) : "None", true),
-                new("Roles", string.Join(",\n", member.Roles.OrderByDescending(r => roles[r].Position).Select(x => $"<@&{x}>"))),
+                new("Flags", user.PublicFlags.IsDefined(out var flags) ? (int)flags is 0 ? "None" : flags.ToString().Split(' ').Join("\n").Humanize(LetterCasing.Title) : "None", true),
+                new("Roles", string.Join(",\n", member.Roles.Append(roles[_context.GuildID.Value].ID).OrderByDescending(r => roles[r].Position).Select(x => $"<@&{x}>"))),
             }
         };
 
         var res = await _channels.CreateMessageAsync
-            (
-             _context.ChannelID,
-             embeds: new[] {embed},
-             attachments: bannerUrl.IsSuccess || bannerImage is null
-                 ? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
-                 : new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("banner.png", bannerImage!)) }
-            );
+        (
+         _context.ChannelID,
+         embeds: new[] {embed},
+         attachments: bannerUrl.IsSuccess || bannerImage is null
+             ? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
+             : new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("banner.png", bannerImage!)) }
+        );
 
         return res;
     }

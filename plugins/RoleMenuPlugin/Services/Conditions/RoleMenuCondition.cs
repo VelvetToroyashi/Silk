@@ -21,6 +21,6 @@ public class RoleMenuCondition : ICondition<RoleMenuAttribute, IMessage>, ICondi
     {
         var existsResult = await _mediator.Send(new GetRoleMenu.Request(data.Value), ct);
         
-        return existsResult.IsSuccess ? Result.FromSuccess() : Result.FromError(existsResult.Error);
+        return (Result)existsResult;
     }
 }

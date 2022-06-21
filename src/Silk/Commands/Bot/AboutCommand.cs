@@ -79,23 +79,20 @@ public class AboutCommand : CommandGroup
         var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=1100484045846&scope=bot%20applications.commands";
 
 
-        var res = await _channelApi
-           .CreateMessageAsync(
-                               _context.ChannelID,
-                               embeds: new[] { embed },
-                               components: new IMessageComponent[]
-                               {
-                                   new ActionRowComponent(new IMessageComponent[]
-                                   {
-                                       new ButtonComponent(ButtonComponentStyle.Link, "Invite", URL: invite),
-                                       new ButtonComponent(ButtonComponentStyle.Link, "Source", URL: "https://velvetthepanda.dev/vtd/Silk"),
-                                       new ButtonComponent(ButtonComponentStyle.Link, "Support", URL: "https://discord.gg/HZfZb95"),
-                                       new ButtonComponent(ButtonComponentStyle.Link, "Donate", URL: "https://paypal.me/MarshmallowSerg/5")
-                                   })
-                               });
-        
-       return res.IsSuccess 
-           ? Result.FromSuccess() 
-           : Result.FromError(res.Error!);
+        var res = await _channelApi.CreateMessageAsync
+        (
+         _context.ChannelID,
+         embeds: new[] { embed },
+         components: new IMessageComponent[]
+         {
+             new ActionRowComponent(new IMessageComponent[]
+             {
+                 new ButtonComponent(ButtonComponentStyle.Link, "Invite", URL: invite),
+                 new ButtonComponent(ButtonComponentStyle.Link, "Source", URL: "https://silkbot.cc/src/"),
+                 new ButtonComponent(ButtonComponentStyle.Link, "Support", URL: StringConstants.SupportInvite)
+             })
+         });
+
+        return (Result)res;
     }
 }

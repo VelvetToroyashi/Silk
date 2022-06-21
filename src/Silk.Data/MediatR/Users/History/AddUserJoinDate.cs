@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -19,19 +18,16 @@ public static class AddUserJoinDate
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            var user = await _db.Users
-                                .Include(u => u.History)
-                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
-            
-            if (user is null)
-                return new NotFoundError($"No user exists by the ID of {request.UserID} in guild {request.GuildID}");
+            try
+            {
+                _db.Histories.Add(new() { UserID = request.UserID, GuildID = request.GuildID, JoinDate = request.Date });
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                return new NotFoundError($"There is no user by the ID of {request.UserID}.");
+            }
 
-            user.History.Add(new () { UserID = user.ID, GuildID = request.GuildID, JoinDate = request.Date });
-
-            _db.Update(user);
-            
-            await _db.SaveChangesAsync(cancellationToken);
-            
             return Result.FromSuccess();
         }
     }

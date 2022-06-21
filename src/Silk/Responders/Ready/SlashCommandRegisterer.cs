@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway.Responders;
@@ -10,7 +11,7 @@ using Silk.Shared.Configuration;
 
 namespace Silk.Responders;
 
-public class SlashCommandRegisterer : IResponder<IReady>, IResponder<IGuildCreate>
+public class SlashCommandRegisterer : IResponder<IReady>
 {
     private readonly IConfiguration           _config;
     private readonly SlashService             _slash;
@@ -31,23 +32,14 @@ public class SlashCommandRegisterer : IResponder<IReady>, IResponder<IGuildCreat
         {
             _lifetime.StopApplication();
         }
-        
-        return Task.FromResult(slashResult);
-    }
 
-    public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
-    {
-        if (gatewayEvent.IsUnavailable.IsDefined(out var unavailable) && unavailable)
-            return Result.FromSuccess();
-        
-        var config = _config.GetSilkConfigurationOptions();
-
-        if (config.SlashCommandsGuildId != null)
+        if (_config.GetSilkConfigurationOptions().SlashCommandsGuildId is { } slashDebugGuild)
         {
-            if (config.SlashCommandsGuildId != gatewayEvent.ID.Value)
-                return Result.FromSuccess();
+            return _slash.UpdateSlashCommandsAsync(DiscordSnowflake.New(slashDebugGuild), "silk_slash_tree", ct);
         }
-        
-        return await _slash.UpdateSlashCommandsAsync(gatewayEvent.ID, "silk_slash_tree", ct);
+        else
+        {
+            return _slash.UpdateSlashCommandsAsync(null, "silk_slash_tree", ct);
+        }
     }
 }

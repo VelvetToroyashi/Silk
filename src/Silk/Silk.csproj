@@ -70,13 +70,13 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.20" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="2.0.23" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
-        <PackageReference Include="Sentry" Version="3.17.1" />
-        <PackageReference Include="Sentry.DiagnosticSource" Version="3.17.1" />
-        <PackageReference Include="Sentry.Extensions.Logging" Version="3.17.1" />
-        <PackageReference Include="Sentry.Serilog" Version="3.17.1" />
+        <PackageReference Include="Sentry" Version="3.18.0" />
+        <PackageReference Include="Sentry.DiagnosticSource" Version="3.18.0" />
+        <PackageReference Include="Sentry.Extensions.Logging" Version="3.18.0" />
+        <PackageReference Include="Sentry.Serilog" Version="3.18.0" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.Expressions" />
         <PackageReference Include="Serilog.Extensions.Hosting" />
@@ -86,7 +86,7 @@
         <PackageReference Include="Serilog.Sinks.File" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
+        <PackageReference Include="StackExchange.Redis" Version="2.6.45" />
         <PackageReference Include="Svg.Skia" Version="0.5.14" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Gateway.Events;
@@ -31,39 +32,36 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
             return Result.FromSuccess();
 
         var updated = new Remora.Discord.API.Objects.Message
-            (
-             message,
-             channel,
-             cached.GuildID,
-             cached.Author,
-             cached.Member,
-             gatewayEvent.Content.IsDefined(out var content) ? content : cached.Content,
-             cached.Timestamp,
-             gatewayEvent.EditedTimestamp.HasValue ? gatewayEvent.EditedTimestamp.Value : cached.EditedTimestamp,
-             cached.IsTTS,
-             cached.MentionsEveryone,
-             gatewayEvent.Mentions.IsDefined(out var mentions) ? mentions : cached.Mentions,
-             gatewayEvent.MentionedRoles.IsDefined(out var mentionRoles) ? mentionRoles : cached.MentionedRoles,
-             gatewayEvent.MentionedChannels.HasValue ? gatewayEvent.MentionedChannels : cached.MentionedChannels,
-             gatewayEvent.Attachments.IsDefined(out var attachments) ? attachments : cached.Attachments,
-             gatewayEvent.Embeds.IsDefined(out var embeds) ? embeds : cached.Embeds,
-             gatewayEvent.Reactions.HasValue ? gatewayEvent.Reactions : cached.Reactions,
-             cached.Nonce,
-             gatewayEvent.IsPinned.IsDefined(out var isPinned) ? isPinned : cached.IsPinned,
-             cached.WebhookID,
-             cached.Type,
-             cached.Activity,
-             cached.Application,
-             cached.ApplicationID,
-             cached.MessageReference,
-             gatewayEvent.Flags.HasValue ? gatewayEvent.Flags : cached.Flags,
-             cached.ReferencedMessage,
-             cached.Interaction,
-             cached.Thread,
-             gatewayEvent.Components.HasValue ? gatewayEvent.Components : cached.Components,
-             cached.StickerItems
-            );
-        
+        (
+         message,
+         channel,
+         cached.Author,
+         gatewayEvent.Content.IsDefined(out var content) ? content : cached.Content,
+         cached.Timestamp,
+         gatewayEvent.EditedTimestamp.HasValue ? gatewayEvent.EditedTimestamp.Value : cached.EditedTimestamp,
+         cached.IsTTS,
+         cached.MentionsEveryone,
+         gatewayEvent.MentionedRoles.IsDefined(out var mentionRoles) ? mentionRoles : cached.MentionedRoles,
+         gatewayEvent.MentionedChannels.HasValue ? gatewayEvent.MentionedChannels : cached.MentionedChannels,
+         gatewayEvent.Attachments.IsDefined(out var attachments) ? attachments : cached.Attachments,
+         gatewayEvent.Embeds.IsDefined(out var embeds) ? embeds : cached.Embeds,
+         gatewayEvent.Reactions.HasValue ? gatewayEvent.Reactions : cached.Reactions,
+         cached.Nonce,
+         gatewayEvent.IsPinned.IsDefined(out var isPinned) ? isPinned : cached.IsPinned,
+         cached.WebhookID,
+         cached.Type,
+         cached.Activity,
+         cached.Application,
+         cached.ApplicationID,
+         cached.MessageReference,
+         gatewayEvent.Flags.HasValue ? gatewayEvent.Flags : cached.Flags,
+         cached.ReferencedMessage,
+         cached.Interaction,
+         cached.Thread,
+         gatewayEvent.Components.HasValue ? gatewayEvent.Components : cached.Components,
+         cached.StickerItems
+        );
+    
         await _cache.CacheAsync(key, updated, ct);
 
         return Result.FromSuccess();

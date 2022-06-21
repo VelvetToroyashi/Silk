@@ -28,9 +28,14 @@ public class PollyMetricsHandler : AsyncPolicy<HttpResponseMessage>
         // If we haven't, don't log metrics; we're retrying the request via Polly
         if (res.RequestMessage is { } request)
         {
-            var sanitizedEndpoint = SanitizeEndpoint(endpoint);
-        
-            SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
+            try
+            {
+                var sanitizedEndpoint = SanitizeEndpoint(endpoint);
+
+                SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
+            }
+            catch { /* */}
+
         }
 
         return res;

@@ -20,23 +20,15 @@ public static class AddUserLeaveDate
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            var user = await _db.Users
-                                .Include(u => u.History)
-                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+            var history = await _db.Histories.LastOrDefaultAsync(h => h.UserID == request.UserID && h.GuildID == request.GuildID, cancellationToken);
             
-            if (user is null)
+            if (history is null)
                 return new NotFoundError($"No user exists by the ID of {request.UserID} in guild {request.GuildID}");
 
-            var latestJoin = user.History.LastOrDefault(l => l.LeaveDate is null);
-
-            latestJoin ??= new() { GuildID = request.GuildID };
-
-            latestJoin.LeaveDate = request.Date;
-            
-            _db.Update(user);
+            _db.Update(history);
             
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             return Result.FromSuccess();
         }
     }

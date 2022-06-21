@@ -240,7 +240,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     }
 
     /// <inheritdoc />
-    public async Task<Result<InfractionDTO>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.")
+    public async Task<Result<InfractionDTO>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", bool notify = true)
     {
         using var _ = SilkMetric.InfractionDispatchTime.WithLabels("kick").NewTimer();
         
@@ -256,11 +256,18 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         InfractionDTO infraction = await _mediator.Send(new CreateInfraction.Request(guildID, targetID, enforcerID, reason, InfractionType.Kick));
 
-        var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+        if (notify)
+        {
+            var memberRes = await _guilds.GetGuildMemberAsync(guildID, targetID);
 
-        if (informResult.IsDefined(out var informed) && informed)
-            infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.CaseID, infraction.GuildID, Notified: true));
+            if (memberRes.IsSuccess)
+            {
+                var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
 
+                if (informResult.IsDefined(out var informed) && informed)
+                    infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.CaseID, infraction.GuildID, Notified: true));
+            }
+        }
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
         if (!kickResult.IsSuccess)
@@ -297,11 +304,15 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         if (notify)
         {
-            //TODO: Don't attempt to inform the user if they're not present on the guild.
-            var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+            var memberRes = await _guilds.GetGuildMemberAsync(guildID, targetID);
 
-            if (informResult.IsDefined(out var informed) && informed)
-                infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.CaseID, infraction.GuildID, Notified: true));
+            if (memberRes.IsSuccess)
+            {
+                var informResult = await TryInformTargetAsync(infraction, enforcer, guildID);
+
+                if (informResult.IsDefined(out var informed) && informed)
+                    infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.CaseID, infraction.GuildID, Notified: true));
+            }
         }
         
         Result banResult = await _guilds.CreateGuildBanAsync(guildID, targetID, days, reason);

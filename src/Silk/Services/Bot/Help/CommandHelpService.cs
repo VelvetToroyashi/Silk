@@ -75,7 +75,7 @@ public class CommandHelpService : ICommandHelpService
 
         var sendResult = await _channels.CreateMessageAsync(channelID, embeds: embeds.ToArray());
 
-        return sendResult.IsSuccess ? Result.FromSuccess() : Result.FromError(sendResult.Error);
+        return (Result)sendResult;
     }
     
     public async Task<(IEnumerable<IChildNode> Nodes, ConditionAttribute? FirstFailedCondition)> EvaluateNodeConditionsAsync(IReadOnlyList<IChildNode> nodes)

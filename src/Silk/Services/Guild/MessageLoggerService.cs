@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching;
 using Remora.Discord.Caching.Services;
+using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Extensions;
@@ -38,7 +39,7 @@ public class MessageLoggerService
         _exemptions    = exemptions;
     }
 
-    public async Task<Result> LogEditAsync(IPartialMessage message)
+    public async Task<Result> LogEditAsync(IPartialMessage message, Optional<Snowflake> messageGuildID)
     {
         if (!message.Author.IsDefined(out var author))
             return Result.FromSuccess();
@@ -46,7 +47,7 @@ public class MessageLoggerService
         if (author.IsBot.IsDefined(out var bot) && bot)
             return Result.FromSuccess();
 
-        if (!message.GuildID.IsDefined(out var guildID))
+        if (!messageGuildID.IsDefined(out var guildID))
             return Result.FromSuccess();
         
         if (!message.ChannelID.IsDefined(out var channelID))

@@ -9,25 +9,17 @@ namespace Silk.Interactivity;
 [PublicAPI]
 public class InteractivityExtension
 {
-    private readonly InteractivityWaiter<IMessageCreate>     _messageWaiter;
-    private readonly InteractivityWaiter<IInteractionCreate> _interactionWaiter;
-    
-    public InteractivityExtension
-    (
-        InteractivityWaiter<IMessageCreate> messageWaiter,
-        InteractivityWaiter<IInteractionCreate> interactionWaiter
-    )
-    {
-        _messageWaiter     = messageWaiter;
-        _interactionWaiter = interactionWaiter;
-    }
+    private readonly InteractivityWaiter _eventWaiter;
+
+    public InteractivityExtension(InteractivityWaiter eventWaiter)
+        => _eventWaiter = eventWaiter;
     
     public Task<Result<IInteractionCreate?>> WaitForSelectAsync(IUser user, IMessage message, CancellationToken ct = default)
         => WaitForSelectAsync(ev => GetUser(ev).IsDefined(out var evUser)   && evUser.ID    == user.ID &&
                                     ev.Message.IsDefined(out var evMessage) && evMessage.ID == message.ID, ct);
     
     public Task<Result<IInteractionCreate?>> WaitForSelectAsync(Func<IInteractionCreate, bool> predicate, CancellationToken ct = default)
-        => _interactionWaiter.WaitForEventAsync(predicate, ct);
+        => _eventWaiter.WaitForEventAsync(predicate, ct);
 
 
     public Task<Result<IInteractionCreate?>> WaitForButtonAsync(IUser user, IMessage message, CancellationToken ct = default)
@@ -36,13 +28,13 @@ public class InteractivityExtension
                               ct);
 
     public Task<Result<IInteractionCreate?>> WaitForButtonAsync(Func<IInteractionCreate, bool> predicate, CancellationToken ct = default)
-        => _interactionWaiter.WaitForEventAsync(predicate, ct);
+        => _eventWaiter.WaitForEventAsync(predicate, ct);
 
     public Task<Result<IMessageCreate?>> WaitForMessageAsync(IPartialUser user, CancellationToken ct = default)
-        => _messageWaiter.WaitForEventAsync(ev => ev.Author.ID == user.ID, ct);
+        => _eventWaiter.WaitForEventAsync<IMessageCreate>(ev => ev.Author.ID == user.ID, ct);
 
     public Task<Result<IMessageCreate?>> WaitForMessageAsync(Func<IMessage, bool> predicate, CancellationToken ct = default)
-        => _messageWaiter.WaitForEventAsync(predicate, ct);
+        => _eventWaiter.WaitForEventAsync<IMessageCreate>(predicate, ct);
     
     
     private Optional<IUser> GetUser(IInteraction interaction) 
