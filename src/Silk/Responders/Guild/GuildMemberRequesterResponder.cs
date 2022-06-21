@@ -14,7 +14,7 @@ using Silk.Services.Data;
 namespace Silk.Responders;
 
 [ResponderGroup(ResponderGroup.Late)]
-public class GuildMemberRequesterResponder : IResponder<IGuildCreate>//, IResponder<IGatewayEvent>
+public class GuildMemberRequesterResponder : IResponder<IGuildCreate>
 {
     private readonly CacheService                           _cache;
     private readonly ICacheProvider                         _provider;
