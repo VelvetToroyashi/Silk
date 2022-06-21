@@ -9,14 +9,14 @@ namespace Silk.Dashboard.Services.DashboardDiscordClient;
 
 public class DashboardDiscordClient : IDashboardDiscordClient
 {
-    private readonly IDiscordRestUserAPI           _userApi;
+    private readonly IDiscordRestUserAPI  _userApi;
 
     private IUser?                        _cachedUser;
     private IReadOnlyList<IPartialGuild>? _cachedCurrentUserGuilds;
 
-    public DashboardDiscordClient(IDiscordRestUserAPI restClient)
+    public DashboardDiscordClient(IDiscordRestUserAPI userApi)
     {
-        _userApi = restClient;
+        _userApi  = userApi;
     }
 
     public async Task<IUser?> GetCurrentUserAsync(bool forceRefresh = false)
