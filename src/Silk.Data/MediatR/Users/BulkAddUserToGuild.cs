@@ -33,18 +33,10 @@ public static class BulkAddUserToGuild
     internal sealed class Handler : IRequestHandler<Request>, IAsyncDisposable
     {
         private readonly GuildContext _db;
-        private readonly IMediator    _mediator;
-        
-        public Handler(GuildContext db, IMediator mediator)
-        {
-            _db       = db;
-            _mediator = mediator;
-        }
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
-            await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, "s!"), cancellationToken);
-            
             var users      = request.Users.Select(u => new UserEntity()      { ID     = u.ID, History = { new() { UserID = u.ID, GuildID = request.GuildID, JoinDate = u.JoinedAt } } });
             var guildUsers = request.Users.Select(u => new GuildUserEntity() { UserID = u.ID, GuildID = request.GuildID });
             
