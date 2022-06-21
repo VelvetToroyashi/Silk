@@ -50,7 +50,7 @@ public class GuildConfigCacheService
 
     private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(Snowflake guildId)
     {
-        var configuration = await _mediator.Send(new GetOrCreateGuildModConfig.Request(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
+        var configuration = await _mediator.Send(new GetGuildModConfig.Request(guildId), CancellationToken.None);
         var                cacheKey      = SilkKeyHelper.GenerateGuildModKey(guildId);
         _cache.Set(cacheKey, configuration, _defaultCacheExpiration);
         return configuration;

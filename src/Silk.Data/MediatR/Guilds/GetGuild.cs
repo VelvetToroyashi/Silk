@@ -13,18 +13,18 @@ public static class GetGuild
     /// Request for retrieving a <see cref="GuildEntity" />.
     /// </summary>
     /// <param name="GuildID">The Id of the Guild</param>
-    public sealed record Request(Snowflake GuildID) : IRequest<GuildEntity>;
+    public sealed record Request(Snowflake GuildID) : IRequest<GuildEntity?>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, GuildEntity>
+    internal sealed class Handler : IRequestHandler<Request, GuildEntity?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
 
-        public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
             GuildEntity? guild = await _db.Guilds
                                           .AsSplitQuery()
