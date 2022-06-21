@@ -4,6 +4,7 @@ using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
+using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
@@ -19,9 +20,7 @@ public partial class ManageGuild
     [Inject]    private IDashboardDiscordClient DiscordClient { get; set; }
     [Parameter] public  string                  GuildId       { get; set; }
 
-    private Snowflake GuildIdParsed => Snowflake.TryParse(GuildId, out var snowflake, Constants.DiscordEpoch)
-        ? (Snowflake)snowflake
-        : new();
+    private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();
 
     private bool _savingChanges;
     private bool _requestFailed;

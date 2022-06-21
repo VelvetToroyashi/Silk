@@ -123,79 +123,79 @@ else
                                 @* Todo: Create separate sections for each Entity type (i.e LoggingEntity, etc...) *@
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.UseNativeMute"
-                                                 Label="@LabelFor(nameof(_guildModConfig.UseNativeMute))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.UseNativeMute)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Logging.LogMessageEdits"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Logging.LogMessageEdits))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Logging.LogMessageEdits)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Logging.LogMemberJoins"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Logging.LogMemberJoins))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Logging.LogMemberJoins)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Logging.LogMemberLeaves"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Logging.LogMemberLeaves))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Logging.LogMemberLeaves)"/>
                                 </MudItem>
 
                                 @* Todo: Make/Show another section to add the LoggingId and Webhook URL *@
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Logging.UseWebhookLogging"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Logging.UseWebhookLogging))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Logging.UseWebhookLogging)"/>
                                 </MudItem>
 
                                 @* Todo: Add separate section for adding Whitelisted invites *@
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Invites.WhitelistEnabled"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Invites.WhitelistEnabled))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Invites.WhitelistEnabled)"/>
                                 </MudItem>
 
                                 @*<MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.BlacklistWords"
-                                                 Label="@LabelFor(nameof(_guildModConfig.BlacklistWords))" />
+                                                 Label="@LabelFor(() => _guildModConfig.BlacklistWords)" />
                                 </MudItem>*@
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Invites.WarnOnMatch"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Invites.WarnOnMatch))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Invites.WarnOnMatch)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Invites.DeleteOnMatch"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Invites.DeleteOnMatch))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Invites.DeleteOnMatch)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.Invites.UseAggressiveRegex"
-                                                 Label="@LabelFor(nameof(_guildModConfig.Invites.UseAggressiveRegex))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.Invites.UseAggressiveRegex)"/>
                                 </MudItem>
 
                                 @*<MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.AutoEscalateInfractions"
-                                                 Label="@LabelFor(nameof(_guildModConfig.AutoEscalateInfractions))" />
+                                                 Label="@LabelFor(() => _guildModConfig.AutoEscalateInfractions)" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.AutoDehoist"
-                                                 Label="@LabelFor(nameof(_guildModConfig.AutoDehoist))" />
+                                                 Label="@LabelFor(() => _guildModConfig.AutoDehoist)" />
                                 </MudItem>*@
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.DetectPhishingLinks"
-                                                 Label="@LabelFor(nameof(_guildModConfig.DetectPhishingLinks))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.DetectPhishingLinks)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.DeletePhishingLinks"
-                                                 Label="@LabelFor(nameof(_guildModConfig.DeletePhishingLinks))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.DeletePhishingLinks)"/>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCheckBox @bind-Checked="_guildModConfig.ProgressiveStriking"
-                                                 Label="@LabelFor(nameof(_guildModConfig.ProgressiveStriking))"/>
+                                                 Label="@LabelFor(() => _guildModConfig.ProgressiveStriking)"/>
                                 </MudItem>
                             </MudGrid>
                         </div>
@@ -206,7 +206,7 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="Id of the role to apply when muting members.">
                                         <MudText Typo="Typo.h5">
-                                            @LabelFor(nameof(_guildModConfig.MuteRoleID))
+                                            @LabelFor(() => _guildModConfig.MuteRoleID)
                                         </MudText>
                                     </MudTooltip>
 
@@ -218,7 +218,7 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The maximum amount of users that can be mentioned in a single message.">
                                         <MudText Typo="Typo.h5">
-                                            @LabelFor(nameof(_guildModConfig.MaxUserMentions))
+                                            @LabelFor(() => _guildModConfig.MaxUserMentions)
                                         </MudText>
                                     </MudTooltip>
 
@@ -230,7 +230,7 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The maximum amount of roles that can be mentioned in a single role.">
                                         <MudText Typo="Typo.h5">
-                                            @LabelFor(nameof(_guildModConfig.MaxRoleMentions))
+                                            @LabelFor(() => _guildModConfig.MaxRoleMentions)
                                         </MudText>
                                     </MudTooltip>
 
@@ -242,7 +242,7 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudTooltip Placement="Placement.Bottom" Text="The Channel Id to log moderation/message changes to.">
                                         <MudText Typo="Typo.h5">
-                                            @LabelFor(nameof(_guildModConfig.Logging))
+                                            @LabelFor(() => _guildModConfig.Logging)
                                         </MudText>
                                     </MudTooltip>
 
