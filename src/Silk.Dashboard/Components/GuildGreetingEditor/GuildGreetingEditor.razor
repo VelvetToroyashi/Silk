@@ -9,80 +9,64 @@
 
 @inherits DashboardComponentBase
 
-<MudCard Class="m-4">
+<MudCard>
     <MudCardContent>
-        <MudForm Model="Greeting" @ref="_form">
-
+        <MudForm @ref="_form" Model="_greeting">
             @* Guild ID *@
             <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Bottom"
+                <MudTooltip Placement="Placement.Top"
                             Text="The ID of the guild to greet members in">
                     <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(Greeting.GuildID))
+                        @LabelFor(() => _greeting.GuildID)
                     </MudText>
                 </MudTooltip>
 
-                <MudTextField T="Snowflake"
-                              @bind-Value="Greeting.GuildID"
+                <MudTextField @bind-Value="_greeting.GuildID"
                               Variant="Variant.Outlined"
-                              Immediate="false"
-                              Validation="NonNullableValidator"
-                              Converter="NonNullableConverter"/>
-            </MudContainer>
-
-            @* Channel ID *@
-            <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Bottom"
-                            Text="The ID of the channel to send the greeting to">
-                    <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(Greeting.ChannelID))
-                    </MudText>
-                </MudTooltip>
-
-                <MudTextField T="Snowflake"
-                              @bind-Value="Greeting.ChannelID"
-                              Variant="Variant.Outlined"
-                              Immediate="false"
+                              Immediate="true"
                               Validation="NonNullableValidator"
                               Converter="NonNullableConverter"/>
             </MudContainer>
 
             @* Greeting Option *@
             <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Bottom"
+                <MudTooltip Placement="Placement.Top"
                             Text="How / when to greet new members">
                     <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(Greeting.Option))
+                        @LabelFor(nameof(GreetingOption))
                     </MudText>
                 </MudTooltip>
 
-                <MudSelect @bind-Value="Greeting.Option"
+                <MudSelect @bind-Value="_greeting.Option"
                            Variant="Variant.Outlined">
-                    @foreach (var greetingOption in GreetingOptions)
+                    @foreach (var go in GreetingOptions)
                     {
-                        <MudSelectItem Value="@greetingOption">
-                            @greetingOption.Humanize(LetterCasing.Title)
+                        <MudSelectItem Value="@go">
+                            @go.Humanize(LetterCasing.Title)
                         </MudSelectItem>
                     }
                 </MudSelect>
             </MudContainer>
 
-            @if (Greeting.Option is GreetingOption.GreetOnRole)
+            @if (_greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
             {
+                var roleSelected = _greeting.Option is GreetingOption.GreetOnRole;
+                var optionHeader = (roleSelected ? "Role" : "Channel") + " ID";
+
                 <MudContainer>
-                    <MudTooltip Placement="Placement.Bottom"
+                    <MudTooltip Placement="Placement.Top"
                                 Text="@MetaDataIdHelpText">
                         <MudText Typo="Typo.h5">
-                            Role ID
+                            @optionHeader
                         </MudText>
                     </MudTooltip>
 
-                    <MudTextField T="Snowflake?"
-                                  @bind-Value="Greeting.MetadataID"
+                    <MudTextField T="Snowflake"
+                                  @bind-Value="GreetingMetadataID"
                                   Variant="Variant.Outlined"
-                                  Immediate="false"
-                                  Validation="NullableValidator"
-                                  Converter="NullableConverter"/>
+                                  Immediate="true"
+                                  Validation="NonNullableValidator"
+                                  Converter="NonNullableConverter"/>
                 </MudContainer>
             }
 
@@ -102,21 +86,31 @@
                     </MudListItem>
                 </MudList>
 
-                <MudTooltip Placement="Placement.Bottom"
+                <MudTooltip Placement="Placement.Top"
                             Text="The message that will be used to greet new members">
                     <MudText Typo="Typo.h5">
                         Message
                     </MudText>
                 </MudTooltip>
 
-                <MudTextField @bind-Value="Greeting.Message"
+                <MudTextField @bind-Value="_greeting.Message"
                               Class="mb-2"
                               Immediate="true"
                               Variant="Variant.Outlined"
                               DisableUnderLine="true"
                               Lines="6"
                               Placeholder="@("Welcome {@u}! This is {s}, the best server around!")"
-                              MaxLength="MaxMessageLength"/>
+                              Counter="0"/>
+
+                @if (_greeting.Message?.Length > EmbedMessageLengthThreshold)
+                {
+                    <MudChip Variant="Variant.Outlined"
+                             Color="Color.Warning"
+                             Class="my-2">
+                        The length of this greeting is greater than @EmbedMessageLengthThreshold characters,
+                        and will be placed in an embed when sent.
+                    </MudChip>
+                }
             </MudContainer>
 
             @* Save Button *@
@@ -128,7 +122,6 @@
                     Save Changes
                 </MudButton>
             </MudContainer>
-
         </MudForm>
     </MudCardContent>
 </MudCard>
