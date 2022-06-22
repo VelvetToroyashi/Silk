@@ -36,17 +36,9 @@ public static class CreateInfraction
 
         public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
-            
-            // We want to make sure that if two infractions are created simultaneously,
-            // they're given different IDs. Otherwise when fetching infractions, an exception
-            // is thrown becuase the case id is duplicated.
-            int guildInfractionCount = await _db.Infractions.CountAsync(i => i.GuildID == request.GuildID, cancellationToken: cancellationToken);
-
             var infraction = new InfractionEntity
             {
                 GuildID    = request.GuildID,
-                CaseNumber = guildInfractionCount,
                 EnforcerID = request.EnforcerID,
                 Reason     = request.Reason,
                 ExpiresAt  = request.Expiration,
@@ -61,8 +53,6 @@ public static class CreateInfraction
             _db.Infractions.Add(infraction);
             await _db.SaveChangesAsync(cancellationToken);
             
-            await transaction.CommitAsync(cancellationToken);
-
             return InfractionEntity.ToDTO(infraction);
         }
     }
