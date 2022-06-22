@@ -1,11 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Silk.Dashboard.Extensions;
-using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
+using Silk.Dashboard.Services.DashboardDiscordClient;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Guilds.Config;
@@ -17,7 +16,7 @@ public partial class ManageGuild
 {
     [Inject]    private IMediator               Mediator      { get; set; }
     [Inject]    private ISnackbar               Snackbar      { get; set; }
-    [Inject]    private IDashboardDiscordClient DiscordClient { get; set; }
+    [Inject]    private DashboardDiscordClient DiscordClient { get; set; }
     [Parameter] public  string                  GuildId       { get; set; }
 
     private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();

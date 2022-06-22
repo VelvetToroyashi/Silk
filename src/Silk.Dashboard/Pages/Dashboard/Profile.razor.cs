@@ -2,14 +2,14 @@
 using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
-using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
+using Silk.Dashboard.Services.DashboardDiscordClient;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
 public partial class Profile
 {
     [Inject] public  ISnackbar                Snackbar      { get; set; }
-    [Inject] private IDashboardDiscordClient  DiscordClient { get; set; }
+    [Inject] private DashboardDiscordClient  DiscordClient { get; set; }
 
     private bool _showJoinedGuilds;
 
@@ -19,8 +19,8 @@ public partial class Profile
 
     protected override async Task OnInitializedAsync()
     {
-        _user          = await DiscordClient.GetCurrentUserAsync(true);
-        _joinedGuilds  = await DiscordClient.GetCurrentUserGuildsAsync(true);
+        _user          = await DiscordClient.GetCurrentUserAsync();
+        _joinedGuilds  = await DiscordClient.GetCurrentUserGuildsAsync();
 
         _managedGuilds = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }

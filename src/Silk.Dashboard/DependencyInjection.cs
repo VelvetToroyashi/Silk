@@ -1,12 +1,14 @@
-﻿using AspNet.Security.OAuth.Discord;
+﻿using System.Security.Claims;
+using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MudBlazor.Services;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Rest.Extensions;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services.DashboardDiscordClient;
-using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
 using Silk.Dashboard.Services.DiscordTokenStorage;
 using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 using Silk.Data;
@@ -37,21 +39,15 @@ public static class DependencyInjection
         this IServiceCollection services
     )
     {
-        return services.AddDiscordRest(_ => "_", clientBuilder => 
-        { 
-            clientBuilder.ConfigureHttpClient((provider, client) => 
-            {
-                // Todo: Check that using the context accessor works (NOT recommended)
-                // due to HttpContext only hitting _Host.cshtml page on initial request or full page reload)
-                var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                var tokenStore          = provider.GetRequiredService<IDiscordTokenStore>();
+        services.AddDiscordRest
+        (
+         provider => provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
+                             .Value.Discord.BotToken
+        );
 
-                var userId      = httpContextAccessor.HttpContext?.User.GetUserId();
-                var accessToken = tokenStore.GetToken(userId!)?.AccessToken;
+        services.AddScoped<DashboardDiscordClient>();
 
-                client.DefaultRequestHeaders.Authorization = new("Bearer", accessToken); 
-            });
-        });
+        return services;
     }
 
     private static IServiceCollection AddDashboardDiscordAuthentication
@@ -61,41 +57,88 @@ public static class DependencyInjection
     )
     {
         services.AddAuthentication(opt => 
-                 {
-                     opt.DefaultScheme          = CookieAuthenticationDefaults.AuthenticationScheme;
-                     opt.DefaultSignInScheme    = CookieAuthenticationDefaults.AuthenticationScheme; 
-                     opt.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
-                 })
-                .AddDiscord(opt => 
-                 {
-                     opt.UsePkce = true; 
-                     opt.SaveTokens = true; 
-                     
-                     opt.Scope.Add("guilds");
-                     
-                     opt.ClientId          = silkConfigOptions.Discord.ClientId; 
-                     opt.ClientSecret      = silkConfigOptions.Discord.ClientSecret;
-                     
-                     opt.CallbackPath       = DiscordAuthenticationDefaults.CallbackPath; 
-                     opt.AccessDeniedPath   = new("/");
-                     opt.ReturnUrlParameter = string.Empty;
-                     
-                     opt.Events.OnCreatingTicket = context => 
-                     {
-                         var userId     = context.Principal.GetUserId();
-                         var tokenStore = context.HttpContext.RequestServices.GetRequiredService<IDiscordTokenStore>();
+        {
+            opt.DefaultScheme          = CookieAuthenticationDefaults.AuthenticationScheme;
+            opt.DefaultSignInScheme    = CookieAuthenticationDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
+        })
+        .AddDiscord(opt => 
+        {
+            opt.UsePkce    = true;
+            opt.SaveTokens = true;
 
-                         tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
-                         return Task.CompletedTask;
-                     };
-                 })
-                .AddCookie(options => 
-                 { 
-                     // Todo: Find way to set expiration based on OAuth token expiry
-                     options.ExpireTimeSpan = TimeSpan.FromDays(7); 
-                 });
+            opt.Scope.Add("guilds");
+
+            opt.ClientId     = silkConfigOptions.Discord.ClientId;
+            opt.ClientSecret = silkConfigOptions.Discord.ClientSecret;
+
+            opt.CallbackPath       = DiscordAuthenticationDefaults.CallbackPath;
+            opt.AccessDeniedPath   = new("/");
+            opt.ReturnUrlParameter = string.Empty;
+
+            opt.Events.OnCreatingTicket = async context =>
+            {
+                var serviceProvider = context.HttpContext.RequestServices;
+                var oAuth2Api       = serviceProvider.GetRequiredService<IDiscordRestOAuth2API>();
+
+                var userId     = context.Principal!.GetUserId();
+                var tokenStore = serviceProvider.GetRequiredService<IDiscordTokenStore>();
+                tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
+
+                await TryAddTeamMemberClaim(context.Principal, userId, oAuth2Api);
+            };
+        })
+        .AddCookie(options => 
+        {
+            // Todo: Find way to set expiration based on OAuth token expiry
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        });
+
+        services.AddAuthorization
+        (
+            options => options.AddPolicy(DashboardPolicies.TeamMemberPolicy, 
+                                         DashboardPolicies.IsTeamMemberPolicy())
+        );
 
         return services;
+    }
+
+    /* Todo: Does not seem to work when using `@attribute [Authorize]` when setting Roles or Policies */
+    private static async Task TryAddTeamMemberClaim
+    (
+        ClaimsPrincipal       user,
+        string                userId,
+        IDiscordRestOAuth2API oAuth2Api
+    )
+    {
+        if (user.HasClaim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName)) 
+            return;
+
+        try
+        {
+            var res = await oAuth2Api.GetCurrentBotApplicationInformationAsync();
+            if (res.IsDefined(out var appInfo))
+            {
+                var claimIdentity = (ClaimsIdentity) user.Identity;
+
+                if (appInfo.Owner?.ID.Value.Value.ToString() == userId)
+                {
+                    claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName));
+                }
+                else
+                {
+                    var teamMember = appInfo.Team?.Members.FirstOrDefault(member => member.User.ID.Value.Value.ToString() == userId);
+                    if (teamMember is not null)
+                    {
+                        claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName));
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     private static IServiceCollection AddSilkDatabase
@@ -126,15 +169,15 @@ public static class DependencyInjection
         });
 
         services.AddMudServices();
-        
+
         services.AddMediatR(typeof(GuildContext));
 
-        services.AddScoped<IDashboardDiscordClient, DashboardDiscordClient>();
-        
+        /* Todo: Handle Logout of User when expired token belongs to current user */
+        /* Todo: Handle Removal of expired Cookies */
         services.AddSingleton<IDiscordTokenStore, DiscordTokenStore>();
         services.AddSingleton<IDiscordTokenStoreWatcher, DiscordTokenStoreWatcher>();
         services.AddHostedService(s => s.GetRequiredService<IDiscordTokenStoreWatcher>());
-        
+
         return services;
     }
 }

@@ -2,52 +2,72 @@
 
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Caching.Abstractions.Services;
+using Remora.Discord.Rest.Extensions;
+using Remora.Rest;
 using Remora.Rest.Core;
-using Silk.Dashboard.Services.DashboardDiscordClient.Interfaces;
+using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
 namespace Silk.Dashboard.Services.DashboardDiscordClient;
 
-public class DashboardDiscordClient : IDashboardDiscordClient
+public class DashboardDiscordClient
 {
-    private readonly IDiscordRestUserAPI  _userApi;
+    private readonly IRestHttpClient       _restHttpClient;
+    private readonly IDiscordTokenStore    _tokenStore;
+    private readonly ICacheProvider        _cacheProvider;
+    
+    private readonly IDiscordRestUserAPI   _userApi;
+    private readonly IDiscordRestOAuth2API _oAuth2Api;
 
-    private IUser?                        _cachedUser;
-    private IReadOnlyList<IPartialGuild>? _cachedCurrentUserGuilds;
-
-    public DashboardDiscordClient(IDiscordRestUserAPI userApi)
+    public DashboardDiscordClient(
+        IRestHttpClient restHttpClient,
+        IDiscordTokenStore tokenStore,
+        ICacheProvider cacheProvider,
+        IDiscordRestUserAPI   userApi,
+        IDiscordRestOAuth2API oAuth2Api)
     {
-        _userApi  = userApi;
+        _restHttpClient = restHttpClient;
+        _tokenStore     = tokenStore;
+        _cacheProvider  = cacheProvider;
+        _userApi        = userApi;
+        _oAuth2Api      = oAuth2Api;
     }
 
-    public async Task<IUser?> GetCurrentUserAsync(bool forceRefresh = false)
+    private string? GetCurrentUserToken() => _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
+
+    public async Task<IUser?> GetCurrentUserAsync()
     {
-        if (_cachedUser is null || forceRefresh)
-        {
-            var result = await _userApi.GetCurrentUserAsync();
-            _cachedUser = result.IsDefined(out var user) ? user : null;
-        }
-        
-        return _cachedUser;
+        var result = await _restHttpClient.GetAsync<IUser>
+        (
+         "users/@me",
+         b =>
+             b.WithRateLimitContext(_cacheProvider)
+              .With(message => message.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
+        );
+
+        return result.IsDefined(out var user) ? user : null;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync(bool forceRefresh = false)
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync()
     {
-        if (_cachedCurrentUserGuilds is null || forceRefresh)
-        {
-            var result = await _userApi.GetCurrentUserGuildsAsync(limit: 100);
-            _cachedCurrentUserGuilds = result.IsDefined(out var guilds) ? guilds : null;
-        }
+        var result = await _restHttpClient.GetAsync<IReadOnlyList<IPartialGuild>>
+        (
+         "users/@me/guilds",
+         b =>
+             b.WithRateLimitContext(_cacheProvider)
+              .With(message => message.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
+              .AddQueryParameter("limit", 100.ToString())
+        );
 
-        return _cachedCurrentUserGuilds;
+        return result.IsDefined(out var guilds) ? guilds : null;
     }
 
     public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionsAsync
     (
-        DiscordPermission permissions,
-        bool              forceRefresh = false
+        DiscordPermission permissions
     )
     {
-        return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(forceRefresh), permissions);
+        return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(), permissions);
     }
 
     public IReadOnlyList<IPartialGuild>? FilterGuildsByPermission
@@ -64,14 +84,25 @@ public class DashboardDiscordClient : IDashboardDiscordClient
     public async Task<IPartialGuild?> GetCurrentUserGuildByIdAndPermissionAsync
     (
         Snowflake         guildId,
-        DiscordPermission permission,
-        bool              forceRefresh = false
+        DiscordPermission permission
     )
     {
-        var cachedGuilds = await GetCurrentUserGuildsAsync(forceRefresh);
+        var cachedGuilds = await GetCurrentUserGuildsAsync();
         var guild = cachedGuilds?.FirstOrDefault(guild => guild.ID.Value == guildId                          &&
                                                           guild.Permissions.IsDefined(out var permissionSet) &&
                                                           permissionSet.HasPermission(permission));
         return guild;
+    }
+    
+    public async Task<IApplication?> GetCurrentBotApplicationInformationAsync()
+    {
+        var result = await _oAuth2Api.GetCurrentBotApplicationInformationAsync();
+        return result.IsDefined(out var application) ? application : null;
+    }
+
+    public async Task<IAuthorizationInformation?> GetCurrentAuthorizationInformationAsync()
+    {
+        var result = await _oAuth2Api.GetCurrentAuthorizationInformationAsync();
+        return result.IsDefined(out var authorizationInformation) ? authorizationInformation : null;
     }
 }
