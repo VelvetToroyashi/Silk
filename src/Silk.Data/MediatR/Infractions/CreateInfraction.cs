@@ -53,7 +53,9 @@ public static class CreateInfraction
             _db.Infractions.Add(infraction);
             await _db.SaveChangesAsync(cancellationToken);
             
-            return InfractionEntity.ToDTO(infraction);
+            infraction = await _db.Infractions.AsNoTracking().FirstOrDefaultAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            
+            return InfractionEntity.ToDTO(infraction!);
         }
     }
 }
