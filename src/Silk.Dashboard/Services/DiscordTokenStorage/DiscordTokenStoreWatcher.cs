@@ -6,70 +6,76 @@ namespace Silk.Dashboard.Services.DiscordTokenStorage;
 
 public class DiscordTokenStoreWatcher : IDiscordTokenStoreWatcher
 {
-    private          Timer?                     _timer;
+    private readonly PeriodicTimer              _timer;
     private readonly ILogger<DiscordTokenStore> _logger;
     private readonly IDiscordTokenStore         _tokenStore;
 
-    private readonly TimeSpan _checkTokenExpiryPeriod = TimeSpan.FromMinutes(3);
+    private readonly TimeSpan _checkTokenExpiryPeriod = TimeSpan.FromMinutes(5);
 
     // Todo: Zero because HttpContext.User will still have token if removed early
     private readonly TimeSpan _periodBeforeTokenExpires = TimeSpan.Zero;
 
     public DiscordTokenStoreWatcher
     (
-        IDiscordTokenStore         tokenStore,
-        ILogger<DiscordTokenStore> logger
+        ILogger<DiscordTokenStore> logger,
+        IDiscordTokenStore         tokenStore
     )
     {
-        _tokenStore = tokenStore;
         _logger     = logger;
-    }
-
-    private void CreateTimer()
-    {
-        _timer ??= new Timer(CheckForExpiredTokens, null, TimeSpan.Zero, _checkTokenExpiryPeriod);
-    }
-
-    private void DestroyTimer()
-    {
-        _timer?.Dispose();
-    }
-
-    private void CheckForExpiredTokens(object? state)
-    {
-        var expiredTokens = 0;
-
-        foreach (var storeEntry in _tokenStore.GetEntries())
-        {
-            if (!TokenExpired(storeEntry.Value, _periodBeforeTokenExpires)) continue;
-            _tokenStore.RemoveToken(storeEntry.Key);
-            ++expiredTokens;
-        }
-
-        if (expiredTokens > 0)
-            _logger.LogInformation("Removed {TokensRemoved} expired tokens", expiredTokens);
-    }
-
-    private static bool TokenExpired
-    (
-        IDiscordTokenStoreEntry? storeEntry,
-        TimeSpan                 periodBeforeExpiration
-    )
-    {
-        if (storeEntry?.ExpiresAt is null) return false;
-        return storeEntry.ExpiresAt + periodBeforeExpiration <= DateTimeOffset.UtcNow;
+        _tokenStore = tokenStore;
+        _timer      = new(_checkTokenExpiryPeriod);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        CreateTimer();
+        _ = CheckForExpiredTokensAsync(cancellationToken);
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        DestroyTimer();
+        _timer.Dispose();
         _tokenStore.RemoveAllTokens();
         return Task.CompletedTask;
+    }
+
+    private async Task CheckForExpiredTokensAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (await _timer.WaitForNextTickAsync(cancellationToken))
+            {
+                var expiredTokens = 0;
+
+                foreach (var storeEntry in _tokenStore.GetEntries())
+                {
+                    if (!TokenExpired(storeEntry.Value)) continue;
+
+                    _tokenStore.RemoveToken(storeEntry.Key);
+                    ++expiredTokens;
+                }
+
+                if (expiredTokens > 0)
+                    _logger.LogInformation("Removed {TokensRemoved} expired tokens", expiredTokens);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation
+                (
+                 "{TypeName} - Operation was cancelled in {MethodName}",
+                 GetType().Name,
+                 nameof(CheckForExpiredTokensAsync)
+                );
+        }
+    }
+
+    private bool TokenExpired
+    (
+        IDiscordTokenStoreEntry? storeEntry
+    )
+    {
+        if (storeEntry?.ExpiresAt is null) return false;
+        return storeEntry.ExpiresAt + _periodBeforeTokenExpires <= DateTimeOffset.UtcNow;
     }
 }
