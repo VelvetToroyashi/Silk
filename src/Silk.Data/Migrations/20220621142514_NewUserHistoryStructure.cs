@@ -10,8 +10,7 @@ namespace Silk.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("CREATE TABLE temp AS SELECT guild_id, user_id, leave_date FROM user_histories;");
-            migrationBuilder.Sql("INSERT INTO temp SELECT guild_id, user_id, leave_date FROM user_histories h WHERE h.leave_date IS NOT NULL;");
+            migrationBuilder.Sql("CREATE TABLE temp AS SELECT guild_id, user_id, leave_date FROM user_histories h WHERE h.leave_date IS NOT NULL;");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_user_histories",
