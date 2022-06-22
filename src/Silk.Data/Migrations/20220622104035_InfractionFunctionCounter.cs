@@ -15,7 +15,7 @@ RETURNS TRIGGER AS
 $$
 BEGIN
 -- Lock the row for update
-LOCK TABLE infractions IN SHARE ROW EXCLUSIVE MODE;
+LOCK TABLE ONLY infractions IN SHARE UPDATE EXCLUSIVE MODE;
 -- If there's no infractions, MAX retruns NULL, so coalesce with 0
 SELECT COALESCE(MAX(case_id), 0) + 1 INTO new.case_id FROM infractions WHERE guild_id=new.guild_id;
 
