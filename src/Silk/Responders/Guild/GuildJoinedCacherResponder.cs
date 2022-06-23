@@ -10,6 +10,7 @@ using StackExchange.Redis;
 
 namespace Silk.Responders;
 
+[ResponderGroup(ResponderGroup.Early)]
 public class GuildJoinedCacherResponder : IResponder<IGuildCreate>
 {
     private readonly IConnectionMultiplexer _cache;

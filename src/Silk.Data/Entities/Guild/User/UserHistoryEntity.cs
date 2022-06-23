@@ -11,8 +11,6 @@ namespace Silk.Data.Entities;
 [Table("user_histories")]
 public class UserHistoryEntity
 {
-    public int Id { get; set; }
-    
     /// <summary>
     ///     The Id of the user this history is reflective of.
     /// </summary>
@@ -31,15 +29,15 @@ public class UserHistoryEntity
     /// <summary>
     /// When this user joined.
     /// </summary>
-    [Column("join_date")]
-    public DateTimeOffset JoinDate { get; set; }
+    [Column("date")]
+    public DateTimeOffset Date { get; set; }
 
     /// <summary>
     /// When this user left.
     /// </summary>
-    [Column("leave_date")]
-    public DateTimeOffset? LeaveDate { get; set; }
+    [Column("is_join")]
+    public bool IsJoin { get; set; }
 
     public static UserHistoryDTO ToDTO(UserHistoryEntity history)
-        => new(history.GuildID, history.JoinDate, history.LeaveDate);
+        => new(history.GuildID, history.Date, history.IsJoin);
 }

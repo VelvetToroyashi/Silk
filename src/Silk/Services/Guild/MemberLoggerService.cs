@@ -72,14 +72,16 @@ public class MemberLoggerService
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
         else if (twoWeeksOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 weeks old");
+
+        var join = userData.History.Last(u => u.GuildID == guildID && u.IsJoin);
         
         var userFields = new List<EmbedField>()
         {
             new("Username:", user.ToDiscordTag()),
             new("User ID:", user.ID.ToString()),
             new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
-            new("User Joined:", userData.History.Last().JoinDate.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
-                                userData.History.Last().JoinDate.ToTimestamp())
+            new("User Joined:", join.Date.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
+                                join.Date.ToTimestamp())
         };
         
         if (userData.Infractions.Any())
@@ -110,13 +112,13 @@ public class MemberLoggerService
                                                 InfractionType.SoftBan
                                        );
         
-        if (userData.History.Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
+        if (userData.History.Where(u => u.IsJoin).Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding infractions.");
         
-        if (userData.History.Where(g => g.GuildID == guildID).Count(jd => jd.JoinDate.AddDays(TwoWeeks) > DateTimeOffset.UtcNow) > JoinWarningThreshold)
+        if (userData.History.Where(u => u.IsJoin).Where(g => g.GuildID == guildID).Count(jd => jd.Date.AddDays(TwoWeeks) > DateTimeOffset.UtcNow) > JoinWarningThreshold)
             sb.AppendLine("Account has joined more than three times in the last two weeks.");
 
-        if (userData.History.Where(g => g.JoinDate.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
+        if (userData.History.Where(u => u.IsJoin).Where(g => g.Date.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
             sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
         
         var embed = new Embed()

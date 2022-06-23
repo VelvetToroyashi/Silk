@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Humanizer;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API;

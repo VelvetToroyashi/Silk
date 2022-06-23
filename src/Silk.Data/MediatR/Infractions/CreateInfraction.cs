@@ -14,14 +14,14 @@ namespace Silk.Data.MediatR.Infractions;
 public static class CreateInfraction
 {
     public sealed record Request
-        (
-            Snowflake       GuildID,
-            Snowflake       TargetID,
-            Snowflake       EnforcerID,
-            string          Reason,
-            InfractionType  Type,
-            DateTimeOffset? Expiration = null
-        ) : IRequest<InfractionDTO>;
+    (
+        Snowflake       GuildID,
+        Snowflake       TargetID,
+        Snowflake       EnforcerID,
+        string          Reason,
+        InfractionType  Type,
+        DateTimeOffset? Expiration = null
+    ) : IRequest<InfractionDTO>;
 
     internal sealed class Handler : IRequestHandler<Request, InfractionDTO>
     {
@@ -36,14 +36,9 @@ public static class CreateInfraction
 
         public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
         {
-            int guildInfractionCount = await _db.Infractions
-                                                .Where(inf => inf.GuildID == request.GuildID)
-                                                .CountAsync(cancellationToken) + 1;
-
             var infraction = new InfractionEntity
             {
                 GuildID    = request.GuildID,
-                CaseNumber = guildInfractionCount,
                 EnforcerID = request.EnforcerID,
                 Reason     = request.Reason,
                 ExpiresAt  = request.Expiration,
@@ -57,8 +52,10 @@ public static class CreateInfraction
             
             _db.Infractions.Add(infraction);
             await _db.SaveChangesAsync(cancellationToken);
-
-            return InfractionEntity.ToDTO(infraction);
+            
+            infraction = await _db.Infractions.AsNoTracking().FirstOrDefaultAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            
+            return InfractionEntity.ToDTO(infraction!);
         }
     }
 }

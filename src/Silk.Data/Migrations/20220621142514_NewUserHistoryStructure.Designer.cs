@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Silk.Data;
@@ -11,9 +12,10 @@ using Silk.Data;
 namespace Silk.Data.Migrations
 {
     [DbContext(typeof(GuildContext))]
-    partial class SilkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220621142514_NewUserHistoryStructure")]
+    partial class NewUserHistoryStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -669,6 +671,9 @@ namespace Silk.Data.Migrations
                     b.Property<DateTimeOffset>("Date")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsJoin")
                         .HasColumnType("boolean")

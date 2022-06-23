@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Extensions;
 
 namespace Silk.Interactivity;

@@ -16,20 +16,20 @@ public static class GetGuildModConfig
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public Task<GuildModConfigEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildModConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            return _db.GuildModConfigs
-                      .Include(c => c.Invites)
-                      .Include(c => c.Invites.Whitelist)
-                      .Include(c => c.InfractionSteps)
-                      .Include(c => c.Exemptions)
-                      .Include(c => c.Logging)
-                      .Include(c => c.Logging.MemberJoins)
-                      .Include(c => c.Logging.MemberLeaves)
-                      .Include(c => c.Logging.MessageDeletes)
-                      .Include(c => c.Logging.MessageEdits)
-                      .Include(c => c.Logging.Infractions)
-                      .FirstOrDefaultAsync(c => c.GuildID == request.GuildId, cancellationToken)!;
+            return await _db.GuildModConfigs
+                            .Include(c => c.Invites)
+                            .Include(c => c.Invites.Whitelist)
+                            .Include(c => c.InfractionSteps)
+                            .Include(c => c.Exemptions)
+                            .Include(c => c.Logging)
+                            .Include(c => c.Logging.MemberJoins)
+                            .Include(c => c.Logging.MemberLeaves)
+                            .Include(c => c.Logging.MessageDeletes)
+                            .Include(c => c.Logging.MessageEdits)
+                            .Include(c => c.Logging.Infractions)
+                            .FirstOrDefaultAsync(c => c.GuildID == request.GuildId, cancellationToken) ?? new();
         }
     }
 }
