@@ -66,8 +66,6 @@ public class MemberLoggerService
 
         var sb = new StringBuilder();
 
-        sb.AppendLine("Notes:");
-        
         if (twoDaysOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
         else if (twoWeeksOld)
@@ -122,6 +120,9 @@ public class MemberLoggerService
 
         if (userData.History.Where(u => u.IsJoin).Where(g => g.Date.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
             sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
+
+        if (sb.Length > 0) // Why haven't I thought of this before?
+            sb.Insert(0, "Notes:\n");
         
         var embed = new Embed()
         {
