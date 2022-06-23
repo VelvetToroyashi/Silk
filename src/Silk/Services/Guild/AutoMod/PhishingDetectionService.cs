@@ -98,7 +98,7 @@ public class PhishingDetectionService
         var cdnResult = CDN.GetUserAvatarUrl(user.ID, user.Avatar);
 
         if (!cdnResult.IsSuccess)
-            return Result.FromError(cdnResult.Error);
+            return (Result)cdnResult;
         
         var url = cdnResult.Entity;
 
@@ -148,7 +148,7 @@ public class PhishingDetectionService
         var self = await _users.GetCurrentUserAsync();
 
         if (!self.IsSuccess)
-            return Result.FromError(self.Error);
+            return (Result)self;
 
         // We delete the last day of messages to clear any potential join message.
         var infraction = await _infractions.BanAsync
@@ -193,7 +193,6 @@ public class PhishingDetectionService
             return Result.FromSuccess(); // DM channels are exempted.
 
         GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
-        
 
         IEnumerable<string> links;
 
@@ -217,7 +216,7 @@ public class PhishingDetectionService
                 var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
 
                 if (!exemptionResult.IsSuccess)
-                    return Result.FromError(exemptionResult.Error);
+                    return (Result)exemptionResult;
 
                 if (!exemptionResult.Entity)
                     return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
@@ -231,7 +230,9 @@ public class PhishingDetectionService
     ///     Handles a detected phishing link.
     /// </summary>
     /// <param name="guildID">The ID of the guild the message was detected on.</param>
-    /// <param name="authorId">The ID of the author.</param>
+    /// <param name="authorID">The ID of the author.</param>
+    /// <param name="channelID">The ID of the channel.</param>
+    /// <param name="messageID">The ID of the message.</param>
     /// <param name="delete">Whether to delete the detected phishing link.</param>
     private async Task<Result> HandleDetectedPhishingAsync(Snowflake guildID, Snowflake authorID, Snowflake channelID, Snowflake messageID, bool delete)
     {
@@ -246,7 +247,7 @@ public class PhishingDetectionService
         Result<IUser> selfResult = await _users.GetCurrentUserAsync();
 
         if (!selfResult.IsSuccess)
-            return Result.FromError(selfResult.Error);
+            return (Result)selfResult;
 
         IUser self = selfResult.Entity;
 
