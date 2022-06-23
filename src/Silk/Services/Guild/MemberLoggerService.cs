@@ -55,10 +55,10 @@ public class MemberLoggerService
         
         if (channel is null)
             return Result.FromSuccess();
-
-        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        
         var twoDaysOld = user.ID.Timestamp.AddDays(TwoDays) > DateTimeOffset.UtcNow;
-
+        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        
         var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, member.JoinedAt));
         
         if (!userResult.IsDefined(out var userData))
@@ -83,6 +83,8 @@ public class MemberLoggerService
             new("User Joined:", join.Date.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
                                 join.Date.ToTimestamp())
         };
+        
+        // TODO: Break out guild-specific infractions into a variable as to not re-iterate with LINQ.
         
         if (userData.Infractions.Any())
         {
