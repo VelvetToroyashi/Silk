@@ -125,7 +125,7 @@ public class PhishingDetectionService
          user.ID,
          self.ID,
          1,
-         $"Potential Phishing UserBot; Matched Avatar: Similarity of {response.Similarity * 100}%",
+         $"Suspicious avatar detected, category: {response.Key} | Similarity of {response.Similarity * 100}%",
          notify: false
         );
         
@@ -138,10 +138,10 @@ public class PhishingDetectionService
 
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
-        
+
         // TODO: add to config and make toggelable. This will go under phishing settings.
         var detection = IsSuspectedPhishingUsername(user.Username);
-        
+
         if (!detection.IsSuspicious)
             return Result.FromSuccess();
 
@@ -160,10 +160,10 @@ public class PhishingDetectionService
          $"Suspicious username similar to  '{detection.MostSimilarTo}' detected",
          notify: false
         );
-        
+
         if (!infraction.IsSuccess)
             return Result.FromError(infraction.Error);
-        
+
         return Result.FromSuccess();
     }
     
@@ -178,8 +178,7 @@ public class PhishingDetectionService
         // This is somewhat arbitrary, and may be adjusted to be more or less sensitive.
         return (fuzzy.Score > 95, fuzzy.Value);
     }
-    
-    
+
     /// <summary>
     ///     Detects any phishing links in a given message.
     /// </summary>
@@ -262,5 +261,4 @@ public class PhishingDetectionService
 
         return (Result)infractionResult;
     }
-
 }
