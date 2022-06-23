@@ -177,7 +177,7 @@ public class ReminderCommands : CommandGroup
                  {
                      var ret = r.MessageID is null
                          ? $"`[{r.Id}]`"
-                         : $"[`[{r.Id}]`](https://discord.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.MessageID}";
+                         : $"[`[{r.Id}]`](https://discord.com/channels/{r.GuildID?.ToString() ?? "@me"}/{r.ChannelID}/{r.MessageID})";
 
                      return  ret + $" expiring {r.ExpiresAt.ToTimestamp()}:\n" +
                              $"{r.MessageContent.Truncate(100, "[...]")}" +
