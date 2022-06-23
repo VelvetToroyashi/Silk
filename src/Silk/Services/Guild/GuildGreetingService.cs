@@ -48,7 +48,6 @@ public class GuildGreetingService : IHostedService
         ILogger<GuildGreetingService> logger  
     )
     {
-        
         _mediator   = mediator;
         _shardHelper = shardHelper;
         _users      = users;
@@ -57,7 +56,6 @@ public class GuildGreetingService : IHostedService
         _config     = config;
         _logger     = logger;
 
-        
         //It's important to yield to the queue task here because if we get 429'd, 
         // Polly will retry the request, which will continue to block the queue task.
         _timer = new(QueueLoopAsync, TimeSpan.FromSeconds(5), true);
@@ -93,7 +91,6 @@ public class GuildGreetingService : IHostedService
     /// </summary>
     /// <param name="guildID">The ID of the guild.</param>
     /// <param name="user">The member that joined.</param>
-    /// <param name="option">The option to use when checking if the member should be greeted.</param>
     /// <returns>A result that may or may have not succeeded.</returns>
     public async Task<Result> TryGreetMemberAsync(Snowflake guildID, IUser user)
     {
