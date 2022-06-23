@@ -94,6 +94,7 @@ public class MemberLoggerService
                   "Infractions:",
                   userData
                   .Infractions
+                  .Where(inf => inf.GuildID == guildID)
                   .GroupBy(inf => inf.Type)
                   .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
                   .Join("\n"), true
@@ -103,10 +104,10 @@ public class MemberLoggerService
         
         var userInfractionJoinBuffer = JoinWarningThreshold + userData
                                       .Infractions
+                                      .Where(inf => inf.GuildID == guildID)
                                       .Count
                                        (
-                                        inf => 
-                                            inf.Type is
+                                        inf => inf.Type is
                                                 InfractionType.Kick or
                                                 InfractionType.Ban or
                                                 InfractionType.SoftBan
@@ -177,7 +178,7 @@ public class MemberLoggerService
         }
         else
         {
-            var lastJoin = userResult.History.Last();
+            var lastJoin = userResult.History.Last(l => l.IsJoin);
             
             fields.Add(new("User Joined:", lastJoin.Joined.ToTimestamp(TimestampFormat.LongDateTime)));
             
