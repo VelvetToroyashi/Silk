@@ -65,7 +65,7 @@ public sealed class FlagOverlayService
         var getImage = GetImageUri(imageUrl);
 
         if (!getImage.IsDefined(out var imageUri))
-            return Result<Stream>.FromError(getImage);
+            return Result<Stream>.FromError(getImage.Error!);
 
         try
         {
@@ -77,7 +77,7 @@ public sealed class FlagOverlayService
 
         DateTime before = DateTime.UtcNow;
 
-        await using MemoryStream imageStream = await GetImageAsync(imageUri!);
+        await using MemoryStream imageStream = await GetImageAsync(imageUri);
 
         using Image? image = await Image.LoadAsync(imageStream);
 
@@ -86,7 +86,7 @@ public sealed class FlagOverlayService
 
         Stream overlayImage = await GetOverlayAsync(image, overlay, intensity, grayscale);
 
-        DateTime after = DateTime.UtcNow;
+        DateTimeOffset after = DateTimeOffset.UtcNow;
 
         _logger.LogDebug(EventIds.Service, "Processed overlay in {Time:N1}ms", (after - before).TotalMilliseconds);
 
