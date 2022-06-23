@@ -75,10 +75,10 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
             Title  = "Bulk Message Removal Detected",
             Colour = Color.Red,
             Author = new EmbedAuthor
-                (
-                 user?.ToDiscordTag() ?? "Unknown#0000",
-                 IconUrl: (user is null ? CDN.GetDefaultUserAvatarUrl(0).Entity : CDN.GetUserAvatarUrl(user).Entity).ToString()
-                ),
+            (
+             user?.ToDiscordTag() ?? "Unknown#0000",
+             IconUrl: (user is null ? CDN.GetDefaultUserAvatarUrl(0).Entity : (user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user) : CDN.GetUserAvatarUrl(user)).Entity).ToString()
+            ),
             Fields = new EmbedField[]
             {
                 new("User" , $"{(user is null ? "I don't have audit log permissions!" : $"**{user.ToDiscordTag()}**\n(`{user.ID}`)")}", true),
@@ -103,7 +103,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
             var ID  = IDs[i];
             var key = KeyHelpers.CreateMessageCacheKey(channelID, ID);
 
-            if (!(await _cache.TryGetPreviousValueAsync<IMessage>(key)).IsDefined(out var message))
+            if (!(await _cache.TryGetPreviousValueAsync<IMessage>(key)).IsDefined(out var message) && !(await _cache.TryGetValueAsync<IMessage>(key)).IsDefined(out message))
             {
                 sb.AppendLine($"<Message not found> | {ID}");
                 continue;
