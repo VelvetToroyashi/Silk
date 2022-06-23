@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Abstractions.Services;
@@ -29,7 +30,7 @@ public static class IRestHttpClientExtensions
             var result = await client.GetAsync<IReadOnlyList<IGuildMember>>
             (
              $"guilds/{guildID}/members",
-             b => b.WithRateLimitContext(cache)
+             b => b.WithRateLimitContext(cache, true)
                    .AddQueryParameter("limit", "1000")
                    .AddQueryParameter("after", last.ToString())
             );
@@ -43,7 +44,7 @@ public static class IRestHttpClientExtensions
             if (receivedMembers.Count < 1000)
                 return Result<IReadOnlyList<IGuildMember>>.FromSuccess(members);
 
-            last = members[^1].User.Value.ID;
+            last = members.Max(m => m.User.Value.ID);
         }
     }
 }

@@ -142,9 +142,7 @@ public class GuildCacherService
 
     public async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
     {
-
-        var users = members.Where(u => u.User.IsDefined())
-                           .Select(u => (u.User.Value.ID, u.JoinedAt));
+        var users = members.Select(u => (u.User.Value.ID, u.JoinedAt));
 
         await _mediator.Send(new BulkAddUserToGuild.Request(users, guildID));
 
