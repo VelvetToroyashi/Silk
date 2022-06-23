@@ -31,6 +31,7 @@ public static class GetOrCreateUser
                      .RunAsync(cancellationToken);
 
             await _db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
+                     .On(u => new { u.UserID, u.GuildID, u.Date })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
