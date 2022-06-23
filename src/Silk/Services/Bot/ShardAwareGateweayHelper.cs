@@ -71,9 +71,11 @@ public class ShardAwareGateweayHelper : BackgroundService
         {
             var sessionField = typeof(DiscordGatewayClient).GetField("_sessionID", BindingFlags.Instance | BindingFlags.NonPublic);
             var sequenceField = typeof(DiscordGatewayClient).GetField("_lastSequenceNumber", BindingFlags.Instance | BindingFlags.NonPublic);
+            var resumableField = typeof(DiscordGatewayClient).GetField("_isSessionResumable", BindingFlags.Instance | BindingFlags.NonPublic);
             
             sessionField!.SetValue(_client, resume.SessionID);
             sequenceField!.SetValue(_client, resume.Sequence);
+            resumableField!.SetValue(_client, true);
         }
 
         try
@@ -111,7 +113,7 @@ public class ShardAwareGateweayHelper : BackgroundService
             return (null, 0);
         }
         
-        return (session, int.Parse(sequence));
+        return (session, int.Parse(sequence!));
     }
 
     private async Task SaveResumeDataAsync()
@@ -120,10 +122,10 @@ public class ShardAwareGateweayHelper : BackgroundService
         
         var shardKey = $"{ShardPrefix}{_shard.ShardID}";
         
-        var sessionID = typeof(DiscordGatewayClient).GetField("_sessionID", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client) as string;
-        var sequence  = typeof(DiscordGatewayClient).GetField("_lastSequenceNumber", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client) as int?;
+        var sessionID = (string?)typeof(DiscordGatewayClient).GetField("_sessionID", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client);
+        var sequence  = (int)typeof(DiscordGatewayClient).GetField("_lastSequenceNumber", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client)!;
         
-        if (sessionID is null || sequence is null)
+        if (sessionID is null || sequence is 0)
             return;
         
         await redis.StringSetAsync(shardKey + ShardSessionPostfix, sessionID);
