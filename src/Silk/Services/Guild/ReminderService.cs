@@ -221,10 +221,10 @@ public sealed class ReminderService : IHostedService
 
             if (reminder.IsReply)
             {
-                dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:");
-                dispatchMessage.AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
-                dispatchMessage.AppendLine();
-                dispatchMessage.AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
+                dispatchMessage.AppendLine($"You set a reminder on <@{reminder.ReplyAuthorID}>'s message:")
+                               .AppendLine("> " + reminder.ReplyMessageContent.Truncate(800, "[...]").Replace("\n", "\n> "))
+                               .AppendLine()
+                               .AppendLine($"Which was posted here: https://discordapp.com/channels/{reminder.GuildID?.Value.ToString() ?? "@me"}/{reminder.ChannelID}/{reminder.ReplyMessageID}");
             }
         }
         else if (reminder.IsReply)
@@ -237,8 +237,12 @@ public sealed class ReminderService : IHostedService
             {
                 dispatchMessage.AppendLine($"{reminder.CreatedAt.ToTimestamp()}, you asked me to remind ytou about a message, but it's disappeared!.")
                                .AppendLine("Here's what you replied to when you set the reminder, though!")
-                               .AppendLine($"From <@{reminder.ReplyAuthorID}>:")
-                               .AppendLine("> " + reminder.ReplyMessageContent.Truncate(1800, "[...]").Replace("\n", "\n> "));
+                               .AppendLine($"From <@{reminder.ReplyAuthorID}>:");
+
+                if (string.IsNullOrWhiteSpace(reminder.ReplyMessageContent))
+                    dispatchMessage.AppendLine("(No content.)");
+                else
+                    dispatchMessage.AppendLine("> " + reminder.ReplyMessageContent.Truncate(800, "[...]").Replace("\n", "\n> "));
             }
 
             if (!string.IsNullOrWhiteSpace(reminder.MessageContent))
@@ -255,7 +259,8 @@ public sealed class ReminderService : IHostedService
             if (!originalMessageExists)
                 dispatchMessage.AppendLine("I couldn't find the original message, but here's what you wanted to be reminded of:");
 
-            dispatchMessage.AppendLine($"> {reminder.MessageContent} \n\n");
+            if (!string.IsNullOrWhiteSpace(reminder.MessageContent))
+                dispatchMessage.AppendLine($"> {reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> ")} \n\n");
         }
         return dispatchMessage;
     }
