@@ -31,20 +31,22 @@ public class DashboardDiscordClient
         _cacheProvider  = cacheProvider;
         _userApi        = userApi;
         _oAuth2Api      = oAuth2Api;
+
+        _restHttpClient.WithCustomization
+        (
+         b =>
+             {
+                 b.WithRateLimitContext(_cacheProvider)
+                  .With(m => m.Headers.Authorization = new("Bearer", GetCurrentUserToken()));
+             }
+        );
     }
 
     private string? GetCurrentUserToken() => _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
 
     public async Task<IUser?> GetCurrentUserAsync()
     {
-        var result = await _restHttpClient.GetAsync<IUser>
-        (
-         "users/@me",
-         b =>
-             b.WithRateLimitContext(_cacheProvider)
-              .With(message => message.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
-        );
-
+        var result = await _restHttpClient.GetAsync<IUser>("users/@me");
         return result.IsDefined(out var user) ? user : null;
     }
 
@@ -53,21 +55,18 @@ public class DashboardDiscordClient
         var result = await _restHttpClient.GetAsync<IReadOnlyList<IPartialGuild>>
         (
          "users/@me/guilds",
-         b =>
-             b.WithRateLimitContext(_cacheProvider)
-              .With(message => message.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
-              .AddQueryParameter("limit", 100.ToString())
+         b => b.AddQueryParameter("limit", 100.ToString())
         );
 
         return result.IsDefined(out var guilds) ? guilds : null;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionsAsync
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionAsync
     (
-        DiscordPermission permissions
+        DiscordPermission permission
     )
     {
-        return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(), permissions);
+        return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(), permission);
     }
 
     public IReadOnlyList<IPartialGuild>? FilterGuildsByPermission
@@ -87,10 +86,13 @@ public class DashboardDiscordClient
         DiscordPermission permission
     )
     {
-        var cachedGuilds = await GetCurrentUserGuildsAsync();
-        var guild = cachedGuilds?.FirstOrDefault(guild => guild.ID.Value == guildId                          &&
-                                                          guild.Permissions.IsDefined(out var permissionSet) &&
-                                                          permissionSet.HasPermission(permission));
+        var userGuilds = await GetCurrentUserGuildsAsync();
+        var guild = userGuilds?.FirstOrDefault
+        (
+             guild => guild.ID.Value == guildId &&
+                      guild.Permissions.IsDefined(out var permissionSet) &&
+                      permissionSet.HasPermission(permission)
+        );
         return guild;
     }
     
