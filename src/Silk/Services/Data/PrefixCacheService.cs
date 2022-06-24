@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -24,10 +25,15 @@ public sealed class PrefixCacheService : IPrefixCacheService
         _mediator    = mediator;
     }
 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public string RetrievePrefix(Snowflake? guildId)
     {
-        if (guildId is null) return string.Empty;
-        if (_memoryCache.TryGetValue(SilkKeyHelper.GenerateGuildPrefixKey(guildId.Value), out object? prefix)) return (string)prefix;
+        if (guildId is null) 
+            return string.Empty;
+        
+        if (_memoryCache.TryGetValue(SilkKeyHelper.GenerateGuildPrefixKey(guildId.Value), out string prefix))
+            return prefix;
+        
         return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
     }
 
