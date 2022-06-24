@@ -60,10 +60,11 @@ public class PrefixCommand : CommandGroup
         if (!permissionResult.IsSuccess)
             return Result<IMessage>.FromError(permissionResult.Error);
 
-        if (!permissionResult.Entity || string.IsNullOrEmpty(prefix))
-            return await _channels.CreateMessageAsync(_context.ChannelID, $"I respond to {_cache.RetrievePrefix(_context.GuildID.Value)}, `/commands` and when you ping me!");
+        var gprefix = await _cache.RetrievePrefixAsync(_context.GuildID.Value);
         
-
+        if (!permissionResult.Entity || string.IsNullOrEmpty(prefix))
+            return await _channels.CreateMessageAsync(_context.ChannelID, $"I respond to {gprefix}, `/commands` and when you ping me!");
+        
         var prefixCheckResult = IsValidPrefix(prefix);
 
         if (!prefixCheckResult.IsSuccess)

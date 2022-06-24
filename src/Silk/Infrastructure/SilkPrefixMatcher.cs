@@ -32,11 +32,6 @@ public class SilkPrefixMatcher : ICommandPrefixMatcher
         
         if (!_context.GuildID.IsDefined(out var guildID))
             return Result<(bool, int)>.FromSuccess((true, 0));
-
-        var prefix = _prefixCache.RetrievePrefix(guildID);
-        
-        if (content.StartsWith(prefix))
-            return Result<(bool, int)>.FromSuccess((true, prefix.Length));
         
         var selfResult = await _users.GetCurrentUserAsync(ct);
         
@@ -47,6 +42,11 @@ public class SilkPrefixMatcher : ICommandPrefixMatcher
         
         if (match.Success && match.Groups["ID"].Value == selfResult.Entity.ID.ToString())
             return Result<(bool, int)>.FromSuccess((true, match.Length));
+
+        var prefix = await _prefixCache.RetrievePrefixAsync(guildID);
+        
+        if (content.StartsWith(prefix))
+            return Result<(bool, int)>.FromSuccess((true, prefix.Length));
         
         return Result<(bool, int)>.FromSuccess((false, 0));
     }

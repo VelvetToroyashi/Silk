@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,6 +16,8 @@ namespace Silk.Services.Data;
 /// <inheritdoc cref="IPrefixCacheService" />
 public sealed class PrefixCacheService : IPrefixCacheService
 {
+    private readonly SemaphoreSlim _lock = new(1);
+    
     private readonly ILogger<PrefixCacheService> _logger;
     private readonly IMediator                   _mediator;
     private readonly IMemoryCache                _memoryCache;
@@ -25,16 +28,24 @@ public sealed class PrefixCacheService : IPrefixCacheService
         _mediator    = mediator;
     }
 
-    [MethodImpl(MethodImplOptions.Synchronized)]
-    public string RetrievePrefix(Snowflake? guildId)
+    public async ValueTask<string> RetrievePrefixAsync(Snowflake? guildId)
     {
-        if (guildId is null) 
+        if (guildId is null)
             return string.Empty;
         
         if (_memoryCache.TryGetValue(SilkKeyHelper.GenerateGuildPrefixKey(guildId.Value), out string prefix))
             return prefix;
         
-        return GetDatabasePrefixAsync(guildId.Value).GetAwaiter().GetResult();
+        try
+        {
+            await _lock.WaitAsync();
+            
+            return await GetDatabasePrefixAsync(guildId.Value);
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
 
     public void UpdatePrefix(Snowflake id, string prefix)
