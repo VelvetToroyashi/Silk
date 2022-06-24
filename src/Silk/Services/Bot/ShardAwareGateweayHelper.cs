@@ -89,11 +89,11 @@ public class ShardAwareGateweayHelper : BackgroundService
         }
         catch { /* ignored */ }
 
-        _cts.Cancel();
-        await (_shardRefreshTask ?? Task.CompletedTask);
-        
         await SaveResumeDataAsync();
         
+        _cts.Cancel();
+        await (_shardRefreshTask ?? Task.CompletedTask);
+
         _logger.LogInformation("Shard aware gateway helper stopped");
     }
     
@@ -106,7 +106,7 @@ public class ShardAwareGateweayHelper : BackgroundService
         var session = await redis.StringGetAsync(shardKey + ShardSessionPostfix);
         var sequence = await redis.StringGetAsync(shardKey + ShardSequencePostfix);
         
-        if (session.IsNull || sequence.IsNull)
+        if ((string?)session is null || (int)sequence is 0)
         {
             _logger.LogInformation("No resume data found for shard {ShardID}", _shard.ShardID);
             
@@ -125,10 +125,9 @@ public class ShardAwareGateweayHelper : BackgroundService
         var sessionID = (string?)typeof(DiscordGatewayClient).GetField("_sessionID", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client);
         var sequence  = (int)typeof(DiscordGatewayClient).GetField("_lastSequenceNumber", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_client)!;
         
-        if (sessionID is null || sequence is 0)
-            return;
-        
-        await redis.StringSetAsync(shardKey + ShardSessionPostfix, sessionID);
+        await redis.StringSetAsync(shardKey + ShardSessionPostfix, sessionID ?? "");
         await redis.StringSetAsync(shardKey + ShardSequencePostfix, sequence.ToString());
+
+        _logger.LogInformation("Saved resume data for shard {ShardID}", _shard.ShardID);
     }
 }
