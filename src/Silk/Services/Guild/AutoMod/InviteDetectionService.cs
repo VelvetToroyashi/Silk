@@ -44,7 +44,7 @@ public class InviteDetectionService
       _channels    = channels;
       _config      = config;
       _exemptions  = exemptions;
-      _logger = logger;
+      _logger      = logger;
    }
    
    /// <summary>
@@ -93,13 +93,12 @@ public class InviteDetectionService
       }
       
       //Evaluate if the user is whitelisted.
-      
       var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiInvite, guildID, message.Author.ID, message.ChannelID);
 
       if (!exemptionResult.IsDefined(out var isExempt))
       {
          _logger.LogWarning(EventIds.AutoMod, "Failed to evaluate exemption for {User} in {Guild}", message.Author.ID, guildID);
-         return Result.FromError(exemptionResult.Error!);
+         return (Result)exemptionResult;
       }
       
       if (isExempt)
@@ -114,15 +113,15 @@ public class InviteDetectionService
       
          //This should be cached. It should be fine. If it's not it deserves to break.
          if (!selfResult.IsDefined(out var self))
-            return Result.FromError(selfResult.Error!);
+            return (Result)selfResult;
 
-         var infractionResult = await _infractions.StrikeAsync(guildID, message.Author.ID, selfResult.Entity.ID, $"Posted a non-whitelisted invite: {invite}");
+         var infractionResult = await _infractions.StrikeAsync(guildID, message.Author.ID, self.ID, $"Posted a non-whitelisted invite: {invite}");
 
          if (!infractionResult.IsSuccess)
             _logger.LogWarning(EventIds.AutoMod, "Failed to create infraction for {User} in {Guild} \n{@Error}", message.Author.ID, guildID, infractionResult.Error);
       }
       
-      _logger.LogDebug(EventIds.AutoMod, "Invite handling finished in {Time:N0} ms", (message.ID.Timestamp - DateTimeOffset.UtcNow).TotalMilliseconds);
+      _logger.LogDebug(EventIds.AutoMod, "Invite handling finished in {Time:N0} ms", (DateTimeOffset.UtcNow - message.ID.Timestamp).TotalMilliseconds);
       
       return Result.FromSuccess();
    }

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -11,7 +12,7 @@ public static class AddUserJoinDate
 {
     public record Request(Snowflake GuildID, Snowflake UserID, DateTimeOffset Date) : IRequest<Result>;
     
-    internal class Handler : IRequestHandler<Request, Result>
+    internal class Handler : IRequestHandler<Request, Result>, IAsyncDisposable
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
@@ -20,8 +21,10 @@ public static class AddUserJoinDate
         {
             try
             {
-                _db.Histories.Add(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true });
-                await _db.SaveChangesAsync(cancellationToken);
+                await _db.Histories
+                         .Upsert(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true })
+                         .NoUpdate()
+                         .RunAsync(cancellationToken);
             }
             catch
             {
@@ -30,5 +33,7 @@ public static class AddUserJoinDate
 
             return Result.FromSuccess();
         }
+        
+        public async ValueTask DisposeAsync() => await _db.DisposeAsync();
     }
 }

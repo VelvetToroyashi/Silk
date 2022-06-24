@@ -55,10 +55,10 @@ public class MemberLoggerService
         
         if (channel is null)
             return Result.FromSuccess();
-
-        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        
         var twoDaysOld = user.ID.Timestamp.AddDays(TwoDays) > DateTimeOffset.UtcNow;
-
+        var twoWeeksOld = user.ID.Timestamp.AddDays(TwoWeeks) > DateTimeOffset.UtcNow;
+        
         var userResult = await _mediator.Send(new GetOrCreateUser.Request(guildID, user.ID, member.JoinedAt));
         
         if (!userResult.IsDefined(out var userData))
@@ -66,8 +66,6 @@ public class MemberLoggerService
 
         var sb = new StringBuilder();
 
-        sb.AppendLine("Notes:");
-        
         if (twoDaysOld)
             sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
         else if (twoWeeksOld)
@@ -84,6 +82,8 @@ public class MemberLoggerService
                                 join.Date.ToTimestamp())
         };
         
+        // TODO: Break out guild-specific infractions into a variable as to not re-iterate with LINQ.
+        
         if (userData.Infractions.Any())
         {
             sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
@@ -94,6 +94,7 @@ public class MemberLoggerService
                   "Infractions:",
                   userData
                   .Infractions
+                  .Where(inf => inf.GuildID == guildID)
                   .GroupBy(inf => inf.Type)
                   .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
                   .Join("\n"), true
@@ -103,10 +104,10 @@ public class MemberLoggerService
         
         var userInfractionJoinBuffer = JoinWarningThreshold + userData
                                       .Infractions
+                                      .Where(inf => inf.GuildID == guildID)
                                       .Count
                                        (
-                                        inf => 
-                                            inf.Type is
+                                        inf => inf.Type is
                                                 InfractionType.Kick or
                                                 InfractionType.Ban or
                                                 InfractionType.SoftBan
@@ -120,6 +121,9 @@ public class MemberLoggerService
 
         if (userData.History.Where(u => u.IsJoin).Where(g => g.Date.AddHours(HalfDay) > DateTimeOffset.UtcNow).DistinctBy(j => j.GuildID).Count() > JoinWarningThreshold)
             sb.AppendLine($"{Emojis.WarningEmoji} **Account has joined three or more servers in the last 12 hours**");
+
+        if (sb.Length > 0) // Why haven't I thought of this before?
+            sb.Insert(0, "Notes:\n");
         
         var embed = new Embed()
         {
@@ -174,7 +178,7 @@ public class MemberLoggerService
         }
         else
         {
-            var lastJoin = userResult.History.Last();
+            var lastJoin = userResult.History.Last(l => l.IsJoin);
             
             fields.Add(new("User Joined:", lastJoin.Joined.ToTimestamp(TimestampFormat.LongDateTime)));
             

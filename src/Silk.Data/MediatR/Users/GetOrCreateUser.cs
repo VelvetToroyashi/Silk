@@ -19,7 +19,7 @@ public static class GetOrCreateUser
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, Result<UserEntity>>
+    internal sealed class Handler : IRequestHandler<Request, Result<UserEntity>>, IAsyncDisposable
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
@@ -31,6 +31,7 @@ public static class GetOrCreateUser
                      .RunAsync(cancellationToken);
 
             await _db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
+                     .On(u => new { u.UserID, u.GuildID, u.Date })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
@@ -47,5 +48,7 @@ public static class GetOrCreateUser
             
             return user;
         }
+        
+        public ValueTask DisposeAsync() => _db.DisposeAsync();
     }
 }

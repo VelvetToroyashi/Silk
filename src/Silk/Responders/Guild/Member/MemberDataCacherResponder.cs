@@ -8,17 +8,28 @@ using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
 using Silk.Data.MediatR.Users.History;
+using Silk.Services.Data;
 
 namespace Silk.Responders;
 
-[ResponderGroup(ResponderGroup.Early)]
+[ResponderGroup(ResponderGroup.Late)]
 public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
-    private readonly IMediator _mediator;
-    public MemberDataCacherResponder(IMediator mediator) => _mediator = mediator;
+    private readonly IMediator               _mediator;
+    private readonly GuildConfigCacheService _config;
+    public MemberDataCacherResponder(IMediator mediator, GuildConfigCacheService config)
+    {
+        _mediator    = mediator;
+        _config = config;
+    }
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
+        var config = await _config.GetModConfigAsync(gatewayEvent.GuildID);
+        
+        if (!config.Logging.LogMemberJoins)
+            return Result.FromSuccess();
+        
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.Value.ID, JoinedAt: gatewayEvent.JoinedAt), ct);
 
         if (cacheResult.IsDefined(out var user) && user.History.Last().Date != gatewayEvent.JoinedAt)
@@ -29,6 +40,11 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
     {
+        var config = await _config.GetModConfigAsync(gatewayEvent.GuildID);
+        
+        if (!config.Logging.LogMemberLeaves)
+            return Result.FromSuccess();
+        
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.ID, JoinedAt: DateTimeOffset.MinValue), ct);
         
         if (cacheResult.IsDefined(out var user))

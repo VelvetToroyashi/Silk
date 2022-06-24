@@ -17,7 +17,7 @@ public static class SilkMetric
     /// <summary>
     /// Tracker for measuring how long it takes to detect phishing via various means (messages, avatars, or usernames).
     /// </summary>
-    public static readonly Counter PhishingDetection = Metrics.CreateCounter("auto_phishing_ban", "Number of auto phishing bans", "reason");
+    public static readonly Gauge PhishingDetection = Metrics.CreateGauge("phishing_detection_time", "How long it takes to detect phishing", "reason");
     
     /// <summary>
     /// How many reminders Silk has loaded.

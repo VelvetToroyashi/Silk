@@ -171,11 +171,11 @@ public class RemindSlashCommands : CommandGroup
         };
         
         return await _interactions.EditOriginalInteractionResponseAsync
-            (
-             _context.ApplicationID,
-             _context.Token,
-             embeds: new[] { embed }
-            );
+        (
+         _context.ApplicationID,
+         _context.Token,
+         embeds: new[] { embed }
+        );
     }
     
     [Command("view")]

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
 
@@ -20,8 +21,10 @@ public static class AddUserLeaveDate
         {
             try
             {
-                _db.Histories.Add(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true });
-                await _db.SaveChangesAsync(cancellationToken);
+               await _db.Histories
+                   .Upsert(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true })
+                   .NoUpdate()
+                   .RunAsync(cancellationToken);
             }
             catch
             {
