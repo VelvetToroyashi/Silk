@@ -51,7 +51,7 @@ public partial class ManageGuild
     private async Task GetGuildModConfigAsync()
     {
         _guildModConfig = await FetchGuildModConfigAsync();
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     private async Task FetchDiscordGuildFromRestAsync()
@@ -59,20 +59,18 @@ public partial class ManageGuild
         _requestFailed = false;
         _guild = await DiscordClient.GetCurrentUserGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
         if (_guild is null) _requestFailed = true;
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     private async Task<GuildConfigEntity> FetchGuildConfigAsync()
     {
-        var request = new GetOrCreateGuildConfig.Request(GuildIdParsed,
-                                                         StringConstants.DefaultCommandPrefix);
+        var request = new GetOrCreateGuildConfig.Request(GuildIdParsed, StringConstants.DefaultCommandPrefix);
         return await Mediator.Send(request);
     }
 
     private async Task<GuildModConfigEntity> FetchGuildModConfigAsync()
     {
-        var request = new GetOrCreateGuildModConfig.Request(GuildIdParsed, 
-                                                            StringConstants.DefaultCommandPrefix);
+        var request = new GetGuildModConfig.Request(GuildIdParsed);
         return await Mediator.Send(request);
     }
 
