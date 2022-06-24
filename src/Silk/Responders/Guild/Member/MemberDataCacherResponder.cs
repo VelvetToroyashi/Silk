@@ -12,7 +12,7 @@ using Silk.Services.Data;
 
 namespace Silk.Responders;
 
-[ResponderGroup(ResponderGroup.Early)]
+[ResponderGroup(ResponderGroup.Late)]
 public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
     private readonly IMediator               _mediator;
