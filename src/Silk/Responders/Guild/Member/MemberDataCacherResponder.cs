@@ -29,8 +29,6 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
     {
-        return Result.FromSuccess();
-
         var cacheResult = await _mediator.Send(new GetOrCreateUser.Request(gatewayEvent.GuildID, gatewayEvent.User.ID, JoinedAt: DateTimeOffset.MinValue), ct);
         
         if (cacheResult.IsDefined(out var user))

@@ -26,6 +26,7 @@ using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
 using Silk.Data.MediatR.Users;
+using Silk.Data.MediatR.Users.History;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -237,7 +238,8 @@ public class Program
                    .AddMediatR(typeof(GuildContext))
                     // Very high throuput handler that needs to be explitily disposed of,
                     // else it'll gobble up connections.
-                   .AddScoped(typeof(BulkAddUserToGuild).GetNestedTypes(BindingFlags.NonPublic)[0])
+                   .AddScoped(typeof(AddUserJoinDate).GetNestedTypes(BindingFlags.NonPublic)[0])
+                   .AddScoped(typeof(AddUserLeaveDate).GetNestedTypes(BindingFlags.NonPublic)[0])
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (

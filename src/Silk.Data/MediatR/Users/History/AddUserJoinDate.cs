@@ -11,7 +11,7 @@ public static class AddUserJoinDate
 {
     public record Request(Snowflake GuildID, Snowflake UserID, DateTimeOffset Date) : IRequest<Result>;
     
-    internal class Handler : IRequestHandler<Request, Result>
+    internal class Handler : IRequestHandler<Request, Result>, IAsyncDisposable
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
@@ -30,5 +30,7 @@ public static class AddUserJoinDate
 
             return Result.FromSuccess();
         }
+        
+        public async ValueTask DisposeAsync() => await _db.DisposeAsync();
     }
 }
