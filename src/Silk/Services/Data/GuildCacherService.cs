@@ -140,12 +140,4 @@ public class GuildCacherService
     
     public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
 
-    public async Task<Result> CacheMembersAsync(Snowflake guildID, IReadOnlyList<IGuildMember> members)
-    {
-        var users = members.Select(u => (u.User.Value.ID, u.JoinedAt));
-
-        await _mediator.Send(new BulkAddUserToGuild.Request(users, guildID));
-
-        return Result.FromSuccess();
-    }
 }
