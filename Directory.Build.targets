@@ -11,7 +11,7 @@
         <PackageReference Update="Remora.Discord.Hosting" Version="5.0.21" />
         <PackageReference Update="Remora.Discord.Gateway" Version="10.1.0" />
         <PackageReference Update="Remora.Discord.Commands" Version="25.0.2" />
-        <PackageReference Update="Remora.Discord.Caching" Version="30.0.1" />
+        <PackageReference Update="Remora.Discord.Caching" Version="30.0.2" />
         <PackageReference Update="Remora.Discord.Caching.Redis" Version="1.0.15" />
         <PackageReference Update="Remora.Discord.Caching.Abstractions" Version="1.0.0" />
         <PackageReference Update="Remora.Discord.Extensions" Version="4.2.7" />
