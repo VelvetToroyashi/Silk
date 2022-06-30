@@ -94,9 +94,9 @@ public static class IServiceCollectionExtensions
         services
            .AddResponders(asm)
            .AddInteractivity()
-           .AddInteractiveEntity<ReminderModalHandler>()
-           .AddInteractiveEntity<JoinEmbedButtonHandler>()
-           .AddInteractiveEntity<MemberScanButtonHandler>()
+           .AddInteractionGroup<ReminderModalHandler>()
+           .AddInteractionGroup<JoinEmbedButtonHandler>()
+           .AddInteractionGroup<MemberScanButtonHandler>()
            .AddPagination()
            .AddSilkInteractivity();
         

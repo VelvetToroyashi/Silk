@@ -12,6 +12,7 @@
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
         <PackageReference Include="Remora.Commands" />
         <PackageReference Include="Remora.Discord.Gateway" />
+        <PackageReference Include="Remora.Discord.Interactivity" Version="4.0.0" />
     </ItemGroup>
 
 </Project>

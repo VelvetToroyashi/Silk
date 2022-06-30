@@ -13,6 +13,7 @@ using Remora.Commands.Results;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Rest.Core;
@@ -94,21 +95,21 @@ public class ReminderCommands : CommandGroup
 
         private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
         
-        private readonly ReminderService           _reminders;
-        private readonly MessageContext            _context;
-        private readonly IDiscordRestChannelAPI    _channels;
-        private readonly InteractiveMessageService _interactivity;
-        private readonly TimeHelper                _timeHelper;
+        private readonly ReminderService        _reminders;
+        private readonly MessageContext         _context;
+        private readonly IDiscordRestChannelAPI _channels;
+        private readonly FeedbackService        _interactivity;
+        private readonly TimeHelper             _timeHelper;
 
 
 
         public ReminderActionCommands
         (
-            ReminderService           reminders,
-            MessageContext            context,
-            IDiscordRestChannelAPI    channels,
-            InteractiveMessageService interactivity,
-            TimeHelper                timeHelper
+            ReminderService        reminders,
+            MessageContext         context,
+            IDiscordRestChannelAPI channels,
+            FeedbackService        interactivity,
+            TimeHelper             timeHelper
         )
         {
             _context       = context;

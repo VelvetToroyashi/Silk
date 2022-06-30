@@ -19,7 +19,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     private readonly GuildConfigCacheService _config;
     public MemberDataCacherResponder(IMediator mediator, GuildConfigCacheService config)
     {
-        _mediator    = mediator;
+        _mediator = mediator;
         _config = config;
     }
 

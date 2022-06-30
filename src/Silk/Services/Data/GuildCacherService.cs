@@ -91,7 +91,7 @@ public class GuildCacherService
         if (currentMember.JoinedAt + _joinedTimestampThreshold < DateTimeOffset.Now)
             return Result.FromSuccess();
         
-        var channels = guild.Channels.Value;
+        var channels = guild.Channels;
 
         IChannel? availableChannel = null;
         

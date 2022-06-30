@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Feedback.Services;
 using Remora.Discord.Interactivity.Services;
 using Remora.Discord.Pagination.Extensions;
 using Remora.Results;
@@ -30,9 +31,9 @@ public class CasesCommand : CommandGroup
     private readonly ICommandContext        _context;
     private readonly IDiscordRestChannelAPI _channels;
     
-    private readonly InteractiveMessageService _interactivity;
+    private readonly FeedbackService _interactivity;
     
-    public CasesCommand(IMediator mediator, ICommandContext context, IDiscordRestChannelAPI channels, InteractiveMessageService interactivity)
+    public CasesCommand(IMediator mediator, ICommandContext context, IDiscordRestChannelAPI channels, FeedbackService interactivity)
     {
         _mediator      = mediator;
         _context       = context;
