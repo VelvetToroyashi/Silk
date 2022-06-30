@@ -13,6 +13,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity;
 using Remora.Results;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
@@ -42,15 +43,19 @@ public class RemindContextCommands : CommandGroup
         {
             new ActionRowComponent(new[]
             {
-                new TextInputComponent("time", TextInputStyle.Short, "When?", 2, 100, true, "10 minutes from now", "\"10m\", \"in three days\", etc.")
+               new TextInputComponent("reply", TextInputStyle.Short, "Reply ID (do not modify)", 15, 20, true, _context.Data.AsT0.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), "What did I say? >:C") 
             }),
             new ActionRowComponent(new[]
             {
-                new TextInputComponent(_context.Data.AsT0.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), TextInputStyle.Paragraph, "Additional context?", default, 1500, false, default, "Add pineapples out of spite.")
+                new TextInputComponent("when", TextInputStyle.Short, "When?", 2, 100, true, "in 10 minutes", "\"10m\", \"in three days\", etc.")
+            }),
+            new ActionRowComponent(new[]
+            {
+                new TextInputComponent("what", TextInputStyle.Paragraph, "Additional context?", default, 1500, false, default, "Add pineapples out of spite.")
             })
         };
 
-        var data = new InteractionModalCallbackData("reminder-modal", "Set a reminder!", components);
+        var data = new InteractionModalCallbackData(CustomIDHelpers.CreateModalID("reminder-modal"), "Set a reminder!", components);
 
         return await _interactions.CreateInteractionResponseAsync(_context.ID, _context.Token, new InteractionResponse(InteractionCallbackType.Modal, new(data)));
     }
