@@ -47,7 +47,7 @@ public class ReminderModalHandler : InteractionGroup
     }
     
     [Modal("reminder-modal")]
-    public async Task<Result> HandleInteractionAsync(Snowflake reply, string when, string what)
+    public async Task<Result> HandleInteractionAsync(Snowflake reply, string when, string? what = null)
     {
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
         var timeResult = _timeHelper.ExtractTime(when, offset, out _);
