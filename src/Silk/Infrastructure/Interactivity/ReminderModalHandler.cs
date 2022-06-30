@@ -18,7 +18,6 @@ using Silk.Services.Guild;
 
 namespace Silk.Interactivity;
 
-[Ephemeral]
 public class ReminderModalHandler : InteractionGroup
 {
     private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
@@ -48,10 +47,8 @@ public class ReminderModalHandler : InteractionGroup
     }
     
     [Modal("reminder-modal")]
-    public async Task<Result> HandleInteractionAsync(string when, string? what = null)
+    public async Task<Result> HandleInteractionAsync(Snowflake reply, string when, string what)
     {
-        var reply = DiscordSnowflake.New(ulong.Parse((_context.Data.AsT2.Components.First() as PartialTextInputComponent)!.CustomID.Value));
-
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
         var timeResult = _timeHelper.ExtractTime(when, offset, out _);
 
@@ -62,6 +59,7 @@ public class ReminderModalHandler : InteractionGroup
              _context.ApplicationID,
              _context.Token,
              timeResult.Error!.Message,
+             flags: MessageFlags.Ephemeral,
              ct: this.CancellationToken
             );
             
@@ -76,6 +74,7 @@ public class ReminderModalHandler : InteractionGroup
              _context.Token,
              "It seems you specified a time in the past.\n" +
              "Please specify a time in the future.",
+             flags: MessageFlags.Ephemeral,
              ct: this.CancellationToken
             );
             
