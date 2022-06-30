@@ -203,7 +203,7 @@ public sealed class RoleMenuCommand : CommandGroup
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
 
-        var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: false) });
+        var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuInteractionCommands.RoleMenuButtonPrefix, IsDisabled: false) });
         
         var roleMenuMessageResult = await _channels.EditMessageAsync
         (
@@ -505,7 +505,7 @@ public sealed class RoleMenuCommand : CommandGroup
          {
              new ActionRowComponent(new[]
              {
-                 new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuService.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
+                 new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuInteractionCommands.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
              })
          },
          allowedMentions: new AllowedMentions
@@ -571,9 +571,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
         
-        var deleteResult   = await _mediator.Send(new DeleteRoleMenu.Request(messageID.Value));
-
-
+        await _mediator.Send(new DeleteRoleMenu.Request(messageID.Value));
         
         if (roleMenuResult.IsSuccess)
             await _channels.DeleteMessageAsync(new(roleMenuResult.Entity.ChannelId), new(roleMenuResult.Entity.MessageId));
