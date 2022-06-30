@@ -29,7 +29,6 @@ public class ReminderModalHandler : InteractionGroup
     private readonly IDiscordRestChannelAPI     _channels;
     private readonly IDiscordRestInteractionAPI _interactions;
     
-    
     public ReminderModalHandler
     (
         TimeHelper timeHelper,
