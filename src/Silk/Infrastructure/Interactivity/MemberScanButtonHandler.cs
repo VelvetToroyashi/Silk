@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -11,12 +10,15 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Services.Interfaces;
 using OneOf;
-using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Rest.Core;
+using RemoraViewsPOC.Extensions;
+using Silk.Views;
 
 namespace Silk.Interactivity;
 
+[SuppressInteractionResponse(true)]
 [RequireDiscordPermission(DiscordPermission.KickMembers, DiscordPermission.BanMembers)]
 public class MemberScanButtonHandler : InteractionGroup
 {
@@ -45,7 +47,7 @@ public class MemberScanButtonHandler : InteractionGroup
     
     //member-check:dump | member-check:kick | member-check:ban
 
-    [Button("member-check:dump")]
+    [Button("member-check::dump")]
     public async Task<Result> DumpAsync()
     {
         var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
@@ -94,13 +96,10 @@ public class MemberScanButtonHandler : InteractionGroup
         (
          _context.ApplicationID,
          _context.Token,
-         components: new[]
-         {
-             new ActionRowComponent(new[] { AsButton(components[0], false), AsButton(components[1], true), AsButton(components[2], false) })
-         },
-         ct: CancellationToken
+         new MemberScanView(true),
+         CancellationToken
         );
-            
+
         var followupResult = await _interactions.CreateFollowupMessageAsync
         (
          _context.ApplicationID,
@@ -148,10 +147,7 @@ public class MemberScanButtonHandler : InteractionGroup
         (
          _context.ApplicationID,
          _context.Token,
-         components: new[]
-         {
-             new ActionRowComponent(new[] { AsButton(components[0], false), AsButton(components[1], true), AsButton(components[2], true) })
-         },
+         new MemberScanView(true),
          ct: CancellationToken
         );
             
@@ -179,12 +175,5 @@ public class MemberScanButtonHandler : InteractionGroup
          $"Done! Banned {IDs.Count - failed}/{IDs.Count} users.",
          ct: CancellationToken
         );
-    }
-    
-    ButtonComponent AsButton(IPartialMessageComponent component, bool disabled)
-    {
-        var button = component as IPartialButtonComponent;
-
-        return new(button!.Style.Value, button.Label, button.Emoji, button.CustomID, IsDisabled: disabled);
     }
 }

@@ -74,7 +74,7 @@ public class MemberScannerService
         
         var phishing = query
                       .Select(g => g.User.Value)
-                      .Where(u => u.IsBot.IsDefined(out var bot) && !bot)
+                      .Where(u => !u.IsBot.IsDefined(out var bot) || !bot)
                       .Where(u => _phishing.IsSuspectedPhishingUsername(u.Username).IsSuspicious)
                       .Select(u => u.ID)
                       .ToArray();
