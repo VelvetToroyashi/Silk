@@ -25,7 +25,6 @@ using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
-using Silk.Data.MediatR.Users;
 using Silk.Data.MediatR.Users.History;
 using Silk.Services.Bot;
 using Silk.Services.Data;
