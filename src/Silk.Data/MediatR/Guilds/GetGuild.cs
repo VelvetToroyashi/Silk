@@ -26,10 +26,7 @@ public static class GetGuild
 
         public async Task<GuildEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildEntity? guild = await _db.Guilds
-                                          .AsNoTracking()
-                                          .Include(g => g.Configuration)
-                                          .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            GuildEntity? guild = await _db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             return guild;
         }
