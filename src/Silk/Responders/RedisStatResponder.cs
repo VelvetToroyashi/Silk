@@ -48,10 +48,10 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         var db = _redis.GetDatabase();
         
+        await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gatewayEvent.MemberCount);
+        
         if (present)
             return Result.FromSuccess();
-        
-        await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gatewayEvent.MemberCount);
         
         var key = ShardHelper.GetShardGuildCountStatKey(_options.ShardIdentification!.ShardID);
         await db.StringIncrementAsync(key);
