@@ -14,6 +14,7 @@ using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Results;
+using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Conditions;
@@ -203,7 +204,7 @@ public sealed class RoleMenuCommand : CommandGroup
         
         await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
 
-        var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuInteractionCommands.RoleMenuButtonPrefix, IsDisabled: false) });
+        var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: CustomIDHelpers.CreateButtonID(RoleMenuInteractionCommands.RoleMenuButtonPrefix), IsDisabled: false) });
         
         var roleMenuMessageResult = await _channels.EditMessageAsync
         (
@@ -505,7 +506,7 @@ public sealed class RoleMenuCommand : CommandGroup
          {
              new ActionRowComponent(new[]
              {
-                 new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: RoleMenuInteractionCommands.RoleMenuButtonPrefix, IsDisabled: !roles.Any())
+                 new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: CustomIDHelpers.CreateButtonID(RoleMenuInteractionCommands.RoleMenuButtonPrefix), IsDisabled: !roles.Any())
              })
          },
          allowedMentions: new AllowedMentions
