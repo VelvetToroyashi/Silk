@@ -36,6 +36,8 @@ public class RoleMenuButtonFixer : IResponder<IInteractionCreate>
             new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: CustomIDHelpers.CreateButtonID(RoleMenuInteractionCommands.RoleMenuButtonPrefix))
         })}, ct: ct);
 
+        await _interactions.CreateInteractionResponseAsync(gatewayEvent.ID, gatewayEvent.Token, new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage), ct: ct);
+        
         await _interactions.CreateFollowupMessageAsync
         (
          gatewayEvent.ApplicationID,
