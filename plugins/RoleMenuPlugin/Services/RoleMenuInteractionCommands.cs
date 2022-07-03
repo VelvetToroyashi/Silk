@@ -97,7 +97,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
 
             var dropdown = new SelectMenuComponent
             (
-               RoleMenuDropdownPrefix,
+               CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix),
                rolemenu
                   .Options
                   .Select(o =>
@@ -234,7 +234,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
              sb.ToString(),
              components: new[]
              {
-                 new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
+                 new ActionRowComponent(new [] { new SelectMenuComponent(CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix), newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
              }
             );
             

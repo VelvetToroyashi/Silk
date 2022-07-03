@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -30,6 +31,7 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
         {
             serviceCollection
                .AddMediatR(typeof(RoleMenuPlugin))
+               .AddResponder<RoleMenuButtonFixer>()
                .AddInteractionGroup<RoleMenuInteractionCommands>()
                .AddCommandTree()
                .WithCommandGroup<RoleMenuCommand>()
