@@ -31,7 +31,7 @@ public class RoleMenuButtonFixer : IResponder<IInteractionCreate>
 
         var message = gatewayEvent.Message.Value;
 
-        await _channels.CreateMessageAsync(message.ChannelID, message.Content, components: new[] { new ActionRowComponent(new[]
+        await _channels.EditMessageAsync(message.ChannelID, message.ID, message.Content, components: new[] { new ActionRowComponent(new[]
         {
             new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: CustomIDHelpers.CreateButtonID(RoleMenuInteractionCommands.RoleMenuButtonPrefix))
         })}, ct: ct);
@@ -40,7 +40,8 @@ public class RoleMenuButtonFixer : IResponder<IInteractionCreate>
         (
          gatewayEvent.ApplicationID,
          gatewayEvent.Token,
-         "This role-menu has been retroactively repaired to work with the new system. Please use the button again to activate the role-menu.",
+         "This role-menu has been retroactively repaired to work with the new system. \n" +
+         "Please use the button again to activate the role-menu.",
          flags: MessageFlags.Ephemeral,
          ct: ct
         );
