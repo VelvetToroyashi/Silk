@@ -6,7 +6,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
 
@@ -26,40 +25,25 @@ public class GuildConfigCacheService
 
     public void PurgeCache(Snowflake guildId)
     {
-        var guildCacheKey    = SilkKeyHelper.GenerateGuildKey(guildId);
-        var guildModCacheKey = SilkKeyHelper.GenerateGuildModKey(guildId);
-
+        var guildCacheKey = SilkKeyHelper.GenerateGuildKey(guildId);
         _cache.Remove(guildCacheKey);
-        _cache.Remove(guildModCacheKey);
     }
 
     public async ValueTask<GuildConfigEntity> GetConfigAsync(Snowflake guildId)
     {
         var cacheKey = SilkKeyHelper.GenerateGuildKey(guildId);
-        return _cache.TryGetValue(cacheKey, out GuildConfigEntity config)
-            ? config
-            : await GetConfigFromDatabaseAsync(guildId);
-    }
-
-    public async ValueTask<GuildModConfigEntity> GetModConfigAsync(Snowflake guildId)
-    {
-        var cacheKey = SilkKeyHelper.GenerateGuildModKey(guildId);
-        return _cache.TryGetValue(cacheKey, out GuildModConfigEntity config) ? config : await GetModConfigFromDatabaseAsync(guildId);
-    }
-
-
-    private async Task<GuildModConfigEntity> GetModConfigFromDatabaseAsync(Snowflake guildId)
-    {
-        var configuration = await _mediator.Send(new GetGuildModConfig.Request(guildId), CancellationToken.None);
-        var                cacheKey      = SilkKeyHelper.GenerateGuildModKey(guildId);
-        _cache.Set(cacheKey, configuration, _defaultCacheExpiration);
-        return configuration;
+        
+        if (_cache.TryGetValue(cacheKey, out GuildConfigEntity config))
+            return config;
+        else
+            return await GetConfigFromDatabaseAsync(guildId);
     }
 
     private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(Snowflake guildId)
     {
         var configuration = await _mediator.Send(new GetOrCreateGuildConfig.Request(guildId, StringConstants.DefaultCommandPrefix), CancellationToken.None);
-        var           cacheKey      = SilkKeyHelper.GenerateGuildKey(guildId);
+        var cacheKey = SilkKeyHelper.GenerateGuildKey(guildId);
+        
         _cache.Set(cacheKey, configuration, _defaultCacheExpiration);
         return configuration;
     }

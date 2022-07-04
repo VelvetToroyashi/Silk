@@ -73,7 +73,7 @@ public partial class ConfigCommands
 
             await _mediator.Send
                 (
-                 new UpdateGuildModConfig.Request(_context.GuildID.Value)
+                 new UpdateGuildConfig.Request(_context.GuildID.Value)
                  {
                      MuteRoleID    = mute?.ID      ?? default(Optional<Snowflake>),
                      UseNativeMute = useNativeMute ?? default(Optional<bool>)

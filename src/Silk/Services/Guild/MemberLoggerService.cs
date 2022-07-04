@@ -47,7 +47,7 @@ public class MemberLoggerService
         if (!member.User.IsDefined(out var user))
             return Result.FromSuccess();
         
-        var config = await _configService.GetModConfigAsync(guildID);
+        var config = await _configService.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
@@ -152,7 +152,7 @@ public class MemberLoggerService
     
     public async Task<Result> LogMemberLeaveAsync(Snowflake guildID, IUser user)
     {
-        var config = await _configService.GetModConfigAsync(guildID);
+        var config = await _configService.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMemberLeaves)
             return Result.FromSuccess();

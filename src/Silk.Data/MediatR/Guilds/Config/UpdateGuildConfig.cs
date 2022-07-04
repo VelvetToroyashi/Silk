@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,23 +9,24 @@ using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Guilds;
 
-public static class UpdateGuildModConfig
+public static class UpdateGuildConfig
 {
-    public sealed record Request(Snowflake GuildID) : IRequest<GuildModConfigEntity?>
+    public record Request(Snowflake GuildID) : IRequest<GuildConfigEntity>
     {
-        public Optional<bool>      ScanInvites            { get; init; }
-        public Optional<Snowflake> MuteRoleID             { get; init; }
-        public Optional<bool>      UseNativeMute          { get; init; }
-        public Optional<int>       MaxUserMentions        { get; init; }
-        public Optional<int>       MaxRoleMentions        { get; init; }
-        public Optional<bool>      BlacklistInvites       { get; init; }
-        public Optional<bool>      UseAggressiveRegex     { get; init; }
-        public Optional<bool>      EscalateInfractions    { get; init; }
-        public Optional<bool>      WarnOnMatchedInvite    { get; init; }
-        public Optional<bool>      DetectPhishingLinks    { get; init; }
-        public Optional<bool>      DeletePhishingLinks    { get; init; }
-        public Optional<bool>      DeleteOnMatchedInvite  { get; init; }
-        public Optional<bool>      BanSuspiciousUsernames { get; init; }
+        public Optional<bool>                      ScanInvites            { get; init; }
+        public Optional<Snowflake>                 MuteRoleID             { get; init; }
+        public Optional<bool>                      UseNativeMute          { get; init; }
+        public Optional<int>                       MaxUserMentions        { get; init; }
+        public Optional<int>                       MaxRoleMentions        { get; init; }
+        public Optional<bool>                      BlacklistInvites       { get; init; }
+        public Optional<bool>                      UseAggressiveRegex     { get; init; }
+        public Optional<bool>                      EscalateInfractions    { get; init; }
+        public Optional<bool>                      WarnOnMatchedInvite    { get; init; }
+        public Optional<bool>                      DetectPhishingLinks    { get; init; }
+        public Optional<bool>                      DeletePhishingLinks    { get; init; }
+        public Optional<bool>                      DeleteOnMatchedInvite  { get; init; }
+        public Optional<bool>                      BanSuspiciousUsernames { get; init; }
+        public Optional<List<GuildGreetingEntity>> Greetings              { get; init; }
 
         public Optional<GuildLoggingConfigEntity> LoggingConfig { get; init; }
 
@@ -34,24 +35,35 @@ public static class UpdateGuildModConfig
         public Optional<List<InfractionStepEntity>>      InfractionSteps      { get; init; }
         public Dictionary<string, InfractionStepEntity>? NamedInfractionSteps { get; init; }
     }
-
-    internal sealed class Handler : IRequestHandler<Request, GuildModConfigEntity?>
+    
+    internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
+
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<GuildModConfigEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildModConfigEntity config = await _db.GuildModConfigs
-                                                   .AsNoTracking()
-                                                   .Include(c => c.InfractionSteps)
-                                                   .Include(c => c.Invites)
-                                                   .ThenInclude(i => i.Whitelist)
-                                                   .Include(c => c.Exemptions)
-                                                   .Include(c => c.Logging)
-                                                   .FirstAsync(g => g.GuildID == request.GuildID, cancellationToken);
+            var config = await _db
+                              .GuildConfigs
+                              .Include(g => g.Greetings)
+                              .Include(c => c.Invites)
+                              .Include(c => c.Invites.Whitelist)
+                              .Include(c => c.InfractionSteps)
+                              .Include(c => c.Exemptions)
+                              .Include(c => c.Logging)
+                              .Include(c => c.Logging.MemberJoins)
+                              .Include(c => c.Logging.MemberLeaves)
+                              .Include(c => c.Logging.MessageDeletes)
+                              .Include(c => c.Logging.MessageEdits)
+                              .Include(c => c.Logging.Infractions)
+                              .AsSplitQuery()
+                              .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
 
 
+            if (request.Greetings.IsDefined(out var greetings))
+                config.Greetings = greetings;
+            
             if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
                 config.MuteRoleID = muteRole;
             
@@ -133,10 +145,9 @@ public static class UpdateGuildModConfig
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
-
-            _db.Update(config);
             
             await _db.SaveChangesAsync(cancellationToken);
+            
             return config;
         }
     }

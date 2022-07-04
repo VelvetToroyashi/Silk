@@ -13,11 +13,6 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
            .WithOne(g => g.Guild)
            .HasForeignKey<GuildConfigEntity>(g => g.GuildID);
 
-        builder
-           .HasOne(g => g.ModConfig)
-           .WithOne(g => g.Guild)
-           .HasForeignKey<GuildModConfigEntity>(g => g.GuildID);
-
         builder.HasMany(u => u.Infractions)
                .WithOne(i => i.Guild);
     }

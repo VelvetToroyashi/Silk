@@ -22,7 +22,6 @@ using Remora.Results;
 using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Data.MediatR.Infractions;
 using Silk.Errors;
 using Silk.Extensions;
@@ -404,7 +403,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
         }
         
-        var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         if (!config.UseNativeMute)
         {
@@ -415,7 +414,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 if (!muteResult.IsSuccess)
                     return Result<InfractionDTO>.FromError(muteResult.Error);
             
-                config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+                config = await _mediator.Send(new GetGuildConfig.Request(guildID));
             }
 
             var roleResult = await _guilds.AddGuildMemberRoleAsync(guildID, targetID, config.MuteRoleID, reason);
@@ -488,7 +487,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         await _mediator.Send(new UpdateInfraction.Request(mute.CaseID, mute.GuildID, Processed: true));
         
-        var config = await _mediator.Send(new GetGuildModConfig.Request(guildID));
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         Result unmuteResult;
 
@@ -664,7 +663,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
             }
         }
         
-        await _mediator.Send(new UpdateGuildModConfig.Request(guildID)
+        await _mediator.Send(new UpdateGuildConfig.Request(guildID)
         {
             MuteRoleID = roleResult.Entity.ID
         });
@@ -874,7 +873,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="updatedAt">When the infraction was updated.</param>
     private async Task<Result> LogInfractionUpdateAsync(InfractionDTO infraction, IUser updatedBy, IUser infractionTarget, IUser infractionEnforcer, DateTimeOffset updatedAt)
     {
-        GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
+        var config = await _config.GetConfigAsync(infraction.GuildID);
 
         if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
@@ -915,7 +914,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="enforcer">The enforcer of the infraction.</param>
     private async Task<Result> LogInfractionAsync(InfractionDTO infraction, IUser target, IUser enforcer)
     {
-        GuildModConfigEntity config = await _config.GetModConfigAsync(infraction.GuildID);
+        var config = await _config.GetConfigAsync(infraction.GuildID);
 
         if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
@@ -960,7 +959,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="guildID"></param>
     private async Task<Result> EnsureLoggingChannelExistsAsync(Snowflake guildID)
     {
-        GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
 
         Debug.Assert(config.Logging.LogInfractions, "Caller should validate that infraction logging is enabled.");
 
@@ -1060,7 +1059,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                     config.Logging.Infractions.WebhookID    = webhook.ID;
                     config.Logging.Infractions.WebhookToken = webhook.Token.Value;
 
-                    await _mediator.Send(new UpdateGuildModConfig.Request(guildID) { LoggingConfig = config.Logging });
+                    await _mediator.Send(new UpdateGuildConfig.Request(guildID) { LoggingConfig = config.Logging });
                 }
             }
         }

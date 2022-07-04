@@ -60,7 +60,7 @@ public class InviteDetectionService
       if (string.IsNullOrEmpty(message.Content))
          return Result.FromSuccess();
       
-      var config = await _config.GetModConfigAsync(guildID);
+      var config = await _config.GetConfigAsync(guildID);
       var start  = DateTimeOffset.UtcNow;
       
       var inviteMatch = config.Invites.UseAggressiveRegex 
