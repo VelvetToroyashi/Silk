@@ -63,9 +63,9 @@ public partial class ConfigCommands
                 return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel`, `--webhook` or `--mobile true/false` is must be specified.");
             }
 
-            var modConfig = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
 
-            var loggingConfig = modConfig.Logging;
+            var loggingConfig = config.Logging;
             
             if (mobile is {} useMobile)
                 loggingConfig.UseMobileFriendlyLogging = useMobile;
