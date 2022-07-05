@@ -8,7 +8,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -41,7 +40,7 @@ public partial class ConfigCommands
             ExemptionCoverage[] remove
         )
         {
-            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
             
             var exemptions = config.Exemptions;
 
@@ -74,7 +73,7 @@ public partial class ConfigCommands
                 }
             }
             
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
                 Exemptions = config.Exemptions
             });

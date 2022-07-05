@@ -44,7 +44,7 @@ public class ExemptionEvaluationService
     {
         _logger.LogTrace("Evaluating exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
         
-        GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
 
         using (SilkMetric.EvaluationExemptionTime.WithLabels(exemptionType.ToString()).NewTimer()) 
         {

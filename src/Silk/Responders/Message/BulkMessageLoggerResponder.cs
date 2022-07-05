@@ -53,7 +53,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
         if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             return Result.FromSuccess();
         
-        var guildConfig = await _config.GetModConfigAsync(guildID);
+        var guildConfig = await _config.GetConfigAsync(guildID);
         
         if (!guildConfig.Logging.LogMessageDeletes)
             return Result.FromSuccess();

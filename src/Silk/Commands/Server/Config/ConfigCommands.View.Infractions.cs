@@ -6,7 +6,7 @@ using Humanizer;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Objects;
 using Remora.Results;
-using Silk.Data.MediatR.Guilds.Config;
+using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
@@ -20,7 +20,7 @@ public partial class ConfigCommands
         [Description("View Infraction settings for your server.")]
         public async Task<IResult> ViewInfractionsAsync()
         {
-            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
 
             var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
 

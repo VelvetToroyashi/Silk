@@ -12,7 +12,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
@@ -49,7 +48,7 @@ public partial class ConfigCommands
             if ((delete ?? aggressive ?? scanOrigin ?? warnOnMatch) is null)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify at least one option.");
             
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
                 DeleteOnMatchedInvite = delete      ?? default(Optional<bool>),
                 UseAggressiveRegex    = aggressive  ?? default(Optional<bool>),
@@ -85,7 +84,7 @@ public partial class ConfigCommands
             bool? active = null
         )
         {
-            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var modConfig = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
             
             if (clear)
             {
@@ -97,7 +96,7 @@ public partial class ConfigCommands
 
                 var inviteString = modConfig.Invites.Whitelist.Select(r => r.VanityURL).Join(" ");
 
-                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
                 
                 await _channels.CreateMessageAsync(_context.ChannelID, $"Here's a dump of the whitelist prior to clearing! \n{inviteString}");
 
@@ -238,7 +237,7 @@ public partial class ConfigCommands
                     messageBuilder.AppendLine(invite);
             }
             
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
                 AllowedInvites = modConfig.Invites.Whitelist,
                 BlacklistInvites = active ?? default

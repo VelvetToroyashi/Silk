@@ -53,7 +53,7 @@ public class MessageLoggerService
         if (!message.ChannelID.IsDefined(out var channelID))
             return Result.FromSuccess();
         
-        var config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMessageEdits)
             return Result.FromSuccess();
@@ -166,7 +166,7 @@ public class MessageLoggerService
         if (!message.GuildID.IsDefined(out var guildID))
             return Result.FromSuccess();
         
-        var config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMessageDeletes)
             return Result.FromSuccess();

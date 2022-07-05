@@ -23,14 +23,9 @@ public class GuildEntity
     public string Prefix                        { get; set; } = "";
     
     /// <summary>
-    /// Non-moderation related configuration.
+    /// Guild configuration.
     /// </summary>
     public GuildConfigEntity      Configuration { get; set; } = new();
-    
-    /// <summary>
-    /// Moderation-related configuration.
-    /// </summary>
-    public GuildModConfigEntity   ModConfig     { get; set; } = new();
     
     /// <summary>
     /// Users that are a part of this guild.

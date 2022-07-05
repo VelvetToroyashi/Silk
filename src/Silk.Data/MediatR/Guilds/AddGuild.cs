@@ -35,8 +35,7 @@ public static class AddGuild
             {
                 ID            = request.GuildID,
                 Prefix        = request.Prefix,
-                Configuration = new() { GuildID = request.GuildID },
-                ModConfig     = new() { GuildID = request.GuildID },
+                Configuration = new() { GuildID = request.GuildID }
             };
 
             _db.Guilds.Add(guild);
