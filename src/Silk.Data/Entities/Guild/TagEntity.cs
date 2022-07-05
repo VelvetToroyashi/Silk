@@ -51,6 +51,11 @@ public class TagEntity
     /// </summary>
     [Column("guild_id")]
     public Snowflake GuildID { get; set; }
+    
+    /// <summary>
+    /// The guild this tag belongs to.
+    /// </summary>
+    public GuildEntity Guild { get; set; }
 
     /// <summary>
     /// The ID of the tag's parent, if any.

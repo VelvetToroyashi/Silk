@@ -14,6 +14,11 @@ public class GuildEntityConfiguration : IEntityTypeConfiguration<GuildEntity>
            .HasForeignKey<GuildConfigEntity>(g => g.GuildID);
 
         builder.HasMany(u => u.Infractions)
-               .WithOne(i => i.Guild);
+               .WithOne(i => i.Guild)
+               .HasForeignKey(i => i.GuildID);
+        
+        builder.HasMany(g => g.Tags)
+               .WithOne(t => t.Guild)
+               .HasForeignKey(t => t.GuildID);
     }
 }
