@@ -19,7 +19,6 @@ public class GuildContext : DbContext
     public DbSet<GuildConfigEntity>       GuildConfigs       { get; set; }
     public DbSet<GuildGreetingEntity>     GuildGreetings     { get; set; }
     public DbSet<PendingGreetingEntity>   PendingGreetings   { get; set; }
-    public DbSet<GuildModConfigEntity>    GuildModConfigs    { get; set; }
     public DbSet<CommandInvocationEntity> CommandInvocations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

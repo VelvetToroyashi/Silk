@@ -15,7 +15,6 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
@@ -90,7 +89,7 @@ public partial class ConfigCommands : CommandGroup
         public async Task<IResult> ViewAllAsync()
         {
             var config    = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
-            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var modConfig = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
 
             var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value);
 

@@ -16,15 +16,7 @@ public static class SilkKeyHelper
     /// <returns>The generated key.</returns>
     public static string GenerateGuildKey(Snowflake guildId)
         => $"guild_config:{guildId}";
-
-    /// <summary>
-    ///     Generates a key for a moderation guild config.
-    /// </summary>
-    /// <param name="guildId">The ID of the guild.</param>
-    /// <returns>The generated key.</returns>
-    public static string GenerateGuildModKey(Snowflake guildId)
-        => $"guild_mod_config:{guildId}";
-
+    
     /// <summary>
     ///     Generates a key for a guild prefix.
     /// </summary>

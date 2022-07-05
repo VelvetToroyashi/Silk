@@ -7,7 +7,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -52,12 +51,12 @@ public partial class ConfigCommands
                 _      => throw new ArgumentOutOfRangeException(nameof(action), action, "Impossible condition.")
             };
 
-            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
             
             if (action is not null)
                 config!.NamedInfractionSteps[AutoModConstants.PhishingLinkDetected] = new() { Type = parsedAction.Value };
 
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
                 DetectPhishingLinks  = enabled ?? default(Optional<bool>),
                 DeletePhishingLinks  = !preserve,
