@@ -48,9 +48,8 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         
         var db = _redis.GetDatabase();
         
-        if (gatewayEvent.MemberCount.IsDefined(out var gwm))
-            await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gwm);
-
+        await db.StringIncrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gatewayEvent.MemberCount);
+        
         if (present)
             return Result.FromSuccess();
         
@@ -75,10 +74,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
         if ((await _cache.TryGetValueAsync<IGuildCreate>(cacheKey, ct)).IsDefined(out var guild) || 
             (await _cache.TryGetPreviousValueAsync<IGuildCreate>(cacheKey)).IsDefined(out guild))
         {
-            if (!guild.MemberCount.IsDefined(out var gwm))
-                return Result.FromSuccess();
-            
-            await db.StringDecrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), gwm);
+            await db.StringDecrementAsync(ShardHelper.GetShardUserCountStatKey(_options.ShardIdentification!.ShardID), guild.MemberCount);
         }
         
         return Result.FromSuccess();

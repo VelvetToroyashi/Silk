@@ -47,5 +47,5 @@ public class InviteConfigEntity
     
     public int GuildModConfigId { get; set; }
     
-    public GuildModConfigEntity GuildConfig { get; set; }
+    public GuildConfigEntity GuildConfig { get; set; }
 }

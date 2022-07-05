@@ -7,6 +7,7 @@ using Remora.Commands.Extensions;
 using Remora.Commands.Groups;
 using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Gateway.Responders;
+using Remora.Discord.Interactivity;
 
 namespace Silk.Extensions.Remora;
 
@@ -33,7 +34,7 @@ public static class RemoraIServiceCollectionExtensions
     {
         IEnumerable<Type>? types = assembly
                                   .GetExportedTypes()
-                                  .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
+                                  .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)) && !t.IsAssignableTo(typeof(InteractionGroup)));
 
         var tree = collection.AddCommandTree();
         
@@ -47,7 +48,7 @@ public static class RemoraIServiceCollectionExtensions
     {
         IEnumerable<Type>? types = assembly
                                   .GetExportedTypes()
-                                  .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)));
+                                  .Where(t => t.IsClass && !t.IsNested && !t.IsAbstract && t.IsAssignableTo(typeof(CommandGroup)) && !t.IsAssignableTo(typeof(InteractionGroup)));
 
         var tree = collection.AddCommandTree("silk_slash_tree");
         

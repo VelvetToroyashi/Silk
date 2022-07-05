@@ -25,8 +25,19 @@ public static class GetGuildConfig
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            //TODO: Add commands to get individual configs.
             var config = await _db.GuildConfigs
                                   .Include(g => g.Greetings)
+                                  .Include(c => c.Invites)
+                                  .Include(c => c.Invites.Whitelist)
+                                  .Include(c => c.InfractionSteps)
+                                  .Include(c => c.Exemptions)
+                                  .Include(c => c.Logging)
+                                  .Include(c => c.Logging.MemberJoins)
+                                  .Include(c => c.Logging.MemberLeaves)
+                                  .Include(c => c.Logging.MessageDeletes)
+                                  .Include(c => c.Logging.MessageEdits)
+                                  .Include(c => c.Logging.Infractions)
                                    //.Include(c => c.BlackListedWords)
                                   .AsSplitQuery()
                                   .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);

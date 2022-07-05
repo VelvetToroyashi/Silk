@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.API.Objects;
-using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
@@ -17,8 +12,7 @@ using Silk.Services.Guild;
 
 namespace Silk.Interactivity;
 
-[Ephemeral]
-public class ReminderModalHandler : IModalInteractiveEntity
+public class ReminderModalHandler : InteractionGroup
 {
     private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
                                                   "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
@@ -28,7 +22,6 @@ public class ReminderModalHandler : IModalInteractiveEntity
     private readonly InteractionContext         _context;
     private readonly IDiscordRestChannelAPI     _channels;
     private readonly IDiscordRestInteractionAPI _interactions;
-    
     
     public ReminderModalHandler
     (
@@ -45,20 +38,12 @@ public class ReminderModalHandler : IModalInteractiveEntity
         _channels     = channels;
         _interactions = interactions;
     }
-
-    public Task<Result<bool>> IsInterestedAsync(ComponentType? componentType, string customID, CancellationToken ct = default) 
-        => Task.FromResult<Result<bool>>(componentType is null && customID is "reminder-modal");
-
-    public async Task<Result> HandleInteractionAsync(IUser user, string customID, IReadOnlyList<IPartialMessageComponent> components, CancellationToken ct = default)
+    
+    [Modal("reminder-modal")]
+    public async Task<Result> HandleInteractionAsync(Snowflake reply, string when, string? what = null)
     {
-        components = components.SelectMany(c => (c as PartialActionRowComponent)!.Components.Value).ToArray();
-        
-        var raw = (components[0] as PartialTextInputComponent)!.Value.Value;
-
-        var reply = new Snowflake(ulong.Parse((components[1] as PartialTextInputComponent)!.CustomID.Value));
-        
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
-        var timeResult = _timeHelper.ExtractTime(raw, offset, out _);
+        var timeResult = _timeHelper.ExtractTime(when, offset, out _);
 
         if (!timeResult.IsDefined(out var parsedTime))
         {
@@ -67,7 +52,8 @@ public class ReminderModalHandler : IModalInteractiveEntity
              _context.ApplicationID,
              _context.Token,
              timeResult.Error!.Message,
-             ct: ct
+             flags: MessageFlags.Ephemeral,
+             ct: this.CancellationToken
             );
             
            return (Result)informResult;
@@ -81,7 +67,8 @@ public class ReminderModalHandler : IModalInteractiveEntity
              _context.Token,
              "It seems you specified a time in the past.\n" +
              "Please specify a time in the future.",
-             ct: ct
+             flags: MessageFlags.Ephemeral,
+             ct: this.CancellationToken
             );
             
            return (Result)informResult;
@@ -95,7 +82,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
              _context.Token,
              "You can't set a reminder less than three minutes!",
              flags: MessageFlags.Ephemeral,
-             ct: ct
+             ct: this.CancellationToken
             );
             
            return (Result)minTimeResult;
@@ -103,7 +90,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
         
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
 
-        var messageResult = await _channels.GetChannelMessageAsync(_context.ChannelID, reply, ct);
+        var messageResult = await _channels.GetChannelMessageAsync(_context.ChannelID, reply, this.CancellationToken);
         
         if (!messageResult.IsDefined(out var message))
             return Result.FromError(messageResult.Error!);
@@ -115,7 +102,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
          _context.ChannelID,
          null,
          null,
-         (components[1] as PartialTextInputComponent)!.Value.IsDefined(out var reminderText) ? reminderText : null,
+         what,
          message.Content,
          reply,
          message.Author.ID
@@ -127,7 +114,7 @@ public class ReminderModalHandler : IModalInteractiveEntity
          _context.Token,
          $"Done! I'll remind you {reminderTime.ToTimestamp()}!",
          flags: MessageFlags.Ephemeral,
-         ct: ct
+         ct: this.CancellationToken
         );
 
         return (Result)res;

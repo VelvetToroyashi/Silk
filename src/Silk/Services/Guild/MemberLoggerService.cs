@@ -8,6 +8,7 @@ using MediatR;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -46,7 +47,7 @@ public class MemberLoggerService
         if (!member.User.IsDefined(out var user))
             return Result.FromSuccess();
         
-        var config = await _configService.GetModConfigAsync(guildID);
+        var config = await _configService.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
@@ -133,15 +134,15 @@ public class MemberLoggerService
             Thumbnail   = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
             Fields      = userFields.ToArray()
         };
-
+        
         var buttons = new IMessageComponent[]
         {
             new ActionRowComponent
             (
                 new[]
                 {
-                 new ButtonComponent(ButtonComponentStyle.Success, "Kick", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), $"join-action-kick-{user.ID}"),
-                 new ButtonComponent(ButtonComponentStyle.Danger, "Ban", new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), $"join-action-ban-{user.ID}")
+                 new ButtonComponent(ButtonComponentStyle.Success, "Kick", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), CustomIDHelpers.CreateButtonID("join-action-kick")),
+                 new ButtonComponent(ButtonComponentStyle.Danger, "Ban", new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), CustomIDHelpers.CreateButtonID("join-action-ban"))
                 }
             )
         };
@@ -151,7 +152,7 @@ public class MemberLoggerService
     
     public async Task<Result> LogMemberLeaveAsync(Snowflake guildID, IUser user)
     {
-        var config = await _configService.GetModConfigAsync(guildID);
+        var config = await _configService.GetConfigAsync(guildID);
         
         if (!config.Logging.LogMemberLeaves)
             return Result.FromSuccess();

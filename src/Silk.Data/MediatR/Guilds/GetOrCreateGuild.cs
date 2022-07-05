@@ -32,11 +32,7 @@ public static class GetOrCreateGuild
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildEntity? guild = await _db.Guilds
-                                          .AsSplitQuery()
-                                          .Include(g => g.Users)
-                                          .Include(g => g.Infractions)
-                                          .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            GuildEntity? guild = await _db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;

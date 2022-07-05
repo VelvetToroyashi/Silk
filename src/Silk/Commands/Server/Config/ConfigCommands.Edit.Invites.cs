@@ -12,7 +12,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Extensions;
 using Silk.Shared.Constants;
 
@@ -49,7 +48,7 @@ public partial class ConfigCommands
             if ((delete ?? aggressive ?? scanOrigin ?? warnOnMatch) is null)
                 return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify at least one option.");
             
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
                 DeleteOnMatchedInvite = delete      ?? default(Optional<bool>),
                 UseAggressiveRegex    = aggressive  ?? default(Optional<bool>),
@@ -85,19 +84,19 @@ public partial class ConfigCommands
             bool? active = null
         )
         {
-            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
             
             if (clear)
             {
-                if (!modConfig.Invites.Whitelist.Any())
+                if (!config.Invites.Whitelist.Any())
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "There are no invites to clear!");
                     return Result.FromSuccess();
                 }
 
-                var inviteString = modConfig.Invites.Whitelist.Select(r => r.VanityURL).Join(" ");
+                var inviteString = config.Invites.Whitelist.Select(r => r.VanityURL).Join(" ");
 
-                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
                 
                 await _channels.CreateMessageAsync(_context.ChannelID, $"Here's a dump of the whitelist prior to clearing! \n{inviteString}");
 
@@ -115,7 +114,7 @@ public partial class ConfigCommands
             {
                 if (added.TryPickT0(out var inviteString, out var guildID))
                 {
-                    if (modConfig.Invites.Whitelist.Any(iv => iv.VanityURL == inviteString))
+                    if (config.Invites.Whitelist.Any(iv => iv.VanityURL == inviteString))
                     {
                         failedAdds.Add($"`{inviteString,-15}{"(already whitelisted)`",30}");
                         continue;
@@ -141,7 +140,7 @@ public partial class ConfigCommands
                         continue;
                     }
                     
-                    modConfig.Invites.Whitelist.Add(new () { VanityURL = inviteString, GuildId = _context.GuildID.Value});
+                    config.Invites.Whitelist.Add(new () { VanityURL = inviteString, GuildId = _context.GuildID.Value});
                     addedInvites.Add($"`{inviteString,-44}`");
                 }
                 else
@@ -152,13 +151,13 @@ public partial class ConfigCommands
                         continue;
                     }
                     
-                    if (modConfig.Invites.Whitelist.Any(iv => iv.InviteGuildId == guildID))
+                    if (config.Invites.Whitelist.Any(iv => iv.InviteGuildId == guildID))
                     {
                         failedAdds.Add($"`{guildID.ToString(),-15}{"(already whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.Invites.Whitelist.Add(new() { GuildId = _context.GuildID.Value, InviteGuildId = guildID });
+                    config.Invites.Whitelist.Add(new() { GuildId = _context.GuildID.Value, InviteGuildId = guildID });
                     
                     addedInvites.Add($"`{guildID,-44}`");
                 }
@@ -166,7 +165,7 @@ public partial class ConfigCommands
 
             foreach (var removed in remove)
             {
-                if (!modConfig.Invites.Whitelist.Any())
+                if (!config.Invites.Whitelist.Any())
                 {
                     failedRemoves.Add("The whitelist is empty!".PadRight(34));
                     break;
@@ -176,24 +175,24 @@ public partial class ConfigCommands
                 {
                     inviteString = Regex.Replace(inviteString, @"(https?:\/\/discord\.gg\/)?(?<invite>[A-z0-9_-]+)", "${invite}");
                     
-                    if (modConfig.Invites.Whitelist.All(iv => iv.VanityURL != inviteString))
+                    if (config.Invites.Whitelist.All(iv => iv.VanityURL != inviteString))
                     {
                         failedRemoves.Add($"`{inviteString,-15}{"(not whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.Invites.Whitelist.RemoveAll(iv => iv.VanityURL == inviteString);
+                    config.Invites.Whitelist.RemoveAll(iv => iv.VanityURL == inviteString);
                     removedInvites.Add($"`{inviteString,-44}`");
                 }
                 else
                 {
-                    if (modConfig.Invites.Whitelist.All(iv => iv.InviteGuildId != guildID))
+                    if (config.Invites.Whitelist.All(iv => iv.InviteGuildId != guildID))
                     {
                         failedRemoves.Add($"`{guildID.ToString(),-15}{"(not whitelisted)`",30}");
                         continue;
                     }
                     
-                    modConfig.Invites.Whitelist.RemoveAll(iv => iv.InviteGuildId == guildID);
+                    config.Invites.Whitelist.RemoveAll(iv => iv.InviteGuildId == guildID);
                     removedInvites.Add($"`{guildID,-44}`");
                 }
             }
@@ -238,9 +237,9 @@ public partial class ConfigCommands
                     messageBuilder.AppendLine(invite);
             }
             
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value)
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
-                AllowedInvites = modConfig.Invites.Whitelist,
+                AllowedInvites = config.Invites.Whitelist,
                 BlacklistInvites = active ?? default
             });
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -14,7 +13,6 @@ using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Users;
 using Silk.Shared.Constants;
 
 namespace Silk.Services.Data;
@@ -91,7 +89,7 @@ public class GuildCacherService
         if (currentMember.JoinedAt + _joinedTimestampThreshold < DateTimeOffset.Now)
             return Result.FromSuccess();
         
-        var channels = guild.Channels.Value;
+        var channels = guild.Channels;
 
         IChannel? availableChannel = null;
         

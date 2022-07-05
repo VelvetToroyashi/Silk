@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Objects;
 using Remora.Results;
-using Silk.Data.MediatR.Guilds.Config;
+using Silk.Data.MediatR.Guilds;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -17,7 +17,7 @@ public partial class ConfigCommands
         [Description("View the logging configuration.")]
         public async Task<IResult> ViewLoggingAsync()
         {
-            var config = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
             var logging = config.Logging;
 
             var webhookLoggingEnabled = logging.UseWebhookLogging ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;

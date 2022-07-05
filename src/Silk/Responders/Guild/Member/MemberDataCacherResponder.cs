@@ -19,13 +19,13 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
     private readonly GuildConfigCacheService _config;
     public MemberDataCacherResponder(IMediator mediator, GuildConfigCacheService config)
     {
-        _mediator    = mediator;
+        _mediator = mediator;
         _config = config;
     }
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
-        var config = await _config.GetModConfigAsync(gatewayEvent.GuildID);
+        var config = await _config.GetConfigAsync(gatewayEvent.GuildID);
         
         if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
@@ -40,7 +40,7 @@ public class MemberDataCacherResponder : IResponder<IGuildMemberAdd>, IResponder
 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
     {
-        var config = await _config.GetModConfigAsync(gatewayEvent.GuildID);
+        var config = await _config.GetConfigAsync(gatewayEvent.GuildID);
         
         if (!config.Logging.LogMemberLeaves)
             return Result.FromSuccess();

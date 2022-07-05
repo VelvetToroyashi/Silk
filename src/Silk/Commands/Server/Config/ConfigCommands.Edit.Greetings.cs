@@ -112,7 +112,7 @@ public partial class ConfigCommands
 
                 config.Greetings.Add(greetingEntity);
 
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { Greetings = config.Greetings});
 
                 var message = $"Created greeting with ID `{greetingEntity.Id}`\n\n";
 
@@ -174,7 +174,7 @@ public partial class ConfigCommands
                 if (option is not null)
                     greetingEntity.Option = (GreetingOption)option;
 
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { Greetings = config.Greetings });
 
                 var message = $"Updated greeting with ID `{greetingEntity.Id}`\n\n";
 
@@ -206,7 +206,7 @@ public partial class ConfigCommands
 
                 config.Greetings.Remove(greetingEntity);
 
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value, config.Greetings));
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { Greetings = config.Greetings });
 
                 await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted greeting with ID `{greetingEntity.Id}`");
 

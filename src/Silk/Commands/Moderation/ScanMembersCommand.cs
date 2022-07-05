@@ -9,6 +9,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity;
 using Remora.Results;
 using Silk.Services.Guild;
 using Silk.Shared.Constants;
@@ -57,9 +58,9 @@ public class ScanMembersCommand : CommandGroup
         (
          new[]
          {
-             new ButtonComponent(ButtonComponentStyle.Secondary, "Dump IDs", new PartialEmoji(DiscordSnowflake.New(Emojis.NoteId)), "member-check:dump"),
-             new ButtonComponent(ButtonComponentStyle.Success, "Kick Users", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), "member-check:kick"),
-             new ButtonComponent(ButtonComponentStyle.Danger, "Ban Users", new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), "member-check:ban")
+             new ButtonComponent(ButtonComponentStyle.Secondary, "Dump IDs", new PartialEmoji(DiscordSnowflake.New(Emojis.NoteId)), CustomIDHelpers.CreateButtonID("member-check::dump")),
+             new ButtonComponent(ButtonComponentStyle.Success, "Kick Users", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), CustomIDHelpers.CreateButtonID("member-check::kick")),
+             new ButtonComponent(ButtonComponentStyle.Danger, "Ban Users",   new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), CustomIDHelpers.CreateButtonID("member-check::ban"))
          }
         );
 

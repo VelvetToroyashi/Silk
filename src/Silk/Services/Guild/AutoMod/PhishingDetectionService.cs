@@ -87,7 +87,7 @@ public class PhishingDetectionService
         
         var now = DateTimeOffset.UtcNow;
 
-        var config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
         
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
@@ -134,7 +134,7 @@ public class PhishingDetectionService
     
     public async Task<Result> HandlePotentialSuspiciousUsernameAsync(Snowflake guildID, IUser user)
     {
-        var config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
 
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
@@ -191,7 +191,7 @@ public class PhishingDetectionService
         if (!message.GuildID.IsDefined(out Snowflake guildId))
             return Result.FromSuccess(); // DM channels are exempted.
 
-        GuildModConfigEntity config = await _config.GetModConfigAsync(guildId);
+        var config = await _config.GetConfigAsync(guildId);
 
         IEnumerable<string> links;
 
@@ -238,7 +238,7 @@ public class PhishingDetectionService
         if (delete)
             await _channels.DeleteMessageAsync(channelID, messageID);
 
-        GuildModConfigEntity config = await _config.GetModConfigAsync(guildID);
+        var config = await _config.GetConfigAsync(guildID);
 
         if (!config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out InfractionStepEntity? step))
             return Result.FromError(new InvalidOperationError("Failed to get step for phishing link detected."));

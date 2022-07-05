@@ -6,7 +6,6 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -64,9 +63,9 @@ public partial class ConfigCommands
                 return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel`, `--webhook` or `--mobile true/false` is must be specified.");
             }
 
-            var modConfig = await _mediator.Send(new GetGuildModConfig.Request(_context.GuildID.Value));
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
 
-            var loggingConfig = modConfig.Logging;
+            var loggingConfig = config.Logging;
             
             if (mobile is {} useMobile)
                 loggingConfig.UseMobileFriendlyLogging = useMobile;
@@ -106,7 +105,7 @@ public partial class ConfigCommands
                     loggingConfig.Infractions    = null;
                 }
 
-                await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
+                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
 
                 return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
             }
@@ -281,7 +280,7 @@ public partial class ConfigCommands
                 }
             }
 
-            await _mediator.Send(new UpdateGuildModConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
+            await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
             return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
         }
 

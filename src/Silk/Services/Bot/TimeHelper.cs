@@ -31,7 +31,6 @@ public sealed class TimeHelper
 
     public Result<TimeSpan> ExtractTime(string input, Offset? offset, out string remainder)
     {
-        
         remainder = input;
         
         if (string.IsNullOrEmpty(input))

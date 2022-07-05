@@ -26,10 +26,7 @@ public static class AddGuild
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var guild = await _db.Guilds
-                                 .Include(g => g.ModConfig)
-                                 .Include(g => g.Configuration)
-                                 .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;
@@ -38,8 +35,7 @@ public static class AddGuild
             {
                 ID            = request.GuildID,
                 Prefix        = request.Prefix,
-                Configuration = new() { GuildID = request.GuildID },
-                ModConfig     = new() { GuildID = request.GuildID },
+                Configuration = new() { GuildID = request.GuildID }
             };
 
             _db.Guilds.Add(guild);

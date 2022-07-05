@@ -1,7 +1,7 @@
-using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
@@ -10,7 +10,7 @@ using Silk.Services.Interfaces;
 
 namespace Silk.Interactivity;
 
-public class JoinEmbedButtonHandler : IButtonInteractiveEntity
+public class JoinEmbedButtonHandler : InteractionGroup
 {
     private readonly InteractionContext         _context;
     private readonly IInfractionService         _infractions;
@@ -24,47 +24,42 @@ public class JoinEmbedButtonHandler : IButtonInteractiveEntity
         _users        = users;
         _interactions = interactions;
     }
-
-    public Task<Result<bool>> IsInterestedAsync(ComponentType? componentType, string customID, CancellationToken ct = default)
-        => Task.FromResult(Result<bool>.FromSuccess(customID.StartsWith("join-action-")));
-
     
-    public async Task<Result> HandleInteractionAsync(IUser user, string customID, CancellationToken ct = default)
+    [Button("join-action-kick")]
+    [RequireDiscordPermission(DiscordPermission.KickMembers)]
+    public async Task<Result> KickAsync()
     {
-        var actionAndUser = customID[12..].Split('-');
+        _ = Snowflake.TryParse(_context.Message.Value.Embeds[0].Fields.Value[1].Value, out var userID);
 
-        var action = actionAndUser[0];
-        _ = Snowflake.TryParse(actionAndUser[1], out var userID);
-
-        var permissions = _context.Member.Value.Permissions.Value;
-
-        if (!permissions.HasPermission(DiscordPermission.Administrator) && !permissions.HasPermission(action is "kick" ? DiscordPermission.KickMembers : DiscordPermission.BanMembers))
-        {
-            var permissionResult = await _interactions.CreateFollowupMessageAsync
-            (
-                _context.ApplicationID,
-                _context.Token,
-                "Sorry, but you're not allowed to do that.",
-                flags: MessageFlags.Ephemeral
-            );
-
-            return (Result)permissionResult;
-        }
-            
-        var infractionResult = action switch
-        {
-            "ban"  => ("banned", await _infractions.BanAsync(_context.GuildID.Value, userID.Value, user.ID, 1, "Moderater-initiated action from join.")),
-            "kick" => ("kicked", await _infractions.KickAsync(_context.GuildID.Value, userID.Value, user.ID, "Moderator-initiated action from join."))
-        };
+        var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, userID.Value, _context.User.ID, "Moderator-initiated action from join.");
 
         var logResult = await _interactions.CreateFollowupMessageAsync
         (
             _context.ApplicationID,
             _context.Token,
-            infractionResult.Item2.IsSuccess ? $"Successfully {infractionResult.Item1} user." : infractionResult.Item2.Error.Message,
+            infractionResult.IsSuccess ? $"Successfully kicked user." : infractionResult.Error.Message,
             flags: MessageFlags.Ephemeral
         );
 
+        return (Result)logResult;
+    }
+    
+    [Button("join-action-ban")]
+    [RequireDiscordPermission(DiscordPermission.BanMembers)]
+    public async Task<Result> BanAsync()
+    {
+        _ = Snowflake.TryParse(_context.Message.Value.Embeds[0].Fields.Value[1].Value, out var userID);
+        
+        var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, userID.Value, _context.User.ID, 0, "Moderator-initiated action from join.");
+        
+        var logResult = await _interactions.CreateFollowupMessageAsync
+        (
+            _context.ApplicationID,
+            _context.Token,
+            infractionResult.IsSuccess ? $"Successfully banned user." : infractionResult.Error.Message,
+            flags: MessageFlags.Ephemeral
+        );
+        
         return (Result)logResult;
     }
 }

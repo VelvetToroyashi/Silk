@@ -9,12 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Interactivity.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
 using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
-using RoleMenuPlugin.Responders;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
 
@@ -25,15 +25,14 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
     public override string Name        { get; } = "Role-Menu Plugin";
     public override string Description { get; } = "Provides interaction-based role-menu functionality.";
     
-
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         try
         {
             serviceCollection
                .AddMediatR(typeof(RoleMenuPlugin))
-               .AddSingleton<RoleMenuService>()
-               .AddResponder<RoleMenuComponentResponder>()
+               .AddResponder<RoleMenuButtonFixer>()
+               .AddInteractionGroup<RoleMenuInteractionCommands>()
                .AddCommandTree()
                .WithCommandGroup<RoleMenuCommand>()
                .Finish()

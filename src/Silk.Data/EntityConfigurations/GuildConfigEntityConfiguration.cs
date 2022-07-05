@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
@@ -7,9 +7,10 @@ using Silk.Data.Entities.Guild.Config;
 
 namespace Silk.Data.EntityConfigurations;
 
-public sealed class GuildModConfigEntityConfiguration : IEntityTypeConfiguration<GuildModConfigEntity>
+public class GuildConfigEntityConfiguration : IEntityTypeConfiguration<GuildConfigEntity>
 {
-    public void Configure(EntityTypeBuilder<GuildModConfigEntity> builder)
+
+    public void Configure(EntityTypeBuilder<GuildConfigEntity> builder)
     {
         builder.Property(b => b.NamedInfractionSteps)
                .HasConversion(b => JsonConvert.SerializeObject(b,

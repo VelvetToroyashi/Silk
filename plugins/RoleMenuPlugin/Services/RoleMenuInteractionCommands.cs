@@ -1,57 +1,69 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Database.MediatR;
 
 namespace RoleMenuPlugin;
 
-public class RoleMenuService
+public class RoleMenuInteractionCommands : InteractionGroup
 {
     public const string RoleMenuButtonPrefix = "rm-menu-initiator";
     
     public const string RoleMenuDropdownPrefix = "rm-menu-selector";
+
+    private readonly IMediator                            _mediator;
+    private readonly InteractionContext                   _context;
+    private readonly IDiscordRestUserAPI                  _users;
+    private readonly IDiscordRestGuildAPI                 _guilds;
+    private readonly IDiscordRestInteractionAPI           _interactions;
+    private readonly ILogger<RoleMenuInteractionCommands> _logger;
     
-    private readonly IMediator                  _mediator;
-    private readonly IDiscordRestUserAPI        _users;
-    private readonly IDiscordRestGuildAPI       _guilds;
-    private readonly IDiscordRestInteractionAPI _interactions;
-    private readonly ILogger<RoleMenuService>   _logger;
-    
-    public RoleMenuService(IMediator mediator, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions, ILogger<RoleMenuService> logger)
+    public RoleMenuInteractionCommands
+    (
+        IMediator mediator,
+        InteractionContext context,
+        IDiscordRestUserAPI users,
+        IDiscordRestGuildAPI guilds,
+        IDiscordRestInteractionAPI interactions,
+        ILogger<RoleMenuInteractionCommands> logger
+    )
     {
         _mediator     = mediator;
+        _context      = context;
         _users        = users;
         _guilds       = guilds;
         _interactions = interactions;
         _logger       = logger;
     }
-
-    public async Task<Result> HandleButtonAsync(IInteraction interaction)
+    
+    [Button(RoleMenuButtonPrefix)]
+    // TODO: [RequiresRoleMenu] ?
+    public async Task<IResult> HandleButtonAsync()
     {
-        await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token,
-                                                           new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage));
-        
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(interaction.Message.Value.ID.Value));
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(_context.Message.Value.ID.Value));
 
         if (!roleMenuResult.IsDefined(out var rolemenu))
         {
-            var guildID   = interaction.GuildID.Value;
-            var channelID = interaction.ChannelID.Value;
-            var messageID = interaction.Message.Value.ID;
+            var guildID   = _context.GuildID.Value;
+            var channelID = _context.ChannelID.Value;
+            var messageID = _context.Message.Value.ID;
 
             await _interactions.CreateFollowupMessageAsync
             (
-             interaction.ApplicationID,
-             interaction.Token,
+             _context.ApplicationID,
+             _context.Token,
              "Hmm, it looks like this message was a role menu, but it's gone missing.\n"              +
              "Please notify server staff to fix this! Here is a message link for you to give them:\n" +
              $"https://discordapp.com/channels/{guildID}/{channelID}/{messageID}",
@@ -66,8 +78,8 @@ public class RoleMenuService
             {
                 var followupResult = await _interactions.CreateFollowupMessageAsync
                 (
-                 interaction.ApplicationID,
-                 interaction.Token,
+                 _context.ApplicationID,
+                 _context.Token,
                  "This role menu is being set up! Please wait until options have been added.",
                  flags: MessageFlags.Ephemeral
                 );
@@ -75,17 +87,17 @@ public class RoleMenuService
                 return (Result)followupResult;
             }
 
-            var guildRolesResult = await _guilds.GetGuildRolesAsync(interaction.GuildID.Value);
+            var guildRolesResult = await _guilds.GetGuildRolesAsync(_context.GuildID.Value);
             
             if (!guildRolesResult.IsDefined(out var guildRoles))
                 return Result.FromError(guildRolesResult.Error!);
 
-            if (!interaction.Member.IsDefined(out var member))
+            if (!_context.Member.IsDefined(out var member))
                 throw new InvalidOperationException("Member was not defined in the interaction, but the role menu was found.");
 
             var dropdown = new SelectMenuComponent
             (
-               RoleMenuDropdownPrefix,
+               CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix),
                rolemenu
                   .Options
                   .Select(o =>
@@ -116,67 +128,43 @@ public class RoleMenuService
 
             var result = await _interactions.CreateFollowupMessageAsync
             (
-             interaction.ApplicationID, 
-             interaction.Token,
+             _context.ApplicationID, 
+             _context.Token,
              "Use the dropdown below to assign yourself some roles!",
              flags: MessageFlags.Ephemeral,
-             components: new[]
-             {
-                new ActionRowComponent(new[] { dropdown })
-             });
+             components: new[] { new ActionRowComponent(new[] { dropdown }) }
+            );
             
            return (Result)result;
         }
         return Result.FromSuccess();
     }
 
-    public async Task<Result> HandleDropdownAsync(IInteraction interaction)
+    [SelectMenu(RoleMenuDropdownPrefix)]
+    [RequireContext(ChannelContext.Guild)]
+    public async Task<IResult> HandleDropdownAsync(IReadOnlyList<Snowflake> values)
     {
-        await _interactions.CreateInteractionResponseAsync(interaction.ID, interaction.Token, new InteractionResponse(InteractionCallbackType.DeferredUpdateMessage));
-
-        if (!interaction.Member.IsDefined(out var member) || !member.User.IsDefined(out var user))
-            throw new InvalidOperationException("Member was not defined but the interaction referred to a role menu.");
+       var dropdown = GetDropdownFromMessage(_context.Message.Value);
         
-        if (!interaction.GuildID.IsDefined(out var guildID))
-            return Result.FromError(new InvalidOperationError("Guild ID was not defined."));
-        
-        if (!interaction.Message.IsDefined(out var message))
-            return Result.FromError(new InvalidOperationError("Message was not defined but the interaction referred to a role menu."));
+        var roleMenuRoleIDs = dropdown.Options.Select
+        (
+         r => Snowflake.TryParse(r.Value, out var ID)
+             ? ID.Value
+             : default
+        )
+        .ToArray();
 
-        if (!interaction.Data.IsDefined() || interaction.Data.Value.Value is not IMessageComponentData data)
-            throw new InvalidOperationException("Interaction without data?");
-
-        if (data.ComponentType is not ComponentType.SelectMenu)
-            return Result.FromError(new InvalidOperationError($"Expected a select menu but got {data.ComponentType}."));
-        
-        if (!data.Values.IsDefined(out var values))
-                values ??= Array.Empty<string>();
-
-        var dropdown = GetDropdownFromMessage(message);
-        
-        var roleMenuRoleIDs = dropdown
-                             .Options
-                             .Select
-                              (
-                               r => Snowflake.TryParse(r.Value, out var ID)
-                                  ? ID.Value
-                                  : default
-                              )
-                              .ToArray();
-
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(interaction.Message.Value.MessageReference.Value.MessageID.Value.Value));
+        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(_context.Message.Value.MessageReference.Value.MessageID.Value.Value));
 
         if (!roleMenuResult.IsDefined(out var roleMenu))
         {
-            await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID, interaction.Token, "Sorry, but this role menu is no longer available!", flags: MessageFlags.Ephemeral);
+            await _interactions.CreateFollowupMessageAsync(_context.ApplicationID, _context.Token, "Sorry, but this role menu is no longer available!", flags: MessageFlags.Ephemeral);
             return Result.FromError(roleMenuResult.Error!);
         }
         
-        var parsedRoleIDs = values.Select(ulong.Parse).Select(DiscordSnowflake.New);
-        
-        var newUserRoles = member.Roles
+        var newUserRoles = _context.Member.Value.Roles
                                  .Except(roleMenuRoleIDs)
-                                 .Union(parsedRoleIDs)
+                                 .Union(values)
                                  .ToList();
 
         var newRoleIDs = newUserRoles.Select(s => s.Value).ToArray();
@@ -197,9 +185,9 @@ public class RoleMenuService
         
         var sb = new StringBuilder();
         
-        if (newUserRoles.Count > member.Roles.Count)
+        if (newUserRoles.Count > _context.Member.Value.Roles.Count)
         {
-            var assigned = newUserRoles.Except(member.Roles).ToArray();
+            var assigned = newUserRoles.Except(_context.Member.Value.Roles).ToArray();
             sb.AppendLine($"I've successfully assigned the following roles to you: {string.Join(", ", assigned.Select(r => $"<@&{r.Value}>"))}");
         }
 
@@ -222,40 +210,41 @@ public class RoleMenuService
                 sb.AppendLine($"<@&{inclusion.RoleId}> is mutually inclusive with {string.Join(", ", inclusion.MutuallyInclusiveRoleIds.Select(r => $"<@&{r}>"))}");
         }
         
-        var roleResult = newUserRoles.Count == member.Roles.Count 
+        var roleResult = newUserRoles.Count == _context.Member.Value.Roles.Count 
             ? Result.FromSuccess()
             : await _guilds.ModifyGuildMemberAsync
               (
-               interaction.GuildID.Value,
-               user.ID,
+               _context.GuildID.Value,
+               _context.User.ID,
                roles: newUserRoles
               );
 
         if (roleResult.IsSuccess)
         {
+            // TODO: Figure out a way to do this without stringifying?
             var newOptions = dropdown
                             .Options
-                            .Select(r => new SelectOption(r.Label, r.Value, r.Description, r.Emoji, values.Contains(r.Value)))
+                            .Select(r => new SelectOption(r.Label, r.Value, r.Description, r.Emoji, values.Any(parsed => parsed.Value.ToString() == r.Value)))
                             .ToArray();
             
             var interactionResult = await _interactions.EditOriginalInteractionResponseAsync
             (
-             interaction.ApplicationID,
-             interaction.Token,
+             _context.ApplicationID,
+             _context.Token,
              sb.ToString(),
              components: new[]
              {
-                 new ActionRowComponent(new [] { new SelectMenuComponent(RoleMenuDropdownPrefix, newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
+                 new ActionRowComponent(new [] { new SelectMenuComponent(CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix), newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
              }
             );
             
             return (Result)interactionResult;
         }
 
-        return await DisplayRoleMenuErrorAsync(interaction, guildID, roleMenuRoleIDs, roleResult);
+        return await DisplayRoleMenuErrorAsync(_context.GuildID.Value, roleMenuRoleIDs, roleResult);
     }
 
-    private async Task<Result> DisplayRoleMenuErrorAsync(IInteraction interaction, Snowflake guildID, Snowflake[] roleMenuRoleIDs, Result roleResult)
+    private async Task<Result> DisplayRoleMenuErrorAsync(Snowflake guildID, Snowflake[] roleMenuRoleIDs, Result roleResult)
     {
         var selfResult = await _users.GetCurrentUserAsync();
 
@@ -311,9 +300,12 @@ public class RoleMenuService
             }
         }
 
-        await _interactions.CreateFollowupMessageAsync(interaction.ApplicationID,
-                                                       interaction.Token,
-                                                       content.ToString());
+        await _interactions.CreateFollowupMessageAsync
+        (
+         _context.ApplicationID,
+         _context.Token,
+         content.ToString()
+        );
 
         return Result.FromError(roleResult.Error!);
     }
@@ -325,6 +317,6 @@ public class RoleMenuService
         
         var selectMenu = actionRow!.Components[0] as ISelectMenuComponent;
         
-        return selectMenu;
+        return selectMenu!;
     }
 }
