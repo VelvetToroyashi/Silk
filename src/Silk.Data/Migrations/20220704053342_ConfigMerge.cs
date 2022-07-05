@@ -145,6 +145,9 @@ namespace Silk.Data.Migrations
             migrationBuilder.Sql("CREATE UNIQUE INDEX \"IX_infraction_steps_GuildConfigEntityId\" ON infraction_steps USING btree (\"GuildConfigEntityId\");");
             migrationBuilder.Sql("CREATE UNIQUE INDEX \"IX_invite_configs_GuildModConfigId\" ON invite_configs USING btree (\"GuildModConfigId\");");
             
+            migrationBuilder.Sql("ALTER TABLE guild_greetings DROP CONSTRAINT IF EXISTS \"FK_guild_greetings_guild_configs_GuildConfigEntityId\", " +
+                                 "ADD CONSTRAINT \"FK_guild_greetings_guild_configs_GuildConfigEntityId\" FOREIGN KEY (\"GuildConfigEntityId\") REFERENCES guild_configs(\"Id\") ON DELETE CASCADE;");
+            
             migrationBuilder.Sql("DROP TABLE temp;");
 
             migrationBuilder.CreateIndex(
