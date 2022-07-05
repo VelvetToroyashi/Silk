@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FuzzySharp;
@@ -21,7 +23,9 @@ using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Shared.Types;
 using Silk.Utilities;
+using StackExchange.Redis;
 using Unidecode.NET;
 
 namespace Silk.Services.Guild;
@@ -31,6 +35,8 @@ namespace Silk.Services.Guild;
 /// </summary>
 public class PhishingDetectionService
 {
+    private const string AntiPhishAPIUrl = "https://api.phish.gg/check?id=";
+    
     private record struct RavyAPIResponse(bool Matched, string? Key, double Similarity);
     
     private const           string Phishing  = "Message contained a phishing link.";
@@ -38,9 +44,12 @@ public class PhishingDetectionService
 
 
     private readonly HttpClient                        _http;
+    private readonly HttpClient                        _httpUnauthorized;
     private readonly IInfractionService                _infractions;
     private readonly IDiscordRestUserAPI               _users;
+    private readonly IConnectionMultiplexer            _redis;
     private readonly IDiscordRestChannelAPI            _channels;
+    private readonly IDiscordRestInviteAPI            _invites;
     private readonly PhishingGatewayService            _phishGateway;
     private readonly GuildConfigCacheService           _config;
     private readonly ExemptionEvaluationService        _exemptions;
@@ -51,21 +60,26 @@ public class PhishingDetectionService
         IHttpClientFactory                http,
         IInfractionService                infractions,
         IDiscordRestUserAPI               users,
+        IConnectionMultiplexer            redis,
         IDiscordRestChannelAPI            channels,
+        IDiscordRestInviteAPI             invites,
         PhishingGatewayService            phishGateway,
         GuildConfigCacheService           config,
         ExemptionEvaluationService        exemptions,
         ILogger<PhishingDetectionService> logger
     )
     {
-        _http = http.CreateClient("ravy-api");
-        _infractions  = infractions;
-        _users        = users;
-        _channels     = channels;
-        _phishGateway = phishGateway;
-        _config       = config;
-        _exemptions   = exemptions;
-        _logger       = logger;
+        _http             = http.CreateClient("ravy-api");
+        _httpUnauthorized = http.CreateClient();
+        _infractions      = infractions;
+        _users            = users;
+        _redis            = redis;
+        _channels         = channels;
+        _invites          = invites;
+        _phishGateway     = phishGateway;
+        _config           = config;
+        _exemptions       = exemptions;
+        _logger           = logger;
     }
 
     private static readonly string[] SuspiciousUsernames = new[]
@@ -197,16 +211,18 @@ public class PhishingDetectionService
 
         using (SilkMetric.PhishingDetection.WithLabels("message").NewTimer())
         {
-            links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value).Where(_phishGateway.IsBlacklisted);
+            links = LinkRegex.Matches(message.Content).Where(m => m.Success).Select(m => m.Groups["link"].Value);
         }
 
-        foreach (var match in links)
+        var knownPhishingLinks = links.Where(_phishGateway.IsBlacklisted).ToArray();
+
+        foreach (var match in knownPhishingLinks)
             SilkMetric.SeenPhishingLinks.WithLabels(match).Inc();
         
         if (!config.DetectPhishingLinks)
             return Result.FromSuccess(); // Phishing detection is disabled.
         
-        foreach (var link in links)
+        foreach (var link in knownPhishingLinks)
         {
             if (_phishGateway.IsBlacklisted(link))
             {
@@ -221,7 +237,48 @@ public class PhishingDetectionService
                     return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
             }
         }
+        
+        // There aren't any cached phishing links in the message, but there's still invites.
+        // Handle accordingly.
 
+        var db = _redis.GetDatabase();
+
+        foreach (var link in links.Except(knownPhishingLinks))
+        {
+            var cacheResult = (bool?)await db.StringGetAsync(SilkKeyHelper.GenerateInviteKey(link));
+
+            if (cacheResult is null)
+            {
+                // It'd be nice to have a way to poke this endpoint with a HEAD request.
+                var exists = await _invites.GetInviteAsync(link);
+
+                if (!exists.IsDefined(out var serverRes) || !serverRes.Guild.IsDefined(out var guild))
+                    return Result.FromSuccess(); // We've 404'd, invite's dead.
+
+                var apiResult = await _httpUnauthorized.GetAsync(AntiPhishAPIUrl + guild.ID);
+
+                if (!apiResult.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Failed to check invite: {Link}; is the API down?", link);
+                    continue;
+                }
+                
+                var apiResponse = await JsonDocument.ParseAsync(await apiResult.Content.ReadAsStreamAsync());
+
+                if (!apiResponse.RootElement.TryGetProperty("match", out var matchProp))
+                    continue; // There was an error, so forget it.
+                
+                var match = matchProp.GetBoolean();
+                
+                var type = apiResponse.RootElement.TryGetProperty("reason", out var typeProp) ? $" ({typeProp})" : null;
+
+                await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), match);
+                
+                if (match)
+                    return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
+            }
+        }
+        
         return Result.FromSuccess();
     }
 
@@ -233,10 +290,12 @@ public class PhishingDetectionService
     /// <param name="channelID">The ID of the channel.</param>
     /// <param name="messageID">The ID of the message.</param>
     /// <param name="delete">Whether to delete the detected phishing link.</param>
-    private async Task<Result> HandleDetectedPhishingAsync(Snowflake guildID, Snowflake authorID, Snowflake channelID, Snowflake messageID, bool delete)
+    private async Task<Result> HandleDetectedPhishingAsync(Snowflake guildID, Snowflake authorID, Snowflake channelID, Snowflake messageID, bool delete, string? reason = null)
     {
         if (delete)
             await _channels.DeleteMessageAsync(channelID, messageID);
+
+        reason ??= Phishing;
 
         var config = await _config.GetConfigAsync(guildID);
 
@@ -252,10 +311,10 @@ public class PhishingDetectionService
 
         var infractionResult = step.Type switch
         {
-            InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, Phishing),
-            InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, Phishing),
-            InfractionType.Strike => await _infractions.StrikeAsync(guildID, authorID, self.ID, Phishing),
-            InfractionType.Mute   => await _infractions.MuteAsync(guildID, authorID, self.ID, Phishing, step.Duration == TimeSpan.Zero ? null : step.Duration),
+            InfractionType.Ban    => await _infractions.BanAsync(guildID, authorID, self.ID, 0, reason),
+            InfractionType.Kick   => await _infractions.KickAsync(guildID, authorID, self.ID, reason),
+            InfractionType.Strike => await _infractions.StrikeAsync(guildID, authorID, self.ID, reason),
+            InfractionType.Mute   => await _infractions.MuteAsync(guildID, authorID, self.ID, reason, step.Duration == TimeSpan.Zero ? null : step.Duration),
             _                     => throw new InvalidOperationException("Invalid infraction type.")
         };
 
