@@ -11,17 +11,12 @@
 else
 {
     <MudContainer>
-        <HeaderView ImageUrl="@CurrentUserAvatar" 
-                    Text="@HeaderViewGreeting"/>
+        <HeaderView ImageUrl="@CurrentUserAvatar" Text="@HeaderViewGreeting"/>
 
-        <MudDivider Class="my-6"
-                    Style="height: 4px"
-                    DividerType="DividerType.Middle"/>
+        <MudDivider Class="my-6" Style="height: 4px" DividerType="DividerType.Middle"/>
 
         <MudContainer Class="my-6">
-            <MudText Class="mb-4" 
-                     Typo="Typo.h4" 
-                     GutterBottom="true">
+            <MudText Class="mb-4" Typo="Typo.h4" GutterBottom="true">
                 Servers you Manage
             </MudText>
 
@@ -32,7 +27,7 @@ else
                             <ItemTemplate>
                                 <MudItem @key="context.ID.Value.Value">
                                     <GuildView Guild="context"
-                                               OnClick="HandleGuildNavigation"/>
+                                               OnClick="NavigateToManageGuild"/>
                                 </MudItem>
                             </ItemTemplate>
                         </CollectionView>
@@ -63,7 +58,7 @@ else
                                 <ItemTemplate>
                                     <MudItem @key="context.ID.Value.Value">
                                         <GuildView Guild="context"
-                                                   OnClick="HandleGuildNavigation"/>
+                                                   OnClick="NavigateToManageGuild"/>
                                     </MudItem>
                                 </ItemTemplate>
                             </CollectionView>

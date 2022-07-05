@@ -8,7 +8,7 @@ namespace Silk.Dashboard.Pages.Dashboard;
 
 public partial class Profile
 {
-    [Inject] public  ISnackbar                Snackbar      { get; set; }
+    [Inject] public  ISnackbar               Snackbar      { get; set; }
     [Inject] private DashboardDiscordClient  DiscordClient { get; set; }
 
     private bool _showJoinedGuilds;
@@ -25,28 +25,20 @@ public partial class Profile
         _managedGuilds = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
     }
 
-    private string CurrentUserAvatar => GetUserAvatarUrl();
+    private string CurrentUserName            => _user.Username;
+    private string CurrentUserAvatar          => GetUserAvatarUrl();
+    private string HeaderViewGreeting         => CurrentUserName;
+    private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers";
 
     private string GetUserAvatarUrl()
     {
-        var avatarUrl = "";
         var result = CDN.GetUserAvatarUrl(_user, imageSize: 256);
-
-        if (!result.IsSuccess) return avatarUrl;
-
-        if (result.IsDefined(out var uri))
-            avatarUrl = uri.ToString();
-
-        return avatarUrl;
+        return result.IsDefined(out var uri) ? uri.ToString() : "";
     }
-
-    private string CurrentUserName            => _user.Username;
-    private string HeaderViewGreeting         => CurrentUserName;
-    private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers"; 
 
     private void ToggleJoinedGuildsVisibility() => _showJoinedGuilds = !_showJoinedGuilds;
 
-    private void HandleGuildNavigation(IPartialGuild guild)
+    private void NavigateToManageGuild(IPartialGuild guild)
     {
         var navUrl = $"/manage-guild/{guild.ID.Value.Value}";
         var canNavigate = guild.Permissions.IsDefined(out var permissionSet) && 

@@ -70,14 +70,14 @@ public partial class GuildGreetingEditor
              if (foundGreeting is not null)
              {
                  UpdateGreeting(foundGreeting);
-                 await Mediator.Send(new UpdateGuildConfig.Request(foundGreeting.GuildID, guildConfig.Greetings));
+                 await Mediator.Send(new UpdateGuildConfig.Request(foundGreeting.GuildID) { Greetings = guildConfig.Greetings});
                  Snackbar.Add($"Updated greeting with ID {foundGreeting.Id}", Severity.Success);
              }
              // Creating a Greeting
              else
              {
                  guildConfig.Greetings.Add(_greeting);
-                 await Mediator.Send(new UpdateGuildConfig.Request(_greeting.GuildID, guildConfig.Greetings));
+                 await Mediator.Send(new UpdateGuildConfig.Request(_greeting.GuildID) {Greetings = guildConfig.Greetings});
                  Snackbar.Add($"Created greeting with ID {_greeting.Id}", Severity.Success);
              }
          }

@@ -1,13 +1,7 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<MudContainer Class="d-flex flex-column align-center justify-center"
-              Style="height: 100%">
-    <MudImage ObjectFit="ObjectFit.Contain"
-              Width="256"
-              Src="@ImageUrl"
-              Alt="Issue Image"
-              Elevation="1"
-              Class="rounded"/>
+<MudContainer Class="d-flex flex-column align-center justify-center">
+    <MudImage Class="rounded" Src="@ImageUrl" Width="256" ObjectFit="ObjectFit.Contain"/>
 
     <MudText Class="my-3" Typo="Typo.h4">
         @Message
@@ -19,10 +13,10 @@
 @code {
 
     [Parameter]
-    public string Message { get; set; } = "We don't know what went wrong, but lets pretend we do";
+    public string Message { get; set; } = "Uh Oh, something went wrong!";
 
     [Parameter]
-    public string ImageUrl { get; set; } = "imgs/rp_flop.png";
+    public string ImageUrl { get; set; } = "images/rp_flop.png";
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }

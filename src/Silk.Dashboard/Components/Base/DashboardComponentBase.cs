@@ -44,8 +44,7 @@ public abstract class DashboardComponentBase : ComponentBase
         ILogger<DashboardComponentBase> logger              = null
     )
     {
-        if (IsBusy)
-            return;
+        if (IsBusy) return;
 
         IsBusy = true;
 

@@ -1,7 +1,6 @@
 ﻿@namespace Silk.Dashboard.Components
 
-<MudContainer Class="@Class" 
-              Style="@Style">
+<MudContainer Class="@Class" Style="@Style">
     @if (Content is null)
     {
         <MudProgressCircular Color="Color.Primary" 
@@ -17,10 +16,10 @@
 @code {
 
     [Parameter]
-    public string Class { get; set; } = "d-flex flex-column align-center justify-center";
+    public string Class { get; set; } = "d-flex flex-column align-center justify-center mud-height-full";
 
     [Parameter]
-    public string Style { get; set; } = "height: 100%";
+    public string Style { get; set; } = "";
     
     [Parameter]
     public string Size { get; set; } = "120px";

@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using Remora.Discord.API.Abstractions.Objects;
-using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
@@ -12,37 +11,32 @@ namespace Silk.Dashboard.Services.DashboardDiscordClient;
 
 public class DashboardDiscordClient
 {
-    private readonly IRestHttpClient       _restHttpClient;
+    private readonly ICacheProvider        _cache;
     private readonly IDiscordTokenStore    _tokenStore;
-    private readonly ICacheProvider        _cacheProvider;
-    
-    private readonly IDiscordRestUserAPI   _userApi;
-    private readonly IDiscordRestOAuth2API _oAuth2Api;
+    private readonly IRestHttpClient       _restHttpClient;
 
-    public DashboardDiscordClient(
-        IRestHttpClient restHttpClient,
+    public DashboardDiscordClient
+    (
+        ICacheProvider     cache,
         IDiscordTokenStore tokenStore,
-        ICacheProvider cacheProvider,
-        IDiscordRestUserAPI   userApi,
-        IDiscordRestOAuth2API oAuth2Api)
+        IRestHttpClient    restHttpClient
+    )
     {
-        _restHttpClient = restHttpClient;
+        _cache          = cache;
         _tokenStore     = tokenStore;
-        _cacheProvider  = cacheProvider;
-        _userApi        = userApi;
-        _oAuth2Api      = oAuth2Api;
+        _restHttpClient = restHttpClient;
 
         _restHttpClient.WithCustomization
         (
-         b =>
-             {
-                 b.WithRateLimitContext(_cacheProvider)
-                  .With(m => m.Headers.Authorization = new("Bearer", GetCurrentUserToken()));
-             }
+             b => b.WithRateLimitContext(_cache)
+                    .With(m => m.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
         );
     }
 
-    private string? GetCurrentUserToken() => _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
+    private string? GetCurrentUserToken()
+    {
+        return _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
+    }
 
     public async Task<IUser?> GetCurrentUserAsync()
     {
@@ -52,16 +46,17 @@ public class DashboardDiscordClient
 
     public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync()
     {
+        const uint limit = 100;
         var result = await _restHttpClient.GetAsync<IReadOnlyList<IPartialGuild>>
         (
-         "users/@me/guilds",
-         b => b.AddQueryParameter("limit", 100.ToString())
+             "users/@me/guilds",
+             b => b.AddQueryParameter("limit", limit.ToString())
         );
 
         return result.IsDefined(out var guilds) ? guilds : null;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsByPermissionAsync
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync
     (
         DiscordPermission permission
     )
@@ -75,12 +70,11 @@ public class DashboardDiscordClient
         DiscordPermission             permission
     )
     {
-        return guilds?.Where(g => g.Permissions.IsDefined(out var permissionSet) && 
-                                  permissionSet.HasPermission(permission))
+        return guilds?.Where(guild => GuildHasPermission(guild, permission))
                       .ToList();
     }
 
-    public async Task<IPartialGuild?> GetCurrentUserGuildByIdAndPermissionAsync
+    public async Task<IPartialGuild?> GetCurrentUserGuildAsync
     (
         Snowflake         guildId,
         DiscordPermission permission
@@ -89,22 +83,21 @@ public class DashboardDiscordClient
         var userGuilds = await GetCurrentUserGuildsAsync();
         var guild = userGuilds?.FirstOrDefault
         (
-             guild => guild.ID.Value == guildId &&
-                      guild.Permissions.IsDefined(out var permissionSet) &&
-                      permissionSet.HasPermission(permission)
+             guild => guild.ID.IsDefined(out var gID) &&
+                      gID == guildId &&
+                      GuildHasPermission(guild, permission)
         );
+
         return guild;
     }
-    
-    public async Task<IApplication?> GetCurrentBotApplicationInformationAsync()
-    {
-        var result = await _oAuth2Api.GetCurrentBotApplicationInformationAsync();
-        return result.IsDefined(out var application) ? application : null;
-    }
 
-    public async Task<IAuthorizationInformation?> GetCurrentAuthorizationInformationAsync()
+    private static bool GuildHasPermission
+    (
+        IPartialGuild     guild,
+        DiscordPermission permission
+    )
     {
-        var result = await _oAuth2Api.GetCurrentAuthorizationInformationAsync();
-        return result.IsDefined(out var authorizationInformation) ? authorizationInformation : null;
+        return guild.Permissions.IsDefined(out var permissions) &&
+               permissions.HasPermission(permission);
     }
 }

@@ -7,37 +7,32 @@ using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services.DashboardDiscordClient;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Data.MediatR.Guilds.Config;
 using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
 public partial class ManageGuild
 {
-    [Inject]    private IMediator               Mediator      { get; set; }
-    [Inject]    private ISnackbar               Snackbar      { get; set; }
+    [Inject]    private IMediator              Mediator      { get; set; }
+    [Inject]    private ISnackbar              Snackbar      { get; set; }
     [Inject]    private DashboardDiscordClient DiscordClient { get; set; }
-    [Parameter] public  string                  GuildId       { get; set; }
+
+    [Parameter] public  string  GuildId { get; set; }
 
     private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();
-
-    private bool _savingChanges;
-    private bool _requestFailed;
+    private bool      RequestFailed { get; set; }
 
     private const string GenConfigTabId = "gen";
     private const string ModConfigTabId = "mod";
 
-    private IPartialGuild        _guild;
-    private GuildConfigEntity    _guildConfig;
-    private GuildModConfigEntity _guildModConfig;
-
-    private MudTabs _tabContainer;
-
-    private bool CanShowSaveButton => _guildConfig is not null || _guildModConfig is not null;
+    private bool              _showGreetingEditor;
+    private MudTabs           _tabContainer;
+    private IPartialGuild     _guild;
+    private GuildConfigEntity _guildConfig;
 
     protected override Task OnInitializedAsync()
     {
-        _ = FetchDiscordGuildFromRestAsync();
+        _ = GetGuildFromRestAsync();
         _ = GetGuildConfigAsync();
         return Task.CompletedTask;
     }
@@ -45,20 +40,14 @@ public partial class ManageGuild
     private async Task GetGuildConfigAsync()
     {
         _guildConfig = await FetchGuildConfigAsync();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task GetGuildModConfigAsync()
-    {
-        _guildModConfig = await FetchGuildModConfigAsync();
         StateHasChanged();
     }
 
-    private async Task FetchDiscordGuildFromRestAsync()
+    private async Task GetGuildFromRestAsync()
     {
-        _requestFailed = false;
-        _guild = await DiscordClient.GetCurrentUserGuildByIdAndPermissionAsync(GuildIdParsed, DiscordPermission.ManageGuild);
-        if (_guild is null) _requestFailed = true;
+        RequestFailed = false;
+        _guild = await DiscordClient.GetCurrentUserGuildAsync(GuildIdParsed, DiscordPermission.ManageGuild);
+        if (_guild is null) RequestFailed = true;
         StateHasChanged();
     }
 
@@ -68,79 +57,38 @@ public partial class ManageGuild
         return await Mediator.Send(request);
     }
 
-    private async Task<GuildModConfigEntity> FetchGuildModConfigAsync()
-    {
-        var request = new GetGuildModConfig.Request(GuildIdParsed);
-        return await Mediator.Send(request);
-    }
-
     private async Task<GuildConfigEntity> UpdateGuildConfigAsync()
     {
         if (_guildConfig is null) return null;
 
-        /*var request = new UpdateGuildConfig.Request(GuildIdParsed)
+        var request = new UpdateGuildConfig.Request(GuildIdParsed)
         {
-            GreetingOption = _guildConfig.GreetingOption,
-            GreetingChannelId = _guildConfig.GreetingChannel,
-            VerificationRoleId = _guildConfig.VerificationRole,
-            GreetingText = _guildConfig.GreetingText,
-            DisabledCommands = _guildConfig.DisabledCommands,
-        };*/
-
-        GuildConfigEntity response = null; // Todo: Add MediatR Request + Handler
-        // var response = await Mediator.Send(request);
-        return response;
-    }
-
-    private async Task<GuildModConfigEntity> UpdateGuildModConfigAsync()
-    {
-        if (_guildModConfig is null) return null;
-
-        var request = new UpdateGuildModConfig.Request(GuildIdParsed)
-        {
-            MuteRoleID = _guildModConfig.MuteRoleID,
+            // TODO: add changes
         };
 
-        var response = await Mediator.Send(request);
-        return response;
+        return await Mediator.Send(request);
     }
 
     private async Task SaveChangesAsync()
     {
-        var updateGuildConfigTask    = UpdateGuildConfigAsync();
-        var updateGuildModConfigTask = UpdateGuildModConfigAsync();
+        await ComponentRunAsync
+        (
+             async () =>
+             {
+                 try
+                 {
+                     var result = await UpdateGuildConfigAsync();
+                     var message = result is not null
+                         ? "Successfully saved config!"
+                         : "Unable to save config changes, please try again";
 
-        _savingChanges = true;
-
-        try
-        {
-            var tasks = new Task[] { updateGuildConfigTask, updateGuildModConfigTask };
-
-            await Task.WhenAll(tasks);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _savingChanges = false;
-        }
-
-        var updatedGuildConfig    = updateGuildConfigTask.Result;
-        var updatedGuildModConfig = updateGuildModConfigTask.Result;
-
-        if (updatedGuildConfig is not null ||
-            updatedGuildModConfig is not null)
-        {
-            _guildConfig    = updatedGuildConfig;
-            _guildModConfig = updatedGuildModConfig;
-
-            Snackbar.Add("Successfully saved config!", Severity.Success);
-        }
-        else
-        {
-            Snackbar.Add("Uh-oh! Something went wrong!", Severity.Error);
-        }
+                     Snackbar.Add(message, Severity.Success);
+                 }
+                 catch (Exception ex)
+                 {
+                     Snackbar.Add($"Uh-oh! Something went wrong! - {ex.Message}", Severity.Error);
+                 }
+             }
+        );
     }
 }

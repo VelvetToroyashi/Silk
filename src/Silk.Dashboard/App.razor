@@ -9,7 +9,7 @@
                     @if (!context.User.IsAuthenticated())
                     {
                         <ProblemView Message="Please login to get started with the Dashboard"
-                                     ImageUrl="imgs/rp_scare.png">
+                                     ImageUrl="images/rp_scare.png">
                             <MudButton Size="Size.Large" 
                                        Color="Color.Info" 
                                        Href="api/account/login"
@@ -21,7 +21,7 @@
                     else
                     {
                         <ProblemView Message="Would love to let you through, but you need some permissions" 
-                                      ImageUrl="imgs/rp_no.png" />
+                                      ImageUrl="images/rp_no.png" />
                     }
                 </NotAuthorized>
             </AuthorizeRouteView>
