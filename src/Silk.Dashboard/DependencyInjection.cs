@@ -96,8 +96,8 @@ public static class DependencyInjection
 
         services.AddAuthorization
         (
-            options => options.AddPolicy(DashboardPolicies.TeamMemberPolicy, 
-                                         DashboardPolicies.IsTeamMemberPolicy())
+            options => options.AddPolicy(DashboardPolicies.TeamMemberPolicyName, 
+                                         DashboardPolicies.TeamMemberPolicy())
         );
 
         return services;
@@ -111,7 +111,7 @@ public static class DependencyInjection
         IDiscordRestOAuth2API oAuth2Api
     )
     {
-        if (user.HasClaim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName)) 
+        if (user.HasClaim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName)) 
             return;
 
         try
@@ -123,14 +123,14 @@ public static class DependencyInjection
 
                 if (appInfo.Owner?.ID.Value.Value.ToString() == userId)
                 {
-                    claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName));
+                    claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName));
                 }
                 else
                 {
                     var teamMember = appInfo.Team?.Members.FirstOrDefault(member => member.User.ID.Value.Value.ToString() == userId);
                     if (teamMember is not null)
                     {
-                        claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberClaimName));
+                        claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName));
                     }
                 }
             }
@@ -162,6 +162,9 @@ public static class DependencyInjection
         this IServiceCollection services
     )
     {
+        services.AddMemoryCache();
+        services.AddHttpContextAccessor();
+
         services.AddHttpClient("Github", con => 
         {
             con.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/vnd.github.v3+json");

@@ -9,9 +9,6 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddMemoryCache();
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddDashboardInfrastructure(builder.Configuration);
 
 var app = builder.Build();
