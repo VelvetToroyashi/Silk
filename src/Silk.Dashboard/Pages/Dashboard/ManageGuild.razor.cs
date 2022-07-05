@@ -20,12 +20,12 @@ public partial class ManageGuild
     [Parameter] public  string  GuildId { get; set; }
 
     private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();
-    private bool      RequestFailed { get; set; }
+    private bool RequestFailed { get; set; }
+    private bool ShowGreetingEditor { get; set; }
 
     private const string GenConfigTabId = "gen";
     private const string ModConfigTabId = "mod";
 
-    private bool              _showGreetingEditor;
     private MudTabs           _tabContainer;
     private IPartialGuild     _guild;
     private GuildConfigEntity _guildConfig;

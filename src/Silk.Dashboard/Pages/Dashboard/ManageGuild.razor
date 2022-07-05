@@ -17,14 +17,23 @@
         </MudText>
     </MudContainer>
 }
-else if (_guild is null)
-{
-    <LoadingView/>
-}
 else
 {
     <MudContainer>
-        <HeaderView ImageUrl="@GuildView.GetGuildIconUrl(_guild)" Text="@_guild.Name.Value"/>
+        @if (_guild is null)
+        {
+            <LoadingView/>
+        }
+        else
+        {
+            <MudContainer Class="d-flex flex-column align-center justify-space-between">
+                <MudImage Class="rounded mb-3" Width="185"
+                          Src="@GuildView.GetGuildIconUrl(_guild)" 
+                          ObjectFit="ObjectFit.Contain"/>
+
+                <MudText Typo="Typo.h4">@_guild.Name.Value</MudText>
+            </MudContainer>
+        }
 
         <MudDivider Class="my-7" Style="height: 4px" DividerType="DividerType.Middle"/>
 
@@ -36,8 +45,10 @@ else
         @if (_guildConfig is null)
         {
             <LoadingView>
-                <MudText Class="mr-2">Loading Guild Configuration</MudText>
-                <MudProgressCircular Size="Size.Small" Indeterminate="true"/>
+                <Content>
+                    <MudText Class="mb-2">Loading Guild Configuration</MudText>
+                    <MudProgressCircular Size="Size.Medium" Indeterminate="true"/>
+                </Content>
             </LoadingView>
         }
         else
@@ -47,7 +58,7 @@ else
                      ApplyEffectsToContainer="true">
                 @* General Tab *@
                 <MudTabPanel ID="@GenConfigTabId"
-                             Text="General Configuration"
+                             Text="General"
                              Icon="@Icons.Material.Filled.Build">
                     <MudContainer>
                         @* Todo: Rewrite using greeting entities *@
@@ -63,29 +74,21 @@ else
                             <MudContainer Class="d-flex flex-row">
                                 <MudText Typo="Typo.h5">Configured Greetings</MudText>
                                 <MudSpacer/>
-                                <MudSwitch @bind-Checked="_showGreetingEditor" Label="@(_showGreetingEditor ? "Close Editor" : "Open Editor")" Color="Color.Info"/>
+                                <MudList>
+                                    @foreach (var greetingEntity in _guildConfig.Greetings)
+                                    {
+                                        var t = $"{greetingEntity.ChannelID.Value} - {greetingEntity.Option} - {greetingEntity.Message}";
+                                        <MudListItem Text="@t"/>
+                                    }
+                                </MudList>
                             </MudContainer>
-
-                            @if (_showGreetingEditor)
-                            {
-                                <GuildGreetingEditor/>
-                            }
-
-                            <MudList>
-                                @foreach (var greetingEntity in _guildConfig.Greetings)
-                                {
-                                                    @* Todo: Remove this placeholder *@
-                                    var t = $"{greetingEntity.ChannelID.Value} - {greetingEntity.Option} - {greetingEntity.Message}";
-                                    <MudListItem Text="@t"/>
-                                }
-                            </MudList>
                         }
                     </MudContainer>
                 </MudTabPanel>
 
                 @* Moderation Tab *@
                 <MudTabPanel ID="@ModConfigTabId"
-                             Text="Moderation Configuration"
+                             Text="Moderation"
                              Icon="@Icons.Material.Filled.Shield">
                     <MudContainer>
                         <div class="mb-7">
