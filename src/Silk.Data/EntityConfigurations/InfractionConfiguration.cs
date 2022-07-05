@@ -13,5 +13,6 @@ public class InfractionEntityConfiguration : IEntityTypeConfiguration<Infraction
                .HasForeignKey(inf => inf.TargetID);
 
         builder.HasIndex(inf => inf.GuildID);
+        builder.HasIndex(inf => inf.TargetID);
     }
 }

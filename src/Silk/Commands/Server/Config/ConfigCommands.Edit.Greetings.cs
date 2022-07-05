@@ -106,6 +106,7 @@ public partial class ConfigCommands
                 {
                     Message    = greeting,
                     ChannelID  = channel.ID,
+                    GuildID    = _context.GuildID.Value,
                     MetadataID = role?.ID,
                     Option     = (GreetingOption)option
                 };

@@ -18,6 +18,11 @@ public class GuildGreetingEntity
     ///     The id of the guild this greeting belongs to.
     /// </summary>
     public Snowflake GuildID { get; set; }
+    
+    /// <summary>
+    ///  The guild this greeting belongs to.
+    /// </summary>
+    public GuildEntity Guild { get; set; }
 
     /// <summary>
     ///     The message to greet the user with.
