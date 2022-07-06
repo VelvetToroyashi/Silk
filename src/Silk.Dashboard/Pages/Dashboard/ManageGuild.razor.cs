@@ -87,7 +87,7 @@ public partial class ManageGuild
 
     private async Task SaveChangesAsync
     (
-        string successMessage = "Successfully saved config!",
+        string successMessage = "Successfully saved config",
         string errorMessage = "Unable to save config changes, please try again"
     )
     {

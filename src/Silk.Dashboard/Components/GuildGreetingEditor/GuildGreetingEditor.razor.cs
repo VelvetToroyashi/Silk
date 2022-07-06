@@ -20,20 +20,15 @@ public partial class GuildGreetingEditor
     [Inject]    public IMediator           Mediator   { get; set; }
     [Inject]    public ISnackbar           Snackbar   { get; set; }
     [Parameter] public int                 GreetingId { get; set; }
-    [Parameter] public GuildGreetingEntity? Greeting   { get; set; }
-
-    private Snowflake GreetingMetadataID
-    {
-        get => Greeting.MetadataID ?? default;
-        set
-        {
-            Greeting.MetadataID = value.Value == 0 ? null : value;
-            if (Greeting.Option is GreetingOption.GreetOnJoin)
-                Greeting.ChannelID = GreetingMetadataID;
-        }
-    }
+    [Parameter] public GuildGreetingEntity Greeting   { get; set; }
 
     private MudForm _form;
+
+    private Snowflake GreetingMetadataId
+    {
+        get => Greeting!.MetadataID ?? default;
+        set => Greeting!.MetadataID = value.Value == 0 ? null : value;
+    }
 
     private string SaveButtonText => Greeting.Id > 0 ? "Save Changes" : "Create";
 
@@ -63,35 +58,32 @@ public partial class GuildGreetingEditor
 
         await ComponentRunAsync
         (
-         async () =>
-         {
-             var guildConfig = await Mediator.Send(new GetGuildConfig.Request(Greeting.GuildID));
-             if (guildConfig is null)
+             async () =>
              {
-                 Snackbar.Add($"Could not find a config with ID {Greeting.Id}. <br/>" + 
-                              "Please double check that the guild ID is valid or try again.", Severity.Error);
-                 return;
-             }
+                 var guildConfig = await Mediator.Send(new GetGuildConfig.Request(Greeting.GuildID));
+                 if (guildConfig is null)
+                 {
+                     Snackbar.Add($"Could not find a config with ID {Greeting.Id}. <br/>" + 
+                                  "Please double check that the guild ID is valid or try again.", Severity.Error);
+                     return;
+                 }
 
-             // Todo: Update Channel or Role ID's using MetadataID as it's the one Binding
-             var foundGreeting = guildConfig.Greetings
-                                            .FirstOrDefault(g => g.ChannelID == Greeting.ChannelID);
+                 var foundGreeting = guildConfig.Greetings
+                                                .FirstOrDefault(g => g.ChannelID == Greeting.ChannelID);
 
-             // Updating a Greeting
-             if (foundGreeting is not null)
-             {
-                 UpdateGreeting(foundGreeting);
-                 await Mediator.Send(new UpdateGuildConfig.Request(foundGreeting.GuildID) { Greetings = guildConfig.Greetings});
-                 Snackbar.Add($"Updated greeting with ID {foundGreeting.Id}", Severity.Success);
+                 if (foundGreeting is not null)
+                 {
+                     UpdateGreeting(foundGreeting);
+                     await Mediator.Send(new UpdateGuildConfig.Request(foundGreeting.GuildID) { Greetings = guildConfig.Greetings});
+                     Snackbar.Add($"Updated greeting with ID {foundGreeting.Id}", Severity.Success);
+                 }
+                 else
+                 {
+                     guildConfig.Greetings.Add(Greeting);
+                     await Mediator.Send(new UpdateGuildConfig.Request(Greeting.GuildID) {Greetings = guildConfig.Greetings});
+                     Snackbar.Add($"Created greeting with ID {Greeting.Id}", Severity.Success);
+                 }
              }
-             // Creating a Greeting
-             else
-             {
-                 guildConfig.Greetings.Add(Greeting);
-                 await Mediator.Send(new UpdateGuildConfig.Request(Greeting.GuildID) {Greetings = guildConfig.Greetings});
-                 Snackbar.Add($"Created greeting with ID {Greeting.Id}", Severity.Success);
-             }
-         }
         );
     }
 }

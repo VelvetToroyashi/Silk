@@ -56,8 +56,8 @@ else
 
                 @if (Greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
                 {
-                    var roleSelected = Greeting.Option is GreetingOption.GreetOnRole;
-                    var optionHeader = (roleSelected ? "Role" : "Channel") + " ID";
+                    var roleOptionSelected = Greeting.Option is GreetingOption.GreetOnRole;
+                    var optionHeader = (roleOptionSelected ? "Role" : "Channel") + " ID";
 
                     <MudContainer>
                         <MudTooltip Placement="Placement.Top"
@@ -67,12 +67,24 @@ else
                             </MudText>
                         </MudTooltip>
 
-                        <MudTextField T="Snowflake"
-                                      @bind-Value="GreetingMetadataID"
-                                      Variant="Variant.Outlined"
-                                      Immediate="true"
-                                      Validation="NonNullableValidator"
-                                      Converter="NonNullableConverter"/>
+                        @if (roleOptionSelected)
+                        {
+                            <MudTextField T="Snowflake"
+                                          @bind-Value="GreetingMetadataId"
+                                          Variant="Variant.Outlined"
+                                          Immediate="true"
+                                          Validation="NonNullableValidator"
+                                          Converter="NonNullableConverter"/>
+                        }
+                        else
+                        {
+                            <MudTextField T="Snowflake"
+                                          @bind-Value="Greeting.ChannelID"
+                                          Variant="Variant.Outlined"
+                                          Immediate="true"
+                                          Validation="NonNullableValidator"
+                                          Converter="NonNullableConverter"/>
+                        }
                     </MudContainer>
                 }
 
