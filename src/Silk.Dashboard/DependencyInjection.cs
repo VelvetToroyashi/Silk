@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Rest.Extensions;
+using Remora.Rest.Core;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services.DashboardDiscordClient;
 using Silk.Dashboard.Services.DiscordTokenStorage;
@@ -85,7 +86,7 @@ public static class DependencyInjection
                 var tokenStore = serviceProvider.GetRequiredService<IDiscordTokenStore>();
                 tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
 
-                await TryAddTeamMemberClaim(context.Principal, userId, oAuth2Api);
+                await TryAddTeamMemberRoles(context.Principal, oAuth2Api);
             };
         })
         .AddCookie(options => 
@@ -103,35 +104,36 @@ public static class DependencyInjection
         return services;
     }
 
-    /* Todo: Does not seem to work when using `@attribute [Authorize]` when setting Roles or Policies */
-    private static async Task TryAddTeamMemberClaim
+    private static async Task TryAddTeamMemberRoles
     (
         ClaimsPrincipal       user,
-        string                userId,
         IDiscordRestOAuth2API oAuth2Api
     )
     {
-        if (user.HasClaim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName)) 
-            return;
-
         try
         {
-            var res = await oAuth2Api.GetCurrentBotApplicationInformationAsync();
-            if (res.IsDefined(out var appInfo))
+            var result = await oAuth2Api.GetCurrentBotApplicationInformationAsync();
+            if (result.IsDefined(out var appInfo))
             {
-                var claimIdentity = (ClaimsIdentity) user.Identity;
+                var claimIdentity   = user.Identity as ClaimsIdentity;
+                var userIdSnowflake = user.GetUserId().ToSnowflake<Snowflake>();
 
-                if (appInfo.Owner?.ID.Value.Value.ToString() == userId)
+                if (appInfo.Owner?.ID.Value == userIdSnowflake &&
+                    !user.HasRole(DashboardPolicies.BotCreatorRoleName))
                 {
-                    claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName));
+                    claimIdentity!.AddClaim(CreateRole(DashboardPolicies.BotCreatorRoleName));
+                    claimIdentity!.AddClaim(CreateRole(DashboardPolicies.TeamMemberRoleName));
                 }
-                else
+
+                var teamMember = appInfo.Team?.Members.FirstOrDefault
+                (
+                    member => member.User.ID.Value == userIdSnowflake
+                );
+
+                if (teamMember is not null &&
+                    !user.HasRole(DashboardPolicies.TeamMemberRoleName))
                 {
-                    var teamMember = appInfo.Team?.Members.FirstOrDefault(member => member.User.ID.Value.Value.ToString() == userId);
-                    if (teamMember is not null)
-                    {
-                        claimIdentity?.AddClaim(new Claim(ClaimTypes.Role, DashboardPolicies.TeamMemberRoleName));
-                    }
+                    claimIdentity!.AddClaim(CreateRole(DashboardPolicies.TeamMemberRoleName));
                 }
             }
         }
@@ -140,6 +142,12 @@ public static class DependencyInjection
             Console.WriteLine(e);
         }
     }
+
+    private static bool HasRole(this ClaimsPrincipal claimsPrincipal, string roleValue)
+        => claimsPrincipal.HasClaim(ClaimTypes.Role, roleValue);
+
+    private static Claim CreateRole(string roleValue) 
+        => new(ClaimTypes.Role, roleValue);
 
     private static IServiceCollection AddSilkDatabase
     (

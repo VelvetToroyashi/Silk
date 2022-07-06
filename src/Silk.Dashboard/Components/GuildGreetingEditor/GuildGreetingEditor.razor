@@ -9,119 +9,126 @@
 
 @inherits DashboardComponentBase
 
-<MudCard>
-    <MudCardContent>
-        <MudForm @ref="_form" Model="_greeting">
-            @* Guild ID *@
-            <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Top"
-                            Text="The ID of the guild to greet members in">
-                    <MudText Typo="Typo.h5">
-                        @LabelFor(() => _greeting.GuildID)
-                    </MudText>
-                </MudTooltip>
-
-                <MudTextField @bind-Value="_greeting.GuildID"
-                              Variant="Variant.Outlined"
-                              Immediate="true"
-                              Validation="NonNullableValidator"
-                              Converter="NonNullableConverter"/>
-            </MudContainer>
-
-            @* Greeting Option *@
-            <MudContainer Class="mb-4">
-                <MudTooltip Placement="Placement.Top"
-                            Text="How / when to greet new members">
-                    <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(GreetingOption))
-                    </MudText>
-                </MudTooltip>
-
-                <MudSelect @bind-Value="_greeting.Option"
-                           Variant="Variant.Outlined">
-                    @foreach (var go in GreetingOptions)
-                    {
-                        <MudSelectItem Value="@go">
-                            @go.Humanize(LetterCasing.Title)
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            </MudContainer>
-
-            @if (_greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
-            {
-                var roleSelected = _greeting.Option is GreetingOption.GreetOnRole;
-                var optionHeader = (roleSelected ? "Role" : "Channel") + " ID";
-
-                <MudContainer>
+@if (Greeting is null)
+{
+    <LoadingView/>
+}
+else
+{
+    <MudCard>
+        <MudCardContent>
+            <MudForm @ref="_form" Model="Greeting">
+                @* Guild ID *@
+                <MudContainer Class="mb-4">
                     <MudTooltip Placement="Placement.Top"
-                                Text="@MetaDataIdHelpText">
+                                Text="The ID of the guild to greet members in">
                         <MudText Typo="Typo.h5">
-                            @optionHeader
+                            @LabelFor(() => Greeting.GuildID)
                         </MudText>
                     </MudTooltip>
 
-                    <MudTextField T="Snowflake"
-                                  @bind-Value="GreetingMetadataID"
+                    <MudTextField @bind-Value="Greeting.GuildID"
                                   Variant="Variant.Outlined"
                                   Immediate="true"
                                   Validation="NonNullableValidator"
                                   Converter="NonNullableConverter"/>
                 </MudContainer>
-            }
 
-            @* Greeting Message *@
-            <MudContainer Class="mb-4">
-                <MudList Clickable="false">
-                    <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{u}</span> = Member's username
-                    </MudListItem>
+                @* Greeting Option *@
+                <MudContainer Class="mb-4">
+                    <MudTooltip Placement="Placement.Top"
+                                Text="How / when to greet new members">
+                        <MudText Typo="Typo.h5">
+                            @LabelFor(nameof(GreetingOption))
+                        </MudText>
+                    </MudTooltip>
 
-                    <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{s}</span> = Guild's name
-                    </MudListItem>
+                    <MudSelect @bind-Value="Greeting.Option"
+                               Variant="Variant.Outlined">
+                        @foreach (var go in GreetingOptions)
+                        {
+                            <MudSelectItem Value="@go">
+                                @go.Humanize(LetterCasing.Title)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudContainer>
 
-                    <MudListItem Class="pa-0">
-                        <span class="mud-info-text">{@@u}</span> = Member's mention
-                    </MudListItem>
-                </MudList>
-
-                <MudTooltip Placement="Placement.Top"
-                            Text="The message that will be used to greet new members">
-                    <MudText Typo="Typo.h5">
-                        Message
-                    </MudText>
-                </MudTooltip>
-
-                <MudTextField @bind-Value="_greeting.Message"
-                              Class="mb-2"
-                              Immediate="true"
-                              Variant="Variant.Outlined"
-                              DisableUnderLine="true"
-                              Lines="6"
-                              Placeholder="@("Welcome {@u}! This is {s}, the best server around!")"
-                              Counter="0"/>
-
-                @if (_greeting.Message?.Length > EmbedMessageLengthThreshold)
+                @if (Greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
                 {
-                    <MudChip Variant="Variant.Outlined"
-                             Color="Color.Warning"
-                             Class="my-2">
-                        The length of this greeting is greater than @EmbedMessageLengthThreshold characters,
-                        and will be placed in an embed when sent.
-                    </MudChip>
-                }
-            </MudContainer>
+                    var roleSelected = Greeting.Option is GreetingOption.GreetOnRole;
+                    var optionHeader = (roleSelected ? "Role" : "Channel") + " ID";
 
-            @* Save Button *@
-            <MudContainer>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="IsBusy"
-                           OnClick="SubmitAsync">
-                    Save Changes
-                </MudButton>
-            </MudContainer>
-        </MudForm>
-    </MudCardContent>
-</MudCard>
+                    <MudContainer>
+                        <MudTooltip Placement="Placement.Top"
+                                    Text="@MetaDataIdHelpText">
+                            <MudText Typo="Typo.h5">
+                                @optionHeader
+                            </MudText>
+                        </MudTooltip>
+
+                        <MudTextField T="Snowflake"
+                                      @bind-Value="GreetingMetadataID"
+                                      Variant="Variant.Outlined"
+                                      Immediate="true"
+                                      Validation="NonNullableValidator"
+                                      Converter="NonNullableConverter"/>
+                    </MudContainer>
+                }
+
+                @* Greeting Message *@
+                <MudContainer Class="mb-4">
+                    <MudList Clickable="false">
+                        <MudListItem Class="pa-0">
+                            <span class="mud-info-text">{u}</span> = Member's username
+                        </MudListItem>
+
+                        <MudListItem Class="pa-0">
+                            <span class="mud-info-text">{s}</span> = Guild's name
+                        </MudListItem>
+
+                        <MudListItem Class="pa-0">
+                            <span class="mud-info-text">{@@u}</span> = Member's mention
+                        </MudListItem>
+                    </MudList>
+
+                    <MudTooltip Placement="Placement.Top"
+                                Text="The message that will be used to greet new members">
+                        <MudText Typo="Typo.h5">
+                            Message
+                        </MudText>
+                    </MudTooltip>
+
+                    <MudTextField @bind-Value="Greeting.Message"
+                                  Class="mb-2"
+                                  Immediate="true"
+                                  Variant="Variant.Outlined"
+                                  DisableUnderLine="true"
+                                  Lines="3"
+                                  Placeholder="@("Welcome {@u}! This is {s}, the best server around!")"
+                                  Counter="0"/>
+
+                    @if (Greeting.Message?.Length > EmbedMessageLengthThreshold)
+                    {
+                        <MudChip Variant="Variant.Outlined"
+                                 Color="Color.Warning"
+                                 Class="my-2">
+                            The length of this greeting is greater than @EmbedMessageLengthThreshold characters,
+                            and will be placed in an embed when sent.
+                        </MudChip>
+                    }
+                </MudContainer>
+
+                @* Save Button *@
+                <MudContainer>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="IsBusy"
+                               OnClick="SubmitAsync">
+                        @SaveButtonText
+                    </MudButton>
+                </MudContainer>
+            </MudForm>
+        </MudCardContent>
+    </MudCard>
+}

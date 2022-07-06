@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Silk.Dashboard.Extensions;
+namespace Silk.Dashboard;
 
 public static class DashboardPolicies
 {
+    public const string BotCreatorRoleName  = "BotCreator";
     public const string TeamMemberRoleName  = "TeamMember";
     public const string TeamMemberPolicyName = "TeamMembersOnly";
 
