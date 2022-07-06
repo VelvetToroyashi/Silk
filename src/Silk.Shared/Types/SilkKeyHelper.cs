@@ -24,4 +24,12 @@ public static class SilkKeyHelper
     /// <returns>The generated key.</returns>
     public static string GenerateGuildPrefixKey(Snowflake guildId)
         => $"guild_prefix:{guildId}";
+    
+    /// <summary>
+    /// Generates a key for storing information about a potential phishing invite.
+    /// </summary>
+    /// <param name="invite"></param>
+    /// <returns></returns>
+    public static string GenerateInviteKey(string invite)
+        => $"Silk:invite-cache:{invite}";
 }
