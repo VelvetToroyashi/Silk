@@ -24,13 +24,13 @@ public class LoggingChannelEntity
 	///     The ID of the webhook to use for logging, if configured.
 	/// </summary>
 	[Column("webhook_id")]
-    public Snowflake WebhookID { get; set; }
-
+	public Snowflake WebhookID { get; set; }
+	
 	/// <summary>
 	///     The token of the webhook to use for logging, if configured.
 	/// </summary>
 	[Column("webhook_token")]
-    public string WebhookToken { get; set; }
+	public string WebhookToken { get; set; } = string.Empty;
 
 	/// <summary>
 	///     The channel to log to.
