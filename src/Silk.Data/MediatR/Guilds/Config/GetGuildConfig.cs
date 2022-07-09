@@ -27,6 +27,7 @@ public static class GetGuildConfig
         {
             //TODO: Add commands to get individual configs.
             var config = await _db.GuildConfigs
+                                  .AsNoTracking()
                                   .Include(g => g.Greetings)
                                   .Include(c => c.Invites)
                                   .Include(c => c.Invites.Whitelist)
