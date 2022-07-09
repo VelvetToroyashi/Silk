@@ -255,8 +255,7 @@ public partial class ConfigCommands
                                                          );
 
                 sb.AppendLine("\t\t ➜ Locking channel for everyone...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
-                
+
                 var editResult = await _channels.EditChannelPermissionsAsync
                 (
                  channel!.ID,
@@ -271,7 +270,6 @@ public partial class ConfigCommands
                 {
                     sb.RemoveLine();
                     sb.AppendLine("\t\t ➜ Locked channel for everyone!");
-                    await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
                 }
                 else
                 {
@@ -280,7 +278,7 @@ public partial class ConfigCommands
                 }
 
                 sb.AppendLine("\t\t ➜ Setting overrides for moderators...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+                
 
                 if (applicableRole is not null)
                 {
@@ -299,7 +297,6 @@ public partial class ConfigCommands
                 {
                     sb.RemoveLine();
                     sb.AppendLine("\t\t ➜ Overrides set for moderators!");
-                    await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
                 }
                 else
                 {
@@ -313,8 +310,7 @@ public partial class ConfigCommands
             async Task<Result> SetLoggingChannelAsync()
             {
                 sb.AppendLine("\t\t ➜ Setting join and deletes channel to mod-log channel...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
-                
+
                 var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
 
                 config.Logging.LogMemberJoins = true;
@@ -339,7 +335,6 @@ public partial class ConfigCommands
 
             async Task<Result> SetInviteWhitelistAsync()
             {
-                
                 sb.AppendLine("\t\t ➜ Enabling invite whitelist...");
                 await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
 
@@ -360,7 +355,6 @@ public partial class ConfigCommands
             async Task<Result> SetInfractionLoggingAsync()
             {
                 sb.AppendLine("\t\t ➜ Enabling infraction logging...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
                 
                 var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
                 
@@ -385,8 +379,7 @@ public partial class ConfigCommands
             async Task<Result> SetPhishingDetectionAsync()
             {
                 sb.AppendLine("\t\t ➜ Enabling phishing detection...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
-                
+
                 var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
                 
                 config.NamedInfractionSteps.Add(AutoModConstants.PhishingLinkDetected, new() { Type = InfractionType.Ban });
