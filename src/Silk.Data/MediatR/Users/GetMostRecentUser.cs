@@ -19,13 +19,15 @@ public static class GetMostRecentUser
 
         public async Task<UserDTO?> Handle(Request request, CancellationToken cancellationToken)
         {
-            var guild = await _db.Guilds
-                           .Include(g => g.Users)
-                                 .ThenInclude(gu => gu.User)
-                                 .ThenInclude(u => u.History)
-                           .FirstAsync(g => g.ID == request.GuildID, cancellationToken);
+            var history = await _db.Histories
+                                   .Where(j => j.GuildID == request.GuildID)
+                                   .OrderByDescending(h => h.Date)
+                                   .FirstOrDefaultAsync(cancellationToken);
 
-            var user = guild.Users.MaxBy(u => u.User.History.Last(h => h.IsJoin).Date)?.User;
+            if (history is null)
+                return null; // No users?
+            
+            var user = await _db.Users.FirstAsync(g => g.ID == history.UserID, cancellationToken);
 
             return user;
         }

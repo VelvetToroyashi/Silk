@@ -50,12 +50,13 @@ public class ServerInfoCommand : CommandGroup
         if (!guildResult.IsDefined(out var guild))
             return guildResult;
         
-        var fields = new List<IEmbedField>();
+        var fields = new List<IEmbedField>
+        {
+            new EmbedField("Server Icon:", CDN.GetGuildIconUrl(guild, imageSize: 4096).IsDefined(out var guildIcon) ? $"[Link]({guildIcon})" : "Not Set!", true),
+            new EmbedField("Invite Splash:", CDN.GetGuildSplashUrl(guild, imageSize: 4096).IsDefined(out var guildSplash) ? $"[Link]({guildSplash})" : "Not Set!", true),
+            new EmbedField("Server Banner:", CDN.GetGuildBannerUrl(guild, imageSize: 4096).IsDefined(out var guildBanner) ? $"[Link]({guildBanner})" : "Not Set!", true)
+        };
 
-        fields.Add(new EmbedField("Server Icon:", CDN.GetGuildIconUrl(guild, imageSize: 4096).IsDefined(out var guildIcon) ? $"[Link]({guildIcon})" : "Not Set!", true));
-        fields.Add(new EmbedField("Invite Splash:", CDN.GetGuildSplashUrl(guild, imageSize: 4096).IsDefined(out var guildSplash) ? $"[Link]({guildSplash})" : "Not Set!", true));
-        fields.Add(new EmbedField("Server Banner:", CDN.GetGuildBannerUrl(guild, imageSize: 4096).IsDefined(out var guildBanner) ? $"[Link]({guildBanner})" : "Not Set!", true));
-        
         var memberInformation = $"Max: {(guild.MaxMembers.IsDefined(out var maxMembers) ? $"{maxMembers}" : "Unknown")}\n"                   +
                                 $"Current\\*: {(guild.ApproximateMemberCount.IsDefined(out var memberCount) ? $"{memberCount}" : "Unknown")}\n" +
                                 $"Online\\*: {(guild.ApproximatePresenceCount.IsDefined(out var onlineCount) ? $"{onlineCount}" : "Unknown")}";
