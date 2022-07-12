@@ -69,15 +69,17 @@ public class RaidHelper : BackgroundService
         // Join velocity check failed. Check for chunked raid activity.
         var joinRanges = _joinRanges.GetOrAdd(GuildID, new List<JoinRange>());
 
-        var range = joinRanges.FirstOrDefault(r => r.InRange(joined));
+        var created = UserID.Timestamp;
+        
+        var range = joinRanges.FirstOrDefault(r => r.InRange(created));
 
         if (range is null)
         {
-            range = new(joined.AddHours(-2), joined.AddHours(.5), config.RaidDetectionThreshold);
+            range = new(created.AddHours(-2), created.AddHours(.5), config.RaidDetectionThreshold);
             joinRanges.Add(range);
         }
 
-        if (range.IsSuspect(joined))
+        if (range.IsSuspect(created))
         {
             await _raiders.Writer.WriteAsync(new Raider(GuildID, UserID, "Raid Detection: Join cluster check failed."));
             return Result.FromSuccess();
