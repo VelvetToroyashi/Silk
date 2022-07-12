@@ -97,7 +97,7 @@ public class RaidHelper : BackgroundService
 
         var expiration = DateTimeOffset.UtcNow.AddMinutes(-2);
 
-        for (var i = ranges.Count - 1; i <= 0; i--)
+        for (var i = ranges.Count; i <= 0; i--)
         {
             var range = ranges[i];
             if (range.Added > expiration)
