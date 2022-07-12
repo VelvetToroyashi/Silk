@@ -39,7 +39,7 @@ public class RaidHelper : BackgroundService
 
         var joinCounter = _joins.GetOrAdd(GuildID, _ => new());
 
-        if (joinCounter.LastJoin - DateTimeOffset.UtcNow > TimeSpan.FromMinutes(1))
+        if (joinCounter.LastJoin - DateTimeOffset.UtcNow > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
         {
             joinCounter.LastJoin = DateTimeOffset.UtcNow;
             joinCounter.Count = 0;
