@@ -49,22 +49,18 @@ public class RaidHelper : BackgroundService
 
         if (joinCounter.LastJoin - DateTimeOffset.UtcNow > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
         {
-            joinCounter.LastJoin = DateTimeOffset.UtcNow;
             joinCounter.Count = 0;
-            
-            _joins[GuildID] = joinCounter;
         }
         
         if (joinCounter.Count++ >= config.RaidDetectionThreshold)
         {
             await _raiders.Writer.WriteAsync(new Raider(GuildID, UserID, "Raid Detection: Join velocity check exceeds threshold."));
-            
-            joinCounter.LastJoin = DateTimeOffset.UtcNow;
-            
-            _joins[GuildID] = joinCounter;
-            
+
             return Result.FromSuccess();
         }
+        
+        joinCounter.LastJoin = joined;
+        _joins[GuildID] = joinCounter;
         
         // Join velocity check failed. Check for chunked raid activity.
         var joinRanges = _joinRanges.GetOrAdd(GuildID, new List<JoinRange>());
