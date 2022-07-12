@@ -6,26 +6,34 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Services.Data;
+using Silk.Services.Interfaces;
 
 namespace Silk.Services.Guild;
 
 public class RaidHelper : BackgroundService
 {
+    private readonly IInfractionService      _infractions;
+    private readonly IDiscordRestUserAPI     _users;
     private readonly GuildConfigCacheService _config;
+
     
     private record Raider(Snowflake GuildID, Snowflake RaiderID, string Reason);
 
     private readonly Channel<Raider> _raiders = Channel.CreateUnbounded<Raider>();
     
-    private readonly ConcurrentDictionary<Snowflake, List<JoinRange>>        _joinRanges = new();
-    private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins = new();
-    
-    public RaidHelper(GuildConfigCacheService config)
+    private readonly ConcurrentDictionary<Snowflake, List<JoinRange>>                      _joinRanges = new();
+    private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins      = new();
+
+
+    public RaidHelper(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
     {
-        _config = config;
+        _infractions = infractions;
+        _users       = users;
+        _config      = config;
     }
 
     public async Task<Result> HandleJoinAsync(Snowflake GuildID, Snowflake UserID, DateTimeOffset joined, bool hasAvatar)
@@ -82,7 +90,7 @@ public class RaidHelper : BackgroundService
     
     private void TrimBuckets(Snowflake GuildID)
     {
-        if (!_joinRanges.TryGetValue(GuildID, out var ranges) || !_joins.TryGetValue(GuildID, out var joins))
+        if (!_joinRanges.TryGetValue(GuildID, out var ranges))
             return;
 
         var expiration = DateTimeOffset.UtcNow.AddMinutes(-2);
@@ -97,7 +105,19 @@ public class RaidHelper : BackgroundService
         }
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken) => null;
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var self = (await _users.GetCurrentUserAsync(stoppingToken)).Entity;
+
+        stoppingToken.Register(() => _raiders.Writer.Complete());
+        
+        await foreach (var raider in _raiders.Reader.ReadAllAsync(CancellationToken.None))
+        {
+            // We don't *particularly* care to await this, as this slows down the entire loop if we do once we
+            // start hitting ratelimits.
+            _ =  _infractions.BanAsync(raider.GuildID, raider.RaiderID, self.ID, 0, raider.Reason, null, false);
+        }
+    }
 }
 
 public sealed class JoinRange
