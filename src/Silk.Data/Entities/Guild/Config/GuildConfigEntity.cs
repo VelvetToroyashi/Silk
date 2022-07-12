@@ -100,12 +100,12 @@ public class GuildConfigEntity
     /// </summary>
     [Column("raid_threshold")]
     public int RaidDetectionThreshold { get; set; }
-    
+
     /// <summary>
     /// How long (in seconds) after the last join that raid mode should be automatically disabled.
     /// </summary>
     [Column("raid_decay_seconds")]
-    public int RaidCooldownSeconds { get; set; }
+    public int RaidCooldownSeconds { get; set; } = 120;
 
     /// <summary>
     ///     Gets various logging-related settings.
