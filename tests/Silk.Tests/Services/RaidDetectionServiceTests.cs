@@ -23,10 +23,23 @@ public class RaidHelperTests
     private static readonly ImmutableArray<Snowflake> MockIDs = Enumerable.Range(1, 20).Select(x => DiscordSnowflake.New((ulong)x)).ToImmutableArray();
 
     private static readonly ImmutableArray<Snowflake> MockOldIDs = new[] { 444881658809024532, 755254361533186092, 936459828044374036 }.Select(x => DiscordSnowflake.New((ulong)x)).ToImmutableArray();
+
+    private static readonly ImmutableArray<(Snowflake ChannelID, Snowflake AuthorID, Snowflake MessageID, string Content)> MockMessages = new[]
+    {
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(4), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(5), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(6), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(7), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(1), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "Oh no! A raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(9), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "Oh no, a raid!!")
+    }.ToImmutableArray();
     
-    private const string DummyToken = "dummy-token";
-    private static readonly Snowflake DummyGuild = new Snowflake(123456789012345678);
-    
+    private static readonly Snowflake[] ExpectedLegitIDs = new[] { DiscordSnowflake.New(1), DiscordSnowflake.New(9) };
+    private const           string      DummyToken       = "dummy-token";
+    private static readonly Snowflake   DummyGuild       = new Snowflake(123456789012345678);
+
 
     [Test]
     public async Task JoinVelocityThresholdIsCaught()
@@ -134,4 +147,31 @@ public class RaidHelperTests
         infractions.Verify(i => i.BanAsync(It.IsAny<Snowflake>(), It.IsIn(MockOldIDs.AsEnumerable()), It.IsAny<Snowflake>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<bool>()), Times.Never);
     }
     
+    [Test]
+    public async Task MessageDetectionCatchesSpammedMessages()
+    {
+        var infractions = new Mock<IInfractionService>();
+        var users       = new Mock<IDiscordRestUserAPI>();
+        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
+        
+        users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
+             .ReturnsAsync(new User(default, "", default, null));
+        
+        // -1 to skip velocity check
+        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
+             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
+        
+        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        
+        await raid.StartAsync(CancellationToken.None);
+
+        foreach (var mockEvent in MockMessages.Take(3))
+            await raid.HandleMessageAsync(DummyGuild, mockEvent.ChannelID, mockEvent.MessageID, mockEvent.AuthorID, mockEvent.Content);
+        
+        await raid.StopAsync(CancellationToken.None);
+        
+        infractions.Verify(i => i.BanAsync(It.IsAny<Snowflake>(), It.IsNotIn(ExpectedLegitIDs), It.IsAny<Snowflake>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<bool>()), Times.AtLeastOnce);
+        
+        infractions.Verify(i => i.BanAsync(It.IsAny<Snowflake>(), It.IsIn(ExpectedLegitIDs), It.IsAny<Snowflake>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<bool>()), Times.Never);
+    }
 }
