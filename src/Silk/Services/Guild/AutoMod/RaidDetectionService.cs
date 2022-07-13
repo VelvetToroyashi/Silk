@@ -70,6 +70,8 @@ public class RaidDetectionService : BackgroundService
             
             foreach (var raider in group)
                 await _raiders.Writer.WriteAsync(new Raider(raider.GuildID, raider.AuthorID, "Suspected raid: Coordinated message raid detected."));
+            
+            bucket.RemoveAll(r => group.Contains(r));
         }
         
         return Result.FromSuccess();
