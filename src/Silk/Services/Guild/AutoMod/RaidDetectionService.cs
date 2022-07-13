@@ -21,7 +21,7 @@ public class RaidDetectionService : BackgroundService
     private readonly IDiscordRestUserAPI     _users;
     private readonly GuildConfigCacheService _config;
     
-    private record Raider(Snowflake     GuildID, Snowflake RaiderID,  string    Reason);
+    private record Raider(Snowflake GuildID, Snowflake RaiderID, string  Reason);
     
     private record MessageDTO(Snowflake GuildID, Snowflake ChannelID, Snowflake MessageID, Snowflake AuthorID, int HashCode);
     
@@ -54,7 +54,7 @@ public class RaidDetectionService : BackgroundService
         
         bucket.Add(new MessageDTO(guildID, channelID, messageID, AuthorID, content.GetHashCode()));
         
-        var groups = bucket.GroupBy(x => x.HashCode).ToArray();
+        var groups = bucket.GroupBy(x => x.HashCode);
 
         foreach (var group in groups)
         {
@@ -151,6 +151,9 @@ public class RaidDetectionService : BackgroundService
         foreach (var bucket in _messageBuckets.ToArray())
         {
             var expiration = DateTimeOffset.UtcNow.AddSeconds(-30);
+
+            if (!bucket.Value.Any())
+                continue; // If a bucket consists purely of raid-messages, it will be completely cleared.
             
             if (bucket.Value.Count < 2 && bucket.Value.Last().MessageID.Timestamp < expiration)
             {
