@@ -15,7 +15,7 @@ using Silk.Shared.Types.Collections;
 
 namespace Silk.Services.Guild;
 
-public class RaidHelper : BackgroundService
+public class RaidDetectionService : BackgroundService
 {
     private readonly IInfractionService      _infractions;
     private readonly IDiscordRestUserAPI     _users;
@@ -31,7 +31,7 @@ public class RaidHelper : BackgroundService
     private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins          = new();
     private readonly ConcurrentDictionary<Snowflake, LoopedList<MessageDTO>>               _messageBuckets = new();
 
-    public RaidHelper(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
+    public RaidDetectionService(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
     {
         _infractions = infractions;
         _users       = users;
