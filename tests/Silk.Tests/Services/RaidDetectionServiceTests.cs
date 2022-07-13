@@ -26,14 +26,14 @@ public class RaidHelperTests
 
     private static readonly ImmutableArray<(Snowflake ChannelID, Snowflake AuthorID, Snowflake MessageID, string Content)> MockMessages = new[]
     {
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(4), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(5), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(6), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(7), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "This is a raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(1), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "Oh no! A raid!!"),
-        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(9), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow), Content: "Oh no, a raid!!")
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(4), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(5), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(6), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(7), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(3), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "This is a raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(1), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "Oh no! A raid!!"),
+        (ChannelID: DiscordSnowflake.New(2), AuthorID: DiscordSnowflake.New(9), MessageID: Snowflake.CreateTimestampSnowflake(DateTimeOffset.UtcNow.AddMinutes(10)), Content: "Oh no, a raid!!")
     }.ToImmutableArray();
     
     private static readonly Snowflake[] ExpectedLegitIDs = new[] { DiscordSnowflake.New(1), DiscordSnowflake.New(9) };
@@ -165,7 +165,7 @@ public class RaidHelperTests
         
         await raid.StartAsync(CancellationToken.None);
 
-        foreach (var mockEvent in MockMessages.Take(3))
+        foreach (var mockEvent in MockMessages)
             await raid.HandleMessageAsync(DummyGuild, mockEvent.ChannelID, mockEvent.MessageID, mockEvent.AuthorID, mockEvent.Content);
         
         await raid.StopAsync(CancellationToken.None);

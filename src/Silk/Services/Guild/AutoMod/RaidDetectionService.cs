@@ -29,7 +29,7 @@ public class RaidDetectionService : BackgroundService
     
     private readonly ConcurrentDictionary<Snowflake, List<JoinRange>>                      _joinRanges     = new();
     private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins          = new();
-    private readonly ConcurrentDictionary<Snowflake, LoopedList<MessageDTO>>               _messageBuckets = new();
+    private readonly ConcurrentDictionary<Snowflake, List<MessageDTO>>               _messageBuckets = new();
 
     public RaidDetectionService(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
     {
@@ -61,7 +61,7 @@ public class RaidDetectionService : BackgroundService
             if (group.Count() < 3)
                 continue;
 
-            if (group.Last().MessageID.Timestamp - DateTimeOffset.UtcNow > TimeSpan.FromSeconds(15))
+            if (group.Last().MessageID.Timestamp - DateTimeOffset.UtcNow < TimeSpan.FromSeconds(15))
                 continue; // Given up? Or just not a raid. This is an abitrary decision.
 
             // We're grouping by a value with maybe 5-10 messages tops here; this should be fast.
@@ -155,7 +155,7 @@ public class RaidDetectionService : BackgroundService
             if (!bucket.Value.Any())
                 continue; // If a bucket consists purely of raid-messages, it will be completely cleared.
             
-            if (bucket.Value.Count < 2 && bucket.Value.Last().MessageID.Timestamp < expiration)
+            if (bucket.Value.Last().MessageID.Timestamp < expiration)
             {
                 _messageBuckets.TryRemove(bucket.Key, out _);
                 continue;
@@ -164,7 +164,7 @@ public class RaidDetectionService : BackgroundService
             for (var i = bucket.Value.Count - 1; i >= 0; i--)
             {
                 var message = bucket.Value[i];
-                if (message.MessageID.Timestamp < expiration)
+                if (message.MessageID.Timestamp > expiration)
                     continue;
 
                 bucket.Value.Remove(message);
