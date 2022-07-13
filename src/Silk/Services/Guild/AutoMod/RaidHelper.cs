@@ -107,13 +107,18 @@ public class RaidHelper : BackgroundService
     {
         var self = (await _users.GetCurrentUserAsync(stoppingToken)).Entity;
 
-        stoppingToken.Register(() => _raiders.Writer.Complete());
-        
-        await foreach (var raider in _raiders.Reader.ReadAllAsync(CancellationToken.None))
+        try
         {
-            // We don't *particularly* care to await this, as this slows down the entire loop if we do once we
-            // start hitting ratelimits.
-            _ =  _infractions.BanAsync(raider.GuildID, raider.RaiderID, self.ID, 0, raider.Reason, null, false);
+            await foreach (var raider in _raiders.Reader.ReadAllAsync(stoppingToken))
+            {
+                // We don't *particularly* care to await this, as this slows down the entire loop if we do once we
+                // start hitting ratelimits.
+                _ = _infractions.BanAsync(raider.GuildID, raider.RaiderID, self.ID, 0, raider.Reason, null, false);
+            }
+        }
+        finally
+        {
+            _raiders.Writer.Complete();
         }
     }
 }
