@@ -158,7 +158,7 @@ public class RaidDetectionService : BackgroundService
                 continue;
             }
             
-            for (var i = bucket.Value.Count; i >= 0; i--)
+            for (var i = bucket.Value.Count - 1; i >= 0; i--)
             {
                 var message = bucket.Value[i];
                 if (message.MessageID.Timestamp < expiration)
