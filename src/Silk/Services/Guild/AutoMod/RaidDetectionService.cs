@@ -150,16 +150,16 @@ public class RaidDetectionService : BackgroundService
         {
             var expiration = DateTimeOffset.UtcNow.AddSeconds(-30);
             
-            if (bucket.Value.Count < 2)
+            if (bucket.Value.Count < 2 && bucket.Value.Last().MessageID.Timestamp < expiration)
             {
                 _messageBuckets.TryRemove(bucket.Key, out _);
                 continue;
             }
             
-            for (var i = bucket.Value.Count; i <= 0; i--)
+            for (var i = bucket.Value.Count; i >= 0; i--)
             {
                 var message = bucket.Value[i];
-                if (message.AuthorID.Timestamp > expiration)
+                if (message.AuthorID.Timestamp < expiration)
                     continue;
 
                 bucket.Value.Remove(message);
