@@ -61,12 +61,8 @@ public class RaidDetectionService : BackgroundService
             if (group.Count() < 3)
                 continue;
 
-            if (group.Last().MessageID.Timestamp - DateTimeOffset.UtcNow < TimeSpan.FromSeconds(15))
+            if (DateTimeOffset.UtcNow - group.Last().MessageID.Timestamp > TimeSpan.FromSeconds(15))
                 continue; // Given up? Or just not a raid. This is an abitrary decision.
-
-            // We're grouping by a value with maybe 5-10 messages tops here; this should be fast.
-            if (group.GroupBy(g => g.AuthorID).Count() < 2)
-                continue; // Allow Anti-Spam to catch this.
             
             foreach (var raider in group)
                 await _raiders.Writer.WriteAsync(new Raider(raider.GuildID, raider.AuthorID, "Suspected raid: Coordinated message raid detected."));
@@ -182,7 +178,7 @@ public class RaidDetectionService : BackgroundService
             {
                 // We don't *particularly* care to await this, as this slows down the entire loop if we do once we
                 // start hitting ratelimits.
-                _ = _infractions.BanAsync(raider.GuildID, raider.RaiderID, self.ID, 0, raider.Reason, null, false);
+                _ = _infractions.BanAsync(raider.GuildID, raider.RaiderID, self.ID, 1, raider.Reason, null, false);
             }
         }
         finally
