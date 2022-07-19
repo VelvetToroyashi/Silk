@@ -13,8 +13,11 @@ public static class UpdateGuildConfig
 {
     public record Request(Snowflake GuildID) : IRequest<GuildConfigEntity>
     {
+        public Optional<bool>                      DetectRaids            { get; init; }
         public Optional<bool>                      ScanInvites            { get; init; }
         public Optional<Snowflake>                 MuteRoleID             { get; init; }
+        public Optional<int>                       RaidCooldown           { get; init; }
+        public Optional<int>                       RaidThreshold          { get; init; }
         public Optional<bool>                      UseNativeMute          { get; init; }
         public Optional<int>                       MaxUserMentions        { get; init; }
         public Optional<int>                       MaxRoleMentions        { get; init; }
@@ -62,6 +65,15 @@ public static class UpdateGuildConfig
                               .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
 
 
+            if (request.DetectRaids.IsDefined(out var detect))
+                config.EnableRaidDetection = detect;
+            
+            if (request.RaidThreshold.IsDefined(out var threshold))
+                config.RaidDetectionThreshold = threshold;
+            
+            if (request.RaidCooldown.IsDefined(out var cooldown))
+                config.RaidCooldownSeconds = cooldown;
+            
             if (request.Greetings.IsDefined(out var greetings))
                 config.Greetings = greetings;
             
