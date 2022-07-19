@@ -88,7 +88,7 @@ public class RaidDetectionService : BackgroundService
 
         var joinCounter = _joins.GetOrAdd(GuildID, _ => new());
 
-        if (joinCounter.LastJoin - DateTimeOffset.UtcNow > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
+        if (DateTimeOffset.UtcNow - joinCounter.LastJoin > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
         {
             joinCounter.Count = 0;
         }
