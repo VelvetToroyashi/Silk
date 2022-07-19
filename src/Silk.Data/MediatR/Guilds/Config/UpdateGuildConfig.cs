@@ -46,6 +46,7 @@ public static class UpdateGuildConfig
         {
             var config = await _db
                               .GuildConfigs
+                              .AsNoTracking()
                               .Include(g => g.Greetings)
                               .Include(c => c.Invites)
                               .Include(c => c.Invites.Whitelist)
@@ -145,6 +146,8 @@ public static class UpdateGuildConfig
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
+
+            _db.Update(config);
             
             await _db.SaveChangesAsync(cancellationToken);
             
