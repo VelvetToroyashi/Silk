@@ -55,7 +55,7 @@ else
         }
         else
         {
-            <MudTabs @ref="_tabContainer" PanelClass="py-5"
+            <MudTabs PanelClass="py-5"
                      Color="Color.Dark" Elevation="2" 
                      Rounded="true" ApplyEffectsToContainer="true">
                 @* General Tab *@
@@ -70,7 +70,7 @@ else
 
                                 @{ var cGreeting = new GuildGreetingEntity { GuildID = _guildConfig.GuildID }; }
                                 <MudButton Variant="Variant.Text" Color="Color.Success"
-                                           OnClick="@(async () => await OpenGreetingModal(greeting: cGreeting))">
+                                           OnClick="@(async () => await OpenGreetingDialogAsync(greeting: cGreeting))">
                                     Create Greeting
                                 </MudButton>
                             </div>
@@ -106,7 +106,7 @@ else
 
                                                     <MudButtonGroup Class="mt-2" Size="Size.Small" OverrideStyles="false">
                                                         <MudButton Color="Color.Info" Variant="Variant.Text"
-                                                                   OnClick="@(async () => await OpenGreetingModal(greeting: greeting))">
+                                                                   OnClick="@(async () => await OpenGreetingDialogAsync(greeting: greeting))">
                                                             Edit
                                                         </MudButton>
                                                         <MudButton Color="Color.Error" Variant="Variant.Text"
@@ -173,6 +173,7 @@ else
                 <MudTabPanel Text="Logging"
                              Icon="@Icons.Material.Filled.Article">
                     <MudContainer>
+                        @* Checkbox Options *@
                         <MudGrid Spacing="0">
                             <MudItem xs="12" sm="6" md="4">
                                 <MudCheckBox @bind-Checked="_guildConfig.Logging.LogMemberJoins"
@@ -183,7 +184,7 @@ else
                                 <MudCheckBox @bind-Checked="_guildConfig.Logging.LogMemberLeaves"
                                              Label="@LabelFor(() => _guildConfig.Logging.LogMemberLeaves)"/>
                             </MudItem>
-                            
+
                             <MudItem xs="12" sm="6" md="4">
                                 <MudCheckBox @bind-Checked="_guildConfig.Logging.LogMessageEdits"
                                              Label="@LabelFor(() => _guildConfig.Logging.LogMessageEdits)"/>
@@ -205,6 +206,8 @@ else
                                              Label="@LabelFor(() => _guildConfig.Logging.UseMobileFriendlyLogging)"/>
                             </MudItem>
                         </MudGrid>
+
+                        
                     </MudContainer>
                 </MudTabPanel>
 

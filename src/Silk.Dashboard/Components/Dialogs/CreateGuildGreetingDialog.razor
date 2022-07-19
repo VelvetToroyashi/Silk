@@ -1,14 +1,20 @@
 @using Silk.Data.Entities
 <MudDialog>
     <DialogContent>
-        <GuildGreetingEditor GreetingId="GreetingId" 
+        <GuildGreetingEditor GreetingId="GreetingId"
                              Greeting="Greeting"/>
     </DialogContent>
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    
-    [Parameter] public int GreetingId { get; set; }
-    [Parameter] public GuildGreetingEntity Greeting { get; set; }
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public int GreetingId { get; set; }
+
+    [Parameter]
+    public GuildGreetingEntity Greeting { get; set; }
+
 }

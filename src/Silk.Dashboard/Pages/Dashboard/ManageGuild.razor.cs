@@ -22,11 +22,11 @@ public partial class ManageGuild
     [Parameter] public  string  GuildId { get; set; }
 
     private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();
-    private bool RequestFailed { get; set; }
 
-    private MudTabs           _tabContainer;
     private IPartialGuild     _guild;
     private GuildConfigEntity _guildConfig;
+
+    private bool RequestFailed { get; set; }
 
     protected override Task OnInitializedAsync()
     {
@@ -109,7 +109,7 @@ public partial class ManageGuild
         );
     }
 
-    private async Task OpenGreetingModal
+    private async Task OpenGreetingDialogAsync
     (
         int                  greetingId = 0,
         GuildGreetingEntity? greeting   = null
@@ -133,6 +133,7 @@ public partial class ManageGuild
 
         var dialog = DialogService.Show<CreateGuildGreetingDialog>("", parameters, options);
         await dialog.Result;
+
         StateHasChanged();
     }
 
