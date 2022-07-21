@@ -58,6 +58,9 @@ public class RaidDetectionService : BackgroundService
 
         foreach (var group in groups)
         {
+            if (group.GroupBy(g => g.AuthorID).Count() < 2)
+                continue; // Let anti-spam handle this; it's just one person spamming the same thing.
+            
             if (group.Count() < 3)
                 continue;
 
