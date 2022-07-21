@@ -84,9 +84,9 @@ public class PhishingDetectionService
 
     private static readonly string[] SuspiciousUsernames = new[]
     {
-        "Academy Moderator", "Bot Developer", "Bot Moderator", "Developer Message",
+        "Academy Moderator", "Bot Developer", "Bot Moderator", "CapchaBot", "Developer Message",
         "Discord Academy", "Discord Developers", "Discord Message", "Discord Moderation Academy",
-        "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", 
+        "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", "Hype Mail", 
         "HypeSquad Academy", "Hypesquad Events", "Hypesquad Moderation Academy", "Hypesquad Moderation", 
         "Hypesquad Moderator", "ModMail", "Moderation Message", "Moderation Notification", 
         "Moderation Team", "Moderator Message", "Moderator Team", "Staff Academy",
