@@ -15,7 +15,8 @@
     if (!string.IsNullOrEmpty(userId))
     {
         var tokenStorage = HttpContext.RequestServices.Get<IDiscordTokenStore>();
-        tokenStorage!.SetToken(userId, await DiscordTokenStoreEntry.FromHttpContext(HttpContext));
+        var token = await DiscordTokenStoreEntry.FromHttpContext(HttpContext);
+        tokenStorage!.SetToken(userId, token);
     }
 }
 

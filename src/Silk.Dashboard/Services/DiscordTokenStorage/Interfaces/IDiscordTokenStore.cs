@@ -2,7 +2,6 @@
 
 namespace Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
-// Registered as Singleton in DI
 public interface IDiscordTokenStore
 {
     public string? CurrentUserId { get; }

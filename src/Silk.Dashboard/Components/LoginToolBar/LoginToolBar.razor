@@ -2,39 +2,24 @@
 
 @using Silk.Dashboard.Extensions
 
-@if (_authState.User.IsAuthenticated())
-{
-    <MudButtonGroup OverrideStyles="false">
+<AuthorizeView>
+    <Authorized>
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton Variant="Variant.Text"
+                       Href="profile">
+                @context.User.Identity?.Name
+            </MudButton>
+
+            <MudButton Variant="Variant.Text"
+                       Href="api/account/logout">
+                Logout
+            </MudButton>
+        </MudButtonGroup>
+    </Authorized>
+    <NotAuthorized>
         <MudButton Variant="Variant.Text"
-                   Href="profile">
-            @_authState.User.Identity?.Name
+                   Href="api/account/login">
+            Login
         </MudButton>
-
-        <MudButton Variant="Variant.Text"
-                   Href="api/account/logout">
-            Logout
-        </MudButton>
-    </MudButtonGroup>
-}
-else
-{
-    <MudButton Variant="Variant.Text"
-               Href="api/account/login">
-        Login
-    </MudButton>
-}
-
-@code {
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthTask { get; set; }
-
-    private AuthenticationState _authState;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        _authState = await AuthTask;
-    }
-
-}
+    </NotAuthorized>
+</AuthorizeView>

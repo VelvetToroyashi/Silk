@@ -2,6 +2,7 @@
 using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MudBlazor;
@@ -81,10 +82,10 @@ public static class DependencyInjection
             opt.Events.OnCreatingTicket = async context =>
             {
                 var serviceProvider = context.HttpContext.RequestServices;
+                var tokenStore      = serviceProvider.GetRequiredService<IDiscordTokenStore>();
                 var oAuth2Api       = serviceProvider.GetRequiredService<IDiscordRestOAuth2API>();
 
-                var userId     = context.Principal!.GetUserId();
-                var tokenStore = serviceProvider.GetRequiredService<IDiscordTokenStore>();
+                var userId          = context.Principal!.GetUserId();
                 tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
 
                 await TryAddTeamMemberRoles(context.Principal, oAuth2Api);
@@ -92,8 +93,9 @@ public static class DependencyInjection
         })
         .AddCookie(options => 
         {
-            // Todo: Find way to set expiration based on OAuth token expiry
-            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            // Wiggle room for cookie expiration so Blazor authentication state provider
+            // can invalidate first
+            options.ExpireTimeSpan = new TimeSpan(7, 0, 5, 0);
         });
 
         services.AddAuthorization
@@ -190,8 +192,8 @@ public static class DependencyInjection
         /* Todo: Handle Logout of User when expired token belongs to current user */
         /* Todo: Handle Removal of expired Cookies */
         services.AddSingleton<IDiscordTokenStore, DiscordTokenStore>();
-        services.AddSingleton<IDiscordTokenStoreWatcher, DiscordTokenStoreWatcher>();
-        services.AddHostedService(s => s.GetRequiredService<IDiscordTokenStoreWatcher>());
+        services.AddScoped<DiscordAuthenticationStateProvider>();
+        services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<DiscordAuthenticationStateProvider>());
 
         return services;
     }
