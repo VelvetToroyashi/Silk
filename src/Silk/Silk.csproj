@@ -177,6 +177,9 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.Setup.cs">
           <DependentUpon>ConfigCommands.cs</DependentUpon>
         </Compile>
+        <Compile Update="Commands\Server\Config\ConfigCommands.Edit.Raid.cs">
+          <DependentUpon>ConfigCommands.Edit.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
