@@ -11,9 +11,9 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest.Core;
 using Silk.Dashboard.Extensions;
-using Silk.Dashboard.Services.DashboardDiscordClient;
-using Silk.Dashboard.Services.DiscordTokenStorage;
-using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
+using Silk.Dashboard.Models;
+using Silk.Dashboard.Providers;
+using Silk.Dashboard.Services;
 using Silk.Data;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
@@ -82,11 +82,11 @@ public static class DependencyInjection
             opt.Events.OnCreatingTicket = async context =>
             {
                 var serviceProvider = context.HttpContext.RequestServices;
-                var tokenStore      = serviceProvider.GetRequiredService<IDiscordTokenStore>();
+                var tokenStore      = serviceProvider.GetRequiredService<DiscordTokenStore>();
                 var oAuth2Api       = serviceProvider.GetRequiredService<IDiscordRestOAuth2API>();
 
                 var userId          = context.Principal!.GetUserId();
-                tokenStore.SetToken(userId!, new DiscordTokenStoreEntry(context));
+                tokenStore.SetToken(userId!, new DiscordOAuthToken(context));
 
                 await TryAddTeamMemberRoles(context.Principal, oAuth2Api);
             };
@@ -189,11 +189,8 @@ public static class DependencyInjection
 
         services.AddMediatR(typeof(GuildContext));
 
-        /* Todo: Handle Logout of User when expired token belongs to current user */
-        /* Todo: Handle Removal of expired Cookies */
-        services.AddSingleton<IDiscordTokenStore, DiscordTokenStore>();
-        services.AddScoped<DiscordAuthenticationStateProvider>();
-        services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<DiscordAuthenticationStateProvider>());
+        services.AddSingleton<DiscordTokenStore>();
+        services.AddScoped<AuthenticationStateProvider, DiscordAuthenticationStateProvider>();
 
         return services;
     }

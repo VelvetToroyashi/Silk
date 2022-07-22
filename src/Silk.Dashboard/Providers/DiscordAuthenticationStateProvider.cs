@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Silk.Dashboard.Extensions;
-using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
+using Silk.Dashboard.Services;
 
-namespace Silk.Dashboard;
+namespace Silk.Dashboard.Providers;
 
 public class DiscordAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider
 {
     // Adjust this parameter to control the time after which the authentication state will be revalidated.
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(3);
 
-    private readonly IDiscordTokenStore _tokenStore;
+    private readonly DiscordTokenStore _tokenStore;
 
     public DiscordAuthenticationStateProvider
     (
-        IDiscordTokenStore tokenStore,
+        DiscordTokenStore tokenStore,
         ILoggerFactory     loggerFactory
     ) : base(loggerFactory)
     {

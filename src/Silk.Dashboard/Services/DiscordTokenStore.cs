@@ -1,18 +1,19 @@
 ﻿#nullable enable
 
 using System.Collections.Concurrent;
-using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
+using Silk.Dashboard.Models;
 
-namespace Silk.Dashboard.Services.DiscordTokenStorage;
+namespace Silk.Dashboard.Services;
 
-public class DiscordTokenStore : IDiscordTokenStore
+public class DiscordTokenStore
 {
-    private readonly ConcurrentDictionary<string, IDiscordTokenStoreEntry> _tokenStore = new();
-    
+    // Maps Discord User IDs to their OAuth token.
+    private readonly ConcurrentDictionary<string, DiscordOAuthToken> _tokenStore = new();
+
     private string? _currentUserId;
     public string? CurrentUserId => _currentUserId;
 
-    public bool SetToken(string userId, IDiscordTokenStoreEntry? token)
+    public bool SetToken(string userId, DiscordOAuthToken? token)
     {
         if (token is null) return false;
         _tokenStore.AddOrUpdate(userId, _ =>
@@ -23,7 +24,7 @@ public class DiscordTokenStore : IDiscordTokenStore
         return true;
     }
 
-    public IDiscordTokenStoreEntry? GetToken(string? userId)
+    public DiscordOAuthToken? GetToken(string? userId)
     {
         if (string.IsNullOrEmpty(userId)) return null;
         _tokenStore.TryGetValue(userId, out var tokenEntry);
@@ -45,7 +46,7 @@ public class DiscordTokenStore : IDiscordTokenStore
         _currentUserId = null;
     }
 
-    public IReadOnlyDictionary<string, IDiscordTokenStoreEntry> GetEntries()
+    public IReadOnlyDictionary<string, DiscordOAuthToken> GetEntries()
     {
         return _tokenStore;
     }

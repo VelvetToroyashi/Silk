@@ -10,16 +10,20 @@
                 @context.User.Identity?.Name
             </MudButton>
 
-            <MudButton Variant="Variant.Text"
-                       Href="api/account/logout">
-                Logout
-            </MudButton>
+            <form action="api/auth/logout" method="post">
+                <MudButton ButtonType="ButtonType.Submit" 
+                           Variant="Variant.Text">
+                    Logout
+                </MudButton>
+            </form>
         </MudButtonGroup>
     </Authorized>
     <NotAuthorized>
-        <MudButton Variant="Variant.Text"
-                   Href="api/account/login">
-            Login
-        </MudButton>
+        <form action="api/auth/login" method="post">
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Text">
+                Login
+            </MudButton>
+        </form>
     </NotAuthorized>
 </AuthorizeView>

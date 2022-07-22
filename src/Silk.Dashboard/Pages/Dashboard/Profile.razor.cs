@@ -2,7 +2,7 @@
 using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
-using Silk.Dashboard.Services.DashboardDiscordClient;
+using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 

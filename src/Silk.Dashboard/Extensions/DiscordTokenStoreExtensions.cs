@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Authentication.OAuth;
 
-namespace Silk.Dashboard.Services.DiscordTokenStorage;
+namespace Silk.Dashboard.Extensions;
 
 public static class DiscordTokenStoreExtensions
 {
@@ -14,7 +14,7 @@ public static class DiscordTokenStoreExtensions
             ? tokenExpiry
             : null;
     }
-    
+
     public static DateTimeOffset? GetTokenExpiry(this OAuthCreatingTicketContext context)
     {
         return GetTokenExpiry(context.Properties.Items[DiscordAuthenticationTokenExpiryKey]);

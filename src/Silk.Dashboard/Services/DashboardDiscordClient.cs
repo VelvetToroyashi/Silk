@@ -5,21 +5,20 @@ using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
 using Remora.Rest.Core;
-using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces;
 
-namespace Silk.Dashboard.Services.DashboardDiscordClient;
+namespace Silk.Dashboard.Services;
 
 public class DashboardDiscordClient
 {
-    private readonly ICacheProvider        _cache;
-    private readonly IDiscordTokenStore    _tokenStore;
-    private readonly IRestHttpClient       _restHttpClient;
+    private readonly ICacheProvider    _cache;
+    private readonly DiscordTokenStore _tokenStore;
+    private readonly IRestHttpClient   _restHttpClient;
 
     public DashboardDiscordClient
     (
-        ICacheProvider     cache,
-        IDiscordTokenStore tokenStore,
-        IRestHttpClient    restHttpClient
+        ICacheProvider    cache,
+        DiscordTokenStore tokenStore,
+        IRestHttpClient   restHttpClient
     )
     {
         _cache          = cache;
@@ -33,10 +32,8 @@ public class DashboardDiscordClient
         );
     }
 
-    private string? GetCurrentUserToken()
-    {
-        return _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
-    }
+    private string? GetCurrentUserToken() 
+        => _tokenStore.GetToken(_tokenStore.CurrentUserId)?.AccessToken;
 
     public async Task<IUser?> GetCurrentUserAsync()
     {

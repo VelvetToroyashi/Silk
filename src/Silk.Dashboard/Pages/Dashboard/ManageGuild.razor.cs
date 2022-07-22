@@ -5,7 +5,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Silk.Dashboard.Components.Dialogs;
 using Silk.Dashboard.Extensions;
-using Silk.Dashboard.Services.DashboardDiscordClient;
+using Silk.Dashboard.Services;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared.Constants;

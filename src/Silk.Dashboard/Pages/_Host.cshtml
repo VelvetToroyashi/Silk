@@ -2,10 +2,11 @@
 @namespace Silk.Dashboard.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Silk.Extensions
 @using Silk.Dashboard.Extensions
-@using Silk.Dashboard.Services.DiscordTokenStorage
-@using Silk.Dashboard.Services.DiscordTokenStorage.Interfaces
+@using Silk.Dashboard.Models
+@using Silk.Dashboard.Services
 
 @{
     Layout = "_Layout";
@@ -14,8 +15,8 @@
 
     if (!string.IsNullOrEmpty(userId))
     {
-        var tokenStorage = HttpContext.RequestServices.Get<IDiscordTokenStore>();
-        var token = await DiscordTokenStoreEntry.FromHttpContext(HttpContext);
+        var tokenStorage = HttpContext.RequestServices.Get<DiscordTokenStore>();
+        var token = await DiscordOAuthToken.FromHttpContext(HttpContext);
         tokenStorage!.SetToken(userId, token);
     }
 }

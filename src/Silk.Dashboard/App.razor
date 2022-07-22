@@ -10,12 +10,15 @@
                     {
                         <ProblemView Message="Please login to get started with the Dashboard"
                                      ImageUrl="images/rp_scare.png">
-                            <MudButton Size="Size.Large" 
-                                       Color="Color.Info" 
-                                       Href="api/account/login"
-                                       StartIcon="@Icons.Material.Filled.Login">
-                                Login
-                            </MudButton>
+
+                            <form action="api/auth/login" method="post">
+                                <MudButton ButtonType="ButtonType.Submit"
+                                           Size="Size.Large"
+                                           Color="Color.Info"
+                                           StartIcon="@Icons.Material.Filled.Login">
+                                    Login
+                                </MudButton>
+                            </form>
                         </ProblemView>
                     }
                     else
