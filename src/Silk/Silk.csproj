@@ -76,7 +76,7 @@
         <PackageReference Include="Sentry" Version="3.20.0" />
         <PackageReference Include="Sentry.DiagnosticSource" Version="3.20.0" />
         <PackageReference Include="Sentry.Extensions.Logging" Version="3.20.0" />
-        <PackageReference Include="Sentry.Serilog" Version="3.19.0" />
+        <PackageReference Include="Sentry.Serilog" Version="3.20.0" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.Expressions" />
         <PackageReference Include="Serilog.Extensions.Hosting" />
