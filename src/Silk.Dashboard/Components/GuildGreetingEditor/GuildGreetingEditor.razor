@@ -69,7 +69,7 @@ else
                 @if (Greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
                 {
                     var roleOptionSelected = Greeting.Option is GreetingOption.GreetOnRole;
-                    var optionHeader = (roleOptionSelected ? "Role" : "Channel") + " ID";
+                    var optionHeader = roleOptionSelected ? "Role" : "Channel";
 
                     <MudContainer>
                         <MudTooltip Placement="Placement.Top"

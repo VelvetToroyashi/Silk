@@ -91,16 +91,10 @@ else
                                                 <MudCardContent>
                                                     <MudContainer>
                                                         <MudText>
-                                                            @greeting.Id ➜ @greeting.Option.Humanize(LetterCasing.Title)
-                                                            @if (greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
-                                                            {
-                                                                <p class="d-inline">
-                                                                    &nbsp;
-                                                                    @(greeting.Option == GreetingOption.GreetOnJoin ? "in" : "on")
-                                                                    @greeting.MetadataID.ToString()
-                                                                </p>
-                                                            }
-                                                            -- @greeting.Message
+                                                            @greeting.Id ➜ @GetGreetingStatus(greeting)
+                                                        </MudText>
+                                                        <MudText>
+                                                            @greeting.Message
                                                         </MudText>
                                                     </MudContainer>
 

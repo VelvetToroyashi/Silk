@@ -47,8 +47,10 @@ public partial class GuildGreetingEditor
         }
 
         _managedGuilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
+        await UpdateGreetingGuildAsync(Greeting.GuildID);
     }
 
+    // Todo: Handle non-update issue of sub select/dropdown menus when switching guilds.
     private async Task UpdateGreetingGuildAsync(Snowflake snowflake)
     {
         Greeting.GuildID = snowflake;
@@ -100,8 +102,9 @@ public partial class GuildGreetingEditor
                      return;
                  }
 
+                 // Todo: Figure out what defines selecting/finding a greeting.
                  var foundGreeting = guildConfig.Greetings
-                                                .FirstOrDefault(g => g.ChannelID == Greeting.ChannelID);
+                                                .FirstOrDefault(g => g.Id == Greeting.Id);
 
                  if (foundGreeting is not null)
                  {

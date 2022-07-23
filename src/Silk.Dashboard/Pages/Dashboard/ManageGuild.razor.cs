@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Humanizer;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Remora.Discord.API.Abstractions.Objects;
@@ -33,6 +34,17 @@ public partial class ManageGuild
         _ = GetGuildFromRestAsync();
         _ = GetGuildConfigAsync();
         return Task.CompletedTask;
+    }
+
+    private static string GetGreetingStatus(GuildGreetingEntity greeting)
+    {
+        var option = greeting.Option.Humanize(LetterCasing.Title);
+        var data = greeting.Option switch
+        {
+            GreetingOption.GreetOnJoin => greeting.ChannelID,
+            GreetingOption.GreetOnRole => greeting.MetadataID,
+        };
+        return $"{option} - {data}";
     }
 
     private async Task GetGuildConfigAsync()

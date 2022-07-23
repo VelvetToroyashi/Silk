@@ -64,7 +64,7 @@ public class DashboardDiscordClient
         (
              BotGuildsKey,
              botGuilds,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(5)
+             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
         );
 
         return botGuilds.ToDictionary(g => g.ID.Value, g => g);
@@ -85,11 +85,14 @@ public class DashboardDiscordClient
         if (!result.IsDefined(out guildChannels))
             return null;
 
+        guildChannels = guildChannels.Where(c => c.Type == ChannelType.GuildText)
+                                     .ToList();
+
         await _cache.CacheAsync
         (
              cacheKey,
              guildChannels,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(5)
+             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
         );
 
         return guildChannels;
@@ -114,7 +117,7 @@ public class DashboardDiscordClient
         (
              cacheKey,
              guildRoles,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(5)
+             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
         );
 
         return guildRoles;
@@ -170,7 +173,7 @@ public class DashboardDiscordClient
         (
              UserGuildsKey,
              guilds,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(5)
+             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
         );
 
         return guilds;
