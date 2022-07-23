@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
+using Silk.Dashboard.Services;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Greetings;
 using Silk.Data.MediatR.Guilds;
@@ -16,13 +18,17 @@ public partial class GuildGreetingEditor
                                               "ID of the role to check for, or the ID of the channel to greet in.";
 
     private static readonly GreetingOption[] GreetingOptions = Enum.GetValues<GreetingOption>();
+    
+    [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
+    [Inject]    public IMediator              Mediator      { get; set; }
+    [Inject]    public ISnackbar              Snackbar      { get; set; }
+    [Parameter] public int                    GreetingId    { get; set; }
+    [Parameter] public GuildGreetingEntity    Greeting      { get; set; }
 
-    [Inject]    public IMediator           Mediator   { get; set; }
-    [Inject]    public ISnackbar           Snackbar   { get; set; }
-    [Parameter] public int                 GreetingId { get; set; }
-    [Parameter] public GuildGreetingEntity Greeting   { get; set; }
-
-    private MudForm _form;
+    private MudForm _form; 
+    private IReadOnlyList<IPartialGuild> _managedGuilds;
+    private IReadOnlyList<IChannel> _guildChannels;
+    private IReadOnlyList<IRole> _guildRoles;
 
     private Snowflake GreetingMetadataId
     {
@@ -39,7 +45,33 @@ public partial class GuildGreetingEditor
             var response = await Mediator.Send(new GetGuildGreeting.Request(GreetingId));
             Greeting = response.IsDefined(out var existingGreeting) ? existingGreeting : new();
         }
+
+        _managedGuilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
     }
+
+    private async Task UpdateGreetingGuildAsync(Snowflake snowflake)
+    {
+        Greeting.GuildID = snowflake;
+        await UpdateGreetingOptionAsync(Greeting.Option);
+    }
+
+    private async Task UpdateGreetingOptionAsync(GreetingOption greetingOption)
+    {
+        Greeting.Option = greetingOption;
+        var task = Greeting.Option switch
+        {
+            GreetingOption.GreetOnRole      => UpdateRolesAsync(),
+            GreetingOption.GreetOnJoin      => UpdateChannelAsync(),
+            _                               => Task.CompletedTask
+        };
+        await task;
+    }
+
+    private async Task UpdateChannelAsync()
+        => _guildChannels = await DiscordClient.GetBotChannelsAsync(Greeting.GuildID);
+
+    private async Task UpdateRolesAsync() 
+        => _guildRoles = await DiscordClient.GetBotRolesAsync(Greeting.GuildID);
 
     private void UpdateGreeting(GuildGreetingEntity existingGreeting)
     {

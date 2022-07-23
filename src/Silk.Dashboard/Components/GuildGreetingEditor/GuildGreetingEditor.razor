@@ -9,9 +9,13 @@
 
 @inherits DashboardComponentBase
 
-@if (Greeting is null)
+@if (Greeting is null || _managedGuilds is null)
 {
-    <LoadingView/>
+    <LoadingView>
+        <Content>
+            <MudProgressCircular Size="Size.Large" Indeterminate="true"/>
+        </Content>
+    </LoadingView>
 }
 else
 {
@@ -27,11 +31,17 @@ else
                         </MudText>
                     </MudTooltip>
 
-                    <MudTextField @bind-Value="Greeting.GuildID"
-                                  Variant="Variant.Outlined"
-                                  Immediate="true"
-                                  Validation="NonNullableValidator"
-                                  Converter="NonNullableConverter"/>
+                    <MudSelect T="Snowflake"
+                               Value="Greeting.GuildID"
+                               ValueChanged="@(async g => await UpdateGreetingGuildAsync(g))"
+                               Variant="Variant.Outlined">
+                        @foreach (var guild in _managedGuilds)
+                        {
+                            <MudSelectItem Value="@guild.ID.Value">
+                                @guild.Name.Value
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudContainer>
 
                 @* Greeting Option *@
@@ -43,7 +53,9 @@ else
                         </MudText>
                     </MudTooltip>
 
-                    <MudSelect @bind-Value="Greeting.Option"
+                    <MudSelect T="GreetingOption" 
+                               Value="Greeting.Option"
+                               ValueChanged="@(async o => await UpdateGreetingOptionAsync(o))"
                                Variant="Variant.Outlined">
                         @foreach (var go in GreetingOptions)
                         {
@@ -69,21 +81,35 @@ else
 
                         @if (roleOptionSelected)
                         {
-                            <MudTextField T="Snowflake"
-                                          @bind-Value="GreetingMetadataId"
-                                          Variant="Variant.Outlined"
-                                          Immediate="true"
-                                          Validation="NonNullableValidator"
-                                          Converter="NonNullableConverter"/>
+                            if (_guildRoles is not null)
+                            {
+                                <MudSelect T="Snowflake"
+                                           @bind-Value="GreetingMetadataId"
+                                           Variant="Variant.Outlined">
+                                    @foreach (var role in _guildRoles)
+                                    {
+                                        <MudSelectItem Value="@role.ID">
+                                            @role.Name
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
                         }
                         else
                         {
-                            <MudTextField T="Snowflake"
-                                          @bind-Value="Greeting.ChannelID"
-                                          Variant="Variant.Outlined"
-                                          Immediate="true"
-                                          Validation="NonNullableValidator"
-                                          Converter="NonNullableConverter"/>
+                            if (_guildChannels is not null)
+                            {
+                                <MudSelect T="Snowflake"
+                                           @bind-Value="Greeting.ChannelID"
+                                           Variant="Variant.Outlined">
+                                    @foreach (var channel in _guildChannels)
+                                    {
+                                        <MudSelectItem Value="@channel.ID">
+                                            @channel.Name.Value
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
                         }
                     </MudContainer>
                 }

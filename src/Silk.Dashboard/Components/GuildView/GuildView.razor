@@ -11,6 +11,7 @@
          @onclick="HandleOnClickAsync">
     <MudCardContent Class="d-flex flex-column align-center p-2">
         <MudText Typo="Typo.h5"
+                 Align="Align.Center"
                  GutterBottom="true">
             @Guild.Name.Value
         </MudText>
@@ -40,6 +41,7 @@
     private StyleBuilder GuildViewStyleBuilder
         => new StyleBuilder()
             .AddStyle("cursor", "pointer")
+            .AddStyle("max-width", "220px")
             .AddStyle(base.ComponentStyles);
 
     private bool HasIcon => Guild.Icon.IsDefined(out var icon) &&
@@ -49,9 +51,11 @@
 
     public static string GetGuildIconUrl(IPartialGuild guild)
     {
-        var guildIconUrl = "";
+        if (!guild.Icon.IsDefined(out var icon))
+            return DefaultGuildIconUrl;
 
-        var result = CDN.GetGuildIconUrl(guild.ID.Value, guild.Icon.Value!, imageSize: 256);
+        var guildIconUrl = "";
+        var result = CDN.GetGuildIconUrl(guild.ID.Value, icon, imageSize: 256);
 
         if (result.IsDefined(out var uri))
             guildIconUrl = uri.ToString();

@@ -2,6 +2,7 @@
 using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Rest.Core;
 using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Pages.Dashboard;
@@ -13,16 +14,17 @@ public partial class Profile
 
     private bool _showJoinedGuilds;
 
-    private IUser                        _user;
-    private IReadOnlyList<IPartialGuild> _joinedGuilds;
-    private IReadOnlyList<IPartialGuild> _managedGuilds;
+    private IUser                                _user;
+    private Dictionary<Snowflake, IPartialGuild> _botGuilds;
+    private IReadOnlyList<IPartialGuild>         _joinedGuilds;
+    private IReadOnlyList<IPartialGuild>         _managedGuilds;
 
     protected override async Task OnInitializedAsync()
     {
         _user          = await DiscordClient.GetCurrentUserAsync();
         _joinedGuilds  = await DiscordClient.GetCurrentUserGuildsAsync();
-
-        _managedGuilds = DiscordClient.FilterGuildsByPermission(_joinedGuilds, DiscordPermission.ManageGuild);
+        _botGuilds     = await DiscordClient.GetBotGuildsAsync();
+        _managedGuilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync(_joinedGuilds);
     }
 
     private string CurrentUserName            => _user.Username;
@@ -36,13 +38,15 @@ public partial class Profile
         return result.IsDefined(out var uri) ? uri.ToString() : "";
     }
 
-    private void ToggleJoinedGuildsVisibility() => _showJoinedGuilds = !_showJoinedGuilds;
+    private void ToggleJoinedGuildsVisibility() 
+        => _showJoinedGuilds = !_showJoinedGuilds;
 
     private void NavigateToManageGuild(IPartialGuild guild)
     {
         var navUrl = $"/manage-guild/{guild.ID.Value.Value}";
         var canNavigate = guild.Permissions.IsDefined(out var permissionSet) && 
-                          permissionSet.HasPermission(DiscordPermission.ManageGuild);
+                          permissionSet.HasPermission(DiscordPermission.ManageGuild) && 
+                          _botGuilds.ContainsKey(guild.ID.Value);
 
         if (!canNavigate)
         {
