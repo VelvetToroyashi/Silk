@@ -8,7 +8,7 @@ public static class ThemeManager
     {
         Palette = new Palette
         {
-            Black = "#27272f",
+            Primary = "#3ca4ff",
             Background = "#32333d",
             BackgroundGrey = "#27272f",
             Surface = "#373740",

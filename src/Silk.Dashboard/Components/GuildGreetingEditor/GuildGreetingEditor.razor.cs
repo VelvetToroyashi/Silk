@@ -18,11 +18,10 @@ public partial class GuildGreetingEditor
                                               "ID of the role to check for, or the ID of the channel to greet in.";
 
     private static readonly GreetingOption[] GreetingOptions = Enum.GetValues<GreetingOption>();
-    
+
     [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
     [Inject]    public IMediator              Mediator      { get; set; }
     [Inject]    public ISnackbar              Snackbar      { get; set; }
-
     [Parameter] public int                    GreetingId    { get; set; }
     [Parameter] public GuildGreetingEntity    Greeting      { get; set; }
 
@@ -32,7 +31,7 @@ public partial class GuildGreetingEditor
 
     protected override async Task OnInitializedAsync()
     {
-        if (Greeting is null)
+        if (GreetingId > 0 && Greeting is null)
         {
             var response = await Mediator.Send(new GetGuildGreeting.Request(GreetingId));
             Greeting = response.IsDefined(out var existingGreeting) ? existingGreeting : new();
@@ -42,7 +41,6 @@ public partial class GuildGreetingEditor
         await UpdateGreetingGuildAsync(Greeting.GuildID);
     }
 
-    // Todo: Handle non-update issue of sub select/dropdown menus when switching guilds.
     private async Task UpdateGreetingGuildAsync(Snowflake snowflake)
     {
         Greeting.GuildID = snowflake;

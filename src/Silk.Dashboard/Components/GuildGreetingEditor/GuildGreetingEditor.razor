@@ -47,7 +47,7 @@ else
                 <MudTooltip Placement="Placement.Top"
                             Text="How / when to greet new members">
                     <MudText Typo="Typo.h5">
-                        @LabelFor(nameof(GreetingOption))
+                        Greeting
                     </MudText>
                 </MudTooltip>
 
@@ -142,7 +142,6 @@ else
                     </MudTooltip>
 
                     <MudTextField @bind-Value="Greeting.Message"
-                                  Class="mb-2"
                                   Immediate="true"
                                   Variant="Variant.Outlined"
                                   DisableUnderLine="true"
@@ -154,7 +153,7 @@ else
                     {
                         <MudChip Variant="Variant.Outlined"
                                  Color="Color.Warning"
-                                 Class="my-2">
+                                 Class="mt-2">
                             The length of this greeting is greater than @EmbedMessageLengthThreshold characters 
                             and will be placed in an embed when sent.
                         </MudChip>
