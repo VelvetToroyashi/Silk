@@ -22,21 +22,13 @@ public partial class GuildGreetingEditor
     [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
     [Inject]    public IMediator              Mediator      { get; set; }
     [Inject]    public ISnackbar              Snackbar      { get; set; }
+
     [Parameter] public int                    GreetingId    { get; set; }
     [Parameter] public GuildGreetingEntity    Greeting      { get; set; }
 
-    private MudForm _form; 
-    private IReadOnlyList<IPartialGuild> _managedGuilds;
-    private IReadOnlyList<IChannel> _guildChannels;
-    private IReadOnlyList<IRole> _guildRoles;
-
-    private Snowflake GreetingMetadataId
-    {
-        get => Greeting!.MetadataID ?? default;
-        set => Greeting!.MetadataID = value.Value == 0 ? null : value;
-    }
-
-    private string SaveButtonText => Greeting.Id > 0 ? "Save Changes" : "Create";
+    private IReadOnlyList<IRole> _roles;
+    private IReadOnlyList<IChannel> _channels;
+    private IReadOnlyList<IPartialGuild> _guilds;
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,7 +38,7 @@ public partial class GuildGreetingEditor
             Greeting = response.IsDefined(out var existingGreeting) ? existingGreeting : new();
         }
 
-        _managedGuilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
+        _guilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
         await UpdateGreetingGuildAsync(Greeting.GuildID);
     }
 
@@ -57,23 +49,29 @@ public partial class GuildGreetingEditor
         await UpdateGreetingOptionAsync(Greeting.Option);
     }
 
+    // Todo: Make action cancelable.
     private async Task UpdateGreetingOptionAsync(GreetingOption greetingOption)
     {
         Greeting.Option = greetingOption;
-        var task = Greeting.Option switch
-        {
-            GreetingOption.GreetOnRole      => UpdateRolesAsync(),
-            GreetingOption.GreetOnJoin      => UpdateChannelAsync(),
-            _                               => Task.CompletedTask
-        };
-        await task;
+        await Task.WhenAll
+        (
+            UpdateChannelAsync(),
+            UpdateRolesAsync()
+        );
+        StateHasChanged();
     }
 
     private async Task UpdateChannelAsync()
-        => _guildChannels = await DiscordClient.GetBotChannelsAsync(Greeting.GuildID);
+    {
+        _channels = await DiscordClient.GetBotChannelsAsync(Greeting.GuildID);
+        if (_channels?.Count > 0) Greeting.ChannelID = _channels[0].ID;
+    }
 
-    private async Task UpdateRolesAsync() 
-        => _guildRoles = await DiscordClient.GetBotRolesAsync(Greeting.GuildID);
+    private async Task UpdateRolesAsync()
+    {
+        _roles = await DiscordClient.GetBotRolesAsync(Greeting.GuildID);
+        if (_roles?.Count > 0) Greeting.MetadataID = _roles[0].ID;
+    }
 
     private void UpdateGreeting(GuildGreetingEntity existingGreeting)
     {
@@ -86,10 +84,6 @@ public partial class GuildGreetingEditor
 
     private async Task SubmitAsync()
     {
-        await _form.Validate();
-
-        if (!_form.IsValid) return;
-
         await ComponentRunAsync
         (
              async () =>

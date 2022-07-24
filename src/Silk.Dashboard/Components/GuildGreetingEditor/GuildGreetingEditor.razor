@@ -1,18 +1,17 @@
-﻿@using Microsoft.AspNetCore.Components
-@using Humanizer
+﻿@using Humanizer
 @using Remora.Rest.Core
 @using Silk.Data.Entities
-@using static Silk.Dashboard.Converters.MudBlazorSnowflakeConverter
 @using static Silk.Dashboard.Helpers.StringHelpers
 
 @namespace Silk.Dashboard.Components
 
 @inherits DashboardComponentBase
 
-@if (Greeting is null || _managedGuilds is null)
+@if (Greeting is null || _guilds is null)
 {
     <LoadingView>
         <Content>
+            <MudText Class="mb-2">Loading Editor</MudText>
             <MudProgressCircular Size="Size.Large" Indeterminate="true"/>
         </Content>
     </LoadingView>
@@ -21,95 +20,100 @@ else
 {
     <MudCard>
         <MudCardContent>
-            <MudForm @ref="_form" Model="Greeting">
-                @* Guild ID *@
+            @* Guild *@
+            <MudContainer Class="mb-4">
+                <MudTooltip Placement="Placement.Top"
+                            Text="The ID of the guild to greet members in">
+                    <MudText Typo="Typo.h5">
+                        Guild
+                    </MudText>
+                </MudTooltip>
+
+                <MudSelect T="Snowflake"
+                           Value="Greeting.GuildID"
+                           ValueChanged="@(async g => await UpdateGreetingGuildAsync(g))"
+                           Variant="Variant.Outlined">
+                    @foreach (var guild in _guilds)
+                    {
+                        <MudSelectItem Value="@guild.ID.Value">
+                            @guild.Name.Value
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudContainer>
+
+            @* Greeting Option *@
+            <MudContainer Class="mb-4">
+                <MudTooltip Placement="Placement.Top"
+                            Text="How / when to greet new members">
+                    <MudText Typo="Typo.h5">
+                        @LabelFor(nameof(GreetingOption))
+                    </MudText>
+                </MudTooltip>
+
+                <MudSelect T="GreetingOption"
+                           Value="Greeting.Option"
+                           ValueChanged="@(async o => await UpdateGreetingOptionAsync(o))"
+                           Variant="Variant.Outlined">
+                    @foreach (var go in GreetingOptions)
+                    {
+                        <MudSelectItem Value="@go">
+                            @go.Humanize(LetterCasing.Title)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudContainer>
+
+            @if (Greeting.Option is not GreetingOption.DoNotGreet)
+            {
+                @* Channel *@
                 <MudContainer Class="mb-4">
                     <MudTooltip Placement="Placement.Top"
-                                Text="The ID of the guild to greet members in">
+                                Text="@MetaDataIdHelpText">
                         <MudText Typo="Typo.h5">
-                            @LabelFor(() => Greeting.GuildID)
+                            Channel
                         </MudText>
                     </MudTooltip>
 
-                    <MudSelect T="Snowflake"
-                               Value="Greeting.GuildID"
-                               ValueChanged="@(async g => await UpdateGreetingGuildAsync(g))"
-                               Variant="Variant.Outlined">
-                        @foreach (var guild in _managedGuilds)
-                        {
-                            <MudSelectItem Value="@guild.ID.Value">
-                                @guild.Name.Value
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_channels is not null)
+                    {
+                        <MudSelect T="Snowflake"
+                                   @bind-Value="Greeting.ChannelID"
+                                   Variant="Variant.Outlined">
+                            @foreach (var channel in _channels)
+                            {
+                                <MudSelectItem Value="@channel.ID">
+                                    @channel.Name.Value
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudContainer>
 
-                @* Greeting Option *@
-                <MudContainer Class="mb-4">
-                    <MudTooltip Placement="Placement.Top"
-                                Text="How / when to greet new members">
-                        <MudText Typo="Typo.h5">
-                            @LabelFor(nameof(GreetingOption))
-                        </MudText>
-                    </MudTooltip>
-
-                    <MudSelect T="GreetingOption" 
-                               Value="Greeting.Option"
-                               ValueChanged="@(async o => await UpdateGreetingOptionAsync(o))"
-                               Variant="Variant.Outlined">
-                        @foreach (var go in GreetingOptions)
-                        {
-                            <MudSelectItem Value="@go">
-                                @go.Humanize(LetterCasing.Title)
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudContainer>
-
-                @if (Greeting.Option is GreetingOption.GreetOnRole or GreetingOption.GreetOnJoin)
+                @* Role *@
+                if (Greeting.Option is GreetingOption.GreetOnRole)
                 {
-                    var roleOptionSelected = Greeting.Option is GreetingOption.GreetOnRole;
-                    var optionHeader = roleOptionSelected ? "Role" : "Channel";
-
-                    <MudContainer>
+                    <MudContainer Class="mb-4">
                         <MudTooltip Placement="Placement.Top"
                                     Text="@MetaDataIdHelpText">
                             <MudText Typo="Typo.h5">
-                                @optionHeader
+                                Role
                             </MudText>
                         </MudTooltip>
 
-                        @if (roleOptionSelected)
+                        @if (_roles is not null)
                         {
-                            if (_guildRoles is not null)
-                            {
-                                <MudSelect T="Snowflake"
-                                           @bind-Value="GreetingMetadataId"
-                                           Variant="Variant.Outlined">
-                                    @foreach (var role in _guildRoles)
-                                    {
-                                        <MudSelectItem Value="@role.ID">
-                                            @role.Name
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            }
-                        }
-                        else
-                        {
-                            if (_guildChannels is not null)
-                            {
-                                <MudSelect T="Snowflake"
-                                           @bind-Value="Greeting.ChannelID"
-                                           Variant="Variant.Outlined">
-                                    @foreach (var channel in _guildChannels)
-                                    {
-                                        <MudSelectItem Value="@channel.ID">
-                                            @channel.Name.Value
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            }
+                            <MudSelect T="Snowflake?"
+                                       @bind-Value="Greeting.MetadataID"
+                                       Variant="Variant.Outlined">
+                                @foreach (var role in _roles)
+                                {
+                                    var value = new Snowflake?(role.ID);
+                                    <MudSelectItem Value="@value">
+                                        @role.Name
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
                         }
                     </MudContainer>
                 }
@@ -151,22 +155,22 @@ else
                         <MudChip Variant="Variant.Outlined"
                                  Color="Color.Warning"
                                  Class="my-2">
-                            The length of this greeting is greater than @EmbedMessageLengthThreshold characters,
+                            The length of this greeting is greater than @EmbedMessageLengthThreshold characters 
                             and will be placed in an embed when sent.
                         </MudChip>
                     }
                 </MudContainer>
+            }
 
-                @* Save Button *@
-                <MudContainer>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               Disabled="IsBusy"
-                               OnClick="SubmitAsync">
-                        @SaveButtonText
-                    </MudButton>
-                </MudContainer>
-            </MudForm>
+            @* Save Button *@
+            <MudContainer>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="IsBusy"
+                           OnClick="SubmitAsync">
+                    Submit
+                </MudButton>
+            </MudContainer>
         </MudCardContent>
     </MudCard>
 }

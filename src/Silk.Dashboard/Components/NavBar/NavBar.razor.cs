@@ -2,7 +2,7 @@
 
 public partial class NavBar
 {
-    private const string IconLink = "https://files.velvetthepanda.dev/silk.png";
+    private const string IconLink = "favicon.png";
 
     private const string GithubLink = "https://github.com/VTPDevelopment/Silk";
 

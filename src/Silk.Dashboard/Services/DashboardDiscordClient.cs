@@ -113,6 +113,10 @@ public class DashboardDiscordClient
         if (!result.IsDefined(out guildRoles))
             return null;
 
+        // Filter out @everyone role
+        guildRoles = guildRoles.Where(r => r.ID != guildId)
+                               .ToList();
+
         await _cache.CacheAsync
         (
              cacheKey,
