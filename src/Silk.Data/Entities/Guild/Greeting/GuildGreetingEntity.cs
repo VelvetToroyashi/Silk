@@ -27,7 +27,7 @@ public class GuildGreetingEntity
     /// <summary>
     ///     The message to greet the user with.
     /// </summary>
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     ///     When to greet the user.
