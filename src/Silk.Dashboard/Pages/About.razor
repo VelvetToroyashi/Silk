@@ -1,14 +1,36 @@
 ﻿@page "/about"
 
 <MudContainer>
-    <MudText Align="Align.Center"
-             Typo="Typo.h3">
-        Meet our Contributors!
-    </MudText>
+    <MudContainer Class="d-flex flex-column align-center justify-space-evenly">
+        <MudImage Src="favicon.png" Fluid="true"/>
+
+        <MudText Class="my-5" Typo="Typo.h3" Align="Align.Center">
+            Why Silk! ?
+        </MudText>
+
+        @* Todo: Edit this description? *@
+        <MudText Class="mb-5" Typo="Typo.h5">
+            Silk! is a bot that's aimed to fill gaps of other bots that simply don't quite fill, as they tend
+            to compete with other bots that do the exact same thing, and usually quite poorly, at that. For most people,
+            they invite one or two bots that overlap, and that's about enough for them and their server. It can kick, ban,
+            and give people arbitrary levels for sending messages in chat that nobody really cares for.
+        </MudText>
+
+        <MudText Typo="Typo.h5">
+            Silk! aims to bring moderation, entertainment, and utility together in a way that makes sense, and doesn't make
+            it too complicated to use. Silk!, as well as the contributors that make everything possible, aim to create a bot to scale to the masses, 
+            with new features that make you actually want to use the bot!
+        </MudText>
+    </MudContainer>
 
     <MudDivider Class="my-6"
                 Style="height: 4px"
                 DividerType="DividerType.Middle"/>
+
+    <MudText Class="mb-5" Align="Align.Center"
+             Typo="Typo.h3">
+        Meet our Contributors!
+    </MudText>
 
     @if (_contributors is null)
     {

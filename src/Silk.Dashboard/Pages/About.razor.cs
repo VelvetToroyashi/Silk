@@ -10,9 +10,8 @@ namespace Silk.Dashboard.Pages;
 public partial class About
 {
     private const string ContributorsUrl         = "https://api.github.com/repos/VTPDevelopment/Silk/contributors";
-    private const string ExcludedContributorName = "[bot]";
 
-    private static readonly TimeSpan FetchPeriod = TimeSpan.FromHours(1);
+    private static readonly TimeSpan FetchPeriod = TimeSpan.FromMinutes(5);
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -24,12 +23,12 @@ public partial class About
     private static DateTimeOffset         _nextFetchTime;
     private static List<SilkContributor>? _contributors;
 
-    [Inject]
-    private IHttpClientFactory HttpClientFactory { get; set; }
+    [Inject] private IHttpClientFactory HttpClientFactory { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        await GetContributorsAsync();
+        _ = GetContributorsAsync();
+        return Task.CompletedTask;
     }
 
     private async Task GetContributorsAsync()
@@ -44,9 +43,10 @@ public partial class About
                 await FetchContributorsAsync();
         }
 
-        _contributors = _contributors?.Where(contributor => !contributor.Name.Contains(ExcludedContributorName))
+        _contributors = _contributors?.Where(contributor => !contributor.Name.Contains("[bot]"))
                                       .OrderByDescending(contributor => contributor.Contributions)
                                       .ToList();
+        StateHasChanged();
     }
 
     private async Task FetchContributorsAsync()
