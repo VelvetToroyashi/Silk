@@ -3,11 +3,12 @@
 @attribute [Authorize]
 
 @inherits DashboardPageBase
+
 @using Microsoft.AspNetCore.Components
 @using static Silk.Dashboard.Helpers.StringHelpers
 @using static Silk.Dashboard.Converters.MudBlazorSnowflakeConverter
 
-@if (RequestFailed)
+@if (_requestFailed)
 {
     <ProblemView Message="Uh Oh!" ImageUrl="images/rp_flop.png">
         <MudText Typo="Typo.h5" Align="Align.Center">
@@ -21,7 +22,12 @@ else
     <MudContainer>
         @if (_guild is null)
         {
-            <LoadingView/>
+            <LoadingView>
+                <Content>
+                    <MudText Class="mb-2">Loading Guild Profile</MudText>
+                    <MudProgressCircular Size="Size.Medium" Indeterminate="true"/>
+                </Content>
+            </LoadingView>
         }
         else
         {
@@ -68,7 +74,7 @@ else
                                 <MudFab Color="Color.Dark"
                                         StartIcon="@Icons.Material.Filled.Add"
                                         Size="Size.Small"
-                                        OnClick="@(async () => await OpenGreetingDialogAsync(greeting: new() { GuildID = _guildConfig.GuildID }))">
+                                        OnClick="@(async () => await CreateGreetingAsync())">
                                 </MudFab>
                             </div>
 

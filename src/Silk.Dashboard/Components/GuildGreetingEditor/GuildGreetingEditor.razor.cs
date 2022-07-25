@@ -14,17 +14,18 @@ public partial class GuildGreetingEditor
 {
     private const int EmbedMessageLengthThreshold = 2000;
 
-    private const string MetaDataIdHelpText = "When greeting on role or join, this will either be the " +
-                                              "ID of the role to check for, or the ID of the channel to greet in.";
-
     private static readonly GreetingOption[] GreetingOptions = Enum.GetValues<GreetingOption>();
 
     [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
     [Inject]    public IMediator              Mediator      { get; set; }
     [Inject]    public ISnackbar              Snackbar      { get; set; }
+
     [Parameter] public int                    GreetingId    { get; set; }
     [Parameter] public GuildGreetingEntity    Greeting      { get; set; }
+    [Parameter] public EventCallback          OnSubmit      { get; set; }
+    [Parameter] public EventCallback          OnCancel      { get; set; }
 
+    private MudForm _form;
     private IReadOnlyList<IRole> _roles;
     private IReadOnlyList<IChannel> _channels;
     private IReadOnlyList<IPartialGuild> _guilds;
@@ -37,8 +38,13 @@ public partial class GuildGreetingEditor
             Greeting = response.IsDefined(out var existingGreeting) ? existingGreeting : new();
         }
 
-        _guilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
-        await UpdateGreetingGuildAsync(Greeting.GuildID);
+        await Task.WhenAll
+        (
+            UpdateGuildsAsync(),
+            LoadChannelsAndRolesAsync()
+        );
+
+        StateHasChanged();
     }
 
     private async Task UpdateGreetingGuildAsync(Snowflake snowflake)
@@ -51,65 +57,98 @@ public partial class GuildGreetingEditor
     private async Task UpdateGreetingOptionAsync(GreetingOption greetingOption)
     {
         Greeting.Option = greetingOption;
-        await Task.WhenAll
+        await LoadChannelsAndRolesAsync();
+        UpdateGreetingMetadata();
+        StateHasChanged();
+    }
+
+    private Task LoadChannelsAndRolesAsync()
+    {
+        return Task.WhenAll
         (
             UpdateChannelAsync(),
             UpdateRolesAsync()
         );
-        StateHasChanged();
+    }
+
+    private void UpdateGreetingMetadata()
+    {
+        if (_channels?.Count > 0) Greeting.ChannelID = _channels[0].ID;
+        if (_roles?.Count > 0) Greeting.MetadataID = _roles[0].ID;
+    }
+
+    private async Task UpdateGuildsAsync()
+    {
+        _guilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
     }
 
     private async Task UpdateChannelAsync()
     {
         _channels = await DiscordClient.GetBotChannelsAsync(Greeting.GuildID);
-        if (_channels?.Count > 0) Greeting.ChannelID = _channels[0].ID;
     }
 
     private async Task UpdateRolesAsync()
     {
         _roles = await DiscordClient.GetBotRolesAsync(Greeting.GuildID);
-        if (_roles?.Count > 0) Greeting.MetadataID = _roles[0].ID;
     }
 
-    private void UpdateGreeting(GuildGreetingEntity existingGreeting)
+    private string GreetingMessageValidation(string message)
     {
-        existingGreeting.GuildID    = Greeting.GuildID;
-        existingGreeting.ChannelID  = Greeting.ChannelID;
-        existingGreeting.Message    = Greeting.Message;
-        existingGreeting.Option     = Greeting.Option;
-        existingGreeting.MetadataID = Greeting.MetadataID;
+        if (Greeting.Option is not GreetingOption.DoNotGreet && string.IsNullOrWhiteSpace(message))
+            return "Message cannot be empty";
+        return null;
+    }
+
+    private void UpdateGreeting(GuildGreetingEntity greeting)
+    {
+        greeting.GuildID    = Greeting.GuildID;
+        greeting.ChannelID  = Greeting.ChannelID;
+        greeting.Message    = Greeting.Message;
+        greeting.Option     = Greeting.Option;
+        greeting.MetadataID = Greeting.MetadataID;
+    }
+
+    private void Cancel()
+    {
+        if (OnCancel.HasDelegate) 
+            OnCancel.InvokeAsync();
     }
 
     private async Task SubmitAsync()
     {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
         await ComponentRunAsync
         (
              async () =>
              {
-                 var guildConfig = await Mediator.Send(new GetGuildConfig.Request(Greeting.GuildID));
-                 if (guildConfig is null)
+                 var config = await Mediator.Send(new GetGuildConfig.Request(Greeting.GuildID));
+                 if (config is null)
                  {
                      Snackbar.Add($"Could not find a config with ID {Greeting.Id}. <br/>" + 
                                   "Please double check that the guild ID is valid or try again.", Severity.Error);
-                     return;
-                 }
-
-                 // Todo: Figure out what defines selecting/finding a greeting.
-                 var foundGreeting = guildConfig.Greetings
-                                                .FirstOrDefault(g => g.Id == Greeting.Id);
-
-                 if (foundGreeting is not null)
-                 {
-                     UpdateGreeting(foundGreeting);
-                     await Mediator.Send(new UpdateGuildConfig.Request(foundGreeting.GuildID) { Greetings = guildConfig.Greetings});
-                     Snackbar.Add($"Updated greeting with ID {foundGreeting.Id}", Severity.Success);
                  }
                  else
                  {
-                     guildConfig.Greetings.Add(Greeting);
-                     await Mediator.Send(new UpdateGuildConfig.Request(Greeting.GuildID) {Greetings = guildConfig.Greetings});
-                     Snackbar.Add($"Created greeting with ID {Greeting.Id}", Severity.Success);
+                    var dbGreeting = config.Greetings.FirstOrDefault(g => g.Id == Greeting.Id);
+
+                    if (dbGreeting is not null)
+                    {
+                        UpdateGreeting(dbGreeting);
+                        await Mediator.Send(new UpdateGuildConfig.Request(dbGreeting.GuildID) { Greetings = config.Greetings});
+                        Snackbar.Add($"Updated greeting with ID {dbGreeting.Id}", Severity.Success);
+                    }
+                    else
+                    {
+                        config.Greetings.Add(Greeting);
+                        await Mediator.Send(new UpdateGuildConfig.Request(Greeting.GuildID) {Greetings = config.Greetings});
+                        Snackbar.Add($"Created greeting with ID {Greeting.Id}", Severity.Success);
+                    }
                  }
+
+                 if (OnSubmit.HasDelegate) 
+                    await OnSubmit.InvokeAsync();
              }
         );
     }

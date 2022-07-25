@@ -6,16 +6,17 @@ using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
 using Remora.Rest.Core;
+using Remora.Results;
 
 namespace Silk.Dashboard.Services;
 
 public class DashboardDiscordClient
 {
+    private const string UserMeKey     = "dashboard:user-me";
     private const string UserGuildsKey = "dashboard:user-guilds";
     private const string BotGuildsKey  = "dashboard:bot-guilds";
-
-    private const string ChannelsKey   = "dashboard:bot-guild-channels";
     private const string RolesKey      = "dashboard:bot-guild-roles";
+    private const string ChannelsKey   = "dashboard:bot-guild-channels";
 
     private readonly ICacheProvider       _cache;
     private readonly IDiscordRestUserAPI  _userApi;
@@ -25,10 +26,10 @@ public class DashboardDiscordClient
 
     public DashboardDiscordClient
     (
-        ICacheProvider      cache,
-        DiscordTokenStore   tokenStore,
-        IRestHttpClient     restHttpClient,
-        IDiscordRestUserAPI userApi,
+        ICacheProvider       cache,
+        DiscordTokenStore    tokenStore,
+        IRestHttpClient      restHttpClient,
+        IDiscordRestUserAPI  userApi,
         IDiscordRestGuildAPI guildApi
     )
     {
@@ -50,81 +51,62 @@ public class DashboardDiscordClient
 
     public async Task<Dictionary<Snowflake, IPartialGuild>?> GetBotGuildsAsync()
     {
-        IReadOnlyList<IPartialGuild>? botGuilds;
-
-        var result = await _cache.RetrieveAsync<IReadOnlyList<IPartialGuild>>(BotGuildsKey);
-        if (result.IsDefined(out botGuilds))
-            return botGuilds.ToDictionary(g => g.ID.Value, g => g);
-
-        result = await _userApi.GetCurrentUserGuildsAsync();
-        if (!result.IsDefined(out botGuilds))
-            return null;
-
-        await _cache.CacheAsync
+        var result = await CacheAsync
         (
              BotGuildsKey,
-             botGuilds,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
+             () => _userApi.GetCurrentUserGuildsAsync(),
+             DateTimeOffset.UtcNow.AddMinutes(4)
         );
-
-        return botGuilds.ToDictionary(g => g.ID.Value, g => g);
+        return result?.ToDictionary(g => g.ID.Value, g => g);
     }
 
-    // TODO: Make a DTO + refactor.
+    // TODO: Make a DTO
     public async Task<IReadOnlyList<IChannel>?> GetBotChannelsAsync(Snowflake guildId)
     {
-        IReadOnlyList<IChannel>? guildChannels;
-
-        var cacheKey = $"{ChannelsKey}:{guildId.Value}";
-
-        var result = await _cache.RetrieveAsync<IReadOnlyList<IChannel>>(cacheKey);
-        if (result.IsDefined(out guildChannels))
-            return guildChannels;
-
-        result = await _guildApi.GetGuildChannelsAsync(guildId);
-        if (!result.IsDefined(out guildChannels))
-            return null;
-
-        guildChannels = guildChannels.Where(c => c.Type == ChannelType.GuildText)
-                                     .ToList();
-
-        await _cache.CacheAsync
+        var result = await CacheAsync
         (
-             cacheKey,
-             guildChannels,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
+             $"{ChannelsKey}:{guildId.Value}",
+             () => _guildApi.GetGuildChannelsAsync(guildId),
+             DateTimeOffset.UtcNow.AddMinutes(4),
+             channels => channels.Where(c => c.Type == ChannelType.GuildText).ToList()
         );
-
-        return guildChannels;
+        return result;
     }
 
-    // TODO: Make a DTO + refactor.
     public async Task<IReadOnlyList<IRole>?> GetBotRolesAsync(Snowflake guildId)
     {
-        IReadOnlyList<IRole>? guildRoles;
-
-        var cacheKey = $"{RolesKey}:{guildId.Value}";
-        
-        var result   = await _cache.RetrieveAsync<IReadOnlyList<IRole>>(cacheKey);
-        if (result.IsDefined(out guildRoles))
-            return guildRoles;
-
-        result = await _guildApi.GetGuildRolesAsync(guildId);
-        if (!result.IsDefined(out guildRoles))
-            return null;
-
-        // Filter out @everyone role
-        guildRoles = guildRoles.Where(r => r.ID != guildId)
-                               .ToList();
-
-        await _cache.CacheAsync
+        var result = await CacheAsync
         (
-             cacheKey,
-             guildRoles,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
+             $"{RolesKey}:{guildId.Value}",
+             () => _guildApi.GetGuildRolesAsync(guildId),
+             DateTimeOffset.UtcNow.AddMinutes(4),
+             roles => roles.Where(r => r.ID != guildId && !r.IsManaged).ToList()
         );
+        return result;
+    }
 
-        return guildRoles;
+    private async Task<T?> CacheAsync<T>
+    (
+        string                key,
+        Func<Task<Result<T>>> func,
+        DateTimeOffset        expiration,
+        Func<T, T>?           modify = null 
+    ) where T : class
+    {
+        var result = await _cache.RetrieveAsync<T>(key);
+        if (result.IsDefined(out var ret))
+            return ret;
+
+        result = await func();
+        if (!result.IsDefined(out ret))
+            return null;
+        
+        if (modify is not null)
+            ret = modify(ret);
+
+        await _cache.CacheAsync(key, ret, expiration);
+
+        return ret;
     }
 
     public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserBotManagedGuildsAsync
@@ -147,40 +129,36 @@ public class DashboardDiscordClient
         return managedGuilds;
     }
 
-    public async Task<IUser?> GetCurrentUserAsync()
+    public async Task<IPartialGuild?> GetCurrentUserBotManagedGuildAsync(Snowflake guildId)
     {
-        var result = await _restHttpClient.GetAsync<IUser>("users/@me");
-        return result.IsDefined(out var user) ? user : null;
+        var result = await GetCurrentUserBotManagedGuildsAsync();
+        return result?.FirstOrDefault(g => g.ID.Value == guildId);
     }
 
-    // TODO: Use cache.
+    public async Task<IUser?> GetCurrentUserAsync()
+    {
+        var result = await CacheAsync
+        (
+             UserMeKey,
+             () => _restHttpClient.GetAsync<IUser>("users/@me"),
+             DateTimeOffset.UtcNow.AddMinutes(4)
+        );
+        return result;
+    }
+
     public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync()
     {
-        const uint limit = 100;
-
-        IReadOnlyList<IPartialGuild>? guilds;
-
-        var result = await _cache.RetrieveAsync<IReadOnlyList<IPartialGuild>>(UserGuildsKey);
-        if (result.IsDefined(out guilds))
-            return guilds;
-
-        result = await _restHttpClient.GetAsync<IReadOnlyList<IPartialGuild>>
-        (
-         "users/@me/guilds",
-         b => b.AddQueryParameter("limit", limit.ToString())
-        );
-
-        if (!result.IsDefined(out guilds))
-            return null;
-
-        await _cache.CacheAsync
+        var result = await CacheAsync
         (
              UserGuildsKey,
-             guilds,
-             absoluteExpiration: DateTimeOffset.UtcNow.AddMinutes(1)
+             () => _restHttpClient.GetAsync<IReadOnlyList<IPartialGuild>>
+             (
+                  "users/@me/guilds",
+                  b => b.AddQueryParameter("limit", "100")
+             ),
+             DateTimeOffset.UtcNow.AddMinutes(4)
         );
-
-        return guilds;
+        return result;
     }
 
     public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserGuildsAsync

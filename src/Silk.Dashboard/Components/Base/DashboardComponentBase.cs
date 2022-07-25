@@ -5,8 +5,6 @@ namespace Silk.Dashboard.Components;
 
 public abstract class DashboardComponentBase : ComponentBase
 {
-    private const int DebugTaskDelayTime = 750;
-
     /// <summary>
     /// Classes added after component's classes
     /// </summary>
@@ -50,10 +48,6 @@ public abstract class DashboardComponentBase : ComponentBase
 
         try
         {
-#if DEBUG
-            await Task.Delay(DebugTaskDelayTime);
-#endif
-
             await func.Invoke();
         }
         catch (Exception e)
@@ -63,8 +57,8 @@ public abstract class DashboardComponentBase : ComponentBase
         finally
         {
             IsBusy = false;
-            if (callStateHasChanged)
-                await InvokeAsync(StateHasChanged);
+            if (callStateHasChanged) 
+                StateHasChanged();
         }
     }
 }

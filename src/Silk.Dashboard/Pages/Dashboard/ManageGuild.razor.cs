@@ -9,7 +9,6 @@ using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
-using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
@@ -26,14 +25,12 @@ public partial class ManageGuild
 
     private IPartialGuild     _guild;
     private GuildConfigEntity _guildConfig;
+    private bool              _requestFailed;
 
-    private bool RequestFailed { get; set; }
-
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _ = GetGuildFromRestAsync();
+        await GetGuildFromRestAsync();
         _ = GetGuildConfigAsync();
-        return Task.CompletedTask;
     }
 
     private static string GetGreetingStatus(GuildGreetingEntity greeting)
@@ -55,15 +52,15 @@ public partial class ManageGuild
 
     private async Task GetGuildFromRestAsync()
     {
-        RequestFailed = false;
-        _guild = await DiscordClient.GetCurrentUserGuildAsync(GuildIdParsed, DiscordPermission.ManageGuild);
-        if (_guild is null) RequestFailed = true;
+        _requestFailed = false;
+        _guild = await DiscordClient.GetCurrentUserBotManagedGuildAsync(GuildIdParsed);
+        if (_guild is null) _requestFailed = true;
         StateHasChanged();
     }
 
     private async Task<GuildConfigEntity> FetchGuildConfigAsync()
     {
-        var request = new GetOrCreateGuildConfig.Request(GuildIdParsed, StringConstants.DefaultCommandPrefix);
+        var request = new GetGuildConfig.Request(GuildIdParsed);
         return await Mediator.Send(request);
     }
 
@@ -121,6 +118,14 @@ public partial class ManageGuild
         );
     }
 
+    private Task CreateGreetingAsync()
+    {
+        return OpenGreetingDialogAsync(greeting: new() 
+        { 
+            GuildID = _guildConfig.GuildID,
+        });
+    }
+
     private async Task OpenGreetingDialogAsync
     (
         int                  greetingId = 0,
@@ -130,11 +135,11 @@ public partial class ManageGuild
         // Todo: Handle scrolling?
         var options = new DialogOptions
         {
-            CloseButton          = true,
             CloseOnEscapeKey     = false,
             DisableBackdropClick = true,
             Position             = DialogPosition.Center,
             FullWidth            = true,
+            NoHeader             = true,
         };
 
         var parameters = new DialogParameters
@@ -143,7 +148,7 @@ public partial class ManageGuild
             { "Greeting", greeting },
         };
 
-        var dialog = DialogService.Show<CreateGuildGreetingDialog>("", parameters, options);
+        var dialog = DialogService.Show<GuildGreetingDialog>("", parameters, options);
         await dialog.Result;
 
         StateHasChanged();
