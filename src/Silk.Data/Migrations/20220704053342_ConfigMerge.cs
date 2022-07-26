@@ -137,9 +137,9 @@ namespace Silk.Data.Migrations
             migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_infraction_steps_GuildConfigEntityId\";");
             migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_invite_configs_GuildModConfigId\";");
             
-            migrationBuilder.Sql("UPDATE invite_configs ic SET \"GuildModConfigId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id));");
-            migrationBuilder.Sql("UPDATE infraction_steps istep SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id));");
-            migrationBuilder.Sql("UPDATE infraction_exemptions iexempt SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id));");
+            migrationBuilder.Sql("UPDATE invite_configs ic SET \"GuildModConfigId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id) WHERE t.\"Id\" = ic.\"Id\" );");
+            migrationBuilder.Sql("UPDATE infraction_steps istep SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id) WHERE t.\"Id\" = istep.\"GuildConfigEntityId\" );");
+            migrationBuilder.Sql("UPDATE infraction_exemptions iexempt SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc LEFT JOIN temp t USING (guild_id) WHERE t.\"Id\" = iexempt.\"GuildConfigEntityId\" );");
             
             migrationBuilder.Sql("CREATE UNIQUE INDEX \"IX_infraction_exemptions_GuildConfigEntityId\" ON infraction_exemptions USING btree (\"GuildConfigEntityId\");");
             migrationBuilder.Sql("CREATE UNIQUE INDEX \"IX_infraction_steps_GuildConfigEntityId\" ON infraction_steps USING btree (\"GuildConfigEntityId\");");
