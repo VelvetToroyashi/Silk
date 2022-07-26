@@ -9,6 +9,7 @@ using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
+using Silk.Shared.Constants;
 
 namespace Silk.Dashboard.Pages.Dashboard;
 
@@ -92,7 +93,7 @@ public partial class ManageGuild
 
     private async Task<GuildConfigEntity> FetchGuildConfigAsync()
     {
-        var request = new GetGuildConfig.Request(GuildIdParsed);
+        var request = new GetOrCreateGuildConfig.Request(GuildIdParsed, StringConstants.DefaultCommandPrefix);
         return await Mediator.Send(request);
     }
 
