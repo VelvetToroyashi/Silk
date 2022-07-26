@@ -33,7 +33,7 @@
     [Parameter]
     public EventCallback<IPartialGuild> OnClick { get; set; }
 
-    private const string DefaultGuildIconUrl = "https://img.icons8.com/ios-filled/100/000000/no-image.png";
+    public const string DefaultGuildIconUrl = "https://img.icons8.com/ios-filled/100/000000/no-image.png";
 
     protected override string ComponentStyles
         => GuildViewStyleBuilder.Build();

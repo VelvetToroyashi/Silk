@@ -5,30 +5,26 @@
         Welcome to Silk! Dashboard
     </MudText>
 
-    <AuthorizeView>
-        <Authorized>
-            <MudDivider Class="my-8" Style="height: 4px" DividerType="DividerType.Middle"/>
+    <MudDivider Class="my-8" Style="height: 4px" DividerType="DividerType.Middle"/>
 
-            <MudGrid Spacing="4">
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <div class="d-flex flex-column align-center justify-center">
-                                <MudText Class="mb-2" Color="Color.Info" Align="Align.Center" Typo="Typo.h6">
-                                    Manage Guilds
-                                </MudText>
-                                <MudText Class="mb-4" Align="Align.Center">
-                                    See the guilds you've joined and manage
-                                    the ones you have permissions to.
-                                </MudText>
-                                <MudButton Variant="Variant.Outlined" Href="profile">
-                                    Goto
-                                </MudButton>
-                            </div>
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            </MudGrid>
-        </Authorized>
-    </AuthorizeView>
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <div class="d-flex flex-column align-center justify-center">
+                        <MudText Class="mb-2" Color="Color.Info" Align="Align.Center" Typo="Typo.h6">
+                            Manage Guilds
+                        </MudText>
+                        <MudText Class="mb-4" Align="Align.Center">
+                            See the guilds you've joined and manage
+                            the ones you have permissions to.
+                        </MudText>
+                        <MudButton Variant="Variant.Outlined" Href="profile">
+                            Goto
+                        </MudButton>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 </MudContainer>

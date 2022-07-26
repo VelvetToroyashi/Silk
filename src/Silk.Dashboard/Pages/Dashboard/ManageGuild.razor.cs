@@ -26,11 +26,18 @@ public partial class ManageGuild
     private IPartialGuild     _guild;
     private GuildConfigEntity _guildConfig;
     private bool              _requestFailed;
+    
+    private IReadOnlyList<IRole>         _roles;
+    private IReadOnlyList<IChannel>      _channels;
+    private IReadOnlyList<IPartialGuild> _guilds;
 
     protected override async Task OnInitializedAsync()
     {
         await GetGuildFromRestAsync();
+        if (_requestFailed) return;
         _ = GetGuildConfigAsync();
+        await LoadGuildDataAsync();
+        StateHasChanged();
     }
 
     private static string GetGreetingStatus(GuildGreetingEntity greeting)
@@ -42,6 +49,31 @@ public partial class ManageGuild
             GreetingOption.GreetOnRole => greeting.MetadataID,
         };
         return $"{option} - {data}";
+    }
+
+    private Task LoadGuildDataAsync()
+    {
+        return Task.WhenAll
+        (
+             UpdateGuildsAsync(),
+             UpdateChannelAsync(),
+             UpdateRolesAsync()
+        );
+    }
+
+    private async Task UpdateGuildsAsync()
+    {
+        _guilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync();
+    }
+
+    private async Task UpdateChannelAsync()
+    {
+        _channels = await DiscordClient.GetBotChannelsAsync(GuildIdParsed);
+    }
+
+    private async Task UpdateRolesAsync()
+    {
+        _roles = await DiscordClient.GetBotRolesAsync(GuildIdParsed);
     }
 
     private async Task GetGuildConfigAsync()

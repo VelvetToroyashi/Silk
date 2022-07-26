@@ -5,6 +5,7 @@
 @inherits DashboardPageBase
 
 @using Microsoft.AspNetCore.Components
+@using Remora.Rest.Core
 @using static Silk.Dashboard.Helpers.StringHelpers
 @using static Silk.Dashboard.Converters.MudBlazorSnowflakeConverter
 
@@ -129,14 +130,21 @@ else
                             <MudItem xs="12" sm="6">
                                 <MudTooltip Placement="Placement.Bottom" Text="Id of the role to apply when muting members.">
                                     <MudText Typo="Typo.h5">
-                                        @LabelFor(() => _guildConfig.MuteRoleID)
+                                        Mute Role
                                     </MudText>
                                 </MudTooltip>
 
-                                <MudTextField @bind-Value="_guildConfig.MuteRoleID"
-                                              Variant="Variant.Outlined"
-                                              Validation="NonNullableValidator"
-                                              Converter="NonNullableConverter"/>
+                                @* Todo: Make reusable select/dropdown component with data refresh capability *@
+                                <MudSelect T="Snowflake"
+                                           Value="_guildConfig.MuteRoleID"
+                                           Variant="Variant.Outlined">
+                                    @foreach (var role in _roles)
+                                    {
+                                        <MudSelectItem Value="@role.ID">
+                                            @role.Name
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
@@ -267,8 +275,8 @@ else
 
             @* Save Button *@
             <MudButton Class="mt-5" Color="Color.Info" 
-                       Variant="Variant.Filled"
-                       OnClick="@(async () => await SaveChangesAsync())" Disabled="IsBusy">
+                       Variant="Variant.Filled" Disabled="IsBusy"
+                       OnClick="@(async () => await SaveChangesAsync())">
                 @if (IsBusy)
                 {
                     <MudText Class="mr-2">Saving</MudText>

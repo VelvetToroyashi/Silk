@@ -3,6 +3,7 @@ using MudBlazor;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
+using Silk.Dashboard.Components;
 using Silk.Dashboard.Services;
 
 namespace Silk.Dashboard.Pages.Dashboard;
@@ -29,13 +30,12 @@ public partial class Profile
 
     private string CurrentUserName            => _user.Username;
     private string CurrentUserAvatar          => GetUserAvatarUrl();
-    private string HeaderViewGreeting         => CurrentUserName;
     private string JoinedGuildsVisibilityText => $"{(_showJoinedGuilds ? "Hide" : "Show")} Joined Servers";
 
     private string GetUserAvatarUrl()
     {
         var result = CDN.GetUserAvatarUrl(_user, imageSize: 256);
-        return result.IsDefined(out var uri) ? uri.ToString() : "";
+        return result.IsDefined(out var uri) ? uri.ToString() : GuildView.DefaultGuildIconUrl;
     }
 
     private void ToggleJoinedGuildsVisibility() 
