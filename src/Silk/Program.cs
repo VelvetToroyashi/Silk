@@ -47,13 +47,13 @@ public class Program
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();
-        
+
         hostBuilder.ConfigureAppConfiguration(configuration =>
         {
-            configuration.AddEnvironmentVariables("SILK_");
             configuration.SetBasePath(Directory.GetCurrentDirectory());
             configuration.AddJsonFile("appSettings.json", true, false);
             configuration.AddUserSecrets("VelvetThePanda-Silk", false);
+            configuration.AddEnvironmentVariables("SILK_");
         });
 
         ConfigureServices(hostBuilder).AddPlugins();
