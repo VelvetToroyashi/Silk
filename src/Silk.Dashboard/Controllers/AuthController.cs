@@ -18,20 +18,17 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login(string returnUrl = "/")
+    public IActionResult Login([FromForm] string returnUrl = "/")
     {
-        return Challenge(new AuthenticationProperties { RedirectUri = EnsureLocalRedirectUrl(returnUrl) }, 
+        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, 
                          DiscordAuthenticationDefaults.AuthenticationScheme);
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> LogOut(string returnUrl = "/")
+    public async Task<IActionResult> LogOut()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         _tokenStore.RemoveToken(HttpContext.User.GetUserId());
-        return LocalRedirect(EnsureLocalRedirectUrl(returnUrl));
+        return LocalRedirect("/");
     }
-
-    private string EnsureLocalRedirectUrl(string returnUrl) 
-        => Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
 }

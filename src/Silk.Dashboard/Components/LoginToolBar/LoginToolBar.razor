@@ -2,6 +2,8 @@
 
 @using Silk.Dashboard.Extensions
 
+@inject NavigationManager NavManager
+
 <AuthorizeView>
     <Authorized>
         <MudButtonGroup OverrideStyles="false">
@@ -24,6 +26,7 @@
                        Variant="Variant.Text">
                 Login
             </MudButton>
+            <input type="hidden" name="returnUrl" value="@NavManager.Uri">
         </form>
     </NotAuthorized>
 </AuthorizeView>

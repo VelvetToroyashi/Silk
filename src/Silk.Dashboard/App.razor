@@ -1,6 +1,8 @@
 ﻿@using Silk.Dashboard.Extensions
 @using Silk.Dashboard.Themes
 
+@inject NavigationManager NavManager
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
@@ -14,10 +16,10 @@
                             <form action="api/auth/login" method="post">
                                 <MudButton ButtonType="ButtonType.Submit"
                                            Size="Size.Large"
-                                           Color="Color.Info"
                                            StartIcon="@Icons.Material.Filled.Login">
                                     Login
                                 </MudButton>
+                                <input type="hidden" name="returnUrl" value="@NavManager.Uri">
                             </form>
                         </ProblemView>
                     }
