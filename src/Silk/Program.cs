@@ -276,11 +276,15 @@ public class Program
     {
         void Builder(DbContextOptionsBuilder b)
         {
-            b.UseNpgsql(persistenceOptions.GetConnectionString());
+            var connectionString = persistenceOptions.GetConnectionString();
+
             #if DEBUG
+            connectionString += "Include Error Detail=true;";
             b.EnableSensitiveDataLogging();
             b.EnableDetailedErrors();
             #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
+
+            b.UseNpgsql(connectionString);
         }
 
         services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
