@@ -17,13 +17,9 @@ namespace Silk.Data.Migrations
                 name: "FK_infraction_steps_guild_moderation_config_GuildModConfigEnti~",
                 table: "infraction_steps");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_invite_configs_guild_moderation_config_GuildModConfigId",
-                table: "invite_configs");
+            migrationBuilder.Sql("ALTER TABLE invite_configs DROP CONSTRAINT IF EXISTS \"FK_invite_configs_guild_moderation_config_GuildModConfigId\";");
             
-            migrationBuilder.DropIndex(
-               name: "IX_invite_configs_GuildModConfigId",
-               table: "invite_configs");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_invite_configs_GuildModConfigId\";");
             
             migrationBuilder.Sql("CREATE TABLE temp AS SELECT * FROM guild_moderation_config;");
 
@@ -141,7 +137,7 @@ namespace Silk.Data.Migrations
             migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_infraction_steps_GuildConfigEntityId\";");
             migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_invite_configs_GuildModConfigId\";");
             
-            migrationBuilder.Sql("UPDATE invite_configs ic SET \"GuildModConfigId\" = (SELECT gc.\"Id\" FROM guild_configs gc INNER JOIN temp t USING (guild_id) WHERE t.\"Id\" = ic.\"Id\" );");
+            migrationBuilder.Sql("UPDATE invite_configs ic SET \"GuildModConfigId\" = (SELECT gc.\"Id\" FROM guild_configs gc INNER JOIN temp t USING (guild_id) WHERE t.\"Id\" = ic.\"GuildModConfigId\" );");
             migrationBuilder.Sql("UPDATE infraction_steps istep SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc INNER JOIN temp t USING (guild_id) WHERE t.\"Id\" = istep.\"GuildConfigEntityId\" );");
             migrationBuilder.Sql("UPDATE infraction_exemptions iexempt SET \"GuildConfigEntityId\" = (SELECT gc.\"Id\" FROM guild_configs gc INNER JOIN temp t USING (guild_id) WHERE t.\"Id\" = iexempt.\"GuildConfigEntityId\" );");
             
