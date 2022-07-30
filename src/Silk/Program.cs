@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -41,31 +40,22 @@ public class Program
 {
     public static async Task Main()
     {
-        Console.WriteLine("Starting Silk...");
-        
-        
+        Console.WriteLine("Starting Silk!...");
+
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();
 
-        hostBuilder.ConfigureAppConfiguration(configuration =>
-        {
-            configuration.SetBasePath(Directory.GetCurrentDirectory());
-            configuration.AddJsonFile("appSettings.json", true, false);
-            configuration.AddUserSecrets("VelvetThePanda-Silk", false);
-            configuration.AddEnvironmentVariables("SILK_");
-        });
-
+        ConfigureApp(hostBuilder);
         ConfigureServices(hostBuilder).AddPlugins();
+        AddRedisAndAcquireShard(hostBuilder);
 
-        hostBuilder.ConfigureServices(AddRedisAndAcquireShard);
-        
         Console.WriteLine("Configured services.");
-        
+
         IHost? host = hostBuilder.Build();
-        
+
         Console.WriteLine("Host is built.");
-        
+
         Log.ForContext<Program>().Information("Attempting to migrate core database");
         var coreMigrationResult = await EnsureDatabaseCreatedAndApplyMigrations(host);
 
@@ -80,105 +70,122 @@ public class Program
             Log.ForContext<Program>().Fatal("Failed to migrate core database. Error: {Error}", coreMigrationResult.Error);
             return;
         }
-        
+
         Log.ForContext<Program>().Information("Startup checks OK. Starting Silk!");
 
         var metrics = new KestrelMetricServer(6000);
 
         try { metrics.Start(); } catch { /* ignored */ }
-        
+
         await host.RunAsync();
-        
+
         await metrics.StopAsync();
     }
 
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "EFCore CLI tools rely on reflection.")]
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
-        IHostBuilder? builder = Host
-           .CreateDefaultBuilder(args);
-
-        builder.ConfigureServices((context, container) =>
-        {
-            SilkConfigurationOptions? silkConfig = context.Configuration.GetSilkConfigurationOptions();
-
-            AddDatabases(container, silkConfig.Persistence);
-        });
-
+        IHostBuilder? builder = Host.CreateDefaultBuilder(args);
+        builder.ConfigureServices((context, services) => services.AddSilkDatabase(context.Configuration));
         return builder;
     }
 
-    private static void AddRedisAndAcquireShard(HostBuilderContext context, IServiceCollection services)
+    private static void ConfigureApp(IHostBuilder hostBuilder)
     {
-        Log.ForContext<Program>().Information("Attempting to acquire shard ID from Redis...");
-        var config      = context.Configuration;
-        
-        var silkConfig  = config.GetSilkConfigurationOptions();
-        var redisConfig = silkConfig.Redis;
-
-        var connectionConfig = new ConfigurationOptions()
-        {
-            EndPoints       = { { redisConfig.Host, redisConfig.Port } },
-            Password        = redisConfig.Password,
-            DefaultDatabase = redisConfig.Database,
-            SyncTimeout = 90000,
-            AbortOnConnectFail = false
-        };
-        
-        var redis = ConnectionMultiplexer.Connect(connectionConfig);
-        
-        var db    = redis.GetDatabase();
-        var taken = false;
-
-        var takenShard = 0;
-        
-        while (true)
-        {
-            for (int i = 0; i < silkConfig.Discord.Shards; i++)
-            {
-                var key = $"shard:{i}";
-
-                if (db.KeyExists(key))
-                    continue;
-
-                db.StringSet(key, "", TimeSpan.FromSeconds(7));
-                Metrics.DefaultRegistry.SetStaticLabels(new() { {"shard", i.ToString()} });
-                
-                takenShard = i;
-                
-                taken = true;
-                break;
-            }
-            
-            if (taken) break;
-            
-            Thread.Sleep(1000);
-        }
-
-        Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
-        
-        services.AddSingleton<IConnectionMultiplexer>(redis);
-        services.AddDiscordRedisCaching(r => r.ConfigurationOptions = connectionConfig);
-        
-        services.Configure<DiscordGatewayClientOptions>(gw => gw.ShardIdentification = new ShardIdentification(takenShard, silkConfig.Discord.Shards));
+        hostBuilder.ConfigureAppConfiguration
+        (
+             builder =>
+             {
+                 // Need to specify configuration providers explicitly
+                 // due to custom 'appSettings.json' file, as well as
+                 // UserSecrets only being available by default in Development mode
+                 builder.AddJsonFile("appSettings.json", optional: true);
+                 builder.AddUserSecrets<Program>(optional: true);
+                 builder.AddEnvironmentVariables("SILK_");
+             }
+        );
     }
-    
+
+    private static void AddRedisAndAcquireShard(IHostBuilder builder)
+    {
+        builder.ConfigureServices
+        (
+             (context, services) =>
+             {
+                 Log.ForContext<Program>().Information("Attempting to acquire shard ID from Redis...");
+
+                 var configOptions = context.Configuration.GetSilkConfigurationOptions();
+                 var redisConfig   = configOptions.Redis;
+
+                 var connectionConfig = new ConfigurationOptions
+                 {
+                     EndPoints          = { { redisConfig.Host, redisConfig.Port } },
+                     Password           = redisConfig.Password,
+                     DefaultDatabase    = redisConfig.Database,
+                     SyncTimeout        = 90000,
+                     AbortOnConnectFail = false
+                 };
+
+                 var redis = ConnectionMultiplexer.Connect(connectionConfig);
+
+                 var db    = redis.GetDatabase();
+                 var taken = false;
+
+                 var takenShard = 0;
+
+                 while (true)
+                 {
+                     for (int i = 0; i < configOptions.Discord.Shards; i++)
+                     {
+                         var key = $"shard:{i}";
+
+                         if (db.KeyExists(key))
+                             continue;
+
+                         db.StringSet(key, "", TimeSpan.FromSeconds(7));
+                         Metrics.DefaultRegistry.SetStaticLabels(new() { { "shard", i.ToString() } });
+
+                         takenShard = i;
+
+                         taken = true;
+                         break;
+                     }
+
+                     if (taken) break;
+
+                     Thread.Sleep(1000);
+                 }
+
+                 Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
+
+                 services.AddSingleton<IConnectionMultiplexer>(redis);
+                 services.AddDiscordRedisCaching(r => r.ConfigurationOptions = connectionConfig);
+
+                 services.Configure<DiscordGatewayClientOptions>
+                 (
+                    gw => gw.ShardIdentification = new ShardIdentification(takenShard, configOptions.Discord.Shards)
+                 );
+             }
+        );
+    }
+
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
     {
         try
         {
             using var serviceScope = builtBuilder.Services.CreateScope();
 
-            await using GuildContext dbContext = serviceScope
-                                                .ServiceProvider
-                                                .GetRequiredService<GuildContext>();
+            await using var dbContext = serviceScope
+                                       .ServiceProvider
+                                       .GetRequiredService<GuildContext>();
 
-            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+            var pendingMigrations = (await dbContext.Database
+                                                   .GetPendingMigrationsAsync()).ToList();
 
             if (pendingMigrations.Any())
                 await dbContext.Database.MigrateAsync();
 
-            return Result<int>.FromSuccess(pendingMigrations.Count());
+            return Result<int>.FromSuccess(pendingMigrations.Count);
         }
         catch (Exception e)
         {
@@ -189,26 +196,22 @@ public class Program
     private static IHostBuilder ConfigureServices(IHostBuilder builder)
     {
         builder
-           .AddPlugins()
-           .AddRemoraHosting()
            .ConfigureLogging(l => l.ClearProviders().AddSerilog())
            .ConfigureServices((context, services) =>
             {
-                // There's a more elegant way to do this, but I'm lazy and this works.
                 var silkConfig = context.Configuration.GetSilkConfigurationOptions();
 
-                AddDatabases(services, silkConfig.Persistence);
-                
                 // A little note on Sentry; it's important to initialize logging FIRST
                 // And then sentry, because we set the settings for sentry later. 
                 // If we configure logging after, it'll override the settings with defaults.
 
                 services
                    .AddSilkConfigurationOptions(context.Configuration)
+                   .AddSilkDatabase(context.Configuration)
+                   .AddSilkLogging(context.Configuration)
                    .AddRemoraServices()
                    .AddSingleton<ShardHelper>()
                    .AddHostedService<ShardStatService>()
-                   .AddSilkLogging(context.Configuration)
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()
@@ -226,17 +229,17 @@ public class Program
                    .AddSingleton<MemberLoggerService>()
                    .AddSingleton<GuildConfigCacheService>()
                    .AddScoped<GuildCacherService>()
-                   .AddSingleton<GuildGreetingService>()
                    .AddSingleton<IClock>(SystemClock.Instance)
                    .AddSingleton<IDateTimeZoneSource>(TzdbDateTimeZoneSource.Default)
                    .AddSingleton<IDateTimeZoneProvider, DateTimeZoneCache>()
                    .AddTransient<TimeHelper>()
+                   .AddSingleton<GuildGreetingService>()
                    .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
                    .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
                    .AddMediatR(typeof(GuildContext))
-                    // Very high throuput handler that needs to be explitily disposed of,
+                    // Very high throughput handler that needs to be explicitly disposed of,
                     // else it'll gobble up connections.
                    .AddScoped(typeof(AddUserJoinDate).GetNestedTypes(BindingFlags.NonPublic)[0])
                    .AddScoped(typeof(AddUserLeaveDate).GetNestedTypes(BindingFlags.NonPublic)[0])
@@ -270,24 +273,5 @@ public class Program
             });
 
         return builder;
-    }
-
-    private static void AddDatabases(IServiceCollection services, SilkPersistenceOptions persistenceOptions)
-    {
-        void Builder(DbContextOptionsBuilder b)
-        {
-            var connectionString = persistenceOptions.GetConnectionString();
-
-            #if DEBUG
-            connectionString += "Include Error Detail=true;";
-            b.EnableSensitiveDataLogging();
-            b.EnableDetailedErrors();
-            #endif // EFCore will complain about enabling sensitive data if you're not in a debug build. //
-
-            b.UseNpgsql(connectionString);
-        }
-
-        services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
-        services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
     }
 }
