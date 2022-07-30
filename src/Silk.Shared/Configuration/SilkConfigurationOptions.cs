@@ -136,8 +136,7 @@ public class SilkPersistenceOptions
         $"Port={Port};"         +
         $"Database={Database};" +
         $"Username={Username};" +
-        $"Password={Password};" +
-        "Include Error Detail = true";
+        $"Password={Password};";
 }
 
 /// <summary>

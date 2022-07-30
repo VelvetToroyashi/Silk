@@ -11,23 +11,16 @@
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <Optimize>false</Optimize>
         <WarningLevel>2</WarningLevel>
         <DebugType>full</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-        <DebugType>full</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
+        <None Remove="logs\**" />
+        <None Include="flags\*.png" CopyToOutputDirectory="Always" />
         <Content Include="appSettings.json" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
@@ -70,13 +63,13 @@
         <PackageReference Include="Remora.Discord.Extensions" />
         <PackageReference Include="Remora.Discord.Hosting" />
         <PackageReference Include="Remora.Discord.Interactivity" />
-        <PackageReference Include="Remora.Discord.Pagination" Version="3.0.3" />
+        <PackageReference Include="Remora.Discord.Pagination" Version="3.0.6" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
-        <PackageReference Include="Sentry" Version="3.20.0" />
-        <PackageReference Include="Sentry.DiagnosticSource" Version="3.20.0" />
-        <PackageReference Include="Sentry.Extensions.Logging" Version="3.20.0" />
-        <PackageReference Include="Sentry.Serilog" Version="3.20.0" />
+        <PackageReference Include="Sentry" Version="3.20.1" />
+        <PackageReference Include="Sentry.DiagnosticSource" Version="3.20.1" />
+        <PackageReference Include="Sentry.Extensions.Logging" Version="3.20.1" />
+        <PackageReference Include="Sentry.Serilog" Version="3.20.1" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.Expressions" />
         <PackageReference Include="Serilog.Extensions.Hosting" />
@@ -102,36 +95,7 @@
         <ProjectReference Include="..\Silk.Shared\Silk.Shared.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="flags\trans.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\pan.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\mlm.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\enby.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\demi.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\bi.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\ace.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="flags\pride.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Remove="logs\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Remove="logs\**" />
+     <ItemGroup>
         <Compile Update="Commands\Server\Config\ConfigCommands.Edit.cs">
           <DependentUpon>ConfigCommands.cs</DependentUpon>
         </Compile>
@@ -177,10 +141,5 @@
         <Compile Update="Commands\Server\Config\ConfigCommands.Setup.cs">
           <DependentUpon>ConfigCommands.cs</DependentUpon>
         </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\Commands" />
-      <Folder Include="Services\Bot\Help" />
-    </ItemGroup>
+    </ItemGroup> 
 </Project>

@@ -44,8 +44,8 @@ For the **Database**, look for the `Persistence` section of the file, it will lo
 "Host": "localhost",
 "Port": "5432",
 "Database": "silk",
-"Username": "postgres",
-"Password": ""
+"Username": "silk",
+"Password": "silk"
 }
 ```
 
@@ -79,7 +79,7 @@ The **Plugins** section will look something like this:
 ```json
 "Plugins": {
   "RoleMenu": {
-    "Database": "Host=localhost;Port=5432;Database=silk_role_menu;Username=postgres;Password="
+    "Database": "Host=localhost;Port=5432;Database=silk_role_menu;Username=silk;Password=silk"
   }
 }
 ```
@@ -128,7 +128,7 @@ The structure for the file is the same for the [Default](#default) - `appSetting
 
 Before you start, you will want to make sure that you have both Postgres and Redis running and available to Silk!. If the services are running in docker, you'll wanna make sure that the appropriate ports are exposed on the container (`5432` and `6379` respectively).
 
-If Silk! is also running in Docker, ensure that it's within the same network as both Postgres and Redis. To connect, simply reference the container name instead of `localhost` or an IP (e.g. `Server=postgres`).
+If Silk! is also running in Docker, ensure that it's within the same network as both Postgres and Redis. To connect, simply reference the container name instead of `localhost` or an IP (e.g. `Server=silk`).
 
 If you're starting fresh, just cloned the repo, then you'll need to make sure you've done the needed [Configuration](#configuration--secrets-management), before running or debugging Silk!.
 
