@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MudBlazor;
 using MudBlazor.Services;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest.Core;
 using Silk.Dashboard.Extensions;
@@ -44,8 +45,8 @@ public static class DependencyInjection
     {
         services.AddDiscordRest
         (
-         provider => provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
-                             .Value.Discord.BotToken
+         provider => (provider.GetRequiredService<IOptions<SilkConfigurationOptions>>()
+                             .Value.Discord.BotToken, DiscordTokenType.Bot)
         );
 
         services.AddScoped<DashboardDiscordClient>();
