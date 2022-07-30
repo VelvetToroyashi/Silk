@@ -3,6 +3,7 @@
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Caching.Abstractions.Services;
+using Remora.Discord.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
 using Remora.Rest.Core;
@@ -42,7 +43,8 @@ public class DashboardDiscordClient
         _restHttpClient.WithCustomization
         (
              b => b.WithRateLimitContext(_cache)
-                    .With(m => m.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
+                   .With(m => m.Headers.Authorization = new("Bearer", GetCurrentUserToken()))
+                   .SkipAuthorization()
         );
     }
 
