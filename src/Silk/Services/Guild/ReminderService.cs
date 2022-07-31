@@ -254,10 +254,16 @@ public sealed class ReminderService : IHostedService
         }
         else
         {
-            dispatchMessage.AppendLine($"Hi! {reminder.CreatedAt.ToTimestamp()}, you set a reminder.");
-
-            if (!originalMessageExists)
+            if (originalMessageExists)
+            {
+                dispatchMessage.AppendLine($"Hi! {reminder.CreatedAt.ToTimestamp()}, you set a reminder.");
+            }
+            else
+            {
+                dispatchMessage.AppendLine($"Hi <@{reminder.OwnerID}! You set a reminder {reminder.CreatedAt.ToTimestamp()} but the message it referred to has disappeared!");
                 dispatchMessage.AppendLine("I couldn't find the original message, but here's what you wanted to be reminded of:");
+            }
+
 
             if (!string.IsNullOrWhiteSpace(reminder.MessageContent))
                 dispatchMessage.AppendLine($"> {reminder.MessageContent.Truncate(1800, "[...]").Replace("\n", "\n> ")} \n\n");
