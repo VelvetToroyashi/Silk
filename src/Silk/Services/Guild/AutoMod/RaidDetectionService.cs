@@ -28,9 +28,10 @@ public class RaidDetectionService : BackgroundService
     private readonly Channel<Raider> _raiders = Channel.CreateUnbounded<Raider>();
     
     private readonly ConcurrentDictionary<Snowflake, List<JoinRange>>                      _joinRanges     = new();
+    private readonly ConcurrentDictionary<Snowflake, List<MessageDTO>>                     _messageBuckets = new();
     private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins          = new();
-    private readonly ConcurrentDictionary<Snowflake, List<MessageDTO>>               _messageBuckets = new();
 
+    
     public RaidDetectionService(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
     {
         _infractions = infractions;
