@@ -39,7 +39,7 @@ public class RaidDetectionService : BackgroundService
         _config      = config;
     }
 
-    public async Task<Result> HandleMessageAsync(Snowflake guildID, Snowflake channelID, Snowflake messageID, Snowflake AuthorID, string? content)
+    public async Task<Result> HandleMessageAsync(Snowflake guildID, Snowflake channelID, Snowflake messageID, Snowflake authorID, string? content)
     {
         if (string.IsNullOrWhiteSpace(content))
             return Result.FromSuccess();
@@ -53,7 +53,7 @@ public class RaidDetectionService : BackgroundService
         
         var bucket = _messageBuckets.GetOrAdd(channelID, _ => new());
         
-        bucket.Add(new MessageDTO(guildID, channelID, messageID, AuthorID, content.GetHashCode()));
+        bucket.Add(new MessageDTO(guildID, channelID, messageID, authorID, content.GetHashCode()));
         
         var groups = bucket.GroupBy(x => x.HashCode);
 

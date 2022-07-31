@@ -33,12 +33,18 @@ public partial class ConfigCommands : CommandGroup
     private readonly IDiscordRestChannelAPI  _channels;
     private readonly ViewConfigCommands    _viewConfig;
 
-    public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels, ViewConfigCommands viewConfig)
+    public ConfigCommands
+    (
+        ICommandContext         context,
+        ViewConfigCommands      viewConfig,
+        IDiscordRestChannelAPI  channels,
+        GuildConfigCacheService configCache
+    )
     {
-        _context         = context;
-        _configCache     = configCache;
-        _channels        = channels;
-        _viewConfig = viewConfig;
+        _context     = context;
+        _channels    = channels;
+        _viewConfig  = viewConfig;
+        _configCache = configCache;
     }
 
     [Command("reload")]
