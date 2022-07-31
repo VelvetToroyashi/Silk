@@ -77,16 +77,16 @@ public class RaidDetectionService : BackgroundService
         return Result.FromSuccess();
     }
 
-    public async Task<Result> HandleJoinAsync(Snowflake GuildID, Snowflake UserID, DateTimeOffset joined, bool hasAvatar)
+    public async Task<Result> HandleJoinAsync(Snowflake guildID, Snowflake userID, DateTimeOffset joinedAt, bool hasAvatar)
     {
-        TrimBuckets(GuildID);
+        TrimBuckets(guildID);
 
-        var config = await _config.GetConfigAsync(GuildID);
+        var config = await _config.GetConfigAsync(guildID);
         
         if (!config.EnableRaidDetection)
             return Result.FromSuccess();
 
-        var joinCounter = _joins.GetOrAdd(GuildID, _ => new());
+        var joinCounter = _joins.GetOrAdd(guildID, _ => new());
 
         if (DateTimeOffset.UtcNow - joinCounter.LastJoin > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
         {
@@ -95,18 +95,18 @@ public class RaidDetectionService : BackgroundService
         
         if (joinCounter.Count++ >= config.RaidDetectionThreshold)
         {
-            await _raiders.Writer.WriteAsync(new Raider(GuildID, UserID, "Raid Detection: Join velocity check exceeds threshold."));
+            await _raiders.Writer.WriteAsync(new Raider(guildID, userID, "Raid Detection: Join velocity check exceeds threshold."));
 
             return Result.FromSuccess();
         }
         
-        joinCounter.LastJoin = joined;
-        _joins[GuildID] = joinCounter;
+        joinCounter.LastJoin = joinedAt;
+        _joins[guildID] = joinCounter;
         
         // Join velocity check failed. Check for chunked raid activity.
-        var joinRanges = _joinRanges.GetOrAdd(GuildID, new List<JoinRange>());
+        var joinRanges = _joinRanges.GetOrAdd(guildID, new List<JoinRange>());
 
-        var created = UserID.Timestamp;
+        var created = userID.Timestamp;
         
         var range = joinRanges.FirstOrDefault(r => r.InRange(created));
 
@@ -118,7 +118,7 @@ public class RaidDetectionService : BackgroundService
 
         if (range.IsSuspect(created))
         {
-            await _raiders.Writer.WriteAsync(new Raider(GuildID, UserID, "Raid Detection: Join cluster check failed."));
+            await _raiders.Writer.WriteAsync(new Raider(guildID, userID, "Raid Detection: Join cluster check failed."));
             return Result.FromSuccess();
         }
         
@@ -127,9 +127,9 @@ public class RaidDetectionService : BackgroundService
         return Result.FromSuccess();
     }
 
-    private void TrimBuckets(Snowflake GuildID)
+    private void TrimBuckets(Snowflake guildID)
     {
-        if (!_joinRanges.TryGetValue(GuildID, out var ranges))
+        if (!_joinRanges.TryGetValue(guildID, out var ranges))
             return;
 
         var expiration = DateTimeOffset.UtcNow.AddMinutes(-2);
