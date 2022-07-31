@@ -27,6 +27,7 @@ using Remora.Discord.Gateway.Transport;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
+using Remora.Discord.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
@@ -56,8 +57,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
         // Add REST and tack on our own policy
-        services.AddDiscordRest(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken,
-                            b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
+        services.AddDiscordRest(s => (s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, DiscordTokenType.Bot), b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
 
         services.TryAddSingleton<Random>();
         services.TryAddSingleton<ResponderDispatchService>();
