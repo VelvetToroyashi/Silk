@@ -33,12 +33,18 @@ public partial class ConfigCommands : CommandGroup
     private readonly IDiscordRestChannelAPI  _channels;
     private readonly ViewConfigCommands    _viewConfig;
 
-    public ConfigCommands(ICommandContext context, GuildConfigCacheService configCache, IDiscordRestChannelAPI channels, ViewConfigCommands viewConfig)
+    public ConfigCommands
+    (
+        ICommandContext         context,
+        ViewConfigCommands      viewConfig,
+        IDiscordRestChannelAPI  channels,
+        GuildConfigCacheService configCache
+    )
     {
-        _context         = context;
-        _configCache     = configCache;
-        _channels        = channels;
-        _viewConfig = viewConfig;
+        _context     = context;
+        _channels    = channels;
+        _viewConfig  = viewConfig;
+        _configCache = configCache;
     }
 
     [Command("reload")]
@@ -131,14 +137,19 @@ public partial class ConfigCommands : CommandGroup
                .AppendLine($"> Infraction steps: {(config.InfractionSteps.Count is var dictCount and not 0 ? $"{dictCount} steps [See `config view infractions`]" : "Not configured")}")
                .AppendLine($"> Infraction steps (named): {((config.NamedInfractionSteps?.Count ?? 0) is var infNameCount and not 0 ? $"{infNameCount} steps [See `config view infractions`]" : "Not configured")}")
                .AppendLine()
-               .AppendLine($"**Exemptions** | `exemptions`")
+               .AppendLine("**Exemptions** | `exemptions`")
                .AppendLine($"> {(config.Exemptions.Any() ? $"Configured AutoMod Exemptions: {config.Exemptions.Count}" : "Not configured")}")
                .AppendLine()
-               .AppendLine($"**Anti-Phishing** | `phishing`")
+               .AppendLine("**Anti-Phishing** | `phishing`")
                .AppendLine($"> {(config.DetectPhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WarningEmoji} Detect Phishing Links")
                .AppendLine($"> {(config.BanSuspiciousUsernames ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.ScanEmoji} Ban Suspicious Usernames")
                .AppendLine($"> {(config.DeletePhishingLinks ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.DeleteEmoji} Delete Phishing Links")
-               .AppendLine($"> {(action is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WrenchEmoji} Post-detection action: {phishingAction}");
+               .AppendLine($"> {(action is not null ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} {Emojis.WrenchEmoji} Post-detection action: {phishingAction}")
+               .AppendLine()
+               .AppendLine($"Anti-Raid | `raid` {Emojis.NewEmoji} {Emojis.BetaEmoji}")
+               .AppendLine($"> {(config.EnableRaidDetection ? Emojis.EnabledEmoji : Emojis.DisabledEmoji)} Enable raid-detection")
+               .AppendLine($"> Raid threshold: {config.RaidDetectionThreshold} accounts")
+               .AppendLine($"> Raid detection decay: {config.RaidCooldownSeconds} seconds");
 
             var embed = new Embed
             {
