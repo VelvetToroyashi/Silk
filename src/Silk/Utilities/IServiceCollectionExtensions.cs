@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,6 +27,7 @@ using Remora.Discord.Gateway.Transport;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
+using Remora.Discord.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
@@ -35,7 +37,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
-using Silk.Extensions;
+using Silk.Data;
 using Silk.Extensions.Remora;
 using Silk.Infrastructure;
 using Silk.Interactivity;
@@ -52,43 +54,28 @@ namespace Silk.Utilities;
 
 public static class IServiceCollectionExtensions
 {
-    public static IHostBuilder AddRemoraHosting(this IHostBuilder hostBuilder)
-    {
-        hostBuilder.ConfigureServices
-            (
-             serviceCollection =>
-             {
-                 // Add REST and tack on our own policy
-                 serviceCollection
-                    .AddDiscordRest(s => s.Get<IConfiguration>()!.GetSilkConfigurationOptions().Discord.BotToken,
-                                    b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
-
-                serviceCollection.TryAddSingleton<Random>();
-                serviceCollection.TryAddSingleton<ResponderDispatchService>();
-                serviceCollection.TryAddSingleton<IResponderTypeRepository>(s => s.GetRequiredService<IOptions<ResponderService>>().Value);
-                serviceCollection.TryAddSingleton<DiscordGatewayClient>();
-
-                serviceCollection.TryAddTransient<ClientWebSocket>();
-                serviceCollection.TryAddTransient<IPayloadTransportService>(s => new WebSocketPayloadTransportService
-                (
-                    s,
-                    s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>().Get("Discord"),
-                    s.GetRequiredService<ILogger<WebSocketPayloadTransportService>>()
-                ));
-                 
-
-                 serviceCollection.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
-                 serviceCollection.AddSingleton<ShardAwareGateweayHelper>();
-                 serviceCollection.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
-                 
-             }
-            );
-        
-        return hostBuilder;
-    }
-    
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
+        // Add REST and tack on our own policy
+        services.AddDiscordRest(s => (s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, DiscordTokenType.Bot), b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
+
+        services.TryAddSingleton<Random>();
+        services.TryAddSingleton<ResponderDispatchService>();
+        services.TryAddSingleton<IResponderTypeRepository>(s => s.GetRequiredService<IOptions<ResponderService>>().Value);
+        services.TryAddSingleton<DiscordGatewayClient>();
+
+        services.TryAddTransient<ClientWebSocket>();
+        services.TryAddTransient<IPayloadTransportService>(s => new WebSocketPayloadTransportService
+        (
+            s,
+            s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>().Get("Discord"),
+            s.GetRequiredService<ILogger<WebSocketPayloadTransportService>>()
+        ));
+
+        services.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
+        services.AddSingleton<ShardAwareGateweayHelper>();
+        services.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
+
         var asm = Assembly.GetEntryAssembly()!;
 
         services
@@ -177,8 +164,31 @@ public static class IServiceCollectionExtensions
                                  ((AggregateError)configResult.Error)
                                 .Errors.Select(err => err.Error!.Message + "\n"));
             }
-            
         });
+    }
+
+    public static IServiceCollection AddSilkDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        var silkConfig = configuration.GetSilkConfigurationOptions();
+
+        void Builder(DbContextOptionsBuilder b)
+        {
+            var connectionString = silkConfig.Persistence.GetConnectionString();
+
+            #if DEBUG
+            connectionString += "Include Error Detail=true;";
+            // EFCore will complain about enabling sensitive data if you're not in a debug build. //
+            b.EnableSensitiveDataLogging();
+            b.EnableDetailedErrors();
+            #endif 
+
+            b.UseNpgsql(connectionString);
+        }
+
+        services.AddDbContextFactory<GuildContext>(Builder);
+        services.AddTransient(sp => sp.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext());
+
+        return services;
     }
 
     public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)

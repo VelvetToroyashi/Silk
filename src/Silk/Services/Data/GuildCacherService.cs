@@ -32,6 +32,8 @@ public class GuildCacherService
     private const string GuildJoinThankYouMessage = "Hiya! My name is Silk! I hope to satisfy your entertainment and moderation needs.\n\n" +
                                                     $"I respond to mentions and `{StringConstants.DefaultCommandPrefix}` by default, "      +
                                                     $"but you can change that with `{StringConstants.DefaultCommandPrefix}prefix`\n\n"      +
+                                                    $"Ex. `{StringConstants.DefaultCommandPrefix}prefix` `<new-prefix>` (make sure there's " +
+                                                    "no space between the bot's prefix and the command you want to use!)\n\n"      +
                                                     "There's also a variety of :sparkles: slash commands :sparkles: if those suit your fancy!\n";
     
     private readonly IMediator              _mediator;

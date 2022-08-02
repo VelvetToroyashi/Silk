@@ -75,7 +75,10 @@ public static class UpdateGuildConfig
                 config.RaidCooldownSeconds = cooldown;
             
             if (request.Greetings.IsDefined(out var greetings))
+            {
+                _db.RemoveRange(config.Greetings.Except(greetings));
                 config.Greetings = greetings;
+            }
             
             if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
                 config.MuteRoleID = muteRole;

@@ -122,9 +122,9 @@ public class SilkPersistenceOptions
 {
     public string Host     { get; set; } = "localhost";
     public string Port     { get; set; } = "5432";
-    public string Database { get; set; } = string.Empty;
-    public string Username { get; set; } = "postgres";
-    public string Password { get; set; } = string.Empty;
+    public string Database { get; set; } = "silk";
+    public string Username { get; set; } = "silk";
+    public string Password { get; set; } = "silk";
 
     /// <summary>
     ///     Convenience method to compose the ConnectionString based on the provided Persistence options
@@ -136,8 +136,7 @@ public class SilkPersistenceOptions
         $"Port={Port};"         +
         $"Database={Database};" +
         $"Username={Username};" +
-        $"Password={Password};" +
-        "Include Error Detail = true";
+        $"Password={Password};";
 }
 
 /// <summary>
