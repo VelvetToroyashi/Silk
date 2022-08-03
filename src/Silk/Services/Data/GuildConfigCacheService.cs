@@ -29,7 +29,7 @@ public class GuildConfigCacheService
         _cache.Remove(guildCacheKey);
     }
 
-    public async ValueTask<GuildConfigEntity> GetConfigAsync(Snowflake guildId)
+    public virtual async ValueTask<GuildConfigEntity> GetConfigAsync(Snowflake guildId)
     {
         var cacheKey = SilkKeyHelper.GenerateGuildKey(guildId);
         

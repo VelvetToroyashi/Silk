@@ -52,7 +52,7 @@ using VTP.Remora.Commands.HelpSystem;
 
 namespace Silk.Utilities;
 
-public static class IServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {

@@ -10,7 +10,7 @@ using Remora.Results;
 
 namespace Silk.Extensions.Remora;
 
-public static class IRestHttpClientExtensions
+public static class RestHttpClientExtensions
 {
     /// <summary>
     /// Queries the API to request all members from a given guild.

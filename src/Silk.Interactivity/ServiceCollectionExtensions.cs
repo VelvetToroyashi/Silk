@@ -3,7 +3,7 @@ using Remora.Discord.Gateway.Extensions;
 
 namespace Silk.Interactivity;
 
-public static class IServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSilkInteractivity(this IServiceCollection services)
     {
