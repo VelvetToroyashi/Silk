@@ -126,35 +126,35 @@ public class Program
                      AbortOnConnectFail = false
                  };
 
-                 var redis = ConnectionMultiplexer.Connect(connectionConfig);
+                var redis = ConnectionMultiplexer.Connect(connectionConfig);
 
-                 var db    = redis.GetDatabase();
-                 var taken = false;
+                var db    = redis.GetDatabase();
+                var taken = false;
 
-                 var takenShard = 0;
+                var takenShard = 0;
 
-                 while (true)
-                 {
-                     for (int i = 0; i < configOptions.Discord.Shards; i++)
-                     {
-                         var key = $"shard:{i}";
+                while (true)
+                {
+                    for (int i = 0; i < configOptions.Discord.Shards; i++)
+                    {
+                        var key = $"shard:{i}";
 
-                         if (db.KeyExists(key))
-                             continue;
+                        if (db.KeyExists(key))
+                            continue;
 
-                         db.StringSet(key, "", TimeSpan.FromSeconds(7));
-                         Metrics.DefaultRegistry.SetStaticLabels(new() { { "shard", i.ToString() } });
+                        db.StringSet(key, "", TimeSpan.FromSeconds(7));
+                        Metrics.DefaultRegistry.SetStaticLabels(new() { { "shard", i.ToString() } });
 
-                         takenShard = i;
+                        takenShard = i;
 
-                         taken = true;
-                         break;
-                     }
+                        taken = true;
+                        break;
+                    }
 
-                     if (taken) break;
+                    if (taken) break;
 
-                     Thread.Sleep(1000);
-                 }
+                    Thread.Sleep(1000);
+                }
 
                  Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
 
