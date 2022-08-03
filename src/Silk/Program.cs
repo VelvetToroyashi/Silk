@@ -236,6 +236,8 @@ public class Program
                    .AddSingleton<GuildGreetingService>()
                    .AddHostedService(s => s.GetRequiredService<GuildGreetingService>())
                    .AddSingleton<FlagOverlayService>()
+                   .AddSingleton<RaidDetectionService>()
+                   .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
                    .AddMediatR(typeof(Program))
                    .AddMediatR(typeof(GuildContext))
