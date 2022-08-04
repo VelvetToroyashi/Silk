@@ -8,7 +8,7 @@ using Remora.Results;
 
 namespace Silk.Extensions.Remora;
 
-public static class IGuildMemberExtensions
+public static class GuildMemberExtensions
 {
     /// <summary>
     /// Determines whether a member has a given permission, taking administration roles into account.

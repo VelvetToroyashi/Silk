@@ -10,7 +10,7 @@ namespace Silk.Extensions.Remora;
 /// <summary>
 /// A collection of extension methods for <see cref="IDiscordRestGuildAPI"/>
 /// </summary>
-public static class IDiscordRestGuildAPIExtensions
+public static class DiscordRestGuildAPIExtensions
 {
     /// <summary>
     /// Gets the "current member" of the guild. This is the member that is currently logged in.
