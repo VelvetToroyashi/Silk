@@ -50,6 +50,7 @@ public static class UpdateGuildConfig
             var config = await _db
                               .GuildConfigs
                               .AsNoTracking()
+                              .AsSplitQuery()
                               .Include(g => g.Greetings)
                               .Include(c => c.Invites)
                               .Include(c => c.Invites.Whitelist)
@@ -61,7 +62,6 @@ public static class UpdateGuildConfig
                               .Include(c => c.Logging.MessageDeletes)
                               .Include(c => c.Logging.MessageEdits)
                               .Include(c => c.Logging.Infractions)
-                              .AsSplitQuery()
                               .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
 
 
@@ -78,6 +78,8 @@ public static class UpdateGuildConfig
             {
                 _db.RemoveRange(config.Greetings.Except(greetings));
                 config.Greetings = greetings;
+
+                _db.Update(config.Greetings);
             }
             
             if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
@@ -116,7 +118,7 @@ public static class UpdateGuildConfig
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
             
-            if (request.BanSuspiciousUsernames.IsDefined(out var banSuspiciousUsernames))
+            if (request.BanSuspiciousUsernames.IsDefined(out bool banSuspiciousUsernames))
                 config.BanSuspiciousUsernames = banSuspiciousUsernames;
 
             if (request.LoggingConfig.IsDefined(out var loggingConfig))
@@ -140,12 +142,16 @@ public static class UpdateGuildConfig
                 
                 log.UseWebhookLogging = loggingConfig.UseWebhookLogging;
                 log.UseMobileFriendlyLogging = loggingConfig.UseMobileFriendlyLogging;
+
+                _db.Update(log);
             }
             
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
             {
                 _db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
+
+                _db.Update(config.Exemptions);
             }
 
             config.NamedInfractionSteps = request.NamedInfractionSteps ?? config.NamedInfractionSteps;
@@ -154,15 +160,18 @@ public static class UpdateGuildConfig
             {
                 _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
                 config.InfractionSteps = infractionSteps;
+
+                _db.Update(config.InfractionSteps);
             }
 
             if (request.AllowedInvites.IsDefined(out List<InviteEntity>? whitelistedInvites))
             {
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
-            }
 
-            _db.Update(config);
+                _db.Update(config.Invites.Whitelist);
+            }
+            
             
             await _db.SaveChangesAsync(cancellationToken);
             
