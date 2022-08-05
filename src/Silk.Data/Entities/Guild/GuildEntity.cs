@@ -37,8 +37,4 @@ public class GuildEntity
     /// </summary>
     public List<InfractionEntity> Infractions   { get; set; } = new();
     
-    /// <summary>
-    /// Tags on this guild.
-    /// </summary>
-    public List<TagEntity>        Tags          { get; set; } = new();
 }
