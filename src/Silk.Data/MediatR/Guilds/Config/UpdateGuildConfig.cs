@@ -49,7 +49,7 @@ public static class UpdateGuildConfig
         {
             var config = await _db
                               .GuildConfigs
-                              .AsNoTracking()
+                              //.AsNoTracking()
                               .AsSplitQuery()
                               .Include(g => g.Greetings)
                               .Include(c => c.Invites)
@@ -78,8 +78,6 @@ public static class UpdateGuildConfig
             {
                 _db.RemoveRange(config.Greetings.Except(greetings));
                 config.Greetings = greetings;
-
-                _db.Update(config.Greetings);
             }
             
             if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
@@ -142,16 +140,12 @@ public static class UpdateGuildConfig
                 
                 log.UseWebhookLogging = loggingConfig.UseWebhookLogging;
                 log.UseMobileFriendlyLogging = loggingConfig.UseMobileFriendlyLogging;
-
-                _db.Update(log);
             }
             
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
             {
                 _db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
-
-                _db.Update(config.Exemptions);
             }
 
             config.NamedInfractionSteps = request.NamedInfractionSteps ?? config.NamedInfractionSteps;
@@ -160,18 +154,13 @@ public static class UpdateGuildConfig
             {
                 _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
                 config.InfractionSteps = infractionSteps;
-
-                _db.Update(config.InfractionSteps);
             }
 
             if (request.AllowedInvites.IsDefined(out List<InviteEntity>? whitelistedInvites))
             {
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
-
-                _db.Update(config.Invites.Whitelist);
             }
-            
             
             await _db.SaveChangesAsync(cancellationToken);
             
