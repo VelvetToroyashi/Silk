@@ -28,6 +28,7 @@ public static class GetGuildConfig
             //TODO: Add commands to get individual configs.
             var config = await _db.GuildConfigs
                                   .AsNoTracking()
+                                  .AsSplitQuery()
                                   .Include(g => g.Greetings)
                                   .Include(c => c.Invites)
                                   .Include(c => c.Invites.Whitelist)
@@ -39,7 +40,6 @@ public static class GetGuildConfig
                                   .Include(c => c.Logging.MessageDeletes)
                                   .Include(c => c.Logging.MessageEdits)
                                   .Include(c => c.Logging.Infractions)
-                                  .AsSplitQuery()
                                   .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
 
             return config;

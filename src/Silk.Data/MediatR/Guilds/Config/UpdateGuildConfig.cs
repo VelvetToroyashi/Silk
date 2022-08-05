@@ -49,7 +49,8 @@ public static class UpdateGuildConfig
         {
             var config = await _db
                               .GuildConfigs
-                              .AsNoTracking()
+                              //.AsNoTracking()
+                              .AsSplitQuery()
                               .Include(g => g.Greetings)
                               .Include(c => c.Invites)
                               .Include(c => c.Invites.Whitelist)
@@ -61,7 +62,6 @@ public static class UpdateGuildConfig
                               .Include(c => c.Logging.MessageDeletes)
                               .Include(c => c.Logging.MessageEdits)
                               .Include(c => c.Logging.Infractions)
-                              .AsSplitQuery()
                               .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
 
 
@@ -116,7 +116,7 @@ public static class UpdateGuildConfig
             if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
             
-            if (request.BanSuspiciousUsernames.IsDefined(out var banSuspiciousUsernames))
+            if (request.BanSuspiciousUsernames.IsDefined(out bool banSuspiciousUsernames))
                 config.BanSuspiciousUsernames = banSuspiciousUsernames;
 
             if (request.LoggingConfig.IsDefined(out var loggingConfig))
@@ -161,8 +161,6 @@ public static class UpdateGuildConfig
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
-
-            _db.Update(config);
             
             await _db.SaveChangesAsync(cancellationToken);
             
