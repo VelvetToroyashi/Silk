@@ -56,23 +56,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
+        services.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, 
+                                   b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
+        
         // Add REST and tack on our own policy
-        services.AddDiscordRest(s => (s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, DiscordTokenType.Bot), b => b.AddPolicyHandler(PollyMetricsHandler.Create()));
-
-        services.TryAddSingleton<Random>();
-        services.TryAddSingleton<ResponderDispatchService>();
-        services.TryAddSingleton<IResponderTypeRepository>(s => s.GetRequiredService<IOptions<ResponderService>>().Value);
-        services.TryAddSingleton<DiscordGatewayClient>();
-
-        services.TryAddTransient<ClientWebSocket>();
-        services.TryAddTransient<IPayloadTransportService>(s => new WebSocketPayloadTransportService
-        (
-            s,
-            s.GetRequiredService<IOptionsMonitor<JsonSerializerOptions>>().Get("Discord"),
-            s.GetRequiredService<ILogger<WebSocketPayloadTransportService>>()
-        ));
-
-        services.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken);
         services.AddSingleton<ShardAwareGateweayHelper>();
         services.AddHostedService(s => s.GetRequiredService<ShardAwareGateweayHelper>());
 
