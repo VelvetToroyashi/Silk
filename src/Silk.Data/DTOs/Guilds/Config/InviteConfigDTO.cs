@@ -3,13 +3,13 @@ using System.Collections.Generic;
 namespace Silk.Data.DTOs.Guilds.Config;
 
 public record InviteConfigDTO
-(
-    int                      ID,
-    int                      ConfigID,
-    bool                     WhitelistEnabled,
-    bool                     UseAggressiveRegex,
-    bool                     WarnOnMatch,
-    bool                     DeleteOnMatch,
-    bool                     ScanOrigin,
-    IReadOnlyList<InviteDTO> Whitelist
-);
+{
+    public int                      Id                 { get; set; }
+    public bool                     WhitelistEnabled   { get; set; }
+    public bool                     UseAggressiveRegex { get; set; }
+    public bool                     WarnOnMatch        { get; set; }
+    public bool                     DeleteOnMatch      { get; set; }
+    public bool                     ScanOrigin         { get; set; }
+    public int                      GuildConfigId      { get; set; }
+    public IReadOnlyList<InviteDTO> Whitelist          { get; set; }
+}

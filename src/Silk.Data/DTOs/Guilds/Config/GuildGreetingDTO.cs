@@ -4,11 +4,11 @@ using Silk.Data.Entities;
 namespace Silk.Data.DTOs.Guilds.Config;
 
 public record GuildGreetingDTO
-(
-    int            ID,
-    GreetingOption Option,
-    Snowflake      GuildID,
-    Snowflake      ChannelID,
-    Snowflake?     RoleID,
-    string         Message = ""
-);
+{
+    public int            Id         { get; set; }
+    public Snowflake      GuildID    { get; set; }
+    public string         Message    { get; set; } = string.Empty;
+    public GreetingOption Option     { get; set; }
+    public Snowflake      ChannelID  { get; set; }
+    public Snowflake?     MetadataID { get; set; }
+}

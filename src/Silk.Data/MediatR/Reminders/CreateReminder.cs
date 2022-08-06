@@ -48,7 +48,7 @@ public static class CreateReminder
                 MessageContent      = request.MessageContent,
                 ReplyAuthorID       = request.ReplyAuthorID,
                 ReplyMessageContent = request.ReplyMessageContent,
-                IsPrivate           = request.GuildID is null,
+                IsPrivate           = request.MessageID is null || request.GuildID is null,
                 IsReply             = request.ReplyID is not null,
             };
 

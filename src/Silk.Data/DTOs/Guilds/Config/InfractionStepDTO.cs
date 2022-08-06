@@ -4,10 +4,10 @@ using Silk.Data.Entities;
 namespace Silk.Data.DTOs.Guilds.Config;
 
 public record InfractionStepDTO
-(
-    int            ID,
-    int            ConfigID,
-    int            InfractionsRequired,
-    InfractionType Type,
-    TimeSpan       Duration
-);
+{
+    public int            Id          { get; set; }
+    public int            ConfigId    { get; set; }
+    public int            Infractions { get; set; }
+    public InfractionType Type        { get; set; }
+    public TimeSpan       Duration    { get; set; } = TimeSpan.Zero;
+}

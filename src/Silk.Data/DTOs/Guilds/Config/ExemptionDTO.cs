@@ -4,10 +4,10 @@ using Silk.Data.Entities;
 namespace Silk.Data.DTOs.Guilds.Config;
 
 public record ExemptionDTO
-(
-    int ID,
-    ExemptionCoverage Coverage,
-    ExemptionTarget Target,
-    Snowflake TargetID,
-    Snowflake GuildId
-);
+{
+    public int               Id         { get; set; }
+    public ExemptionCoverage Exemption  { get; set; }
+    public ExemptionTarget   TargetType { get; set; }
+    public Snowflake         TargetID   { get; set; }
+    public Snowflake         GuildID    { get; set; }
+}
