@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Services;
@@ -34,9 +35,11 @@ public class PostCommandReactionHandler : IPostExecutionEvent
         (
          context.ChannelID,
          mc.MessageID,
-         re.Entity.Reaction.TryPickT0(out Snowflake snowflake, out var unicode) 
+         re.Entity.Reaction.TryPickT0(out Snowflake snowflake, out var ulongOrRaw) 
              ? $"_:{snowflake}" 
-             : unicode,
+             : ulongOrRaw.TryPickT0(out var id, out var unicode) 
+                 ? $"_:{id}" 
+                 : unicode,
          ct
         );
 
