@@ -1,13 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Rest;
-using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Services;
+using Remora.Rest.Core;
 using Remora.Results;
-using Silk.Infrastructure;
 
-namespace Silk;
+namespace Silk.Shared;
 
 public class PostCommandReactionHandler : IPostExecutionEvent
 {
@@ -35,7 +34,7 @@ public class PostCommandReactionHandler : IPostExecutionEvent
         (
          context.ChannelID,
          mc.MessageID,
-         re.Entity.Reaction.TryPickT0(out var snowflake, out var unicode) 
+         re.Entity.Reaction.TryPickT0(out Snowflake snowflake, out var unicode) 
              ? $"_:{snowflake}" 
              : unicode,
          ct

@@ -1,7 +1,7 @@
 using OneOf;
 using Remora.Rest.Core;
 
-namespace Silk.Infrastructure;
+namespace Silk.Shared;
 
 /// <summary>
 /// A return type that can be used to add a reaction to the source message.
