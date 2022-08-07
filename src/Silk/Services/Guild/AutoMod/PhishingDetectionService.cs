@@ -148,7 +148,7 @@ public class PhishingDetectionService
          user.ID,
          self.ID,
          1,
-         $"Suspicious avatar detected, category: {response.Key} | Similarity of {response.Similarity * 100}%",
+         $"ANTI-PHISH: Suspicious avatar detected. \nCategory: `{response.Key}` \nSimilarity: {response.Similarity * 100}%",
          notify: false
         );
         
@@ -180,7 +180,7 @@ public class PhishingDetectionService
          user.ID,
          self.Entity.ID,
          1,
-         $"Suspicious username similar to  '{detection.MostSimilarTo}' detected",
+         $"ANTI-PHISH: Detected suspicious username similar to `{detection.MostSimilarTo}`.",
          notify: false
         );
 
