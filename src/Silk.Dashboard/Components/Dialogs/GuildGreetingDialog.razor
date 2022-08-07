@@ -1,9 +1,8 @@
-@using Silk.Data.Entities
+@using Silk.Data.DTOs.Guilds.Config
 
 <MudDialog>
     <DialogContent>
-        <GuildGreetingEditor GreetingId="GreetingId"
-                             Greeting="Greeting"
+        <GuildGreetingEditor Greeting="Greeting"
                              OnSubmit="Close"
                              OnCancel="Cancel"/>
     </DialogContent>
@@ -18,7 +17,7 @@
     public int GreetingId { get; set; }
 
     [Parameter]
-    public GuildGreetingEntity Greeting { get; set; }
+    public GuildGreeting Greeting { get; set; }
 
     void Close() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();

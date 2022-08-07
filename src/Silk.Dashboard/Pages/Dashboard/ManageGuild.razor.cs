@@ -7,7 +7,9 @@ using Remora.Rest.Core;
 using Silk.Dashboard.Components.Dialogs;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
+using Silk.Data.DTOs.Guilds.Config;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Greetings;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared.Constants;
 
@@ -17,7 +19,7 @@ public partial class ManageGuild
 {
     [Inject] private IMediator              Mediator      { get; set; }
     [Inject] private ISnackbar              Snackbar      { get; set; }
-    [Inject] private IDialogService         DialogService      { get; set; }
+    [Inject] private IDialogService         DialogService { get; set; }
     [Inject] private DashboardDiscordClient DiscordClient { get; set; }
 
     [Parameter] public  string  GuildId { get; set; }
@@ -25,7 +27,7 @@ public partial class ManageGuild
     private Snowflake GuildIdParsed => GuildId.ToSnowflake<Snowflake>();
 
     private IPartialGuild     _guild;
-    private GuildConfigEntity _guildConfig;
+    private GuildConfigEntity _guildConfig; // Todo: use DTO
     private bool              _requestFailed;
     
     private IReadOnlyList<IRole>         _roles;
@@ -41,15 +43,16 @@ public partial class ManageGuild
         StateHasChanged();
     }
 
-    private static string GetGreetingStatus(GuildGreetingEntity greeting)
+    private static string GetGreetingOptionInfo(GuildGreeting greeting)
     {
         var option = greeting.Option.Humanize(LetterCasing.Title);
-        var data = greeting.Option switch
+        return greeting.Option switch
         {
-            GreetingOption.GreetOnJoin => greeting.ChannelID,
-            GreetingOption.GreetOnRole => greeting.MetadataID,
+            GreetingOption.GreetOnJoin or GreetingOption.GreetOnScreening => $"{option} --- {greeting.ChannelID}",
+            GreetingOption.GreetOnRole                                    => $"{option} --- {greeting.MetadataID}",
+            GreetingOption.DoNotGreet                                     => option,
+            _                                                             => ""
         };
-        return $"{option} - {data}";
     }
 
     private Task LoadGuildDataAsync()
@@ -159,10 +162,42 @@ public partial class ManageGuild
         });
     }
 
+    private Task EditGreetingAsync(GuildGreeting greeting)
+    {
+        return OpenGreetingDialogAsync(greeting: greeting);
+    }
+
+    private async Task DeleteGreetingAsync(GuildGreeting greeting)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Confirm delete?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Medium, };
+
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data is true)
+        {
+            var deleteResult =  await Mediator.Send(new RemoveGuildGreeting.Request(greeting.Id, GuildIdParsed));
+            if (deleteResult.IsSuccess)
+            {
+                _guildConfig.Greetings.Remove(_guildConfig.Greetings.First(x => x.Id == greeting.Id));
+                Snackbar.Add("Successfully deleted greeting!", Severity.Success);
+            }
+        }
+
+        StateHasChanged();
+    }
+
     private async Task OpenGreetingDialogAsync
     (
         int                  greetingId = 0,
-        GuildGreetingEntity? greeting   = null
+        GuildGreeting? greeting   = null
     )
     {
         // Todo: Handle scrolling?
@@ -183,29 +218,6 @@ public partial class ManageGuild
 
         var dialog = DialogService.Show<GuildGreetingDialog>("", parameters, options);
         await dialog.Result;
-
-        StateHasChanged();
-    }
-
-    private async Task DeleteGreetingAsync(GuildGreetingEntity greeting)
-    {
-        var parameters = new DialogParameters
-        {
-            { "ContentText", "Confirm delete?" },
-            { "ButtonText", "Delete" },
-            { "Color", Color.Error }
-        };
-
-        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Medium, };
-
-        var dialog = DialogService.Show<ConfirmationDialog>("Delete", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result.Cancelled && result.Data is true)
-        {
-            var removed = _guildConfig.Greetings.Remove(greeting);
-            if (removed) Snackbar.Add("Removed greeting, make sure to hit 'Save Changes' to persist changes");
-        }
 
         StateHasChanged();
     }

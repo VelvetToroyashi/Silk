@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
+using Remora.Results;
 using Silk.Dashboard.Services;
+using Silk.Data.DTOs.Guilds.Config;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Greetings;
 using Silk.Data.MediatR.Guilds;
@@ -19,9 +21,7 @@ public partial class GuildGreetingEditor
     [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
     [Inject]    public IMediator              Mediator      { get; set; }
     [Inject]    public ISnackbar              Snackbar      { get; set; }
-
-    [Parameter] public int                    GreetingId    { get; set; }
-    [Parameter] public GuildGreetingEntity    Greeting      { get; set; }
+    [Parameter] public GuildGreeting          Greeting      { get; set; }
     [Parameter] public EventCallback          OnSubmit      { get; set; }
     [Parameter] public EventCallback          OnCancel      { get; set; }
 
@@ -32,18 +32,7 @@ public partial class GuildGreetingEditor
 
     protected override async Task OnInitializedAsync()
     {
-        if (GreetingId > 0 && Greeting is null)
-        {
-            var response = await Mediator.Send(new GetGuildGreeting.Request(GreetingId));
-            Greeting = response.IsDefined(out var existingGreeting) ? existingGreeting : new();
-        }
-
-        await Task.WhenAll
-        (
-            UpdateGuildsAsync(),
-            LoadChannelsAndRolesAsync()
-        );
-
+        await Task.WhenAll(UpdateGuildsAsync(), LoadChannelsAndRolesAsync());
         StateHasChanged();
     }
 
@@ -53,7 +42,6 @@ public partial class GuildGreetingEditor
         await UpdateGreetingOptionAsync(Greeting.Option);
     }
 
-    // Todo: Make action cancelable.
     private async Task UpdateGreetingOptionAsync(GreetingOption greetingOption)
     {
         Greeting.Option = greetingOption;
@@ -73,6 +61,7 @@ public partial class GuildGreetingEditor
 
     private void UpdateGreetingMetadata()
     {
+        // Todo: Handle display and selection change when either list is empty 
         if (_channels?.Count > 0) Greeting.ChannelID = _channels[0].ID;
         if (_roles?.Count > 0) Greeting.MetadataID = _roles[0].ID;
     }
@@ -99,7 +88,7 @@ public partial class GuildGreetingEditor
         return null;
     }
 
-    private void UpdateGreeting(GuildGreetingEntity greeting)
+    private void UpdateGreeting(GuildGreeting greeting)
     {
         greeting.GuildID    = Greeting.GuildID;
         greeting.ChannelID  = Greeting.ChannelID;
@@ -116,39 +105,26 @@ public partial class GuildGreetingEditor
 
     private async Task SubmitAsync()
     {
-        await _form.Validate();
-        if (!_form.IsValid) return;
-
         await ComponentRunAsync
         (
              async () =>
              {
-                 var config = await Mediator.Send(new GetGuildConfig.Request(Greeting.GuildID));
-                 if (config is null)
-                 {
-                     Snackbar.Add($"Could not find a config with ID {Greeting.Id}. <br/>" + 
-                                  "Please double check that the guild ID is valid or try again.", Severity.Error);
-                 }
-                 else
-                 {
-                    var dbGreeting = config.Greetings.FirstOrDefault(g => g.Id == Greeting.Id);
+                 await _form.Validate();
+                 if (!_form.IsValid) return;
 
-                    if (dbGreeting is not null)
-                    {
-                        UpdateGreeting(dbGreeting);
-                        await Mediator.Send(new UpdateGuildConfig.Request(dbGreeting.GuildID) { Greetings = config.Greetings});
-                        Snackbar.Add($"Updated greeting with ID {dbGreeting.Id}", Severity.Success);
-                    }
-                    else
-                    {
-                        config.Greetings.Add(Greeting);
-                        await Mediator.Send(new UpdateGuildConfig.Request(Greeting.GuildID) {Greetings = config.Greetings});
-                        Snackbar.Add($"Created greeting with ID {Greeting.Id}", Severity.Success);
-                    }
-                 }
+                 var isUpdatingGreeting = Greeting.Id > 0;
+                 var result = isUpdatingGreeting
+                     ? await Mediator.Send(new UpdateGuildGreeting.Request(Greeting))
+                     : await Mediator.Send(new AddGuildGreeting.Request(Greeting));
 
-                 if (OnSubmit.HasDelegate) 
-                    await OnSubmit.InvokeAsync();
+                 var messageData = result.IsDefined(out var resultGreeting)
+                     ? ($"Greeting #{resultGreeting.Id} {(isUpdatingGreeting ? "updated" : "created")} successfully", Severity.Success)
+                     : ($"Failed to complete request - {result.Error}", Severity.Error);
+
+                 Snackbar.Add(messageData.Item1, messageData.Item2);
+
+                 if (OnSubmit.HasDelegate)
+                     await OnSubmit.InvokeAsync();
              }
         );
     }

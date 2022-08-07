@@ -7,7 +7,8 @@
 @using Microsoft.AspNetCore.Components
 @using Remora.Rest.Core
 @using static Silk.Dashboard.Helpers.StringHelpers
-@using static Silk.Dashboard.Converters.MudBlazorSnowflakeConverter
+@using Mapster
+@using Silk.Data.DTOs.Guilds.Config
 
 @if (_requestFailed)
 {
@@ -90,12 +91,14 @@ else
                                 <MudList>
                                     @foreach (var greeting in _guildConfig.Greetings)
                                     {
+                                        @* Todo: Replace with actual DTO from DTO GuildConfig *@
+                                        var greetingDto = greeting.Adapt<GuildGreeting>();
                                         <MudListItem>
                                             <MudCard>
                                                 <MudCardContent>
                                                     <MudContainer>
                                                         <MudText>
-                                                            @greeting.Id ➜ @GetGreetingStatus(greeting)
+                                                            @greeting.Id ➜ @GetGreetingOptionInfo(greetingDto)
                                                         </MudText>
                                                         <MudText>
                                                             @greeting.Message
@@ -104,11 +107,11 @@ else
 
                                                     <MudButtonGroup Class="mt-2" Size="Size.Small" OverrideStyles="false">
                                                         <MudButton Color="Color.Info" Variant="Variant.Text"
-                                                                   OnClick="@(async () => await OpenGreetingDialogAsync(greeting: greeting))">
+                                                                   OnClick="@(async () => await EditGreetingAsync(greetingDto))">
                                                             Edit
                                                         </MudButton>
                                                         <MudButton Color="Color.Error" Variant="Variant.Text"
-                                                                   OnClick="@(async () => await DeleteGreetingAsync(greeting))">
+                                                                   OnClick="@(async () => await DeleteGreetingAsync(greetingDto))">
                                                             Delete
                                                         </MudButton>
                                                     </MudButtonGroup>
