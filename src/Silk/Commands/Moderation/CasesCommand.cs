@@ -85,7 +85,7 @@ public class CasesCommand : CommandGroup
         {
             var paginatedInfractions = cases.Chunk(5)
                                             .Select(c => 
-                                                        new Embed()
+                                                        new Embed
                                                         {
                                                             Title       = $"Infractions for {user.ToDiscordTag()}",
                                                             Colour      = Color.Goldenrod,
@@ -96,7 +96,7 @@ public class CasesCommand : CommandGroup
             return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, paginatedInfractions.ToList());
         }
         
-        var embed = new Embed()
+        var embed = new Embed
         {
             Title       = $"Infractions for {user.ToDiscordTag()}",
             Colour      = Color.Goldenrod,

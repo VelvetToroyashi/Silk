@@ -34,6 +34,9 @@ public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
         var member = gatewayEvent.User.Value.ID;
 
         var isMuted = await _infractions.IsMutedAsync(member, guild);
+        
+        if (!isMuted)
+            return Result.FromSuccess();
 
         var automodRes = await _users.GetCurrentUserAsync(ct);
 
@@ -41,10 +44,7 @@ public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
             return Result.FromError(automodRes.Error);
 
         var automod = automodRes.Entity.ID;
-
-        if (!isMuted)
-            return Result.FromSuccess();
-
+        
         await _infractions.MuteAsync(member, guild, automod, "Re-applied active mute on join.");
         await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied mute for {member} on rejoin.");
 

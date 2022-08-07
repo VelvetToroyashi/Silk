@@ -7,6 +7,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -17,7 +18,7 @@ public partial class ConfigCommands
     {
         [Command("raid")]
         [RequireDiscordPermission(DiscordPermission.BanMembers)]
-        public async Task<Result> RaidAsync
+        public async Task<IResult> RaidAsync
         (
             [Option('t', "threshold")]
             [Description(
@@ -48,13 +49,13 @@ public partial class ConfigCommands
             if (threshold is < 3)
             {
                 await _channels.CreateMessageAsync(_context.ChannelID, "A raid threshold of less than three is not recommended.");
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.WarningId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.WarningId));
             }
             
             if (decay is < 10)
             {
                 await _channels.CreateMessageAsync(_context.ChannelID, "A raid decay of less than ten seconds is not recommended.");
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.WarningId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.WarningId));
             }
 
             var request = new UpdateGuildConfig.Request(_context.GuildID.Value)
@@ -66,7 +67,7 @@ public partial class ConfigCommands
             
             await _mediator.Send(request);
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
         }
     }
 }

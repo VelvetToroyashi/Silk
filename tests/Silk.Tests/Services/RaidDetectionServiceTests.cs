@@ -52,7 +52,8 @@ public class RaidHelperTests
              .ReturnsAsync(new User(default, "", default, null));
         
         cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+             .ReturnsAsync(new GuildConfigEntity
+                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
 
         var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
 
@@ -77,7 +78,8 @@ public class RaidHelperTests
              .ReturnsAsync(new User(default, "", default, null));
         
         cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+             .ReturnsAsync(new GuildConfigEntity
+                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
 
         var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
 
@@ -105,7 +107,8 @@ public class RaidHelperTests
              .ReturnsAsync(new User(default, "", default, null));
         
         cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 0 });
+             .ReturnsAsync(new GuildConfigEntity
+                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 0 });
         
         var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
         
@@ -131,7 +134,8 @@ public class RaidHelperTests
         
         // -1 to skip velocity check
         cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
+             .ReturnsAsync(new GuildConfigEntity
+                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
         
         var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
         
@@ -159,7 +163,8 @@ public class RaidHelperTests
         
         // -1 to skip velocity check
         cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity() { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
+             .ReturnsAsync(new GuildConfigEntity
+                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
         
         var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
         

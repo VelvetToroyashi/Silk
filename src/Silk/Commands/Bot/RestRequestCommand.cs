@@ -83,7 +83,7 @@ public class RestRequestCommand : CommandGroup
 
         if (jsn.Length <= 1000)
         {
-            var embed = new Embed()
+            var embed = new Embed
             {
                 Title = $"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.Title)}",
                 Colour =

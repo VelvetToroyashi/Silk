@@ -2,10 +2,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Remora.Commands.Attributes;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -59,8 +61,7 @@ public partial class ConfigCommands
         {
             if (!remove && channel is null && webhook is null && mobile is null)
             {
-                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
-                return await _channels.CreateMessageAsync(_context.ChannelID, "`--channel`, `--webhook` or `--mobile true/false` is must be specified.");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId, "`--channel`, `--webhook` or `--mobile true/false` is must be specified."));
             }
 
             var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
@@ -107,7 +108,7 @@ public partial class ConfigCommands
 
                 await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
 
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
 
             if (channel is not null)
@@ -274,14 +275,12 @@ public partial class ConfigCommands
 
                 if (!success)
                 {
-                    await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
-
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't create webhooks in that channel. Check the channel settings to ensure I have `Manage Webhooks` please!");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId, "I couldn't create webhooks in that channel. Check the channel settings to ensure I have `Manage Webhooks` please!"));
                 }
             }
 
             await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = loggingConfig });
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
         }
 
         private async Task<Result<IWebhook>> TryCreateWebhookAsync(Snowflake channelID)

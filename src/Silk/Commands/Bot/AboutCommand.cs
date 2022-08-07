@@ -63,7 +63,7 @@ public class AboutCommand : CommandGroup
         if (!guilds.IsDefined(out var guildsList))
             return Result.FromError(guilds.Error!);
 
-        IEmbed? embed = new Embed()
+        IEmbed? embed = new Embed
         {
             Title  = "About Silk!",
             Colour = Color.Gold,

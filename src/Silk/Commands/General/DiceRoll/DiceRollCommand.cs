@@ -71,7 +71,7 @@ public class DiceRollCommand : CommandGroup
         
         embedFields.Add(new EmbedField("Total", $"{rolls.Sum() + modifiers.Sum()}"));
 
-        var embed = new Embed()
+        var embed = new Embed
         {
             Title  = "Roll Result",
             Colour = Color.DarkBlue,
