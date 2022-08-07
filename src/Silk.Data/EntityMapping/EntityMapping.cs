@@ -8,7 +8,7 @@ namespace Silk.Data.EntityMapping;
 // Most likely move mapping to another common library
 public static class EntityMapping
 {
-    public static void ConfigureEntityMappings()
+    public static void ConfigureMappings()
     {
         TypeAdapterConfig<GuildGreetingEntity, GuildGreetingDTO>
            .NewConfig()
