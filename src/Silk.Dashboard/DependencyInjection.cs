@@ -60,27 +60,27 @@ public static class DependencyInjection
         SilkConfigurationOptions silkConfigOptions
     )
     {
-        services.AddAuthentication(opt => 
+        services.AddAuthentication(opts => 
         {
-            opt.DefaultScheme          = CookieAuthenticationDefaults.AuthenticationScheme;
-            opt.DefaultSignInScheme    = CookieAuthenticationDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
+            opts.DefaultScheme          = CookieAuthenticationDefaults.AuthenticationScheme;
+            opts.DefaultSignInScheme    = CookieAuthenticationDefaults.AuthenticationScheme;
+            opts.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
         })
-        .AddDiscord(opt => 
+        .AddDiscord(opts => 
         {
-            opt.UsePkce    = true;
-            opt.SaveTokens = true;
+            opts.UsePkce    = true;
+            opts.SaveTokens = true;
 
-            opt.Scope.Add("guilds");
+            opts.Scope.Add("guilds");
 
-            opt.ClientId     = silkConfigOptions.Discord.ClientId;
-            opt.ClientSecret = silkConfigOptions.Discord.ClientSecret;
+            opts.ClientId     = silkConfigOptions.Discord.ClientId;
+            opts.ClientSecret = silkConfigOptions.Discord.ClientSecret;
 
-            opt.CallbackPath       = DiscordAuthenticationDefaults.CallbackPath;
-            opt.AccessDeniedPath   = new("/");
-            opt.ReturnUrlParameter = string.Empty;
+            opts.CallbackPath       = DiscordAuthenticationDefaults.CallbackPath;
+            opts.AccessDeniedPath   = new("/");
+            opts.ReturnUrlParameter = string.Empty;
 
-            opt.Events.OnCreatingTicket = async context =>
+            opts.Events.OnCreatingTicket = async context =>
             {
                 var serviceProvider = context.HttpContext.RequestServices;
                 var tokenStore      = serviceProvider.GetRequiredService<DiscordTokenStore>();
@@ -92,16 +92,16 @@ public static class DependencyInjection
                 await TryAddTeamMemberRoles(context.Principal, oAuth2Api);
             };
         })
-        .AddCookie(options => 
+        .AddCookie(opts => 
         {
             // Wiggle room for cookie expiration so Blazor authentication state provider
             // can invalidate first
-            options.ExpireTimeSpan = new TimeSpan(7, 0, 5, 0);
+            opts.ExpireTimeSpan = new TimeSpan(7, 0, 5, 0);
         });
 
         services.AddAuthorization
         (
-            options => options.AddPolicy(DashboardPolicies.TeamMemberPolicyName, 
+            opts => opts.AddPolicy(DashboardPolicies.TeamMemberPolicyName, 
                                          DashboardPolicies.TeamMemberPolicy())
         );
 
