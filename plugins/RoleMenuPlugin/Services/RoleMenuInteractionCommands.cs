@@ -281,22 +281,22 @@ public class RoleMenuInteractionCommands : InteractionGroup
             {
                 content.AppendLine($"Role {role} has since been removed from the server.");
 
-                if (!loggedMissingRole)
-                {
-                    loggedMissingRole = true;
-                    _logger.LogError("One or more roles has gone missing in {GuildID}", guildID);
-                }
+                if (loggedMissingRole)
+                    continue;
+                
+                loggedMissingRole = true;
+                _logger.LogError("One or more roles has gone missing in {GuildID}", guildID);
             }
 
             else if (guildRole.Position >= highestSelfRole.Position)
             {
                 content.AppendLine($"<@&{role}> has been moved above my highest role (<@&{highestSelfRole.ID}>); I cannot (un-)assign it.");
 
-                if (!loggedHierarchy)
-                {
-                    loggedHierarchy = true;
-                    _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
-                }
+                if (loggedHierarchy)
+                    continue;
+                
+                loggedHierarchy = true;
+                _logger.LogError("One or more roles have become unassignable due to hierarchy in {GuildID}", guildID);
             }
         }
 
@@ -304,7 +304,8 @@ public class RoleMenuInteractionCommands : InteractionGroup
         (
          _context.ApplicationID,
          _context.Token,
-         content.ToString()
+         content.ToString(),
+         flags: MessageFlags.Ephemeral
         );
 
         return Result.FromError(roleResult.Error!);
