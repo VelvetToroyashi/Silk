@@ -27,8 +27,8 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> LogOut()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         _tokenStore.RemoveToken(HttpContext.User.GetUserId());
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return LocalRedirect("/");
     }
 }
