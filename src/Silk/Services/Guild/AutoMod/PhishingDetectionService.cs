@@ -16,6 +16,8 @@ using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Caching;
+using Remora.Discord.Caching.Services;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -43,13 +45,14 @@ public class PhishingDetectionService
     private static readonly Regex  LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
 
+    private readonly CacheService                      _cache;
     private readonly HttpClient                        _http;
     private readonly HttpClient                        _httpUnauthorized;
     private readonly IInfractionService                _infractions;
     private readonly IDiscordRestUserAPI               _users;
     private readonly IConnectionMultiplexer            _redis;
     private readonly IDiscordRestChannelAPI            _channels;
-    private readonly IDiscordRestInviteAPI            _invites;
+    private readonly IDiscordRestInviteAPI             _invites;
     private readonly PhishingGatewayService            _phishGateway;
     private readonly GuildConfigCacheService           _config;
     private readonly ExemptionEvaluationService        _exemptions;
@@ -57,18 +60,20 @@ public class PhishingDetectionService
 
     public PhishingDetectionService
     (
+        CacheService cache,
         IHttpClientFactory                http,
         IInfractionService                infractions,
         IDiscordRestUserAPI               users,
         IConnectionMultiplexer            redis,
-        IDiscordRestChannelAPI            channels,
         IDiscordRestInviteAPI             invites,
+        IDiscordRestChannelAPI            channels,
         PhishingGatewayService            phishGateway,
         GuildConfigCacheService           config,
         ExemptionEvaluationService        exemptions,
         ILogger<PhishingDetectionService> logger
     )
     {
+        _cache = cache;
         _http             = http.CreateClient("ravy-api");
         _httpUnauthorized = http.CreateClient();
         _infractions      = infractions;
@@ -82,8 +87,7 @@ public class PhishingDetectionService
         _logger           = logger;
     }
 
-    private static readonly string[] SuspiciousUsernames = new[]
-    {
+    private static readonly string[] SuspiciousUsernames = {
         "Academy Moderator", "Bot Developer", "Bot Moderator", "CapchaBot", "Developer Message",
         "Discord Academy", "Discord Developers", "Discord Message", "Discord Moderation Academy",
         "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", "Hype Mail", 
@@ -107,6 +111,11 @@ public class PhishingDetectionService
             return Result.FromSuccess();
 
         if (user.Avatar is null) // No avatar, no need to check.
+            return Result.FromSuccess();
+        
+        var priorUserResult = await _cache.TryGetPreviousValueAsync<IUser>(KeyHelpers.CreateUserCacheKey(user.ID));
+
+        if (priorUserResult.IsDefined(out var priorUser) && !user.Avatar.Value.Equals(priorUser.Avatar?.Value)) // If the avatar hasn't changed, we don't care about this update.
             return Result.FromSuccess();
         
         var cdnResult = CDN.GetUserAvatarUrl(user.ID, user.Avatar);
@@ -175,13 +184,11 @@ public class PhishingDetectionService
          notify: false
         );
 
-        if (!infraction.IsSuccess)
-            return Result.FromError(infraction.Error);
+        return (Result)infraction;
 
-        return Result.FromSuccess();
     }
     
-    public (bool IsSuspicious, string MostSimilarTo) IsSuspectedPhishingUsername(string username)
+    public static (bool IsSuspicious, string MostSimilarTo) IsSuspectedPhishingUsername(string username)
     {
         using var _ = SilkMetric.PhishingDetection.WithLabels("username").NewTimer();
         
@@ -224,18 +231,18 @@ public class PhishingDetectionService
         
         foreach (var link in knownPhishingLinks)
         {
-            if (_phishGateway.IsBlacklisted(link))
-            {
-                _logger.LogInformation("Detected phishing link.");
+            if (!_phishGateway.IsBlacklisted(link))
+                continue;
+            
+            _logger.LogInformation("Detected phishing link.");
 
-                var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
+            var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
 
-                if (!exemptionResult.IsSuccess)
-                    return (Result)exemptionResult;
+            if (!exemptionResult.IsSuccess)
+                return (Result)exemptionResult;
 
-                if (!exemptionResult.Entity)
-                    return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
-            }
+            if (!exemptionResult.Entity)
+                return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
         }
         
         // There aren't any cached phishing links in the message, but there's still invites.
@@ -247,36 +254,36 @@ public class PhishingDetectionService
         {
             var cacheResult = (bool?)await db.StringGetAsync(SilkKeyHelper.GenerateInviteKey(link));
 
-            if (cacheResult is null)
+            if (cacheResult is not null)
+                continue;
+
+            // It'd be nice to have a way to poke this endpoint with a HEAD request.
+            var exists = await _invites.GetInviteAsync(link);
+
+            if (!exists.IsDefined(out var serverRes) || !serverRes.Guild.IsDefined(out var guild))
+                return Result.FromSuccess(); // We've 404'd, invite's dead.
+
+            var apiResult = await _httpUnauthorized.GetAsync(AntiPhishAPIUrl + guild.ID);
+
+            if (!apiResult.IsSuccessStatusCode)
             {
-                // It'd be nice to have a way to poke this endpoint with a HEAD request.
-                var exists = await _invites.GetInviteAsync(link);
-
-                if (!exists.IsDefined(out var serverRes) || !serverRes.Guild.IsDefined(out var guild))
-                    return Result.FromSuccess(); // We've 404'd, invite's dead.
-
-                var apiResult = await _httpUnauthorized.GetAsync(AntiPhishAPIUrl + guild.ID);
-
-                if (!apiResult.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("Failed to check invite: {Link}; is the API down?", link);
-                    continue;
-                }
-                
-                var apiResponse = await JsonDocument.ParseAsync(await apiResult.Content.ReadAsStreamAsync());
-
-                if (!apiResponse.RootElement.TryGetProperty("match", out var matchProp))
-                    continue; // There was an error, so forget it.
-                
-                var match = matchProp.GetBoolean();
-                
-                var type = apiResponse.RootElement.TryGetProperty("reason", out var typeProp) ? $" ({typeProp})" : null;
-
-                await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), match);
-                
-                if (match)
-                    return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
+                _logger.LogWarning("Failed to check invite: {Link}; is the API down?", link);
+                continue;
             }
+                
+            var apiResponse = await JsonDocument.ParseAsync(await apiResult.Content.ReadAsStreamAsync());
+
+            if (!apiResponse.RootElement.TryGetProperty("match", out var matchProp))
+                continue; // There was an error, so forget it.
+                
+            var match = matchProp.GetBoolean();
+                
+            var type = apiResponse.RootElement.TryGetProperty("reason", out var typeProp) ? $" ({typeProp})" : null;
+
+            await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), match);
+                
+            if (match)
+                return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
         }
         
         return Result.FromSuccess();
