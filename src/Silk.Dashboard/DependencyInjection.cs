@@ -16,6 +16,7 @@ using Silk.Dashboard.Models;
 using Silk.Dashboard.Providers;
 using Silk.Dashboard.Services;
 using Silk.Data;
+using Silk.Data.EntityMapping;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 
@@ -161,6 +162,7 @@ public static class DependencyInjection
     {
         return services.AddDbContextFactory<GuildContext>(dbBuilder =>
         {
+            EntityMapping.ConfigureMappings();
             dbBuilder.UseNpgsql(silkConfigOptions.Persistence.GetConnectionString());
 #if DEBUG
             dbBuilder.EnableSensitiveDataLogging();
