@@ -13,6 +13,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -56,7 +57,7 @@ public partial class ConfigCommands
                 WarnOnMatchedInvite   = warnOnMatch ?? default(Optional<bool>)
             });
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
         }
 
         
@@ -248,7 +249,7 @@ public partial class ConfigCommands
                 return await _channels.CreateMessageAsync(_context.ChannelID, messageBuilder.ToString());
             
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
         }
 
         #endregion

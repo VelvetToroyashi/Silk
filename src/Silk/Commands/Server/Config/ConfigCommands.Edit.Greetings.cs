@@ -11,6 +11,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -85,7 +86,7 @@ public partial class ConfigCommands
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
 
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
@@ -99,7 +100,7 @@ public partial class ConfigCommands
                          "Consider updating or deleting that greeting instead!"
                         );
 
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 var greetingEntity = new GuildGreetingEntity
@@ -122,7 +123,7 @@ public partial class ConfigCommands
 
                 await _channels.CreateMessageAsync(_context.ChannelID, message);
 
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
 
             [Command("update")]
@@ -158,14 +159,14 @@ public partial class ConfigCommands
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "Could not find a greeting with that ID!");
 
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 if (option is GreetOption.Role && role is null)
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
 
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 greetingEntity.ChannelID  = channel?.ID ?? greetingEntity.ChannelID;
@@ -184,7 +185,7 @@ public partial class ConfigCommands
 
                 await _channels.CreateMessageAsync(_context.ChannelID, message);
 
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
 
             [Command("delete")]
@@ -202,7 +203,7 @@ public partial class ConfigCommands
                 {
                     await _channels.CreateMessageAsync(_context.ChannelID, "I can't seem to find a greeting with that ID!");
 
-                    return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.DeclineId}");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 config.Greetings.Remove(greetingEntity);
@@ -211,7 +212,7 @@ public partial class ConfigCommands
 
                 await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted greeting with ID `{greetingEntity.Id}`");
 
-                return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+                return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
         }
     }

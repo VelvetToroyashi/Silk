@@ -20,6 +20,7 @@ using Remora.Results;
 using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Database.MediatR;
+using Silk.Shared;
 
 // ReSharper disable once ContextualLoggerProblem
 // ReSharper disable RedundantBlankLines
@@ -96,21 +97,14 @@ public sealed class RoleMenuCommand : CommandGroup
         var roleMenuResult = await CreateRoleMenuMessageAsync(channel.ID, roles);
 
         if (!roleMenuResult.IsSuccess)
-        {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-
-            await _channels.CreateMessageAsync(_context.ChannelID,
-                                               "Failed to create role menu: " + roleMenuResult.Error!.Message);
-
-            return roleMenuResult;
-        }
+            return Result<ReactionResult>.FromError(new ReactionResult("❌", "Failed to create role menu: " + roleMenuResult.Error!.Message), roleMenuResult);
 
         await _channels.CreateMessageAsync(_context.ChannelID,
-                                           $"RoleMenu ID: {((Result<IMessage>) roleMenuResult).Entity.ID}.\n" +
-                                           $"Use this ID to edit the menu!");
+                                               $"RoleMenu ID: {((Result<IMessage>) roleMenuResult).Entity.ID}.\n" +
+                                               $"Use this ID to edit the menu!");
 
 
-        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        return Result<ReactionResult>.FromSuccess(new("✅"));
     }
 
     [Command("add", "a")]
@@ -144,8 +138,8 @@ public sealed class RoleMenuCommand : CommandGroup
     {
         if (!roles.Any())
         {
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
+           await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+           return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
 
         var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
@@ -217,15 +211,14 @@ public sealed class RoleMenuCommand : CommandGroup
          components: new[] {components}
         );
 
-        if (!roleMenuMessageResult.IsSuccess)
-        {
-            _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+        if (roleMenuMessageResult.IsSuccess)
+            return Result<ReactionResult>.FromSuccess(new("✅"));
+        
+        _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+        await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
-        }
+        return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
 
-        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
     }
 
 
@@ -282,13 +275,11 @@ public sealed class RoleMenuCommand : CommandGroup
             
             var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions));
 
-            if (!res.IsSuccess)
-            {
-                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-                return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
-            }
+            if (res.IsSuccess)
+                return Result<ReactionResult>.FromSuccess(new("✅"));
             
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+            return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
         }
 
         [Command("role", "r")]
@@ -399,7 +390,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
             await _mediator.Send(new UpdateRoleMenu.Request(messageId, roleMenu.Options));
 
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+            return Result<ReactionResult>.FromSuccess(new("✅"));
         }
     }
 
@@ -466,15 +457,13 @@ public sealed class RoleMenuCommand : CommandGroup
          string.Join('\n', newRoles.Select(r => $"<@&{r.RoleId}>"))
         );
 
-        if (!roleMenuMessageResult.IsSuccess)
-        {
-            _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
-            await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
+        if (roleMenuMessageResult.IsSuccess)
+            return Result<ReactionResult>.FromSuccess(new("✅"));
+        _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+        await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
-            return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
-        }
-        
-        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
+
     }
 
     
@@ -577,7 +566,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (roleMenuResult.IsSuccess)
             await _channels.DeleteMessageAsync(new(roleMenuResult.Entity.ChannelId), new(roleMenuResult.Entity.MessageId));
         
-        return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "✅");
+        return Result<ReactionResult>.FromSuccess(new("✅"));
     }
     
     private async Task<IResult> EnsureChannelPermissionsAsync(IChannel channel)

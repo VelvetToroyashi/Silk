@@ -33,6 +33,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Silk.Extensions\Silk.Extensions.csproj" />
       <ProjectReference Include="..\..\src\Silk.Interactivity\Silk.Interactivity.csproj" />
+      <ProjectReference Include="..\..\src\Silk.Shared\Silk.Shared.csproj" />
     </ItemGroup>
 
     <!-- Todo: Update this if support for multi-plugin project dll export is needed -->

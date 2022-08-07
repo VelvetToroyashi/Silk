@@ -21,16 +21,16 @@ public class PostCommandReactionHandler : IPostExecutionEvent
             return Result.FromSuccess();
         }
 
-        if (commandResult.Inner!.Inner!.Inner!.Inner is not Result<ReactionResult> re)
+        if (commandResult is not Result<ReactionResult> re)
         {
-            return Result.FromSuccess();   
+            return Result.FromSuccess();
         }
         
         await _channels.CreateReactionAsync
         (
          context.ChannelID,
          mc.MessageID,
-         re.Entity.Reaction.TryPickT0(out Snowflake snowflake, out var ulongOrRaw) 
+         (re.Entity ?? re.Error as ReactionResult)!.Reaction.TryPickT0(out Snowflake snowflake, out var ulongOrRaw) 
              ? $"_:{snowflake}" 
              : ulongOrRaw.TryPickT0(out var id, out var unicode) 
                  ? $"_:{id}" 
@@ -38,7 +38,7 @@ public class PostCommandReactionHandler : IPostExecutionEvent
          ct
         );
 
-        if (re.Entity.Message.IsDefined(out var message))
+        if ((re.Entity ?? re.Error as ReactionResult)!.Message.IsDefined(out var message))
         {
             await _channels.CreateMessageAsync(context.ChannelID, message, ct: ct);
         }

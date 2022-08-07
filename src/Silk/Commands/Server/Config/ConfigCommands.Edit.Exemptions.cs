@@ -8,6 +8,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -78,7 +79,7 @@ public partial class ConfigCommands
                 Exemptions = config.Exemptions
             });
 
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
 
             (Snowflake, ExemptionTarget) GetSnowflake(OneOf<IUser, IRole, IChannel> oneOf)
                 => ((Snowflake, ExemptionTarget))oneOf
