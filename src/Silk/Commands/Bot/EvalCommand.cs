@@ -154,7 +154,7 @@ Microsoft.Extensions.Logging
 
             var returnResult = GetHumanFriendlyResultString(evalResult.ReturnValue);
             
-            var returnEmbed = new Embed()
+            var returnEmbed = new Embed
             {
                 Title = "Evaluation Result",
                 Description = returnResult ?? "Something went horribly wrong help",
@@ -165,7 +165,7 @@ Microsoft.Extensions.Logging
         }
         catch (Exception ex)
         {
-            var exEmbed = new Embed()
+            var exEmbed = new Embed
             {
                 Title       = "Eval Error!",
                 Description = $"**{ex.GetType()}**: {ex.Message.Split('\n')[0]}",

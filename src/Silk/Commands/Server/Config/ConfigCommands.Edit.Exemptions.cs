@@ -62,7 +62,7 @@ public partial class ConfigCommands
                 }
                 else if (flagsToAdd != default)
                 {
-                    var newExemption = new ExemptionEntity()
+                    var newExemption = new ExemptionEntity
                     {
                         Exemption  = flagsToAdd,
                         GuildID    = _context.GuildID.Value,

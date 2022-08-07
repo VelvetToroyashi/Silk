@@ -187,7 +187,7 @@ public sealed class RoleMenuCommand : CommandGroup
                             TimeSpan.FromSeconds(15));
         }
 
-        roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel()
+        roleMenu.Options.AddRange(rolesToAdd.Select(r => new RoleMenuOptionModel
         {
             RoleMenuId = roleMenu.MessageId,
             MessageId  = roleMenu.MessageId,
@@ -515,7 +515,8 @@ public sealed class RoleMenuCommand : CommandGroup
                  ChannelId = channelID.Value,
                  GuildId = _context.GuildID.Value.Value,
                  MessageId = roleMenuMessageResult.Entity.ID.Value,
-                 Options = roles.Select(r => new RoleMenuOptionModel() {RoleId = r.ID.Value, RoleName = r.Name})
+                 Options = roles.Select(r => new RoleMenuOptionModel
+                                            {RoleId = r.ID.Value, RoleName = r.Name})
                                 .ToList()
              })
             );

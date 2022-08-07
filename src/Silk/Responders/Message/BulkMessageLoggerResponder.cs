@@ -70,7 +70,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
         if (!channelResult.IsDefined(out var channel))
             return Result.FromSuccess();
 
-        IEmbed embed = new Embed()
+        IEmbed embed = new Embed
         {
             Title  = "Bulk Message Removal Detected",
             Colour = Color.Red,

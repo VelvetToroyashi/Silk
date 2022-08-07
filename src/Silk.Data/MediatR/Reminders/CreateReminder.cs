@@ -36,7 +36,7 @@ public static class CreateReminder
 
         public async Task<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var reminder = new ReminderEntity()
+            var reminder = new ReminderEntity
             {
                 ExpiresAt           = request.Expiration,
                 CreatedAt           = DateTimeOffset.UtcNow,

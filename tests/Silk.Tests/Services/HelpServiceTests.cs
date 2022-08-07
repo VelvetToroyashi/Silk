@@ -64,7 +64,8 @@ public class HelpServiceTests
 
         formatterMock
             .Setup(fm => fm.GetTopLevelHelpEmbeds(It.IsAny<IEnumerable<IGrouping<string, IChildNode>>>()))
-            .Returns(new IEmbed[] { new Embed() { Title = "Top Level Commands"} });
+            .Returns(new IEmbed[] { new Embed
+                         { Title = "Top Level Commands"} });
 
         var services = new ServiceCollection()
             .AddSingleton(formatterMock.Object)
@@ -92,7 +93,8 @@ public class HelpServiceTests
         
         formatterMock
             .Setup(fm => fm.GetCommandHelp(It.IsAny<IEnumerable<IChildNode>>()))
-            .Returns(new IEmbed[] { new Embed() { Title = "Showing subcommands for group" } });
+            .Returns(new IEmbed[] { new Embed
+                         { Title = "Showing subcommands for group" } });
         
         var services = new ServiceCollection()
             .AddSingleton(formatterMock.Object)
@@ -126,7 +128,8 @@ public class HelpServiceTests
         
         formatterMock
             .Setup(fm => fm.GetCommandHelp(It.IsAny<IEnumerable<IChildNode>>()))
-            .Returns(new IEmbed[] { new Embed() { Title = "Showing subcommands for group" } });
+            .Returns(new IEmbed[] { new Embed
+                         { Title = "Showing subcommands for group" } });
         
         var services = new ServiceCollection()
             .AddSingleton(formatterMock.Object)
@@ -166,7 +169,8 @@ public class HelpServiceTests
         
         formatterMock
             .Setup(fm => fm.GetCommandHelp(It.IsAny<IChildNode>()))
-            .Returns( new Embed() { Title = "Showing single command" } );
+            .Returns( new Embed
+                         { Title = "Showing single command" } );
         
         var services = new ServiceCollection()
             .AddSingleton(formatterMock.Object)
@@ -198,7 +202,8 @@ public class HelpServiceTests
         
         formatterMock
             .Setup(fm => fm.GetCommandHelp((IEnumerable<IChildNode>)It.IsAny<IEnumerable<IGrouping<string,IChildNode>>>()))
-            .Returns(new IEmbed[] { new Embed() { Title = "Showing subcommands for group" } });
+            .Returns(new IEmbed[] { new Embed
+                         { Title = "Showing subcommands for group" } });
 
         var services = new ServiceCollection()
             .AddSingleton(formatterMock.Object)

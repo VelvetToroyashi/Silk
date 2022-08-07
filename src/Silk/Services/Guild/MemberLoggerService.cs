@@ -74,7 +74,7 @@ public class MemberLoggerService
 
         var join = userData.History.Last(u => u.GuildID == guildID && u.IsJoin);
         
-        var userFields = new List<EmbedField>()
+        var userFields = new List<EmbedField>
         {
             new("Username:", user.ToDiscordTag()),
             new("User ID:", user.ID.ToString()),
@@ -126,7 +126,7 @@ public class MemberLoggerService
         if (sb.Length > 0) // Why haven't I thought of this before?
             sb.Insert(0, "Notes:\n");
         
-        var embed = new Embed()
+        var embed = new Embed
         {
             Title       = "Member Joined",
             Description = sb.ToString(),
@@ -166,7 +166,7 @@ public class MemberLoggerService
         
         var userResult = await _mediator.Send(new GetUser.Request(user.ID));
         
-        var fields = new List<EmbedField>()
+        var fields = new List<EmbedField>
         {
             new("Username:", user.ToDiscordTag()),
             new("User ID:", user.ID.ToString()),
@@ -190,7 +190,7 @@ public class MemberLoggerService
                 sb.AppendLine($"{Emojis.WarningEmoji} User joined less than a day ago");
         }
 
-        var embed = new Embed()
+        var embed = new Embed
         {
             Title       = "Member Left",
             Description = sb.ToString(),
