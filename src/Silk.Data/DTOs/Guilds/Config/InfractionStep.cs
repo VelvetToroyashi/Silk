@@ -3,7 +3,7 @@ using Silk.Data.Entities;
 
 namespace Silk.Data.DTOs.Guilds.Config;
 
-public record InfractionStepDTO
+public record InfractionStep
 {
     public int            Id          { get; set; }
     public int            ConfigId    { get; set; }

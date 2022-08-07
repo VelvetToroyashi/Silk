@@ -2,7 +2,7 @@ using Remora.Rest.Core;
 
 namespace Silk.Data.DTOs.Guilds.Config;
 
-public record InviteDTO
+public record Invite
 {
     public int       Id            { get; set; }
     public Snowflake GuildId       { get; set; }

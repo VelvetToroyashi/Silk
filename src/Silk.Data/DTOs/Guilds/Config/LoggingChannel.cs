@@ -2,7 +2,7 @@ using Remora.Rest.Core;
 
 namespace Silk.Data.DTOs.Guilds.Config;
 
-public record LoggingChannelDTO
+public record LoggingChannel
 {
     public int       Id           { get; set; }
     public Snowflake GuildID      { get; set; }

@@ -11,36 +11,36 @@ namespace Silk.Data.MediatR.Greetings;
 
 public static class UpdateGuildGreeting
 {
-    public record Request(GuildGreetingDTO GreetingDto) : IRequest<Result<GuildGreetingDTO>>;
+    public record Request(GuildGreeting Greeting) : IRequest<Result<GuildGreeting>>;
 
-    internal class Handler : IRequestHandler<Request, Result<GuildGreetingDTO>>
+    internal class Handler : IRequestHandler<Request, Result<GuildGreeting>>
     {
         private readonly IDbContextFactory<GuildContext> _dbContextFactory;
 
         public Handler(IDbContextFactory<GuildContext> dbContextFactory) 
             => _dbContextFactory = dbContextFactory;
 
-        public async Task<Result<GuildGreetingDTO>> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
             var guildConfig = await dbContext.GuildConfigs
                                              .Include(gc => gc.Greetings)
-                                             .FirstOrDefaultAsync(gc => gc.GuildID == request.GreetingDto.GuildID, cancellationToken);
+                                             .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
             if (guildConfig is null)
-                return Result<GuildGreetingDTO>.FromError(new NotFoundError("Guild config not found"));
+                return Result<GuildGreeting>.FromError(new NotFoundError("Guild config not found"));
 
             var existingGreeting = guildConfig.Greetings
-                                              .FirstOrDefault(g => g.Id == request.GreetingDto.Id);
+                                              .FirstOrDefault(g => g.Id == request.Greeting.Id);
             if (existingGreeting is null)
-                return Result<GuildGreetingDTO>.FromError(new NotFoundError("Greeting does not exist"));
+                return Result<GuildGreeting>.FromError(new NotFoundError("Greeting does not exist"));
 
-            var updatedGreetingEntity = request.GreetingDto.Adapt(existingGreeting);
+            var updatedGreetingEntity = request.Greeting.Adapt(existingGreeting);
             var saved = await dbContext.SaveChangesAsync(cancellationToken) > 0;
 
             return saved 
-                ? Result<GuildGreetingDTO>.FromSuccess(updatedGreetingEntity.Adapt<GuildGreetingDTO>())
-                : Result<GuildGreetingDTO>.FromError(new GenericError("Failed to update greeting"));
+                ? Result<GuildGreeting>.FromSuccess(updatedGreetingEntity.Adapt<GuildGreeting>())
+                : Result<GuildGreeting>.FromError(new GenericError("Failed to update greeting"));
         }
     }
 }

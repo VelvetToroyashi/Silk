@@ -3,7 +3,7 @@ using Silk.Data.Entities;
 
 namespace Silk.Data.DTOs.Guilds.Config;
 
-public record GuildGreetingDTO
+public record GuildGreeting
 {
     public int            Id         { get; set; }
     public Snowflake      GuildID    { get; set; }
