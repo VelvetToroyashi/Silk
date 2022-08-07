@@ -89,7 +89,7 @@ public class PhishingDetectionService
         "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", "Hype Mail", 
         "HypeSquad Academy", "Hypesquad Events", "Hypesquad Moderation Academy", "Hypesquad Moderation", 
         "Hypesquad Moderator", "ModMail", "Moderation Message", "Moderation Notification", 
-        "Moderation Team", "Moderator Message", "Moderator Team", "Staff Academy",
+        "Moderation Team", "Moderator Message", "Moderator Team", "Staff Academy", "EventsHS",
         "Staff Developers", "Staff Events", "Staff Message", "Staff Moderators ", "System Message",
     };
 
