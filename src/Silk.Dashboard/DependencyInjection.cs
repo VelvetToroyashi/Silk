@@ -175,7 +175,6 @@ public static class DependencyInjection
     )
     {
         services.AddMemoryCache();
-        services.AddHttpContextAccessor();
 
         services.AddHttpClient("Github", con => 
         {
