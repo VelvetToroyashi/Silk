@@ -91,6 +91,7 @@ public static class ServiceCollectionExtensions
             //.AddPostExecutionEvent<FailedCommandResponder>()
            .AddCommands(asm) // Register types
            .AddCommands()
+           .AddPostExecutionEvent<PostCommandReactionHandler>()
            .AddPostExecutionEvent<PostCommandHandler>()
            .AddPostExecutionEvent<CommandMetricsHandler>();   // Register commands
         //.Replace(ServiceDescriptor.Scoped<CommandResponder>(s => s.GetRequiredService<SilkCommandResponder>()));

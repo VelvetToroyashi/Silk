@@ -9,6 +9,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Extensions.Remora;
+using Silk.Shared;
 using Silk.Shared.Constants;
 
 namespace Silk.Commands.Server;
@@ -33,11 +34,7 @@ public partial class ConfigCommands
         )
         {
             if (mute is null && useNativeMute is null)
-            {
-                await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, $"_:{Emojis.DeclineId}");
-                
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify either a role or whether to use the native mute functionality.");
-            }
+                return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId, "You must specify either a role or whether to use the native mute functionality."));
 
             var selfResult = await _guilds.GetCurrentGuildMemberAsync(_users, _context.GuildID.Value);
 
@@ -72,15 +69,15 @@ public partial class ConfigCommands
             }
 
             await _mediator.Send
-                (
-                 new UpdateGuildConfig.Request(_context.GuildID.Value)
-                 {
-                     MuteRoleID    = mute?.ID      ?? default(Optional<Snowflake>),
-                     UseNativeMute = useNativeMute ?? default(Optional<bool>)
-                 }
-                );
+            (
+             new UpdateGuildConfig.Request(_context.GuildID.Value)
+             {
+                 MuteRoleID    = mute?.ID      ?? default(Optional<Snowflake>),
+                 UseNativeMute = useNativeMute ?? default(Optional<bool>)
+             }
+            );
 
-            return await _channels.CreateReactionAsync(_context.ChannelID, _context!.MessageID, $"_:{Emojis.ConfirmId}");
+            return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
         }
     }
 }

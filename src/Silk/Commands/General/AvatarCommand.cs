@@ -86,7 +86,7 @@ public class AvatarCommand : CommandGroup
     private IEmbed[] GetEmbeds(IUser user, Uri avatar, bool isSelf, bool isGuild)
         => new[]
         {
-            new Embed()
+            new Embed
             {
                 Title = (isSelf ? "Your " : $"{user.Username}'s ") + (isGuild ? "guild" : "") + " avatar!",
                 Colour = Color.MidnightBlue,

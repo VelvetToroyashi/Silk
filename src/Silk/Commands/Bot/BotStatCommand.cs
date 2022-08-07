@@ -58,7 +58,7 @@ public class BotStatCommand : CommandGroup
 
         var heapMemory = $"{GC.GetTotalMemory(true) / 1024 / 1024:n0} MB";
         
-        var embed = new Embed()
+        var embed = new Embed
         {
             Title  = $"Stats (Shard {_shard.ShardID + 1}):",
             Colour = Color.Gold,
