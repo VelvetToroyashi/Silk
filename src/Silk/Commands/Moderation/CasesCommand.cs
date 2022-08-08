@@ -106,7 +106,7 @@ public class CasesCommand : CommandGroup
         return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
     }
 
-    private string GetCaseDescription(InfractionDTO infraction) =>
+    private string GetCaseDescription(Infraction infraction) =>
         $"| {infraction.CaseID} "                            +
         $"| **{infraction.Type.Humanize(LetterCasing.Title)}** " +
         $"| {infraction.CreatedAt.ToTimestamp()} "               +

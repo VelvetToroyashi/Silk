@@ -20,9 +20,9 @@ public static class CreateInfraction
         string          Reason,
         InfractionType  Type,
         DateTimeOffset? Expiration = null
-    ) : IRequest<InfractionDTO>;
+    ) : IRequest<Infraction>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionDTO>
+    internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
         private readonly GuildContext _db;
         private readonly IMediator    _mediator;
@@ -33,7 +33,7 @@ public static class CreateInfraction
             _mediator = mediator;
         }
 
-        public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<Infraction> Handle(Request request, CancellationToken cancellationToken)
         {
             var infraction = new InfractionEntity
             {

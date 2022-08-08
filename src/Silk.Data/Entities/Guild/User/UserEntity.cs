@@ -37,8 +37,8 @@ public class UserEntity
     /// </summary>
     public bool ShareTimezone { get; set; }
 
-    public static implicit operator UserDTO?(UserEntity? user) => ToDTO(user);
+    public static implicit operator User?(UserEntity? user) => ToDTO(user);
     
-    public static UserDTO? ToDTO(UserEntity? user)
+    public static User? ToDTO(UserEntity? user)
         => user is null ? null : new(user.ID,user.TimezoneID, user.ShareTimezone, user.Guilds.Select(g => g.GuildID).ToArray(), user.History.Select(UserHistoryEntity.ToDTO).ToArray(), user.Infractions.Select(InfractionEntity.ToDTO).ToArray()!);
 }

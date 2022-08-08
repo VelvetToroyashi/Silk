@@ -21,14 +21,14 @@ public static class UpdateInfraction
         Optional<bool>            Processed       = default,
         Optional<bool>            Escalated       = default,
         Optional<bool>            Notified        = default
-    ) : IRequest<InfractionDTO>;
+    ) : IRequest<Infraction>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionDTO>
+    internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<InfractionDTO> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<Infraction> Handle(Request request, CancellationToken cancellationToken)
         {
             var infraction = await _db.Infractions
                                       .FirstAsync(inf => inf.CaseNumber == request.CaseID &&

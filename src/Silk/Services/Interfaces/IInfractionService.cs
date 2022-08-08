@@ -19,7 +19,7 @@ public interface IInfractionService
 	/// <param name="newReason">The new reason to apply to the infraction.</param>
 	/// <param name="newExpiration">The new expiration to apply to the infraction.</param>
 	/// <param name="updatedBy">The user that updated the infraction.</param>
-	public Task<Result<InfractionDTO>> UpdateInfractionAsync(InfractionDTO infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default);
+	public Task<Result<Infraction>> UpdateInfractionAsync(Infraction infraction, IUser updatedBy, string? newReason = null, Optional<TimeSpan?> newExpiration = default);
 
 	/// <summary>
 	///     Applies a strike to a user. Strikes may be used in automod actions to determine what action to take against a user.
@@ -28,7 +28,7 @@ public interface IInfractionService
 	/// <param name="targetID">The ID of the target to be struck.</param>
 	/// <param name="enforcerID">The ID of user striking the target.</param>
 	/// <param name="reason">The reason strike was given.</param>
-	public Task<Result<InfractionDTO>> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	public Task<Result<Infraction>> StrikeAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
 
 
 	/// <summary>
@@ -39,7 +39,7 @@ public interface IInfractionService
 	/// <param name="enforcerID">The ID of the user that kicked the target.</param>
 	/// <param name="reason">The reason the target was kicked.</param>
 	/// <param name="notify">Whether to notify the target of the infraction.</param>
-	public Task<Result<InfractionDTO>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", bool notify = true);
+	public Task<Result<Infraction>> KickAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", bool notify = true);
 
 	/// <summary>
 	///     Bans a member from the specified guild, generating an infraction.
@@ -51,7 +51,7 @@ public interface IInfractionService
 	/// <param name="reason">The reason the target was banned.</param>
 	/// <param name="expirationRelativeToNow">A time relative to now to automatically unban the target.</param>
 	/// <param name="notify">Whether or not to notify the target of the ban.</param>
-	public Task<Result<InfractionDTO>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true);
+	public Task<Result<Infraction>> BanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, int deleteDays = 0, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null, bool notify = true);
 
 	/// <summary>
 	///     Unbans a user from the specified guild.
@@ -60,7 +60,7 @@ public interface IInfractionService
 	/// <param name="targetID">The ID of the target to unban.</param>
 	/// <param name="enforcerID">The ID of user that unbanned the target.</param>
 	/// <param name="reason">The reason the target was unbanned.</param>
-	public Task<Result<InfractionDTO>> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	public Task<Result<Infraction>> UnBanAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
 
 
 
@@ -79,7 +79,7 @@ public interface IInfractionService
 	/// <param name="enforcerID">The ID of the user that invoked this action.</param>
 	/// <param name="reason">The reason the target is being muted.</param>
 	/// <param name="expirationRelativeToNow">Specifies a time relative to now for the user to be automatically unmuted at.</param>
-	public Task<Result<InfractionDTO>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
+	public Task<Result<Infraction>> MuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.", TimeSpan? expirationRelativeToNow = null);
 
 	/// <summary>
 	///     Attempts to unmute a user on the specified guild.
@@ -88,7 +88,7 @@ public interface IInfractionService
 	/// <param name="targetID">The ID of the target to be unmuted.</param>
 	/// <param name="enforcerID">The ID of user that invoked this action.</param>
 	/// <param name="reason">The reason the target is being umuted.</param>
-	public Task<Result<InfractionDTO>> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
+	public Task<Result<Infraction>> UnMuteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string reason = "Not Given.");
 
 	/// <summary>
 	///     Adds a note-infraction to the specified user. Notes are not taken into account when calculating automod actions.
@@ -97,7 +97,7 @@ public interface IInfractionService
 	/// <param name="targetID">The ID of the target this action is taken against.</param>
 	/// <param name="enforcerID">The ID of entity that invoked this action. The "moderator", in other words.</param>
 	/// <param name="note">The content of the note to add to the target.</param>
-	public Task<Result<InfractionDTO>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note);
+	public Task<Result<Infraction>> AddNoteAsync(Snowflake guildID, Snowflake targetID, Snowflake enforcerID, string note);
 
 	/// <summary>
 	///     Pardons a user from a specific infraction. Only strikes that are held against the user can be pardoned.
