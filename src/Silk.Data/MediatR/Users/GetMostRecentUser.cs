@@ -10,14 +10,14 @@ namespace Silk.Data.MediatR.Users;
 
 public static class GetMostRecentUser
 {
-    public record Request(Snowflake GuildID) : IRequest<UserDTO?>;
+    public record Request(Snowflake GuildID) : IRequest<User?>;
     
-    internal class Handler : IRequestHandler<Request, UserDTO?>
+    internal class Handler : IRequestHandler<Request, User?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<UserDTO?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
         {
             var history = await _db.Histories
                                    .Where(j => j.GuildID == request.GuildID)

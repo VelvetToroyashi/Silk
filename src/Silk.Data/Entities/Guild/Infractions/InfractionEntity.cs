@@ -103,6 +103,6 @@ public class InfractionEntity
     public TimeSpan? Duration => !ExpiresAt.HasValue ? null : ExpiresAt.Value - CreatedAt;
 
     [return: NotNullIfNotNull("infraction")]
-    public static InfractionDTO? ToDTO(InfractionEntity? infraction)
+    public static Infraction? ToDTO(InfractionEntity? infraction)
         => infraction is null ? null : new(infraction.TargetID, infraction.EnforcerID, infraction.GuildID, infraction.Type, infraction.CreatedAt, infraction.ExpiresAt, infraction.Duration, infraction.CaseNumber, infraction.Reason, infraction.UserNotified, infraction.Processed, !infraction.AppliesToTarget);
 }

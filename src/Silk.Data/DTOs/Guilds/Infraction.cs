@@ -19,7 +19,7 @@ namespace Silk.Data.DTOs.Guilds;
 /// <param name="Notified">Whether the user was notified about the infraction.</param>
 /// <param name="Processed">Whether this infraction has been processed.</param>
 /// <param name="Pardoned">Whether this infraction has been pardoned.</param>
-public record InfractionDTO
+public record Infraction
 (
     Snowflake       TargetID,
     Snowflake       EnforcerID,

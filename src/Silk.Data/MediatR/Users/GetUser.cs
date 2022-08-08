@@ -13,17 +13,17 @@ public static class GetUser
     /// <summary>
     /// Request to get a user from the database, or null, if it does not exist.
     /// </summary>
-    public sealed record Request(Snowflake UserID) : IRequest<UserDTO?>;
+    public sealed record Request(Snowflake UserID) : IRequest<User?>;
 
     /// <summary>
     /// The default handler associated with <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, UserDTO?>
+    internal sealed class Handler : IRequestHandler<Request, User?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<UserDTO?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
         {
             UserEntity? user = await _db.Users
                                         .Include(u => u.History)

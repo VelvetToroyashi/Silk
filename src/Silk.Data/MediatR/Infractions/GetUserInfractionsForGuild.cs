@@ -12,14 +12,14 @@ namespace Silk.Data.MediatR.Infractions;
 
 public static class GetUserInfractionsForGuild
 {
-    public sealed record Request(Snowflake GuildID, Snowflake TargetID) : IRequest<IEnumerable<InfractionDTO>>;
+    public sealed record Request(Snowflake GuildID, Snowflake TargetID) : IRequest<IEnumerable<Infraction>>;
 
-    internal sealed class Handler : IRequestHandler<Request, IEnumerable<InfractionDTO>>
+    internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<InfractionDTO>> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
         {
             var query = _db.Infractions
                            .Where(inf => inf.TargetID == request.TargetID)

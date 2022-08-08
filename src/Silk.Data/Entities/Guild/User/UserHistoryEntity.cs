@@ -38,6 +38,6 @@ public class UserHistoryEntity
     [Column("is_join")]
     public bool IsJoin { get; set; }
 
-    public static UserHistoryDTO ToDTO(UserHistoryEntity history)
+    public static UserHistory ToDTO(UserHistoryEntity history)
         => new(history.GuildID, history.Date, history.IsJoin);
 }
