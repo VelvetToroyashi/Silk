@@ -11,66 +11,54 @@ public static class EntityMapping
     public static void ConfigureMappings()
     {
         TypeAdapterConfig<GuildGreetingEntity, GuildGreeting>
-           .NewConfig()
-            ;
+           .NewConfig();
 
         TypeAdapterConfig<GuildGreeting, GuildGreetingEntity>
            .NewConfig()
-           .Ignore(dest => dest.Guild)
-            ;
+           .Ignore(dest => dest.Guild);
 
         TypeAdapterConfig<ExemptionEntity, Exemption>
            .NewConfig()
-           .Map(dest => dest.Coverage, src => src.Exemption)
-            ;
+           .Map(dest => dest.Coverage, src => src.Exemption);
 
         TypeAdapterConfig<Exemption, ExemptionEntity>
            .NewConfig()
-           .Map(dest => dest.Exemption, src => src.Coverage)
-            ;
+           .Map(dest => dest.Exemption, src => src.Coverage);
 
         // Currently 1-1 mapping
         TypeAdapterConfig<InviteEntity, Invite>
            .NewConfig()
-           .TwoWays()
-            ;
+           .TwoWays();
 
         // Currently 1-1 mapping
         TypeAdapterConfig<LoggingChannelEntity, LoggingChannel>
            .NewConfig()
-           .TwoWays()
-            ;
+           .TwoWays();
 
         // Currently 1-1 mapping
         TypeAdapterConfig<InfractionStepEntity, InfractionStep>
            .NewConfig()
-           .TwoWays()
-            ;
+           .TwoWays();
 
         // Currently 1-1 mapping
         TypeAdapterConfig<GuildLoggingConfigEntity, GuildLoggingConfig>
            .NewConfig()
-           .TwoWays()
-            ;
+           .TwoWays();
 
         TypeAdapterConfig<InviteConfigEntity, InviteConfig>
            .NewConfig()
-           .Map(dest => dest.GuildConfigId, src => src.GuildModConfigId)
-            ;
+           .Map(dest => dest.GuildConfigId, src => src.GuildModConfigId);
 
         TypeAdapterConfig<InviteConfig, InviteConfigEntity>
            .NewConfig()
            .Ignore(dest => dest.GuildConfig)
-           .Map(dest => dest.GuildModConfigId, src => src.GuildConfigId)
-            ;
+           .Map(dest => dest.GuildModConfigId, src => src.GuildConfigId);
 
         TypeAdapterConfig<GuildConfigEntity, GuildConfig>
-           .NewConfig()
-            ;
+           .NewConfig();
 
         TypeAdapterConfig<GuildConfig, GuildConfigEntity>
            .NewConfig()
-           .Ignore(dest => dest.Guild)
-            ;
+           .Ignore(dest => dest.Guild);
     }
 }
