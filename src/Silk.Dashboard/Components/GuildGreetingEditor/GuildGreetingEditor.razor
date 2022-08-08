@@ -17,7 +17,7 @@
 }
 else
 {
-    <MudForm Class="my-3" @ref="_form" Model="Greeting">
+    <MudForm @ref="_form" Class="my-3" Model="Greeting">
         @* Guild *@
         <MudContainer Class="mb-4">
             <MudTooltip Placement="Placement.Top"
@@ -53,10 +53,10 @@ else
                        Value="Greeting.Option"
                        ValueChanged="@(async o => await UpdateGreetingOptionAsync(o))"
                        Variant="Variant.Outlined">
-                @foreach (var go in GreetingOptions)
+                @foreach (var option in GreetingOptions)
                 {
-                    <MudSelectItem Value="@go">
-                        @go.Humanize(LetterCasing.Title)
+                    <MudSelectItem Value="@option">
+                        @option.Humanize(LetterCasing.Title)
                     </MudSelectItem>
                 }
             </MudSelect>

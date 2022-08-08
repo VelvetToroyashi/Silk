@@ -1,10 +1,11 @@
 @using Silk.Data.DTOs.Guilds.Config
+@using Remora.Results
 
 <MudDialog>
     <DialogContent>
         <GuildGreetingEditor Greeting="Greeting"
-                             OnSubmit="Close"
-                             OnCancel="Cancel"/>
+                             OnSubmit="Submit"
+                             OnCancel="Cancel" />
     </DialogContent>
 </MudDialog>
 
@@ -14,12 +15,14 @@
     MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public int GreetingId { get; set; }
-
-    [Parameter]
     public GuildGreeting Greeting { get; set; }
 
-    void Close() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
+
+    private void Submit(Result<GuildGreeting> result)
+    {
+        if (result.IsDefined(out _)) 
+            MudDialog.Close(result);
+    }
 
 }

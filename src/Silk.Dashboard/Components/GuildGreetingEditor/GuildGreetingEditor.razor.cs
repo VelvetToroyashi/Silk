@@ -18,12 +18,12 @@ public partial class GuildGreetingEditor
 
     private static readonly GreetingOption[] GreetingOptions = Enum.GetValues<GreetingOption>();
 
-    [Inject]    public DashboardDiscordClient DiscordClient { get; set; }
-    [Inject]    public IMediator              Mediator      { get; set; }
-    [Inject]    public ISnackbar              Snackbar      { get; set; }
-    [Parameter] public GuildGreeting          Greeting      { get; set; }
-    [Parameter] public EventCallback          OnSubmit      { get; set; }
-    [Parameter] public EventCallback          OnCancel      { get; set; }
+    [Inject]    public DashboardDiscordClient               DiscordClient { get; set; }
+    [Inject]    public IMediator                            Mediator      { get; set; }
+    [Inject]    public ISnackbar                            Snackbar      { get; set; }
+    [Parameter] public GuildGreeting                        Greeting      { get; set; }
+    [Parameter] public EventCallback<Result<GuildGreeting>> OnSubmit      { get; set; }
+    [Parameter] public EventCallback                        OnCancel      { get; set; }
 
     private MudForm _form;
     private IReadOnlyList<IRole> _roles;
@@ -88,44 +88,22 @@ public partial class GuildGreetingEditor
         return null;
     }
 
-    private void UpdateGreeting(GuildGreeting greeting)
+    private async Task SetResult(Result<GuildGreeting> result)
     {
-        greeting.GuildID    = Greeting.GuildID;
-        greeting.ChannelID  = Greeting.ChannelID;
-        greeting.Message    = Greeting.Message;
-        greeting.Option     = Greeting.Option;
-        greeting.MetadataID = Greeting.MetadataID;
+        if (OnSubmit.HasDelegate)
+            await OnSubmit.InvokeAsync(result);
     }
 
     private void Cancel()
     {
-        if (OnCancel.HasDelegate) 
+        if (OnCancel.HasDelegate)
             OnCancel.InvokeAsync();
     }
 
     private async Task SubmitAsync()
     {
-        await ComponentRunAsync
-        (
-             async () =>
-             {
-                 await _form.Validate();
-                 if (!_form.IsValid) return;
-
-                 var isUpdatingGreeting = Greeting.Id > 0;
-                 var result = isUpdatingGreeting
-                     ? await Mediator.Send(new UpdateGuildGreeting.Request(Greeting))
-                     : await Mediator.Send(new AddGuildGreeting.Request(Greeting));
-
-                 var messageData = result.IsDefined(out var resultGreeting)
-                     ? ($"Greeting #{resultGreeting.Id} {(isUpdatingGreeting ? "updated" : "created")} successfully", Severity.Success)
-                     : ($"Failed to complete request - {result.Error}", Severity.Error);
-
-                 Snackbar.Add(messageData.Item1, messageData.Item2);
-
-                 if (OnSubmit.HasDelegate)
-                     await OnSubmit.InvokeAsync();
-             }
-        );
+        await _form.Validate();
+        if (!_form.IsValid) await SetResult(Result<GuildGreeting>.FromError(new GenericError("Form invalid")));
+        else await SetResult(Result<GuildGreeting>.FromSuccess(Greeting));
     }
 }

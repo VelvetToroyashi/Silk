@@ -1,9 +1,11 @@
 ﻿using Humanizer;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
+using Remora.Results;
 using Silk.Dashboard.Components.Dialogs;
 using Silk.Dashboard.Extensions;
 using Silk.Dashboard.Services;
@@ -48,8 +50,8 @@ public partial class ManageGuild
         var option = greeting.Option.Humanize(LetterCasing.Title);
         return greeting.Option switch
         {
-            GreetingOption.GreetOnJoin or GreetingOption.GreetOnScreening => $"{option} --- {greeting.ChannelID}",
-            GreetingOption.GreetOnRole                                    => $"{option} --- {greeting.MetadataID}",
+            GreetingOption.GreetOnJoin or GreetingOption.GreetOnScreening => $"{option} - {greeting.ChannelID}",
+            GreetingOption.GreetOnRole                                    => $"{option} - {greeting.ChannelID} - {greeting.MetadataID}",
             GreetingOption.DoNotGreet                                     => option,
             _                                                             => ""
         };
@@ -156,7 +158,7 @@ public partial class ManageGuild
 
     private Task CreateGreetingAsync()
     {
-        return OpenGreetingDialogAsync(greeting: new() 
+        return OpenGreetingDialogAsync(new()
         { 
             GuildID = _guildConfig.GuildID,
         });
@@ -164,7 +166,7 @@ public partial class ManageGuild
 
     private Task EditGreetingAsync(GuildGreeting greeting)
     {
-        return OpenGreetingDialogAsync(greeting: greeting);
+        return OpenGreetingDialogAsync(greeting);
     }
 
     private async Task DeleteGreetingAsync(GuildGreeting greeting)
@@ -182,25 +184,14 @@ public partial class ManageGuild
         var result = await dialog.Result;
 
         if (!result.Cancelled && result.Data is true)
-        {
-            var deleteResult =  await Mediator.Send(new RemoveGuildGreeting.Request(greeting.Id, GuildIdParsed));
-            if (deleteResult.IsSuccess)
-            {
-                _guildConfig.Greetings.Remove(_guildConfig.Greetings.First(x => x.Id == greeting.Id));
-                Snackbar.Add("Successfully deleted greeting!", Severity.Success);
-            }
-        }
+            await HandleGreetingDeleteAsync(greeting);
 
         StateHasChanged();
     }
 
-    private async Task OpenGreetingDialogAsync
-    (
-        int                  greetingId = 0,
-        GuildGreeting? greeting   = null
-    )
+    private async Task OpenGreetingDialogAsync(GuildGreeting greeting)
     {
-        // Todo: Handle scrolling?
+        // Todo: Handle scrolling
         var options = new DialogOptions
         {
             CloseOnEscapeKey     = false,
@@ -210,15 +201,54 @@ public partial class ManageGuild
             NoHeader             = true,
         };
 
-        var parameters = new DialogParameters
-        {
-            { "GreetingId", greetingId },
-            { "Greeting", greeting },
-        };
+        var parameters = new DialogParameters { { "Greeting", greeting } };
 
-        var dialog = DialogService.Show<GuildGreetingDialog>("", parameters, options);
-        await dialog.Result;
+        var dialog = DialogService.Show<GuildGreetingDialog>("Greeting Editor", parameters, options);
+        var dialogResult = await dialog.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data is Result<GuildGreeting> greetingResult)
+            await HandleGreetingEditAsync(greetingResult);
 
         StateHasChanged();
+    }
+
+    private async Task HandleGreetingEditAsync(Result<GuildGreeting> greetingResult)
+    {
+        if (!greetingResult.IsDefined(out var editedGreeting)) return;
+
+        var updateGreeting = editedGreeting.Id > 0;
+
+        var response = updateGreeting
+            ? await Mediator.Send(new UpdateGuildGreeting.Request(editedGreeting))
+            : await Mediator.Send(new AddGuildGreeting.Request(editedGreeting));
+
+        if (response.IsDefined(out var resultGreeting))
+        {
+            // Todo: Use DTO
+            if (!updateGreeting)
+            {
+                Snackbar.Add($"Greeting #{resultGreeting.Id} created successfully", Severity.Success);
+                _guildConfig.Greetings.Add(resultGreeting.Adapt<GuildGreetingEntity>());
+            }
+            else
+            {
+                Snackbar.Add("Successfully updated greeting!", Severity.Success);
+                resultGreeting.Adapt(_guildConfig.Greetings.First(x => x.Id == resultGreeting.Id));
+            }
+        }
+        else
+        {
+            Snackbar.Add($"Uh-oh! Something went wrong - {response.Error?.Message}", Severity.Error);
+        }
+    }
+
+    private async Task HandleGreetingDeleteAsync(GuildGreeting greeting)
+    {
+        var deleteResult = await Mediator.Send(new RemoveGuildGreeting.Request(greeting.Id, GuildIdParsed));
+        if (deleteResult.IsSuccess)
+        {
+            Snackbar.Add("Successfully deleted greeting!", Severity.Success);
+            _guildConfig.Greetings.Remove(_guildConfig.Greetings.First(x => x.Id == greeting.Id));
+        }
     }
 }
