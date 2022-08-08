@@ -13,7 +13,7 @@ public record GuildLoggingConfig
     public bool            LogMemberJoins           { get; set; }
     public bool            LogMemberLeaves          { get; set; }
     public bool            UseWebhookLogging        { get; set; }
-    public bool            UseMobileFriendlyLogging { get; set; } = true;
+    public bool            UseMobileFriendlyLogging { get; set; }
     public LoggingChannel? Infractions              { get; set; }
     public LoggingChannel? MessageEdits             { get; set; }
     public LoggingChannel? MessageDeletes           { get; set; }
