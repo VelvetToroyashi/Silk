@@ -64,7 +64,7 @@ public class UserTests
     public async Task GetReturnsNullForNonUser()
     {
         //Arrange
-        UserDTO? user;
+        User? user;
         //Act
         user = await _mediator.Send(new GetUser.Request(UserId));
         //Assert
@@ -75,7 +75,7 @@ public class UserTests
     public async Task GetReturnsUserCorrectly()
     {
         //Arrange
-        UserDTO? user;
+        User? user;
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         //Act
         user = await _mediator.Send(new GetUser.Request(UserId));
@@ -87,7 +87,7 @@ public class UserTests
     public async Task GetOrCreateCreatesForNonUser()
     {
         //Arrange
-        UserDTO? user;
+        User? user;
         //Act
         await _mediator.Send(new GetOrCreateUser.Request(GuildId, UserId));
         user = await _mediator.Send(new GetUser.Request(UserId));

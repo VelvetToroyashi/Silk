@@ -9,4 +9,9 @@ namespace Silk.Data.DTOs.Guilds.Users;
 /// <param name="GuildID">The ID of the guild that was joined.</param>
 /// <param name="Joined">The timestamp the user joined.</param>
 /// <param name="IsJoin">Whether this history was a join..</param>
-public record UserHistoryDTO(Snowflake GuildID, DateTimeOffset Joined, bool IsJoin);
+public record UserHistory
+(
+    Snowflake      GuildID,
+    DateTimeOffset Joined,
+    bool           IsJoin
+);

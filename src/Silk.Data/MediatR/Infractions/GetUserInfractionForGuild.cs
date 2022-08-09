@@ -15,14 +15,14 @@ public static class GetUserInfractionForGuild
         Snowflake      UserID,
         Snowflake      GuildID,
         InfractionType Type,
-        int?           CaseId = null) : IRequest<InfractionDTO?>;
+        int?           CaseId = null) : IRequest<Infraction?>;
 
-    internal sealed class Handler : IRequestHandler<Request, InfractionDTO?>
+    internal sealed class Handler : IRequestHandler<Request, Infraction?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<InfractionDTO?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<Infraction?> Handle(Request request, CancellationToken cancellationToken)
         {
             InfractionEntity? infraction;
 

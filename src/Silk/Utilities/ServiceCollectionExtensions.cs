@@ -38,6 +38,7 @@ using Serilog.Events;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Data;
+using Silk.Data.EntityMapping;
 using Silk.Extensions.Remora;
 using Silk.Infrastructure;
 using Silk.Interactivity;
@@ -173,6 +174,7 @@ public static class ServiceCollectionExtensions
             b.UseNpgsql(connectionString);
         }
 
+        EntityMapping.ConfigureMappings();
         services.AddDbContextFactory<GuildContext>(Builder);
         services.AddTransient(sp => sp.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext());
 
