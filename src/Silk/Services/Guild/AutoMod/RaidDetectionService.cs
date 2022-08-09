@@ -2,23 +2,30 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Extensions.Hosting;
+using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Types.Collections;
+using StackExchange.Redis;
 
 namespace Silk.Services.Guild;
 
 public class RaidDetectionService : BackgroundService
 {
+    private readonly IMediator               _mediator;
     private readonly IInfractionService      _infractions;
     private readonly IDiscordRestUserAPI     _users;
+    private readonly IConnectionMultiplexer  _redis;
     private readonly GuildConfigCacheService _config;
     
     private record Raider(Snowflake GuildID, Snowflake RaiderID, string  Reason);
@@ -31,11 +38,24 @@ public class RaidDetectionService : BackgroundService
     private readonly ConcurrentDictionary<Snowflake, List<MessageDTO>>                     _messageBuckets = new();
     private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins          = new();
 
+    private record Suspect(Snowflake GuildID, Snowflake UserID, string Username, DateTimeOffset JoinedAt, string Reason);
     
-    public RaidDetectionService(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
+    private readonly ConcurrentDictionary<Snowflake, List<Suspect>> _suspects = new();
+
+
+    public RaidDetectionService
+    (
+        IMediator mediator,
+        IInfractionService infractions,
+        IDiscordRestUserAPI users,
+        IConnectionMultiplexer redis,
+        GuildConfigCacheService config
+    )
     {
+        _mediator     = mediator;
         _infractions = infractions;
         _users       = users;
+        _redis       = redis;
         _config      = config;
     }
 
@@ -143,6 +163,34 @@ public class RaidDetectionService : BackgroundService
             ranges.Remove(range);
         }
     }
+
+    // TODO: return RaidDetectionResult? Tuples are bleh. 
+    public async Task<bool> IsThreatAsync(Snowflake guildID, IUser user, DateTimeOffset joinedAt)
+    {
+        const int AvatarScore = 15;
+        
+        var db = _redis.GetDatabase();
+
+        var threat = 0;
+        var config = await _config.GetConfigAsync(guildID);
+        
+        if (!config.EnableRaidDetection)
+            return false;
+        
+        var joinCounter = _suspects.GetOrAdd(guildID, _ => new());
+
+        var delta = (DateTimeOffset.UtcNow - user.ID.Timestamp).TotalDays;
+        
+        threat += user.Avatar is null ? AvatarScore : 0;
+
+        // 20 = max threat, 1 - 0.05 = decay rate/day
+        threat += (int)Math.Floor(20 * Math.Pow(1 - 0.05, delta));
+        
+        
+        
+        return threat > 60;
+    }
+    
 
     private void TrimMessageBuckets()
     {
