@@ -18,8 +18,6 @@ public class ShardAwareGateweayHelper : BackgroundService
     private const string ShardPrefix         = "shard:";
     private const string ShardSessionPostfix = ":resume:session";
     private const string ShardSequencePostfix = ":resume:sequence";
-
-    private Task? _shardRefreshTask;
     
     private readonly CancellationTokenSource _cts = new();
 
@@ -92,7 +90,6 @@ public class ShardAwareGateweayHelper : BackgroundService
         await SaveResumeDataAsync();
         
         _cts.Cancel();
-        await (_shardRefreshTask ?? Task.CompletedTask);
 
         _logger.LogInformation("Shard aware gateway helper stopped");
     }
@@ -105,15 +102,14 @@ public class ShardAwareGateweayHelper : BackgroundService
         
         var session = await redis.StringGetAsync(shardKey + ShardSessionPostfix);
         var sequence = await redis.StringGetAsync(shardKey + ShardSequencePostfix);
+
+        if ((string?)session is not null && (int)sequence is not 0)
+            return (session, int.Parse(sequence!));
         
-        if ((string?)session is null || (int)sequence is 0)
-        {
-            _logger.LogInformation("No resume data found for shard {ShardID}", _shard.ShardID);
+        _logger.LogInformation("No resume data found for shard {ShardID}", _shard.ShardID);
             
-            return (null, 0);
-        }
-        
-        return (session, int.Parse(sequence!));
+        return (null, 0);
+
     }
 
     private async Task SaveResumeDataAsync()
