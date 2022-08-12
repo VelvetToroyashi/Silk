@@ -6,8 +6,8 @@
 @using Remora.Discord.API
 @using Remora.Discord.API.Abstractions.Objects
 
-<MudCard Class="@ComponentClasses"
-         Style="@ComponentStyles"
+<MudCard Class="@(ComponentClasses.Build())"
+         Style="@(ComponentStyles.Build())"
          @onclick="HandleOnClickAsync">
     <MudCardContent Class="d-flex flex-column align-center p-2">
         <MudText Typo="Typo.h5"
@@ -35,14 +35,10 @@
 
     public const string DefaultGuildIconUrl = "https://img.icons8.com/ios-filled/100/000000/no-image.png";
 
-    protected override string ComponentStyles
-        => GuildViewStyleBuilder.Build();
-
-    private StyleBuilder GuildViewStyleBuilder
-        => new StyleBuilder()
-            .AddStyle("cursor", "pointer")
-            .AddStyle("max-width", "220px")
-            .AddStyle(base.ComponentStyles);
+    protected override StyleBuilder ComponentStyles
+        => base.ComponentStyles
+                .AddStyle("cursor", "pointer")
+                .AddStyle("max-width", "220px");
 
     private bool HasIcon => Guild.Icon.IsDefined(out var icon) &&
                             !string.IsNullOrEmpty(icon.Value);

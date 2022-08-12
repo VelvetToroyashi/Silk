@@ -25,15 +25,13 @@ public abstract class DashboardComponentBase : ComponentBase
 
     protected bool IsBusy { get; set; }
 
-    protected virtual string ComponentClasses
+    protected virtual CssBuilder ComponentClasses
         => new CssBuilder()
-          .AddClass(Class)
-          .Build();
+          .AddClass(Class);
 
-    protected virtual string ComponentStyles
+    protected virtual StyleBuilder ComponentStyles
         => new StyleBuilder()
-          .AddStyle(Style)
-          .Build();
+          .AddStyle(Style);
 
     protected async Task ComponentRunAsync
     (
