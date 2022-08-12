@@ -82,13 +82,12 @@ public class ChannelLoggingService : IChannelLoggingService
         );
 
 
-        if (!result.IsSuccess)
-        {
-            LogReadableError(result.Error, loggingData.ChannelID, loggingData.GuildID);
-            return Result.FromError(result.Error); 
-        }
+        if (result.IsSuccess)
+            return Result.FromSuccess();
         
-        return  Result.FromSuccess();
+        LogReadableError(result.Error, loggingData.ChannelID, loggingData.GuildID);
+        return Result.FromError(result.Error);
+
     }
     
     /// <summary>
@@ -114,13 +113,12 @@ public class ChannelLoggingService : IChannelLoggingService
          attachments: fileData?.Select(OneOf<FileData, IPartialAttachment>.FromT0).ToArray() ?? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
         );
 
-        if (!result.IsSuccess)
-        {
-            LogReadableError(result.Error, loggingData.ChannelID, loggingData.GuildID);
-            return Result.FromError(result.Error); 
-        }
+        if (result.IsSuccess)
+            return Result.FromSuccess();
         
-        return Result.FromSuccess();
+        LogReadableError(result.Error, loggingData.ChannelID, loggingData.GuildID);
+        return Result.FromError(result.Error);
+
     }
     
     /// <summary>

@@ -211,7 +211,6 @@ public class Program
                    .AddSilkLogging(context.Configuration)
                    .AddRemoraServices()
                    .AddSingleton<ShardHelper>()
-                   .AddHostedService<ShardStatService>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()
