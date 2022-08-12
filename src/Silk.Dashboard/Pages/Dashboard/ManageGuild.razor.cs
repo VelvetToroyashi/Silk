@@ -158,7 +158,7 @@ public partial class ManageGuild
 
     private Task CreateGreetingAsync()
     {
-        return OpenGreetingDialogAsync(new()
+        return OpenGreetingEditorDialogAsync(new()
         { 
             GuildID = _guildConfig.GuildID,
         });
@@ -166,10 +166,10 @@ public partial class ManageGuild
 
     private Task EditGreetingAsync(GuildGreeting greeting)
     {
-        return OpenGreetingDialogAsync(greeting);
+        return OpenGreetingEditorDialogAsync(greeting);
     }
 
-    private async Task DeleteGreetingAsync(GuildGreeting greeting)
+    private async Task OpenDeleteGreetingDialogAsync(GuildGreeting greeting)
     {
         var parameters = new DialogParameters
         {
@@ -189,7 +189,7 @@ public partial class ManageGuild
         StateHasChanged();
     }
 
-    private async Task OpenGreetingDialogAsync(GuildGreeting greeting)
+    private async Task OpenGreetingEditorDialogAsync(GuildGreeting greeting)
     {
         // Todo: Handle scrolling
         var options = new DialogOptions

@@ -3,7 +3,6 @@
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Caching.Abstractions.Services;
-using Remora.Discord.Rest;
 using Remora.Discord.Rest.Extensions;
 using Remora.Rest;
 using Remora.Rest.Core;
@@ -13,11 +12,12 @@ namespace Silk.Dashboard.Services;
 
 public class DashboardDiscordClient
 {
-    private const string UserMeKey     = "dashboard:user-me";
-    private const string UserGuildsKey = "dashboard:user-guilds";
-    private const string BotGuildsKey  = "dashboard:bot-guilds";
-    private const string RolesKey      = "dashboard:bot-guild-roles";
-    private const string ChannelsKey   = "dashboard:bot-guild-channels";
+    private const string UserMeKey               = "dashboard:user-me";
+    private const string UserGuildsKey           = "dashboard:user-guilds";
+    private const string UserBotManagedGuildsKey = "dashboard:user-bot-guilds";
+    private const string BotGuildsKey            = "dashboard:bot-guilds";
+    private const string RolesKey                = "dashboard:bot-guild-roles";
+    private const string ChannelsKey             = "dashboard:bot-guild-channels";
 
     private readonly ICacheProvider       _cache;
     private readonly IDiscordRestUserAPI  _userApi;
@@ -62,7 +62,6 @@ public class DashboardDiscordClient
         return result?.ToDictionary(g => g.ID.Value, g => g);
     }
 
-    // TODO: Make a DTO
     public async Task<IReadOnlyList<IChannel>?> GetBotChannelsAsync(Snowflake guildId)
     {
         var result = await CacheAsync
@@ -111,22 +110,22 @@ public class DashboardDiscordClient
         return ret;
     }
 
-    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserBotManagedGuildsAsync
-    (
-        IReadOnlyList<IPartialGuild>? guilds = null
-    )
+    public async Task<IReadOnlyList<IPartialGuild>?> GetCurrentUserBotManagedGuildsAsync()
     {
+        var result = await _cache.RetrieveAsync<IReadOnlyList<IPartialGuild>>(UserBotManagedGuildsKey);
+        if (result.IsDefined(out var ret))
+            return ret;
+
         IReadOnlyList<IPartialGuild>? managedGuilds = null;
 
-        var botGuilds  = await GetBotGuildsAsync();
-        var userGuilds = FilterGuildsByPermission
-        (
-             guilds ?? await GetCurrentUserGuildsAsync(),
-             DiscordPermission.ManageGuild
-        );
+        var botGuilds = await GetBotGuildsAsync();
+        var userGuilds = await GetCurrentUserGuildsAsync(DiscordPermission.ManageGuild);
 
         if (botGuilds is not null && userGuilds is not null)
             managedGuilds = userGuilds.Where(g => botGuilds.ContainsKey(g.ID.Value)).ToList();
+
+        if (managedGuilds is not null)
+            await _cache.CacheAsync(UserBotManagedGuildsKey, managedGuilds, DateTimeOffset.UtcNow.AddMinutes(4));
 
         return managedGuilds;
     }
@@ -171,7 +170,12 @@ public class DashboardDiscordClient
         return FilterGuildsByPermission(await GetCurrentUserGuildsAsync(), permission);
     }
 
-    public IReadOnlyList<IPartialGuild>? FilterGuildsByPermission
+    public async Task<bool> CurrentUserCanManageGuildAsync(Snowflake guildId)
+    {
+        return await GetCurrentUserBotManagedGuildAsync(guildId) is not null;
+    }
+
+    private IReadOnlyList<IPartialGuild>? FilterGuildsByPermission
     (
         IReadOnlyList<IPartialGuild>? guilds,
         DiscordPermission             permission
@@ -179,23 +183,6 @@ public class DashboardDiscordClient
     {
         return guilds?.Where(guild => GuildHasPermission(guild, permission))
                       .ToList();
-    }
-
-    public async Task<IPartialGuild?> GetCurrentUserGuildAsync
-    (
-        Snowflake         guildId,
-        DiscordPermission permission
-    )
-    {
-        var userGuilds = await GetCurrentUserGuildsAsync();
-        var guild = userGuilds?.FirstOrDefault
-        (
-             guild => guild.ID.IsDefined(out var gID) &&
-                      gID == guildId &&
-                      GuildHasPermission(guild, permission)
-        );
-
-        return guild;
     }
 
     private static bool GuildHasPermission

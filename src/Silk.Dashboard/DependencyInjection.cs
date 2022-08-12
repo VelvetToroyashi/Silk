@@ -2,6 +2,7 @@
 using AspNet.Security.OAuth.Discord;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -102,8 +103,14 @@ public static class DependencyInjection
 
         services.AddAuthorization
         (
-            opts => opts.AddPolicy(DashboardPolicies.TeamMemberPolicyName, 
-                                         DashboardPolicies.TeamMemberPolicy())
+            opts =>
+            {
+                opts.AddPolicy(DashboardPolicies.TeamMemberPolicyName,
+                               DashboardPolicies.TeamMemberPolicy());
+
+                opts.AddPolicy(DashboardPolicies.ManageGuildPolicyName,
+                               DashboardPolicies.ManageGuildPolicy());
+            }
         );
 
         return services;
@@ -192,6 +199,7 @@ public static class DependencyInjection
         services.AddMediatR(typeof(GuildContext));
 
         services.AddSingleton<DiscordTokenStore>();
+        services.AddScoped<IAuthorizationHandler, ManageGuildAuthorizationHandler>();
         services.AddScoped<AuthenticationStateProvider, DiscordAuthenticationStateProvider>();
 
         return services;
