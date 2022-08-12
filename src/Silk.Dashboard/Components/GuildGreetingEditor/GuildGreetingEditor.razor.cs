@@ -7,8 +7,6 @@ using Remora.Results;
 using Silk.Dashboard.Services;
 using Silk.Data.DTOs.Guilds.Config;
 using Silk.Data.Entities;
-using Silk.Data.MediatR.Greetings;
-using Silk.Data.MediatR.Guilds;
 
 namespace Silk.Dashboard.Components;
 
