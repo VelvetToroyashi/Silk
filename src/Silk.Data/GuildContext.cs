@@ -20,6 +20,13 @@ public class GuildContext : DbContext
     public DbSet<PendingGreetingEntity>   PendingGreetings   { get; set; }
     public DbSet<CommandInvocationEntity> CommandInvocations { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(GuildContext).Assembly);
