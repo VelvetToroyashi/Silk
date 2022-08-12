@@ -7,8 +7,8 @@
 @using Remora.Discord.API.Abstractions.Objects
 
 <MudCard Class="@(ComponentClasses.Build())"
-         Style="@(ComponentStyles.Build())"
-         @onclick="HandleOnClickAsync">
+         Style="@(ComponentStyles.Build(true))"
+         @onclick="@(async () => await HandleOnClickAsync())">
     <MudCardContent Class="d-flex flex-column align-center p-2">
         <MudText Typo="Typo.h5"
                  Align="Align.Center"

@@ -60,3 +60,9 @@ public abstract class DashboardComponentBase : ComponentBase
         }
     }
 }
+
+public static class BlazorComponentUtilitiesExtensions
+{
+    public static string Build(this StyleBuilder styleBuilder, bool removeTrailingSemicolon = false) 
+        => removeTrailingSemicolon ? styleBuilder.Build().TrimEnd(';') : styleBuilder.Build();
+}
