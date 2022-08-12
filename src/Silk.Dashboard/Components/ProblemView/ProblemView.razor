@@ -3,9 +3,12 @@
 <MudContainer Class="d-flex flex-column align-center justify-center">
     <MudImage Class="rounded" Src="@ImageUrl" Width="256" ObjectFit="ObjectFit.Contain"/>
 
-    <MudText Class="my-3" Typo="Typo.h4">
-        @Message
-    </MudText>
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <MudText Class="my-3" Typo="Typo.h4">
+            @Message
+        </MudText>
+    }
 
     @ChildContent
 </MudContainer>
