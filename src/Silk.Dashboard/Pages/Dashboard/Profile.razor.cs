@@ -22,10 +22,17 @@ public partial class Profile
 
     protected override async Task OnInitializedAsync()
     {
-        _user          = await DiscordClient.GetCurrentUserAsync();
-        _joinedGuilds  = await DiscordClient.GetCurrentUserGuildsAsync();
-        _botGuilds     = await DiscordClient.GetBotGuildsAsync();
-        _managedGuilds = await DiscordClient.GetCurrentUserBotManagedGuildsAsync(_joinedGuilds);
+        var userTask          = DiscordClient.GetCurrentUserAsync();
+        var joinedGuildsTask  = DiscordClient.GetCurrentUserGuildsAsync();
+        var botGuildsTask     = DiscordClient.GetBotGuildsAsync();
+        var managedGuildsTask = DiscordClient.GetCurrentUserBotManagedGuildsAsync();
+
+        await Task.WhenAll(userTask, joinedGuildsTask, botGuildsTask, managedGuildsTask);
+
+        _user          = userTask.Result;
+        _joinedGuilds  = joinedGuildsTask.Result;
+        _botGuilds     = botGuildsTask.Result;
+        _managedGuilds = managedGuildsTask.Result;
     }
 
     private string CurrentUserName            => _user.Username;
