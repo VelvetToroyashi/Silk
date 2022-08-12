@@ -19,33 +19,36 @@ else
 {
     <MudForm @ref="_form" Class="my-3" Model="Greeting">
         @* Guild *@
-        <MudContainer Class="mb-4">
-            <MudTooltip Placement="Placement.Top"
-                        Text="The ID of the guild to greet members in">
-                <MudText Typo="Typo.h5">
-                    Guild
-                </MudText>
-            </MudTooltip>
+        @if (Greeting.Id is 0)
+        {
+            <MudContainer Class="mb-4">
+                <MudTooltip Placement="Placement.Top"
+                            Text="The ID of the guild to greet members in">
+                    <MudText Typo="Typo.h5">
+                        Guild
+                    </MudText>
+                </MudTooltip>
 
-            <MudSelect T="Snowflake"
-                       Value="Greeting.GuildID"
-                       ValueChanged="@(async g => await UpdateGreetingGuildAsync(g))"
-                       Variant="Variant.Outlined">
-                @foreach (var guild in _guilds)
-                {
-                    <MudSelectItem Value="@guild.ID.Value">
-                        @guild.Name.Value
-                    </MudSelectItem>
-                }
-            </MudSelect>
-        </MudContainer>
+                <MudSelect T="Snowflake"
+                           Value="Greeting.GuildID"
+                           ValueChanged="@(async g => await UpdateGreetingGuildAsync(g))"
+                           Variant="Variant.Outlined">
+                    @foreach (var guild in _guilds)
+                    {
+                        <MudSelectItem Value="@guild.ID.Value">
+                            @guild.Name.Value
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudContainer>
+        }
 
         @* Greeting Option *@
         <MudContainer Class="mb-4">
             <MudTooltip Placement="Placement.Top"
                         Text="How / when to greet new members">
                 <MudText Typo="Typo.h5">
-                    Greeting
+                    Option
                 </MudText>
             </MudTooltip>
 
