@@ -6,11 +6,13 @@ using System.Net.WebSockets;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Remora.Commands.Extensions;
 using Remora.Commands.Tokenization;
@@ -109,8 +111,7 @@ public static class ServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.DirectMessages |
-                    GatewayIntents.MessageContents;
+                    GatewayIntents.DirectMessages; // | GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
             {
@@ -169,14 +170,16 @@ public static class ServiceCollectionExtensions
             // EFCore will complain about enabling sensitive data if you're not in a debug build. //
             b.EnableSensitiveDataLogging();
             b.EnableDetailedErrors();
-            #endif 
+            
+            #endif
 
+            b.UseLoggerFactory(NullLoggerFactory.Instance);
             b.UseNpgsql(connectionString);
         }
 
         EntityMapping.ConfigureMappings();
-        services.AddDbContextFactory<GuildContext>(Builder);
-        services.AddTransient(sp => sp.GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContext());
+        //services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Scoped);
+        services.AddDbContext<GuildContext>(Builder);
 
         return services;
     }

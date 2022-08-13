@@ -41,9 +41,6 @@ public static class GetOrCreateUser
             
             var user = await _db.Users
                                 .AsNoTracking()
-                                .Include(u => u.Guilds)
-                                .Include(u => u.History)
-                                .Include(u => u.Infractions)
                                 .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;

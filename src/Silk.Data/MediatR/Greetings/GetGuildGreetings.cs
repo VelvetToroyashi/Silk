@@ -16,19 +16,16 @@ public static class GetGuildGreetings
 
     internal class Handler : IRequestHandler<Request, List<GuildGreeting>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbContextFactory;
-
-        public Handler(IDbContextFactory<GuildContext> dbContextFactory)
-            => _dbContextFactory = dbContextFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<List<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-            return await context.GuildGreetings
-                                .AsNoTracking()
-                                .Where(g => g.GuildID == request.GuildID)
-                                .ProjectToType<GuildGreeting>()
-                                .ToListAsync(cancellationToken: cancellationToken);
+            return await _db.GuildGreetings
+                            .AsNoTracking()
+                            .Where(g => g.GuildID == request.GuildID)
+                            .ProjectToType<GuildGreeting>()
+                            .ToListAsync(cancellationToken: cancellationToken);
         }
     }
 }

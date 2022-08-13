@@ -17,25 +17,23 @@ public static class RemoveGuildGreeting
     internal class Handler : IRequestHandler<Request, Result>
     {
         private readonly ILogger<Handler>                _logger;
-        private readonly IDbContextFactory<GuildContext> _dbContextFactory;
+        private readonly GuildContext _db;
 
         public Handler
         (
             ILogger<Handler>                logger,
-            IDbContextFactory<GuildContext> dbContextFactory
+            GuildContext db
         )
         {
             _logger           = logger;
-            _dbContextFactory = dbContextFactory;
+            _db = db;
         }
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-            var guildConfig = await dbContext.GuildConfigs
-                                             .Include(gc => gc.Greetings)
-                                             .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
+            var guildConfig = await _db.GuildConfigs
+                                       .Include(gc => gc.Greetings)
+                                       .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
             if (guildConfig is null)
                 return Result.FromError(new NotFoundError("Guild config not found"));
             
@@ -49,7 +47,7 @@ public static class RemoveGuildGreeting
             try
             {
                 guildConfig.Greetings.Remove(greeting);
-                removed = await dbContext.SaveChangesAsync(cancellationToken) > 0;
+                removed = await _db.SaveChangesAsync(cancellationToken) > 0;
             }
             catch (Exception e)
             {

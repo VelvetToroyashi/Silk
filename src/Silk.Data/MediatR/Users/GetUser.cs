@@ -26,6 +26,7 @@ public static class GetUser
         public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
         {
             UserEntity? user = await _db.Users
+                                        .AsNoTracking()
                                         .Include(u => u.History)
                                         .Include(u => u.Infractions)
                                         .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
