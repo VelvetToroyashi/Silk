@@ -240,7 +240,7 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
-                   .AddMediatR(typeof(Program).Assembly, typeof(GuildContext).Assembly)
+                   .AddMediatR(c => c.AsTransient(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
                     // Very high throughput handler that needs to be explicitly disposed of,
                     // else it'll gobble up connections.
                    .AddScoped(typeof(AddUserJoinDate).GetNestedTypes(BindingFlags.NonPublic)[0])
