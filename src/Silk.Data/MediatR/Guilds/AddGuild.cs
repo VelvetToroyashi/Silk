@@ -22,6 +22,7 @@ public static class AddGuild
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
         private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
