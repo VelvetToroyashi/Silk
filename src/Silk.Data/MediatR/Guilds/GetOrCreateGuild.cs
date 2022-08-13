@@ -21,18 +21,20 @@ public static class GetOrCreateGuild
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
-        private readonly GuildContext _db;
-        private readonly IMediator    _mediator;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly IMediator                       _mediator;
 
-        public Handler(GuildContext db, IMediator mediator)
+        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
         {
-            _db       = db;
+            _dbFactory       = dbFactory;
             _mediator = mediator;
         }
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildEntity? guild = await _db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            GuildEntity? guild = await db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;

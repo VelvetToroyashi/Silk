@@ -19,29 +19,27 @@ public static class RemoveReminder
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, Result>
     {
-        private readonly GuildContext _db;
-
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            ReminderEntity? reminder = await _db.Reminders
-                                                .FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            ReminderEntity? reminder = await db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
 
             if (reminder is null)
             {
                 return Result.FromError(new NotFoundError($"A reminder with the ID of {request.ReminderId} does not exist."));
             }
-            else
+            
+            db.Reminders.Remove(reminder);
+            
+            try
             {
-                _db.Reminders.Remove(reminder);
-                try
-                {
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                // Timer timed out and it got dequeued slower than it should've. //
-                catch (DbUpdateConcurrencyException) { }
+                await db.SaveChangesAsync(cancellationToken);
             }
+            // Timer timed out and it got dequeued slower than it should've. //
+            catch (DbUpdateConcurrencyException) { }
 
             return Result.FromSuccess();
         }

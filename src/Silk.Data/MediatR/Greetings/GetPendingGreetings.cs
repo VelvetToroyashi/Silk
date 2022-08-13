@@ -9,16 +9,21 @@ namespace Silk.Data.MediatR.Greetings;
 
 public static class GetPendingGreetings
 {
-    public record Request() : IRequest<IReadOnlyList<PendingGreetingEntity>>;
+    public record Request : IRequest<IReadOnlyList<PendingGreetingEntity>>;
     
     internal class Handler : IRequestHandler<Request, IReadOnlyList<PendingGreetingEntity>>
     {
-        private readonly GuildContext _db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
-        public Handler(GuildContext db) => _db = db;
 
         public async Task<IReadOnlyList<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
-            => await _db.PendingGreetings.ToArrayAsync(cancellationToken);
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            return await db.PendingGreetings.ToArrayAsync(cancellationToken);
+        }
     }
 
 }

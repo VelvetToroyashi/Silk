@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -30,12 +31,13 @@ public static class CreateReminder
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, ReminderEntity>
     {
-        private readonly GuildContext _db;
-
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
             var reminder = new ReminderEntity
             {
                 ExpiresAt           = request.Expiration,
@@ -52,9 +54,9 @@ public static class CreateReminder
                 IsReply             = request.ReplyID is not null,
             };
 
-            _db.Add(reminder);
+            db.Add(reminder);
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
 
             return reminder;
         }

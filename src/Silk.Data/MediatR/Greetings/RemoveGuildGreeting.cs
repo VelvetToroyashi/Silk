@@ -17,21 +17,23 @@ public static class RemoveGuildGreeting
     internal class Handler : IRequestHandler<Request, Result>
     {
         private readonly ILogger<Handler>                _logger;
-        private readonly GuildContext _db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
         public Handler
         (
             ILogger<Handler>                logger,
-            GuildContext db
+            IDbContextFactory<GuildContext> dbFactory
         )
         {
-            _logger           = logger;
-            _db = db;
+            _logger = logger;
+            _dbFactory = dbFactory;
         }
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            var guildConfig = await _db.GuildConfigs
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            var guildConfig = await db.GuildConfigs
                                        .Include(gc => gc.Greetings)
                                        .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
             if (guildConfig is null)
@@ -47,10 +49,11 @@ public static class RemoveGuildGreeting
             try
             {
                 guildConfig.Greetings.Remove(greeting);
-                removed = await _db.SaveChangesAsync(cancellationToken) > 0;
+                removed = await db.SaveChangesAsync(cancellationToken) > 0;
             }
             catch (Exception e)
             {
+                // Why log? Just return an error and let it be handled further up the call stack.
                 _logger.LogError("Error removing greeting - {ExceptionMessage}", e.Message);
             }
 
