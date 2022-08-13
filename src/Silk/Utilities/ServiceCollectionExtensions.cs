@@ -111,7 +111,8 @@ public static class ServiceCollectionExtensions
             {
                 gw.Intents |=
                     GatewayIntents.GuildMembers   |
-                    GatewayIntents.DirectMessages; // | GatewayIntents.MessageContents;
+                    GatewayIntents.DirectMessages |
+                    GatewayIntents.MessageContents;
             })
            .Configure<CacheSettings>(cs =>
             {
