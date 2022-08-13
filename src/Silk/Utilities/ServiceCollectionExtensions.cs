@@ -179,8 +179,7 @@ public static class ServiceCollectionExtensions
         }
 
         EntityMapping.ConfigureMappings();
-        //services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Scoped);
-        services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
+        services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
 
         return services;
     }
