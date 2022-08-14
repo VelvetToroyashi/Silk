@@ -24,13 +24,13 @@ public static class CreateInfraction
 
     internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
-        private readonly GuildContext _db;
-        private readonly IMediator    _mediator;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly IMediator                       _mediator;
 
-        public Handler(GuildContext db, IMediator mediator)
+        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
         {
-            _db       = db;
-            _mediator = mediator;
+            _dbFactory = dbFactory;
+            _mediator  = mediator;
         }
 
         public async Task<Infraction> Handle(Request request, CancellationToken cancellationToken)
@@ -45,14 +45,16 @@ public static class CreateInfraction
                 TargetID   = request.TargetID,
                 Type       = request.Type
             };
+            
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.TargetID), cancellationToken);
             await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.EnforcerID), cancellationToken);
             
-            _db.Infractions.Add(infraction);
-            await _db.SaveChangesAsync(cancellationToken);
+            db.Infractions.Add(infraction);
+            await db.SaveChangesAsync(cancellationToken);
             
-            infraction = await _db.Infractions.AsNoTracking().FirstOrDefaultAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            infraction = await db.Infractions.AsNoTracking().FirstOrDefaultAsync(inf => inf.Id == infraction.Id, cancellationToken); 
             
             return InfractionEntity.ToDTO(infraction!);
         }

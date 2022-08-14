@@ -18,12 +18,16 @@ public static class SetUserTimezone
 
     internal class Handler : IRequestHandler<Request>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
-
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        
         public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            var user = await db.Users
+                               .AsTracking()
+                               .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
 
             if (user is null)
                 return Unit.Value; // TODO: Return result?
@@ -31,7 +35,7 @@ public static class SetUserTimezone
             user.TimezoneID    = request.TimezoneID;
             user.ShareTimezone = request.ShareTimezone ?? user.ShareTimezone;
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }

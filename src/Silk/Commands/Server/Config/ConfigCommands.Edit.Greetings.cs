@@ -9,7 +9,9 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Data.DTOs.Guilds.Config;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Greetings;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared;
 using Silk.Shared.Constants;
@@ -103,7 +105,7 @@ public partial class ConfigCommands
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
-                var greetingEntity = new GuildGreetingEntity
+                var greetingDto = new GuildGreeting
                 {
                     Message    = greeting,
                     ChannelID  = channel.ID,
@@ -112,11 +114,14 @@ public partial class ConfigCommands
                     Option     = (GreetingOption)option
                 };
 
-                config.Greetings.Add(greetingEntity);
+                var result = await _mediator.Send(new AddGuildGreeting.Request(greetingDto));
+                if (!result.IsDefined(out var savedGreeting))
+                {
+                    await _channels.CreateMessageAsync(_context.ChannelID, "Failed to create greeting!");
+                    return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
+                }
 
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { Greetings = config.Greetings});
-
-                var message = $"Created greeting with ID `{greetingEntity.Id}`\n\n";
+                var message = $"Created greeting with ID `{savedGreeting.Id}`\n\n";
 
                 if (greeting.Length > 2000)
                     message += $"Be warned! This greeting is larger than 2000 characters ({greeting.Length}), and will be placed an embed.";

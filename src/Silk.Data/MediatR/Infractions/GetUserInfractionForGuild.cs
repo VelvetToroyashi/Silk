@@ -19,22 +19,24 @@ public static class GetUserInfractionForGuild
 
     internal sealed class Handler : IRequestHandler<Request, Infraction?>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Infraction?> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             InfractionEntity? infraction;
 
             if (request.CaseId is not null)
             {
-                infraction = await _db.Infractions
+                infraction = await db.Infractions
                                       .Where(inf => inf.GuildID == request.GuildID && inf.CaseNumber == request.CaseId)
                                       .SingleOrDefaultAsync(cancellationToken);
             }
             else
             {
-                infraction = await _db.Infractions
+                infraction = await db.Infractions
                                       .Where(inf => inf.TargetID == request.UserID)
                                       .Where(inf => inf.GuildID  == request.GuildID)
                                       .Where(inf => inf.Type     == request.Type)

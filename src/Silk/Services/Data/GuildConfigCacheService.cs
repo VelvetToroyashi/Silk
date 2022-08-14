@@ -35,8 +35,8 @@ public class GuildConfigCacheService
         
         if (_cache.TryGetValue(cacheKey, out GuildConfigEntity config))
             return config;
-        else
-            return await GetConfigFromDatabaseAsync(guildId);
+        
+        return await GetConfigFromDatabaseAsync(guildId);
     }
 
     private async Task<GuildConfigEntity> GetConfigFromDatabaseAsync(Snowflake guildId)

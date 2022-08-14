@@ -16,18 +16,18 @@ public static class AddGuildGreeting
 
     internal class Handler : IRequestHandler<Request, Result<GuildGreeting>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbContextFactory;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(IDbContextFactory<GuildContext> dbContextFactory) 
-            => _dbContextFactory = dbContextFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-            var guildConfig = await dbContext.GuildConfigs
-                                             .Include(gc => gc.Greetings)
-                                             .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var guildConfig = await db.GuildConfigs
+                                      .AsTracking()
+                                      .Include(gc => gc.Greetings)
+                                      .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
             if (guildConfig is null)
                 return Result<GuildGreeting>.FromError(new NotFoundError("Guild config not found"));
 
@@ -40,7 +40,7 @@ public static class AddGuildGreeting
             var newGreeting = (request.Greeting with { Id = 0 }).Adapt<GuildGreetingEntity>();
 
             guildConfig.Greetings.Add(newGreeting);
-            var saved = await dbContext.SaveChangesAsync(cancellationToken) > 0;
+            var saved = await db.SaveChangesAsync(cancellationToken) > 0;
 
             return saved 
                 ? Result<GuildGreeting>.FromSuccess(newGreeting.Adapt<GuildGreeting>())

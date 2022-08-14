@@ -40,6 +40,8 @@ public class Program
 {
     public static async Task Main()
     {
+        
+        
         Console.WriteLine("Starting Silk!...");
 
         IHostBuilder? hostBuilder = Host
@@ -238,8 +240,7 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
-                   .AddMediatR(typeof(Program))
-                   .AddMediatR(typeof(GuildContext))
+                   .AddMediatR(c => c.AsTransient(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
                     // Very high throughput handler that needs to be explicitly disposed of,
                     // else it'll gobble up connections.
                    .AddScoped(typeof(AddUserJoinDate).GetNestedTypes(BindingFlags.NonPublic)[0])
