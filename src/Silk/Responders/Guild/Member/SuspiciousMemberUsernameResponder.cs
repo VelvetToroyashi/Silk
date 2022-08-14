@@ -17,10 +17,10 @@ public class SuspiciousMemberUsernameResponder : IResponder<IGuildMemberAdd>, IR
         => _suspiciousUserDetectionService = suspiciousUserDetectionService;
 
     public Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default) 
-        => _suspiciousUserDetectionService.HandlePotentialSuspiciousUsernameAsync(gatewayEvent.GuildID, gatewayEvent.User.Value);
+        => _suspiciousUserDetectionService.HandlePotentialSuspiciousUsernameAsync(gatewayEvent.GuildID, gatewayEvent.User.Value, true);
     
     public Task<Result> RespondAsync(IGuildMemberUpdate gatewayEvent, CancellationToken ct = default)
         => gatewayEvent.JoinedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromSeconds(15)) 
             ? Task.FromResult(Result.FromSuccess()) 
-            :_suspiciousUserDetectionService.HandlePotentialSuspiciousUsernameAsync(gatewayEvent.GuildID, gatewayEvent.User);
+            :_suspiciousUserDetectionService.HandlePotentialSuspiciousUsernameAsync(gatewayEvent.GuildID, gatewayEvent.User, false);
 }
