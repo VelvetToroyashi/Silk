@@ -28,10 +28,9 @@ public static class GetUser
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             UserEntity? user = await db.Users
-                                        .AsNoTracking()
-                                        .Include(u => u.History)
-                                        .Include(u => u.Infractions)
-                                        .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+                                       .Include(u => u.History)
+                                       .Include(u => u.Infractions)
+                                       .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;
         }

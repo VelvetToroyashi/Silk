@@ -42,8 +42,7 @@ public static class GetOrCreateUser
                      .RunAsync(cancellationToken);
             
             var user = await db.Users
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+                               .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;
         }

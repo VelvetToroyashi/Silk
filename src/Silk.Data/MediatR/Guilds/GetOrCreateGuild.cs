@@ -34,7 +34,7 @@ public static class GetOrCreateGuild
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            GuildEntity? guild = await db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            GuildEntity? guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;
