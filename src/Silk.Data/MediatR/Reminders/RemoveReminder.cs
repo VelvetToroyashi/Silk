@@ -20,6 +20,7 @@ public static class RemoveReminder
     internal sealed class Handler : IRequestHandler<Request, Result>
     {
         private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
