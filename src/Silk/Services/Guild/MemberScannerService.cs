@@ -53,10 +53,11 @@ public class MemberScannerService
 
         var delta = DateTimeOffset.UtcNow - time;
 
-        if (delta < TimeSpan.FromHours(6))
-            return Result.FromError(new InvalidOperationError($"{Emojis.DeclineEmoji} Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
+        if (delta >= TimeSpan.FromHours(6))
+            return Result.FromSuccess();
         
-        return Result.FromSuccess();
+        return Result.FromError(new InvalidOperationError($"{Emojis.DeclineEmoji} Member scanning is only available every 6 hours. Check back {(DateTimeOffset.UtcNow + (TimeSpan.FromHours(6) - delta)).ToTimestamp()}!"));
+
     }
     
     public async Task<Result<IReadOnlyList<Snowflake>>> GetSuspicousMembersAsync(Snowflake guildID, CancellationToken ct = default)
