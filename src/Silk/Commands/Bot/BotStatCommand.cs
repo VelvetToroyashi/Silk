@@ -56,6 +56,7 @@ public class BotStatCommand : CommandGroup
         var members = (int)await db.StringGetAsync(ShardHelper.GetShardUserCountStatKey(_shard.ShardID));
         var guilds  = (int)await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
 
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
         var heapMemory = $"{GC.GetTotalMemory(true) / 1024 / 1024:n0} MB";
         
         var embed = new Embed

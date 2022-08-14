@@ -51,7 +51,7 @@ public static class UpdateGuildConfig
             
             var config = await db
                               .GuildConfigs
-                              //.AsNoTracking()
+                              .AsTracking()
                               .AsSplitQuery()
                               .Include(g => g.Greetings)
                               .Include(c => c.Invites)
