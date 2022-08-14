@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Mapster;
 using MediatR;
@@ -20,17 +19,11 @@ public static class UpdateGuildGreeting
 
         public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var guildConfig = await db.GuildConfigs
-                                      .AsTracking()
-                                      .Include(gc => gc.Greetings)
-                                      .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
-            if (guildConfig is null)
-                return Result<GuildGreeting>.FromError(new NotFoundError("Guild config not found"));
-
-            var existingGreeting = guildConfig.Greetings
-                                              .FirstOrDefault(g => g.Id == request.Greeting.Id);
+            var existingGreeting = await db.GuildGreetings
+                                           .AsTracking()
+                                           .FirstOrDefaultAsync(g => g.Id == request.Greeting.Id, cancellationToken);
             if (existingGreeting is null)
                 return Result<GuildGreeting>.FromError(new NotFoundError("Greeting does not exist"));
 

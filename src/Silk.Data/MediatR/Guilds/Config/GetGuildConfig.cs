@@ -26,7 +26,7 @@ public static class GetGuildConfig
 
         public async Task<GuildConfigEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
-            using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             //TODO: Add commands to get individual configs.
             var config = await db.GuildConfigs
