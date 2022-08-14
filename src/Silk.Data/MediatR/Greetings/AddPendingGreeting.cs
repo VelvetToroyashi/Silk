@@ -21,7 +21,7 @@ public static class AddPendingGreeting
 
         public async Task<Result<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var pendingGreeting = new PendingGreetingEntity
+            var pendingGreeting = new PendingGreetingEntity // Why not an .Adapt<T> here?
             {
                 GreetingID = request.GreetingID,
                 GuildID    = request.GuildID,

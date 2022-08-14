@@ -22,7 +22,7 @@ public static class GetPendingGreetings
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.PendingGreetings.ToArrayAsync(cancellationToken);
+            return await db.PendingGreetings.ToArrayAsync(cancellationToken); // Should probably take a shard ID to limit the query to that shard
         }
     }
 

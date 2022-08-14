@@ -22,7 +22,7 @@ public static class GetActiveInfractions
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            List<InfractionEntity>? infractions = await db.Infractions
+            List<InfractionEntity> infractions = await db.Infractions
                                                            .Where(inf => !inf.Processed)
                                                            .Where(inf => inf.AppliesToTarget)
                                                            .Where(inf => inf.ExpiresAt.HasValue) // This is dangerous because it's not guaranteed to be of a correct type, but eh. //
