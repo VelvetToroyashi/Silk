@@ -29,13 +29,15 @@ public static class BulkAddUserToGuild
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request>, IAsyncDisposable
+    internal sealed class Handler : IRequestHandler<Request>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
             var users         = request.Users.Select(u => new UserEntity
                                                          { ID       = u.ID });
             var guildUsers    = request.Users.Select(u => new GuildUserEntity
@@ -43,13 +45,11 @@ public static class BulkAddUserToGuild
             var userHistories = request.Users.Select(u => new UserHistoryEntity
                                                          { UserID = u.ID, GuildID = request.GuildID, Date = u.JoinedAt, IsJoin = true });
             
-            await _db.Users.UpsertRange(users).On(u => u.ID).NoUpdate().RunAsync(cancellationToken);
-            await _db.GuildUsers.UpsertRange(guildUsers).On(gu => new { gu.UserID, gu.GuildID }).NoUpdate().RunAsync(cancellationToken);
-            await _db.Histories.UpsertRange(userHistories).On(u => new { u.UserID, u.GuildID, JoinDate = u.Date }).NoUpdate().RunAsync(cancellationToken);
+            await db.Users.UpsertRange(users).On(u => u.ID).NoUpdate().RunAsync(cancellationToken);
+            await db.GuildUsers.UpsertRange(guildUsers).On(gu => new { gu.UserID, gu.GuildID }).NoUpdate().RunAsync(cancellationToken);
+            await db.Histories.UpsertRange(userHistories).On(u => new { u.UserID, u.GuildID, JoinDate = u.Date }).NoUpdate().RunAsync(cancellationToken);
             
             return Unit.Value;
         }
-        
-        public ValueTask DisposeAsync() => _db.DisposeAsync();
     }
 }

@@ -14,14 +14,16 @@ public static class AddUserLeaveDate
     
     internal class Handler : IRequestHandler<Request, Result>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
             try
             {
-               await _db.Histories
+               await db.Histories
                    .Upsert(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true })
                    .NoUpdate()
                    .RunAsync(cancellationToken);

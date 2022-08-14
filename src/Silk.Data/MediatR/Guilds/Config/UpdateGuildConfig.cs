@@ -41,13 +41,15 @@ public static class UpdateGuildConfig
     
     internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
-        private readonly GuildContext _db;
-
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var config = await _db
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            var config = await db
                               .GuildConfigs
                               //.AsNoTracking()
                               .AsSplitQuery()
@@ -76,7 +78,7 @@ public static class UpdateGuildConfig
             
             if (request.Greetings.IsDefined(out var greetings))
             {
-                _db.RemoveRange(config.Greetings.Except(greetings));
+                db.RemoveRange(config.Greetings.Except(greetings));
                 config.Greetings = greetings;
             }
             
@@ -144,7 +146,7 @@ public static class UpdateGuildConfig
             
             if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
             {
-                _db.RemoveRange(config.Exemptions.Except(exemptions));
+                db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
             }
 
@@ -152,17 +154,17 @@ public static class UpdateGuildConfig
 
             if (request.InfractionSteps.IsDefined(out List<InfractionStepEntity>? infractionSteps))
             {
-                _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
+                db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
                 config.InfractionSteps = infractionSteps;
             }
 
             if (request.AllowedInvites.IsDefined(out List<InviteEntity>? whitelistedInvites))
             {
-                _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
+                db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
             
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
             
             return config;
         }

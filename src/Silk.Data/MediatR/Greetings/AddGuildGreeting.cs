@@ -16,14 +16,15 @@ public static class AddGuildGreeting
 
     internal class Handler : IRequestHandler<Request, Result<GuildGreeting>>
     {
-        private readonly GuildContext _db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db) 
-            => _db = db;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var guildConfig = await _db.GuildConfigs
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var guildConfig = await db.GuildConfigs
                                        .Include(gc => gc.Greetings)
                                        .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
             if (guildConfig is null)
@@ -38,7 +39,7 @@ public static class AddGuildGreeting
             var newGreeting = (request.Greeting with { Id = 0 }).Adapt<GuildGreetingEntity>();
 
             guildConfig.Greetings.Add(newGreeting);
-            var saved = await _db.SaveChangesAsync(cancellationToken) > 0;
+            var saved = await db.SaveChangesAsync(cancellationToken) > 0;
 
             return saved 
                 ? Result<GuildGreeting>.FromSuccess(newGreeting.Adapt<GuildGreeting>())

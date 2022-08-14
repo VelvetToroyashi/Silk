@@ -16,19 +16,21 @@ public static class UpdateGuild
 
     internal sealed class Handler : IRequestHandler<Request, Result<GuildEntity>>
     {
-        private readonly GuildContext        _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Result<GuildEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
             
             if (guild is null)
                 return Result<GuildEntity>.FromError(new NotFoundError($"No guild was found with the ID of {request.GuildID}"));
             
             guild.Prefix = request.Prefix;
             
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
             
             return Result<GuildEntity>.FromSuccess(guild);
         }
