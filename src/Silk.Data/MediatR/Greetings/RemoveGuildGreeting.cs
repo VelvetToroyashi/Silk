@@ -34,8 +34,9 @@ public static class RemoveGuildGreeting
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             var guildConfig = await db.GuildConfigs
-                                       .Include(gc => gc.Greetings)
-                                       .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
+                                      .AsTracking()
+                                      .Include(gc => gc.Greetings)
+                                      .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
             if (guildConfig is null)
                 return Result.FromError(new NotFoundError("Guild config not found"));
             

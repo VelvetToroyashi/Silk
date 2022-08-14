@@ -20,8 +20,12 @@ public static class UpdateReminder
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            ReminderEntity reminder = await db.Reminders.FirstAsync(r => r.Id == request.Reminder.Id, cancellationToken);
+            ReminderEntity reminder = await db.Reminders
+                                              .AsTracking()
+                                              .FirstAsync(r => r.Id == request.Reminder.Id, cancellationToken);
+
             reminder.ExpiresAt = request.Expiration;
+
             await db.SaveChangesAsync(cancellationToken);
             return reminder;
         }

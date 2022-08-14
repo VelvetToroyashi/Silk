@@ -23,8 +23,9 @@ public static class UpdateGuildGreeting
             var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             var guildConfig = await db.GuildConfigs
-                                       .Include(gc => gc.Greetings)
-                                       .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
+                                      .AsTracking()
+                                      .Include(gc => gc.Greetings)
+                                      .FirstOrDefaultAsync(gc => gc.GuildID == request.Greeting.GuildID, cancellationToken);
             if (guildConfig is null)
                 return Result<GuildGreeting>.FromError(new NotFoundError("Guild config not found"));
 
