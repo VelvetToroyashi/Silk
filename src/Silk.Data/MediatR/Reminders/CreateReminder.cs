@@ -14,17 +14,17 @@ public static class CreateReminder
     /// Request for creating a <see cref="ReminderEntity" />.
     /// </summary>
     public sealed record Request
-        (
-            DateTimeOffset Expiration,
-            Snowflake      OwnerID,
-            Snowflake      ChannelID,
-            Snowflake?     MessageID,
-            Snowflake?     GuildID,
-            string?        MessageContent,
-            Snowflake?     ReplyID             = null,
-            Snowflake?     ReplyAuthorID       = null,
-            string?        ReplyMessageContent = null
-        ) : IRequest<ReminderEntity>;
+    (
+        DateTimeOffset Expiration,
+        Snowflake      OwnerID,
+        Snowflake      ChannelID,
+        Snowflake?     MessageID,
+        Snowflake?     GuildID,
+        string?        MessageContent,
+        Snowflake?     ReplyID             = null,
+        Snowflake?     ReplyAuthorID       = null,
+        string?        ReplyMessageContent = null
+    ) : IRequest<ReminderEntity>;
 
     /// <summary>
     /// The default handler for <see cref="T:Silk.Data.MediatR.Reminders.Request" />.

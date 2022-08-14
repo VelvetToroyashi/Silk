@@ -25,7 +25,9 @@ public static class SetUserTimezone
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var user = await db.Users.FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+            var user = await db.Users
+                               .AsTracking()
+                               .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
 
             if (user is null)
                 return Unit.Value; // TODO: Return result?

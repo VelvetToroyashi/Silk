@@ -22,16 +22,17 @@ public static class UpdateGuild
         public async Task<Result<GuildEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-            
-            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
-            
+
+            var guild = await db.Guilds
+                                .AsTracking()
+                                .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
             if (guild is null)
                 return Result<GuildEntity>.FromError(new NotFoundError($"No guild was found with the ID of {request.GuildID}"));
-            
+
             guild.Prefix = request.Prefix;
-            
+
             await db.SaveChangesAsync(cancellationToken);
-            
+
             return Result<GuildEntity>.FromSuccess(guild);
         }
     }

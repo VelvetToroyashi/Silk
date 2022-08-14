@@ -33,8 +33,9 @@ public static class UpdateInfraction
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             var infraction = await db.Infractions
-                                      .FirstAsync(inf => inf.CaseNumber == request.CaseID &&
-                                                         inf.GuildID == request.GuildID, cancellationToken);
+                                     .AsTracking()
+                                     .FirstAsync(inf => inf.CaseNumber == request.CaseID && 
+                                                        inf.GuildID == request.GuildID, cancellationToken);
 
             if (request.Expiration.HasValue)
                 infraction.ExpiresAt = request.Expiration.Value;
