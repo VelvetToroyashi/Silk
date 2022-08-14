@@ -30,20 +30,19 @@ public static class GetGuildConfig
             
             //TODO: Add commands to get individual configs.
             var config = await db.GuildConfigs
-                                  .AsNoTracking()
-                                  .AsSplitQuery()
-                                  .Include(g => g.Greetings)
-                                  .Include(c => c.Invites)
-                                  .Include(c => c.Invites.Whitelist)
-                                  .Include(c => c.InfractionSteps)
-                                  .Include(c => c.Exemptions)
-                                  .Include(c => c.Logging)
-                                  .Include(c => c.Logging.MemberJoins)
-                                  .Include(c => c.Logging.MemberLeaves)
-                                  .Include(c => c.Logging.MessageDeletes)
-                                  .Include(c => c.Logging.MessageEdits)
-                                  .Include(c => c.Logging.Infractions)
-                                  .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
+                                 .AsSplitQuery()
+                                 .Include(g => g.Greetings)
+                                 .Include(c => c.Invites)
+                                 .Include(c => c.Invites.Whitelist)
+                                 .Include(c => c.InfractionSteps)
+                                 .Include(c => c.Exemptions)
+                                 .Include(c => c.Logging)
+                                 .Include(c => c.Logging.MemberJoins)
+                                 .Include(c => c.Logging.MemberLeaves)
+                                 .Include(c => c.Logging.MessageDeletes)
+                                 .Include(c => c.Logging.MessageEdits)
+                                 .Include(c => c.Logging.Infractions)
+                                 .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
 
             return config;
         }

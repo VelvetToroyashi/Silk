@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 using Silk.Data.DTOs.Guilds.Config;
-using Silk.Data.Entities;
 
 namespace Silk.Data.MediatR.Greetings;
 
@@ -21,10 +20,11 @@ public static class UpdateGuildGreeting
 
         public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
-            var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-
-            var existingGreeting = await db.Set<GuildGreetingEntity>().AsTracking().FirstOrDefaultAsync(g => g.Id == request.Greeting.Id, cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
+            var existingGreeting = await db.GuildGreetings
+                                           .AsTracking()
+                                           .FirstOrDefaultAsync(g => g.Id == request.Greeting.Id, cancellationToken);
             if (existingGreeting is null)
                 return Result<GuildGreeting>.FromError(new NotFoundError("Greeting does not exist"));
 
