@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -40,7 +41,6 @@ public class Program
 {
     public static async Task Main()
     {
-        
         
         Console.WriteLine("Starting Silk!...");
 

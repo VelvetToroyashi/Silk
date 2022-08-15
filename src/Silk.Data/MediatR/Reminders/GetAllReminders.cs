@@ -12,7 +12,7 @@ public static class GetAllReminders
     /// <summary>
     /// Request for getting all reminders.
     /// </summary>
-    public sealed record Request : IRequest<IEnumerable<ReminderEntity>>;
+    public sealed record Request(int ShardCount, int ShardID) : IRequest<IEnumerable<ReminderEntity>>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
@@ -26,7 +26,9 @@ public static class GetAllReminders
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.Reminders.ToListAsync(cancellationToken);
+            return await db.Reminders
+                           .FromSqlRaw("SELECT * FROM reminders r WHERE (COALESCE(r.guild_id, 0)::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
+                           .ToListAsync(cancellationToken);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -31,7 +32,7 @@ public class GuildGreetingService : IHostedService
     private readonly ILogger<GuildGreetingService> _logger;
 
     private readonly IMediator              _mediator;
-    private readonly ShardHelper            _shardHelper;
+    private readonly IShardIdentification   _shard;
     private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestGuildAPI   _guildApi;
     private readonly IDiscordRestChannelAPI _channelApi;
@@ -40,7 +41,7 @@ public class GuildGreetingService : IHostedService
     (
        
         IMediator                     mediator,
-        ShardHelper                   shardHelper,
+        IShardIdentification                   shard,
         IDiscordRestUserAPI           users,
         IDiscordRestGuildAPI          guilds,
         IDiscordRestChannelAPI        channels,
@@ -49,7 +50,7 @@ public class GuildGreetingService : IHostedService
     )
     {
         _mediator   = mediator;
-        _shardHelper = shardHelper;
+        _shard = shard;
         _users      = users;
         _guildApi   = guilds;
         _channelApi = channels;
@@ -66,9 +67,9 @@ public class GuildGreetingService : IHostedService
         _logger.LogInformation("Greeting service starting...");
         
         _logger.LogDebug("Fetching pending greetings...");
-        var greetings = await _mediator.Send(new GetPendingGreetings.Request(), cancellationToken);
+        var greetings = await _mediator.Send(new GetPendingGreetings.Request(_shard.ShardCount, _shard.ShardID), cancellationToken);
         
-        _pendingGreetings.AddRange(greetings.Where(g => _shardHelper.IsRelevantToCurrentShard(g.GuildID)));
+        _pendingGreetings.AddRange(greetings);
         
         _timer.Start();
         
