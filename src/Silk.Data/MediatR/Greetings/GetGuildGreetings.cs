@@ -25,10 +25,9 @@ public static class GetGuildGreetings
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             return await db.GuildGreetings
-                            .AsNoTracking()
-                            .Where(g => g.GuildID == request.GuildID)
-                            .ProjectToType<GuildGreeting>()
-                            .ToListAsync(cancellationToken: cancellationToken);
+                           .Where(g => g.GuildID == request.GuildID)
+                           .ProjectToType<GuildGreeting>()
+                           .ToListAsync(cancellationToken: cancellationToken);
         }
     }
 }

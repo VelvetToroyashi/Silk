@@ -29,7 +29,7 @@ public static class GetGuild
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            GuildEntity? guild = await db.Guilds.AsNoTracking().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             return guild;
         }

@@ -31,7 +31,7 @@ public static class GetOrCreateGuildConfig
             if (guildConfig is not null)
                 return guildConfig;
         
-            GuildEntity? response = await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, request.Prefix), cancellationToken);
+            var response = await _mediator.Send(new GetOrCreateGuild.Request(request.GuildID, request.Prefix), cancellationToken);
 
             guildConfig = response.Configuration;
 

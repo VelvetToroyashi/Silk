@@ -155,12 +155,15 @@ public class PhishingDetectionService
        return (Result)infractionResult;
     }
     
-    public async Task<Result> HandlePotentialSuspiciousUsernameAsync(Snowflake guildID, IUser user)
+    public async Task<Result> HandlePotentialSuspiciousUsernameAsync(Snowflake guildID, IUser user, bool bypass)
     {
-        var userBefore = await _cache.TryGetPreviousValueAsync<IUser>(KeyHelpers.CreateUserCacheKey(user.ID));
+        if (!bypass)
+        {
+            var userBefore = await _cache.TryGetPreviousValueAsync<IUser>(KeyHelpers.CreateUserCacheKey(user.ID));
         
-        if (!userBefore.IsDefined(out var priorUser) ||  user.Username == priorUser.Username)
-            return Result.FromSuccess();
+            if (!userBefore.IsDefined(out var priorUser) ||  user.Username == priorUser.Username)
+                return Result.FromSuccess();
+        }
         
         var config = await _config.GetConfigAsync(guildID);
 

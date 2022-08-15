@@ -16,18 +16,9 @@ public static class RemoveGuildGreeting
     
     internal class Handler : IRequestHandler<Request, Result>
     {
-        private readonly ILogger<Handler>                _logger;
         private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler
-        (
-            ILogger<Handler>                logger,
-            IDbContextFactory<GuildContext> dbFactory
-        )
-        {
-            _logger = logger;
-            _dbFactory = dbFactory;
-        }
+        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
@@ -54,8 +45,7 @@ public static class RemoveGuildGreeting
             }
             catch (Exception e)
             {
-                // Why log? Just return an error and let it be handled further up the call stack.
-                _logger.LogError("Error removing greeting - {ExceptionMessage}", e.Message);
+                return e;
             }
 
             return removed 

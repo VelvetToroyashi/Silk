@@ -23,6 +23,9 @@ public static class UpdateGuild
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
+            //TODO: SQL; pulling the guild isn't necessary when we can write better SQL manually.
+            // SET g.Prefix = @Prefix WHERE g.GuildID = @GuildID;  Would need to be sanitized however, since it's prone to SQL injection.
+            
             var guild = await db.Guilds
                                 .AsTracking()
                                 .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);

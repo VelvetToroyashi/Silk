@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -9,7 +10,7 @@ namespace Silk.Data.MediatR.Greetings;
 
 public static class GetPendingGreetings
 {
-    public record Request : IRequest<IReadOnlyList<PendingGreetingEntity>>;
+    public record Request(int ShardCount, int ShardID) : IRequest<IReadOnlyList<PendingGreetingEntity>>;
     
     internal class Handler : IRequestHandler<Request, IReadOnlyList<PendingGreetingEntity>>
     {
@@ -22,7 +23,9 @@ public static class GetPendingGreetings
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.PendingGreetings.ToArrayAsync(cancellationToken);
+            return await db.PendingGreetings
+                           .FromSqlRaw("SELECT * FROM pending_greetings pg WHERE (pg.guild_id::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
+                           .ToArrayAsync(cancellationToken); // Will EF Core do client eval for this?
         }
     }
 

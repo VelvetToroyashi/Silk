@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using Remora.Discord.API;
+using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Abstractions.Results;
@@ -46,7 +47,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
     private readonly ILogger<InfractionService> _logger;
     private readonly IMediator                  _mediator;
-    private readonly ShardHelper                _shardHelper;
+    private readonly IShardIdentification       _shard;
 
     private readonly GuildConfigCacheService _config;
 
@@ -62,7 +63,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     (
         
         IMediator                  mediator,
-        ShardHelper                shardHelper,
+        IShardIdentification       shard,
         GuildConfigCacheService    config,
         IDiscordRestUserAPI        users,
         IDiscordRestGuildAPI       guilds,
@@ -73,7 +74,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     )
     {
         _mediator      = mediator;
-        _shardHelper   = shardHelper;
+        _shard         = shard;
         _config        = config;
         _users         = users;
         _guilds        = guilds;
@@ -573,7 +574,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         var now = DateTimeOffset.UtcNow;
         
-        var infractions = await _mediator.Send(new GetActiveInfractions.Request());
+        var infractions = await _mediator.Send(new GetActiveInfractions.Request(_shard.ShardID, _shard.ShardCount));
 
         _logger.LogDebug("Loaded infractions in {Time:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
@@ -585,8 +586,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
 
         _logger.LogDebug("Enqueuing {Infractions} infractions.", infractions.Count());
 
-        infractions = infractions.Where(inf => _shardHelper.IsRelevantToCurrentShard(inf.GuildID));
-        
         _queue.AddRange(infractions);
         
         SilkMetric.LoadedInfractions.IncTo(_queue.Count);

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -40,7 +41,6 @@ public class Program
 {
     public static async Task Main()
     {
-        
         
         Console.WriteLine("Starting Silk!...");
 
@@ -241,10 +241,6 @@ public class Program
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
                    .AddMediatR(c => c.AsTransient(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
-                    // Very high throughput handler that needs to be explicitly disposed of,
-                    // else it'll gobble up connections.
-                   .AddScoped(typeof(AddUserJoinDate).GetNestedTypes(BindingFlags.NonPublic)[0])
-                   .AddScoped(typeof(AddUserLeaveDate).GetNestedTypes(BindingFlags.NonPublic)[0])
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (

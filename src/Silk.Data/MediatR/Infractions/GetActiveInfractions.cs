@@ -11,7 +11,7 @@ namespace Silk.Data.MediatR.Infractions;
 
 public static class GetActiveInfractions
 {
-    public sealed record Request : IRequest<IEnumerable<Infraction>>;
+    public sealed record Request(int ShardID, int ShardCount) : IRequest<IEnumerable<Infraction>>;
 
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
@@ -22,13 +22,15 @@ public static class GetActiveInfractions
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            List<InfractionEntity>? infractions = await db.Infractions
-                                                           .Where(inf => !inf.Processed)
-                                                           .Where(inf => inf.AppliesToTarget)
-                                                           .Where(inf => inf.ExpiresAt.HasValue) // This is dangerous because it's not guaranteed to be of a correct type, but eh. //
-                                                           .ToListAsync(cancellationToken);
-
-            return infractions.Select(InfractionEntity.ToDTO);
+            List<InfractionEntity> infractions = await db.Infractions
+                                                         .FromSqlRaw("SELECT * FROM infractions i "    +
+                                                                     "WHERE i.expires_at IS NOT NULL " +
+                                                                     "AND i.expires_at > NOW() "       +
+                                                                     "AND i.processed IS FALSE "        +
+                                                                     "AND (i.guild_id::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
+                                                         .ToListAsync(cancellationToken);
+            
+            return infractions.Select(InfractionEntity.ToDTO)!;
         }
     }
 }
