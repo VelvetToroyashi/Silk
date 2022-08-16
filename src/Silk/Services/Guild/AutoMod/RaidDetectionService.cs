@@ -23,7 +23,10 @@ public class RaidDetectionService : BackgroundService
     
     private record Raider(Snowflake GuildID, Snowflake RaiderID, string  Reason);
     
-    private record MessageDTO(Snowflake GuildID, Snowflake ChannelID, Snowflake MessageID, Snowflake AuthorID, int HashCode);
+    private record MessageDTO(Snowflake GuildID, Snowflake ChannelID, Snowflake MessageID, Snowflake AuthorID, int HashCode)
+    {
+        public bool IsFlagged { get; set; }
+    }
     
     private readonly Channel<Raider> _raiders = Channel.CreateUnbounded<Raider>();
     
@@ -59,19 +62,24 @@ public class RaidDetectionService : BackgroundService
 
         foreach (var group in groups)
         {
-            if (group.GroupBy(g => g.AuthorID).Count() < 2)
+            if (group.DistinctBy(g => g.AuthorID).Count() < 2)
                 continue; // Let anti-spam handle this; it's just one person spamming the same thing.
             
-            if (group.Count() < 3)
+            if (group.Count() < config.RaidDetectionThreshold)
                 continue;
 
-            if (DateTimeOffset.UtcNow - group.Last().MessageID.Timestamp > TimeSpan.FromSeconds(15))
+            if (DateTimeOffset.UtcNow - group.Last().MessageID.Timestamp > TimeSpan.FromSeconds(config.RaidCooldownSeconds))
                 continue; // Given up? Or just not a raid. This is an abitrary decision.
             
             foreach (var raider in group)
-                await _raiders.Writer.WriteAsync(new Raider(raider.GuildID, raider.AuthorID, "Suspected raid: Coordinated message raid detected."));
-            
-            bucket.RemoveAll(r => group.Contains(r));
+            {
+                // Instead of removing buckets, only flag the messages so it doesn't reset the state since the raid might be continuing after this message
+                if (!raider.IsFlagged)
+                {
+                    raider.IsFlagged = true;
+                    await _raiders.Writer.WriteAsync(new Raider(raider.GuildID, raider.AuthorID, "Suspected raid: Coordinated message raid detected."));
+                }
+            }
         }
         
         return Result.FromSuccess();
@@ -146,15 +154,14 @@ public class RaidDetectionService : BackgroundService
 
     private void TrimMessageBuckets()
     {
-        // Copying the array is wasteful, but if we remove from the collection, it'll throw.
-        // Optimization: Iterate keys, and use the indexer to get the bucket?
-        foreach (var bucket in _messageBuckets.ToArray())
+        // Modifying concurrent collections while using foreach on them is allowed.
+        foreach (var bucket in _messageBuckets)
         {
+            if (!bucket.Value.Any())
+                continue; // Skip empty buckets, nothing to remove.
+
             var expiration = DateTimeOffset.UtcNow.AddSeconds(-30);
 
-            if (!bucket.Value.Any())
-                continue; // If a bucket consists purely of raid-messages, it will be completely cleared.
-            
             if (bucket.Value.Last().MessageID.Timestamp < expiration)
             {
                 _messageBuckets.TryRemove(bucket.Key, out _);
