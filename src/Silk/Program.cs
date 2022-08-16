@@ -1,14 +1,14 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NodaTime;
@@ -25,7 +25,6 @@ using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
 using Silk.Commands.Conditions;
 using Silk.Data;
-using Silk.Data.MediatR.Users.History;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
@@ -240,7 +239,9 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
+                   .AddTransient<ServiceFactory>(s => s.CreateScope().ServiceProvider.GetRequiredService)
                    .AddMediatR(c => c.AsTransient(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
+                   .RemoveAll(typeof(RequestExceptionActionProcessorBehavior<,>))
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (
