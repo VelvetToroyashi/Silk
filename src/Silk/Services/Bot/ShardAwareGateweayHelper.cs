@@ -61,7 +61,7 @@ public class ShardAwareGateweayHelper : BackgroundService
         _logger.LogInformation("Shard aware gateway helper started");
 
         _ = Task.Run(KeepAliveLoopAsync, CancellationToken.None);
-        
+
         var resume = await LoadResumeDataAsync();
 
         if (resume.SessionID is not null)
@@ -92,6 +92,8 @@ public class ShardAwareGateweayHelper : BackgroundService
         
         if (!stoppingToken.IsCancellationRequested) // There was an error, and thusly we should ask the host to stop.
             _lifetime.StopApplication();
+        
+        _refreshTimer.Dispose();
 
         _logger.LogInformation("Shard aware gateway helper stopped");
     }
