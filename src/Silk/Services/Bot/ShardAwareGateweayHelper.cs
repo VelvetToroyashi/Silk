@@ -90,6 +90,9 @@ public class ShardAwareGateweayHelper : BackgroundService
         await SaveResumeDataAsync();
         
         _cts.Cancel();
+        
+        if (!stoppingToken.IsCancellationRequested) // There was an error, and thusly we should ask the host to stop.
+            _lifetime.StopApplication();
 
         _logger.LogInformation("Shard aware gateway helper stopped");
     }
