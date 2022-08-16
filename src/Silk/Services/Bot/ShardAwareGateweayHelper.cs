@@ -12,8 +12,9 @@ namespace Silk.Services.Bot;
 
 public class ShardAwareGateweayHelper : BackgroundService
 {
-    private static readonly TimeSpan ShardRefreshInterval = TimeSpan.FromSeconds(3);
-    private static readonly TimeSpan ShardRefreshTimeout = TimeSpan.FromSeconds(5);
+    private readonly        PeriodicTimer _refreshTimer = new(ShardRefreshInterval);
+    private static readonly TimeSpan      ShardRefreshInterval = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan      ShardRefreshTimeout  = TimeSpan.FromSeconds(5);
     
     private const string ShardPrefix         = "shard:";
     private const string ShardSessionPostfix = ":resume:session";
@@ -49,11 +50,9 @@ public class ShardAwareGateweayHelper : BackgroundService
 
         var shardKey = $"{ShardPrefix}{_shard.ShardID}";
         
-        while (!_cts.Token.IsCancellationRequested)
+        while (await _refreshTimer.WaitForNextTickAsync(_cts.Token))
         {
             await redis.KeyExpireAsync(shardKey, ShardRefreshTimeout);
-            
-            await Task.Delay(ShardRefreshInterval, _cts.Token);
         }
     }
 
