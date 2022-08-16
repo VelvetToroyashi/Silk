@@ -48,7 +48,7 @@ public class ShardAwareGateweayHelper : BackgroundService
     {
         var redis = _redis.GetDatabase();
 
-        var shardKey = $"{ShardPrefix}{_shard.ShardID}";
+        var shardKey = (RedisKey)$"{ShardPrefix}{_shard.ShardID}";
         
         while (await _refreshTimer.WaitForNextTickAsync(_cts.Token))
         {
