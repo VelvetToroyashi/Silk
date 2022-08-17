@@ -239,8 +239,7 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
-                   .AddTransient<ServiceFactory>(s => s.CreateScope().ServiceProvider.GetRequiredService)
-                   .AddMediatR(c => c.AsTransient(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
+                   .AddMediatR(c => c.AsTransient().Using<ScopingMediator>(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
                    .RemoveAll(typeof(RequestExceptionActionProcessorBehavior<,>))
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
