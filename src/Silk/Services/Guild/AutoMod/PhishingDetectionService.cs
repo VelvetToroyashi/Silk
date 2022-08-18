@@ -87,17 +87,18 @@ public class PhishingDetectionService
         _logger           = logger;
     }
 
-    private static readonly string[] SuspiciousUsernames = {
-        "Academy Moderator", "Bot Developer", "Bot Moderator", "CapchaBot", "Developer Message",
-        "Discord Academy", "Discord Developers", "Discord Message", "Discord Moderation Academy",
-        "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", "Hype Mail", 
-        "HypeSquad Academy", "Hypesquad Events", "Hypesquad Moderation Academy", "Hypesquad Moderation", 
-        "Hypesquad Moderator", "ModMail", "Moderation Message", "Moderation Notification", 
-        "Moderation Team", "Moderator Message", "Moderator Team", "Staff Academy", "EventsHS",
-        "Staff Developers", "Staff Events", "Staff Message", "Staff Moderators ", "System Message",
+    private static readonly string[] SuspiciousUsernames = 
+    { 
+        "Academy Moderator", "Bot Developer", "Bot Moderator",
+        "CapchaBot", "Developer Message", "Discord Academy", "Discord Bug Hunter", "Discord Developers", "Discord Message",
+        "Discord Moderation Academy", "Discord Moderator", "Discord Moderators", "Discord Staff", "Discord Terms", "EventsHS",
+        "Hype Email", "Hype Form Ads", "Hype Mail", "HypeSquad Academy", "Hypesquad Events", "Hypesquad Moderation",
+        "Hypesquad Moderation Academy", "Hypesquad Moderator", "Join Hype", 
+        "Mod Email", "Moderation Message", "Moderation Notification",
+        "Moderation Team", "Moderator Message", "Moderator Team", "ModMail", "Recruitment Moderator",
+        "Staff Academy", "Staff Developers", "Staff Events", "Staff Message", "Staff Moderators ", "System Message"
     };
-
-
+    
     public async Task<Result> HandlePotentialSuspiciousAvatarAsync(Snowflake guildID, IUser user)
     {
         if (user.IsBot.IsDefined(out var bot) && bot)
