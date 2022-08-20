@@ -14,6 +14,8 @@ namespace RoleMenuPlugin.Database
         public ulong ChannelId { get; set; }
 
         public ulong GuildId { get; set; }
+        
+        public string Description { get; set; }
 
         [Range(1, 25)]
 		public int MaxSelections { get; set; }

@@ -268,15 +268,35 @@ public sealed class RoleMenuCommand : CommandGroup
             
             [Range(Min = 1, Max = 25)]
             [Description("The maximum number of roles that can be selected.")]
-            int maxOptions
+            int maxOptions,
+            
+            [Description("The description for the role menu. Leave blank to revert to the default.")]
+            string? description = null
         )
         {
             var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
             
-            var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions));
+            var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions, description));
 
+            if (description is not null)
+            {
+                string descriptionText = description;
+
+                if (string.IsNullOrWhiteSpace(description))
+                {
+                    descriptionText = "**Role Menu!**\n"                               +
+                                      "Use the button below to select your roles!\n\n" +
+                                      "Available roles:\n"                             +
+                                      string.Join('\n', roleMenuResult.Entity.Options.Select(r => $"<@&{r.RoleId}>"));
+                }
+
+                await _channels.EditMessageAsync(new(roleMenuResult.Entity.ChannelId), messageID, descriptionText);
+            }
+            
             if (res.IsSuccess)
+            {
                 return Result<ReactionResult>.FromSuccess(new("✅"));
+            }
             
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
@@ -466,7 +486,6 @@ public sealed class RoleMenuCommand : CommandGroup
 
     }
 
-    
     private static async Task<IResult> DeleteAfter(MessageContext context, IDiscordRestChannelAPI api,  string content, TimeSpan delay)
     {
         var sendResult = await api.CreateMessageAsync(context.ChannelID, content);
@@ -515,8 +534,7 @@ public sealed class RoleMenuCommand : CommandGroup
                  ChannelId = channelID.Value,
                  GuildId = _context.GuildID.Value.Value,
                  MessageId = roleMenuMessageResult.Entity.ID.Value,
-                 Options = roles.Select(r => new RoleMenuOptionModel
-                                            {RoleId = r.ID.Value, RoleName = r.Name})
+                 Options = roles.Select(r => new RoleMenuOptionModel {RoleId = r.ID.Value, RoleName = r.Name})
                                 .ToList()
              })
             );

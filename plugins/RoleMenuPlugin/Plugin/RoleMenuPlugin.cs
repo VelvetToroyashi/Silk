@@ -22,9 +22,9 @@ namespace RoleMenuPlugin;
 
 public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
 {
-    public override string Name        { get; } = "Role-Menu Plugin";
-    public override string Description { get; } = "Provides interaction-based role-menu functionality.";
-    
+    public override string Name        => "Role-Menu Plugin";
+    public override string Description => "Provides interaction-based role-menu functionality.";
+
     public override Result ConfigureServices(IServiceCollection serviceCollection)
     {
         try
