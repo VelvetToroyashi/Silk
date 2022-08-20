@@ -52,7 +52,7 @@
         <PackageReference Include="Microsoft.Extensions.Http" />
         <PackageReference Include="Microsoft.Extensions.Logging" />
         <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
-        <PackageReference Include="NodaTime" Version="3.1.1" />
+        <PackageReference Include="NodaTime" Version="3.1.2" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="prometheus-net" Version="6.0.0" />
         <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
