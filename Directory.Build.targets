@@ -7,7 +7,7 @@
         <PackageReference Update="Remora.Discord.Pagination" Version="3.0.7" />
         <PackageReference Update="Remora.Plugins.Abstractions" Version="4.0.5" />
         <PackageReference Update="Remora.Results" Version="7.2.2" />
-        <PackageReference Update="Remora.Commands" Version="10.0.1" />
+        <PackageReference Update="Remora.Commands" Version="10.0.2" />
         <PackageReference Update="Remora.Discord.Hosting" Version="5.0.26" />
         <PackageReference Update="Remora.Discord.Gateway" Version="10.1.7" />
         <PackageReference Update="Remora.Discord.Commands" Version="25.2.3" />
