@@ -67,7 +67,7 @@ public class BotStatCommand : CommandGroup
             {
                 new("Latency:", $"{_gateway.Latency.TotalMilliseconds:n0} ms", true),
                 new("Guilds:", guilds.ToString(), true),
-                new("Members:", members.ToString(), true),
+                new("Members:", members.ToString("N0"), true),
                 new("Memory:", heapMemory, true),
                 new("Threads:", $"{ThreadPool.ThreadCount}", true),
                 new("Uptime:", $"{DateTimeOffset.UtcNow.Subtract(process.StartTime).Humanize(2, minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day)}", true)
