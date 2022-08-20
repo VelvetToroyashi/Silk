@@ -32,7 +32,6 @@ namespace RoleMenuPlugin.Migrations
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("GuildId")

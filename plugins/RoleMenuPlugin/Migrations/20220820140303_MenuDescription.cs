@@ -12,7 +12,7 @@ namespace RoleMenuPlugin.Migrations
                 name: "Description",
                 table: "RoleMenus",
                 type: "text",
-                nullable: false,
+                nullable: true,
                 defaultValue: "");
         }
 
