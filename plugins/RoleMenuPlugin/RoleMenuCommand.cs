@@ -204,10 +204,7 @@ public sealed class RoleMenuCommand : CommandGroup
         (
          new(roleMenu.ChannelId),
          messageID,
-         "**Role Menu!**\n"                               +
-         "Use the button below to select your roles!\n\n" +
-         "Available roles:\n"                             +
-         string.Join('\n', roleMenu.Options.Select(r => $"<@&{r.RoleId}>")),
+         FormatHelper.Format(roleMenu.Options),
          components: new[] {components}
         );
 
@@ -284,10 +281,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
                 if (string.IsNullOrWhiteSpace(description))
                 {
-                    descriptionText = "**Role Menu!**\n"                               +
-                                      "Use the button below to select your roles!\n\n" +
-                                      "Available roles:\n"                             +
-                                      string.Join('\n', roleMenuResult.Entity.Options.Select(r => $"<@&{r.RoleId}>"));
+                    descriptionText = FormatHelper.Format(roleMenuResult.Entity.Options);
                 }
 
                 await _channels.EditMessageAsync(new(roleMenuResult.Entity.ChannelId), messageID, descriptionText);
@@ -471,10 +465,7 @@ public sealed class RoleMenuCommand : CommandGroup
         (
          new(roleMenu.ChannelId),
          messageID,
-         "**Role Menu!**\n"                              +
-         "Use the button below to select your roles!\n\n" +
-         "Available roles:\n"                             +
-         string.Join('\n', newRoles.Select(r => $"<@&{r.RoleId}>"))
+         FormatHelper.Format(roleMenu.Options)
         );
 
         if (roleMenuMessageResult.IsSuccess)
@@ -505,10 +496,7 @@ public sealed class RoleMenuCommand : CommandGroup
          channelID,
          !roles.Any()
              ? "This role menu is being set up, please wait!"
-             : "**Role Menu!**\n"                               +
-               "Use the button below to select your roles!\n\n" +
-               "Available roles:\n"                             +
-               string.Join('\n', roles.Select(r => $"<@&{r.ID}>")),
+             : FormatHelper.Format(roles.Select(r => new RoleMenuOptionModel { RoleId = r.ID.Value }).ToArray()),
          components:
          new[]
          {
