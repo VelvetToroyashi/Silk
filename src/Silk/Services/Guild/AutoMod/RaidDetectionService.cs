@@ -157,7 +157,7 @@ public class RaidDetectionService : BackgroundService
         // Modifying concurrent collections while using foreach on them is allowed.
         foreach (var bucket in _messageBuckets)
         {
-            if (!bucket.Value.Any())
+            if (!bucket.Value?.Any() ?? true)
                 continue; // Skip empty buckets, nothing to remove.
 
             var expiration = DateTimeOffset.UtcNow.AddSeconds(-30);
@@ -171,7 +171,7 @@ public class RaidDetectionService : BackgroundService
             for (var i = bucket.Value.Count - 1; i >= 0; i--)
             {
                 var message = bucket.Value[i];
-                if (message.MessageID.Timestamp > expiration)
+                if (message?.MessageID.Timestamp > expiration)
                     continue;
 
                 bucket.Value.Remove(message);
