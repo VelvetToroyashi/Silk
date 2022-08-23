@@ -54,8 +54,8 @@ public static class CreateInfraction
             db.Infractions.Add(infraction);
             await db.SaveChangesAsync(cancellationToken);
             
-            // This may *not* be necessary? The ID should be set by EF Core. 
-            //infraction = await db.Infractions.AsNoTracking().FirstAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            // We have to re-request in order to get the ID.
+            infraction = await db.Infractions.FirstAsync(inf => inf.Id == infraction.Id, cancellationToken); 
             
             return InfractionEntity.ToDTO(infraction);
         }
