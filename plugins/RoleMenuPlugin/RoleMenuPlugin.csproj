@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- Needed for copying plugin dependecies to output folder -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,6 +40,11 @@
 
     <!-- Todo: Update this if support for multi-plugin project dll export is needed -->
     <Target Name="CopyPluginDLL" AfterTargets="Build">
+        <ItemGroup>
+            <!-- Collect all needed .dll files for plugin -->
+            <PluginDlls Include="$(TargetDir)*.dll" />
+        </ItemGroup>
+
         <PropertyGroup>
             <!-- Update 'RootPath' if solution file is renamed -->
             <RootPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Silk.sln))</RootPath>
@@ -51,10 +58,7 @@
             <PluginOutputDir>$(RootPath)\src\$(SilkCoreProjectName)\bin\$(Configuration)\$(SilkCoreProjectFramework)\plugins</PluginOutputDir>
         </PropertyGroup>
 
-        <Message Text="Copying Plugin DLL ($(Configuration))" Importance="High" />
-
-        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;" DestinationFolder="$(PluginOutputDir)" />
-
+        <Copy SourceFiles="@(PluginDlls)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" />
         <Message Text="Copied Plugin DLL to $(PluginOutputDir)" Importance="High" />
     </Target>
 </Project>
