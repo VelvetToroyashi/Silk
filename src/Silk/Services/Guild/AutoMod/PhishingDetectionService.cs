@@ -44,6 +44,7 @@ public class PhishingDetectionService
     private const           string Phishing  = "Message contained a phishing link.";
     private static readonly Regex  LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
+    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled); 
 
     private readonly CacheService                      _cache;
     private readonly HttpClient                        _http;
@@ -261,6 +262,10 @@ public class PhishingDetectionService
 
         foreach (var link in links.Except(knownPhishingLinks))
         {
+            if (!InviteRegex.IsMatch(link))
+                continue; // Previously we threw all links at the API and dealt with what stuck,
+                          // but that's both wasteful, a privacy risk, and polutes our metrics
+            
             var cacheResult = (bool?)await db.StringGetAsync(SilkKeyHelper.GenerateInviteKey(link));
 
             if (cacheResult is not null)
@@ -285,13 +290,13 @@ public class PhishingDetectionService
             if (!apiResponse.RootElement.TryGetProperty("match", out var matchProp))
                 continue; // There was an error, so forget it.
                 
-            var match = matchProp.GetBoolean();
+            var matched = matchProp.GetBoolean();
                 
             var type = apiResponse.RootElement.TryGetProperty("reason", out var typeProp) ? $" ({typeProp})" : null;
 
-            await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), match);
+            await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), matched);
                 
-            if (match)
+            if (matched)
                 return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
         }
         
