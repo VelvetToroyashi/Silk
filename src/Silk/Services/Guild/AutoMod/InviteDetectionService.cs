@@ -16,6 +16,7 @@ namespace Silk.Services.Guild;
 
 public class InviteDetectionService
 {
+   //TODO: Break this out into Regexes.cs?
    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled); 
    
    private static readonly Regex AggressiveInviteRegex = new(@"(?:https?\:\/\/)?(www\.)?(((di?sc(?:ord)?\.(gg|io|me|li))|(discord(?:app)?\.com\/invite))\/(?<invite>[A-z0-9-]{2,}))", RegexOptions.Compiled);
