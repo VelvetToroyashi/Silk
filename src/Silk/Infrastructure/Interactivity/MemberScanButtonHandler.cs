@@ -76,7 +76,7 @@ public class MemberScanButtonHandler : InteractionGroup
     }
 
     [Button("member-check::kick")]
-    public async Task<IResult> KickAsync()
+    public async Task<Result> KickAsync()
     {
         var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
         
@@ -127,7 +127,7 @@ public class MemberScanButtonHandler : InteractionGroup
     }
 
     [Button("member-check::ban")]
-    public async Task<IResult> BanAsync()
+    public async Task<Result> BanAsync()
     {
         var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
         
