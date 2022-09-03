@@ -14,7 +14,7 @@
         <PackageReference Update="Remora.Discord.Caching" Version="31.0.0" />
         <PackageReference Update="Remora.Discord.Caching.Redis" Version="1.0.22" />
         <PackageReference Update="Remora.Discord.Caching.Abstractions" Version="1.0.2" />
-        <PackageReference Update="Remora.Discord.Extensions" Version="5.0.3" />
+        <PackageReference Update="Remora.Discord.Extensions" Version="5.1.0" />
         <PackageReference Update="Remora.Discord.Interactivity" Version="4.2.5" />
         <PackageReference Update="Remora.Discord.API.Abstractions" Version="70.0.0" />
 
