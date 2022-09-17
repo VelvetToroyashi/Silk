@@ -46,7 +46,7 @@
 
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="6.0.8"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="6.0.9"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.9" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.8"/>
