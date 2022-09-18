@@ -30,7 +30,7 @@ public static class ShedGuilds
                 
                 var deleted = await db.Database.ExecuteSqlRawAsync
                 (
-                 $"DELETE FROM guilds g WHERE ((g.\"Id\"::bigint >> 22) % {request.ShardCount} = {request.ShardID}) AND g.\"Id\" NOT IN({string.Join(", ", ids)}) ;",
+                 $"DELETE FROM guilds g WHERE ((g.\"id\"::bigint >> 22) % {request.ShardCount} = {request.ShardID}) AND g.\"id\" NOT IN({string.Join(", ", ids)}) ;",
                  cancellationToken: cancellationToken
                 );
                 

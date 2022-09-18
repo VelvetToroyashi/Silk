@@ -10,8 +10,6 @@ public enum ExemptionTarget
     User,
     Channel
 }
-
-[Flags]
 public enum ExemptionCoverage
 {
 	NonExemptMarker = 0,
@@ -22,36 +20,30 @@ public enum ExemptionCoverage
     AntiInvite = 32,
     WordBlacklist = 64,
 }
-
-[Table("infraction_exemptions")]
 public sealed class ExemptionEntity
 {
 	/// <summary>
 	///     The Id of this exemption.
 	/// </summary>
-	public int Id { get; set; }
+	public int ID { get; set; }
 
 	/// <summary>
 	///     What this exemption covers.
 	/// </summary>
-	[Column("exempt_from")]
     public ExemptionCoverage Exemption { get; set; }
 
 	/// <summary>
 	///     What type of exemption this is.
 	/// </summary>
-	[Column("type")]
     public ExemptionTarget TargetType { get; set; }
 
 	/// <summary>
 	///     The target of the exemption.
 	/// </summary>
-	[Column("target_id")]
     public Snowflake TargetID { get; set; }
 
 	/// <summary>
 	///     The guild this exemption applies to.
 	/// </summary>
-	[Column("guild_id")]
     public Snowflake GuildID { get; set; }
 }

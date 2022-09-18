@@ -55,7 +55,7 @@ public static class CreateInfraction
             await db.SaveChangesAsync(cancellationToken);
             
             // We have to re-request in order to get the ID.
-            infraction = await db.Infractions.FirstAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            infraction = await db.Infractions.FirstAsync(inf => inf.ID == infraction.ID, cancellationToken); 
             
             return InfractionEntity.ToDTO(infraction);
         }

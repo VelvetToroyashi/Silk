@@ -20,7 +20,7 @@ public static class RemovePendingGreeting
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var greeting = await db.PendingGreetings.FirstOrDefaultAsync(x => x.Id == request.ID, cancellationToken);
+            var greeting = await db.PendingGreetings.FirstOrDefaultAsync(x => x.ID == request.ID, cancellationToken);
 
             if (greeting is null)
                 return Result.FromError(new NotFoundError());

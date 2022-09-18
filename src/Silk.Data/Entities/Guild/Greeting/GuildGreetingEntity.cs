@@ -6,7 +6,6 @@ namespace Silk.Data.Entities;
 /// <summary>
 ///     Represents data for a greeting.
 /// </summary>
-[Table("guild_greetings")]
 public class GuildGreetingEntity
 {
     /// <summary>

@@ -95,7 +95,7 @@ public class PingCommand : CommandGroup
     private int GetDbLatency()
     {
         var sw = Stopwatch.StartNew();
-        _db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"guilds\"");
+        _db.Database.ExecuteSqlRaw("SELECT first_value(\"id\") OVER () FROM \"guilds\"");
         sw.Stop();
         return (int)sw.ElapsedMilliseconds;
     }
