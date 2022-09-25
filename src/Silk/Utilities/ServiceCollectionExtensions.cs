@@ -37,6 +37,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -183,10 +184,12 @@ public static class ServiceCollectionExtensions
 
             b.UseLoggerFactory(NullLoggerFactory.Instance);
             b.UseNpgsql(connectionString);
+
+            b.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
         EntityMapping.ConfigureMappings();
-        services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
+        services.AddDbContextPool<GuildContext>(Builder, 256);
 
         return services;
     }
