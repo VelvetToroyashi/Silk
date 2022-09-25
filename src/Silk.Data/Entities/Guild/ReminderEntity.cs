@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using Remora.Rest.Core;
 
 namespace Silk.Data.Entities;

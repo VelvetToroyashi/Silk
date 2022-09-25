@@ -18,7 +18,6 @@ using Silk.Data.MediatR.Greetings;
 using Silk.Errors;
 using Silk.Services.Data;
 using Silk.Shared.Types;
-using Silk.Utilities;
 
 namespace Silk.Services.Guild;
 
