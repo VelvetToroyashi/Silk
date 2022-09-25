@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -37,35 +36,28 @@ public static class UpdateGuildConfig
         public Optional<List<ExemptionEntity>>           Exemptions           { get; init; }
         public Optional<List<InfractionStepEntity>>      InfractionSteps      { get; init; }
         public Dictionary<string, InfractionStepEntity>? NamedInfractionSteps { get; init; }
+        public bool                                      ShouldCommit         { get; init; } = true;
     }
     
     internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
+        private readonly IMediator    _mediator;
         
-        public Handler(GuildContext db) => _db = db;
+        public Handler(GuildContext db, IMediator mediator)
+        {
+            _db            = db;
+            _mediator = mediator;
+        }
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            
-            
-            var config = await _db
-                              .GuildConfigs
-                              .AsTracking()
-                              .AsSplitQuery()
-                              .Include(g => g.Greetings)
-                              .Include(c => c.Invites)
-                              .Include(c => c.Invites.Whitelist)
-                              .Include(c => c.InfractionSteps)
-                              .Include(c => c.Exemptions)
-                              .Include(c => c.Logging)
-                              .Include(c => c.Logging.MemberJoins)
-                              .Include(c => c.Logging.MemberLeaves)
-                              .Include(c => c.Logging.MessageDeletes)
-                              .Include(c => c.Logging.MessageEdits)
-                              .Include(c => c.Logging.Infractions)
-                              .FirstAsync(c => c.GuildID == request.GuildID, cancellationToken);
+            var config = _db.GuildConfigs.Local.FirstOrDefault
+                             (x => x.GuildID == request.GuildID) ??
+                         await _mediator.Send(new GetGuildConfig.Request(request.GuildID, true), cancellationToken);
 
+            if (config is null)
+                throw new KeyNotFoundException($"Guild config for a guild with Id: {request.GuildID} was not found");
 
             if (request.DetectRaids.IsDefined(out var detect))
                 config.EnableRaidDetection = detect;
@@ -82,43 +74,43 @@ public static class UpdateGuildConfig
                 config.Greetings = greetings;
             }
             
-            if (request.MuteRoleID.IsDefined(out Snowflake muteRole))
+            if (request.MuteRoleID.IsDefined(out var muteRole))
                 config.MuteRoleID = muteRole;
             
-            if (request.UseNativeMute.IsDefined(out bool useNativeMute))
+            if (request.UseNativeMute.IsDefined(out var useNativeMute))
                 config.UseNativeMute = useNativeMute;
 
-            if (request.EscalateInfractions.IsDefined(out bool escalate))
+            if (request.EscalateInfractions.IsDefined(out var escalate))
                 config.ProgressiveStriking = escalate;
 
-            if (request.MaxUserMentions.IsDefined(out int maxUserMentions))
+            if (request.MaxUserMentions.IsDefined(out var maxUserMentions))
                 config.MaxUserMentions = maxUserMentions;
 
-            if (request.MaxRoleMentions.IsDefined(out int maxRoleMentions))
+            if (request.MaxRoleMentions.IsDefined(out var maxRoleMentions))
                 config.MaxRoleMentions = maxRoleMentions;
 
-            if (request.UseAggressiveRegex.IsDefined(out bool useAggressiveRegex))
+            if (request.UseAggressiveRegex.IsDefined(out var useAggressiveRegex))
                 config.Invites.UseAggressiveRegex = useAggressiveRegex;
 
-            if (request.ScanInvites.IsDefined(out bool scanInvites))
+            if (request.ScanInvites.IsDefined(out var scanInvites))
                 config.Invites.ScanOrigin = scanInvites;
 
-            if (request.DeletePhishingLinks.IsDefined(out bool deletePhishingLinks))
+            if (request.DeletePhishingLinks.IsDefined(out var deletePhishingLinks))
                 config.DeletePhishingLinks = deletePhishingLinks;
 
-            if (request.DetectPhishingLinks.IsDefined(out bool detectPhishingLinks))
+            if (request.DetectPhishingLinks.IsDefined(out var detectPhishingLinks))
                 config.DetectPhishingLinks = detectPhishingLinks;
 
-            if (request.BlacklistInvites.IsDefined(out bool blacklistInvites))
+            if (request.BlacklistInvites.IsDefined(out var blacklistInvites))
                 config.Invites.WhitelistEnabled = blacklistInvites;
 
-            if (request.WarnOnMatchedInvite.IsDefined(out bool warnOnMatchedInvite))
+            if (request.WarnOnMatchedInvite.IsDefined(out var warnOnMatchedInvite))
                 config.Invites.WarnOnMatch = warnOnMatchedInvite;
 
-            if (request.DeleteOnMatchedInvite.IsDefined(out bool deleteOnMatchedInvite))
+            if (request.DeleteOnMatchedInvite.IsDefined(out var deleteOnMatchedInvite))
                 config.Invites.DeleteOnMatch = deleteOnMatchedInvite;
             
-            if (request.BanSuspiciousUsernames.IsDefined(out bool banSuspiciousUsernames))
+            if (request.BanSuspiciousUsernames.IsDefined(out var banSuspiciousUsernames))
                 config.BanSuspiciousUsernames = banSuspiciousUsernames;
 
             if (request.LoggingConfig.IsDefined(out var loggingConfig))
@@ -144,7 +136,7 @@ public static class UpdateGuildConfig
                 log.UseMobileFriendlyLogging = loggingConfig.UseMobileFriendlyLogging;
             }
             
-            if (request.Exemptions.IsDefined(out List<ExemptionEntity>? exemptions))
+            if (request.Exemptions.IsDefined(out var exemptions))
             {
                 _db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
@@ -152,19 +144,20 @@ public static class UpdateGuildConfig
 
             config.NamedInfractionSteps = request.NamedInfractionSteps ?? config.NamedInfractionSteps;
 
-            if (request.InfractionSteps.IsDefined(out List<InfractionStepEntity>? infractionSteps))
+            if (request.InfractionSteps.IsDefined(out var infractionSteps))
             {
                 _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
                 config.InfractionSteps = infractionSteps;
             }
 
-            if (request.AllowedInvites.IsDefined(out List<InviteEntity>? whitelistedInvites))
+            if (request.AllowedInvites.IsDefined(out var whitelistedInvites))
             {
                 _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
             
-            await _db.SaveChangesAsync(cancellationToken);
+            if (request.ShouldCommit)
+                await _db.SaveChangesAsync(cancellationToken);
             
             return config;
         }
