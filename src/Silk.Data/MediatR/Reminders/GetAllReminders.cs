@@ -19,14 +19,14 @@ public static class GetAllReminders
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<ReminderEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.Reminders
+            
+            return await _db.Reminders
                            .FromSqlRaw("SELECT * FROM reminders r WHERE (COALESCE(r.guild_id, 0)::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
                            .ToListAsync(cancellationToken);
         }

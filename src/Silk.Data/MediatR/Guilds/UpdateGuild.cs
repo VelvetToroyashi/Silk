@@ -16,17 +16,17 @@ public static class UpdateGuild
 
     internal sealed class Handler : IRequestHandler<Request, Result<GuildEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<Result<GuildEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
 
             //TODO: SQL; pulling the guild isn't necessary when we can write better SQL manually.
             // SET g.Prefix = @Prefix WHERE g.GuildID = @GuildID;  Would need to be sanitized however, since it's prone to SQL injection.
             
-            var guild = await db.Guilds
+            var guild = await _db.Guilds
                                 .AsTracking()
                                 .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
             if (guild is null)
@@ -34,7 +34,7 @@ public static class UpdateGuild
 
             guild.Prefix = request.Prefix;
 
-            await db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
 
             return Result<GuildEntity>.FromSuccess(guild);
         }

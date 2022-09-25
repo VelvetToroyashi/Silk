@@ -21,27 +21,27 @@ public static class GetOrCreateUser
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, Result<UserEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            await db.Upsert(new UserEntity { ID = request.UserID })
+            
+            await _db.Upsert(new UserEntity { ID = request.UserID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
 
-            await db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
+            await _db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
                      .On(u => new { u.UserID, u.GuildID, u.Date })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            await db.Upsert(new GuildUserEntity { UserID = request.UserID, GuildID = request.GuildID })
+            await _db.Upsert(new GuildUserEntity { UserID = request.UserID, GuildID = request.GuildID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            var user = await db.Users
+            var user = await _db.Users
                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;

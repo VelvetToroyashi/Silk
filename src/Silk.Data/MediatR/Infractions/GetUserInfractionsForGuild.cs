@@ -16,14 +16,14 @@ public static class GetUserInfractionsForGuild
 
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var query = db.Infractions
+            
+            var query = _db.Infractions
                            .Where(inf => inf.TargetID == request.TargetID)
                            .Where(inf => inf.GuildID == request.GuildID);
             

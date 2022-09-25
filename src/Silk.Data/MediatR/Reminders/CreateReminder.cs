@@ -31,12 +31,12 @@ public static class CreateReminder
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, ReminderEntity>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
             
             var reminder = new ReminderEntity
             {
@@ -54,9 +54,9 @@ public static class CreateReminder
                 IsReply             = request.ReplyID is not null,
             };
 
-            db.Add(reminder);
+            _db.Add(reminder);
 
-            await db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
 
             return reminder;
         }

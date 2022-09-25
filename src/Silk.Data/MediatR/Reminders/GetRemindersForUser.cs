@@ -15,14 +15,14 @@ public static class GetRemindersForUser
     
     internal class Handler : IRequestHandler<Request, IEnumerable<ReminderEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.Reminders.Where(x => x.OwnerID == request.userID).ToListAsync(cancellationToken);
+            
+            return await _db.Reminders.Where(x => x.OwnerID == request.userID).ToListAsync(cancellationToken);
         }
     }
 }

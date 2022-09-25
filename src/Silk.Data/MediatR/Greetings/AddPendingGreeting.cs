@@ -15,9 +15,9 @@ public static class AddPendingGreeting
     
     internal class Handler : IRequestHandler<Request, Result<PendingGreetingEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
 
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<Result<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
@@ -28,12 +28,12 @@ public static class AddPendingGreeting
                 UserID     = request.UserID
             };
             
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
             try
             {
-                db.PendingGreetings.Add(pendingGreeting);
+                _db.PendingGreetings.Add(pendingGreeting);
 
-                await db.SaveChangesAsync(cancellationToken);
+                await _db.SaveChangesAsync(cancellationToken);
             }
             catch (Exception e)
             {
