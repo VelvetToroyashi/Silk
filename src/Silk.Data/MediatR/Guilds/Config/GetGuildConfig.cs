@@ -12,7 +12,8 @@ public static class GetGuildConfig
     /// <summary>
     /// Request for getting the <see cref="GuildConfigEntity" /> for the Guild.
     /// </summary>
-    /// <param name="GuildId">The Id of the Guild</param>
+    /// <param name="GuildId">The Id of the Guild.</param>
+    /// <param name="AsTracking">Whether to use tracking query behavior.</param>
     public sealed record Request(Snowflake GuildId, bool AsTracking = false) : IRequest<GuildConfigEntity?>;
 
     /// <summary>
