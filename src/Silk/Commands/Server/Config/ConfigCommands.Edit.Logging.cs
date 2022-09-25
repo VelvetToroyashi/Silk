@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Remora.Commands.Attributes;
-using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;

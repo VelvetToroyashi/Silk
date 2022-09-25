@@ -11,7 +11,6 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
-using Silk.Shared.Types.Collections;
 
 namespace Silk.Services.Guild;
 

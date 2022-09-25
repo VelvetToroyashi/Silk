@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
 using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
