@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;

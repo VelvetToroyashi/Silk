@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Commands.Services;

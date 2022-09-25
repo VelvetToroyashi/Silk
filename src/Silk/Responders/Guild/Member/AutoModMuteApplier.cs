@@ -6,7 +6,6 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Interfaces;
-using Silk.Shared.Constants;
 
 namespace Silk.Responders;
 
