@@ -52,7 +52,7 @@ public partial class ConfigCommands
         private readonly MessageContext         _context;
         private readonly IDiscordRestUserAPI    _users;
         private readonly IDiscordRestGuildAPI   _guilds;
-        public readonly  IDiscordRestChannelAPI _channels;
+        private readonly IDiscordRestChannelAPI _channels;
         
         public Setup(IMediator mediator, MessageContext context, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
         {
@@ -75,6 +75,11 @@ public partial class ConfigCommands
             IChannel? channel = null
         )
         {
+            var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value, true));
+            
+            if (config is null)
+                return Result.FromSuccess();
+            
             var now = DateTimeOffset.UtcNow;
             
             var sb = new LineBuilder();
@@ -278,7 +283,7 @@ public partial class ConfigCommands
                 }
 
                 sb.AppendLine("\t\t ➜ Setting overrides for moderators...");
-                
+
 
                 if (applicableRole is not null)
                 {
@@ -292,7 +297,7 @@ public partial class ConfigCommands
                      ct: CancellationToken
                     );
                 }
-                
+
                 if (editResult.IsSuccess)
                 {
                     sb.RemoveLine();
@@ -311,18 +316,20 @@ public partial class ConfigCommands
             {
                 sb.AppendLine("\t\t ➜ Setting join and deletes channel to mod-log channel...");
 
-                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
-
                 config.Logging.LogMemberJoins = true;
                 config.Logging.LogMessageDeletes = true;
 
-                config.Logging.MemberJoins = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
+                config.Logging.MemberJoins    = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
                 config.Logging.MessageDeletes = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
 
                 try
                 {
-                    await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = config.Logging });
-                    
+                    config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) 
+                    {
+                        LoggingConfig = config.Logging,
+                        ShouldCommit  = false
+                    });
+
                     sb.AppendLine("\t\t ➜ Join and delete logging channels set!");
                     return Result.FromSuccess();
                 }
@@ -338,12 +345,13 @@ public partial class ConfigCommands
                 sb.AppendLine("\t\t ➜ Enabling invite whitelist...");
                 await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
 
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
+                config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
                 {
                     ScanInvites           = true,
                     BlacklistInvites      = true,
                     WarnOnMatchedInvite   = true,
-                    DeleteOnMatchedInvite = true
+                    DeleteOnMatchedInvite = true,
+                    ShouldCommit          = false
                 });
 
                 sb.RemoveLine();
@@ -355,15 +363,17 @@ public partial class ConfigCommands
             async Task<Result> SetInfractionLoggingAsync()
             {
                 sb.AppendLine("\t\t ➜ Enabling infraction logging...");
-                
-                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
-                
+
                 config.Logging.LogInfractions = true;
-                config.Logging.Infractions = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
-                
+                config.Logging.Infractions    = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
+
                 try
                 {
-                    await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { LoggingConfig = config.Logging });
+                    config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
+                    {
+                        LoggingConfig = config.Logging,
+                        ShouldCommit  = false
+                    });
 
                     sb.RemoveLine();
                     sb.AppendLine("\t\t ➜ Infraction logging enabled!");
@@ -380,24 +390,22 @@ public partial class ConfigCommands
             {
                 sb.AppendLine("\t\t ➜ Enabling phishing detection...");
 
-                var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value));
-                
                 config.NamedInfractionSteps.Add(AutoModConstants.PhishingLinkDetected, new() { Type = InfractionType.Ban });
-                
-                await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
+
+                config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
                 {
-                    DeletePhishingLinks = true,
-                    DetectPhishingLinks = true,
+                    DeletePhishingLinks    = true,
+                    DetectPhishingLinks    = true,
                     BanSuspiciousUsernames = true,
-                    InfractionSteps = config.NamedInfractionSteps.Values.ToList()
+                    InfractionSteps        = config.NamedInfractionSteps.Values.ToList()
                 });
-                
+
                 sb.RemoveLine();
                 sb.AppendLine("\t\t ➜ Phishing detection enabled!");
 
                 return Result.FromSuccess();
             }
-            
+
             return Result.FromSuccess();
         }
     }
