@@ -47,8 +47,6 @@ public static class UpdateGuildConfig
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            
-            
             var config = await _db
                               .GuildConfigs
                               .AsTracking()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Humanizer;
+using Humanizer.Localisation;
 using MediatR;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -174,7 +175,7 @@ public partial class ConfigCommands
 
             sb.AppendLine();
             sb.AppendLine("\t ➜ Configuration complete!");
-            sb.AppendLine($"\t ➜ Took {(finish - now).Humanize(2)} seconds to complete.");
+            sb.AppendLine($"\t ➜ Took {(finish - now).Humanize(2, minUnit: TimeUnit.Second)} to complete.");
 
             sb.AppendLine();
             sb.AppendLine("Use `config view` to view the current configuration.");
