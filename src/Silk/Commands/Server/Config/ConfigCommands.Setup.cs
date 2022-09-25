@@ -372,7 +372,7 @@ public partial class ConfigCommands
                     config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
                     {
                         LoggingConfig = config.Logging,
-                        ShouldCommit = false
+                        ShouldCommit  = false
                     });
 
                     sb.RemoveLine();
