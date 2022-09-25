@@ -12,49 +12,46 @@ public static class UpdateGuildConfig
 {
     public record Request(Snowflake GuildID) : IRequest<GuildConfigEntity>
     {
-        public Optional<bool>                      DetectRaids            { get; init; }
-        public Optional<bool>                      ScanInvites            { get; init; }
-        public Optional<Snowflake>                 MuteRoleID             { get; init; }
-        public Optional<int>                       RaidCooldown           { get; init; }
-        public Optional<int>                       RaidThreshold          { get; init; }
-        public Optional<bool>                      UseNativeMute          { get; init; }
-        public Optional<int>                       MaxUserMentions        { get; init; }
-        public Optional<int>                       MaxRoleMentions        { get; init; }
-        public Optional<bool>                      BlacklistInvites       { get; init; }
-        public Optional<bool>                      UseAggressiveRegex     { get; init; }
-        public Optional<bool>                      EscalateInfractions    { get; init; }
-        public Optional<bool>                      WarnOnMatchedInvite    { get; init; }
-        public Optional<bool>                      DetectPhishingLinks    { get; init; }
-        public Optional<bool>                      DeletePhishingLinks    { get; init; }
-        public Optional<bool>                      DeleteOnMatchedInvite  { get; init; }
-        public Optional<bool>                      BanSuspiciousUsernames { get; init; }
-        public Optional<List<GuildGreetingEntity>> Greetings              { get; init; }
-
-        public Optional<GuildLoggingConfigEntity> LoggingConfig { get; init; }
-
-        public Optional<List<InviteEntity>>              AllowedInvites       { get; init; }
-        public Optional<List<ExemptionEntity>>           Exemptions           { get; init; }
-        public Optional<List<InfractionStepEntity>>      InfractionSteps      { get; init; }
-        public Dictionary<string, InfractionStepEntity>? NamedInfractionSteps { get; init; }
-        public bool                                      ShouldCommit         { get; init; } = true;
+        public bool                                      ShouldCommit           { get; init; } = true;
+        public Optional<bool>                            DetectRaids            { get; init; }
+        public Optional<bool>                            ScanInvites            { get; init; }
+        public Optional<Snowflake>                       MuteRoleID             { get; init; }
+        public Optional<int>                             RaidCooldown           { get; init; }
+        public Optional<int>                             RaidThreshold          { get; init; }
+        public Optional<bool>                            UseNativeMute          { get; init; }
+        public Optional<int>                             MaxUserMentions        { get; init; }
+        public Optional<int>                             MaxRoleMentions        { get; init; }
+        public Optional<bool>                            BlacklistInvites       { get; init; }
+        public Optional<bool>                            UseAggressiveRegex     { get; init; }
+        public Optional<bool>                            EscalateInfractions    { get; init; }
+        public Optional<bool>                            WarnOnMatchedInvite    { get; init; }
+        public Optional<bool>                            DetectPhishingLinks    { get; init; }
+        public Optional<bool>                            DeletePhishingLinks    { get; init; }
+        public Optional<bool>                            DeleteOnMatchedInvite  { get; init; }
+        public Optional<bool>                            BanSuspiciousUsernames { get; init; }
+        public Optional<List<GuildGreetingEntity>>       Greetings              { get; init; }
+        public Optional<GuildLoggingConfigEntity>        LoggingConfig          { get; init; }
+        public Optional<List<InviteEntity>>              AllowedInvites         { get; init; }
+        public Optional<List<ExemptionEntity>>           Exemptions             { get; init; }
+        public Optional<List<InfractionStepEntity>>      InfractionSteps        { get; init; }
+        public Dictionary<string, InfractionStepEntity>? NamedInfractionSteps   { get; init; }
     }
     
     internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
         private readonly IMediator    _mediator;
-        
+
         public Handler(GuildContext db, IMediator mediator)
         {
-            _db            = db;
+            _db       = db;
             _mediator = mediator;
         }
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var config = _db.GuildConfigs.Local.FirstOrDefault
-                             (x => x.GuildID == request.GuildID) ??
-                         await _mediator.Send(new GetGuildConfig.Request(request.GuildID, true), cancellationToken);
+            var config = _db.GuildConfigs.Local.FirstOrDefault(x => x.GuildID == request.GuildID) 
+                      ?? await _mediator.Send(new GetGuildConfig.Request(request.GuildID, true), cancellationToken);
 
             if (config is null)
                 throw new KeyNotFoundException($"Guild config for a guild with Id: {request.GuildID} was not found");

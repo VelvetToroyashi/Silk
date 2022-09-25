@@ -75,11 +75,12 @@ public partial class ConfigCommands
             IChannel? channel = null
         )
         {
-            var now = DateTimeOffset.UtcNow;
-            
             var config = await _mediator.Send(new GetGuildConfig.Request(_context.GuildID.Value, true));
+            
             if (config is null)
                 return Result.FromSuccess();
+            
+            var now = DateTimeOffset.UtcNow;
             
             var sb = new LineBuilder();
             var messageRes = await _channels.CreateMessageAsync(_context.ChannelID, InProgressTitle);
@@ -261,14 +262,14 @@ public partial class ConfigCommands
                 sb.AppendLine("\t\t ➜ Locking channel for everyone...");
 
                 var editResult = await _channels.EditChannelPermissionsAsync
-                (
-                 channel!.ID,
-                 _context.GuildID.Value,
-                 default,
-                 _modlogPermissions,
-                 reason: ModLogPermissionReason,
-                 ct: CancellationToken
-                );
+                    (
+                     channel!.ID,
+                     _context.GuildID.Value,
+                     default,
+                     _modlogPermissions,
+                     reason: ModLogPermissionReason,
+                     ct: CancellationToken
+                    );
 
                 if (editResult.IsSuccess)
                 {
@@ -282,21 +283,21 @@ public partial class ConfigCommands
                 }
 
                 sb.AppendLine("\t\t ➜ Setting overrides for moderators...");
-                
+
 
                 if (applicableRole is not null)
                 {
                     // We can't add the invoker to the channel; they're usually above us.
                     editResult = await _channels.EditChannelPermissionsAsync
-                    (
-                     channel.ID,
-                     applicableRole!.ID,
-                     _modlogPermissions,
-                     reason: ModLogPermissionReason,
-                     ct: CancellationToken
-                    );
+                        (
+                         channel.ID,
+                         applicableRole!.ID,
+                         _modlogPermissions,
+                         reason: ModLogPermissionReason,
+                         ct: CancellationToken
+                        );
                 }
-                
+
                 if (editResult.IsSuccess)
                 {
                     sb.RemoveLine();
@@ -327,8 +328,8 @@ public partial class ConfigCommands
                         (
                          new UpdateGuildConfig.Request(_context.GuildID.Value)
                          {
-                             LoggingConfig    = config.Logging,
-                             ShouldCommit     = false
+                             LoggingConfig = config.Logging,
+                             ShouldCommit  = false
                          }
                         );
 
@@ -347,14 +348,17 @@ public partial class ConfigCommands
                 sb.AppendLine("\t\t ➜ Enabling invite whitelist...");
                 await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
 
-                config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
-                {
-                    ScanInvites           = true,
-                    BlacklistInvites      = true,
-                    WarnOnMatchedInvite   = true,
-                    DeleteOnMatchedInvite = true,
-                    ShouldCommit          = false
-                });
+                config = await _mediator.Send
+                    (
+                     new UpdateGuildConfig.Request(_context.GuildID.Value)
+                     {
+                         ScanInvites           = true,
+                         BlacklistInvites      = true,
+                         WarnOnMatchedInvite   = true,
+                         DeleteOnMatchedInvite = true,
+                         ShouldCommit          = false
+                     }
+                    );
 
                 sb.RemoveLine();
                 sb.AppendLine("\t\t ➜ Invite whitelist enabled!");
@@ -367,16 +371,16 @@ public partial class ConfigCommands
                 sb.AppendLine("\t\t ➜ Enabling infraction logging...");
 
                 config.Logging.LogInfractions = true;
-                config.Logging.Infractions = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
-                
+                config.Logging.Infractions    = new() { ChannelID = channel!.ID, GuildID = _context.GuildID.Value };
+
                 try
                 {
                     config = await _mediator.Send
                         (
                          new UpdateGuildConfig.Request(_context.GuildID.Value)
                          {
-                             LoggingConfig    = config.Logging,
-                             ShouldCommit = false
+                             LoggingConfig = config.Logging,
+                             ShouldCommit  = false
                          }
                         );
 
@@ -395,22 +399,26 @@ public partial class ConfigCommands
             {
                 sb.AppendLine("\t\t ➜ Enabling phishing detection...");
 
-                config.NamedInfractionSteps.Add(AutoModConstants.PhishingLinkDetected, new() { Type = InfractionType.Ban });
-                
-                config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
-                {
-                    DeletePhishingLinks = true,
-                    DetectPhishingLinks = true,
-                    BanSuspiciousUsernames = true,
-                    InfractionSteps = config.NamedInfractionSteps.Values.ToList()
-                });
-                
+                config.NamedInfractionSteps.Add
+                    (AutoModConstants.PhishingLinkDetected, new() { Type = InfractionType.Ban });
+
+                config = await _mediator.Send
+                    (
+                     new UpdateGuildConfig.Request(_context.GuildID.Value)
+                     {
+                         DeletePhishingLinks    = true,
+                         DetectPhishingLinks    = true,
+                         BanSuspiciousUsernames = true,
+                         InfractionSteps        = config.NamedInfractionSteps.Values.ToList()
+                     }
+                    );
+
                 sb.RemoveLine();
                 sb.AppendLine("\t\t ➜ Phishing detection enabled!");
 
                 return Result.FromSuccess();
             }
-            
+
             return Result.FromSuccess();
         }
     }
