@@ -26,7 +26,7 @@ public static class GetOrCreateGuildConfig
 
         public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            GuildConfigEntity? guildConfig        = await _mediator.Send(new GetGuildConfig.Request(request.GuildID), cancellationToken);
+            GuildConfigEntity? guildConfig = await _mediator.Send(new GetGuildConfig.Request(request.GuildID), cancellationToken);
 
             if (guildConfig is not null)
                 return guildConfig;
