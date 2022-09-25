@@ -158,6 +158,13 @@ public static class ServiceCollectionExtensions
         });
     }
 
+    public static bool IsRootScope(this IServiceProvider provider)
+    {
+        var trueRoot = provider.GetRequiredService<ScopeWrapper>().Provider;
+        
+        return provider == trueRoot;
+    }
+
     public static IServiceCollection AddSilkDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var silkConfig = configuration.GetSilkConfigurationOptions();

@@ -31,14 +31,26 @@ public class ScopingMediator : IMediator
         var requestType = request.GetType();
 
         var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd
-            (
-             requestType,
-             static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse))) ?? throw new InvalidOperationException($"Could not create wrapper type for {t}"))
-            );
+        (
+         requestType,
+         static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse))) ?? throw new InvalidOperationException($"Could not create wrapper type for {t}"))
+        );
 
-        await using var scope = _serviceFactory.GetInstance<IServiceProvider>().CreateAsyncScope();
+        var provider = _serviceFactory.GetInstance<IServiceProvider>();
+
+        if (!provider.IsRootScope()) 
+        {
+            // We're within a scope, likely created by Remora. This *should* be fine.
+            // However this is unsafe in the case that we need to make two db calls from the same event.
+            // .AsNoTracking() *should* fix this, since we only track what we need, but we could still prematurely write, which is an issue.
+            // For the most part however, this should be fine.
+            return await handler.Handle(request, cancellationToken, provider.GetService!);
+        }
+        
+        await using var scope = provider.CreateAsyncScope();
         
         return await handler.Handle(request, cancellationToken, scope.ServiceProvider.GetService!);
+
     }
     
     

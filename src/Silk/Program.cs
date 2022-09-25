@@ -207,6 +207,7 @@ public class Program
                 // If we configure logging after, it'll override the settings with defaults.
 
                 services
+                   .AddSingleton<ScopeWrapper>()
                    .AddSilkConfigurationOptions(context.Configuration)
                    .AddSilkDatabase(context.Configuration)
                    .AddSilkLogging(context.Configuration)
