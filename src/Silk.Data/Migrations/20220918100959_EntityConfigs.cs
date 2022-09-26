@@ -10,10 +10,6 @@ namespace Silk.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_guild_greetings_guilds_GuildID",
-                table: "guild_greetings");
-
             migrationBuilder.DropTable(
                 name: "command_invocations");
 
