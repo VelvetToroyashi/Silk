@@ -399,7 +399,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (await IsMutedAsync(guildID, targetID))
         {
             var userInfractions = await _mediator.Send(new GetUserInfractionsForGuild.Request(guildID, targetID));
-            var muteInfraction  = userInfractions.Last(inf => inf.Type == InfractionType.AutoModMute || inf.Type == InfractionType.Mute && !inf.Pardoned && !inf.Processed);
+            var muteInfraction  = userInfractions.Last(inf => inf.Type is InfractionType.AutoModMute or InfractionType.Mute && !inf.Pardoned && !inf.Processed);
             
             return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
         }
@@ -493,7 +493,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         Result unmuteResult;
 
         if (!config.UseNativeMute)
-            unmuteResult = await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config!.MuteRoleID, reason);
+            unmuteResult = await _guilds.RemoveGuildMemberRoleAsync(guildID, targetID, config.MuteRoleID, reason);
         else
             unmuteResult = await _guilds.ModifyGuildMemberAsync(guildID, targetID, communicationDisabledUntil: null);
 

@@ -14,18 +14,18 @@ public static class GetGuildConfig
     /// </summary>
     /// <param name="GuildId">The Id of the Guild.</param>
     /// <param name="AsTracking">Whether to use tracking query behavior.</param>
-    public sealed record Request(Snowflake GuildId, bool AsTracking = false) : IRequest<GuildConfigEntity?>;
+    public sealed record Request(Snowflake GuildId, bool AsTracking = false) : IRequest<GuildConfigEntity>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity?>
+    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
         
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<GuildConfigEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
             //TODO: Add commands to get individual configs.
             var initialQueryable = _db.GuildConfigs
@@ -44,9 +44,9 @@ public static class GetGuildConfig
 
             return request.AsTracking
                 ? await initialQueryable.AsTracking()
-                                        .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken)
+                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken)
                 : await initialQueryable.AsNoTracking()
-                                        .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
+                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
         }
     }
 }

@@ -30,6 +30,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -174,7 +175,7 @@ public static class ServiceCollectionExtensions
             
             #endif
 
-            b.UseLoggerFactory(NullLoggerFactory.Instance);
+            b.UseLoggerFactory(new SerilogLoggerFactory(Log.Logger));
             b.UseNpgsql(connectionString);
 
             b.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);

@@ -33,7 +33,7 @@ public class MuteCommand : CommandGroup
     [RequireContext(ChannelContext.Guild)]
     [RequireDiscordPermission(DiscordPermission.ManageRoles)]
     [Description("Mutes a user either temporarily. Muting an already muted member will update the mute time.")]
-    public async Task<IResult> MuteAsync
+    public async Task<Result> MuteAsync
     (
         [NonSelfActionable]
         IUser user,
@@ -49,13 +49,12 @@ public class MuteCommand : CommandGroup
         var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
         var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
-        return
-            await _channels.CreateMessageAsync
-                (
-                 _context.ChannelID,
-                 !infractionResult.IsSuccess
-                     ? infractionResult.Error!.Message
-                     : $"{Emojis.MuteEmoji} Successfully muted {user.ToDiscordTag()}! {notified}"
-                );
+        return (Result)await _channels.CreateMessageAsync
+        (
+         _context.ChannelID,
+         !infractionResult.IsSuccess
+             ? infractionResult.Error!.Message
+             : $"{Emojis.MuteEmoji} Successfully muted {user.ToDiscordTag()}! {notified}"
+        );
     }
 }
