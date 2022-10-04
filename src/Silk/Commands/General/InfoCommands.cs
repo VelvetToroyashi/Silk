@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -314,8 +315,8 @@ public class InfoCommands : CommandGroup
         roles = roles.OrderBy(r => r.Position).ToArray();
         
         var roleIDs = roles.OrderBy(r => r.Position).Select(r => r.ID).ToArray();
-
-        var currentIndex = roleIDs.IndexOf(role.ID);
+        
+        var currentIndex = Array.IndexOf(roleIDs, role.ID); 
 
         var sb = new StringBuilder();
         

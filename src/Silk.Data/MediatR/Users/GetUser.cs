@@ -20,14 +20,14 @@ public static class GetUser
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, User?>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            UserEntity? user = await db.Users
+            
+            UserEntity? user = await _db.Users
                                        .Include(u => u.History)
                                        .Include(u => u.Infractions)
                                        .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);

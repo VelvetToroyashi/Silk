@@ -6,7 +6,6 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 using Silk.Services.Interfaces;
-using Silk.Shared.Constants;
 
 namespace Silk.Responders;
 
@@ -46,7 +45,6 @@ public sealed class AutoModMuteApplier : IResponder<IGuildMemberAdd>
         var automod = automodRes.Entity.ID;
         
         await _infractions.MuteAsync(member, guild, automod, "Re-applied active mute on join.");
-        await _infractions.AddNoteAsync(member, guild, automod, $"{StringConstants.AutoModMessagePrefix} Automatically re-applied mute for {member} on rejoin.");
 
         return Result.FromSuccess();
     }

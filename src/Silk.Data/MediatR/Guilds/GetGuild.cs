@@ -20,16 +20,16 @@ public static class GetGuild
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, GuildEntity?>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
         
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public Handler(GuildContext db) => _db = db;
 
 
         public async Task<GuildEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            
+            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             return guild;
         }

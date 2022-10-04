@@ -12,39 +12,41 @@ public static class GetGuildConfig
     /// <summary>
     /// Request for getting the <see cref="GuildConfigEntity" /> for the Guild.
     /// </summary>
-    /// <param name="GuildId">The Id of the Guild</param>
-    public sealed record Request(Snowflake GuildId) : IRequest<GuildConfigEntity?>;
+    /// <param name="GuildId">The Id of the Guild.</param>
+    /// <param name="AsTracking">Whether to use tracking query behavior.</param>
+    public sealed record Request(Snowflake GuildId, bool AsTracking = false) : IRequest<GuildConfigEntity>;
 
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
-    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity?>
+    internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
         
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public Handler(GuildContext db) => _db = db;
 
-        public async Task<GuildConfigEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-            
             //TODO: Add commands to get individual configs.
-            var config = await db.GuildConfigs
-                                 .AsSplitQuery()
-                                 .Include(g => g.Greetings)
-                                 .Include(c => c.Invites)
-                                 .Include(c => c.Invites.Whitelist)
-                                 .Include(c => c.InfractionSteps)
-                                 .Include(c => c.Exemptions)
-                                 .Include(c => c.Logging)
-                                 .Include(c => c.Logging.MemberJoins)
-                                 .Include(c => c.Logging.MemberLeaves)
-                                 .Include(c => c.Logging.MessageDeletes)
-                                 .Include(c => c.Logging.MessageEdits)
-                                 .Include(c => c.Logging.Infractions)
-                                 .FirstOrDefaultAsync(g => g.GuildID == request.GuildId, cancellationToken);
+            var initialQueryable = _db.GuildConfigs
+                                            .AsSplitQuery()
+                                            .Include(g => g.Greetings)
+                                            .Include(c => c.Invites)
+                                            .Include(c => c.Invites.Whitelist)
+                                            .Include(c => c.InfractionSteps)
+                                            .Include(c => c.Exemptions)
+                                            .Include(c => c.Logging)
+                                            .Include(c => c.Logging.MemberJoins)
+                                            .Include(c => c.Logging.MemberLeaves)
+                                            .Include(c => c.Logging.MessageDeletes)
+                                            .Include(c => c.Logging.MessageEdits)
+                                            .Include(c => c.Logging.Infractions);
 
-            return config;
+            return request.AsTracking
+                ? await initialQueryable.AsTracking()
+                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken)
+                : await initialQueryable.AsNoTracking()
+                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
         }
     }
 }

@@ -57,10 +57,10 @@ public class ShardsCommand : CommandGroup
             sb.AppendLine(isUp ? Emojis.ConfirmEmoji : Emojis.DeclineEmoji);
 
             sb.AppendLine("```cs");
-            sb.AppendLine($"CPU: {db.StringGet(ShardHelper.GetShardCPUUsageStatKey(i))}%");
-            sb.AppendLine($"Memory: {db.StringGet(ShardHelper.GetShardMemoryStatKey(i))} MB");
-            sb.AppendLine($"Uptime: {db.StringGet(ShardHelper.GetShardUptimeStatKey(i))}");
-            sb.AppendLine($"Guilds: {db.StringGet(ShardHelper.GetShardGuildCountStatKey(i))}");
+            sb.AppendLine($"CPU:     {db.StringGet(ShardHelper.GetShardCPUUsageStatKey(i))}%");
+            sb.AppendLine($"Memory:  {db.StringGet(ShardHelper.GetShardMemoryStatKey(i))} MB");
+            sb.AppendLine($"Uptime:  {db.StringGet(ShardHelper.GetShardUptimeStatKey(i))}");
+            sb.AppendLine($"Guilds:  {db.StringGet(ShardHelper.GetShardGuildCountStatKey(i))}");
             sb.AppendLine($"Members: {db.StringGet(ShardHelper.GetShardUserCountStatKey(i))}");
             sb.AppendLine("```");
             

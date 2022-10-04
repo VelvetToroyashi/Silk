@@ -20,16 +20,16 @@ namespace Silk.Commands.General;
 public class PingCommand : CommandGroup
 {
     private readonly GuildContext         _db;
-    private readonly ICommandContext      _context;
+    private readonly MessageContext      _context;
     private readonly DiscordGatewayClient _gateway;
     
     private readonly IDiscordRestChannelAPI _channels;
 
     public PingCommand
     (
-        GuildContext db,
-        ICommandContext context,
-        DiscordGatewayClient gateway,
+        GuildContext           db,
+        MessageContext         context,
+        DiscordGatewayClient   gateway,
         IDiscordRestChannelAPI channels
     )
     {
@@ -74,16 +74,18 @@ public class PingCommand : CommandGroup
         
         var apiLat = sw.ElapsedMilliseconds.ToString("N0");
 
+        var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.MessageID.Timestamp);
+
         embed = embed with
         {
             Fields = new[]
             {
-                (embed.Fields.Value[0] as EmbedField)! with { Value = $"```cs\n" + $"{(message.Entity.Timestamp - (_context as MessageContext)!.MessageID.Timestamp).TotalMilliseconds:N0} ms".PadLeft(10) + "```" },
+                (embed.Fields.Value[0] as EmbedField)! with { Value = "```cs\n" + $"{messageLat.TotalMilliseconds:N0} ms".PadLeft(10) + "```" },
                 (embed.Fields.Value[1] as EmbedField)!,
                 (embed.Fields.Value[2] as EmbedField)!,
-                (embed.Fields.Value[3] as EmbedField)! with { Value = $"```cs\n" + $"{GetDbLatency()}".PadLeft(7) + " ms```" },
+                (embed.Fields.Value[3] as EmbedField)! with { Value = "```cs\n" + $"{GetDbLatency()}".PadLeft(7) + " ms```" },
                 (embed.Fields.Value[4] as EmbedField)!,
-                (embed.Fields.Value[5] as EmbedField)! with { Value = $"```cs\n" + $"{apiLat} ms".PadLeft(11) + "```" },
+                (embed.Fields.Value[5] as EmbedField)! with { Value = "```cs\n" + $"{apiLat} ms".PadLeft(11) + "```" },
             }
         };
         
@@ -93,7 +95,7 @@ public class PingCommand : CommandGroup
     private int GetDbLatency()
     {
         var sw = Stopwatch.StartNew();
-        _db.Database.ExecuteSqlRaw("SELECT first_value(\"Id\") OVER () FROM \"guilds\"");
+        _db.Database.ExecuteSqlRaw("SELECT first_value(\"id\") OVER () FROM \"guilds\"");
         sw.Stop();
         return (int)sw.ElapsedMilliseconds;
     }

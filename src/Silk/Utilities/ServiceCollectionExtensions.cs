@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Reflection;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,19 +21,16 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
-using Remora.Discord.Gateway.Services;
-using Remora.Discord.Gateway.Transport;
 using Remora.Discord.Interactivity.Extensions;
 using Remora.Discord.Pagination;
 using Remora.Discord.Pagination.Extensions;
-using Remora.Discord.Rest;
-using Remora.Discord.Rest.Extensions;
 using Remora.Extensions.Options.Immutable;
 using Remora.Plugins.Services;
 using Remora.Rest.Core;
 using Remora.Results;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Data;
@@ -158,6 +152,13 @@ public static class ServiceCollectionExtensions
         });
     }
 
+    public static bool IsRootScope(this IServiceProvider provider)
+    {
+        var trueRoot = provider.GetRequiredService<ScopeWrapper>().Provider;
+        
+        return provider == trueRoot;
+    }
+
     public static IServiceCollection AddSilkDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var silkConfig = configuration.GetSilkConfigurationOptions();
@@ -174,12 +175,14 @@ public static class ServiceCollectionExtensions
             
             #endif
 
-            b.UseLoggerFactory(NullLoggerFactory.Instance);
+            b.UseLoggerFactory(new SerilogLoggerFactory(Log.Logger));
             b.UseNpgsql(connectionString);
+
+            b.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
         EntityMapping.ConfigureMappings();
-        services.AddDbContextFactory<GuildContext>(Builder, ServiceLifetime.Transient);
+        services.AddDbContextPool<GuildContext>(Builder, 256);
 
         return services;
     }

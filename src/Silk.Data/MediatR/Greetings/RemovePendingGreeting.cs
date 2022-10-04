@@ -12,22 +12,22 @@ public static class RemovePendingGreeting
     
     internal class Handler : IRequestHandler<Request, Result>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
 
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var greeting = await db.PendingGreetings.FirstOrDefaultAsync(x => x.Id == request.ID, cancellationToken);
+            
+            var greeting = await _db.PendingGreetings.FirstOrDefaultAsync(x => x.ID == request.ID, cancellationToken);
 
             if (greeting is null)
                 return Result.FromError(new NotFoundError());
             
-            db.PendingGreetings.Remove(greeting);
+            _db.PendingGreetings.Remove(greeting);
             
-            await db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
 
             return Result.FromSuccess();
         }

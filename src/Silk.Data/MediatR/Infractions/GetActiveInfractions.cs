@@ -15,14 +15,14 @@ public static class GetActiveInfractions
 
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            List<InfractionEntity> infractions = await db.Infractions
+            
+            List<InfractionEntity> infractions = await _db.Infractions
                                                          .FromSqlRaw("SELECT * FROM infractions i "    +
                                                                      "WHERE i.expires_at IS NOT NULL " +
                                                                      "AND i.expires_at > NOW() "       +

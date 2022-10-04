@@ -17,5 +17,15 @@ public class GuildUserConfiguration : IEntityTypeConfiguration<GuildUserEntity>
         builder.HasOne(gu => gu.Guild)
                .WithMany(g => g.Users)
                .HasForeignKey(g => g.GuildID);
+
+        builder.ToTable("guild_user_joiner");
+        
+        builder.Property(gu => gu.UserID)
+               .HasColumnName("user_id")
+               .IsRequired();
+        
+        builder.Property(gu => gu.GuildID)
+               .HasColumnName("guild_id")
+               .IsRequired();
     }
 }

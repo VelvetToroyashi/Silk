@@ -1,18 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;
 
 namespace Silk.Data.Entities;
 
-[Table("users")]
 public class UserEntity
 {
     /// <summary>
     /// The ID of the user.
     /// </summary>
-    [Column("id")]
     public Snowflake ID { get; set; }
 
     /// <summary>

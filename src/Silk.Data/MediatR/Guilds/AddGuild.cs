@@ -21,14 +21,14 @@ public static class AddGuild
     /// </summary>
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            
+            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;
@@ -40,9 +40,9 @@ public static class AddGuild
                 Configuration = new() { GuildID = request.GuildID },
             };
 
-            db.Guilds.Add(guild);
+            _db.Guilds.Add(guild);
             
-            await db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
             return guild;
         }
     }

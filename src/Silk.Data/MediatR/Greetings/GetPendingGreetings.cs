@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -14,16 +13,16 @@ public static class GetPendingGreetings
     
     internal class Handler : IRequestHandler<Request, IReadOnlyList<PendingGreetingEntity>>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
         
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        public Handler(GuildContext db) => _db = db;
 
 
         public async Task<IReadOnlyList<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            return await db.PendingGreetings
+            
+            return await _db.PendingGreetings
                            .FromSqlRaw("SELECT * FROM pending_greetings pg WHERE (pg.guild_id::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
                            .ToArrayAsync(cancellationToken); // Will EF Core do client eval for this?
         }

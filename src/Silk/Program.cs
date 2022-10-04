@@ -180,8 +180,7 @@ public class Program
                                        .ServiceProvider
                                        .GetRequiredService<GuildContext>();
 
-            var pendingMigrations = (await dbContext.Database
-                                                   .GetPendingMigrationsAsync()).ToList();
+            var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
 
             if (pendingMigrations.Any())
                 await dbContext.Database.MigrateAsync();
@@ -207,9 +206,10 @@ public class Program
                 // If we configure logging after, it'll override the settings with defaults.
 
                 services
+                   .AddSingleton<ScopeWrapper>()
                    .AddSilkConfigurationOptions(context.Configuration)
-                   .AddSilkDatabase(context.Configuration)
                    .AddSilkLogging(context.Configuration)
+                   .AddSilkDatabase(context.Configuration)
                    .AddRemoraServices()
                    .AddSingleton<ShardHelper>()
                    .AddSingleton<ReminderService>()

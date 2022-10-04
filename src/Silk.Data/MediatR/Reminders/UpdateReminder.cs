@@ -13,20 +13,20 @@ public static class UpdateReminder
 
     internal sealed class Handler : IRequestHandler<Request, ReminderEntity>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
-        public Handler(IDbContextFactory<GuildContext> dbFactory) => _dbFactory = dbFactory;
+        private readonly GuildContext _db;
+        public Handler(GuildContext db) => _db = db;
 
         public async Task<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            ReminderEntity reminder = await db.Reminders
+            
+            ReminderEntity reminder = await _db.Reminders
                                               .AsTracking()
                                               .FirstAsync(r => r.Id == request.Reminder.Id, cancellationToken);
 
             reminder.ExpiresAt = request.Expiration;
 
-            await db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
             return reminder;
         }
     }

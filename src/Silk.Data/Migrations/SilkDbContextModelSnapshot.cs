@@ -17,44 +17,23 @@ namespace Silk.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("ProductVersion", "6.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Silk.Data.Entities.CommandInvocationEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("CommandName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("command_name");
-
-                    b.Property<DateTime>("InvocationTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("used_at");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("command_invocations");
-                });
-
             modelBuilder.Entity("Silk.Data.Entities.ExemptionEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<int>("Exemption")
                         .HasColumnType("integer")
-                        .HasColumnName("exempt_from");
+                        .HasColumnName("exemption_type");
 
                     b.Property<int?>("GuildConfigEntityId")
                         .HasColumnType("integer");
@@ -71,11 +50,11 @@ namespace Silk.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("type");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.HasIndex("GuildConfigEntityId");
 
-                    b.ToTable("infraction_exemptions");
+                    b.ToTable("infraction_exemptions", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.Guild.Config.InviteConfigEntity", b =>
@@ -99,7 +78,7 @@ namespace Silk.Data.Migrations
 
                     b.Property<bool>("UseAggressiveRegex")
                         .HasColumnType("boolean")
-                        .HasColumnName("match_aggressively");
+                        .HasColumnName("use_aggressive_regex");
 
                     b.Property<bool>("WarnOnMatch")
                         .HasColumnType("boolean")
@@ -114,7 +93,7 @@ namespace Silk.Data.Migrations
                     b.HasIndex("GuildModConfigId")
                         .IsUnique();
 
-                    b.ToTable("invite_configs");
+                    b.ToTable("invite_configs", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildConfigEntity", b =>
@@ -131,11 +110,11 @@ namespace Silk.Data.Migrations
 
                     b.Property<bool>("DeletePhishingLinks")
                         .HasColumnType("boolean")
-                        .HasColumnName("delete_detected_phishing");
+                        .HasColumnName("delete_phishing_links");
 
                     b.Property<bool>("DetectPhishingLinks")
                         .HasColumnType("boolean")
-                        .HasColumnName("detect_phishing");
+                        .HasColumnName("detect_phishing_links");
 
                     b.Property<bool>("EnableRaidDetection")
                         .HasColumnType("boolean")
@@ -166,7 +145,7 @@ namespace Silk.Data.Migrations
 
                     b.Property<bool>("ProgressiveStriking")
                         .HasColumnType("boolean")
-                        .HasColumnName("progressive_infractions");
+                        .HasColumnName("progressive_striking");
 
                     b.Property<int>("RaidCooldownSeconds")
                         .HasColumnType("integer")
@@ -174,7 +153,7 @@ namespace Silk.Data.Migrations
 
                     b.Property<int>("RaidDetectionThreshold")
                         .HasColumnType("integer")
-                        .HasColumnName("raid_threshold");
+                        .HasColumnName("raid_detection_threshold");
 
                     b.Property<bool>("UseNativeMute")
                         .HasColumnType("boolean")
@@ -187,14 +166,14 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("LoggingId");
 
-                    b.ToTable("guild_configs");
+                    b.ToTable("guild_configs", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildEntity", b =>
                 {
                     b.Property<ulong>("ID")
                         .HasColumnType("numeric(20,0)")
-                        .HasColumnName("Id");
+                        .HasColumnName("id");
 
                     b.Property<string>("Prefix")
                         .IsRequired()
@@ -204,35 +183,41 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("guilds");
+                    b.ToTable("guilds", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildGreetingEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<ulong>("ChannelID")
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
 
                     b.Property<int?>("GuildConfigEntityId")
                         .HasColumnType("integer");
 
                     b.Property<ulong>("GuildID")
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("message");
 
                     b.Property<ulong?>("MetadataID")
-                        .HasColumnType("numeric(20,0)");
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("metadata_id");
 
                     b.Property<int>("Option")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("option");
 
                     b.HasKey("Id");
 
@@ -240,7 +225,7 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildID");
 
-                    b.ToTable("guild_greetings");
+                    b.ToTable("guild_greetings", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildLoggingConfigEntity", b =>
@@ -315,7 +300,7 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("MessageEditsId");
 
-                    b.ToTable("guild_logging_configs");
+                    b.ToTable("guild_logging_configs", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.GuildUserEntity", b =>
@@ -332,19 +317,22 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("GuildID");
 
-                    b.ToTable("guild_user_joiner");
+                    b.ToTable("guild_user_joiner", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.InfractionEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<bool>("AppliesToTarget")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(true)
                         .HasColumnName("active");
 
                     b.Property<int>("CaseNumber")
@@ -360,7 +348,9 @@ namespace Silk.Data.Migrations
                         .HasColumnName("enforcer_id");
 
                     b.Property<bool>("Escalated")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(false)
                         .HasColumnName("escalated");
 
                     b.Property<DateTimeOffset?>("ExpiresAt")
@@ -372,7 +362,9 @@ namespace Silk.Data.Migrations
                         .HasColumnName("guild_id");
 
                     b.Property<bool>("Processed")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(false)
                         .HasColumnName("processed");
 
                     b.Property<string>("Reason")
@@ -389,25 +381,28 @@ namespace Silk.Data.Migrations
                         .HasColumnName("type");
 
                     b.Property<bool>("UserNotified")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(false)
                         .HasColumnName("user_notified");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.HasIndex("GuildID");
 
                     b.HasIndex("TargetID");
 
-                    b.ToTable("infractions");
+                    b.ToTable("infractions", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.InfractionStepEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<int>("ConfigId")
                         .HasColumnType("integer")
@@ -415,7 +410,7 @@ namespace Silk.Data.Migrations
 
                     b.Property<long>("Duration")
                         .HasColumnType("bigint")
-                        .HasColumnName("infraction_duration");
+                        .HasColumnName("infration_duration");
 
                     b.Property<int?>("GuildConfigEntityId")
                         .HasColumnType("integer");
@@ -428,20 +423,21 @@ namespace Silk.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("infraction_type");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.HasIndex("GuildConfigEntityId");
 
-                    b.ToTable("infraction_steps");
+                    b.ToTable("infraction_steps", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.InviteEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<ulong>("GuildId")
                         .HasColumnType("numeric(20,0)")
@@ -459,11 +455,11 @@ namespace Silk.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("invite_code");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.HasIndex("InviteConfigEntityId");
 
-                    b.ToTable("invites");
+                    b.ToTable("invites", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.LoggingChannelEntity", b =>
@@ -493,17 +489,17 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("logging_channels");
+                    b.ToTable("logging_channels", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.PendingGreetingEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<int>("GreetingID")
                         .HasColumnType("integer")
@@ -517,16 +513,17 @@ namespace Silk.Data.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
-                    b.ToTable("pending_greetings");
+                    b.ToTable("pending_greetings", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.ReminderEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
@@ -580,7 +577,7 @@ namespace Silk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("reminders");
+                    b.ToTable("reminders", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.UserEntity", b =>
@@ -590,14 +587,16 @@ namespace Silk.Data.Migrations
                         .HasColumnName("id");
 
                     b.Property<bool>("ShareTimezone")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("share_timezone");
 
                     b.Property<string>("TimezoneID")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("timezone_id");
 
                     b.HasKey("ID");
 
-                    b.ToTable("users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.UserHistoryEntity", b =>
@@ -624,7 +623,7 @@ namespace Silk.Data.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("user_histories");
+                    b.ToTable("user_histories", (string)null);
                 });
 
             modelBuilder.Entity("Silk.Data.Entities.ExemptionEntity", b =>

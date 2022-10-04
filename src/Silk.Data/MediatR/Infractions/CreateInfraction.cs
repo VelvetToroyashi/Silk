@@ -24,12 +24,12 @@ public static class CreateInfraction
 
     internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
-        private readonly IDbContextFactory<GuildContext> _dbFactory;
+        private readonly GuildContext _db;
         private readonly IMediator                       _mediator;
 
-        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
+        public Handler(GuildContext db, IMediator mediator)
         {
-            _dbFactory = dbFactory;
+            _db = db;
             _mediator  = mediator;
         }
 
@@ -46,16 +46,16 @@ public static class CreateInfraction
                 Type       = request.Type
             };
             
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
 
             await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.TargetID), cancellationToken);
             await _mediator.Send(new GetOrCreateUser.Request(request.GuildID, request.EnforcerID), cancellationToken);
             
-            db.Infractions.Add(infraction);
-            await db.SaveChangesAsync(cancellationToken);
+            _db.Infractions.Add(infraction);
+            await _db.SaveChangesAsync(cancellationToken);
             
             // We have to re-request in order to get the ID.
-            infraction = await db.Infractions.FirstAsync(inf => inf.Id == infraction.Id, cancellationToken); 
+            infraction = await _db.Infractions.FirstAsync(inf => inf.ID == infraction.ID, cancellationToken); 
             
             return InfractionEntity.ToDTO(infraction);
         }
