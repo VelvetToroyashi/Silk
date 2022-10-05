@@ -15,6 +15,7 @@ using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
 using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
+using RoleMenuPlugin.Parsers;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
 
@@ -37,6 +38,7 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
                .WithCommandGroup<RoleMenuCommand>()
                .Finish()
                .AddCondition<RoleMenuCondition>()
+               .AddParser<MessageLinkSnowflakeParser>()
                .AddDbContext<RoleMenuContext>((s, b) =>
                 {
                     var config = s.GetRequiredService<IConfiguration>();
@@ -53,7 +55,6 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
         {
             return Result.FromError(new ExceptionError(e));
         }
-        
         
         return Result.FromSuccess();
     }

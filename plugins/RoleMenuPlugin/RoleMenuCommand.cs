@@ -106,22 +106,6 @@ public sealed class RoleMenuCommand : CommandGroup
 
         return Result<ReactionResult>.FromSuccess(new("✅"));
     }
-
-    [Command("add", "a")]
-    [Description("Adds one or more role(s) to the role menu.\n" +
-                 "Roles can be added at this stage via mentions (@Role) or IDs (123456789).\n")]
-    public Task<IResult> AddAsync
-    (
-        [RoleMenu]
-        [Description("A link to the role menu message. \n"                                                                +
-                     "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
-                     "**This is required if you set the role menu to the current channel.**")]
-        IMessage message,
-            
-        [Description("The roles to add to the role menu. Roles above my own and the @everyone role will be discarded!")]
-        IRole[] roles
-    )
-    => AddAsync(message.ID, roles);
     
     [Command("add", "a")]
     [Description("Adds one or more role(s) to the role menu.\n"                                             +
@@ -233,24 +217,6 @@ public sealed class RoleMenuCommand : CommandGroup
             _context       = context;
             _channels = channels;
         }
-
-        [Command("menu", "m")]
-        [Description("Edits the role menu message.\n" +
-                     "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
-                     "**This is required if you set the role menu to the current channel.**")]
-        public Task<IResult> EditAsync
-        (
-            [RoleMenu]
-            [Description("A link to the role menu message. \n"                                                                +
-                         "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
-                         "**This is required if you set the role menu to the current channel.**")]
-            IMessage message,
-            
-            [Range(Min = 1, Max = 25)]
-            [Description("The maximum number of roles that can be selected.")]
-            int maxOptions
-        )
-        => EditAsync(message.ID, maxOptions);
         
         [Command("menu", "m")]
         [Description("Edits the role menu message.\n"                                                                     +
@@ -298,37 +264,7 @@ public sealed class RoleMenuCommand : CommandGroup
                                                           $"If it means anything to you the error is: `{res.Error.Message}`\n" +
                                                           $"(It's recommended to report this to the developers!)");
         }
-
-        [Command("role", "r")]
-        [Description("Edits various attributes of a role menu option.")]
-        public Task<IResult> EditAsync
-        (
-            [RoleMenu]
-            [Description("A link to the role menu message. \n"                                                                +
-                         "This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.\n" +
-                         "**This is required if you set the role menu to the current channel.**")]
-            IMessage message,
-            
-            [Description("The ID of the role menu option to edit.")]
-            IRole role,
-            
-            [Range(Min = 0, Max = 25)]
-            [Option('x', "exclusive")]
-            [Description("What role should be mutually exclusive with this option?")]
-            IRole[]? exclusiveRoles = null,
-
-            [Range(Min = 0, Max = 25)]
-            [Option('i', "inclusive")]
-            [Description("What roles should be mutually inclusive with this option?")]
-            IRole[]? inclusiveRoles = null,
-            
-            [Greedy]
-            [Option('d', "description")]
-            [Description("The description of the role menu option.")]
-            string? description = null
-        )
-        => EditAsync(message.ID, role, exclusiveRoles, inclusiveRoles, description);
-
+        
         [Command("role", "r")]
         [Description("Edits various attributes of a role menu option.")]
         public async Task<IResult> EditAsync
@@ -410,21 +346,6 @@ public sealed class RoleMenuCommand : CommandGroup
             return Result<ReactionResult>.FromSuccess(new("✅"));
         }
     }
-
-
-    [Command("remove", "rm", "r")]
-    [Description("Removes one or more roles from the role menu.")]
-    public Task<IResult> RemoveAsync
-    (
-        [RoleMenu]
-        [Description("A link to the role menu message. This can be obtained by right clicking or holding the message and selecting `Copy Message Link`.")]
-        IMessage message,
-        
-        [Description("The roles to remove, roles can be removed by mention (@Role) or by ID (123456789).\n" +
-                     "You must have at least one role in the role menu, however.")]
-        IRole[] roles
-    )
-    => RemoveAsync(message.ID, roles);
 
     [Command("remove", "rm", "r")]
     [Description("Removes one or more roles from the role menu.")]
@@ -535,20 +456,6 @@ public sealed class RoleMenuCommand : CommandGroup
 
         return roleMenuMessageResult;
     }
-
-    
-    [Command("delete", "d")]
-    [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
-    public Task<IResult> DeleteAsync
-    (
-        [RoleMenu]
-        [Description("A link to the role menu you'd like to delete.")]
-        IMessage message,
-        
-        [Switch("confirm")]
-        [Description("Ensures you don't accidentally delete a role menu!")]
-        bool confirm = false
-    ) => DeleteAsync(message.ID, confirm);
 
     [Command("delete", "d")]
     [Description("Deletes a role menu. This cannot be undone! For this reason, you must confirm that you actually want to delete the rolemenu.")]
