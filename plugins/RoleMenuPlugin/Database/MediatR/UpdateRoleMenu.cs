@@ -30,9 +30,6 @@ namespace RoleMenuPlugin.Database.MediatR
 
                 if (roleMenu is null)
                     return Result.FromError(new NotFoundError("RoleMenu not found"));
-
-                if (request.Options.Count() is < 1 or > 25)
-                    return Result.FromError(new ArgumentOutOfRangeError(nameof(request.Options), "Options must be between 1 and 25"));
                 
                 _db.RemoveRange(roleMenu.Options.Except(request.Options));
                 
