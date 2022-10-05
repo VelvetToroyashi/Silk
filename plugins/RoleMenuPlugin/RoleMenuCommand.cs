@@ -267,6 +267,7 @@ public sealed class RoleMenuCommand : CommandGroup
             [Description("The maximum number of roles that can be selected.")]
             int maxOptions,
             
+            [Greedy]
             [Description("The description for the role menu. Leave blank to revert to the default.")]
             string? description = null
         )
@@ -293,7 +294,9 @@ public sealed class RoleMenuCommand : CommandGroup
             }
             
             await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
-            return await DeleteAfter(_context, _channels, "There was an internal error while processing that. Sorry.", TimeSpan.FromSeconds(12));
+            return await _channels.CreateMessageAsync(_context.ChannelID, "Something went wrong will processing your request.\n "              +
+                                                          $"If it means anything to you the error is: `{res.Error.Message}`\n" +
+                                                          $"(It's recommended to report this to the developers!)");
         }
 
         [Command("role", "r")]
