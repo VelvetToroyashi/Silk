@@ -234,6 +234,7 @@ public sealed class RoleMenuCommand : CommandGroup
             int maxOptions,
             
             [Greedy]
+            [Option('d', "description")]
             [Description("The description for the role menu. Leave blank to revert to the default.")]
             string? description = null
         )
