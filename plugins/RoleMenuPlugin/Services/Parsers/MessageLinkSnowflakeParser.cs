@@ -12,7 +12,7 @@ namespace RoleMenuPlugin.Parsers;
 
 public class MessageLinkSnowflakeParser : AbstractTypeParser<Snowflake>
 {
-    private static readonly Regex _messageRegex = new(@"https://(?:\S+\.)?discord.com/channels/@me|\d{17,20}/(?<message>\d{17,20})");
+    private static readonly Regex _messageRegex = new(@"https://(?:\S+\.)?discord.com/channels/(?:@me|\d{17,20})/\d{17,20}/(?<message>\d{17,20})");
 
     public override ValueTask<Result<Snowflake>> TryParseAsync(string token, CancellationToken ct = default)
         => _messageRegex.Match(token).Groups["message"] is { Length: > 0 } match
