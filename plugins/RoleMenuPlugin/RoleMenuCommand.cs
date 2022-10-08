@@ -195,7 +195,7 @@ public sealed class RoleMenuCommand : CommandGroup
         if (roleMenuMessageResult.IsSuccess)
             return Result<ReactionResult>.FromSuccess(new("✅"));
         
-        _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+        _logger.LogWarning("Failed to edit role menu message {RoleMenuChannelID}, {RoleMenuMessageID}", roleMenu.ChannelId, roleMenu.MessageId);
         await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
         return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
@@ -394,7 +394,8 @@ public sealed class RoleMenuCommand : CommandGroup
 
         if (roleMenuMessageResult.IsSuccess)
             return Result<ReactionResult>.FromSuccess(new("✅"));
-        _logger.LogWarning($"Failed to edit role menu message {roleMenu.ChannelId}/{roleMenu.MessageId}.");
+        
+        _logger.LogWarning("Failed to edit role menu message {RoleMenuChannelID}, {RoleMenuMessageID}.", roleMenu.ChannelId, roleMenu.MessageId);
         await _channels.CreateReactionAsync(_context.ChannelID, _context.MessageID, "❌");
             
         return await DeleteAfter(_context, _channels, "I couldn't edit the role menu message, are you sure it still exists?", TimeSpan.FromSeconds(10));
