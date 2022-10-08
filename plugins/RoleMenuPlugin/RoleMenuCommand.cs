@@ -188,7 +188,7 @@ public sealed class RoleMenuCommand : CommandGroup
         (
          new(roleMenu.ChannelId),
          messageID,
-         FormatHelper.Format(roleMenu.Options),
+         roleMenu.Description ?? FormatHelper.Format(roleMenu.Options),
          components: new[] {components}
         );
 
@@ -389,7 +389,7 @@ public sealed class RoleMenuCommand : CommandGroup
         (
          new(roleMenu.ChannelId),
          messageID,
-         FormatHelper.Format(roleMenu.Options)
+         roleMenu.Description ?? FormatHelper.Format(roleMenu.Options)
         );
 
         if (roleMenuMessageResult.IsSuccess)
