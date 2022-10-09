@@ -33,6 +33,7 @@ using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Templates;
 using Silk.Commands.Conditions;
+using Silk.Commands.Interactivity;
 using Silk.Data;
 using Silk.Data.EntityMapping;
 using Silk.Extensions.Remora;
