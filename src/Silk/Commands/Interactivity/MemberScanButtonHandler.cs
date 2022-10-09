@@ -16,7 +16,7 @@ using Remora.Rest.Core;
 using RemoraViewsPOC.Extensions;
 using Silk.Views;
 
-namespace Silk.Interactivity;
+namespace Silk.Commands.Interactivity;
 
 [SuppressInteractionResponse(true)]
 [RequireDiscordPermission(DiscordPermission.KickMembers, DiscordPermission.BanMembers)]

@@ -10,7 +10,7 @@ using Silk.Extensions;
 using Silk.Services.Bot;
 using Silk.Services.Guild;
 
-namespace Silk.Interactivity;
+namespace Silk.Commands.Interactivity;
 
 public class ReminderModalHandler : InteractionGroup
 {

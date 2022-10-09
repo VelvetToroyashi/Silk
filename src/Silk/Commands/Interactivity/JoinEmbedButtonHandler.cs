@@ -8,7 +8,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Services.Interfaces;
 
-namespace Silk.Interactivity;
+namespace Silk.Commands.Interactivity;
 
 public class JoinEmbedButtonHandler : InteractionGroup
 {
