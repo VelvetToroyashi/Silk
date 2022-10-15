@@ -59,7 +59,7 @@
         <PackageReference Update="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1"/>
         <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
-        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0"/>
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.1"/>
         <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.1"/>
         <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Http" Version="6.0.0"/>
