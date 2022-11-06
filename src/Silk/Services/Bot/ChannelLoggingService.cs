@@ -130,7 +130,10 @@ public class ChannelLoggingService : IChannelLoggingService
     private void LogReadableError(IResultError error, Snowflake channelID, Snowflake guildID)
     {
         if (error is not RestResultError<RestError> re)
-            throw new ArgumentException($"Expected {nameof(RestResultError<RestError>)} but got {error.GetType().Name}", nameof(error));
+        {
+            _logger.LogError("Unknown Error ({ErorrType}) when logging to {Channel}. Error: {ErrorMessage}", error.GetType(), channelID, error);
+            return;
+        }
 
         switch (re.Error.Code)
         {
