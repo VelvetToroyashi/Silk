@@ -68,9 +68,9 @@ public class MemberLoggerService
         var sb = new StringBuilder();
 
         if (twoDaysOld)
-            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 days old");
+            sb.AppendLine($"{Emojis.WarningEmoji} Account is only __>__ 2 days old");
         else if (twoWeeksOld)
-            sb.AppendLine($"{Emojis.WarningEmoji} Account is only 2 weeks old");
+            sb.AppendLine($"{Emojis.WarningEmoji} Account is only __>__ 2 weeks old");
 
         var join = userData.History.Last(u => u.GuildID == guildID && u.IsJoin);
         
@@ -79,8 +79,7 @@ public class MemberLoggerService
             new("Username:", user.ToDiscordTag()),
             new("User ID:", user.ID.ToString()),
             new("User Created:", user.ID.Timestamp.ToTimestamp(TimestampFormat.LongDateTime)),
-            new("User Joined:", join.Date.ToTimestamp(TimestampFormat.LongDateTime) + '/' +
-                                join.Date.ToTimestamp())
+            new("User Joined:", join.Date.ToTimestamp(TimestampFormat.LongDateTime) + '/' + join.Date.ToTimestamp())
         };
         
         // TODO: Break out guild-specific infractions into a variable as to not re-iterate with LINQ.
@@ -90,29 +89,30 @@ public class MemberLoggerService
             sb.AppendLine($"{Emojis.WarningEmoji} User has infractions on record");
             userFields.Add
             (
-             new
-                 (
-                  "Infractions:",
-                  userData
-                  .Infractions
-                  .Where(inf => inf.GuildID == guildID)
-                  .GroupBy(inf => inf.Type)
-                  .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
-                  .Join("\n"), true
+                new
+                (
+                    "Infractions:",
+                    userData
+                        .Infractions
+                        .Where(inf => inf.GuildID == guildID)
+                        .GroupBy(inf => inf.Type)
+                        .Select(inf => $"{inf.Key}: {inf.Count()} time(s)")
+                        .Join("\n"), true
                  )
             );
         }
         
-        var userInfractionJoinBuffer = JoinWarningThreshold + userData
-                                      .Infractions
-                                      .Where(inf => inf.GuildID == guildID)
-                                      .Count
-                                       (
-                                        inf => inf.Type is
-                                                InfractionType.Kick or
-                                                InfractionType.Ban or
-                                                InfractionType.SoftBan
-                                       );
+        var userInfractionJoinBuffer = 
+            JoinWarningThreshold + userData
+                                  .Infractions
+                                  .Where(inf => inf.GuildID == guildID)
+                                  .Count
+                                  (
+                                    inf => inf.Type is
+                                    InfractionType.Kick or
+                                    InfractionType.Ban or
+                                    InfractionType.SoftBan
+                                  );
         
         if (userData.History.Where(u => u.IsJoin).Count(g => g.GuildID == guildID) > userInfractionJoinBuffer)
             sb.AppendLine("Account has joined more than four times excluding infractions.");
@@ -141,8 +141,8 @@ public class MemberLoggerService
             (
                 new[]
                 {
-                 new ButtonComponent(ButtonComponentStyle.Success, "Kick", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), CustomIDHelpers.CreateButtonID("join-action-kick")),
-                 new ButtonComponent(ButtonComponentStyle.Danger, "Ban", new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)), CustomIDHelpers.CreateButtonID("join-action-ban"))
+                    new ButtonComponent(ButtonComponentStyle.Success, "Kick", new PartialEmoji(DiscordSnowflake.New(Emojis.KickId)), CustomIDHelpers.CreateButtonID("join-action-kick")),
+                    new ButtonComponent(ButtonComponentStyle.Danger,  "Ban",  new PartialEmoji(DiscordSnowflake.New(Emojis.BanId)),  CustomIDHelpers.CreateButtonID("join-action-ban" ))
                 }
             )
         };
@@ -195,8 +195,8 @@ public class MemberLoggerService
             Title       = "Member Left",
             Description = sb.ToString(),
             Colour      = Color.Firebrick,
-            Thumbnail = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
-            Fields = fields
+            Thumbnail   = new EmbedThumbnail(user.Avatar is null ? CDN.GetDefaultUserAvatarUrl(user).Entity.ToString() : CDN.GetUserAvatarUrl(user).Entity.ToString()),
+            Fields      = fields
         };
         
         return await _channelLogger.LogAsync(config.Logging.UseWebhookLogging, channel, null, embed);

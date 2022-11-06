@@ -92,7 +92,7 @@ public class ReminderCommands : CommandGroup
         private const string ReminderTimeNotPresent = "It seems you didn't specify a time in your reminder.\n" +
                                                       "I can recognize times like 10m, 5h, 2h30m, and even natural language like 'three hours from now' and 'in 2 days'";
 
-        private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(3);
+        private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(0.01);
         
         private readonly ReminderService        _reminders;
         private readonly MessageContext         _context;

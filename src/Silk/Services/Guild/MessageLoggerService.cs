@@ -112,11 +112,11 @@ public class MessageLoggerService
             {
                 Title = "Message Edited",
                 Thumbnail = new EmbedThumbnail
-                    (
-                     author.Avatar is null
-                         ? CDN.GetDefaultUserAvatarUrl(author, imageSize: 256).Entity.ToString()
-                         : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
-                    ),
+                (
+                 author.Avatar is null
+                     ? CDN.GetDefaultUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                     : CDN.GetUserAvatarUrl(author, imageSize: 256).Entity.ToString()
+                ),
                 Description = "Please see the attached embeds for the content of the message.",
 
                 Colour = Color.DarkOrange,
@@ -186,11 +186,11 @@ public class MessageLoggerService
             Title = "Message Deleted",
             Url = $"https://discord.com/users/{cachedMessage.Author.ID}/0",
             Thumbnail = new EmbedThumbnail
-                (
-                 cachedMessage.Author.Avatar is null
-                     ? CDN.GetDefaultUserAvatarUrl(cachedMessage.Author, imageSize: 256).Entity.ToString()
-                     : CDN.GetUserAvatarUrl(cachedMessage.Author, imageSize: 256).Entity.ToString()
-                ),
+            (
+             cachedMessage.Author.Avatar is null
+                 ? CDN.GetDefaultUserAvatarUrl(cachedMessage.Author, imageSize: 256).Entity.ToString()
+                 : CDN.GetUserAvatarUrl(cachedMessage.Author, imageSize: 256).Entity.ToString()
+            ),
 
             Description = $"**Content:** \n{(string.IsNullOrEmpty(cachedMessage.Content) ? "Message did not contain content!" : $"> {cachedMessage.Content.Replace("\n", "\n> ")}")}",
 
@@ -198,7 +198,7 @@ public class MessageLoggerService
 
             Fields = new EmbedField[]
             {
-                new ("Author", $"{cachedMessage?.Author.ToDiscordTag() ?? "Unknown"}", false),
+                new ("Author", $"{cachedMessage.Author.ToDiscordTag() ?? "Unknown"}", false),
                 new("Channel", $"<#{message.ChannelID}>", true),
                 new("Thread", cachedMessage.Thread.IsDefined(out var thread) ? $"<#{thread.ID}>" : "None", true),
                 new("\u200b", "\u200b", true),
