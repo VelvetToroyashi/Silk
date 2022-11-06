@@ -24,22 +24,24 @@ public class SlashCommandRegisterer : IResponder<IReady>
         _lifetime = lifetime;
     }
     
-    public Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
+    public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
     {
-        var slashResult = _slash.SupportsSlashCommands("silk_slash_tree");
+        Result register;
 
-        if (!slashResult.IsSuccess)
+        if (_config.GetSilkConfigurationOptions().SlashCommandsGuildId is { } slashDebugGuild)
+        {
+            register = await _slash.UpdateSlashCommandsAsync(DiscordSnowflake.New(slashDebugGuild), "silk_slash_tree", ct);
+        }
+        else
+        {
+            register = await _slash.UpdateSlashCommandsAsync(null, "silk_slash_tree", ct);
+        }
+        
+        if (!register.IsSuccess)
         {
             _lifetime.StopApplication();
         }
 
-        if (_config.GetSilkConfigurationOptions().SlashCommandsGuildId is { } slashDebugGuild)
-        {
-            return _slash.UpdateSlashCommandsAsync(DiscordSnowflake.New(slashDebugGuild), "silk_slash_tree", ct);
-        }
-        else
-        {
-            return _slash.UpdateSlashCommandsAsync(null, "silk_slash_tree", ct);
-        }
+        return register;
     }
 }
