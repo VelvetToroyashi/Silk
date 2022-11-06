@@ -95,7 +95,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
             if (!_context.Member.IsDefined(out var member))
                 throw new InvalidOperationException("Member was not defined in the interaction, but the role menu was found.");
 
-            var dropdown = new SelectMenuComponent
+            var dropdown = new StringSelectComponent
             (
                CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix),
                rolemenu
@@ -234,7 +234,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
              sb.ToString(),
              components: new[]
              {
-                 new ActionRowComponent(new [] { new SelectMenuComponent(CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix), newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
+                 new ActionRowComponent(new [] { new StringSelectComponent(CustomIDHelpers.CreateSelectMenuID(RoleMenuDropdownPrefix), newOptions, dropdown.Placeholder, 0, dropdown.MaxValues) } )
              }
             );
             
@@ -312,11 +312,11 @@ public class RoleMenuInteractionCommands : InteractionGroup
     }
 
 
-    public ISelectMenuComponent GetDropdownFromMessage(IMessage message)
+    public IStringSelectComponent GetDropdownFromMessage(IMessage message)
     {
         var actionRow = message.Components.Value[0] as IActionRowComponent;
         
-        var selectMenu = actionRow!.Components[0] as ISelectMenuComponent;
+        var selectMenu = actionRow!.Components[0] as IStringSelectComponent;
         
         return selectMenu!;
     }

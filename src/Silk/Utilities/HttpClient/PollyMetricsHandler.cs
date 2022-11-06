@@ -26,17 +26,15 @@ public class PollyMetricsHandler : AsyncPolicy<HttpResponseMessage>
         // Pre-emptive ratelimiting doesn't return the request
         // HttpClient methods do, so we know if we actually made a call
         // If we haven't, don't log metrics; we're retrying the request via Polly
-        if (res.RequestMessage is { } request)
+        if (res.RequestMessage is not { } request)
+            return res;
+        try
         {
-            try
-            {
-                var sanitizedEndpoint = SanitizeEndpoint(endpoint);
+            var sanitizedEndpoint = SanitizeEndpoint(endpoint);
 
-                SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
-            }
-            catch { /* */}
-
+            SilkMetric.HttpRequests.WithLabels(request.Method.Method, ((int)res.StatusCode).ToString(), sanitizedEndpoint).Inc();
         }
+        catch { /* */}
 
         return res;
     }

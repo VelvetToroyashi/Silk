@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -40,7 +41,6 @@ public class Program
 {
     public static async Task Main()
     {
-        
         Console.WriteLine("Starting Silk!...");
 
         IHostBuilder? hostBuilder = Host
@@ -144,7 +144,7 @@ public class Program
                             continue;
 
                         db.StringSet(key, "", TimeSpan.FromSeconds(7));
-                        Metrics.DefaultRegistry.SetStaticLabels(new() { { "shard", i.ToString() } });
+                        Metrics.DefaultRegistry.SetStaticLabels(new Dictionary<string, string>{ { "shard", i.ToString() } });
 
                         takenShard = i;
 

@@ -44,12 +44,12 @@ public class ScopingMediator : IMediator
             // However this is unsafe in the case that we need to make two db calls from the same event.
             // .AsNoTracking() *should* fix this, since we only track what we need, but we could still prematurely write, which is an issue.
             // For the most part however, this should be fine.
-            return await handler.Handle(request, cancellationToken, provider.GetService!);
+            return await handler.Handle(request, provider.GetService!, cancellationToken);
         }
         
         await using var scope = provider.CreateAsyncScope();
         
-        return await handler.Handle(request, cancellationToken, scope.ServiceProvider.GetService!);
+        return await handler.Handle(request, scope.ServiceProvider.GetService!, cancellationToken);
 
     }
     

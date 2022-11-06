@@ -36,7 +36,7 @@ public class RemindContextCommands : CommandGroup
 
     [Command("Remind Me!")]
     [SuppressInteractionResponse(true)]
-    [CommandType(ApplicationCommandType.Message)]
+    [CommandType(ApplicationCommandType.User)]
     public async Task<IResult> RemindAsync()
     {
         var components = new IMessageComponent[]
