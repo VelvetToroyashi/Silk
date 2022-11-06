@@ -26,13 +26,11 @@ namespace Silk.Services.Guild;
 
 public sealed class ReminderService : IHostedService
 {
-    
     private readonly IMediator                _mediator;
     private readonly IShardIdentification     _shard;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestChannelAPI   _channels;
     private readonly ILogger<ReminderService> _logger;
-
     
     // When it comes to sharding, ideally this is only the reminders for the guilds that are in the shard.
     // Perhaps we'll filter manually with `.Where(r => r.GuildID >> 22 % ShardCount == ShardId)`
@@ -93,12 +91,13 @@ public sealed class ReminderService : IHostedService
             return;
 
         DateTime now = DateTime.UtcNow;
-        ReminderEntity[] reminders = _reminders.Where(r => r.ExpiresAt <= now).ToArray();
+        
+        var dueReminders = _reminders.Where(r => r.ExpiresAt <= now).Select(DispatchReminderAsync).ToArray();
 
-        if (reminders.Length is 0)
+        if (!dueReminders.Any())
             return;
         
-        await Task.WhenAll(reminders.Select(DispatchReminderAsync));
+        await Task.WhenAll(dueReminders);
     }
 
     /// <summary>
