@@ -18,6 +18,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Reminders;
 using Silk.Extensions;
+using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
 using Silk.Utilities;
@@ -165,24 +166,24 @@ public sealed class ReminderService : IHostedService
 
         var dispatchResult = await _channels.CreateMessageAsync
         (
-         reminder.ChannelID,
-         dispatchMessage,
-         allowedMentions: 
-         new AllowedMentions
-         (
-          Users: new[] { reminder.OwnerID },
-          MentionRepliedUser: !reminder.IsReply
-         ),
-         messageReference: 
-         new MessageReference
-         (
-          reminder.ReplyMessageID ?? reminder.MessageID ?? default,
-          reminder.ChannelID,
-          FailIfNotExists: false
-         )
+            reminder.ChannelID,
+            dispatchMessage,
+            allowedMentions: 
+            new AllowedMentions
+            (
+                Users: new[] { reminder.OwnerID },
+                MentionRepliedUser: !reminder.IsReply
+            ),
+            messageReference: 
+            new MessageReference
+            (
+                reminder.ReplyMessageID ?? reminder.MessageID ?? default,
+                reminder.ChannelID,
+                FailIfNotExists: false
+            )
         ); 
         
-        if (dispatchResult.IsSuccess)
+        if (dispatchResult.IsSuccess) 
         {
             _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {DispatchTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
 
@@ -190,6 +191,7 @@ public sealed class ReminderService : IHostedService
         }
         
         _logger.LogWarning(EventIds.Service, "Failed to dispatch reminder. Falling back to a DM.");
+        _logger.LogError(EventIds.Service, dispatchResult.GetDeepestError()!.Message);
 
         var fallbackResult = await AttemptDispatchDMReminderAsync(reminder);
 
