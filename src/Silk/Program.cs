@@ -24,12 +24,14 @@ using Sentry;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Templates;
 using Silk.Commands.Conditions;
 using Silk.Data;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
+using Silk.Shared;
 using Silk.Shared.Configuration;
 using Silk.Shared.Constants;
 using Silk.Utilities;
@@ -41,21 +43,18 @@ public class Program
 {
     public static async Task Main()
     {
-        Console.WriteLine("Starting Silk!...");
-
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();
-
+        
         ConfigureApp(hostBuilder);
         ConfigureServices(hostBuilder).AddPlugins();
-        AddRedisAndAcquireShard(hostBuilder);
 
-        Console.WriteLine("Configured services.");
+        Log.ForContext<Program>().Information("Configured services.");
 
         IHost? host = hostBuilder.Build();
 
-        Console.WriteLine("Host is built.");
+        Log.ForContext<Program>().Information("Host is built.");
 
         Log.ForContext<Program>().Information("Attempting to migrate core database");
         var coreMigrationResult = await EnsureDatabaseCreatedAndApplyMigrations(host);
@@ -103,16 +102,26 @@ public class Program
                  builder.AddJsonFile("appSettings.json", optional: true);
                  builder.AddUserSecrets<Program>(optional: true);
                  builder.AddEnvironmentVariables("SILK_");
+                 
+                 Log.Logger = new LoggerConfiguration()
+                             .Enrich.WithProperty("Shard", "?")
+                             .Enrich.WithProperty("Shards", builder.Build()["silk:discord:shards"])
+                             .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))
+                             .CreateLogger();
              }
         );
+        
     }
 
-    private static void AddRedisAndAcquireShard(IHostBuilder builder)
+    private static void AddRedisAndAcquireShard(IHostBuilder builder, out int takenShard)
     {
+        var t = takenShard = 0;
+        
         builder.ConfigureServices
         (
              (context, services) =>
              {
+                 
                  Log.ForContext<Program>().Information("Attempting to acquire shard ID from Redis...");
 
                  var configOptions = context.Configuration.GetSilkConfigurationOptions();
@@ -131,8 +140,7 @@ public class Program
 
                 var db    = redis.GetDatabase();
                 var taken = false;
-
-                var takenShard = 0;
+                
 
                 while (true)
                 {
@@ -146,7 +154,7 @@ public class Program
                         db.StringSet(key, "", TimeSpan.FromSeconds(7));
                         Metrics.DefaultRegistry.SetStaticLabels(new Dictionary<string, string>{ { "shard", i.ToString() } });
 
-                        takenShard = i;
+                        t = i;
 
                         taken = true;
                         break;
@@ -156,18 +164,20 @@ public class Program
 
                     Thread.Sleep(1000);
                 }
-
-                 Log.ForContext<Program>().Information("Acquired shard ID {Shard}", takenShard);
+                
+                 Log.ForContext<Program>().Information("Acquired shard ID {Shard}", t);
 
                  services.AddSingleton<IConnectionMultiplexer>(redis);
                  services.AddDiscordRedisCaching(r => r.ConfigurationOptions = connectionConfig);
 
                  services.Configure<DiscordGatewayClientOptions>
                  (
-                    gw => gw.ShardIdentification = new ShardIdentification(takenShard, configOptions.Discord.Shards)
+                    gw => gw.ShardIdentification = new ShardIdentification(t, configOptions.Discord.Shards)
                  );
              }
         );
+        
+        takenShard = t;
     }
 
     private static async Task<Result<int>> EnsureDatabaseCreatedAndApplyMigrations(IHost builtBuilder)
@@ -195,8 +205,11 @@ public class Program
 
     private static IHostBuilder ConfigureServices(IHostBuilder builder)
     {
+        builder.ConfigureServices(se => se.AddRemoraServices());
+        
+        AddRedisAndAcquireShard(builder, out var shardId);
+        
         builder
-           .ConfigureLogging(l => l.ClearProviders().AddSerilog())
            .ConfigureServices((context, services) =>
             {
                 var silkConfig = context.Configuration.GetSilkConfigurationOptions();
@@ -204,13 +217,14 @@ public class Program
                 // A little note on Sentry; it's important to initialize logging FIRST
                 // And then sentry, because we set the settings for sentry later. 
                 // If we configure logging after, it'll override the settings with defaults.
-
+                
+               
                 services
                    .AddSingleton<ScopeWrapper>()
                    .AddSilkConfigurationOptions(context.Configuration)
-                   .AddSilkLogging(context.Configuration)
+                   .AddSilkLogging(context.Configuration, shardId)
                    .AddSilkDatabase(context.Configuration)
-                   .AddRemoraServices()
+                   //.AddRemoraServices()
                    .AddSingleton<ShardHelper>()
                    .AddSingleton<ReminderService>()
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())

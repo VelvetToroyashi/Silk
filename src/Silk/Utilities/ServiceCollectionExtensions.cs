@@ -188,11 +188,13 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddSilkLogging(this IServiceCollection services, IConfiguration configuration, int shardId)
     {
         var config = configuration.GetSilkConfigurationOptions();
 
         LoggerConfiguration logger = new LoggerConfiguration()
+                                    .Enrich.WithProperty("Shard", shardId)
+                                    .Enrich.WithProperty("Shards", config.Discord.Shards)
                                     .Enrich.FromLogContext()
                                     .WriteTo.Sentry()
                                     .WriteTo.Console(new ExpressionTemplate(StringConstants.LogFormat, theme: SilkLogTheme.TemplateTheme))

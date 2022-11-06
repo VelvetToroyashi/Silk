@@ -125,16 +125,4 @@ public class FlagCommand : CommandGroup
             return await _channels.CreateMessageAsync(_context.ChannelID, result.Error.Message);
         }
     }
-
-
-    /*
-        [Command]
-        [Priority(1)]
-        public async Task Flagify(CommandContext ctx, string flag, float intensity = 100, float grayscale = 0)
-        {
-            if (ctx.Message.Attachments.Count is 0)
-                await ctx.RespondAsync("Please upload an image to use this command.");
-            else
-                await Flagify(ctx, flag, ctx.Message.Attachments[0].Url, intensity, grayscale);
-        }*/
 }

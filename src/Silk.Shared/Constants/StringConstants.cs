@@ -20,12 +20,12 @@ public static class StringConstants
     /// <summary>
     /// A special expression based log template that allows for conditional event ID insertion.
     /// </summary>
-    public const string LogFormat            = "[{@t:h:mm:ss ff tt}] [{@l:u3}]{#if EventId is not null} [{EventId.Name}]{#end} [{Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)}] {@m}\n{@x}";
+    public const string LogFormat            = "[{@t:h:mm:ss ff tt}] [{@l:u3}] [{Shard}/{Shards}] {#if EventId is not null}[{EventId.Name}] {#end}[{Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)}] {@m}\n{@x}";
     
     /// <summary>
     /// The log format for files. e.g. [12:24:15 75 AM] [INF] [Program] This is a log message.
     /// </summary>
-    public const string FileLogFormat        = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
+    public const string FileLogFormat        = "[{Timestamp:h:mm:ss ff tt}] [{Level:u3}] [{Shard}/{Shards}] [{SourceContext}] {Message:lj} {Exception:j}{NewLine}";
     
     public const string AutoModMessagePrefix = "[AUTOMOD]";
 
