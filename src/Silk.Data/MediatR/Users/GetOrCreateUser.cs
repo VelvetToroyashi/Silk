@@ -26,8 +26,6 @@ public static class GetOrCreateUser
 
         public async Task<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            
-            
             await _db.Upsert(new UserEntity { ID = request.UserID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
@@ -41,8 +39,7 @@ public static class GetOrCreateUser
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            var user = await _db.Users
-                               .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+            var user = await _db.Users.Include(u => u.History).FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;
         }
