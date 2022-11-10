@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Remora.Commands.Attributes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.DTOs.Guilds.Config;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared;
@@ -17,13 +19,14 @@ public partial class ConfigCommands
 {
     public partial class EditConfigCommands
     {
-        private const string ExemptionDescription =
-            "Exemptions allow targets to bypass automod (such as anti-spam)\n\n"                     +
-            "\"Target\" refers to the target of the exemption, be it a user, role, or channel.\n"    +
-            "Supports "                                                                              +
-            $"`{nameof(ExemptionCoverage.AntiInvite)}`, `{nameof(ExemptionCoverage.AntiPhishing)}` " +
-            $"`{nameof(ExemptionCoverage.EditLogging)}`, `{nameof(ExemptionCoverage.DeleteLogging)}`\n\n";
-    
+        private const string ExemptionDescription = """
+            Exemptions allow targets to bypass Silk's automod (such as anti-spam).
+            "Target" in this context refers to the target who is being exempted.
+            A target can be a user, a role, or an entire channel.
+            Supported exmeptions are (case-insensitive):
+            `EditLogging`, `DeleteLogging`, `AntiPhishing` and `AntiInvite`
+            """;    
+
         [Command("exemptions", "exempt", "ex")]
         [Description(ExemptionDescription)]
         public async Task<IResult> EditExemptionsAsync
@@ -82,11 +85,12 @@ public partial class ConfigCommands
             return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
 
             (Snowflake, ExemptionTarget) GetSnowflake(OneOf<IUser, IRole, IChannel> oneOf)
-                => ((Snowflake, ExemptionTarget))oneOf
-                             .MapT0(u => (u.ID, ExemptionTarget.User))
-                             .MapT1(r => (r.ID, ExemptionTarget.Role))
-                             .MapT2(c => (c.ID, ExemptionTarget.Channel))
-                             .Value;
+                => oneOf.Match
+                   (
+                        static user => (user.ID, ExemptionTarget.User), 
+                        static role => (role.ID, ExemptionTarget.Role), 
+                        static channel => (channel.ID, ExemptionTarget.Channel)
+                   );
         }
     }
 }

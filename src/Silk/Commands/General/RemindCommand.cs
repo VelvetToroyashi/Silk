@@ -66,12 +66,16 @@ public static class MicroTimeParser
 [Category(Categories.General)]
 public class ReminderCommands : CommandGroup
 {
-    private const string ReminderDescription = "The reminder to set. \n"                                            +
-                                               "Natural language such as \"in six hours\" as well as \n"            +
-                                               "formats such as `2d` and `15m` are supported."                      +
-                                               "You can set your timezone via the `timezone` command;\n"            +
-                                               " reminders like `tonight at 8` will reflect local time, otherwise " +
-                                               "the reference point is UTC.";
+    private const string ReminderDescription = 
+        """
+        The reminder to set.
+        Natural language such as "in six hours", or formats
+        such as `2d` and `15m` are supported.
+        
+        You can set your timezone via the `timezone` command.
+        Reminders like "tonight at 8PM" will use your local time,
+        otherwise UTC is used.
+        """;
 
     private readonly ReminderActionCommands _reminderCommands;
 
@@ -100,8 +104,7 @@ public class ReminderCommands : CommandGroup
         private readonly FeedbackService        _interactivity;
         private readonly TimeHelper             _timeHelper;
 
-
-
+        
         public ReminderActionCommands
         (
             ReminderService        reminders,

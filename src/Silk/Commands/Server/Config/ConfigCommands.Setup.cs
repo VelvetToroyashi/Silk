@@ -25,20 +25,28 @@ public partial class ConfigCommands
 {
     public class Setup : CommandGroup
     {
-        private const string SetupDescription = "Confused about what to configure? \n"                            +
-            "This command will configure some settings that're suitable for most servers.\n\n"   +
-            "The following settings will be set:\n\n"                                                             +
-            "➜ Log member joins\n"                                                                                +
-            "➜ Log message deletes\n"                                                                             +
-            "➜ Enable invite whitelist\n"                                                                         +
-            "➜ Enable infractioin logging\n"                                                                      +
-            "➜ Detect, delete, and ban phishing messages\n";
+        private const string SetupDescription =
+            """
+            Confused about what to configure?
+            This command will automatically configure that're suitable for *most* servers.
+            The following settings will be configured:
+                ➜ Log member joins
+                ➜ Log message deletes
+                ➜ Enable invite whitelist
+                ➜ Enable infractioin logging
+                ➜ Detect, delete, and ban phishing messages
+            """;
 
+       
+        private const string ModLogChannelTopic = 
+            """
+            Moderation logs for Silk!
+            All actions taken by moderators will be logged here
+            This channel is automatically created when the bot is configured.
+            You can delete it if you wish.
+            """;
+        
         private const string ModLogChannelName = "mod-log";
-        private const string ModLogChannelTopic = "Moderation logs for Silk!\n"   +
-            "All actions taken by moderators will be logged here.\n"              +
-            "This channel is automatically created when the bot is configured.\n" +
-            "You can delete it if you wish.";
 
         private const string ModLogChannelReason = "Automatically created via config setup command.";
         private const string ModLogPermissionReason = "Adjusting permissions for mod-log channel.";

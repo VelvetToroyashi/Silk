@@ -1,4 +1,5 @@
-﻿using Remora.Rest.Core;
+﻿using System;
+using Remora.Rest.Core;
 
 namespace Silk.Data.Entities;
 
@@ -8,6 +9,8 @@ public enum ExemptionTarget
     User,
     Channel
 }
+
+[Flags]
 public enum ExemptionCoverage
 {
 	NonExemptMarker = 0,
