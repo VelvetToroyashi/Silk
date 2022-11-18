@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -37,6 +38,7 @@ public static class UpdateGuildConfig
         public Dictionary<string, InfractionStepEntity>? NamedInfractionSteps   { get; init; }
     }
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
@@ -48,7 +50,7 @@ public static class UpdateGuildConfig
             _mediator = mediator;
         }
 
-        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
             var config = _db.GuildConfigs.Local.FirstOrDefault(x => x.GuildID == request.GuildID) 
                       ?? await _mediator.Send(new GetGuildConfig.Request(request.GuildID, true), cancellationToken);

@@ -1,6 +1,7 @@
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -14,12 +15,13 @@ public static class UpdateGuild
     
     public sealed record Request(Snowflake GuildID, string Prefix) : IRequest<Result<GuildEntity>>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Result<GuildEntity>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<GuildEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<GuildEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             
 

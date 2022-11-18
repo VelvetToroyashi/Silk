@@ -1,6 +1,7 @@
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 
@@ -16,12 +17,13 @@ public static class SetUserTimezone
     /// <param name="ShareTimezone">Whether the user want their timezone to be shared publicly</param>
     public record Request(Snowflake UserID, string TimezoneID, bool? ShareTimezone = null) : IRequest;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
         
-        public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

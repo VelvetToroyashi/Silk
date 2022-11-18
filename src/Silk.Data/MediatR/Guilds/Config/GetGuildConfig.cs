@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
@@ -19,13 +20,14 @@ public static class GetGuildConfig
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
         private readonly GuildContext _db;
         
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
             //TODO: Add commands to get individual configs.
             var initialQueryable = _db.GuildConfigs

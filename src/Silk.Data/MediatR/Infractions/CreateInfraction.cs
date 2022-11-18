@@ -1,7 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds;
@@ -22,6 +23,7 @@ public static class CreateInfraction
         DateTimeOffset? Expiration = null
     ) : IRequest<Infraction>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
         private readonly GuildContext _db;
@@ -33,7 +35,7 @@ public static class CreateInfraction
             _mediator  = mediator;
         }
 
-        public async Task<Infraction> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Infraction> Handle(Request request, CancellationToken cancellationToken)
         {
             var infraction = new InfractionEntity
             {

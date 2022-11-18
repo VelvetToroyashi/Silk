@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
-using MediatR;
+using Mediator;
 using Remora.Commands.Attributes;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;

@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
-using MediatR;
+using Mediator;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -19,6 +19,7 @@ using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Utilities.HelpFormatter;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Commands.Moderation;
 

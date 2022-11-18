@@ -1,6 +1,7 @@
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -11,13 +12,14 @@ public static class GetGuildGreeting
 {
     public record Request(int ID) : IRequest<Result<GuildGreetingEntity>>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<GuildGreetingEntity>>
     {
         private readonly GuildContext _db;
         
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<GuildGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<GuildGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

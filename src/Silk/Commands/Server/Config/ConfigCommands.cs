@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
@@ -18,6 +18,7 @@ using Silk.Data.MediatR.Guilds;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
 using Silk.Utilities.HelpFormatter;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Commands.Server;
 

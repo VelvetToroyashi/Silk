@@ -1,11 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Commands.Conditions;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Database.MediatR;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace RoleMenuPlugin.Conditions;
 

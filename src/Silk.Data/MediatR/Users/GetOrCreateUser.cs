@@ -1,7 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -19,12 +20,13 @@ public static class GetOrCreateUser
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Result<UserEntity>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             await _db.Upsert(new UserEntity { ID = request.UserID })
                      .NoUpdate()

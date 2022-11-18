@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using NodaTime;
 using Recognizers.Text.DateTime.Wrapper;
 using Recognizers.Text.DateTime.Wrapper.Models.BclDateTime;

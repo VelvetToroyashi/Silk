@@ -183,7 +183,8 @@ public static class ServiceCollectionExtensions
         }
 
         EntityMapping.ConfigureMappings();
-        services.AddDbContextPool<GuildContext>(Builder, 256);
+        //services.AddDbContextPool<GuildContext>(Builder, 256);
+        services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
 
         return services;
     }

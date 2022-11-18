@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
@@ -138,6 +138,6 @@ public class GuildCacherService
         return Result.FromSuccess();
     }
     
-    public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
+    public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix)).AsTask();
 
 }

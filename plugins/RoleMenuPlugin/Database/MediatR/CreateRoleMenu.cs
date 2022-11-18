@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Results;
 
 namespace RoleMenuPlugin.Database.MediatR
@@ -15,7 +15,7 @@ namespace RoleMenuPlugin.Database.MediatR
             private readonly RoleMenuContext _db;
             public Handler(RoleMenuContext db) => _db = db;
 
-            public async Task<Result<RoleMenuModel>> Handle(Request request, CancellationToken cancellationToken)
+            public async ValueTask<Result<RoleMenuModel>> Handle(Request request, CancellationToken cancellationToken)
             {
                 RoleMenuModel? rm = request.Menu;
 

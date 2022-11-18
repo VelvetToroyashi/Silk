@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -17,12 +18,13 @@ public static class RemoveReminder
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Result>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

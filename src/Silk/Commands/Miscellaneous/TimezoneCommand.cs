@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using NodaTime;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;

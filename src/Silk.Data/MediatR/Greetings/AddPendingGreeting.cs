@@ -1,7 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -12,13 +13,14 @@ public static class AddPendingGreeting
 {
     public record Request(Snowflake UserID, Snowflake GuildID, int GreetingID) : IRequest<Result<PendingGreetingEntity>>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<PendingGreetingEntity>>
     {
         private readonly GuildContext _db;
 
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             var pendingGreeting = new PendingGreetingEntity // Why not an .Adapt<T> here?
             {

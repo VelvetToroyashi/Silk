@@ -1,7 +1,8 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds;
@@ -17,12 +18,13 @@ public static class GetUserInfractionForGuild
         InfractionType Type,
         int?           CaseId = null) : IRequest<Infraction?>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Infraction?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Infraction?> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Infraction?> Handle(Request request, CancellationToken cancellationToken)
         {
             
 

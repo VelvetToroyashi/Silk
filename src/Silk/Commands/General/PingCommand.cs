@@ -75,7 +75,7 @@ public class PingCommand : CommandGroup
         var apiLat = sw.ElapsedMilliseconds.ToString("N0");
 
         var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.MessageID.Timestamp);
-
+        
         embed = embed with
         {
             Fields = new[]

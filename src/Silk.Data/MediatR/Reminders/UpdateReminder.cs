@@ -1,7 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Silk.Data.Entities;
 
@@ -11,12 +12,13 @@ public static class UpdateReminder
 {
     public sealed record Request(ReminderEntity Reminder, DateTime Expiration) : IRequest<ReminderEntity>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, ReminderEntity>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<ReminderEntity> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

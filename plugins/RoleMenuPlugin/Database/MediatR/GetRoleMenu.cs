@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 
@@ -15,12 +16,13 @@ namespace RoleMenuPlugin.Database.MediatR
         /// <param name="MessageId">The Id of the message to grab.</param>
         public sealed record Request(ulong MessageId) : IRequest<Result<RoleMenuModel>>;
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         internal sealed class Handler : IRequestHandler<Request, Result<RoleMenuModel>>
         {
             private readonly RoleMenuContext _db;
             public Handler(RoleMenuContext db) => _db = db;
 
-            public async Task<Result<RoleMenuModel>> Handle(Request request, CancellationToken cancellationToken)
+            public async ValueTask<Result<RoleMenuModel>> Handle(Request request, CancellationToken cancellationToken)
             {
                 RoleMenuModel? rolemenu = await _db.RoleMenus
                                                    .AsNoTracking()

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +18,7 @@ using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Parsers;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
+[assembly: MediatorOptions(Namespace = "RoleMenuPlugin.Mediator", ServiceLifetime = ServiceLifetime.Scoped)]
 
 namespace RoleMenuPlugin;
 
@@ -31,7 +32,6 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
         try
         {
             serviceCollection
-               .AddMediatR(typeof(RoleMenuPlugin))
                .AddResponder<RoleMenuButtonFixer>()
                .AddInteractionGroup<RoleMenuInteractionCommands>()
                .AddCommandTree()

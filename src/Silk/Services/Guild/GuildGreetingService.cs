@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
@@ -18,6 +18,7 @@ using Silk.Data.MediatR.Greetings;
 using Silk.Errors;
 using Silk.Services.Data;
 using Silk.Shared.Types;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Services.Guild;
 

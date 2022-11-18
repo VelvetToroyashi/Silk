@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Silk.Data.Entities;
 
@@ -11,6 +12,7 @@ public static class GetPendingGreetings
 {
     public record Request(int ShardCount, int ShardID) : IRequest<IReadOnlyList<PendingGreetingEntity>>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, IReadOnlyList<PendingGreetingEntity>>
     {
         private readonly GuildContext _db;
@@ -18,7 +20,7 @@ public static class GetPendingGreetings
         public Handler(GuildContext db) => _db = db;
 
 
-        public async Task<IReadOnlyList<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<IReadOnlyList<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

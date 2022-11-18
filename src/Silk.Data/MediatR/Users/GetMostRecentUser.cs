@@ -1,7 +1,8 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;
@@ -12,12 +13,13 @@ public static class GetMostRecentUser
 {
     public record Request(Snowflake GuildID) : IRequest<User?>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, User?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<User?> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

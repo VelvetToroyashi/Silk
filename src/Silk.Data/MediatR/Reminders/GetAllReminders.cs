@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Silk.Data.Entities;
 
@@ -17,12 +18,13 @@ public static class GetAllReminders
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<ReminderEntity>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -27,7 +27,7 @@ public class GuildConfigTests
     public async Task GlobalSetUp()
     {
         _provider.AddDbContext<GuildContext>(o => o.UseNpgsql(ConnectionString), ServiceLifetime.Transient);
-        _provider.AddMediatR(typeof(GuildContext));
+        //_provider.AddMediator();
         _mediator = _provider.BuildServiceProvider().GetRequiredService<IMediator>();
 
         _context = _provider.BuildServiceProvider().GetRequiredService<GuildContext>();

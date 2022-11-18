@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds.Users;
@@ -18,12 +19,13 @@ public static class GetUser
     /// <summary>
     /// The default handler associated with <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, User?>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<User?> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<User?> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

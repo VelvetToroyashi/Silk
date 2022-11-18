@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Caching.Memory;
 using Remora.Rest.Core;
 using Silk.Data.Entities;

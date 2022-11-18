@@ -1,8 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -13,13 +14,14 @@ public static class RemoveGuildGreeting
 {
     public record Request(int GreetingId, Snowflake GuildId) : IRequest<Result>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result>
     {
         private readonly GuildContext _db;
 
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

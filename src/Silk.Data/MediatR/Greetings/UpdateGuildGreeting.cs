@@ -1,7 +1,8 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using Mapster;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 using Silk.Data.DTOs.Guilds.Config;
@@ -12,12 +13,13 @@ public static class UpdateGuildGreeting
 {
     public record Request(GuildGreeting Greeting) : IRequest<Result<GuildGreeting>>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<GuildGreeting>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<GuildGreeting>> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

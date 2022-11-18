@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -21,6 +21,7 @@ using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Database.MediatR;
 using Silk.Shared;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 // ReSharper disable once ContextualLoggerProblem
 // ReSharper disable RedundantBlankLines

@@ -1,7 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
+using Mediator;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
+[assembly: InternalsVisibleTo("Silk")]
+//[assembly: MediatorOptions(ServiceLifetime = ServiceLifetime.Transient)]
 namespace Silk.Data;
 
 public class GuildContext : DbContext

@@ -8,6 +8,8 @@
         <AssemblyVersion>1.5.2</AssemblyVersion>
         <OutputType>Exe</OutputType>
         <ServerGarbageCollection>true</ServerGarbageCollection>
+         <TieredPGO>true</TieredPGO>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
     </PropertyGroup>
 
@@ -31,8 +33,11 @@
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="MathParser.org-mXparser" Version="5.0.7" />
-        <PackageReference Include="MediatR" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.2" />
+        <PackageReference Include="Mediator.SourceGenerator" Version="2.1.0-preview.2">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.3.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">

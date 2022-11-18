@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Silk.Data.DTOs.Guilds;
 using Silk.Data.Entities;
@@ -13,12 +14,13 @@ public static class GetActiveInfractions
 {
     public sealed record Request(int ShardID, int ShardCount) : IRequest<IEnumerable<Infraction>>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
         private readonly GuildContext _db;
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

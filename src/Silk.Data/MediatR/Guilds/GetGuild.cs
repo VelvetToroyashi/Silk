@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
@@ -18,6 +19,7 @@ public static class GetGuild
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildEntity?>
     {
         private readonly GuildContext _db;
@@ -25,7 +27,7 @@ public static class GetGuild
         public Handler(GuildContext db) => _db = db;
 
 
-        public async Task<GuildEntity?> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<GuildEntity?> Handle(Request request, CancellationToken cancellationToken)
         {
             
             

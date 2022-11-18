@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -14,6 +14,7 @@ using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Database.MediatR;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace RoleMenuPlugin;
 

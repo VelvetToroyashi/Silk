@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -14,13 +15,14 @@ public static class ShedGuilds
 {
     public record Request(int ShardID, int ShardCount, IReadOnlyList<Snowflake> GuildIDs) : IRequest<Result<int>>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<int>>
     {
         private readonly GuildContext _db;
         
         public Handler(GuildContext db) => _db = db;
 
-        public async Task<Result<int>> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result<int>> Handle(Request request, CancellationToken cancellationToken)
         {
             try
             {
