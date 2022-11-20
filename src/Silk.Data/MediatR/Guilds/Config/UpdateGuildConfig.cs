@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
 
@@ -41,18 +42,20 @@ public static class UpdateGuildConfig
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
-        private readonly GuildContext _db;
-        private readonly IMediator    _mediator;
+       private readonly IMediator    _mediator;
+       private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db, IMediator mediator)
+        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
         {
-            _db       = db;
-            _mediator = mediator;
+            _dbFactory = dbFactory;
+            _mediator  = mediator;
         }
 
         public async ValueTask<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
-            var config = _db.GuildConfigs.Local.FirstOrDefault(x => x.GuildID == request.GuildID) 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            var config = db.GuildConfigs.Local.FirstOrDefault(x => x.GuildID == request.GuildID) 
                       ?? await _mediator.Send(new GetGuildConfig.Request(request.GuildID, true), cancellationToken);
 
             if (config is null)
@@ -69,7 +72,7 @@ public static class UpdateGuildConfig
             
             if (request.Greetings.IsDefined(out var greetings))
             {
-                _db.RemoveRange(config.Greetings.Except(greetings));
+                db.RemoveRange(config.Greetings.Except(greetings));
                 config.Greetings = greetings;
             }
             
@@ -137,7 +140,7 @@ public static class UpdateGuildConfig
             
             if (request.Exemptions.IsDefined(out var exemptions))
             {
-                _db.RemoveRange(config.Exemptions.Except(exemptions));
+                db.RemoveRange(config.Exemptions.Except(exemptions));
                 config.Exemptions = exemptions;
             }
 
@@ -145,18 +148,18 @@ public static class UpdateGuildConfig
 
             if (request.InfractionSteps.IsDefined(out var infractionSteps))
             {
-                _db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
+                db.RemoveRange(config.InfractionSteps.Except(infractionSteps));
                 config.InfractionSteps = infractionSteps;
             }
 
             if (request.AllowedInvites.IsDefined(out var whitelistedInvites))
             {
-                _db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
+                db.RemoveRange(config.Invites.Whitelist.Except(whitelistedInvites));
                 config.Invites.Whitelist = whitelistedInvites;
             }
             
             if (request.ShouldCommit)
-                await _db.SaveChangesAsync(cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
             
             return config;
         }

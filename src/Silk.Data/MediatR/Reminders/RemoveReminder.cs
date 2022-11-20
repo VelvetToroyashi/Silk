@@ -21,25 +21,27 @@ public static class RemoveReminder
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Result>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<Result> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            ReminderEntity? reminder = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
+            ReminderEntity? reminder = await db.Reminders.FirstOrDefaultAsync(r => r.Id == request.ReminderId, cancellationToken);
 
             if (reminder is null)
             {
                 return Result.FromError(new NotFoundError($"A reminder with the ID of {request.ReminderId} does not exist."));
             }
             
-            _db.Reminders.Remove(reminder);
+            db.Reminders.Remove(reminder);
             
             try
             {
-                await _db.SaveChangesAsync(cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
             }
             // Timer timed out and it got dequeued slower than it should've. //
             catch (DbUpdateConcurrencyException) { }

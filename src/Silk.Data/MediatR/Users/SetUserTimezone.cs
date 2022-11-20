@@ -20,14 +20,16 @@ public static class SetUserTimezone
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
         
         public async ValueTask<Unit> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var user = await _db.Users
+            var user = await db.Users
                                .AsTracking()
                                .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
 
@@ -37,7 +39,7 @@ public static class SetUserTimezone
             user.TimezoneID    = request.TimezoneID;
             user.ShareTimezone = request.ShareTimezone ?? user.ShareTimezone;
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }

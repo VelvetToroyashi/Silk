@@ -23,14 +23,16 @@ public static class AddGuild
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;
@@ -42,9 +44,9 @@ public static class AddGuild
                 Configuration = new() { GuildID = request.GuildID },
             };
 
-            _db.Guilds.Add(guild);
+            db.Guilds.Add(guild);
             
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
             return guild;
         }
     }

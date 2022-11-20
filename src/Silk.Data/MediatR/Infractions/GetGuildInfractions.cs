@@ -18,14 +18,16 @@ public static class GetGuildInfractions
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<Infraction>>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<IEnumerable<Infraction>> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            List<InfractionEntity>? infractions = await _db
+            List<InfractionEntity>? infractions = await db
                                                        .Infractions
                                                        .Where(inf => inf.GuildID == request.GuildID)
                                                        .ToListAsync(cancellationToken);

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
@@ -16,9 +17,10 @@ public static class AddPendingGreeting
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<PendingGreetingEntity>>
     {
-        private readonly GuildContext _db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db) => _db = db;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<Result<PendingGreetingEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
@@ -32,9 +34,11 @@ public static class AddPendingGreeting
             
             try
             {
-                _db.PendingGreetings.Add(pendingGreeting);
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                
+                db.PendingGreetings.Add(pendingGreeting);
 
-                await _db.SaveChangesAsync(cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
             }
             catch (Exception e)
             {

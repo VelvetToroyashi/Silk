@@ -23,25 +23,29 @@ public static class GetOrCreateUser
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Result<UserEntity>>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<Result<UserEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
-            await _db.Upsert(new UserEntity { ID = request.UserID })
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            
+            await db.Upsert(new UserEntity { ID = request.UserID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
 
-            await _db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
+            await db.Upsert(new UserHistoryEntity { UserID = request.UserID, GuildID = request.GuildID, Date = request.JoinedAt, IsJoin = true })
                      .On(u => new { u.UserID, u.GuildID, u.Date })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            await _db.Upsert(new GuildUserEntity { UserID = request.UserID, GuildID = request.GuildID })
+            await db.Upsert(new GuildUserEntity { UserID = request.UserID, GuildID = request.GuildID })
                      .NoUpdate()
                      .RunAsync(cancellationToken);
             
-            var user = await _db.Users.Include(u => u.History).FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
+            var user = await db.Users.Include(u => u.History).FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);
             
             return user;
         }

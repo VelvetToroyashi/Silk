@@ -22,14 +22,16 @@ public static class GetUser
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, User?>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<User?> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            UserEntity? user = await _db.Users
+            UserEntity? user = await db.Users
                                        .Include(u => u.History)
                                        .Include(u => u.Infractions)
                                        .FirstOrDefaultAsync(u => u.ID == request.UserID, cancellationToken);

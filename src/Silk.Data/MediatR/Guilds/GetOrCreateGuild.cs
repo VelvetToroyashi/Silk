@@ -23,20 +23,20 @@ public static class GetOrCreateGuild
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
-        private readonly GuildContext _db;
         private readonly IMediator                       _mediator;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db, IMediator mediator)
+        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
         {
-            _db       = db;
-            _mediator = mediator;
+            _dbFactory = dbFactory;
+            _mediator  = mediator;
         }
 
         public async ValueTask<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;

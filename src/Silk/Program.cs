@@ -217,7 +217,7 @@ public class Program
                 // If we configure logging after, it'll override the settings with defaults.
 
                 services
-                   .AddMediator(s => s.ServiceLifetime = ServiceLifetime.Transient)
+                   .AddMediator()
                    //.AddSingleton<ScopeWrapper>()
                    .AddSilkConfigurationOptions(context.Configuration)
                    .AddSilkLogging(context.Configuration, shardId)

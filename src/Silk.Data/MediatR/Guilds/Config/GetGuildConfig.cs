@@ -23,14 +23,16 @@ public static class GetGuildConfig
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildConfigEntity>
     {
-        private readonly GuildContext _db;
-        
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
+
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
         public async ValueTask<GuildConfigEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             //TODO: Add commands to get individual configs.
-            var initialQueryable = _db.GuildConfigs
+            var initialQueryable = db.GuildConfigs
                                             .AsSplitQuery()
                                             .Include(g => g.Greetings)
                                             .Include(c => c.Invites)
