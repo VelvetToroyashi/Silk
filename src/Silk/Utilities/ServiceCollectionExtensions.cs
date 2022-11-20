@@ -52,6 +52,22 @@ namespace Silk.Utilities;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddScopedHostedService<T>(this IServiceCollection services)
+        where T : class, IScopedHostedService
+    {
+        services.TryAddScoped<ScopedHostedServiceLoaderService>();
+        services.TryAddScoped<IScopedHostedService, T>();
+        return services;
+    }
+    
+    public static IServiceCollection AddScopedHostedService<T>(this IServiceCollection services, Func<IServiceProvider, T> factory)
+        where T : class, IScopedHostedService
+    {
+        services.TryAddScoped<ScopedHostedServiceLoaderService>();
+        services.TryAddScoped(factory);
+        return services;
+    }
+    
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
         services.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, 
