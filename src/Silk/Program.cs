@@ -184,9 +184,9 @@ public class Program
         {
             using var serviceScope = builtBuilder.Services.CreateScope();
 
-            await using var dbContext = serviceScope
+            await using var dbContext = await serviceScope
                                        .ServiceProvider
-                                       .GetRequiredService<GuildContext>();
+                                       .GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContextAsync();
 
             var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
 

@@ -8,7 +8,7 @@
         <AssemblyVersion>1.5.2</AssemblyVersion>
         <OutputType>Exe</OutputType>
         <ServerGarbageCollection>true</ServerGarbageCollection>
-         <TieredPGO>true</TieredPGO>
+        <TieredPGO>true</TieredPGO>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
     </PropertyGroup>
