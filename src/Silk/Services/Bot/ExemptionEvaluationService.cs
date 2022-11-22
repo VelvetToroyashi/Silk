@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using Remora.Discord.API.Abstractions.Objects;
@@ -7,6 +8,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Services.Data;
 using Silk.Utilities;
 
@@ -17,18 +19,18 @@ namespace Silk.Services.Bot;
 /// </summary>
 public class ExemptionEvaluationService
 {
-    private readonly GuildConfigCacheService _config;
+    private readonly IMediator _mediator;
     private readonly IDiscordRestGuildAPI    _guildApi;
     private readonly ILogger<ExemptionEvaluationService> _logger;
 
     public ExemptionEvaluationService
     (
-        GuildConfigCacheService config,
+        IMediator mediator,
         IDiscordRestGuildAPI guildApi,
         ILogger<ExemptionEvaluationService> logger
     )
     {
-        _config   = config;
+        _mediator = mediator;
         _guildApi = guildApi;
         _logger   = logger;
     }
@@ -44,7 +46,7 @@ public class ExemptionEvaluationService
     {
         _logger.LogTrace("Evaluating exemption for {Exemption} in {GuildID} for {UserID} in {ChannelID}", exemptionType, guildID, userID, channelID);
         
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         using (SilkMetric.EvaluationExemptionTime.WithLabels(exemptionType.ToString()).NewTimer()) 
         {

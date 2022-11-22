@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Mediator;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
@@ -14,27 +15,29 @@ using Remora.Discord.Caching.Services;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Services.Guild;
 
 public class MessageLoggerService
 {
+    private readonly IMediator                  _mediator;
     private readonly HttpClient                 _http;
     private readonly CacheService               _cache;
-    private readonly GuildConfigCacheService    _config;
     private readonly IChannelLoggingService     _channelLogger;
     private readonly ExemptionEvaluationService _exemptions;
     
-    public MessageLoggerService(IHttpClientFactory httpFactory, CacheService cache, GuildConfigCacheService config, IChannelLoggingService channelLogger, ExemptionEvaluationService exemptions)
+    public MessageLoggerService(IMediator mediator, IHttpClientFactory httpFactory, CacheService cache, IChannelLoggingService channelLogger, ExemptionEvaluationService exemptions)
     {
+        _mediator      = mediator;
         _http          = httpFactory.CreateClient();
         _cache         = cache;
-        _config        = config;
         _channelLogger = channelLogger;
         _exemptions    = exemptions;
     }
@@ -53,7 +56,7 @@ public class MessageLoggerService
         if (!message.ChannelID.IsDefined(out var channelID))
             return Result.FromSuccess();
         
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.Logging.LogMessageEdits)
             return Result.FromSuccess();
@@ -166,7 +169,7 @@ public class MessageLoggerService
         if (!message.GuildID.IsDefined(out var guildID))
             return Result.FromSuccess();
         
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.Logging.LogMessageDeletes)
             return Result.FromSuccess();

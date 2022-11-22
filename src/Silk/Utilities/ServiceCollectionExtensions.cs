@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,22 +53,6 @@ namespace Silk.Utilities;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddScopedHostedService<T>(this IServiceCollection services)
-        where T : class, IScopedHostedService
-    {
-        services.TryAddScoped<ScopedHostedServiceLoaderService>();
-        services.TryAddScoped<IScopedHostedService, T>();
-        return services;
-    }
-    
-    public static IServiceCollection AddScopedHostedService<T>(this IServiceCollection services, Func<IServiceProvider, T> factory)
-        where T : class, IScopedHostedService
-    {
-        services.TryAddScoped<ScopedHostedServiceLoaderService>();
-        services.TryAddScoped(factory);
-        return services;
-    }
-    
     public static IServiceCollection AddRemoraServices(this IServiceCollection services)
     {
         services.AddDiscordGateway(s => s.GetService<IOptions<SilkConfigurationOptions>>()!.Value.Discord.BotToken, 
@@ -196,10 +181,13 @@ public static class ServiceCollectionExtensions
             b.UseNpgsql(connectionString);
 
             b.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            
         }
 
         EntityMapping.ConfigureMappings();
         services.AddPooledDbContextFactory<GuildContext>(Builder, 256);
+        services.AddEFSecondLevelCache(options => options.UseMemoryCacheProvider(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(15)).DisableLogging(true));
+        
         //services.AddDbContextPool<GuildContext>(Builder, 256);
        // services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using FuzzySharp.SimilarityRatio.Scorer.Composite;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using Remora.Discord.API;
@@ -20,6 +21,7 @@ using Remora.Discord.Caching.Services;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
@@ -43,8 +45,9 @@ public class PhishingDetectionService
     private const           string Phishing  = "Message contained a phishing link.";
     private static readonly Regex  LinkRegex = new(@"[.]*(?:https?:\/\/(www\.)?)?(?<link>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)");
 
-    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled); 
+    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled);
 
+    private readonly IMediator                         _mediator;
     private readonly CacheService                      _cache;
     private readonly HttpClient                        _http;
     private readonly HttpClient                        _httpUnauthorized;
@@ -54,13 +57,13 @@ public class PhishingDetectionService
     private readonly IDiscordRestChannelAPI            _channels;
     private readonly IDiscordRestInviteAPI             _invites;
     private readonly PhishingGatewayService            _phishGateway;
-    private readonly GuildConfigCacheService           _config;
     private readonly ExemptionEvaluationService        _exemptions;
     private readonly ILogger<PhishingDetectionService> _logger;
 
     public PhishingDetectionService
     (
-        CacheService cache,
+        IMediator                         mediator,
+        CacheService                      cache,
         IHttpClientFactory                http,
         IInfractionService                infractions,
         IDiscordRestUserAPI               users,
@@ -68,12 +71,12 @@ public class PhishingDetectionService
         IDiscordRestInviteAPI             invites,
         IDiscordRestChannelAPI            channels,
         PhishingGatewayService            phishGateway,
-        GuildConfigCacheService           config,
         ExemptionEvaluationService        exemptions,
         ILogger<PhishingDetectionService> logger
     )
     {
-        _cache = cache;
+        _mediator         = mediator;
+        _cache            = cache;
         _http             = http.CreateClient("ravy-api");
         _httpUnauthorized = http.CreateClient();
         _infractions      = infractions;
@@ -82,7 +85,6 @@ public class PhishingDetectionService
         _channels         = channels;
         _invites          = invites;
         _phishGateway     = phishGateway;
-        _config           = config;
         _exemptions       = exemptions;
         _logger           = logger;
     }
@@ -106,7 +108,7 @@ public class PhishingDetectionService
         
         var now = DateTimeOffset.UtcNow;
 
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
@@ -166,7 +168,7 @@ public class PhishingDetectionService
                 return Result.FromSuccess();
         }
         
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         if (!config.BanSuspiciousUsernames)
             return Result.FromSuccess();
@@ -218,10 +220,10 @@ public class PhishingDetectionService
         if (message.Author.IsBot.IsDefined(out bool bot) && bot)
             return Result.FromSuccess(); // Sus.
 
-        if (!message.GuildID.IsDefined(out Snowflake guildId))
+        if (!message.GuildID.IsDefined(out Snowflake guildID))
             return Result.FromSuccess(); // DM channels are exempted.
 
-        var config = await _config.GetConfigAsync(guildId);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         IEnumerable<string> links;
 
@@ -245,13 +247,13 @@ public class PhishingDetectionService
             
             _logger.LogInformation("Detected phishing link.");
 
-            var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildId, message.Author.ID, message.ChannelID);
+            var exemptionResult = await _exemptions.EvaluateExemptionAsync(ExemptionCoverage.AntiPhishing, guildID, message.Author.ID, message.ChannelID);
 
             if (!exemptionResult.IsSuccess)
                 return (Result)exemptionResult;
 
             if (!exemptionResult.Entity)
-                return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
+                return await HandleDetectedPhishingAsync(guildID, message.Author.ID, message.ChannelID, message.ID, config.DeletePhishingLinks);
         }
         
         // There aren't any cached phishing links in the message, but there's still invites.
@@ -296,7 +298,7 @@ public class PhishingDetectionService
             await db.StringSetAsync(SilkKeyHelper.GenerateInviteKey(link), matched);
                 
             if (matched)
-                return await HandleDetectedPhishingAsync(guildId, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
+                return await HandleDetectedPhishingAsync(guildID, message.Author.ID, message.ChannelID, message.ID, true, $"Detected malicious invite {type}.");
         }
         
         return Result.FromSuccess();
@@ -317,7 +319,7 @@ public class PhishingDetectionService
 
         reason ??= Phishing;
 
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         if (!config.NamedInfractionSteps.TryGetValue(AutoModConstants.PhishingLinkDetected, out InfractionStepEntity? step))
             return Result.FromError(new InvalidOperationError("Failed to get step for phishing link detected."));

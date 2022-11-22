@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <AssemblyVersion>3.2.0</AssemblyVersion>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
+        <LangVersion>11</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <!-- Needed for copying plugin dependecies to output folder -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -12,11 +12,6 @@
 
     <ItemGroup>
         <PackageReference Include="FuzzySharp" />
-        <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.2" />
-        <PackageReference Include="Mediator.SourceGenerator" Version="2.1.0-preview.2">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -45,7 +40,7 @@
     <Target Name="CopyPluginDLL" AfterTargets="Build">
         <ItemGroup>
             <!-- Collect all needed .dll files for plugin -->
-            <PluginDlls Include="$(TargetDir)*.dll" />
+            <PluginDlls Include="$(TargetDir)*Plugin.dll" />
         </ItemGroup>
 
         <PropertyGroup>

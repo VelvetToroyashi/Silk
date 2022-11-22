@@ -29,41 +29,14 @@ namespace Silk.Commands.Server;
 [RequireDiscordPermission(DiscordPermission.ManageMessages, DiscordPermission.KickMembers, Operator = LogicalOperator.And)]
 public partial class ConfigCommands : CommandGroup
 {
-    private readonly ICommandContext         _context;
-    private readonly GuildConfigCacheService _configCache;
-    private readonly IDiscordRestChannelAPI  _channels;
-    private readonly ViewConfigCommands    _viewConfig;
+    private readonly ViewConfigCommands _viewConfig;
 
-    public ConfigCommands
-    (
-        ICommandContext         context,
-        ViewConfigCommands      viewConfig,
-        IDiscordRestChannelAPI  channels,
-        GuildConfigCacheService configCache
-    )
-    {
-        _context     = context;
-        _channels    = channels;
-        _viewConfig  = viewConfig;
-        _configCache = configCache;
-    }
-
-    [Command("reload")]
-    [Description("Reloads the configuration for your server.")]
-    public async Task<Result<IMessage>> ReloadConfigAsync()
-    {
-        _configCache.PurgeCache(_context.GuildID.Value);
-        
-        // If this fails it doesn't matter. Don't even await it.
-        _ = _channels.CreateReactionAsync(_context.ChannelID, (_context as MessageContext)!.MessageID, $"_:{Emojis.ConfirmId}");
-        
-        return await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.ReloadEmoji} Config reloaded! Changes should take effect immediately.");
-    }
+    public ConfigCommands(ViewConfigCommands viewConfig)
+        => _viewConfig = viewConfig;
 
     [Command("view")]
     [Description("View the settings for your server.")]
     public Task<IResult> ViewConfigAsync() => _viewConfig.ViewAllAsync();
-    
     
     [Group("view", "v")]
     [Description("View the settings for your server.")]
@@ -161,7 +134,5 @@ public partial class ConfigCommands : CommandGroup
 
             return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
         }
-
-
     }
 }

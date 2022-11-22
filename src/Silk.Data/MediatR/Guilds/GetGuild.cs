@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCoreSecondLevelCacheInterceptor;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
@@ -32,7 +33,7 @@ public static class GetGuild
         {
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            var guild = await db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await db.Guilds.Cacheable().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             return guild;
         }

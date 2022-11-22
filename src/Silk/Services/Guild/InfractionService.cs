@@ -39,32 +39,25 @@ public sealed class InfractionService : IHostedService, IInfractionService
 {
     private static readonly TimeSpan _maxTimeoutDuration = TimeSpan.FromDays(28);
     
-    private const string SemiSuccessfulAction = "The action completed, but there was an error processing the infraction.";
-
     private const string SilkWebhookName = "Silk! Logging";
-
+    private const string SemiSuccessfulAction = "The action completed, but there was an error processing the infraction.";
+    
     private readonly AsyncTimer _queueTimer;
-
-    private readonly ILogger<InfractionService> _logger;
+    
     private readonly IMediator                  _mediator;
     private readonly IShardIdentification       _shard;
-
-    private readonly GuildConfigCacheService _config;
-
-    private readonly IDiscordRestUserAPI    _users;
-    private readonly IDiscordRestGuildAPI   _guilds;
-    private readonly IDiscordRestChannelAPI _channels;
-    private readonly IDiscordRestWebhookAPI _webhooks;
-    
-    private readonly IChannelLoggingService _channelLogger;
+    private readonly IDiscordRestUserAPI        _users;
+    private readonly IDiscordRestGuildAPI       _guilds;
+    private readonly IDiscordRestChannelAPI     _channels;
+    private readonly IDiscordRestWebhookAPI     _webhooks;
+    private readonly IChannelLoggingService     _channelLogger;
+    private readonly ILogger<InfractionService> _logger;
 
     private readonly List<Infraction> _queue = new();
     public InfractionService
     (
-        
         IMediator                  mediator,
         IShardIdentification       shard,
-        GuildConfigCacheService    config,
         IDiscordRestUserAPI        users,
         IDiscordRestGuildAPI       guilds,
         IDiscordRestChannelAPI     channels,
@@ -75,7 +68,6 @@ public sealed class InfractionService : IHostedService, IInfractionService
     {
         _mediator      = mediator;
         _shard         = shard;
-        _config        = config;
         _users         = users;
         _guilds        = guilds;
         _channels      = channels;
@@ -666,8 +658,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         {
             MuteRoleID = roleResult.Entity.ID
         });
-
-        _config.PurgeCache(guildID);
+        
         return Result.FromSuccess();
     }
 
@@ -872,7 +863,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="updatedAt">When the infraction was updated.</param>
     private async Task<Result> LogInfractionUpdateAsync(Infraction infraction, IUser updatedBy, IUser infractionTarget, IUser infractionEnforcer, DateTimeOffset updatedAt)
     {
-        var config = await _config.GetConfigAsync(infraction.GuildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(infraction.GuildID));
 
         if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
@@ -913,7 +904,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="enforcer">The enforcer of the infraction.</param>
     private async Task<Result> LogInfractionAsync(Infraction infraction, IUser target, IUser enforcer)
     {
-        var config = await _config.GetConfigAsync(infraction.GuildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(infraction.GuildID));
 
         if (!config.Logging.LogInfractions || config.Logging.Infractions is null)
             return Result.FromSuccess();
@@ -958,7 +949,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <param name="guildID"></param>
     private async Task<Result> EnsureLoggingChannelExistsAsync(Snowflake guildID)
     {
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         Debug.Assert(config.Logging.LogInfractions, "Caller should validate that infraction logging is enabled.");
 

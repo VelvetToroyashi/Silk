@@ -12,6 +12,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Services.Data;
 using Silk.Services.Guild;
 using Silk.Services.Interfaces;
@@ -46,16 +47,15 @@ public class RaidHelperTests
     {
         var infractions = new Mock<IInfractionService>();
         var users       = new Mock<IDiscordRestUserAPI>();
-        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
+        var cache       = new Mock<IMediator>();
 
         users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
              .ReturnsAsync(new User(default, "", default, null));
         
-        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity
-                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+        cache.Setup(c => c.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+             .Returns(() => new GuildConfigEntity { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
 
-        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        var raid = new RaidDetectionService(cache.Object, infractions.Object, users.Object);
 
         await raid.StartAsync(CancellationToken.None);
 
@@ -72,16 +72,15 @@ public class RaidHelperTests
     {
         var infractions = new Mock<IInfractionService>();
         var users       = new Mock<IDiscordRestUserAPI>();
-        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
+        var cache       = new Mock<IMediator>();
 
         users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
              .ReturnsAsync(new User(default, "", default, null));
         
-        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity
-                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+        cache.Setup(c => c.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+             .Returns(() => new GuildConfigEntity { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
 
-        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        var raid = new RaidDetectionService(cache.Object, infractions.Object, users.Object);
 
         await raid.StartAsync(CancellationToken.None);
 
@@ -101,16 +100,15 @@ public class RaidHelperTests
     {
         var infractions = new Mock<IInfractionService>();
         var users       = new Mock<IDiscordRestUserAPI>();
-        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
-        
+        var cache       = new Mock<IMediator>();
+
         users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
              .ReturnsAsync(new User(default, "", default, null));
         
-        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity
-                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 0 });
-        
-        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        cache.Setup(c => c.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+             .Returns(() => new GuildConfigEntity { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+
+        var raid = new RaidDetectionService(cache.Object, infractions.Object, users.Object);
         
         await raid.StartAsync(CancellationToken.None);
         
@@ -127,17 +125,15 @@ public class RaidHelperTests
     {
         var infractions = new Mock<IInfractionService>();
         var users       = new Mock<IDiscordRestUserAPI>();
-        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
-        
+        var cache       = new Mock<IMediator>();
+
         users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
              .ReturnsAsync(new User(default, "", default, null));
         
-        // -1 to skip velocity check
-        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity
-                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
-        
-        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        cache.Setup(c => c.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+             .Returns(() => new GuildConfigEntity { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+
+        var raid = new RaidDetectionService(cache.Object, infractions.Object, users.Object);
         
         await raid.StartAsync(CancellationToken.None);
         
@@ -156,17 +152,15 @@ public class RaidHelperTests
     {
         var infractions = new Mock<IInfractionService>();
         var users       = new Mock<IDiscordRestUserAPI>();
-        var cache       = new Mock<GuildConfigCacheService>(Mock.Of<IMemoryCache>(), Mock.Of<IMediator>());
-        
+        var cache       = new Mock<IMediator>();
+
         users.Setup(u => u.GetCurrentUserAsync(It.IsAny<CancellationToken>()))
              .ReturnsAsync(new User(default, "", default, null));
         
-        // -1 to skip velocity check
-        cache.Setup(c => c.GetConfigAsync(It.IsAny<Snowflake>()))
-             .ReturnsAsync(new GuildConfigEntity
-                               { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = -1 });
-        
-        var raid = new RaidDetectionService(infractions.Object, users.Object, cache.Object);
+        cache.Setup(c => c.Send(It.IsAny<IRequest<GetGuildConfig.Request>>(), It.IsAny<CancellationToken>()))
+             .Returns(() => new GuildConfigEntity { EnableRaidDetection = true, RaidDetectionThreshold = 3, RaidCooldownSeconds = 120});
+
+        var raid = new RaidDetectionService(cache.Object, infractions.Object, users.Object);
         
         await raid.StartAsync(CancellationToken.None);
 

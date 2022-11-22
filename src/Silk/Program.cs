@@ -239,7 +239,6 @@ public class Program
                    .AddSingleton<ExemptionEvaluationService>()
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
                    .AddSingleton<MemberLoggerService>()
-                   .AddScoped<GuildConfigCacheService>()
                    .AddScoped<GuildCacherService>()
                    .AddSingleton<IClock>(SystemClock.Instance)
                    .AddSingleton<IDateTimeZoneSource>(TzdbDateTimeZoneSource.Default)
@@ -251,8 +250,6 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
-                   //.AddMediatR(c => c.AsTransient().Using<ScopingMediator>(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
-                   //.RemoveAll(typeof(RequestExceptionActionProcessorBehavior<,>))
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCoreSecondLevelCacheInterceptor;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
@@ -33,24 +34,23 @@ public static class GetGuildConfig
             await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             //TODO: Add commands to get individual configs.
             var initialQueryable = db.GuildConfigs
-                                            .AsSplitQuery()
-                                            .Include(g => g.Greetings)
-                                            .Include(c => c.Invites)
-                                            .Include(c => c.Invites.Whitelist)
-                                            .Include(c => c.InfractionSteps)
-                                            .Include(c => c.Exemptions)
-                                            .Include(c => c.Logging)
-                                            .Include(c => c.Logging.MemberJoins)
-                                            .Include(c => c.Logging.MemberLeaves)
-                                            .Include(c => c.Logging.MessageDeletes)
-                                            .Include(c => c.Logging.MessageEdits)
-                                            .Include(c => c.Logging.Infractions);
+                                     .Cacheable()
+                                     .AsSplitQuery()
+                                     .Include(g => g.Greetings)
+                                     .Include(c => c.Invites)
+                                     .Include(c => c.Invites.Whitelist)
+                                     .Include(c => c.InfractionSteps)
+                                     .Include(c => c.Exemptions)
+                                     .Include(c => c.Logging)
+                                     .Include(c => c.Logging.MemberJoins)
+                                     .Include(c => c.Logging.MemberLeaves)
+                                     .Include(c => c.Logging.MessageDeletes)
+                                     .Include(c => c.Logging.MessageEdits)
+                                     .Include(c => c.Logging.Infractions);
 
-            return request.AsTracking
-                ? await initialQueryable.AsTracking()
-                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken)
-                : await initialQueryable.AsNoTracking()
-                                        .FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
+            var query = request.AsTracking ? initialQueryable.AsTracking() : initialQueryable.AsNoTracking();
+            
+            return await query.FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
         }
     }
 }

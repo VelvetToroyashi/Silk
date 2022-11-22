@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Remora.Commands.Parsers;
 using Remora.Commands.Results;
-using Remora.Discord.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
 using Constants = Remora.Discord.API.Constants;

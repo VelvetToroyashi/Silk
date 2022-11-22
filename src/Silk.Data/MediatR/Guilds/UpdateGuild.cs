@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCoreSecondLevelCacheInterceptor;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
@@ -31,6 +32,7 @@ public static class UpdateGuild
             // SET g.Prefix = @Prefix WHERE g.GuildID = @GuildID;  Would need to be sanitized however, since it's prone to SQL injection.
             
             var guild = await db.Guilds
+                                .Cacheable()
                                 .AsTracking()
                                 .FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
             if (guild is null)

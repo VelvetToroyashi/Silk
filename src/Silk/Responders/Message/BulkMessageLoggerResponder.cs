@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
+using Mediator;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
@@ -16,35 +17,37 @@ using Remora.Discord.Caching.Services;
 using Remora.Discord.Gateway.Responders;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Responders.Message;
 
 [ResponderGroup(ResponderGroup.Early)]
 public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
 {
+    private readonly IMediator               _mediator;
     private readonly CacheService            _cache;
     private readonly IDiscordRestChannelAPI  _channels;
     private readonly IChannelLoggingService  _logging;
-    private readonly GuildConfigCacheService _config;
     private readonly IDiscordRestAuditLogAPI _auditLogs;
     
     public BulkMessageLoggerResponder
     (
+        IMediator               mediator,
         CacheService            cache,
         IDiscordRestChannelAPI  channels,
         IChannelLoggingService  logging,
-        GuildConfigCacheService config,
         IDiscordRestAuditLogAPI auditLogs
     )
     {
         _cache     = cache;
         _channels  = channels;
         _logging   = logging;
-        _config    = config;
+        _mediator    = mediator;
         _auditLogs = auditLogs;
     }
     
@@ -53,7 +56,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
         if (!gatewayEvent.GuildID.IsDefined(out var guildID))
             return Result.FromSuccess();
         
-        var guildConfig = await _config.GetConfigAsync(guildID);
+        var guildConfig = await _mediator.Send(new GetGuildConfig.Request(guildID), ct);
         
         if (!guildConfig.Logging.LogMessageDeletes)
             return Result.FromSuccess();

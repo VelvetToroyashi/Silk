@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,6 @@ using RoleMenuPlugin.Database;
 using RoleMenuPlugin.Parsers;
 
 [assembly: RemoraPlugin(typeof(RoleMenuPlugin.RoleMenuPlugin))]
-[assembly: MediatorOptions(Namespace = "RoleMenuPlugin.Mediator", ServiceLifetime = ServiceLifetime.Scoped)]
 
 namespace RoleMenuPlugin;
 
@@ -39,6 +37,7 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
                .Finish()
                .AddCondition<RoleMenuCondition>()
                .AddParser<MessageLinkSnowflakeParser>()
+               .AddScoped<RoleMenuRepository>()
                .AddDbContext<RoleMenuContext>((s, b) =>
                 {
                     var config = s.GetRequiredService<IConfiguration>();
