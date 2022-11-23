@@ -32,7 +32,7 @@ namespace Silk.Commands.General;
 [Category(Categories.General)]
 public class InfoCommands : CommandGroup
 {
-    private readonly ICacheProvider _cache;
+    private readonly ICacheProvider         _cache;
     private readonly MessageContext         _context;
     private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestEmojiAPI   _emojis;
@@ -358,6 +358,14 @@ public class InfoCommands : CommandGroup
     
     private async Task<Stream> GenerateBannerColorImageAsync(Color bannerColor)
     {
+        // Can you even serialize a memory stream??
+        var cacheResult = await _cache.RetrieveAsync<byte[]>($"Color:{bannerColor.ToArgb()}");
+
+        if (cacheResult.IsDefined(out var bytes))
+        {
+            return new MemoryStream(bytes);
+        }
+        
         using var image = new Image<Rgba32>(4096, 2048, new(bannerColor.R, bannerColor.G, bannerColor.B, 255));
 
         var stream = new MemoryStream();
@@ -365,7 +373,9 @@ public class InfoCommands : CommandGroup
         await image.SaveAsPngAsync(stream);
 
         stream.Seek(0, SeekOrigin.Begin);
-
+        
+        await _cache.CacheAsync($"Color:{bannerColor.ToArgb()}", stream.ToArray(), DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
+        
         return stream;
     }
 }
