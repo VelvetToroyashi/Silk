@@ -64,7 +64,7 @@ Remora.Rest.Core
 Remora.Results
 Silk.Commands.Conditions
 Silk.Utilities.HelpFormatter
-MediatR
+Mediator
 Microsoft.EntityFrameworkCore
 Remora.Rest.Core
 Remora.Results
